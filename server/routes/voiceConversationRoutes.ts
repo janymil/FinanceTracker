@@ -24,6 +24,115 @@ const conversationSchema = z.object({
   }).optional()
 });
 
+// Generate natural conversation response using OpenAI (transaction-limited)
+async function generateNaturalResponse(currentData: any, missing: string[], userLanguage: string, userCurrency: string): Promise<string> {
+  try {
+    console.log('🗣️ [Natural Response] Generating with OpenAI:', { currentData, missing, userLanguage });
+    
+    // Create context-aware prompt for OpenAI
+    const dataContext = Object.entries(currentData)
+      .filter(([_, value]) => value !== null && value !== undefined)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ');
+    
+    const missingFields = missing.join(', ');
+    
+    const prompt = `You are a transaction data collection assistant. Generate a natural, conversational response to collect missing transaction information.
+
+STRICT RULES:
+1. ONLY discuss financial transactions (expenses, income, purchases)
+2. DO NOT answer questions about other topics
+3. Keep responses SHORT (max 15 words)
+4. Be conversational and friendly
+5. Use the user's currency: ${userCurrency}
+
+Current transaction data: ${dataContext || 'none collected yet'}
+Missing information: ${missingFields}
+User language: ${userLanguage}
+
+Generate a natural question to collect the next piece of missing information. If user language is Slovak (sk-sk), respond in Slovak. If Spanish (es-pe), respond in Spanish.
+
+Examples:
+- Missing amount: "How much did you spend?" or "Koľko to stálo?" (Slovak)
+- Missing description: "What did you buy?" or "Čo ste si kúpili?" (Slovak)
+- Missing type: "Was this an expense or income?" or "Bol to výdavok alebo príjem?" (Slovak)
+- Missing date: "When did this happen?" or "Kedy sa to stalo?" (Slovak)
+
+Response:`;
+
+    // Use basic OpenAI completion (not the full financial tips system)
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system', 
+            content: 'You are a transaction data collection assistant. Generate SHORT, natural conversation responses ONLY about financial transactions. Respond in the user\'s language.'
+          },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 50,
+        temperature: 0.7
+      })
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      const naturalResponse = result.choices[0]?.message?.content?.trim();
+      console.log('✅ [Natural Response] Generated:', naturalResponse);
+      return naturalResponse || getFallbackQuestion(missing[0], currentData, userCurrency, userLanguage);
+    }
+  } catch (error) {
+    console.error('❌ [Natural Response] OpenAI error:', error);
+  }
+
+  // Fallback to predefined questions
+  return getFallbackQuestion(missing[0], currentData, userCurrency, userLanguage);
+}
+
+// Fallback predefined questions if OpenAI fails
+function getFallbackQuestion(nextField: string, data: any, userCurrency: string, userLanguage: string): string {
+  const isSpanish = userLanguage.startsWith('es');
+  const isSlovak = userLanguage.startsWith('sk');
+  
+  switch (nextField) {
+    case 'amount':
+      if (isSlovak) return 'Koľko to stálo?';
+      if (isSpanish) return '¿Cuánto costó?';
+      return 'How much was it?';
+      
+    case 'description':
+      if (isSlovak) return `Čo ste si kúpili za ${userCurrency}${data.amount}?`;
+      if (isSpanish) return `¿Qué compraste por ${userCurrency}${data.amount}?`;
+      return `What was this ${userCurrency}${data.amount} for?`;
+      
+    case 'type':
+      if (isSlovak) return `Bol "${data.description}" výdavok alebo príjem?`;
+      if (isSpanish) return `¿Fue "${data.description}" un gasto o ingreso?`;
+      return `Was "${data.description}" an expense or income?`;
+      
+    case 'date':
+      if (isSlovak) return 'Kedy sa to stalo?';
+      if (isSpanish) return '¿Cuándo pasó esto?';
+      return 'When did this happen?';
+      
+    case 'note':
+      if (isSlovak) return 'Nejaké poznámky? Môžete povedať "žiadne poznámky".';
+      if (isSpanish) return '¿Alguna nota? Puedes decir "sin notas".';
+      return 'Any notes? You can say "no notes".';
+      
+    default:
+      if (isSlovak) return 'Pokračujme s transakciou.';
+      if (isSpanish) return 'Continuemos con la transacción.';
+      return 'Let\'s continue with your transaction.';
+  }
+}
+
 export function registerVoiceConversationRoutes(app: Router) {
   const router = Router();
 
@@ -212,115 +321,6 @@ export function registerVoiceConversationRoutes(app: Router) {
   });
 
   app.use('/api/voice', router);
-}
-
-// Generate natural conversation response using OpenAI (transaction-limited)
-async function generateNaturalResponse(currentData: any, missing: string[], userLanguage: string, userCurrency: string): Promise<string> {
-  try {
-    console.log('🗣️ [Natural Response] Generating with OpenAI:', { currentData, missing, userLanguage });
-    
-    // Create context-aware prompt for OpenAI
-    const dataContext = Object.entries(currentData)
-      .filter(([_, value]) => value !== null && value !== undefined)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join(', ');
-    
-    const missingFields = missing.join(', ');
-    
-    const prompt = `You are a transaction data collection assistant. Generate a natural, conversational response to collect missing transaction information.
-
-STRICT RULES:
-1. ONLY discuss financial transactions (expenses, income, purchases)
-2. DO NOT answer questions about other topics
-3. Keep responses SHORT (max 15 words)
-4. Be conversational and friendly
-5. Use the user's currency: ${userCurrency}
-
-Current transaction data: ${dataContext || 'none collected yet'}
-Missing information: ${missingFields}
-User language: ${userLanguage}
-
-Generate a natural question to collect the next piece of missing information. If user language is Slovak (sk-sk), respond in Slovak. If Spanish (es-pe), respond in Spanish.
-
-Examples:
-- Missing amount: "How much did you spend?" or "Koľko to stálo?" (Slovak)
-- Missing description: "What did you buy?" or "Čo ste si kúpili?" (Slovak)
-- Missing type: "Was this an expense or income?" or "Bol to výdavok alebo príjem?" (Slovak)
-- Missing date: "When did this happen?" or "Kedy sa to stalo?" (Slovak)
-
-Response:`;
-
-    // Use basic OpenAI completion (not the full financial tips system)
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system', 
-            content: 'You are a transaction data collection assistant. Generate SHORT, natural conversation responses ONLY about financial transactions. Respond in the user\'s language.'
-          },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 50,
-        temperature: 0.7
-      })
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      const naturalResponse = result.choices[0]?.message?.content?.trim();
-      console.log('✅ [Natural Response] Generated:', naturalResponse);
-      return naturalResponse || getFallbackQuestion(missing[0], currentData, userCurrency, userLanguage);
-    }
-  } catch (error) {
-    console.error('❌ [Natural Response] OpenAI error:', error);
-  }
-
-  // Fallback to predefined questions
-  return getFallbackQuestion(missing[0], currentData, userCurrency, userLanguage);
-}
-
-// Fallback predefined questions if OpenAI fails
-function getFallbackQuestion(nextField: string, data: any, userCurrency: string, userLanguage: string): string {
-  const isSpanish = userLanguage.startsWith('es');
-  const isSlovak = userLanguage.startsWith('sk');
-  
-  switch (nextField) {
-    case 'amount':
-      if (isSlovak) return 'Koľko to stálo?';
-      if (isSpanish) return '¿Cuánto costó?';
-      return 'How much was it?';
-      
-    case 'description':
-      if (isSlovak) return `Čo ste si kúpili za ${userCurrency}${data.amount}?`;
-      if (isSpanish) return `¿Qué compraste por ${userCurrency}${data.amount}?`;
-      return `What was this ${userCurrency}${data.amount} for?`;
-      
-    case 'type':
-      if (isSlovak) return `Bol "${data.description}" výdavok alebo príjem?`;
-      if (isSpanish) return `¿Fue "${data.description}" un gasto o ingreso?`;
-      return `Was "${data.description}" an expense or income?`;
-      
-    case 'date':
-      if (isSlovak) return 'Kedy sa to stalo?';
-      if (isSpanish) return '¿Cuándo pasó esto?';
-      return 'When did this happen?';
-      
-    case 'note':
-      if (isSlovak) return 'Nejaké poznámky? Môžete povedať "žiadne poznámky".';
-      if (isSpanish) return '¿Alguna nota? Puedes decir "sin notas".';
-      return 'Any notes? You can say "no notes".';
-      
-    default:
-      if (isSlovak) return 'Pokračujme s transakciou.';
-      if (isSpanish) return 'Continuemos con la transacción.';
-      return 'Let\'s continue with your transaction.';
-  }
 }
 
 // Smart extraction: simple patterns first, AI only when needed
