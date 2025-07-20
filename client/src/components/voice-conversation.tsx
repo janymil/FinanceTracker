@@ -85,9 +85,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     recognition.onend = () => {
       console.log('🎤 Recognition ended');
-      if (state === 'listening') {
-        setState('processing');
-      }
+      // Don't change state here - let processVoiceInput handle it
     };
 
     recognition.onerror = (event: any) => {
@@ -246,15 +244,26 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
   // Start listening
   const startListening = useCallback(() => {
-    if (recognitionRef.current && state !== 'listening') {
+    if (recognitionRef.current) {
       try {
         console.log('🎤 Starting to listen...');
+        setState('listening');
         recognitionRef.current.start();
       } catch (error) {
-        console.log('🎤 Recognition already running');
+        console.log('🎤 Recognition error, retrying:', error);
+        setTimeout(() => {
+          if (recognitionRef.current) {
+            try {
+              setState('listening');
+              recognitionRef.current.start();
+            } catch (e) {
+              console.log('🎤 Second retry failed');
+            }
+          }
+        }, 200);
       }
     }
-  }, [state]);
+  }, []);
 
   // Save transaction
   const saveTransaction = useCallback(async (data: TransactionData) => {
