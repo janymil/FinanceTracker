@@ -5,6 +5,7 @@ import { storage } from "../storage";
 import { db } from "../db";
 import { categories } from "../../shared/schema";
 import { eq, and } from "drizzle-orm";
+import { runMistralAnalysis } from "../mistralClient";
 
 const conversationSchema = z.object({
   transcript: z.string().min(1),
@@ -75,8 +76,8 @@ export function registerVoiceConversationRoutes(app: Router) {
       
       console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
 
-      // Extract information from current transcript using user's currency
-      const newData = extractDataFromTranscript(transcript, userCurrency || user.currency || '$', userLanguage);
+      // Extract information from current transcript using AI with existing data context
+      const newData = await extractDataFromTranscript(transcript, userCurrency || user.currency || '$', userLanguage, existing);
       console.log('📝 [VoiceConversation] Extracted:', newData);
 
       // Merge new data with existing (preserve existing data, only add new non-null values)
@@ -214,8 +215,64 @@ export function registerVoiceConversationRoutes(app: Router) {
   app.use('/api/voice', router);
 }
 
-// Extract data from transcript with currency support, date, and note
-function extractDataFromTranscript(transcript: string, userCurrency: string, userLanguage: string = 'en-us') {
+// AI-powered conversational data extraction using Mistral
+async function extractDataFromTranscript(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
+  try {
+    // Use Mistral AI for intelligent extraction
+    const mistralResponse = await runMistralAnalysis({
+      prompt: `Extract transaction data from this natural conversation: "${transcript}"
+      
+Current partially collected data: ${JSON.stringify(existingData)}
+
+Extract and return ONLY a JSON object with these fields:
+{
+  "amount": number or null,
+  "description": "what was bought/paid for" or null,
+  "type": "expense" or "income" or null,
+  "date": "YYYY-MM-DD" or null,
+  "note": "additional details" or null
+}
+
+Examples:
+- "Today I bought pivo for 5 euros" → {"amount": 5, "description": "pivo", "type": "expense", "date": "${new Date().toISOString().split('T')[0]}", "note": null}
+- "päť" (when asking for amount) → {"amount": 5, "description": null, "type": null, "date": null, "note": null}
+- "pivo" (when asking what for) → {"amount": null, "description": "pivo", "type": null, "date": null, "note": null}
+
+Language context: ${userLanguage}
+User currency: ${userCurrency}
+
+Return ONLY the JSON object, no explanation.`,
+      language: userLanguage
+    });
+
+    if (mistralResponse && mistralResponse.result) {
+      console.log('🤖 [AI Extraction] Raw response:', mistralResponse.result);
+      
+      // Parse AI response
+      const cleanResult = mistralResponse.result.replace(/```json|```/g, '').trim();
+      const extracted = JSON.parse(cleanResult);
+      
+      console.log('🔍 [AI Extraction] Parsed result:', extracted);
+      return { 
+        amount: extracted.amount, 
+        description: extracted.description, 
+        type: extracted.type, 
+        date: extracted.date, 
+        note: extracted.note,
+        categoryId: null,
+        categoryName: null
+      };
+    }
+  } catch (error) {
+    console.error('❌ [AI Extraction] Error:', error);
+  }
+
+  // Fallback to simple pattern matching if AI fails
+  return basicExtraction(transcript, userCurrency, userLanguage);
+}
+
+// Simple fallback extraction
+function basicExtraction(transcript: string, userCurrency: string, userLanguage: string) {
   const lower = transcript.toLowerCase().trim();
   
   let amount = null;
@@ -224,76 +281,44 @@ function extractDataFromTranscript(transcript: string, userCurrency: string, use
   let date = null;
   let note = null;
 
-  // Extract amount with user's currency - support both digits and words
-  const currencySymbol = userCurrency === '€' ? '€' : '$';
-  
-  // Try ENGLISH word numbers first (even for Slovak users who might say English numbers)
-  amount = parseWordNumber(lower, 'en-us');
-  
-  // If no English word number found, try user's language
-  if (amount === null && userLanguage !== 'en-us') {
+  // Basic amount patterns
+  const numberMatch = lower.match(/(\d+(?:\.\d{1,2})?)/);
+  if (numberMatch) {
+    amount = parseFloat(numberMatch[1]);
+  }
+
+  // Try word numbers for Slovak
+  if (amount === null) {
     amount = parseWordNumber(lower, userLanguage);
   }
+
+  // Basic type detection
+  const spendingWords = ['bought', 'paid', 'spent', 'kúpil', 'platil', 'výdavok'];
+  const earningWords = ['earned', 'received', 'dostal', 'príjem'];
   
-  // If no word number found, try numeric patterns
-  if (amount === null) {
-    const amountPattern = new RegExp(`\\${currencySymbol}?(\\d+(?:\\.\\d{1,2})?)\\s?(?:dollars?|euros?|€|\\$)?`, 'i');
-    const amountMatch = lower.match(amountPattern);
-    if (amountMatch) {
-      amount = parseFloat(amountMatch[1]);
-    }
-  }
-
-  // Extract date patterns
-  const today = new Date();
-  if (lower.includes('today') || lower.includes('now')) {
-    date = today.toISOString().split('T')[0];
-  } else if (lower.includes('yesterday')) {
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    date = yesterday.toISOString().split('T')[0];
-  } else if (lower.includes('last week')) {
-    const lastWeek = new Date(today);
-    lastWeek.setDate(today.getDate() - 7);
-    date = lastWeek.toISOString().split('T')[0];
-  }
-
-  // Extract note indicators
-  if (lower.includes('note:') || lower.includes('notes:')) {
-    const noteMatch = transcript.match(/(?:note:?|notes:?)\s*(.+)/i);
-    if (noteMatch) {
-      note = noteMatch[1].trim();
-    }
-  } else if (lower.includes('no note') || lower.includes('no notes') || lower.includes('none')) {
-    note = '';
-  }
-
-  // Basic type detection (Mistral will do the intelligent analysis)
-  if (lower.includes('income') || lower.includes('salary') || lower.includes('wage') || 
-      lower.includes('earned') || lower.includes('received') || lower.includes('paid me') ||
-      lower.includes('bonus') || lower.includes('refund') || lower.includes('dividend')) {
-    type = 'income';
-  } else if (lower.includes('expense') || lower.includes('spent') || lower.includes('bought') || 
-            lower.includes('paid for') || lower.includes('purchase') || lower.includes('cost') ||
-            lower.includes('bill') || lower.includes('fee') || lower.includes('subscription') ||
-            lower.includes('coffee') || lower.includes('food') || lower.includes('gas') ||
-            lower.includes('store') || lower.includes('restaurant') || lower.includes('shop')) {
+  if (spendingWords.some(word => lower.includes(word))) {
     type = 'expense';
+  } else if (earningWords.some(word => lower.includes(word))) {
+    type = 'income';
   }
 
-  // Extract description - clean transcript, but preserve meaningful words
+  // Basic date detection
+  const today = new Date();
+  if (lower.includes('today') || lower.includes('dnes')) {
+    date = today.toISOString().split('T')[0];
+  }
+
+  // Basic description - remove numbers and common words
   let cleanText = transcript
-    .replace(/\$?\d+(?:\.\d{1,2})?\s?(?:dollars?|€|euros?)?/gi, '') // Remove amounts
-    .replace(/\b(?:for|at|from|to|on|dollars?|euros?)\b/gi, '') // Remove only prepositions and currency words
-    .replace(/\s+/g, ' ') // Clean multiple spaces
+    .replace(/\d+(?:\.\d{1,2})?/g, '')
+    .replace(/\b(?:euros?|dollars?|€|\$|korun|today|dnes|paid|kúpil|bought|for|za)\b/gi, '')
     .trim();
 
-  // If it's a simple word like "drugstore", "coffee", "groceries" - use it as description
-  if (cleanText && cleanText.length > 1 && !/^\d+(\.\d{1,2})?$/.test(cleanText.trim())) {
+  if (cleanText && cleanText.length > 1) {
     description = cleanText;
   }
 
-  console.log('🔍 [VoiceConversation] Extraction result:', { amount, description, type, date, note });
+  console.log('🔍 [Basic Extraction] Result:', { amount, description, type, date, note });
   return { amount, description, type, date, note, categoryId: null, categoryName: null };
 }
 
