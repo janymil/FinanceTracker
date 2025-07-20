@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { UnifiedAICache } from "../lib/unifiedAICache";
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
+import { mistralClient } from "./mistralClient";
 
 // Using gpt-4o-mini for cost optimization while maintaining quality for financial analysis
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -2048,6 +2049,32 @@ export async function voiceExtraction(
 ): Promise<string> {
   const normalizedLanguage = normalizeLanguageCode(language);
   try {
+    // Try Mistral first for voice extraction
+    try {
+      console.log('🤖 [Local Voice] Trying Mistral Small 3.2...');
+      const mistralResponse = await mistralClient.createChatCompletion({
+        messages: [
+          {
+            role: "system",
+            content: `You are a JSON extraction AI. Respond ONLY with valid JSON. No explanations, no markdown, no code blocks.
+CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).`
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.1,
+        max_tokens: 500
+      });
+      console.log('✅ [Local Voice] Mistral successful');
+      return mistralResponse.choices[0]?.message?.content || '';
+    } catch (mistralError) {
+      console.warn('⚠️ [Local Voice] Mistral failed, using OpenAI fallback:', mistralError.message);
+    }
+
+    // Fallback to OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [

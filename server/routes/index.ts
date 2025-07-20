@@ -25,6 +25,7 @@ import courseRoutes from "../courseRoutes.js";
 import { DataEncryption } from "../encryption.js";
 import { registerVoiceRoutes } from "./voiceRoutes.js";
 import { registerLearningRoutes } from "./learningRoutes.js";
+import { registerTTSRoutes } from "./ttsRoutes.js";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -65,6 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerPDFRoutes(app);
   registerVoiceRoutes(app);
   registerLearningRoutes(app);
+  registerTTSRoutes(app);
   
   // Demo routes for interactive video features
   app.use('/api/demo', demoRoutes);

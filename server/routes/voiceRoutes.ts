@@ -7,12 +7,23 @@ import { getLanguageLabel } from "../../lib/languageUtils";
 import { db } from "../db";
 import { categories, aiUsage, users } from "../../shared/schema";
 import { eq, and, sql, gte } from "drizzle-orm";
+import { storage } from "../storage";
 
 const voiceProcessSchema = z.object({
   transcript: z.string().min(1),
   language: z.string().default("en-us"),
   timezone: z.string().optional(),
   sessionId: z.string().optional(),
+  context: z.object({}).optional(), // Conversation context
+});
+
+const conversationProcessSchema = z.object({
+  transcript: z.string().min(1),
+  sessionId: z.string(),
+  context: z.object({
+    extractedData: z.object({}).optional(),
+    missingFields: z.array(z.string()).optional(),
+  }).optional(),
 });
 
 export function registerVoiceRoutes(app: Router) {
@@ -147,7 +158,7 @@ EXAMPLES FOR ${countryCode.toUpperCase()}:
 
 CRITICAL: Better to return categoryId: null than wrong category. User can select manually.`;
 
-      // Use external AI processor service with fallback to local OpenAI
+      // Call external AI processor (which uses Mistral first, then OpenAI fallback)
       let completion;
       let aiProcessingTime = 0;
       const aiStartTime = Date.now();
@@ -157,7 +168,7 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
         
         console.log('🤖 [VoiceAPI] Calling external AI processor:', {
           url: AI_PROCESSOR_URL,
-          model: 'gpt-4o-mini',
+          model: 'mistral-small-2506',
           promptLength: prompt.length,
           timeout: '30s'
         });
@@ -171,7 +182,7 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
           body: JSON.stringify({
             prompt,
             userId,
-            model: 'gpt-4o-mini',
+            model: 'mistral-small-2506',
             language
           }),
           signal: AbortSignal.timeout(30000) // 30 second timeout
@@ -326,6 +337,156 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
       
       res.status(500).json({ 
         error: "Failed to process voice input",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Conversational voice processing endpoint
+  router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const { transcript, sessionId, context } = conversationProcessSchema.parse(req.body);
+      const userId = req.auth?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      console.log('💬 [VoiceAPI] Processing conversational input:', {
+        sessionId,
+        transcript: transcript.substring(0, 50) + '...',
+        hasContext: !!context
+      });
+
+      // SECURITY: Validate transaction-related input only
+      const TTSService = await import('../ttsService');
+      if (!TTSService.TTSService.isTransactionRelated(transcript)) {
+        return res.status(400).json({ 
+          error: "Voice input is restricted to transaction-related content only.",
+          message: "Please provide transaction information like amount, vendor, or category."
+        });
+      }
+
+      // SECURITY: Validate session context
+      if (!TTSService.TTSService.isValidTransactionSession(sessionId, context?.extractedData)) {
+        return res.status(400).json({ 
+          error: "Invalid transaction session. Please start a new transaction session.",
+          sessionId: null
+        });
+      }
+
+      // SECURITY: Session timeout (30 minutes)
+      const sessionTimestamp = parseInt(sessionId.split('_')[1]);
+      const currentTime = Date.now();
+      const sessionAge = currentTime - sessionTimestamp;
+      const maxSessionAge = 30 * 60 * 1000; // 30 minutes
+
+      if (sessionAge > maxSessionAge) {
+        return res.status(400).json({ 
+          error: "Session expired. Please start a new transaction session.",
+          sessionId: null
+        });
+      }
+
+      // SECURITY: Limit conversation turns (max 10 exchanges)
+      const maxTurns = 10;
+      const currentTurn = context?.turn || 1;
+      
+      if (currentTurn > maxTurns) {
+        return res.status(400).json({ 
+          error: "Conversation limit reached. Please complete the transaction manually.",
+          sessionId: null
+        });
+      }
+
+      // Merge new transcript with existing context
+      const existingData = context?.extractedData || {};
+      const language = req.headers['x-user-language'] as string || 'en-us';
+
+      // Call the main voice processing but with conversation context
+      const prompt = `
+CONVERSATIONAL VOICE INPUT PROCESSING
+===========================================
+
+Previous Context: ${JSON.stringify(existingData, null, 2)}
+New User Input: "${transcript}"
+Session ID: ${sessionId}
+
+TASK: Update the transaction data with new information from user input.
+
+CONVERSATION RULES:
+1. If user provides missing information, update corresponding fields
+2. If user corrects existing information, replace old values
+3. Keep existing data that wasn't mentioned
+4. Return complete updated transaction object
+
+EXPECTED RESPONSE FORMAT:
+{
+  "amount": number | null,
+  "vendor": string | null,
+  "description": string | null, 
+  "category": string | null,
+  "categoryId": number | null,
+  "date": "YYYY-MM-DD" | null,
+  "type": "income" | "expense" | null,
+  "confidence": 0.0-1.0,
+  "missingFields": ["field1", "field2"],
+  "sessionId": "${sessionId}"
+}
+
+MISSING FIELDS: Include any fields that are still null/missing after this update.
+MERGE STRATEGY: Previous context + new input = complete transaction data.
+`;
+
+      // Use local OpenAI for conversational processing (simpler than external processor)
+      let extractedData;
+      try {
+        console.log('💬 [VoiceAPI] Processing conversational input with local AI...');
+        
+        const completion = await runAI("voice-extraction", userId, { prompt, language }, "free");
+        
+        if (!completion) {
+          throw new Error('Failed to process conversational input');
+        }
+
+        try {
+          extractedData = typeof completion === 'string' ? JSON.parse(completion) : completion;
+        } catch (parseError) {
+          console.error('Failed to parse conversation response:', completion);
+          throw new Error('Invalid AI response format');
+        }
+      } catch (error) {
+        console.error('💥 [VoiceAPI] Conversation AI processing failed:', error);
+        throw new Error('Failed to process conversational input');
+      }
+
+      // Determine missing fields
+      const requiredFields = ['amount', 'vendor', 'category'];
+      const missingFields = requiredFields.filter(field => 
+        !extractedData[field] && !existingData[field]
+      );
+
+      const response = {
+        ...extractedData,
+        missingFields,
+        isComplete: missingFields.length === 0,
+        sessionId: sessionId,
+        turn: currentTurn + 1, // Increment turn for next request
+        maxTurns: maxTurns
+      };
+
+      console.log('💬 [VoiceAPI] Conversation processing completed:', {
+        missingFields,
+        isComplete: response.isComplete,
+        sessionId
+      });
+
+      res.json(response);
+
+    } catch (error) {
+      console.error('💥 [VoiceAPI] Conversation processing failed:', error);
+      res.status(500).json({ 
+        error: "Failed to process conversational input",
         details: error instanceof Error ? error.message : "Unknown error"
       });
     }
