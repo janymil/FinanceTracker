@@ -224,15 +224,16 @@ function extractDataFromTranscript(transcript: string, userCurrency: string, use
   // Extract amount with user's currency - support both digits and words
   const currencySymbol = userCurrency === '€' ? '€' : '$';
   
-  // First try to find digit amounts
-  const amountPattern = new RegExp(`\\${currencySymbol}?(\\d+(?:\\.\\d{1,2})?)\\s?(?:dollars?|euros?|€|\\$)?`, 'i');
-  const amountMatch = lower.match(amountPattern);
+  // Try word numbers FIRST, then numeric patterns
+  amount = parseWordNumber(lower, userLanguage);
   
-  if (amountMatch) {
-    amount = parseFloat(amountMatch[1]);
-  } else {
-    // Parse word numbers like "twenty", "fifty", "one hundred"
-    amount = parseWordNumber(lower, userLanguage);
+  // If no word number found, try numeric patterns
+  if (amount === null) {
+    const amountPattern = new RegExp(`\\${currencySymbol}?(\\d+(?:\\.\\d{1,2})?)\\s?(?:dollars?|euros?|€|\\$)?`, 'i');
+    const amountMatch = lower.match(amountPattern);
+    if (amountMatch) {
+      amount = parseFloat(amountMatch[1]);
+    }
   }
 
   // Extract date patterns
