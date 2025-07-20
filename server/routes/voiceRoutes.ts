@@ -223,7 +223,7 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
         });
         
         const fallbackStartTime = Date.now();
-        completion = await runAI("voice-extraction", userId, { prompt, language }, "free");
+        completion = await runAI("voice-extraction", userId, { prompt, language }, user?.plan || "free");
         const fallbackTime = Date.now() - fallbackStartTime;
         
         console.log('🔄 [VoiceAPI] Fallback processing completed:', {

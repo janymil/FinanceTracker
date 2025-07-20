@@ -35,7 +35,12 @@ export function registerTTSRoutes(app: Express) {
       }
 
       // SECURITY: Only allow transaction-related TTS
-      if (!TTSService.isTransactionRelated(text)) {
+      const isTransactionRelated = TTSService.isTransactionRelated(text);
+      if (!isTransactionRelated) {
+        console.log('❌ [TTS] Text rejected - not transaction-related:', {
+          text: text.substring(0, 100),
+          userId: userId.substring(0, 8)
+        });
         return res.status(400).json({ 
           message: "TTS is restricted to transaction-related content only." 
         });

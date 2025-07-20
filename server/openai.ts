@@ -1086,6 +1086,8 @@ You are an advanced financial forecasting AI that analyzes spending patterns and
   }
 }
 
+
+
 export async function generateExpensePredictions(
   userId: string,
   transactions: Array<{
@@ -2044,9 +2046,12 @@ Provide an AI-powered financial health score that adapts to this user's specific
  * This function mirrors the external AI processor for when external service is unavailable
  */
 export async function voiceExtraction(
-  prompt: string,
-  language: string = 'en-us'
+  userId: string,
+  payload: { prompt: string; language?: string },
+  plan: string = 'free'
 ): Promise<string> {
+  const prompt = payload.prompt;
+  const language = payload.language || 'en-us';
   const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Try Mistral first for voice extraction

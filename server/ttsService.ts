@@ -70,9 +70,29 @@ export class TTSService {
     ];
 
     const lowerInput = input.toLowerCase();
-    return transactionKeywords.some(keyword => lowerInput.includes(keyword)) ||
-           /\$\d+|\d+\s*(dollar|euro|crown|koruna|sol)/i.test(input) ||
-           /\d+\.\d{2}/.test(input); // Money amounts like 15.50
+    
+    // Check for transaction keywords
+    const hasKeywords = transactionKeywords.some(keyword => lowerInput.includes(keyword));
+    
+    // Check for currency patterns 
+    const hasCurrency = /\$\d+|\d+\s*(dollar|euro|crown|koruna|sol|eur)/i.test(input);
+    
+    // Check for money amounts
+    const hasAmount = /\d+[\.,]\d{2}/.test(input);
+    
+    // Check for common transaction phrases
+    const hasTransactionPhrases = /extracted|at|purchase|transaction|spent|paid/i.test(input);
+    
+    console.log('🔍 [TTS] Transaction validation:', {
+      input: input.substring(0, 50),
+      hasKeywords,
+      hasCurrency,
+      hasAmount,
+      hasTransactionPhrases,
+      isValid: hasKeywords || hasCurrency || hasAmount || hasTransactionPhrases
+    });
+    
+    return hasKeywords || hasCurrency || hasAmount || hasTransactionPhrases;
   }
 
   /**
