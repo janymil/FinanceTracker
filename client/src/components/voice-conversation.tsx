@@ -223,7 +223,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     }
   }, []);
 
-  // Play pre-recorded efficient greeting
+  // Play pre-recorded efficient greeting with preload optimization
   const playPrerecordedGreeting = useCallback((onComplete: () => void) => {
     try {
       // Determine greeting file based on user language
@@ -237,6 +237,22 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       console.log('🎙️ Playing prerecorded greeting:', greetingFile);
       
       const audio = new Audio(`/audio/${greetingFile}`);
+      audio.preload = 'auto'; // Optimize loading
+      audio.volume = 1.0;
+      
+      audio.oncanplaythrough = () => {
+        // Start playing as soon as it can play through
+        audio.play().catch(error => {
+          console.warn('⚠️ Audio play failed, using fallback TTS');
+          const fallbackMessage = userLanguage.startsWith('sk') ? 
+            'Povedzte mi o vašej transakcii.' :
+            userLanguage.startsWith('es') ? 
+            'Cuéntame sobre tu transacción.' :
+            'Tell me about your transaction.';
+          speak(fallbackMessage, onComplete);
+        });
+      };
+      
       audio.onended = () => {
         console.log('✅ Prerecorded greeting completed');
         if (onComplete) onComplete();
@@ -244,21 +260,19 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       
       audio.onerror = (error) => {
         console.warn('⚠️ Prerecorded greeting failed, using fallback TTS');
-        // Fallback to live TTS
         const fallbackMessage = userLanguage.startsWith('sk') ? 
           'Povedzte mi o vašej transakcii.' :
           userLanguage.startsWith('es') ? 
           'Cuéntame sobre tu transacción.' :
           'Tell me about your transaction.';
-        
         speak(fallbackMessage, onComplete);
       };
       
-      audio.play();
+      // Start loading immediately
+      audio.load();
       
     } catch (error) {
       console.error('❌ Prerecorded greeting error:', error);
-      // Fallback to live TTS
       const fallbackMessage = 'Tell me about your transaction.';
       speak(fallbackMessage, onComplete);
     }
@@ -314,15 +328,20 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         // Update conversation history
         setConversationHistory(result.conversationHistory || []);
         
+        // Always update transaction data to maintain accumulation
+        if (result.transactionData) {
+          setTransactionData(result.transactionData);
+          console.log('📥 Updated transaction data:', result.transactionData);
+        }
+        
         if (result.isComplete && result.transactionData) {
           // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
-          setTransactionData(result.transactionData);
           setState('complete');
           conversationLockRef.current = true; // Lock conversation before saving
           await saveTransaction(result.transactionData);
         } else if (result.response) {
-          // Continue conversation
+          // Continue conversation with accumulated data
           console.log('❓ AI response:', result.response);
           setCurrentMessage(result.response);
           conversationLockRef.current = false;

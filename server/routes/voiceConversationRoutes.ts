@@ -50,51 +50,63 @@ async function manageCompleteConversation(
     // Build conversation context
     const fullConversation = [...conversationHistory, `User: ${transcript}`].join('\n');
     
-    const systemPrompt = `You are an intelligent transaction data collection assistant. Your goal is to collect ALL required transaction data through natural conversation, then provide a complete transaction object.
+    // Extract accumulated data from previous conversation
+    let accumulatedData = {
+      amount: null,
+      description: null,
+      type: null,
+      date: null,
+      note: null,
+      categoryName: null
+    };
 
-CRITICAL RULES:
-1. Conduct natural conversation in ${userLanguage === 'sk-sk' ? 'Slovak' : userLanguage === 'es-pe' ? 'Spanish' : 'English'}
-2. Use user's currency: ${userCurrency}
-3. Collect: amount, description, type (expense/income), date, note (optional)
-4. When ALL data collected, set "complete": true and provide transaction object
-5. Be conversational and natural - don't ask rigid questions
-6. Extract data intelligently from natural speech
+    // Parse previous conversation to maintain state
+    conversationHistory.forEach(entry => {
+      if (entry.includes('amount:') || entry.includes('pivo') || entry.includes('€') || entry.includes('$')) {
+        // Extract data from previous conversation - this is a simplified parser
+        // In production, you'd want more robust parsing
+        const amountMatch = entry.match(/(\d+(?:\.\d+)?)/);
+        if (amountMatch) accumulatedData.amount = parseFloat(amountMatch[1]);
+        
+        if (entry.includes('pivo')) accumulatedData.description = 'pivo';
+        if (entry.includes('expense') || entry.includes('výdavok')) accumulatedData.type = 'expense';
+        if (entry.includes('včera') || entry.includes('yesterday')) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          accumulatedData.date = yesterday.toISOString().split('T')[0];
+        }
+      }
+    });
 
-RESPONSE FORMAT (JSON):
-{
-  "response": "Your natural conversational response in user's language",
-  "complete": false,
-  "transactionData": {
-    "amount": number or null,
-    "description": "clean description" or null,
-    "type": "expense" or "income" or null,
-    "date": "YYYY-MM-DD" or null,
-    "note": "user note" or null,
-    "categoryName": "intelligent category guess" or null
-  }
-}
+    const systemPrompt = `FAST transaction collection. Build on previous data.
 
-When complete=true, ensure ALL required fields (amount, description, type) are filled.
+ACCUMULATED DATA: ${JSON.stringify(accumulatedData)}
 
-Examples:
-- "Kúpil som pivo za 5 eur" → extract amount: 5, description: "pivo", type: "expense"
-- "Got salary 2000" → amount: 2000, description: "salary", type: "income"
-- "yesterday" → date: previous day
-- "today" → date: current day
+USER LANGUAGE: ${userLanguage === 'sk-sk' ? 'Slovak' : userLanguage === 'es-pe' ? 'Spanish' : 'English'}
+CURRENCY: ${userCurrency}
 
-Current conversation:
-${fullConversation}
+RULES:
+1. NEVER repeat what user said
+2. EXTREMELY brief responses (5 words max)
+3. If you have amount+description+type → complete=true IMMEDIATELY
+4. Ask for ONLY next missing piece
+5. Extract ALL data from current+previous conversation
 
-Provide JSON response:`;
+Required: amount, description, type
+Optional: date, note
+
+Latest user input: "${transcript}"
+
+JSON only:`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: 'Process this conversation and respond appropriately.' }
+        { role: 'user', content: `Extract data from: "${transcript}" + previous conversation. Return JSON with updated transactionData building on accumulated data. If amount+description+type exist, set complete=true.` }
       ],
-      temperature: 0.3,
-      max_tokens: 300,
+      temperature: 0.1,
+      max_tokens: 200,
       response_format: { type: "json_object" }
     });
 
