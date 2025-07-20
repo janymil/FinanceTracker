@@ -98,18 +98,40 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     
     // Setup speech recognition with user's language
     const recognition = new (window as any).webkitSpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true;  // Keep listening continuously
+    recognition.interimResults = true; // Get interim results for better UX
     recognition.lang = getRecognitionLanguage(userLanguage);
     
     console.log('🎤 STT Language set to:', recognition.lang);
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript.trim();
-      console.log('🎤 Voice heard:', transcript);
-      if (transcript && !conversationLockRef.current) {
-        setState('processing');
-        processVoiceInput(transcript);
+      try {
+        // Get the final result (not interim)
+        const results = event.results;
+        let transcript = '';
+        
+        for (let i = 0; i < results.length; i++) {
+          if (results[i].isFinal) {
+            transcript = results[i][0].transcript.trim();
+            break;
+          }
+        }
+        
+        if (transcript) {
+          console.log('🎤 Final voice result:', transcript);
+          
+          if (!conversationLockRef.current) {
+            console.log('🎤 Processing transcript:', transcript);
+            setState('processing');
+            
+            // Call handleVoiceInput directly without closure issues
+            handleVoiceInput(transcript);
+          } else {
+            console.log('🎤 Transcript ignored - conversation locked');
+          }
+        }
+      } catch (error) {
+        console.error('🎤 Error in onresult:', error);
       }
     };
 
@@ -120,9 +142,18 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     recognition.onend = () => {
       console.log('🎤 Recognition ended');
-      // Only restart if we're still in conversation mode
-      if (!conversationLockRef.current) {
-        console.log('🎤 Recognition ended naturally, ready for next input');
+      // Restart recognition if conversation is still active
+      if (!conversationLockRef.current && recognitionRef.current) {
+        console.log('🎤 Restarting recognition...');
+        setTimeout(() => {
+          if (recognitionRef.current && !conversationLockRef.current) {
+            try {
+              recognitionRef.current.start();
+            } catch (error) {
+              console.log('🎤 Error restarting recognition:', error);
+            }
+          }
+        }, 100);
       }
     };
 
@@ -232,9 +263,14 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     });
   }, [userLanguage]); // Only include userLanguage dependency to avoid circular reference
 
-  // Process voice input with AI
-  const processVoiceInput = useCallback(async (transcript: string) => {
-    if (conversationLockRef.current) return;
+  // Handle voice input without closure issues
+  const handleVoiceInput = async (transcript: string) => {
+    console.log('🗣️ handleVoiceInput called with:', transcript);
+    
+    if (conversationLockRef.current) {
+      console.log('🗣️ Conversation locked, ignoring input');
+      return;
+    }
     
     conversationLockRef.current = true;
     setState('processing');
@@ -242,7 +278,13 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     try {
       console.log('📡 Processing voice input:', transcript);
-      console.log('📤 Sending to backend:', { transcript, sessionId, currentData: transactionData });
+      console.log('📤 Sending to backend:', { 
+        transcript, 
+        sessionId, 
+        currentData: transactionData,
+        userLanguage: userLanguage,
+        userCurrency: userCurrency 
+      });
       
       const response = await apiRequest('POST', '/api/voice/conversation', {
         transcript,
@@ -264,7 +306,6 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
           setState('complete');
-          conversationLockRef.current = true; // Lock conversation before saving
           await saveTransaction(updatedData);
         } else if (result.nextQuestion) {
           // Ask next question
@@ -272,7 +313,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           setCurrentMessage(result.nextQuestion);
           conversationLockRef.current = false;
           setState('speaking');
-          speak(result.nextQuestion, () => {
+          
+          await speak(result.nextQuestion, () => {
             // Only start listening if conversation is not locked
             if (!conversationLockRef.current) {
               startListening();
@@ -295,9 +337,17 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         startConversation();
       }, 2000);
     } finally {
-      conversationLockRef.current = false;
+      // Always unlock unless we're in complete state
+      if (conversationLockRef.current) {
+        conversationLockRef.current = false;
+      }
     }
-  }, [transactionData, sessionId, userLanguage, userCurrency]);
+  };
+
+  // Process voice input with AI (compatibility wrapper)
+  const processVoiceInput = useCallback(async (transcript: string) => {
+    await handleVoiceInput(transcript);
+  }, []);
 
   // Determine and ask next question with user's currency
   const askNextQuestion = useCallback((data: TransactionData) => {
