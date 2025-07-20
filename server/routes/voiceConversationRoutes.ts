@@ -73,7 +73,7 @@ export function registerVoiceConversationRoutes(app: Router) {
       console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
 
       // Extract information from current transcript using user's currency
-      const newData = extractDataFromTranscript(transcript, userCurrency || user.currency || '$');
+      const newData = extractDataFromTranscript(transcript, userCurrency || user.currency || '$', userLanguage);
       console.log('📝 [VoiceConversation] Extracted:', newData);
 
       // Merge new data with existing (preserve existing data, only add new non-null values)
@@ -212,7 +212,7 @@ export function registerVoiceConversationRoutes(app: Router) {
 }
 
 // Extract data from transcript with currency support, date, and note
-function extractDataFromTranscript(transcript: string, userCurrency: string) {
+function extractDataFromTranscript(transcript: string, userCurrency: string, userLanguage: string = 'en-us') {
   const lower = transcript.toLowerCase().trim();
   
   let amount = null;
@@ -232,7 +232,7 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
     amount = parseFloat(amountMatch[1]);
   } else {
     // Parse word numbers like "twenty", "fifty", "one hundred"
-    amount = parseWordNumber(lower);
+    amount = parseWordNumber(lower, userLanguage);
   }
 
   // Extract date patterns
@@ -280,7 +280,7 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
     .trim();
 
   // If it's a simple word like "drugstore", "coffee", "groceries" - use it as description
-  if (cleanText && cleanText.length > 1 && !isJustNumber(cleanText)) {
+  if (cleanText && cleanText.length > 1 && !/^\d+(\.\d{1,2})?$/.test(cleanText.trim())) {
     description = cleanText;
   }
 
@@ -288,29 +288,45 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
   return { amount, description, type, date, note, categoryId: null, categoryName: null };
 }
 
-// Check if text is just a number
-function isJustNumber(text: string): boolean {
-  return /^\d+(\.\d{1,2})?$/.test(text.trim());
-}
-
 // Parse word numbers to numeric values
-function parseWordNumber(text: string): number | null {
-  const wordNumbers = {
-    'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-    'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-    'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
-    'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
-    'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
-    'eighty': 80, 'ninety': 90, 'hundred': 100, 'thousand': 1000
+function parseWordNumber(text: string, language: string = 'en-us'): number | null {
+  // Multilingual word numbers
+  const wordNumbers: { [key: string]: { [word: string]: number } } = {
+    'en-us': {
+      'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+      'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+      'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+      'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+      'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
+      'eighty': 80, 'ninety': 90, 'hundred': 100, 'thousand': 1000
+    },
+    'es-pe': {
+      'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5,
+      'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10,
+      'once': 11, 'doce': 12, 'trece': 13, 'catorce': 14, 'quince': 15,
+      'dieciséis': 16, 'diecisiete': 17, 'dieciocho': 18, 'diecinueve': 19, 'veinte': 20,
+      'treinta': 30, 'cuarenta': 40, 'cincuenta': 50, 'sesenta': 60, 'setenta': 70,
+      'ochenta': 80, 'noventa': 90, 'cien': 100, 'mil': 1000
+    },
+    'sk-sk': {
+      'nula': 0, 'jeden': 1, 'dva': 2, 'tri': 3, 'štyri': 4, 'päť': 5,
+      'šesť': 6, 'sedem': 7, 'osem': 8, 'deväť': 9, 'desať': 10,
+      'jedenásť': 11, 'dvanásť': 12, 'trinásť': 13, 'štrnásť': 14, 'pätnásť': 15,
+      'šestnásť': 16, 'sedemnásť': 17, 'osemnásť': 18, 'devätnásť': 19, 'dvadsať': 20,
+      'tridsať': 30, 'štyridsať': 40, 'päťdesiat': 50, 'šesťdesiat': 60, 'sedemdesiat': 70,
+      'osemdesiat': 80, 'deväťdesiat': 90, 'sto': 100, 'tisíc': 1000
+    }
   };
+
+  const currentLang = wordNumbers[language] || wordNumbers['en-us'];
 
   const words = text.toLowerCase().split(/\s+/);
   let total = 0;
   let current = 0;
 
   for (const word of words) {
-    if (wordNumbers.hasOwnProperty(word)) {
-      const value = wordNumbers[word as keyof typeof wordNumbers];
+    if (currentLang.hasOwnProperty(word)) {
+      const value = currentLang[word];
       
       if (value === 100) {
         current *= 100;
@@ -366,11 +382,6 @@ async function runMistralAnalysis(description: string, userId: string, userLangu
     console.warn('⚠️ [VoiceConversation] Mistral categorization failed:', error.message);
     return null;
   }
-}
-
-// Check if text is just a number
-function isJustNumber(text: string): boolean {
-  return /^\d+(\.\d{1,2})?$/.test(text.trim());
 }
 
 // Generate question for missing field
