@@ -170,13 +170,13 @@ function isJustNumber(text: string): boolean {
   return /^\d+(\.\d{1,2})?$/.test(text.trim());
 }
 
-// Run AI categorization for voice input using existing AI processor
+// Run AI categorization for voice input using existing AI processor  
 async function runAICategorizationForVoice(description: string, userId: string, type: string) {
   try {
     console.log('🤖 [VoiceConversation] Starting AI categorization:', { description, type });
 
-    // Import the AI processor function
-    const { runAI } = await import('../lib/aiProcessor.js');
+    // Import the AI processor function from the correct path
+    const aiProcessor = await import('../../lib/aiProcessor.js');
     const user = await storage.getUser(userId);
     
     if (!user) {
@@ -185,9 +185,9 @@ async function runAICategorizationForVoice(description: string, userId: string, 
     }
 
     // Use the existing AI categorization system
-    const result = await runAI('categorizeExpense', userId, user.plan || 'free', {
+    const result = await aiProcessor.runAI('categorizeExpense', userId, user.plan || 'free', {
       description,
-      type: type as 'expense' | 'income',
+      type: type as 'expense' | 'income', 
       language: 'en-us'
     });
 
@@ -202,7 +202,7 @@ async function runAICategorizationForVoice(description: string, userId: string, 
     
     return null;
   } catch (error) {
-    console.error('💥 [VoiceConversation] AI categorization failed:', error);
+    console.error('💥 [VoiceConversation] AI categorization failed, continuing without category:', error.message);
     return null;
   }
 }

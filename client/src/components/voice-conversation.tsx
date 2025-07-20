@@ -66,6 +66,11 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         }
       };
 
+      recognition.onstart = () => {
+        console.log('🎤 Recognition started successfully');
+        setIsListening(true);
+      };
+
       recognition.onerror = (event: any) => {
         console.error('🎤 Speech error:', event.error);
         setIsListening(false);
@@ -196,9 +201,23 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
   // Start listening
   const startListening = useCallback(() => {
     if (recognitionRef.current && !isListening && !isProcessing) {
-      console.log('🎤 Starting to listen...');
-      setIsListening(true);
-      recognitionRef.current.start();
+      try {
+        console.log('🎤 Attempting to start listening...');
+        recognitionRef.current.start();
+      } catch (error) {
+        console.log('🎤 Recognition start error (likely already started):', error);
+        setIsListening(false);
+        // Try again after a short delay
+        setTimeout(() => {
+          if (!isListening && !isProcessing) {
+            try {
+              recognitionRef.current.start();
+            } catch (retryError) {
+              console.log('🎤 Retry failed, skipping');
+            }
+          }
+        }, 500);
+      }
     }
   }, [isListening, isProcessing]);
 
