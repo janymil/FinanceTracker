@@ -37,14 +37,6 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     note: undefined
   });
 
-  // Use useRef to store the current transaction data to avoid stale closures
-  const transactionDataRef = useRef<TransactionData>(transactionData);
-  
-  // Keep ref in sync with state
-  useEffect(() => {
-    transactionDataRef.current = transactionData;
-  }, [transactionData]);
-
   const recognitionRef = useRef<any>(null);
   const conversationLockRef = useRef<boolean>(false);
   const { toast } = useToast();
@@ -130,15 +122,12 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     try {
       console.log('📡 Processing voice input:', transcript);
-      
-      // Get current data from ref to avoid stale closure
-      const currentData = transactionDataRef.current;
-      console.log('📤 Sending to backend:', { transcript, sessionId, currentData });
+      console.log('📤 Sending to backend:', { transcript, sessionId, currentData: transactionData });
       
       const response = await apiRequest('POST', '/api/voice/conversation', {
         transcript,
         sessionId,
-        currentData
+        currentData: transactionData
       });
 
       const result = await response.json();
@@ -152,19 +141,16 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         if (result.isComplete) {
           // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
-          conversationLockRef.current = false; // Release lock before saving
           await saveTransaction(updatedData);
         } else if (result.nextQuestion) {
           // Ask next question
           console.log('❓ Asking next question:', result.nextQuestion);
           setCurrentMessage(result.nextQuestion);
-          conversationLockRef.current = false; // Release lock before speaking
           speak(result.nextQuestion, () => {
             startListening();
           });
         } else {
           // Fallback - determine next question
-          conversationLockRef.current = false; // Release lock before fallback
           askNextQuestion(updatedData);
         }
       } else {
@@ -181,7 +167,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     } finally {
       conversationLockRef.current = false;
     }
-  }, [sessionId]);
+  }, [transactionData, sessionId]);
 
   // Determine and ask next question
   const askNextQuestion = useCallback((data: TransactionData) => {
@@ -260,23 +246,15 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
   // Start listening
   const startListening = useCallback(() => {
-    if (recognitionRef.current) {
+    if (recognitionRef.current && state !== 'listening') {
       try {
         console.log('🎤 Starting to listen...');
-        setState('listening');
         recognitionRef.current.start();
       } catch (error) {
-        console.log('🎤 Recognition already running, stopping and restarting');
-        recognitionRef.current.stop();
-        setTimeout(() => {
-          if (recognitionRef.current) {
-            setState('listening');
-            recognitionRef.current.start();
-          }
-        }, 100);
+        console.log('🎤 Recognition already running');
       }
     }
-  }, []);
+  }, [state]);
 
   // Save transaction
   const saveTransaction = useCallback(async (data: TransactionData) => {
