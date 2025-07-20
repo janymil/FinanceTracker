@@ -135,25 +135,22 @@ export class TTSService {
     const promptTemplates = {
       amount: {
         'en-us': (data: any, currency: string) => {
-          // Use the user's actual currency preference, not hardcoded text
-          const currencyText = currency === '$' ? 'dollars' : currency === '€' ? 'euros' : currency === '£' ? 'pounds' : currency === '¥' ? 'yen' : currency === 'Kč' ? 'crowns' : `${currency}`;
-          if (data.vendor) return `How much did you spend at ${data.vendor} in ${currencyText}?`;
-          if (data.category) return `How much did you spend on ${data.category} in ${currencyText}?`;
-          return `How much in ${currencyText}?`;
+          // Use the user's actual currency dynamically - no hardcoding
+          if (data.vendor) return `How much did you spend at ${data.vendor}?`;
+          if (data.category) return `How much did you spend on ${data.category}?`;
+          return `How much was it?`;
         },
         'es-pe': (data: any, currency: string) => {
-          // Use the user's actual currency preference, not hardcoded text
-          const currencyText = currency === '$' ? 'dólares' : currency === '€' ? 'euros' : currency === '£' ? 'libras' : currency === '¥' ? 'yenes' : currency === 'Kč' ? 'coronas' : `${currency}`;
-          if (data.vendor) return `¿Cuántos ${currencyText} gastaste en ${data.vendor}?`;
-          if (data.category) return `¿Cuántos ${currencyText} gastaste en ${data.category}?`;
-          return `¿Cuántos ${currencyText}?`;
+          // Use the user's actual currency dynamically - no hardcoding
+          if (data.vendor) return `¿Cuánto gastaste en ${data.vendor}?`;
+          if (data.category) return `¿Cuánto gastaste en ${data.category}?`;
+          return `¿Cuánto fue?`;
         },
         'sk-sk': (data: any, currency: string) => {
-          // Use the user's actual currency preference, not hardcoded text
-          const currencyText = currency === '$' ? 'dolárov' : currency === '€' ? 'eur' : currency === '£' ? 'libier' : currency === '¥' ? 'jenov' : currency === 'Kč' ? 'korún' : `${currency}`;
-          if (data.vendor) return `Koľko ${currencyText} si minul v ${data.vendor}?`;
-          if (data.category) return `Koľko ${currencyText} si minul na ${data.category}?`;
-          return `Koľko ${currencyText}?`;
+          // Use the user's actual currency dynamically - no hardcoding
+          if (data.vendor) return `Koľko si minul v ${data.vendor}?`;
+          if (data.category) return `Koľko si minul na ${data.category}?`;
+          return `Koľko to bolo?`;
         }
       },
       vendor: {
