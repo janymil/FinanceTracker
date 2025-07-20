@@ -56,7 +56,10 @@ export function VoiceTransactionDialog({
   // Fetch categories
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => apiRequest('/api/categories'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/categories');
+      return response.json();
+    },
   });
 
   // Process voice transcript
@@ -92,7 +95,7 @@ export function VoiceTransactionDialog({
         const endTime = performance.now();
         console.error('💥 [VoiceDialog] API request failed:', {
           processingTime: `${(endTime - startTime).toFixed(2)}ms`,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           timestamp: new Date().toISOString()
         });
         throw error;

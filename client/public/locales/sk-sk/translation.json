@@ -3921,6 +3921,32 @@
     }
   },
 
+  "voiceConversation": {
+    "listening": "Počúvam...",
+    "processing": "Spracúvam...",
+    "speaking": "Hovorím...",
+    "speak": "Hovoriť",
+    "ask_question": "Opýtať sa",
+    "starting_conversation": "Začínam rozhovor...",
+    "tell_me_about_transaction": "Povedz mi o transakcii",
+    "please_provide": "Prosím poskytnite",
+    "mic_permission_denied": "Prístup k mikrofónu zamietnutý",
+    "audio_capture_failed": "Zachytávanie zvuku zlyhalo",
+    "network_error": "Chyba siete",
+    "voice_recognition_error": "Chyba rozpoznávania reči",
+    "processing_error": "Chyba spracovania",
+    "saved": "Uložené",
+    "transaction_saved": "Transakcia uložená",
+    "failed_to_save": "Nepodarilo sa uložiť transakciu",
+    "waiting": "Čakám...",
+    "expense": "Výdavok",
+    "income": "Príjem",
+    "amount": "Suma",
+    "description": "Popis",
+    "type": "Typ",
+    "error": "Chyba"
+  },
+
   "voiceTransaction": {
     "title": "Skontrolovať hlasovú transakciu",
     "description": "Skontrolujte a potvrďte podrobnosti transakcie extrahované z vášho hlasového vstupu",

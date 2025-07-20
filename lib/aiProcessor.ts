@@ -154,7 +154,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
         switch (task) {
           case 'voice-extraction':
             fallbackResult = await import('../server/openai.js').then(m => 
-              m.voiceExtraction(userId, payload, userPlan)
+              m.voiceExtraction(userId, payload as { prompt: string; language?: string }, userPlan)
             );
             break;
           case 'contextual-tips':
@@ -204,7 +204,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
             break;
           case 'voice-extraction':
             const { voiceExtraction } = await import('../server/openai');
-            fallbackResult = await voiceExtraction(userId, payload, userPlan);
+            fallbackResult = await voiceExtraction(userId, payload as { prompt: string; language?: string }, userPlan);
             break;
           default:
             throw new Error(`No local fallback available for task: ${task}`);

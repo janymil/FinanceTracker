@@ -174,7 +174,7 @@ export class TTSService {
       }
     };
 
-    const template = promptTemplates[field]?.[normalizedLanguage];
+    const template = promptTemplates[field as keyof typeof promptTemplates]?.[normalizedLanguage];
     if (template) {
       // For amount field, pass the user currency; for others, use the original signature
       if (field === 'amount') {
@@ -205,7 +205,7 @@ export class TTSService {
     };
 
     const languageQuestions = fallbackQuestions[normalizedLanguage] || fallbackQuestions['en-us'];
-    return languageQuestions[field] || `Please provide the ${field}.`;
+    return languageQuestions[field as keyof typeof languageQuestions] || `Please provide the ${field}.`;
   }
 
   /**
