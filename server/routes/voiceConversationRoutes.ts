@@ -170,69 +170,39 @@ function isJustNumber(text: string): boolean {
   return /^\d+(\.\d{1,2})?$/.test(text.trim());
 }
 
-// Run AI categorization for voice input
+// Run AI categorization for voice input using existing AI processor
 async function runAICategorizationForVoice(description: string, userId: string, type: string) {
   try {
-    // Get available categories
-    const [userCategories, systemCategories] = await Promise.all([
-      db.select().from(categories).where(
-        and(eq(categories.type, type as 'expense' | 'income'), eq(categories.userId, userId))
-      ).limit(10),
-      db.select().from(categories).where(
-        and(eq(categories.type, type as 'expense' | 'income'), eq(categories.userId, null as any))
-      ).limit(20)
-    ]);
+    console.log('🤖 [VoiceConversation] Starting AI categorization:', { description, type });
 
-    const allCategories = [...systemCategories, ...userCategories];
-    console.log('📂 [VoiceConversation] Available categories:', allCategories.length);
-
-    if (allCategories.length === 0) {
+    // Import the AI processor function
+    const { runAI } = await import('../lib/aiProcessor.js');
+    const user = await storage.getUser(userId);
+    
+    if (!user) {
+      console.log('⚠️ [VoiceConversation] User not found for AI categorization');
       return null;
     }
 
-    // Use existing AI processor for categorization
-    const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'http://31.97.103.28:8080';
-    
-    const prompt = `Categorize this transaction: "${description}"
-Available categories: ${allCategories.map(cat => `${cat.name} (ID: ${cat.id})`).join(', ')}
-
-Rules:
-- Analyze what type of business/expense this is
-- Match to the BEST available category
-- Consider user spending patterns and merchant intelligence
-- Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|null}`;
-
-    const response = await fetch(`${AI_PROCESSOR_URL}/api/ai/categorize-expense`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.AI_PROCESSOR_TOKEN || 'default'}`,
-      },
-      body: JSON.stringify({
-        description,
-        categories: allCategories,
-        userId,
-        language: 'en-us'
-      }),
-      signal: AbortSignal.timeout(5000)
+    // Use the existing AI categorization system
+    const result = await runAI('categorizeExpense', userId, user.plan || 'free', {
+      description,
+      type: type as 'expense' | 'income',
+      language: 'en-us'
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      const categoryData = typeof result === 'string' ? JSON.parse(result) : result;
-      
-      if (categoryData.categoryId) {
-        const matchedCategory = allCategories.find(cat => cat.id === categoryData.categoryId);
-        return {
-          categoryId: categoryData.categoryId,
-          categoryName: matchedCategory?.name || categoryData.categoryName
-        };
-      }
+    console.log('✅ [VoiceConversation] AI categorization result:', result);
+
+    if (result && result.categoryId) {
+      return {
+        categoryId: result.categoryId,
+        categoryName: result.categoryName
+      };
     }
     
     return null;
   } catch (error) {
-    console.error('AI categorization failed:', error);
+    console.error('💥 [VoiceConversation] AI categorization failed:', error);
     return null;
   }
 }

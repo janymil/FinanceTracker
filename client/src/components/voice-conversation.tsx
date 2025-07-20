@@ -202,8 +202,43 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     }
   }, [isListening, isProcessing]);
 
-  // Text-to-speech
-  const speak = useCallback((text: string) => {
+  // Text-to-speech using OpenAI TTS
+  const speak = useCallback(async (text: string) => {
+    try {
+      console.log('🔊 Speaking with OpenAI TTS:', text);
+      
+      // Call TTS API endpoint
+      const response = await apiRequest('POST', '/api/tts/speak', {
+        text,
+        voice: 'alloy',
+        speed: 1.0
+      });
+
+      if (response.ok) {
+        const audioBuffer = await response.arrayBuffer();
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioBufferDecoded = await audioContext.decodeAudioData(audioBuffer);
+        
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBufferDecoded;
+        source.connect(audioContext.destination);
+        source.start(0);
+        
+        console.log('✅ OpenAI TTS audio played');
+      } else {
+        // Fallback to browser TTS
+        console.log('⚠️ OpenAI TTS failed, using browser fallback');
+        fallbackSpeak(text);
+      }
+    } catch (error) {
+      console.error('❌ OpenAI TTS error:', error);
+      // Fallback to browser TTS
+      fallbackSpeak(text);
+    }
+  }, []);
+
+  // Fallback browser TTS
+  const fallbackSpeak = (text: string) => {
     if ('speechSynthesis' in window) {
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -212,7 +247,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       utterance.volume = 0.8;
       speechSynthesis.speak(utterance);
     }
-  }, []);
+  };
 
   // Save complete transaction
   const saveTransaction = async (data: TransactionData) => {

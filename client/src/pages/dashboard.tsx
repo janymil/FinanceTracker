@@ -75,7 +75,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { VoiceInputWithPlan } from "@/components/voice-input-with-plan";
 import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
-// Removed VoiceConversation component
+import { VoiceConversation } from "@/components/voice-conversation";
 
 interface Category {
   id: number;
@@ -148,7 +148,7 @@ export default function Dashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
-  // Removed seamlessVoiceOpen state
+  const [voiceConversationOpen, setVoiceConversationOpen] = useState(false);
 
   // Defer expensive rendering to prevent Suspense errors
   const deferredSelectedMonth = useDeferredValue(selectedMonth);
@@ -474,10 +474,10 @@ export default function Dashboard() {
                   }}
                 />
                 <Button
-                  onClick={() => setSeamlessVoiceOpen(true)}
+                  onClick={() => setVoiceConversationOpen(true)}
                   variant="outline"
                   size="icon"
-                  title="ChatGPT-style Voice Mode"
+                  title="ChatGPT-style Voice Conversation"
                   className="border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -854,7 +854,20 @@ export default function Dashboard() {
           }}
         />
 
-        {/* Removed Seamless Voice Transaction */}
+        {/* Voice Conversation - ChatGPT-style Voice Mode */}
+        {voiceConversationOpen && (
+          <VoiceConversation
+            onClose={() => setVoiceConversationOpen(false)}
+            onComplete={() => {
+              // Refresh data after successful transaction creation
+              if (deferredUser) {
+                queryClient.invalidateQueries({ queryKey: ['transactions'] });
+                queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+                queryClient.invalidateQueries({ queryKey: ['budgets'] });
+              }
+            }}
+          />
+        )}
         
         </div>
       </div>
