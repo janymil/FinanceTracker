@@ -223,16 +223,64 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     }
   }, []);
 
-  // Start the initial conversation
+  // Play pre-recorded efficient greeting
+  const playPrerecordedGreeting = useCallback((onComplete: () => void) => {
+    try {
+      // Determine greeting file based on user language
+      let greetingFile = 'voice-greeting-en.mp3'; // Default English
+      if (userLanguage.startsWith('sk')) {
+        greetingFile = 'voice-greeting-sk.mp3';
+      } else if (userLanguage.startsWith('es')) {
+        greetingFile = 'voice-greeting-es.mp3';
+      }
+
+      console.log('🎙️ Playing prerecorded greeting:', greetingFile);
+      
+      const audio = new Audio(`/audio/${greetingFile}`);
+      audio.onended = () => {
+        console.log('✅ Prerecorded greeting completed');
+        if (onComplete) onComplete();
+      };
+      
+      audio.onerror = (error) => {
+        console.warn('⚠️ Prerecorded greeting failed, using fallback TTS');
+        // Fallback to live TTS
+        const fallbackMessage = userLanguage.startsWith('sk') ? 
+          'Povedzte mi o vašej transakcii.' :
+          userLanguage.startsWith('es') ? 
+          'Cuéntame sobre tu transacción.' :
+          'Tell me about your transaction.';
+        
+        speak(fallbackMessage, onComplete);
+      };
+      
+      audio.play();
+      
+    } catch (error) {
+      console.error('❌ Prerecorded greeting error:', error);
+      // Fallback to live TTS
+      const fallbackMessage = 'Tell me about your transaction.';
+      speak(fallbackMessage, onComplete);
+    }
+  }, [userLanguage]);
+
+  // Start the initial conversation with efficient greeting
   const startConversation = useCallback(() => {
-    const message = 'Tell me about your transaction';
-    console.log('🗣️ Starting conversation:', message);
-    setCurrentMessage(message);
-    speak(message, () => {
-      // After speaking, start listening
+    const displayMessage = userLanguage.startsWith('sk') ? 
+      'Povedzte mi o vašej transakcii. Potrebujem sumu, čo ste si kúpili, kedy sa to stalo, a či to bol výdavok alebo príjem.' :
+      userLanguage.startsWith('es') ? 
+      'Cuéntame sobre tu transacción. Necesito el monto, qué compraste, cuándo pasó, y si fue un gasto o ingreso.' :
+      'Tell me about your transaction. I need the amount, what you bought, when it happened, and if it was an expense or income.';
+    
+    console.log('🗣️ Starting conversation with prerecorded greeting');
+    setCurrentMessage(displayMessage);
+    
+    // Use prerecorded greeting instead of live TTS
+    playPrerecordedGreeting(() => {
+      // After greeting, start listening
       startListening();
     });
-  }, [userLanguage]); // Only include userLanguage dependency to avoid circular reference
+  }, [userLanguage, playPrerecordedGreeting]);
 
   // Process voice input with ultra-efficient OpenAI
   const processVoiceInput = useCallback(async (transcript: string) => {
