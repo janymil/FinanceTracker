@@ -16,7 +16,9 @@ const conversationSchema = z.object({
     description: z.string().nullable(),
     type: z.enum(['income', 'expense']).nullable(),
     categoryId: z.number().nullable(),
-    categoryName: z.string().nullable()
+    categoryName: z.string().nullable(),
+    date: z.string().nullable().optional(),
+    note: z.string().nullable().optional()
   }).optional()
 });
 
@@ -60,14 +62,15 @@ export function registerVoiceConversationRoutes(app: Router) {
       }
 
       // Start with existing data from frontend
-      const existing = currentData || { 
-        amount: null, 
-        description: null, 
+      const existing = {
+        amount: null,
+        description: null,
         type: null,
         date: null,
-        note: null,
+        note: undefined,
         categoryId: null,
-        categoryName: null
+        categoryName: null,
+        ...(currentData || {})
       };
       
       console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
