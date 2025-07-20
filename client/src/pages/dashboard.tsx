@@ -75,7 +75,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { VoiceInputWithPlan } from "@/components/voice-input-with-plan";
 import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
-import { SeamlessVoicePopup } from "@/components/seamless-voice-popup";
+import { SeamlessVoiceTransaction } from "@/components/seamless-voice-transaction";
 
 interface Category {
   id: number;
@@ -854,18 +854,19 @@ export default function Dashboard() {
           }}
         />
 
-        {/* Seamless Voice Popup */}
-        <SeamlessVoicePopup
-          isOpen={seamlessVoiceOpen}
-          onClose={() => setSeamlessVoiceOpen(false)}
-          onComplete={() => {
-            // Refresh data after successful transaction creation
-            if (deferredUser) {
-              queryClient.invalidateQueries({ queryKey: ['transactions'] });
-              queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
-            }
-          }}
-        />
+        {/* Seamless Voice Transaction */}
+        {seamlessVoiceOpen && (
+          <SeamlessVoiceTransaction
+            onClose={() => setSeamlessVoiceOpen(false)}
+            onComplete={() => {
+              // Refresh data after successful transaction creation
+              if (deferredUser) {
+                queryClient.invalidateQueries({ queryKey: ['transactions'] });
+                queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+              }
+            }}
+          />
+        )}
         
         </div>
       </div>
