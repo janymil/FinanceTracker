@@ -9,6 +9,8 @@ import { eq, and } from "drizzle-orm";
 const conversationSchema = z.object({
   transcript: z.string().min(1),
   sessionId: z.string().min(1),
+  userLanguage: z.string().optional(),
+  userCurrency: z.string().optional(),
   currentData: z.object({
     amount: z.number().nullable(),
     description: z.string().nullable(),
@@ -24,7 +26,7 @@ export function registerVoiceConversationRoutes(app: Router) {
   // Process voice conversation with AI categorization
   router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
     try {
-      const { transcript, sessionId, currentData } = conversationSchema.parse(req.body);
+      const { transcript, sessionId, currentData, userLanguage, userCurrency } = conversationSchema.parse(req.body);
       const userId = (req as any).auth?.userId;
 
       if (!userId) {
@@ -57,8 +59,8 @@ export function registerVoiceConversationRoutes(app: Router) {
       
       console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
 
-      // Extract information from current transcript
-      const newData = extractDataFromTranscript(transcript, user.currency || '$');
+      // Extract information from current transcript using user's currency
+      const newData = extractDataFromTranscript(transcript, userCurrency || user.currency || '$');
       console.log('📝 [VoiceConversation] Extracted:', newData);
 
       // Merge new data with existing (preserve existing data, only add new non-null values)
@@ -101,7 +103,7 @@ export function registerVoiceConversationRoutes(app: Router) {
       let nextQuestion = null;
       if (!isComplete) {
         if (nextField) {
-          nextQuestion = generateQuestion(nextField, updated, user.currency || '$');
+          nextQuestion = generateQuestion(nextField, updated, userCurrency || user.currency || '$');
         }
       }
 
@@ -302,7 +304,7 @@ async function runMistralAnalysis(description: string, userId: string) {
         name: cat.name,
         type: cat.type
       })),
-      'en-us', // TODO: Get from user settings
+      'en-us', // Note: Mistral analysis uses English for technical processing
       'UTC', // TODO: Get from user settings
       {
         analysisOnly: true // Flag to indicate we only need type and category

@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 
 interface VoiceConversationProps {
   onClose: () => void;
@@ -41,6 +43,24 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
   const conversationLockRef = useRef<boolean>(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { i18n } = useTranslation();
+
+  // Get user data for language and currency
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    staleTime: 5 * 60 * 1000
+  });
+
+  // Get user's language and currency
+  const userLanguage = i18n.language || 'en-us';
+  const userCurrency = (user as any)?.currency || '$';
+  
+  // Language mapping for speech recognition
+  const getRecognitionLanguage = (lang: string) => {
+    if (lang.startsWith('es')) return 'es-ES';
+    if (lang.startsWith('sk')) return 'sk-SK';
+    return 'en-US';
+  };
 
   // Initialize and start conversation
   useEffect(() => {
@@ -64,16 +84,17 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       return;
     }
 
-    // Setup speech recognition
+    // Setup speech recognition with user's language
     const recognition = new (window as any).webkitSpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    recognition.lang = getRecognitionLanguage(userLanguage);
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript.trim();
       console.log('🎤 Voice heard:', transcript);
-      if (transcript && !conversationLockRef.current) {
+      if (transcript && !conversationLockRef.current && state === 'listening') {
+        setState('processing');
         processVoiceInput(transcript);
       }
     };
@@ -125,7 +146,9 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       const response = await apiRequest('POST', '/api/voice/conversation', {
         transcript,
         sessionId,
-        currentData: transactionData
+        currentData: transactionData,
+        userLanguage: userLanguage,
+        userCurrency: userCurrency
       });
 
       const result = await response.json();
@@ -139,16 +162,22 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         if (result.isComplete) {
           // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
+          conversationLockRef.current = false;
           await saveTransaction(updatedData);
         } else if (result.nextQuestion) {
           // Ask next question
           console.log('❓ Asking next question:', result.nextQuestion);
           setCurrentMessage(result.nextQuestion);
+          conversationLockRef.current = false;
+          setState('speaking');
           speak(result.nextQuestion, () => {
-            startListening();
+            if (state !== 'complete') {
+              startListening();
+            }
           });
         } else {
           // Fallback - determine next question
+          conversationLockRef.current = false;
           askNextQuestion(updatedData);
         }
       } else {
@@ -167,14 +196,14 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     }
   }, [transactionData, sessionId]);
 
-  // Determine and ask next question
+  // Determine and ask next question with user's currency
   const askNextQuestion = useCallback((data: TransactionData) => {
     let question = '';
 
     if (!data.amount) {
       question = 'How much was it?';
     } else if (!data.description) {
-      question = `What was this $${data.amount} for?`;
+      question = `What was this ${userCurrency}${data.amount} for?`;
     } else if (!data.date) {
       question = 'When did this happen? Today or another day?';
     } else if (data.note === undefined) {
@@ -182,17 +211,19 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       question = 'Any notes to add to this transaction?';
     } else {
       // All required data collected - save transaction
-      // Note: type (expense/income) should be determined automatically by AI
       saveTransaction(data);
       return;
     }
 
     console.log('🗣️ Asking question:', question);
     setCurrentMessage(question);
+    setState('speaking');
     speak(question, () => {
-      startListening();
+      if (state !== 'complete') {
+        startListening();
+      }
     });
-  }, []);
+  }, [userCurrency, state]);
 
   // Text-to-speech with callback
   const speak = useCallback(async (text: string, onComplete?: () => void) => {
@@ -242,28 +273,28 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     }
   }, []);
 
-  // Start listening
+  // Start listening with proper state management
   const startListening = useCallback(() => {
-    if (recognitionRef.current) {
+    if (recognitionRef.current && state !== 'complete') {
       try {
         console.log('🎤 Starting to listen...');
         setState('listening');
         recognitionRef.current.start();
       } catch (error) {
         console.log('🎤 Recognition error, retrying:', error);
-        setTimeout(() => {
-          if (recognitionRef.current) {
-            try {
+        if ((error as any)?.name === 'InvalidStateError') {
+          // Recognition is already running, stop and restart
+          recognitionRef.current.stop();
+          setTimeout(() => {
+            if (recognitionRef.current) {
               setState('listening');
               recognitionRef.current.start();
-            } catch (e) {
-              console.log('🎤 Second retry failed');
             }
-          }
-        }, 200);
+          }, 300);
+        }
       }
     }
-  }, []);
+  }, [state]);
 
   // Save transaction
   const saveTransaction = useCallback(async (data: TransactionData) => {
@@ -287,15 +318,24 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       const result = await response.json();
 
       if (result.success) {
-        const successMessage = `Saved $${data.amount} ${data.type || 'transaction'}!`;
+        const successMessage = `Saved ${userCurrency}${data.amount} ${data.type || 'transaction'}!`;
         
         setState('complete');
         setCurrentMessage(successMessage);
-        speak(successMessage);
+        
+        // Stop any listening and speak success
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+        
+        speak(successMessage, () => {
+          // After success message, close modal
+          setTimeout(onClose, 1500);
+        });
 
         toast({
           title: 'Transaction saved',
-          description: `$${data.amount} - ${data.description}`,
+          description: `${userCurrency}${data.amount} - ${data.description}`,
         });
 
         // Refresh data
@@ -303,9 +343,6 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
         
         onComplete?.();
-        
-        // Close after success message
-        setTimeout(onClose, 3000);
       } else {
         throw new Error(result.error || 'Failed to save transaction');
       }
