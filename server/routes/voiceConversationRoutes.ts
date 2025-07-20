@@ -48,43 +48,20 @@ export function registerVoiceConversationRoutes(app: Router) {
         amount: null, 
         description: null, 
         type: null,
+        date: null,
+        note: null,
         categoryId: null,
         categoryName: null
       };
 
-      // Extract information from current transcript
-      const newData = extractDataFromTranscript(transcript, user.currency || '$');
-      console.log('📝 [VoiceConversation] Extracted:', newData);
-
-      // Merge new data with existing (prioritize new data)
-      const updated = {
-        amount: newData.amount || existing.amount,
-        description: newData.description || existing.description,
-        type: newData.type || existing.type,
-        categoryId: newData.categoryId || existing.categoryId,
-        categoryName: newData.categoryName || existing.categoryName
-      };
-
-      // AI Categorization - if we have description but no category
-      if (updated.description && !updated.categoryId) {
-        console.log('🤖 [VoiceConversation] Running AI categorization...');
-        
-        try {
-          const categoryResult = await runAICategorizationForVoice(
-            updated.description,
-            userId,
-            updated.type || 'expense'
-          );
-          
-          if (categoryResult) {
-            updated.categoryId = categoryResult.categoryId;
-            updated.categoryName = categoryResult.categoryName;
-            console.log('✅ [VoiceConversation] AI categorized:', categoryResult);
-          }
-        } catch (error) {
-          console.log('⚠️ [VoiceConversation] AI categorization failed, continuing without category');
-        }
-      }
+      // Process input using Mistral AI for comprehensive analysis
+      const updated = await processTranscriptWithMistral(
+        transcript, 
+        existing, 
+        userId, 
+        user.currency || '$',
+        sessionId
+      );
 
       console.log('🔄 [VoiceConversation] Final updated data:', updated);
 
@@ -126,11 +103,111 @@ export function registerVoiceConversationRoutes(app: Router) {
     }
   });
 
+  // Complete and save transaction
+  router.post('/complete', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const { transactionData, sessionId } = req.body;
+      const userId = (req as any).auth?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ success: false, error: "Unauthorized" });
+      }
+
+      console.log('✅ [VoiceConversation] Saving complete transaction:', {
+        userId: userId.substring(0, 8) + '...',
+        sessionId,
+        data: transactionData
+      });
+
+      // Create transaction record
+      const transaction = await storage.addTransaction(userId, {
+        amount: transactionData.amount,
+        description: transactionData.description,
+        type: transactionData.type,
+        date: transactionData.date || new Date().toISOString().split('T')[0],
+        reference: transactionData.note || '',
+        categoryId: transactionData.categoryId || null,
+        source: 'voice_conversation'
+      });
+
+      return res.json({
+        success: true,
+        transaction,
+        message: "Transaction saved successfully"
+      });
+
+    } catch (error: any) {
+      console.error('💥 [VoiceConversation] Failed to save transaction:', error);
+      return res.status(500).json({ 
+        success: false,
+        error: "Failed to save transaction"
+      });
+    }
+  });
+
   app.use('/api/voice', router);
 }
 
-// Extract data from transcript with currency support, date, and note
-function extractDataFromTranscript(transcript: string, userCurrency: string) {
+// Process transcript with Mistral AI for comprehensive analysis
+async function processTranscriptWithMistral(
+  transcript: string,
+  existingData: any,
+  userId: string,
+  currency: string,
+  sessionId: string
+) {
+  console.log('🤖 [VoiceConversation] Processing with Mistral AI...');
+
+  try {
+    // Get user's categories for Mistral processing
+    const userCategories = await storage.getCategories(userId);
+    
+    // Use Mistral client for processing
+    const mistralClient = await import('../mistralClient.ts');
+    const client = new mistralClient.MistralClient();
+
+    // Call processVoiceInput with existing data as session context
+    const result = await client.processVoiceInput(
+      transcript,
+      userCategories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        type: cat.type
+      })),
+      'en-us', // TODO: Get from user settings
+      'UTC', // TODO: Get from user settings
+      {
+        sessionId,
+        existingData,
+        currency
+      }
+    );
+
+    console.log('✅ [VoiceConversation] Mistral result:', result);
+
+    // Merge result with existing data (prioritize AI results)
+    const updated = {
+      amount: result.amount || existingData.amount,
+      description: result.description || result.vendor || existingData.description,
+      type: result.type || existingData.type,
+      date: result.date || existingData.date,
+      note: result.note || existingData.note,
+      categoryId: result.categoryId || existingData.categoryId,
+      categoryName: result.categoryName || existingData.categoryName
+    };
+
+    return updated;
+
+  } catch (error: any) {
+    console.warn('⚠️ [VoiceConversation] Mistral processing failed, using fallback:', error.message);
+    
+    // Fallback to basic extraction
+    return extractDataFromTranscriptFallback(transcript, existingData, currency);
+  }
+}
+
+// Fallback extraction function for when Mistral fails
+function extractDataFromTranscriptFallback(transcript: string, existingData: any, userCurrency: string) {
   const lower = transcript.toLowerCase().trim();
   
   let amount = null;
@@ -172,7 +249,7 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
     note = '';
   }
 
-  // Improved type detection with AI-like intelligence
+  // Basic type detection
   if (lower.includes('income') || lower.includes('salary') || lower.includes('wage') || 
       lower.includes('earned') || lower.includes('received') || lower.includes('paid me') ||
       lower.includes('bonus') || lower.includes('refund') || lower.includes('dividend')) {
@@ -196,49 +273,21 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
     description = cleanText;
   }
 
-  return { amount, description, type, date, note, categoryId: null, categoryName: null };
+  // Merge with existing data
+  return {
+    amount: amount || existingData.amount,
+    description: description || existingData.description,
+    type: type || existingData.type,
+    date: date || existingData.date,
+    note: note !== null ? note : existingData.note,
+    categoryId: existingData.categoryId,
+    categoryName: existingData.categoryName
+  };
 }
 
 // Check if text is just a number
 function isJustNumber(text: string): boolean {
   return /^\d+(\.\d{1,2})?$/.test(text.trim());
-}
-
-// Run AI categorization for voice input using existing AI processor  
-async function runAICategorizationForVoice(description: string, userId: string, type: string) {
-  try {
-    console.log('🤖 [VoiceConversation] Starting AI categorization:', { description, type });
-
-    // Import the AI processor function from the correct path
-    const aiProcessor = await import('../../lib/aiProcessor.ts');
-    const user = await storage.getUser(userId);
-    
-    if (!user) {
-      console.log('⚠️ [VoiceConversation] User not found for AI categorization');
-      return null;
-    }
-
-    // Use the existing AI categorization system
-    const result = await aiProcessor.runAI(userId, 'categorizeExpense', {
-      description,
-      type: type as 'expense' | 'income', 
-      language: 'en-us'
-    }, user.plan || 'free');
-
-    console.log('✅ [VoiceConversation] AI categorization result:', result);
-
-    if (result && result.categoryId) {
-      return {
-        categoryId: result.categoryId,
-        categoryName: result.categoryName
-      };
-    }
-    
-    return null;
-  } catch (error: any) {
-    console.error('💥 [VoiceConversation] AI categorization failed, continuing without category:', error.message);
-    return null;
-  }
 }
 
 // Generate question for missing field

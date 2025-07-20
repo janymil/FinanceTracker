@@ -266,22 +266,17 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     setCurrentMessage('Saving transaction...');
 
     try {
-      const payload = {
-        amount: data.amount,
-        description: data.description,
-        type: data.type || 'expense', // Default to expense if not determined
-        date: data.date || new Date().toISOString().split('T')[0],
-        categoryId: data.categoryId,
-        isRecurring: false,
-        referenceNote: data.note
-      };
+      console.log('💾 Saving transaction:', data);
 
-      console.log('💾 Saving transaction:', payload);
+      // Use voice conversation complete endpoint
+      const response = await apiRequest('POST', '/api/voice/complete', {
+        transactionData: data,
+        sessionId: sessionId
+      });
 
-      const response = await apiRequest('POST', '/api/transactions', payload);
+      const result = await response.json();
 
-      if (response.ok) {
-        const saved = await response.json();
+      if (result.success) {
         const successMessage = `Saved $${data.amount} ${data.type || 'transaction'}!`;
         
         setState('complete');
@@ -302,7 +297,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         // Close after success message
         setTimeout(onClose, 3000);
       } else {
-        throw new Error('Failed to save transaction');
+        throw new Error(result.error || 'Failed to save transaction');
       }
     } catch (error) {
       console.error('💥 Save error:', error);
