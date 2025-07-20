@@ -111,6 +111,14 @@ export function VoiceTransactionDialog({
         setEditedData({ ...data.data });
         setError(null);
         
+        // Add TTS feedback for extracted data
+        if (data.data.followUpQuestions && data.data.followUpQuestions.length > 0) {
+          playTTSFeedback(data.data.followUpQuestions[0]);
+        } else if (data.data.vendor && data.data.amount) {
+          const confirmationText = `${t('voiceTransaction.extracted')}: ${data.data.amount} ${data.data.currency || currency} ${t('voiceTransaction.at')} ${data.data.vendor}`;
+          playTTSFeedback(confirmationText);
+        }
+        
         console.log('📊 [VoiceDialog] Data extraction results:', {
           amount: data.data.amount,
           type: data.data.type,
@@ -159,6 +167,30 @@ export function VoiceTransactionDialog({
       });
     },
   });
+
+  // TTS feedback function  
+  const playTTSFeedback = async (text: string) => {
+    try {
+      const response = await apiRequest('POST', '/api/tts/speak', {
+        text,
+        language: i18n.language,
+        speed: 1.0
+      });
+      
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => URL.revokeObjectURL(audioUrl);
+        audio.play().catch(err => console.warn('TTS playback failed:', err));
+        
+        console.log('🔊 [VoiceDialog] TTS feedback played:', text);
+      }
+    } catch (error) {
+      console.warn('⚠️ [VoiceDialog] TTS feedback failed:', error);
+    }
+  };
 
   // Process transcript when dialog opens
   useEffect(() => {
