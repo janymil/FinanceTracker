@@ -264,18 +264,28 @@ export function registerVoiceConversationRoutes(app: Router) {
 
       console.log('🤖 [VoiceConversation] OpenAI result:', result);
 
-      // Update conversation history
+      // Update conversation history and ensure data persistence
       const updatedHistory = [
         ...conversationHistory,
         `User: ${transcript}`,
         `Assistant: ${result.response}`
       ];
 
+      // CRITICAL: Pass accumulated data to frontend for memory persistence
+      const finalTransactionData = result.transactionData || accumulatedData;
+      
+      console.log('🔄 [VoiceConversation] Returning to frontend:', {
+        response: result.response,
+        isComplete: result.isComplete,
+        transactionData: finalTransactionData,
+        accumulatedData: accumulatedData
+      });
+
       return res.json({
         success: true,
         response: result.response,
         isComplete: result.isComplete,
-        transactionData: result.transactionData,
+        transactionData: finalTransactionData,
         conversationHistory: updatedHistory
       });
 
