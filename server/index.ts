@@ -327,6 +327,16 @@ app.use((req, res, next) => {
 // Serve static mascot images
 app.use('/uploads', express.static('uploads'));
 
+// Serve audio files with correct MIME type
+app.use('/audio', express.static('public/audio', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.mp3')) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Accept-Ranges', 'bytes');
+    }
+  }
+}));
+
 // Serve specific SEO files
 app.get('/sitemap.xml', (req, res) => {
   res.sendFile(pathModule.resolve(process.cwd(), 'public/sitemap.xml'));
