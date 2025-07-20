@@ -98,37 +98,29 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     
     // Setup speech recognition with user's language
     const recognition = new (window as any).webkitSpeechRecognition();
-    recognition.continuous = true;  // Keep listening continuously
-    recognition.interimResults = true; // Get interim results for better UX
+    recognition.continuous = false;  // Single recognition per session
+    recognition.interimResults = false; // Only final results
     recognition.lang = getRecognitionLanguage(userLanguage);
     
     console.log('🎤 STT Language set to:', recognition.lang);
 
     recognition.onresult = (event: any) => {
       try {
-        // Get the final result (not interim)
-        const results = event.results;
-        let transcript = '';
+        const transcript = event.results[0][0].transcript.trim();
+        console.log('🎤 Voice heard:', transcript);
         
-        for (let i = 0; i < results.length; i++) {
-          if (results[i].isFinal) {
-            transcript = results[i][0].transcript.trim();
-            break;
-          }
-        }
-        
-        if (transcript) {
-          console.log('🎤 Final voice result:', transcript);
+        if (transcript && !conversationLockRef.current) {
+          console.log('🎤 Processing transcript:', transcript);
           
-          if (!conversationLockRef.current) {
-            console.log('🎤 Processing transcript:', transcript);
-            setState('processing');
-            
-            // Call handleVoiceInput directly without closure issues
-            handleVoiceInput(transcript);
-          } else {
-            console.log('🎤 Transcript ignored - conversation locked');
+          // STOP recognition immediately to prevent duplicate processing
+          if (recognitionRef.current) {
+            recognitionRef.current.stop();
           }
+          
+          setState('processing');
+          handleVoiceInput(transcript);
+        } else {
+          console.log('🎤 Transcript ignored - conversation locked');
         }
       } catch (error) {
         console.error('🎤 Error in onresult:', error);
@@ -142,19 +134,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     recognition.onend = () => {
       console.log('🎤 Recognition ended');
-      // Restart recognition if conversation is still active
-      if (!conversationLockRef.current && recognitionRef.current) {
-        console.log('🎤 Restarting recognition...');
-        setTimeout(() => {
-          if (recognitionRef.current && !conversationLockRef.current) {
-            try {
-              recognitionRef.current.start();
-            } catch (error) {
-              console.log('🎤 Error restarting recognition:', error);
-            }
-          }
-        }, 100);
-      }
+      // Do NOT restart automatically - wait for next question cycle
     };
 
     recognition.onerror = (event: any) => {
@@ -314,7 +294,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           conversationLockRef.current = false;
           setState('speaking');
           
-          await speak(result.nextQuestion, () => {
+          speak(result.nextQuestion, () => {
             // Only start listening if conversation is not locked
             if (!conversationLockRef.current) {
               startListening();
@@ -337,10 +317,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         startConversation();
       }, 2000);
     } finally {
-      // Always unlock unless we're in complete state
-      if (conversationLockRef.current) {
-        conversationLockRef.current = false;
-      }
+      // Always unlock at the end
+      conversationLockRef.current = false;
     }
   };
 
