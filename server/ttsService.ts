@@ -121,7 +121,8 @@ export class TTSService {
   static generateQuestionForMissingField(
     field: string, 
     extractedData: any, 
-    language: string = 'en-us'
+    language: string = 'en-us',
+    userCurrency: string = '$'
   ): string {
     const normalizedLanguage = normalizeLanguageCode(language);
 
@@ -133,20 +134,23 @@ export class TTSService {
 
     const promptTemplates = {
       amount: {
-        'en-us': (data: any) => {
-          if (data.vendor) return `How much did you spend at ${data.vendor}?`;
-          if (data.category) return `How much did you spend on ${data.category}?`;
-          return 'How much was this transaction?';
+        'en-us': (data: any, currency: string) => {
+          const currencyText = currency === '$' ? 'dollars' : currency === '€' ? 'euros' : currency;
+          if (data.vendor) return `How much did you spend at ${data.vendor} in ${currencyText}?`;
+          if (data.category) return `How much did you spend on ${data.category} in ${currencyText}?`;
+          return `How much in ${currencyText}?`;
         },
-        'es-pe': (data: any) => {
-          if (data.vendor) return `¿Cuánto gastaste en ${data.vendor}?`;
-          if (data.category) return `¿Cuánto gastaste en ${data.category}?`;
-          return '¿Cuánto fue esta transacción?';
+        'es-pe': (data: any, currency: string) => {
+          const currencyText = currency === '$' ? 'dólares' : currency === '€' ? 'euros' : currency;
+          if (data.vendor) return `¿Cuántos ${currencyText} gastaste en ${data.vendor}?`;
+          if (data.category) return `¿Cuántos ${currencyText} gastaste en ${data.category}?`;
+          return `¿Cuántos ${currencyText}?`;
         },
-        'sk-sk': (data: any) => {
-          if (data.vendor) return `Koľko si minul v ${data.vendor}?`;
-          if (data.category) return `Koľko si minul na ${data.category}?`;
-          return 'Koľko bola táto transakcia?';
+        'sk-sk': (data: any, currency: string) => {
+          const currencyText = currency === '$' ? 'dolárov' : currency === '€' ? 'eur' : currency;
+          if (data.vendor) return `Koľko ${currencyText} si minul v ${data.vendor}?`;
+          if (data.category) return `Koľko ${currencyText} si minul na ${data.category}?`;
+          return `Koľko ${currencyText}?`;
         }
       },
       vendor: {
@@ -203,7 +207,12 @@ export class TTSService {
 
     const template = promptTemplates[field]?.[normalizedLanguage];
     if (template) {
-      return template(extractedData);
+      // For amount field, pass the user currency; for others, use the original signature
+      if (field === 'amount') {
+        return template(extractedData, userCurrency);
+      } else {
+        return template(extractedData);
+      }
     }
 
     // NO AI FALLBACK - Only predefined questions allowed

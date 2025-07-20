@@ -113,11 +113,12 @@ export function registerTTSRoutes(app: Express) {
       // Get user language
       const language = getUserLanguage(req);
 
-      // Generate contextual question - FAST processing
+      // Generate contextual question - FAST processing with user currency
       const questionText = TTSService.generateQuestionForMissingField(
         field, 
         extractedData || {}, 
-        language
+        language,
+        user?.currency || '$'
       );
 
       const response: any = {

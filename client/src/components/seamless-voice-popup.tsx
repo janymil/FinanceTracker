@@ -204,6 +204,7 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
             category: newExtractedData.category || 'Other',
             categoryId: newExtractedData.categoryId || null,
             date: newExtractedData.date || new Date().toISOString().split('T')[0],
+            currency: newExtractedData.currency, // Preserve user's currency from voice parsing
             isRecurring: false
           };
           

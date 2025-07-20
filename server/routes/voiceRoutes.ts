@@ -94,9 +94,9 @@ export function registerVoiceRoutes(app: Router) {
       const currentDate = new Date().toISOString().split('T')[0];
       
       try {
-        // Step 1: FAST direct parsing without AI
+        // Step 1: FAST direct parsing with user's currency
         extractedData = {
-          amount: extractAmountFromText(transcript),
+          amount: extractAmountFromText(transcript, user.currency || '$'),
           vendor: extractVendorFromText(transcript),
           description: transcript.trim(),
           type: 'expense', // Default
@@ -104,7 +104,8 @@ export function registerVoiceRoutes(app: Router) {
           parsedDate: currentDate,
           categoryId: null,
           categoryName: null,
-          confidence: 0.8
+          confidence: 0.8,
+          currency: user.currency || '$'
         };
 
         // Step 2: ONLY use AI for categorization if vendor is found but no category
@@ -661,28 +662,37 @@ JSON: {"categoryId": number|null, "categoryName": "string"|null}`;
   app.use('/api/voice', router);
 }
 
-// FAST parsing functions for voice input
-function extractAmountFromText(text: string): number | null {
-  // Look for numbers with currency symbols or decimal points
+// FAST parsing functions for voice input with user currency support
+function extractAmountFromText(text: string, userCurrency: string = '$'): number | null {
+  // Create patterns based on user's currency and common formats
+  const currencySymbol = userCurrency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
+  
   const amountPatterns = [
-    /(\d+\.?\d*)\s*€/g,  // 25€, 25.50€
-    /(\d+\.?\d*)\s*\$|USD/g,  // 25$, 25.50$, 25USD
-    /\$(\d+\.?\d*)/g,    // $25, $25.50
-    /(\d+\.?\d*)\s*(?:dollars?|euros?|czk|eur|usd)/gi,  // 25 dollars, 25 euros
-    /(\d+[.,]\d{2})/g,   // 25.50, 25,50
-    /(\d+)/g             // Just numbers as fallback
+    new RegExp(`(\\d+\\.?\\d*)\\s*${currencySymbol}`, 'gi'),  // 25€, 25.50€ (user currency)
+    new RegExp(`${currencySymbol}(\\d+\\.?\\d*)`, 'gi'),      // €25, €25.50 (user currency prefix)
+    /(\d+\.?\d*)\s*\$|USD/gi,  // 25$, 25.50$, 25USD (dollar fallback)
+    /\$(\d+\.?\d*)/gi,         // $25, $25.50 (dollar fallback)
+    /(\d+\.?\d*)\s*(?:dollars?|euros?|czk|eur|usd|crowns?)/gi,  // 25 dollars, 25 euros, etc.
+    /(\d+[.,]\d{2})/g,         // 25.50, 25,50 (decimal amounts)
+    /(\d+)/g                   // Just numbers as fallback
   ];
   
   for (const pattern of amountPatterns) {
     const matches = text.match(pattern);
     if (matches) {
-      const amount = parseFloat(matches[0].replace(/[^\d.,]/g, '').replace(',', '.'));
-      if (!isNaN(amount) && amount > 0) {
-        return amount;
+      // Extract the numeric part
+      const numericMatch = matches[0].match(/(\d+[.,]?\d*)/);
+      if (numericMatch) {
+        const amount = parseFloat(numericMatch[0].replace(',', '.'));
+        if (!isNaN(amount) && amount > 0) {
+          console.log(`💰 [VoiceAPI] Extracted amount: ${amount} (user currency: ${userCurrency})`);
+          return amount;
+        }
       }
     }
   }
   
+  console.log(`💰 [VoiceAPI] No amount found in: "${text}" (user currency: ${userCurrency})`);
   return null;
 }
 
