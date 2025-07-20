@@ -52,10 +52,15 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
   });
 
   // Get user's ACTUAL language and currency from database/settings
-  const userLanguage = (user as any)?.language || i18n.language || 'en-us';
-  const userCurrency = (user as any)?.currency || '$';
+  const userLanguage = (user as any)?.language || i18n.language || 'en-us'; // User's database language preference  
+  const userCurrency = (user as any)?.currency || '$'; // User's database currency preference
   
-  console.log('🌍 Voice conversation using:', { userLanguage, userCurrency, i18nLang: i18n.language });
+  console.log('🌍 Voice conversation using:', { 
+    userLanguage, 
+    userCurrency, 
+    i18nLang: i18n.language,
+    userData: user 
+  });
   
   // Language mapping for speech recognition
   const getRecognitionLanguage = (lang: string) => {
@@ -66,7 +71,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
   // Initialize and start conversation when user data is available
   useEffect(() => {
-    if (user !== undefined) { // Wait for user data to load
+    if (user !== undefined && userLanguage && userCurrency) { // Wait for all data to load
+      console.log('🚀 Initializing conversation with user data:', { userLanguage, userCurrency });
       initializeConversation();
     }
     
@@ -101,7 +107,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript.trim();
       console.log('🎤 Voice heard:', transcript);
-      if (transcript && !conversationLockRef.current && state === 'listening') {
+      if (transcript && !conversationLockRef.current) {
         setState('processing');
         processVoiceInput(transcript);
       }
@@ -114,7 +120,10 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     recognition.onend = () => {
       console.log('🎤 Recognition ended');
-      // Don't change state here - let processVoiceInput handle it
+      // Only restart if we're still in conversation mode
+      if (!conversationLockRef.current) {
+        console.log('🎤 Recognition ended naturally, ready for next input');
+      }
     };
 
     recognition.onerror = (event: any) => {
@@ -189,7 +198,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
   // Start listening with proper state management
   const startListening = useCallback(() => {
-    if (recognitionRef.current && state !== 'complete') {
+    if (recognitionRef.current && !conversationLockRef.current) {
       try {
         console.log('🎤 Starting to listen...');
         setState('listening');
@@ -200,15 +209,17 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           // Recognition is already running, stop and restart
           recognitionRef.current.stop();
           setTimeout(() => {
-            if (recognitionRef.current) {
+            if (recognitionRef.current && !conversationLockRef.current) {
               setState('listening');
               recognitionRef.current.start();
             }
           }, 300);
         }
       }
+    } else {
+      console.log('🎤 Cannot start listening - conversation locked or no recognition available');
     }
-  }, [state]);
+  }, []);
 
   // Start the initial conversation
   const startConversation = useCallback(() => {
@@ -252,7 +263,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         if (result.isComplete) {
           // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
-          conversationLockRef.current = false;
+          setState('complete');
+          conversationLockRef.current = true; // Lock conversation before saving
           await saveTransaction(updatedData);
         } else if (result.nextQuestion) {
           // Ask next question
@@ -261,8 +273,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           conversationLockRef.current = false;
           setState('speaking');
           speak(result.nextQuestion, () => {
-            // Only start listening if we're not complete
-            if (state !== 'complete' && state !== 'error') {
+            // Only start listening if conversation is not locked
+            if (!conversationLockRef.current) {
               startListening();
             }
           });
@@ -310,8 +322,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     setCurrentMessage(question);
     setState('speaking');
     speak(question, () => {
-      // Only start listening if we're not complete
-      if (state !== 'complete' && state !== 'error') {
+      // Only start listening if conversation is not locked
+      if (!conversationLockRef.current) {
         startListening();
       }
     });
@@ -347,10 +359,12 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         setState('complete');
         setCurrentMessage(successMessage);
         
-        // Stop any listening and speak success
+        // STOP ALL LISTENING permanently
         if (recognitionRef.current) {
           recognitionRef.current.stop();
+          recognitionRef.current = null; // Completely disable recognition
         }
+        conversationLockRef.current = true; // Lock conversation permanently
         
         speak(successMessage, () => {
           // After success message, close modal
