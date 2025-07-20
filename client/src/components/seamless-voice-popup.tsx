@@ -144,15 +144,22 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       console.log('📦 [SeamlessPopup] API result:', result);
       console.log('📦 [SeamlessPopup] Current extractedData:', extractedData);
       
-      // Update extracted data - FIXED MERGING
+      // Update extracted data - FIXED FOR VOICE API RESPONSE FORMAT
+      console.log('🔧 [SeamlessPopup] Raw API result structure:', JSON.stringify(result, null, 2));
+      
+      // Voice API returns data in result.data structure
+      const voiceData = result.data || result;
+      
       const newExtractedData = { 
         ...extractedData, 
-        ...result,
-        // Handle nested data if API returns it differently
-        amount: result.amount || extractedData.amount,
-        vendor: result.vendor || extractedData.vendor, 
-        category: result.category || extractedData.category,
-        description: result.description || extractedData.description
+        // Extract from voice API response structure
+        amount: voiceData.amount || extractedData.amount,
+        vendor: voiceData.vendor || extractedData.vendor, 
+        category: voiceData.categoryName || voiceData.category || extractedData.category,
+        description: voiceData.description || extractedData.description,
+        type: voiceData.type || extractedData.type || 'expense',
+        date: voiceData.parsedDate || voiceData.date || extractedData.date,
+        categoryId: voiceData.categoryId || extractedData.categoryId
       };
       
       console.log('📝 [SeamlessPopup] NEW extractedData:', newExtractedData);
@@ -160,16 +167,21 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       
       if (result.sessionId) setSessionId(result.sessionId);
 
-      // Step 2: Check REQUIRED fields for transaction creation - SIMPLE: only amount and description needed
-      const REQUIRED_FIELDS = {
-        amount: newExtractedData.amount,
-        description: newExtractedData.description || newExtractedData.vendor || 'Purchase'
-      };
+      // Step 2: Check REQUIRED fields for transaction creation - SIMPLE: only amount needed
+      const hasAmount = newExtractedData.amount && newExtractedData.amount > 0;
+      const hasDescription = newExtractedData.description || newExtractedData.vendor;
       
-      const missingFields = Object.keys(REQUIRED_FIELDS).filter(field => {
-        const value = REQUIRED_FIELDS[field];
-        return !value || value === null || value === undefined || value === '' || value === 0;
+      console.log('🔍 [SeamlessPopup] Field validation:', {
+        amount: newExtractedData.amount,
+        hasAmount,
+        description: newExtractedData.description,
+        vendor: newExtractedData.vendor,
+        hasDescription
       });
+      
+      const missingFields = [];
+      if (!hasAmount) missingFields.push('amount');
+      if (!hasDescription) missingFields.push('description');
       
       console.log('🔍 [SeamlessPopup] Missing fields:', missingFields);
       console.log('🎯 [SeamlessPopup] Field values:', {

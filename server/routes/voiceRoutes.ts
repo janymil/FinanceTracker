@@ -96,8 +96,8 @@ export function registerVoiceRoutes(app: Router) {
       try {
         // Step 1: FAST direct parsing without AI
         extractedData = {
-          amount: parseAmountFromText(transcript),
-          vendor: parseVendorFromText(transcript),
+          amount: extractAmountFromText(transcript),
+          vendor: extractVendorFromText(transcript),
           description: transcript.trim(),
           type: 'expense', // Default
           dateReference: 'today',
@@ -196,7 +196,6 @@ Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|nul
       
       console.log('🚀 [VoiceAPI] Voice processing completed successfully:', {
         totalProcessingTime: `${totalTime}ms`,
-        aiProcessingTime: `${aiProcessingTime}ms`,
         finalConfidence: extractedData.confidence,
         extractedFields: Object.keys(extractedData).filter(key => extractedData[key] !== null && extractedData[key] !== undefined),
         userId: (userId || 'unknown').substring(0, 8) + '...',
@@ -660,6 +659,54 @@ JSON: {"categoryId": number|null, "categoryName": "string"|null}`;
   });
 
   app.use('/api/voice', router);
+}
+
+// FAST parsing functions for voice input
+function extractAmountFromText(text: string): number | null {
+  // Look for numbers with currency symbols or decimal points
+  const amountPatterns = [
+    /(\d+\.?\d*)\s*€/g,  // 25€, 25.50€
+    /(\d+\.?\d*)\s*\$|USD/g,  // 25$, 25.50$, 25USD
+    /\$(\d+\.?\d*)/g,    // $25, $25.50
+    /(\d+\.?\d*)\s*(?:dollars?|euros?|czk|eur|usd)/gi,  // 25 dollars, 25 euros
+    /(\d+[.,]\d{2})/g,   // 25.50, 25,50
+    /(\d+)/g             // Just numbers as fallback
+  ];
+  
+  for (const pattern of amountPatterns) {
+    const matches = text.match(pattern);
+    if (matches) {
+      const amount = parseFloat(matches[0].replace(/[^\d.,]/g, '').replace(',', '.'));
+      if (!isNaN(amount) && amount > 0) {
+        return amount;
+      }
+    }
+  }
+  
+  return null;
+}
+
+function extractVendorFromText(text: string): string | null {
+  // Look for common vendor patterns
+  const vendorPatterns = [
+    /(?:at|from|in|to)\s+([A-Za-z][A-Za-z\s&-]+)(?:\s|$)/gi,  // "at McDonald's"
+    /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/g  // Capitalized words
+  ];
+  
+  for (const pattern of vendorPatterns) {
+    const matches = text.match(pattern);
+    if (matches) {
+      // Filter out common non-vendor words
+      const filtered = matches.filter(match => 
+        !['Today', 'Yesterday', 'Morning', 'Evening', 'Expense', 'Income'].includes(match.trim())
+      );
+      if (filtered.length > 0) {
+        return filtered[0].replace(/^(at|from|in|to)\s+/gi, '').trim();
+      }
+    }
+  }
+  
+  return null;
 }
 
 // Helper function to parse natural date references

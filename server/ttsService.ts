@@ -34,7 +34,7 @@ export class TTSService {
         model: "tts-1", // FAST model - not tts-1-hd for speed
         voice: request.voice || this.VOICE_MAPPING[normalizedLanguage] || 'alloy',
         input: request.text,
-        speed: request.speed || 1.2, // FASTER speed - 1.2x for quicker conversation
+        speed: request.speed || 1.0, // NORMAL speed - 1.0x for natural conversation
         response_format: 'mp3' // MP3 is smaller than wav for speed
       });
 

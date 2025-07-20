@@ -133,7 +133,7 @@ export function registerTTSRoutes(app: Express) {
           const audioBuffer = await TTSService.generateSpeech({
             text: questionText,
             language,
-            speed: 1.3 // EVEN FASTER for questions - quick conversation
+            speed: 1.0 // NORMAL speed for natural conversation
           });
 
           // Return audio as base64 for immediate playback
