@@ -96,10 +96,11 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       });
     }
 
-    // Start conversation
+    // Start conversation - only once
     setTimeout(() => {
+      setCurrentMessage('Tell me about a transaction');
       speak('Tell me about a transaction');
-      setTimeout(() => startListening(), 1000);
+      setTimeout(() => startListening(), 1500);
     }, 500);
 
     return () => {
@@ -150,20 +151,10 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           console.log('🎯 Transaction complete - saving...');
           await saveTransaction(updatedData);
         } else {
-          // Ask next question after short delay
-          console.log('❓ Missing fields:', result.missing);
+          // Ask next question - prevent duplicate calls
+          console.log('❓ Missing fields, asking next question');
           setTimeout(() => {
-            if (result.nextQuestion) {
-              setCurrentMessage(result.nextQuestion);
-              speak(result.nextQuestion);
-              // Clear any existing listening timeout
-              if (listeningTimeoutRef.current) {
-                clearTimeout(listeningTimeoutRef.current);
-              }
-              listeningTimeoutRef.current = setTimeout(() => startListening(), 1500);
-            } else {
-              askNextQuestion(result.nextField, updatedData);
-            }
+            askNextQuestion(result.nextField, updatedData);
           }, 500);
         }
       } else {
@@ -201,6 +192,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       return;
     }
 
+    console.log('🗣️ Asking question:', question);
     setCurrentMessage(question);
     speak(question);
     // Clear any existing listening timeout
@@ -208,7 +200,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       clearTimeout(listeningTimeoutRef.current);
     }
     listeningTimeoutRef.current = setTimeout(() => startListening(), 1500);
-  }, [transactionData]);
+  }, []);
 
   // Start listening with debounce protection
   const startListening = useCallback(() => {
