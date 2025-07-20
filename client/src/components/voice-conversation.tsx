@@ -230,8 +230,13 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
   // Process voice input with AI
   const processVoiceInput = useCallback(async (transcript: string) => {
-    if (conversationLockRef.current) return;
+    // CRITICAL: Don't process empty or null transcripts
+    if (!transcript || transcript.trim() === '' || conversationLockRef.current) {
+      console.log('❌ Ignoring empty transcript or locked conversation:', { transcript, locked: conversationLockRef.current });
+      return;
+    }
     
+    console.log('✅ Processing valid transcript:', transcript);
     conversationLockRef.current = true;
     setState('processing');
     setCurrentMessage('Processing...');

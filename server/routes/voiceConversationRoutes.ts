@@ -33,6 +33,19 @@ export function registerVoiceConversationRoutes(app: Router) {
         return res.status(401).json({ success: false, error: "Unauthorized" });
       }
 
+      // CRITICAL: Don't process empty transcripts
+      if (!transcript || transcript.trim() === '') {
+        console.log('❌ [VoiceConversation] Rejecting empty transcript:', {
+          transcript,
+          sessionId,
+          hasCurrentData: !!currentData
+        });
+        return res.status(400).json({ 
+          success: false, 
+          error: "Empty transcript not allowed" 
+        });
+      }
+
       console.log('🎯 [VoiceConversation] Processing:', {
         userId: userId.substring(0, 8) + '...',
         transcript,
