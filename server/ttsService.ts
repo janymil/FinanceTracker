@@ -65,7 +65,8 @@ export class TTSService {
       'gasto', 'compré', 'comprar', 'pagué', 'pagar', 'costo', 'precio', 'dinero', 'dólares', 'euros',
       'tienda', 'restaurante', 'gasolina', 'comida', 'café', 'almuerzo', 'cena', 'salario', 'ingreso',
       // Slovak
-      'minul', 'kúpil', 'platil', 'cena', 'peniaze', 'obchod', 'reštaurácia', 'jedlo', 'káva', 'plat'
+      'minul', 'kúpil', 'platil', 'cena', 'peniaze', 'obchod', 'reštaurácia', 'jedlo', 'káva', 'plat',
+      'papiernictvo', 'kancelárske', 'nákup', 'zaplatil', 'som', 'eur', 'euro', 'koruna', 'zaplatil som'
     ];
 
     const lowerInput = input.toLowerCase();

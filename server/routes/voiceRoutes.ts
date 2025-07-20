@@ -269,7 +269,7 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
         // Return a fallback response instead of failing completely
         extractedData = {
           amount: null,
-          currency: "USD",
+          currency: "EUR",
           vendor: null,
           description: transcript,
           categoryId: null,
