@@ -130,6 +130,17 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
     }
   }, []);
 
+  // SINGLE validation function - ensures consistency everywhere
+  const validateRequiredFields = (data: any): string[] => {
+    const missing = [];
+    
+    if (!data.amount || data.amount <= 0) missing.push('amount');
+    if (!data.description || !data.description.trim()) missing.push('description'); 
+    if (!data.type || (data.type !== 'income' && data.type !== 'expense')) missing.push('type');
+    
+    return missing;
+  };
+
   // Process voice input using existing APIs
   const processVoiceInput = useCallback(async (inputTranscript: string) => {
     try {
@@ -190,12 +201,8 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
         category: newExtractedData.category
       });
       
-      const missingFields = [];
-      if (!hasAmount) missingFields.push('amount');
-      if (!hasDescription) missingFields.push('description');
-      if (!hasType) missingFields.push('type');
-      // Date defaults to today if not provided
-      // Category and vendor are optional
+      // Use the single validation function
+      const missingFields = validateRequiredFields(newExtractedData);
       
       console.log('🔍 [SeamlessPopup] Missing fields:', missingFields);
       console.log('🎯 [SeamlessPopup] Field values:', {
@@ -322,21 +329,8 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       setIsProcessing(true);
       setCurrentMessage('Let me ask you about your transaction...');
       
-      // Determine REQUIRED missing fields based on transaction schema
-      // REQUIRED: amount, description, type (userId and date handled automatically)
-      const REQUIRED_FIELDS = {
-        amount: extractedData.amount,
-        description: extractedData.description,
-        type: extractedData.type
-      };
-      
-      const missingFields = Object.keys(REQUIRED_FIELDS).filter(field => {
-        const value = REQUIRED_FIELDS[field];
-        if (field === 'type') {
-          return !value || (value !== 'income' && value !== 'expense');
-        }
-        return !value || value === null || value === undefined || value === '' || value === 0;
-      });
+      // Use the same single validation function
+      const missingFields = validateRequiredFields(extractedData);
       
       // Ask for first missing required field, or amount if all good
       const nextField = missingFields[0] || 'amount';
