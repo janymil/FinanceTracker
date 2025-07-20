@@ -95,41 +95,22 @@ Response:`;
   return getFallbackQuestion(missing[0], currentData, userCurrency, userLanguage);
 }
 
-// Fallback predefined questions if OpenAI fails
+// Fallback: Simple English-only questions if OpenAI fails
 function getFallbackQuestion(nextField: string, data: any, userCurrency: string, userLanguage: string): string {
-  const isSpanish = userLanguage.startsWith('es');
-  const isSlovak = userLanguage.startsWith('sk');
-  
+  // Simple fallback - OpenAI should handle multilingual questions
   switch (nextField) {
     case 'amount':
-      if (isSlovak) return 'Koľko to stálo?';
-      if (isSpanish) return '¿Cuánto costó?';
       return 'How much was it?';
-      
     case 'description':
-      if (isSlovak) return `Čo ste si kúpili za ${userCurrency}${data.amount}?`;
-      if (isSpanish) return `¿Qué compraste por ${userCurrency}${data.amount}?`;
-      return `What was this ${userCurrency}${data.amount} for?`;
-      
+      return 'What was this for?';
     case 'type':
-      if (isSlovak) return `Bol "${data.description}" výdavok alebo príjem?`;
-      if (isSpanish) return `¿Fue "${data.description}" un gasto o ingreso?`;
-      return `Was "${data.description}" an expense or income?`;
-      
+      return 'Was this an expense or income?';
     case 'date':
-      if (isSlovak) return 'Kedy sa to stalo?';
-      if (isSpanish) return '¿Cuándo pasó esto?';
       return 'When did this happen?';
-      
     case 'note':
-      if (isSlovak) return 'Nejaké poznámky? Môžete povedať "žiadne poznámky".';
-      if (isSpanish) return '¿Alguna nota? Puedes decir "sin notas".';
-      return 'Any notes? You can say "no notes".';
-      
+      return 'Any notes?';
     default:
-      if (isSlovak) return 'Pokračujme s transakciou.';
-      if (isSpanish) return 'Continuemos con la transacción.';
-      return 'Let\'s continue with your transaction.';
+      return 'Tell me more about your transaction.';
   }
 }
 
@@ -190,8 +171,8 @@ export function registerVoiceConversationRoutes(app: Router) {
       const finalUserLanguage = userLanguage || user.language || 'en-us';
       const finalUserCurrency = userCurrency || user.currency || '$';
       
-      // Smart extraction: try simple patterns first, use AI only if needed
-      const newData = await smartExtractData(transcript, finalUserCurrency, finalUserLanguage, existing);
+      // Always use Mistral AI for data extraction from conversation
+      const newData = await aiExtractData(transcript, finalUserCurrency, finalUserLanguage, existing);
       console.log('📝 [VoiceConversation] Extracted:', newData);
 
       // Merge new data with existing (preserve existing data, only add new non-null values)
@@ -327,35 +308,8 @@ export function registerVoiceConversationRoutes(app: Router) {
   app.use('/api/voice', router);
 }
 
-// Smart extraction: simple patterns first, AI only when needed
-async function smartExtractData(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
-  console.log('🧠 [Smart Extraction] Analyzing:', { transcript, existingData });
-  
-  // First try simple pattern matching (cost-free)
-  const simpleResult = basicExtraction(transcript, userCurrency, userLanguage);
-  
-  // Check if simple extraction found useful data
-  const hasUsefulData = simpleResult.amount !== null || 
-                       simpleResult.description !== null || 
-                       simpleResult.type !== null ||
-                       simpleResult.date !== null;
-  
-  // Use AI only when:
-  // 1. Simple extraction failed AND transcript seems complex (multiple words)
-  // 2. OR when transcript contains complete sentence patterns
-  const needsAI = !hasUsefulData && (
-    transcript.split(' ').length >= 3 || // Multiple words
-    /\b(bought|paid|spent|kúpil|for|za|today|dnes)\b/i.test(transcript) // Complex patterns
-  );
-  
-  if (needsAI) {
-    console.log('🤖 [Smart Extraction] Using AI for complex transcript');
-    return await aiExtractData(transcript, userCurrency, userLanguage, existingData);
-  }
-  
-  console.log('⚡ [Smart Extraction] Using simple patterns (cost-free)');
-  return simpleResult;
-}
+// REMOVED: smartExtractData function - not needed anymore
+// All extraction is done by aiExtractData using Mistral
 
 // AI-powered conversational data extraction using external AI processor
 async function aiExtractData(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
@@ -400,139 +354,21 @@ async function aiExtractData(transcript: string, userCurrency: string, userLangu
     console.error('❌ [AI Extraction] External processor error:', error);
   }
 
-  // Fallback to basic extraction if external AI fails
-  return basicExtraction(transcript, userCurrency, userLanguage);
-}
-
-// Enhanced basic extraction for common patterns (cost-free)
-function basicExtraction(transcript: string, userCurrency: string, userLanguage: string) {
-  const original = transcript.trim();
-  const lower = transcript.toLowerCase().trim();
-  
-  let amount = null;
-  let description = null;
-  let type = null;
-  let date = null;
-  let note = null;
-
-  // Enhanced amount detection
-  // 1. Numbers with currency: "5 euros", "€20", "$15"
-  const currencyMatch = lower.match(/(\d+(?:\.\d{1,2})?)\s*(?:euros?|€|\$|dollars?|korun|korún)/);
-  if (currencyMatch) {
-    amount = parseFloat(currencyMatch[1]);
-  }
-  
-  // 2. Just numbers if no currency found
-  if (amount === null) {
-    const numberMatch = lower.match(/(\d+(?:\.\d{1,2})?)/);
-    if (numberMatch) {
-      amount = parseFloat(numberMatch[1]);
-    }
-  }
-
-  // 3. Word numbers (Slovak: päť=5, etc.)
-  if (amount === null) {
-    amount = parseWordNumber(lower, userLanguage);
-  }
-
-  // Enhanced type detection
-  const spendingWords = ['bought', 'paid', 'spent', 'purchase', 'cost', 'kúpil', 'platil', 'výdavok', 'expense'];
-  const earningWords = ['earned', 'received', 'salary', 'income', 'dostal', 'príjem'];
-  
-  if (spendingWords.some(word => lower.includes(word))) {
-    type = 'expense';
-  } else if (earningWords.some(word => lower.includes(word))) {
-    type = 'income';
-  }
-
-  // Enhanced date detection
-  const today = new Date();
-  if (lower.includes('today') || lower.includes('dnes')) {
-    date = today.toISOString().split('T')[0];
-  } else if (lower.includes('yesterday') || lower.includes('včera')) {
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    date = yesterday.toISOString().split('T')[0];
-  }
-
-  // Smart description extraction
-  if (original.split(' ').length === 1 && !amount && !type) {
-    // Single word likely description: "pivo", "coffee", "groceries"
-    description = original;
-  } else {
-    // Enhanced cleaning for better extraction
-    let cleanText = original
-      .replace(/\d+(?:\.\d{1,2})?\s*(?:euros?|€|\$|dollars?|korun|korún)?/gi, '') // Remove amounts
-      .replace(/\b(?:bought|paid|spent|kúpil|platil|today|dnes|for|za|yesterday|včera|som|si|v|at|in)\b/gi, '') // Remove action/filler words
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // Extract meaningful items (nouns typically)
-    const words = cleanText.split(' ').filter(word => word.length > 1);
-    if (words.length > 0) {
-      // Prefer single meaningful items for transactions
-      description = words.length === 1 ? words[0] : words.slice(0, 2).join(' ');
-    }
-  }
-
-  console.log('⚡ [Basic Extraction] Result:', { amount, description, type, date, note });
-  return { amount, description, type, date, note, categoryId: null, categoryName: null };
-}
-
-// Parse word numbers to numeric values
-function parseWordNumber(text: string, language: string = 'en-us'): number | null {
-  // Multilingual word numbers
-  const wordNumbers: { [key: string]: { [word: string]: number } } = {
-    'en-us': {
-      'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-      'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-      'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
-      'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
-      'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
-      'eighty': 80, 'ninety': 90, 'hundred': 100, 'thousand': 1000
-    },
-    'es-pe': {
-      'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5,
-      'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10,
-      'once': 11, 'doce': 12, 'trece': 13, 'catorce': 14, 'quince': 15,
-      'dieciséis': 16, 'diecisiete': 17, 'dieciocho': 18, 'diecinueve': 19, 'veinte': 20,
-      'treinta': 30, 'cuarenta': 40, 'cincuenta': 50, 'sesenta': 60, 'setenta': 70,
-      'ochenta': 80, 'noventa': 90, 'cien': 100, 'mil': 1000
-    },
-    'sk-sk': {
-      'nula': 0, 'jeden': 1, 'dva': 2, 'tri': 3, 'štyri': 4, 'päť': 5,
-      'šesť': 6, 'sedem': 7, 'osem': 8, 'deväť': 9, 'desať': 10,
-      'jedenásť': 11, 'dvanásť': 12, 'trinásť': 13, 'štrnásť': 14, 'pätnásť': 15,
-      'šestnásť': 16, 'sedemnásť': 17, 'osemnásť': 18, 'devätnásť': 19, 'dvadsať': 20,
-      'tridsať': 30, 'štyridsať': 40, 'päťdesiat': 50, 'šesťdesiat': 60, 'sedemdesiat': 70,
-      'osemdesiat': 80, 'deväťdesiat': 90, 'sto': 100, 'tisíc': 1000
-    }
+  // Fallback: return minimal data if external AI fails
+  return {
+    amount: null,
+    description: transcript.trim(),
+    type: null,
+    date: null,
+    note: null,
+    categoryId: null,
+    categoryName: null
   };
-
-  const currentLang = wordNumbers[language] || wordNumbers['en-us'];
-
-  const words = text.toLowerCase().split(/\s+/);
-  let total = 0;
-  let current = 0;
-
-  for (const word of words) {
-    if (currentLang.hasOwnProperty(word)) {
-      const value = currentLang[word];
-      
-      if (value === 100) {
-        current *= 100;
-      } else if (value === 1000) {
-        total += current * 1000;
-        current = 0;
-      } else {
-        current += value;
-      }
-    }
-  }
-  
-  total += current;
-  return total > 0 ? total : null;
 }
+
+// REMOVED: basicExtraction and parseWordNumber functions
+// These contained hardcoded Slovak/Spanish words which is terrible coding practice
+// All extraction now uses AI with proper language understanding
 
 
 
