@@ -31,9 +31,11 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     categoryId: null,
     categoryName: null
   });
+  const [startingListening, setStartingListening] = useState(false);
 
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const listeningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -69,11 +71,13 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       recognition.onstart = () => {
         console.log('🎤 Recognition started successfully');
         setIsListening(true);
+        setStartingListening(false);
       };
 
       recognition.onerror = (event: any) => {
         console.error('🎤 Speech error:', event.error);
         setIsListening(false);
+        setStartingListening(false);
         
         if (event.error === 'no-speech') {
           // No speech detected - trigger follow-up after timeout
@@ -152,7 +156,11 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
             if (result.nextQuestion) {
               setCurrentMessage(result.nextQuestion);
               speak(result.nextQuestion);
-              setTimeout(() => startListening(), 1500);
+              // Clear any existing listening timeout
+              if (listeningTimeoutRef.current) {
+                clearTimeout(listeningTimeoutRef.current);
+              }
+              listeningTimeoutRef.current = setTimeout(() => startListening(), 1500);
             } else {
               askNextQuestion(result.nextField, updatedData);
             }
@@ -195,21 +203,26 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     setCurrentMessage(question);
     speak(question);
-    setTimeout(() => startListening(), 1500);
+    // Clear any existing listening timeout
+    if (listeningTimeoutRef.current) {
+      clearTimeout(listeningTimeoutRef.current);
+    }
+    listeningTimeoutRef.current = setTimeout(() => startListening(), 1500);
   }, [transactionData]);
 
-  // Start listening
+  // Start listening with debounce protection
   const startListening = useCallback(() => {
-    if (recognitionRef.current && !isListening && !isProcessing) {
+    if (recognitionRef.current && !isListening && !isProcessing && !startingListening) {
+      setStartingListening(true);
       try {
         console.log('🎤 Attempting to start listening...');
         recognitionRef.current.start();
       } catch (error) {
         console.log('🎤 Recognition start error (likely already started):', error);
-        // Don't set isListening to false here, let onstart/onend handle it
+        setStartingListening(false);
       }
     }
-  }, [isListening, isProcessing]);
+  }, [isListening, isProcessing, startingListening]);
 
   // Text-to-speech using OpenAI TTS
   const speak = useCallback(async (text: string) => {
