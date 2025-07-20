@@ -32,10 +32,11 @@ export function registerVoiceRoutes(app: Router) {
   // Process voice transcript to extract transaction data
   router.post('/process', requireAuth(), async (req: Request, res: Response) => {
     const startTime = Date.now();
+    let userId: string | undefined;
     
     try {
       const { transcript, language, timezone } = voiceProcessSchema.parse(req.body);
-      const userId = req.auth?.userId;
+      userId = req.auth?.userId;
       
       console.log('🎯 [VoiceAPI] Processing voice input:', {
         userId: (userId || 'unknown').substring(0, 8) + '...',
