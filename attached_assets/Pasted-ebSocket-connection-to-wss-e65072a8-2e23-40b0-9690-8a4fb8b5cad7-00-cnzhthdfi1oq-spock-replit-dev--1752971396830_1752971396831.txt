@@ -1,0 +1,29 @@
+ebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035
+waitForSuccessfulPing @ /@vite/client:1060Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035
+waitForSuccessfulPing @ /@vite/client:1060Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035
+waitForSuccessfulPing @ /@vite/client:1060Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035
+waitForSuccessfulPing @ /@vite/client:1060Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035
+waitForSuccessfulPing @ /@vite/client:1060Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ /@vite/client:1035
+waitForSuccessfulPing @ /@vite/client:1060Understand this error
+ WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
