@@ -210,15 +210,25 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
         // IMMEDIATE transaction saving
         setCurrentMessage('💾 Saving transaction...');
         try {
+          // STRICT validation - NO FALLBACKS for required fields
+          if (!newExtractedData.amount || newExtractedData.amount <= 0) {
+            throw new Error('Amount is required and must be greater than 0');
+          }
+          if (!newExtractedData.description || !newExtractedData.description.trim()) {
+            throw new Error('Description is required');
+          }
+          if (!newExtractedData.type || (newExtractedData.type !== 'income' && newExtractedData.type !== 'expense')) {
+            throw new Error('Type must be either income or expense');
+          }
+          
           const transactionData = {
             amount: parseFloat(newExtractedData.amount),
-            type: newExtractedData.type || 'expense',
-            description: newExtractedData.description || newExtractedData.vendor || 'Voice transaction',
-            vendor: newExtractedData.vendor || 'Unknown',
-            category: newExtractedData.category || 'Other',
-            categoryId: newExtractedData.categoryId || null,
+            type: newExtractedData.type,
+            description: newExtractedData.description.trim(),
             date: newExtractedData.date || new Date().toISOString().split('T')[0],
-            currency: newExtractedData.currency, // Preserve user's currency from voice parsing
+            // Optional fields:
+            categoryId: newExtractedData.categoryId || null,
+            vendor: newExtractedData.vendor || null,
             isRecurring: false
           };
           
