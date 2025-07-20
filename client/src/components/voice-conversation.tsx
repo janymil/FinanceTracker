@@ -176,14 +176,14 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       question = 'How much was it?';
     } else if (!data.description) {
       question = `What was this $${data.amount} for?`;
-    } else if (!data.type) {
-      question = `Was "${data.description}" an expense or income?`;
     } else if (!data.date) {
-      question = 'When did this happen? Today?';
-    } else if (!data.note) {
-      question = 'Any notes to add, or should I save it now?';
+      question = 'When did this happen? Today or another day?';
+    } else if (data.note === undefined) {
+      // Ask for note - user can say "no note" or "none" to skip
+      question = 'Any notes to add to this transaction?';
     } else {
-      // All data collected - save
+      // All required data collected - save transaction
+      // Note: type (expense/income) should be determined automatically by AI
       saveTransaction(data);
       return;
     }
@@ -387,8 +387,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
               <span className="font-medium">Description:</span>
               <span className={transactionData.description ? 'text-green-600 font-medium' : 'text-gray-400'}>
                 {transactionData.description ? 
-                  (transactionData.description.length > 20 ? 
-                    transactionData.description.substring(0, 20) + '...' : 
+                  (transactionData.description.length > 15 ? 
+                    transactionData.description.substring(0, 15) + '...' : 
                     transactionData.description
                   ) : 'Waiting...'
                 }
@@ -399,7 +399,27 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
               <span className={transactionData.type ? 'text-green-600 font-medium' : 'text-gray-400'}>
                 {transactionData.type ? 
                   transactionData.type.charAt(0).toUpperCase() + transactionData.type.slice(1) : 
+                  'AI detecting...'
+                }
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Date:</span>
+              <span className={transactionData.date ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                {transactionData.date ? 
+                  new Date(transactionData.date).toLocaleDateString() : 
                   'Waiting...'
+                }
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Note:</span>
+              <span className={transactionData.note ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                {transactionData.note ? 
+                  (transactionData.note.length > 12 ? 
+                    transactionData.note.substring(0, 12) + '...' : 
+                    transactionData.note
+                  ) : 'Asking...'
                 }
               </span>
             </div>

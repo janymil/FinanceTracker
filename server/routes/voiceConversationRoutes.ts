@@ -25,7 +25,7 @@ export function registerVoiceConversationRoutes(app: Router) {
   router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
     try {
       const { transcript, sessionId, currentData } = conversationSchema.parse(req.body);
-      const userId = req.auth?.userId;
+      const userId = (req as any).auth?.userId;
 
       if (!userId) {
         return res.status(401).json({ success: false, error: "Unauthorized" });
@@ -88,11 +88,13 @@ export function registerVoiceConversationRoutes(app: Router) {
 
       console.log('🔄 [VoiceConversation] Final updated data:', updated);
 
-      // Check what's still missing (only required fields)
+      // Check what's still missing (including date and note)
       const missing = [];
       if (!updated.amount) missing.push('amount');
-      if (!updated.description) missing.push('description');
+      if (!updated.description) missing.push('description'); 
       if (!updated.type) missing.push('type');
+      if (!updated.date) missing.push('date');
+      if (updated.note === undefined) missing.push('note');
 
       const isComplete = missing.length === 0;
       const nextField = missing[0] || null;
@@ -100,7 +102,9 @@ export function registerVoiceConversationRoutes(app: Router) {
       // Generate next question if not complete
       let nextQuestion = null;
       if (!isComplete) {
-        nextQuestion = generateQuestion(nextField, updated, user.currency || '$');
+        if (nextField) {
+          nextQuestion = generateQuestion(nextField, updated, user.currency || '$');
+        }
       }
 
       return res.json({
@@ -125,13 +129,15 @@ export function registerVoiceConversationRoutes(app: Router) {
   app.use('/api/voice', router);
 }
 
-// Extract data from transcript with currency support
+// Extract data from transcript with currency support, date, and note
 function extractDataFromTranscript(transcript: string, userCurrency: string) {
   const lower = transcript.toLowerCase().trim();
   
   let amount = null;
   let description = null;
   let type = null;
+  let date = null;
+  let note = null;
 
   // Extract amount with user's currency
   const currencySymbol = userCurrency === '€' ? '€' : '$';
@@ -142,12 +148,40 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
     amount = parseFloat(amountMatch[1]);
   }
 
-  // Extract type keywords
+  // Extract date patterns
+  const today = new Date();
+  if (lower.includes('today') || lower.includes('now')) {
+    date = today.toISOString().split('T')[0];
+  } else if (lower.includes('yesterday')) {
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    date = yesterday.toISOString().split('T')[0];
+  } else if (lower.includes('last week')) {
+    const lastWeek = new Date(today);
+    lastWeek.setDate(today.getDate() - 7);
+    date = lastWeek.toISOString().split('T')[0];
+  }
+
+  // Extract note indicators
+  if (lower.includes('note:') || lower.includes('notes:')) {
+    const noteMatch = transcript.match(/(?:note:?|notes:?)\s*(.+)/i);
+    if (noteMatch) {
+      note = noteMatch[1].trim();
+    }
+  } else if (lower.includes('no note') || lower.includes('no notes') || lower.includes('none')) {
+    note = '';
+  }
+
+  // Improved type detection with AI-like intelligence
   if (lower.includes('income') || lower.includes('salary') || lower.includes('wage') || 
-      lower.includes('earned') || lower.includes('received') || lower.includes('paid me')) {
+      lower.includes('earned') || lower.includes('received') || lower.includes('paid me') ||
+      lower.includes('bonus') || lower.includes('refund') || lower.includes('dividend')) {
     type = 'income';
   } else if (lower.includes('expense') || lower.includes('spent') || lower.includes('bought') || 
-            lower.includes('paid for') || lower.includes('purchase') || lower.includes('cost')) {
+            lower.includes('paid for') || lower.includes('purchase') || lower.includes('cost') ||
+            lower.includes('bill') || lower.includes('fee') || lower.includes('subscription') ||
+            lower.includes('coffee') || lower.includes('food') || lower.includes('gas') ||
+            lower.includes('store') || lower.includes('restaurant') || lower.includes('shop')) {
     type = 'expense';
   }
 
@@ -162,7 +196,7 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
     description = cleanText;
   }
 
-  return { amount, description, type, categoryId: null, categoryName: null };
+  return { amount, description, type, date, note, categoryId: null, categoryName: null };
 }
 
 // Check if text is just a number
@@ -185,11 +219,11 @@ async function runAICategorizationForVoice(description: string, userId: string, 
     }
 
     // Use the existing AI categorization system
-    const result = await aiProcessor.runAI('categorizeExpense', userId, user.plan || 'free', {
+    const result = await aiProcessor.runAI(userId, 'categorizeExpense', {
       description,
       type: type as 'expense' | 'income', 
       language: 'en-us'
-    });
+    }, user.plan || 'free');
 
     console.log('✅ [VoiceConversation] AI categorization result:', result);
 
@@ -201,7 +235,7 @@ async function runAICategorizationForVoice(description: string, userId: string, 
     }
     
     return null;
-  } catch (error) {
+  } catch (error: any) {
     console.error('💥 [VoiceConversation] AI categorization failed, continuing without category:', error.message);
     return null;
   }
@@ -226,6 +260,12 @@ function generateQuestion(field: string, currentData: any, userCurrency: string)
         return `Was "${currentData.description}" an expense or income?`;
       }
       return 'Was this an expense or income?';
+
+    case 'date':
+      return 'When did this happen? Today or another day?';
+
+    case 'note':
+      return 'Any notes to add to this transaction?';
       
     default:
       return 'Please provide more details.';
