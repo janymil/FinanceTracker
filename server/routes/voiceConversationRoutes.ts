@@ -80,11 +80,7 @@ export function registerVoiceConversationRoutes(app: Router) {
         updated
       });
 
-      // ONLY use Mistral AI for expense/income detection and categorization
-      // This happens asynchronously AFTER we have description
-      if (updated.description && (!updated.type || !updated.categoryId)) {
-        processWithMistralAsync(updated, userId, sessionId);
-      }
+      // Remove Mistral from conversation flow - only use for final categorization
 
       console.log('🔄 [VoiceConversation] Final updated data:', updated);
 
@@ -142,27 +138,27 @@ export function registerVoiceConversationRoutes(app: Router) {
         data: transactionData
       });
 
-      // Use Mistral AI for final type detection and categorization if missing
+      // Use Mistral AI ONLY for categorization if missing
       let finalType = transactionData.type;
       let finalCategoryId = transactionData.categoryId;
       let finalCategoryName = transactionData.categoryName;
 
-      if (transactionData.description && (!finalType || !finalCategoryId)) {
-        console.log('🤖 [VoiceConversation] Using Mistral for final analysis...');
+      if (transactionData.description && !finalCategoryId) {
+        console.log('🤖 [VoiceConversation] Using Mistral for AI categorization...');
         try {
           const analysis = await runMistralAnalysis(
             transactionData.description,
-            userId
+            userId,
+            userLanguage
           );
           
           if (analysis) {
-            finalType = analysis.type || finalType;
             finalCategoryId = analysis.categoryId || finalCategoryId;
             finalCategoryName = analysis.categoryName || finalCategoryName;
-            console.log('✅ [VoiceConversation] Mistral analysis applied:', analysis);
+            console.log('✅ [VoiceConversation] Mistral categorization applied:', analysis);
           }
         } catch (error) {
-          console.log('⚠️ [VoiceConversation] Mistral analysis failed, using defaults');
+          console.log('⚠️ [VoiceConversation] Mistral categorization failed, using defaults');
         }
       }
 
@@ -276,13 +272,7 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
 
 
 
-// Asynchronous Mistral processing for expense/income detection and categorization ONLY
-async function processWithMistralAsync(transactionData: any, userId: string, sessionId: string) {
-  if (!transactionData.description) return;
-  
-  console.log('🤖 [VoiceConversation] Running async Mistral analysis for:', transactionData.description);
-  // This is non-blocking - just for future optimization
-}
+// Remove unused async function
 
 // Synchronous Mistral analysis for AI categorization ONLY
 async function runMistralAnalysis(description: string, userId: string, userLanguage?: string) {
