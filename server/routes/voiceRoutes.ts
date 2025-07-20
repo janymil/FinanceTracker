@@ -52,6 +52,14 @@ export function registerVoiceRoutes(app: Router) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
+      // Get user for plan info
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        console.error('❌ [VoiceAPI] User not found in database');
+        return res.status(404).json({ error: "User not found" });
+      }
+
       // Get user's categories for better categorization
       const userCategories = await db
         .select()
