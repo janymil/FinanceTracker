@@ -17,119 +17,113 @@ interface TransactionData {
   categoryId: number | null;
   categoryName: string | null;
   date?: string;
+  note?: string;
 }
 
+type ConversationState = 'starting' | 'listening' | 'processing' | 'speaking' | 'complete' | 'error';
+
 export function VoiceConversation({ onClose, onComplete }: VoiceConversationProps) {
-  const [isListening, setIsListening] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [currentMessage, setCurrentMessage] = useState('Tell me about a transaction...');
+  const [state, setState] = useState<ConversationState>('starting');
+  const [currentMessage, setCurrentMessage] = useState('');
   const [sessionId] = useState(`session_${Date.now()}`);
+  
   const [transactionData, setTransactionData] = useState<TransactionData>({
     amount: null,
     description: null,
     type: null,
     categoryId: null,
-    categoryName: null
+    categoryName: null,
+    date: undefined,
+    note: undefined
   });
-  const [startingListening, setStartingListening] = useState(false);
 
   const recognitionRef = useRef<any>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const listeningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const conversationLockRef = useRef<boolean>(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Initialize speech recognition
+  // Initialize and start conversation
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window) {
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
+    initializeConversation();
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript.trim();
-        console.log('🎤 Voice heard:', transcript);
-        if (transcript) {
-          processVoiceInput(transcript);
-        }
-      };
-
-      recognition.onend = () => {
-        console.log('🎤 Recognition ended');
-        setIsListening(false);
-        
-        // Auto restart with timeout if transaction not complete
-        if (!isTransactionComplete() && !isProcessing) {
-          timeoutRef.current = setTimeout(() => {
-            console.log('⏰ 1.8s timeout - asking follow-up');
-            askNextQuestion();
-          }, 1800); // 1.8 second timeout as requested
-        }
-      };
-
-      recognition.onstart = () => {
-        console.log('🎤 Recognition started successfully');
-        setIsListening(true);
-        setStartingListening(false);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error('🎤 Speech error:', event.error);
-        setIsListening(false);
-        setStartingListening(false);
-        
-        if (event.error === 'no-speech') {
-          // No speech detected - trigger follow-up after timeout
-          timeoutRef.current = setTimeout(() => {
-            askNextQuestion();
-          }, 1800);
-        }
-      };
-
-      recognitionRef.current = recognition;
-    } else {
+  // Initialize speech recognition and start conversation
+  const initializeConversation = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window)) {
       toast({
         title: 'Not supported',
         description: 'Speech recognition not supported in this browser',
         variant: 'destructive'
       });
+      return;
     }
 
-    // Start conversation - only once
-    setTimeout(() => {
-      setCurrentMessage('Tell me about a transaction');
-      speak('Tell me about a transaction');
-      setTimeout(() => startListening(), 1500);
-    }, 500);
+    // Setup speech recognition
+    const recognition = new (window as any).webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
 
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (recognitionRef.current) recognitionRef.current.stop();
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript.trim();
+      console.log('🎤 Voice heard:', transcript);
+      if (transcript && !conversationLockRef.current) {
+        processVoiceInput(transcript);
+      }
     };
+
+    recognition.onstart = () => {
+      console.log('🎤 Recognition started');
+      setState('listening');
+    };
+
+    recognition.onend = () => {
+      console.log('🎤 Recognition ended');
+      if (state === 'listening') {
+        setState('processing');
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('🎤 Speech error:', event.error);
+      setState('error');
+    };
+
+    recognitionRef.current = recognition;
+
+    // Start conversation
+    startConversation();
   }, []);
 
-  // Process voice input with AI categorization
-  const processVoiceInput = useCallback(async (transcript: string) => {
-    if (isProcessing) return;
+  // Start the initial conversation
+  const startConversation = useCallback(() => {
+    const message = 'Tell me about your transaction';
+    console.log('🗣️ Starting conversation:', message);
+    setCurrentMessage(message);
+    speak(message, () => {
+      // After speaking, start listening
+      startListening();
+    });
+  }, []);
 
-    setIsProcessing(true);
-    setCurrentMessage('Processing...');
+  // Process voice input with AI
+  const processVoiceInput = useCallback(async (transcript: string) => {
+    if (conversationLockRef.current) return;
     
-    // Clear timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+    conversationLockRef.current = true;
+    setState('processing');
+    setCurrentMessage('Processing...');
 
     try {
-      console.log('📡 Sending to voice conversation API:', {
-        transcript,
-        sessionId,
-        currentData: transactionData
-      });
+      console.log('📡 Processing voice input:', transcript);
 
-      // Call voice conversation API with AI categorization
+      // Call voice conversation API
       const response = await apiRequest('POST', '/api/voice/conversation', {
         transcript,
         sessionId,
@@ -137,91 +131,77 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       });
 
       const result = await response.json();
-      console.log('✅ Voice conversation result:', result);
+      console.log('✅ Voice result:', result);
 
       if (result.success) {
-        // Update transaction data with AI categorization results
         const updatedData = result.data;
         setTransactionData(updatedData);
 
-        console.log('📊 Updated transaction data:', updatedData);
-
         if (result.isComplete) {
-          // All required fields collected - save transaction
+          // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
           await saveTransaction(updatedData);
+        } else if (result.nextQuestion) {
+          // Ask next question
+          console.log('❓ Asking next question:', result.nextQuestion);
+          setCurrentMessage(result.nextQuestion);
+          speak(result.nextQuestion, () => {
+            startListening();
+          });
         } else {
-          // Ask next question - prevent duplicate calls
-          console.log('❓ Missing fields, asking next question');
-          setTimeout(() => {
-            askNextQuestion(result.nextField, updatedData);
-          }, 500);
+          // Fallback - determine next question
+          askNextQuestion(updatedData);
         }
       } else {
-        throw new Error(result.error || 'Failed to process voice input');
+        throw new Error('Failed to process voice input');
       }
-
     } catch (error) {
       console.error('💥 Voice processing error:', error);
-      setCurrentMessage('Error processing. Try again.');
-      setTimeout(() => askNextQuestion(), 2000);
+      setState('error');
+      setCurrentMessage('Sorry, something went wrong. Let\'s try again.');
+      
+      setTimeout(() => {
+        startConversation();
+      }, 2000);
     } finally {
-      setIsProcessing(false);
+      conversationLockRef.current = false;
     }
-  }, [transactionData, sessionId, isProcessing]);
+  }, [transactionData, sessionId]);
 
-  // Check if transaction has all required fields
-  const isTransactionComplete = useCallback(() => {
-    return transactionData.amount && 
-           transactionData.description && 
-           transactionData.type;
-  }, [transactionData]);
-
-  // Ask next question based on missing fields
-  const askNextQuestion = useCallback((field?: string, data = transactionData) => {
+  // Determine and ask next question
+  const askNextQuestion = useCallback((data: TransactionData) => {
     let question = '';
-    
-    if (!data.amount || field === 'amount') {
+
+    if (!data.amount) {
       question = 'How much was it?';
-    } else if (!data.description || field === 'description') {
-      question = data.amount ? `What was this $${data.amount} for?` : 'What was this transaction for?';
-    } else if (!data.type || field === 'type') {
-      question = data.description ? `Was "${data.description}" an expense or income?` : 'Was this an expense or income?';
+    } else if (!data.description) {
+      question = `What was this $${data.amount} for?`;
+    } else if (!data.type) {
+      question = `Was "${data.description}" an expense or income?`;
+    } else if (!data.date) {
+      question = 'When did this happen? Today?';
+    } else if (!data.note) {
+      question = 'Any notes to add, or should I save it now?';
     } else {
-      // Should not reach here if logic is correct
+      // All data collected - save
+      saveTransaction(data);
       return;
     }
 
     console.log('🗣️ Asking question:', question);
     setCurrentMessage(question);
-    speak(question);
-    // Clear any existing listening timeout
-    if (listeningTimeoutRef.current) {
-      clearTimeout(listeningTimeoutRef.current);
-    }
-    listeningTimeoutRef.current = setTimeout(() => startListening(), 1500);
+    speak(question, () => {
+      startListening();
+    });
   }, []);
 
-  // Start listening with debounce protection
-  const startListening = useCallback(() => {
-    if (recognitionRef.current && !isListening && !isProcessing && !startingListening) {
-      setStartingListening(true);
-      try {
-        console.log('🎤 Attempting to start listening...');
-        recognitionRef.current.start();
-      } catch (error) {
-        console.log('🎤 Recognition start error (likely already started):', error);
-        setStartingListening(false);
-      }
-    }
-  }, [isListening, isProcessing, startingListening]);
-
-  // Text-to-speech using OpenAI TTS
-  const speak = useCallback(async (text: string) => {
+  // Text-to-speech with callback
+  const speak = useCallback(async (text: string, onComplete?: () => void) => {
+    setState('speaking');
+    
     try {
-      console.log('🔊 Speaking with OpenAI TTS:', text);
+      console.log('🔊 Speaking:', text);
       
-      // Call TTS API endpoint
       const response = await apiRequest('POST', '/api/tts/speak', {
         text,
         voice: 'alloy',
@@ -236,70 +216,81 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         const source = audioContext.createBufferSource();
         source.buffer = audioBufferDecoded;
         source.connect(audioContext.destination);
-        source.start(0);
         
-        console.log('✅ OpenAI TTS audio played');
+        source.onended = () => {
+          console.log('✅ Speech finished');
+          if (onComplete) onComplete();
+        };
+        
+        source.start(0);
       } else {
         // Fallback to browser TTS
-        console.log('⚠️ OpenAI TTS failed, using browser fallback');
-        fallbackSpeak(text);
+        console.log('⚠️ Using browser TTS fallback');
+        if ('speechSynthesis' in window) {
+          speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.onend = () => {
+            if (onComplete) onComplete();
+          };
+          speechSynthesis.speak(utterance);
+        } else if (onComplete) {
+          onComplete();
+        }
       }
     } catch (error) {
-      console.error('❌ OpenAI TTS error:', error);
-      // Fallback to browser TTS
-      fallbackSpeak(text);
+      console.error('❌ TTS error:', error);
+      if (onComplete) onComplete();
     }
   }, []);
 
-  // Fallback browser TTS
-  const fallbackSpeak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
-      speechSynthesis.speak(utterance);
+  // Start listening
+  const startListening = useCallback(() => {
+    if (recognitionRef.current && state !== 'listening') {
+      try {
+        console.log('🎤 Starting to listen...');
+        recognitionRef.current.start();
+      } catch (error) {
+        console.log('🎤 Recognition already running');
+      }
     }
-  };
+  }, [state]);
 
-  // Save complete transaction
-  const saveTransaction = async (data: TransactionData) => {
-    if (!data.amount || !data.description || !data.type) {
-      console.error('❌ Missing required transaction data:', data);
+  // Save transaction
+  const saveTransaction = useCallback(async (data: TransactionData) => {
+    if (!data.amount || !data.description) {
+      console.error('❌ Missing required data:', data);
       return;
     }
 
+    setState('processing');
+    setCurrentMessage('Saving transaction...');
+
     try {
-      setCurrentMessage('Saving transaction...');
-      
-      const transactionPayload = {
+      const payload = {
         amount: data.amount,
         description: data.description,
-        type: data.type,
+        type: data.type || 'expense', // Default to expense if not determined
         date: data.date || new Date().toISOString().split('T')[0],
-        categoryId: data.categoryId, // AI categorization result
-        isRecurring: false
+        categoryId: data.categoryId,
+        isRecurring: false,
+        referenceNote: data.note
       };
 
-      console.log('💾 Saving transaction:', transactionPayload);
+      console.log('💾 Saving transaction:', payload);
 
-      const response = await apiRequest('POST', '/api/transactions', transactionPayload);
+      const response = await apiRequest('POST', '/api/transactions', payload);
 
       if (response.ok) {
         const saved = await response.json();
-        const successMessage = `Saved $${data.amount} ${data.type}!`;
+        const successMessage = `Saved $${data.amount} ${data.type || 'transaction'}!`;
         
-        // Show category if AI found one
-        const categoryInfo = data.categoryName ? ` in ${data.categoryName}` : '';
-        const fullMessage = successMessage + categoryInfo;
-        
-        setCurrentMessage(fullMessage);
+        setState('complete');
+        setCurrentMessage(successMessage);
         speak(successMessage);
-        
+
         toast({
           title: 'Transaction saved',
-          description: `$${data.amount} ${data.type} - ${data.description}${categoryInfo}`,
+          description: `$${data.amount} - ${data.description}`,
         });
 
         // Refresh data
@@ -307,18 +298,58 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
         
         onComplete?.();
+        
+        // Close after success message
         setTimeout(onClose, 3000);
       } else {
         throw new Error('Failed to save transaction');
       }
     } catch (error) {
-      console.error('💥 Save transaction error:', error);
+      console.error('💥 Save error:', error);
+      setState('error');
       setCurrentMessage('Failed to save. Try again.');
+      
       toast({
         title: 'Error',
         description: 'Failed to save transaction',
         variant: 'destructive'
       });
+    }
+  }, [queryClient, onComplete, onClose]);
+
+  // UI helpers
+  const getStatusIcon = () => {
+    switch (state) {
+      case 'listening':
+        return <Mic className="h-12 w-12 text-red-500 animate-pulse" />;
+      case 'processing':
+      case 'speaking':
+        return <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />;
+      case 'complete':
+        return <div className="h-12 w-12 text-green-500 flex items-center justify-center text-2xl">✓</div>;
+      case 'error':
+        return <div className="h-12 w-12 text-red-500 flex items-center justify-center text-2xl">⚠</div>;
+      default:
+        return <MicOff className="h-12 w-12 text-gray-400" />;
+    }
+  };
+
+  const getStatusText = () => {
+    switch (state) {
+      case 'starting':
+        return 'Initializing...';
+      case 'listening':
+        return 'Listening...';
+      case 'processing':
+        return 'Processing...';
+      case 'speaking':
+        return 'Speaking...';
+      case 'complete':
+        return 'Complete!';
+      case 'error':
+        return 'Error occurred';
+      default:
+        return currentMessage;
     }
   };
 
@@ -334,20 +365,14 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         </div>
 
         <div className="text-center space-y-4">
-          {/* Microphone indicator */}
+          {/* Status indicator */}
           <div className="flex justify-center">
-            {isProcessing ? (
-              <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
-            ) : isListening ? (
-              <Mic className="h-12 w-12 text-red-500 animate-pulse" />
-            ) : (
-              <MicOff className="h-12 w-12 text-gray-400" />
-            )}
+            {getStatusIcon()}
           </div>
           
           {/* Current message */}
           <p className="text-sm text-gray-600 dark:text-gray-300 min-h-[40px] flex items-center justify-center px-2">
-            {currentMessage}
+            {currentMessage || getStatusText()}
           </p>
           
           {/* Progress display */}
@@ -378,39 +403,19 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
                 }
               </span>
             </div>
-            {/* Show category if AI found one */}
-            {transactionData.categoryName && (
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Category:</span>
-                <span className="text-blue-600 font-medium text-xs">
-                  {transactionData.categoryName}
-                </span>
-              </div>
-            )}
           </div>
           
-          {/* Manual controls */}
-          <div className="flex gap-2 justify-center">
+          {state === 'error' && (
             <Button 
-              size="sm" 
-              onClick={startListening}
-              disabled={isListening || isProcessing}
-              variant="outline"
+              onClick={() => {
+                setState('starting');
+                startConversation();
+              }}
+              className="mt-4"
             >
-              {isListening ? 'Listening...' : 'Speak'}
+              Try Again
             </Button>
-            
-            {!isTransactionComplete() && (
-              <Button 
-                size="sm" 
-                onClick={() => askNextQuestion()}
-                disabled={isProcessing}
-                variant="outline"
-              >
-                Ask Question
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>
