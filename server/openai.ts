@@ -2056,25 +2056,8 @@ export async function voiceExtraction(
         messages: [
           {
             role: "system",
-            content: `You are an intelligent financial transaction AI that extracts and categorizes Slovak transactions. Respond ONLY with valid JSON.
-CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).
-
-SLOVAK MERCHANT INTELLIGENCE:
-- "papiernictvo" = stationery shop → Office Supplies/Kancelárske potreby
-- "potraviny" = grocery store → Food/Jedlo  
-- "benzínka" = gas station → Transportation/Doprava
-- "reštaurácia" = restaurant → Dining/Stravovanie
-- "lekáreň" = pharmacy → Healthcare/Zdravie
-- "obchod" = shop → Shopping/Nákupy
-- "supermarket" = supermarket → Groceries/Potraviny
-- "hotel" = hotel → Travel/Cestovanie
-- "taxi" = taxi → Transportation/Doprava
-
-CATEGORIZATION PRIORITY:
-1. Use Slovak merchant intelligence above
-2. Analyze business type from context
-3. Map to appropriate Slovak category names
-4. Never leave categoryName as null - always suggest a category`
+            content: `You are a JSON extraction AI. Respond ONLY with valid JSON. No explanations, no markdown, no code blocks.
+CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).`
           },
           {
             role: "user",
@@ -2097,25 +2080,8 @@ CATEGORIZATION PRIORITY:
       messages: [
         {
           role: "system",
-          content: `You are an intelligent financial transaction AI that extracts and categorizes Slovak transactions. Respond ONLY with valid JSON.
-CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).
-
-SLOVAK MERCHANT INTELLIGENCE:
-- "papiernictvo" = stationery shop → Office Supplies/Kancelárske potreby
-- "potraviny" = grocery store → Food/Jedlo  
-- "benzínka" = gas station → Transportation/Doprava
-- "reštaurácia" = restaurant → Dining/Stravovanie
-- "lekáreň" = pharmacy → Healthcare/Zdravie
-- "obchod" = shop → Shopping/Nákupy
-- "supermarket" = supermarket → Groceries/Potraviny
-- "hotel" = hotel → Travel/Cestovanie
-- "taxi" = taxi → Transportation/Doprava
-
-CATEGORIZATION PRIORITY:
-1. Use Slovak merchant intelligence above
-2. Analyze business type from context
-3. Map to appropriate Slovak category names
-4. Never leave categoryName as null - always suggest a category`
+          content: `You are a JSON extraction AI. Respond ONLY with valid JSON. No explanations, no markdown, no code blocks.
+CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).`
         },
         {
           role: "user",
