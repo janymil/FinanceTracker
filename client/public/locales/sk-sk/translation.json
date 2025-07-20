@@ -3917,6 +3917,12 @@
     "descriptionPlaceholder": "Zadajte popis",
     "selectCategory": "Vyberte kategóriu",
     "followUp": "Potrebné ďalšie informácie"
-  }
+  },
 
+  "Take Photo": "Odfotiť",
+  "Choose from Gallery": "Vybrať z Galérie",
+  "What was this transaction for?": "Na čo bola táto transakcia?",
+  "Select type": "Vyberte typ",
+  "Upgrade": "Vylepšiť",
+  "Upgrade to Premium": "Vylepšiť na Prémiový"
 }

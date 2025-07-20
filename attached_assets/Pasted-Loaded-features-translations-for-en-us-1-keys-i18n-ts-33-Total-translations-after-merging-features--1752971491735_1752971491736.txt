@@ -1,0 +1,91 @@
+Loaded features translations for en-us: 1 keys
+i18n.ts:33 Total translations after merging features for en-us: 936 keys
+i18n.ts:55 Loaded translations for en-us: 936 keys
+i18n.ts:30 Loaded features translations for es-pe: 1 keys
+i18n.ts:33 Total translations after merging features for es-pe: 984 keys
+i18n.ts:55 Loaded translations for es-pe: 984 keys
+i18n.ts:30 Loaded features translations for sk-sk: 213 keys
+i18n.ts:33 Total translations after merging features for sk-sk: 1197 keys
+i18n.ts:55 Loaded translations for sk-sk: 1197 keys
+i18n.ts:81 i18next: languageChanged en
+i18n.ts:81 i18next: initialized {debug: true, initAsync: true, ns: Array(1), defaultNS: Array(1), fallbackLng: Array(1), …}
+i18n.ts:99 i18n initialized successfully
+LanguageGuard.tsx:85 LanguageGuard: URL path: /sk/expenses
+LanguageGuard.tsx:86 LanguageGuard: Detected lang from URL: sk
+LanguageGuard.tsx:87 LanguageGuard: Current i18n language: en
+LanguageGuard.tsx:129 LanguageGuard: Changing language from en to sk-sk
+LanguageGuard.tsx:112 LanguageGuard: Updating Clerk localization for sk
+LanguageGuard.tsx:121 LanguageGuard: Language preference saved to localStorage
+LanguageGuard.tsx:136 i18next: languageChanged sk-sk
+LanguageGuard.tsx:137 LanguageGuard: Language changed successfully to sk-sk
+LanguageGuard.tsx:138 LanguageGuard: i18n language is now: sk-sk
+LanguageGuard.tsx:139 LanguageGuard: Has resources for sk-sk : true
+queryClient.ts:31 Clerk token available: true
+header.tsx:294 i18next::translator: missingKey sk-sk translation What was this transaction for? What was this transaction for?
+header.tsx:308 i18next::translator: missingKey sk-sk translation Select type Select type
+header.tsx:489 i18next::translator: missingKey sk-sk translation Upgrade Upgrade
+header.tsx:549 i18next::translator: missingKey sk-sk translation Upgrade to Premium Upgrade to Premium
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+TransactionFilters.tsx:71 i18next::translator: missingKey sk-sk translation Vyhľadať výdavky... Vyhľadať výdavky...
+voice-input.tsx:23 🔧 [VoiceInput] Initializing speech recognition... {hasWebkitSpeechRecognition: true, hasSpeechRecognition: false, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', language: 'sk-SK'}
+voice-input.tsx:39 ✅ [VoiceInput] Speech recognition initialized successfully
+financial-mascot.tsx:147 Loaded cached mascot data: {id: 2, userId: 'user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc', imageUrl: '/uploads/mascots/mascot-user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc-1751420917786.png', healthScore: 80, mood: 'excellent', …}
+4queryClient.ts:31 Clerk token available: true
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+financial-mascot.tsx:460 Mascot image loaded successfully: /uploads/mascots/mascot-user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc-1751420917786.png
+header.tsx:294 i18next::translator: missingKey sk-sk translation What was this transaction for? What was this transaction for?
+header.tsx:308 i18next::translator: missingKey sk-sk translation Select type Select type
+header.tsx:294 i18next::translator: missingKey sk-sk translation What was this transaction for? What was this transaction for?
+header.tsx:308 i18next::translator: missingKey sk-sk translation Select type Select type
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+TransactionFilters.tsx:71 i18next::translator: missingKey sk-sk translation Vyhľadať výdavky... Vyhľadať výdavky...
+voice-input.tsx:23 🔧 [VoiceInput] Initializing speech recognition... {hasWebkitSpeechRecognition: true, hasSpeechRecognition: false, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', language: 'sk-SK'}
+voice-input.tsx:39 ✅ [VoiceInput] Speech recognition initialized successfully
+header.tsx:294 i18next::translator: missingKey sk-sk translation What was this transaction for? What was this transaction for?
+header.tsx:308 i18next::translator: missingKey sk-sk translation Select type Select type
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+TransactionFilters.tsx:71 i18next::translator: missingKey sk-sk translation Vyhľadať výdavky... Vyhľadať výdavky...
+voice-input.tsx:23 🔧 [VoiceInput] Initializing speech recognition... {hasWebkitSpeechRecognition: true, hasSpeechRecognition: false, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', language: 'sk-SK'}
+voice-input.tsx:39 ✅ [VoiceInput] Speech recognition initialized successfully
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+TransactionFilters.tsx:71 i18next::translator: missingKey sk-sk translation Vyhľadať výdavky... Vyhľadať výdavky...
+voice-input.tsx:23 🔧 [VoiceInput] Initializing speech recognition... {hasWebkitSpeechRecognition: true, hasSpeechRecognition: false, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', language: 'sk-SK'}
+voice-input.tsx:39 ✅ [VoiceInput] Speech recognition initialized successfully
+3queryClient.ts:31 Clerk token available: true
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+TransactionFilters.tsx:71 i18next::translator: missingKey sk-sk translation Vyhľadať výdavky... Vyhľadať výdavky...
+voice-input.tsx:23 🔧 [VoiceInput] Initializing speech recognition... {hasWebkitSpeechRecognition: true, hasSpeechRecognition: false, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', language: 'sk-SK'}
+voice-input.tsx:39 ✅ [VoiceInput] Speech recognition initialized successfully
+header.tsx:294 i18next::translator: missingKey sk-sk translation What was this transaction for? What was this transaction for?
+header.tsx:308 i18next::translator: missingKey sk-sk translation Select type Select type
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+TransactionFilters.tsx:71 i18next::translator: missingKey sk-sk translation Vyhľadať výdavky... Vyhľadať výdavky...
+voice-input.tsx:23 🔧 [VoiceInput] Initializing speech recognition... {hasWebkitSpeechRecognition: true, hasSpeechRecognition: false, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', language: 'sk-SK'}
+voice-input.tsx:39 ✅ [VoiceInput] Speech recognition initialized successfully
+header.tsx:294 i18next::translator: missingKey sk-sk translation What was this transaction for? What was this transaction for?
+header.tsx:308 i18next::translator: missingKey sk-sk translation Select type Select type
+header.tsx:92 i18next::translator: missingKey sk-sk translation Doprava Doprava
+header.tsx:92 i18next::translator: missingKey sk-sk translation Zdravotníctvo Zdravotníctvo
+header.tsx:92 i18next::translator: missingKey sk-sk translation Nákupy Nákupy
+header.tsx:92 i18next::translator: missingKey sk-sk translation Bývanie Bývanie
+header.tsx:92 i18next::translator: missingKey sk-sk translation Zábava Zábava
+header.tsx:92 i18next::translator: missingKey sk-sk translation Jedlo Jedlo
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+TransactionFilters.tsx:71 i18next::translator: missingKey sk-sk translation Vyhľadať výdavky... Vyhľadať výdavky...
+voice-input.tsx:23 🔧 [VoiceInput] Initializing speech recognition... {hasWebkitSpeechRecognition: true, hasSpeechRecognition: false, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', language: 'sk-SK'}
+voice-input.tsx:39 ✅ [VoiceInput] Speech recognition initialized successfully
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+UploadReceiptModal.tsx:578 i18next::translator: missingKey sk-sk translation Take Photo Take Photo
+UploadReceiptModal.tsx:586 i18next::translator: missingKey sk-sk translation Choose from Gallery Choose from Gallery
+UploadReceiptModal.tsx:176 Polling result: 

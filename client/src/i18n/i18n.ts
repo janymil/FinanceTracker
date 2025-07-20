@@ -27,10 +27,8 @@ async function loadTranslations() {
         // Load features translations if available
         if (featuresResponse.ok) {
           featuresTranslations = await featuresResponse.json();
-          console.log(`Loaded features translations for ${lang}:`, Object.keys(featuresTranslations).length, 'keys');
           // Merge features translations into main translations to maintain structure
           Object.assign(translations, featuresTranslations);
-          console.log(`Total translations after merging features for ${lang}:`, Object.keys(translations).length, 'keys');
         } else {
           console.error(`Failed to load features translations for ${lang}:`, featuresResponse.status);
         }
@@ -52,7 +50,7 @@ async function loadTranslations() {
           resources['sk'] = { translation: translations };
         }
         
-        console.log(`Loaded translations for ${lang}:`, Object.keys(translations).length, 'keys');
+
       } else {
         console.error(`Failed to load translations for ${lang}:`, response.status);
       }
@@ -82,7 +80,7 @@ async function initializeI18n() {
         lng: 'en',
         supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
         fallbackLng: 'en',
-        debug: true,
+        debug: false,
         
         resources,
 
@@ -107,7 +105,7 @@ async function initializeI18n() {
         lng: 'en',
         supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
         fallbackLng: 'en',
-        debug: true,
+        debug: false,
         interpolation: { escapeValue: false },
         react: { useSuspense: false },
       });
