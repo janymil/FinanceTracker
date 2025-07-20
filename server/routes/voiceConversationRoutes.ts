@@ -54,14 +54,26 @@ export function registerVoiceConversationRoutes(app: Router) {
         categoryName: null
       };
 
-      // Process input using Mistral AI for comprehensive analysis
-      const updated = await processTranscriptWithMistral(
-        transcript, 
-        existing, 
-        userId, 
-        user.currency || '$',
-        sessionId
-      );
+      // Extract information from current transcript
+      const newData = extractDataFromTranscript(transcript, user.currency || '$');
+      console.log('📝 [VoiceConversation] Extracted:', newData);
+
+      // Merge new data with existing (prioritize new data)
+      const updated = {
+        amount: newData.amount || existing.amount,
+        description: newData.description || existing.description,
+        type: newData.type || existing.type,
+        date: newData.date || existing.date,
+        note: newData.note !== undefined ? newData.note : existing.note,
+        categoryId: newData.categoryId || existing.categoryId,
+        categoryName: newData.categoryName || existing.categoryName
+      };
+
+      // ONLY use Mistral AI for expense/income detection and categorization
+      // This happens asynchronously AFTER we have description
+      if (updated.description && (!updated.type || !updated.categoryId)) {
+        processWithMistralAsync(updated, userId, sessionId);
+      }
 
       console.log('🔄 [VoiceConversation] Final updated data:', updated);
 
@@ -119,14 +131,44 @@ export function registerVoiceConversationRoutes(app: Router) {
         data: transactionData
       });
 
+      // Use Mistral AI for final type detection and categorization if missing
+      let finalType = transactionData.type;
+      let finalCategoryId = transactionData.categoryId;
+      let finalCategoryName = transactionData.categoryName;
+
+      if (transactionData.description && (!finalType || !finalCategoryId)) {
+        console.log('🤖 [VoiceConversation] Using Mistral for final analysis...');
+        try {
+          const analysis = await runMistralAnalysis(
+            transactionData.description,
+            userId
+          );
+          
+          if (analysis) {
+            finalType = analysis.type || finalType;
+            finalCategoryId = analysis.categoryId || finalCategoryId;
+            finalCategoryName = analysis.categoryName || finalCategoryName;
+            console.log('✅ [VoiceConversation] Mistral analysis applied:', analysis);
+          }
+        } catch (error) {
+          console.log('⚠️ [VoiceConversation] Mistral analysis failed, using defaults');
+        }
+      }
+
+      // Default to expense if still no type determined
+      if (!finalType) {
+        finalType = 'expense';
+        console.log('📝 [VoiceConversation] Defaulting to expense type');
+      }
+
       // Create transaction record
       const transaction = await storage.addTransaction(userId, {
         amount: transactionData.amount,
         description: transactionData.description,
-        type: transactionData.type,
+        type: finalType,
         date: transactionData.date || new Date().toISOString().split('T')[0],
         reference: transactionData.note || '',
-        categoryId: transactionData.categoryId || null,
+        categoryId: finalCategoryId || null,
         source: 'voice_conversation'
       });
 
@@ -148,66 +190,8 @@ export function registerVoiceConversationRoutes(app: Router) {
   app.use('/api/voice', router);
 }
 
-// Process transcript with Mistral AI for comprehensive analysis
-async function processTranscriptWithMistral(
-  transcript: string,
-  existingData: any,
-  userId: string,
-  currency: string,
-  sessionId: string
-) {
-  console.log('🤖 [VoiceConversation] Processing with Mistral AI...');
-
-  try {
-    // Get user's categories for Mistral processing
-    const userCategories = await storage.getCategories(userId);
-    
-    // Use Mistral client for processing
-    const mistralClient = await import('../mistralClient.ts');
-    const client = new mistralClient.MistralClient();
-
-    // Call processVoiceInput with existing data as session context
-    const result = await client.processVoiceInput(
-      transcript,
-      userCategories.map(cat => ({
-        id: cat.id,
-        name: cat.name,
-        type: cat.type
-      })),
-      'en-us', // TODO: Get from user settings
-      'UTC', // TODO: Get from user settings
-      {
-        sessionId,
-        existingData,
-        currency
-      }
-    );
-
-    console.log('✅ [VoiceConversation] Mistral result:', result);
-
-    // Merge result with existing data (prioritize AI results)
-    const updated = {
-      amount: result.amount || existingData.amount,
-      description: result.description || result.vendor || existingData.description,
-      type: result.type || existingData.type,
-      date: result.date || existingData.date,
-      note: result.note || existingData.note,
-      categoryId: result.categoryId || existingData.categoryId,
-      categoryName: result.categoryName || existingData.categoryName
-    };
-
-    return updated;
-
-  } catch (error: any) {
-    console.warn('⚠️ [VoiceConversation] Mistral processing failed, using fallback:', error.message);
-    
-    // Fallback to basic extraction
-    return extractDataFromTranscriptFallback(transcript, existingData, currency);
-  }
-}
-
-// Fallback extraction function for when Mistral fails
-function extractDataFromTranscriptFallback(transcript: string, existingData: any, userCurrency: string) {
+// Extract data from transcript with currency support, date, and note
+function extractDataFromTranscript(transcript: string, userCurrency: string) {
   const lower = transcript.toLowerCase().trim();
   
   let amount = null;
@@ -249,7 +233,7 @@ function extractDataFromTranscriptFallback(transcript: string, existingData: any
     note = '';
   }
 
-  // Basic type detection
+  // Basic type detection (Mistral will do the intelligent analysis)
   if (lower.includes('income') || lower.includes('salary') || lower.includes('wage') || 
       lower.includes('earned') || lower.includes('received') || lower.includes('paid me') ||
       lower.includes('bonus') || lower.includes('refund') || lower.includes('dividend')) {
@@ -273,16 +257,56 @@ function extractDataFromTranscriptFallback(transcript: string, existingData: any
     description = cleanText;
   }
 
-  // Merge with existing data
-  return {
-    amount: amount || existingData.amount,
-    description: description || existingData.description,
-    type: type || existingData.type,
-    date: date || existingData.date,
-    note: note !== null ? note : existingData.note,
-    categoryId: existingData.categoryId,
-    categoryName: existingData.categoryName
-  };
+  return { amount, description, type, date, note, categoryId: null, categoryName: null };
+}
+
+// Asynchronous Mistral processing for expense/income detection and categorization ONLY
+async function processWithMistralAsync(transactionData: any, userId: string, sessionId: string) {
+  if (!transactionData.description) return;
+  
+  console.log('🤖 [VoiceConversation] Running async Mistral analysis for:', transactionData.description);
+  // This is non-blocking - just for future optimization
+}
+
+// Synchronous Mistral analysis for final transaction saving
+async function runMistralAnalysis(description: string, userId: string) {
+  try {
+    console.log('🤖 [VoiceConversation] Running Mistral analysis for:', description);
+
+    // Get user's categories for Mistral processing
+    const userCategories = await storage.getCategories(userId);
+    
+    // Use Mistral client for processing
+    const mistralClient = await import('../mistralClient.ts');
+    const client = new mistralClient.MistralClient();
+
+    // Call processVoiceInput ONLY for type detection and categorization
+    const result = await client.processVoiceInput(
+      `Analyze this transaction: "${description}" - determine if expense or income and appropriate category`,
+      userCategories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        type: cat.type
+      })),
+      'en-us', // TODO: Get from user settings
+      'UTC', // TODO: Get from user settings
+      {
+        analysisOnly: true // Flag to indicate we only need type and category
+      }
+    );
+
+    console.log('✅ [VoiceConversation] Mistral analysis result:', result);
+
+    return {
+      type: result.type,
+      categoryId: result.categoryId,
+      categoryName: result.categoryName
+    };
+    
+  } catch (error: any) {
+    console.warn('⚠️ [VoiceConversation] Mistral analysis failed:', error.message);
+    return null;
+  }
 }
 
 // Check if text is just a number
