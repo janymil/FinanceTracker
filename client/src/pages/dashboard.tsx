@@ -75,7 +75,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { VoiceInputWithPlan } from "@/components/voice-input-with-plan";
 import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
-import { VoiceConversation } from "@/components/voice-conversation";
+// Removed VoiceConversation component
 
 interface Category {
   id: number;
@@ -148,7 +148,7 @@ export default function Dashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
-  const [seamlessVoiceOpen, setSeamlessVoiceOpen] = useState(false);
+  // Removed seamlessVoiceOpen state
 
   // Defer expensive rendering to prevent Suspense errors
   const deferredSelectedMonth = useDeferredValue(selectedMonth);
@@ -854,19 +854,7 @@ export default function Dashboard() {
           }}
         />
 
-        {/* Seamless Voice Transaction */}
-        {seamlessVoiceOpen && (
-          <VoiceConversation
-            onClose={() => setSeamlessVoiceOpen(false)}
-            onComplete={() => {
-              // Refresh data after successful transaction creation
-              if (deferredUser) {
-                queryClient.invalidateQueries({ queryKey: ['transactions'] });
-                queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
-              }
-            }}
-          />
-        )}
+        {/* Removed Seamless Voice Transaction */}
         
         </div>
       </div>
