@@ -2042,6 +2042,37 @@ Provide an AI-powered financial health score that adapts to this user's specific
  * Parse bank statement text and extract transactions using AI - Server Fallback
  * This function mirrors the external AI processor for when external service is unavailable
  */
+export async function voiceExtraction(
+  prompt: string,
+  language: string = 'en-us'
+): Promise<string> {
+  const normalizedLanguage = normalizeLanguageCode(language);
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are a JSON extraction AI. Respond ONLY with valid JSON. No explanations, no markdown, no code blocks.
+CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).`
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1,
+      max_tokens: 500
+    });
+
+    return response.choices[0]?.message?.content || '';
+  } catch (error) {
+    console.error('Voice extraction error (openai.ts fallback):', error);
+    throw new Error('Failed to extract voice transaction data');
+  }
+}
+
 export async function parseBankStatement(text: string, language: string = 'en-us'): Promise<{ transactions: any[] }> {
   const languageLabel = getLanguageLabel(language);
 

@@ -3,6 +3,7 @@ import { requireAuth } from "@clerk/express";
 import { z } from "zod";
 import { runAI } from "../../lib/aiProcessor";
 import { getMerchantContextForAI, getCountryFromLanguage } from "../../lib/merchantLookup";
+import { getLanguageLabel } from "../../lib/languageUtils";
 import { db } from "../db";
 import { categories, aiUsage, users } from "../../shared/schema";
 import { eq, and, sql, gte } from "drizzle-orm";
@@ -80,6 +81,7 @@ export function registerVoiceRoutes(app: Router) {
       const learnedMatch = await lookupMerchant(transcript, countryCode, userId);
       
       const prompt = `CRITICAL: You must respond with ONLY valid JSON. No explanations, no markdown, no additional text.
+CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).
 
 Extract financial transaction details from this voice transcript:
 "${transcript}"
@@ -169,7 +171,8 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
           body: JSON.stringify({
             prompt,
             userId,
-            model: 'gpt-4o-mini'
+            model: 'gpt-4o-mini',
+            language
           }),
           signal: AbortSignal.timeout(30000) // 30 second timeout
         });
@@ -197,7 +200,7 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
         });
         
         const fallbackStartTime = Date.now();
-        completion = await runAI("voice-extraction", userId, { prompt }, "free");
+        completion = await runAI("voice-extraction", userId, { prompt, language }, "free");
         const fallbackTime = Date.now() - fallbackStartTime;
         
         console.log('🔄 [VoiceAPI] Fallback processing completed:', {
