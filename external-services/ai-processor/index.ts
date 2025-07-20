@@ -2046,9 +2046,9 @@ Extract and return ONLY a JSON object with these fields:
 
 Return ONLY the JSON object, no explanation.`;
 
-    const client = getAIClient();
+    const client = getAIClient('mistral');
     const completion = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'mistral-small-2506',
       messages: [
         {
           role: 'system',
