@@ -514,14 +514,14 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-sm space-y-2">
             <div className="flex justify-between items-center">
               <span className="font-medium">Amount:</span>
-              <span className={transactionData.amount ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                {transactionData.amount ? `${userCurrency}${transactionData.amount}` : 'Waiting...'}
+              <span className={transactionData?.amount ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                {transactionData?.amount ? `${userCurrency}${transactionData.amount}` : 'Waiting...'}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Description:</span>
-              <span className={transactionData.description ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                {transactionData.description ? 
+              <span className={transactionData?.description ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                {transactionData?.description ? 
                   (transactionData.description.length > 15 ? 
                     transactionData.description.substring(0, 15) + '...' : 
                     transactionData.description
@@ -531,8 +531,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Type:</span>
-              <span className={transactionData.type ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                {transactionData.type ? 
+              <span className={transactionData?.type ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                {transactionData?.type ? 
                   transactionData.type.charAt(0).toUpperCase() + transactionData.type.slice(1) : 
                   'AI detecting...'
                 }
@@ -540,8 +540,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Date:</span>
-              <span className={transactionData.date ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                {transactionData.date ? 
+              <span className={transactionData?.date ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                {transactionData?.date ? 
                   new Date(transactionData.date).toLocaleDateString() : 
                   'Waiting...'
                 }
@@ -549,8 +549,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Note:</span>
-              <span className={transactionData.note ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                {transactionData.note ? 
+              <span className={transactionData?.note ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                {transactionData?.note ? 
                   (transactionData.note.length > 12 ? 
                     transactionData.note.substring(0, 12) + '...' : 
                     transactionData.note
