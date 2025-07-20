@@ -29,7 +29,15 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
   const [currentMessage, setCurrentMessage] = useState('');
   const [sessionId] = useState(`session_${Date.now()}`);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
-  const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
+  const [transactionData, setTransactionData] = useState<TransactionData>({
+    amount: null,
+    description: null,
+    type: null,
+    categoryId: null,
+    categoryName: null,
+    date: null,
+    note: null
+  });
 
   const recognitionRef = useRef<any>(null);
   const conversationLockRef = useRef<boolean>(false);
@@ -143,9 +151,17 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     };
 
     recognition.onend = () => {
-      console.log('🎤 Recognition ended');
-      // CRITICAL: Do not restart automatically on end
-      // Only restart if explicitly commanded
+      console.log('🎤 Recognition ended - restarting continuous listening');
+      // Auto-restart for continuous listening like OpenAI
+      setTimeout(() => {
+        if (!conversationLockRef.current && state !== 'complete' && state !== 'error') {
+          try {
+            recognition.start();
+          } catch (error) {
+            console.log('🎤 Failed to restart recognition:', error);
+          }
+        }
+      }, 100);
     };
 
     recognition.onerror = (event: any) => {
@@ -344,7 +360,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         sessionId,
         conversationHistory,
         userLanguage: userLanguage,
-        userCurrency: userCurrency
+        userCurrency: userCurrency,
+        currentTransactionData: transactionData  // Send accumulated data
       });
 
       const result = await response.json();
@@ -354,9 +371,12 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         // Update conversation history
         setConversationHistory(result.conversationHistory || []);
         
-        // Always update transaction data to maintain accumulation
+        // CRITICAL: Always merge transaction data to maintain accumulation
         if (result.transactionData) {
-          setTransactionData(result.transactionData);
+          setTransactionData(prev => ({
+            ...prev,
+            ...result.transactionData  // Merge new data with existing data
+          }));
           console.log('📥 Updated transaction data:', result.transactionData);
         }
         

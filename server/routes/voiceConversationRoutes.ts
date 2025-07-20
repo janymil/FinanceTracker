@@ -16,7 +16,15 @@ const conversationSchema = z.object({
   sessionId: z.string().min(1),
   userLanguage: z.string().optional(),
   userCurrency: z.string().optional(),
-  conversationHistory: z.array(z.string()).optional()
+  conversationHistory: z.array(z.string()).optional(),
+  currentTransactionData: z.object({
+    amount: z.number().nullable(),
+    description: z.string().nullable(),
+    type: z.enum(['expense', 'income']).nullable(),
+    date: z.string().nullable(),
+    note: z.string().nullable(),
+    categoryName: z.string().nullable()
+  }).optional()
 });
 
 const completeTransactionSchema = z.object({
@@ -38,7 +46,8 @@ async function manageCompleteConversation(
   transcript: string, 
   conversationHistory: string[], 
   userLanguage: string, 
-  userCurrency: string
+  userCurrency: string,
+  currentData?: any
 ): Promise<{
   response: string;
   isComplete: boolean;
@@ -50,8 +59,8 @@ async function manageCompleteConversation(
     // Build conversation context
     const fullConversation = [...conversationHistory, `User: ${transcript}`].join('\n');
     
-    // Extract accumulated data from previous conversation
-    let accumulatedData = {
+    // Use existing transaction data if provided, otherwise start fresh
+    let accumulatedData = currentData || {
       amount: null,
       description: null,
       type: null,
@@ -221,7 +230,7 @@ export function registerVoiceConversationRoutes(app: Router) {
   // Ultra-efficient voice conversation with pure OpenAI
   router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
     try {
-      const { transcript, sessionId, userLanguage, userCurrency, conversationHistory = [] } = conversationSchema.parse(req.body);
+      const { transcript, sessionId, userLanguage, userCurrency, conversationHistory = [], currentTransactionData } = conversationSchema.parse(req.body);
       const userId = (req as any).auth?.userId;
 
       if (!userId) {
@@ -259,7 +268,8 @@ export function registerVoiceConversationRoutes(app: Router) {
         transcript,
         conversationHistory,
         finalLanguage,
-        finalCurrency
+        finalCurrency,
+        currentTransactionData
       );
 
       console.log('🤖 [VoiceConversation] OpenAI result:', result);
