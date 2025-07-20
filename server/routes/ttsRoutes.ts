@@ -85,12 +85,9 @@ export function registerTTSRoutes(app: Express) {
 
       const user = await storage.getUser(userId);
       
-      // Require standard+ plan for TTS features
-      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
-        return res.status(403).json({ 
-          message: "TTS questions require Standard or Premium subscription" 
-        });
-      }
+      // REMOVED: TTS plan restriction for fast voice conversation - allow all users
+      // Fast voice conversation should work for everyone
+      console.log('🔊 [TTS] Question generation for user plan:', user?.plan || 'free');
 
       const { field, extractedData, generateAudio = true, sessionId } = req.body;
 

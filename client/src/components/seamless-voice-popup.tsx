@@ -61,7 +61,7 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
 
   // MOVED TO AFTER FUNCTION DEFINITIONS
 
-  // Play TTS audio - MOVED HERE FIRST
+  // Play TTS audio - NON-BLOCKING for seamless conversation
   const playTTSAudio = useCallback(async (base64Data: string) => {
     try {
       setIsSpeaking(true);
@@ -72,17 +72,30 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       
-      await new Promise<void>((resolve) => {
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          setIsSpeaking(false);
-          resolve();
-        };
-        audio.play();
+      // NON-BLOCKING: Play and continue immediately
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        setIsSpeaking(false);
+      };
+      
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        setIsSpeaking(false);
+      };
+      
+      // Start playing and return immediately - don't wait
+      audio.play().catch(err => {
+        console.log('Audio play failed:', err);
+        setIsSpeaking(false);
       });
+      
+      // Return immediately without waiting for audio to finish
+      return Promise.resolve();
+      
     } catch (error) {
       console.error('TTS playback failed:', error);
       setIsSpeaking(false);
+      return Promise.resolve();
     }
   }, []);
 
@@ -147,16 +160,15 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       
       if (result.sessionId) setSessionId(result.sessionId);
 
-      // Step 2: Check REQUIRED fields for transaction creation
+      // Step 2: Check REQUIRED fields for transaction creation - SIMPLE: only amount and description needed
       const REQUIRED_FIELDS = {
         amount: newExtractedData.amount,
-        description: newExtractedData.description || newExtractedData.vendor,
-        type: newExtractedData.type || 'expense' // default to expense
+        description: newExtractedData.description || newExtractedData.vendor || 'Purchase'
       };
       
       const missingFields = Object.keys(REQUIRED_FIELDS).filter(field => {
         const value = REQUIRED_FIELDS[field];
-        return !value || value === null || value === undefined || value === '';
+        return !value || value === null || value === undefined || value === '' || value === 0;
       });
       
       console.log('🔍 [SeamlessPopup] Missing fields:', missingFields);
@@ -175,10 +187,10 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
           const transactionData = {
             amount: parseFloat(newExtractedData.amount),
             type: newExtractedData.type || 'expense',
-            description: newExtractedData.description || newExtractedData.vendor,
-            vendor: newExtractedData.vendor,
-            category: newExtractedData.category,
-            categoryId: newExtractedData.categoryId,
+            description: newExtractedData.description || newExtractedData.vendor || 'Voice transaction',
+            vendor: newExtractedData.vendor || 'Unknown',
+            category: newExtractedData.category || 'Other',
+            categoryId: newExtractedData.categoryId || null,
             date: newExtractedData.date || new Date().toISOString().split('T')[0],
             isRecurring: false
           };
@@ -216,14 +228,22 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
         
         setCurrentMessage(ttsResult.question || `Please provide ${nextField}`);
         
-        // Play TTS audio and restart listening 
+        // Play TTS audio and restart listening IMMEDIATELY - NO WAITING
         if (ttsResult.audioData) {
-          await playTTSAudio(ttsResult.audioData);
+          console.log('🔊 [SeamlessPopup] Playing TTS question...');
+          // Start listening WHILE TTS is playing for seamless conversation
+          setTimeout(() => {
+            console.log('🔄 [SeamlessPopup] Starting listening while TTS plays...');
+            startListening();
+          }, 100); // Start almost immediately - overlapping conversation
+          
+          // Play audio in background
+          playTTSAudio(ttsResult.audioData).catch(err => console.log('TTS play failed:', err));
+        } else {
+          // No audio - start listening immediately
+          console.log('🔄 [SeamlessPopup] No audio - starting listening immediately...');
+          startListening();
         }
-        
-        // Restart listening IMMEDIATELY after TTS
-        console.log('🔄 [SeamlessPopup] Auto-restarting listening...');
-        startListening();
       }
 
       setIsProcessing(false);
@@ -246,15 +266,14 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       setIsProcessing(true);
       setCurrentMessage('Let me ask you about your transaction...');
       
-      // Determine REQUIRED missing field for transaction
+      // Determine REQUIRED missing field for transaction - SIMPLE: only amount needed
       const REQUIRED_FIELDS = {
-        amount: extractedData.amount,
-        description: extractedData.description || extractedData.vendor
+        amount: extractedData.amount
       };
       
       const missingFields = Object.keys(REQUIRED_FIELDS).filter(field => {
         const value = REQUIRED_FIELDS[field];
-        return !value || value === null || value === undefined || value === '';
+        return !value || value === null || value === undefined || value === '' || value === 0;
       });
       
       // Ask for first missing required field, or amount if all good
@@ -272,12 +291,20 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       setCurrentMessage(ttsResult.question || `What is the ${nextField}?`);
       
       if (ttsResult.audioData) {
-        await playTTSAudio(ttsResult.audioData);
+        console.log('🔊 [SeamlessPopup] Playing question TTS...');
+        // Start listening WHILE TTS is playing - seamless conversation
+        setTimeout(() => {
+          console.log('🔄 [SeamlessPopup] Starting listening while question TTS plays...');
+          startListening();
+        }, 150); // Start quickly while audio plays
+        
+        // Play audio in background
+        playTTSAudio(ttsResult.audioData).catch(err => console.log('Question TTS failed:', err));
+      } else {
+        // No audio - start listening immediately
+        console.log('🔄 [SeamlessPopup] No question audio - starting listening immediately...');
+        startListening();
       }
-      
-      // Restart listening immediately after TTS
-      console.log('🔄 [SeamlessPopup] Restarting after question...');
-      startListening();
       
       setIsProcessing(false);
     } catch (error) {
@@ -375,13 +402,22 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       setCurrentMessage(ttsResult.question || 'How much was this transaction?');
       
       if (ttsResult.audioData) {
-        await playTTSAudio(ttsResult.audioData);
+        console.log('🔊 [SeamlessPopup] Playing initial TTS question...');
+        // Start listening WHILE TTS is playing - seamless conversation  
+        setTimeout(() => {
+          console.log('🔄 [SeamlessPopup] Starting listening while initial TTS plays...');
+          startListening();
+        }, 200); // Start quickly while audio plays
+        
+        // Play audio in background
+        playTTSAudio(ttsResult.audioData).catch(err => console.log('Initial TTS failed:', err));
+      } else {
+        // No audio - start listening immediately
+        console.log('🔄 [SeamlessPopup] No initial audio - starting listening immediately...');
+        startListening();
       }
       
       setIsProcessing(false);
-      
-      // Start listening IMMEDIATELY after TTS  
-      startListening();
       
     } catch (error) {
       console.error('❌ [SeamlessPopup] Failed to start with TTS:', error);
@@ -433,9 +469,9 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       transcriptRef.current = '';
       setCurrentMessage('Listening... speak now!');
       
-      // Set timeout for FAST conversation - 2 seconds like human talk
+      // Set timeout for SUPER FAST conversation - 1.5 seconds like human talk
       const timeout = setTimeout(() => {
-        console.log('⏰ [SeamlessPopup] 2-second timeout, stopping to ask question...');
+        console.log('⏰ [SeamlessPopup] 1.5-second timeout, stopping to ask question...');
         if (recognitionRef.current && isListening) {
           try {
             recognitionRef.current.stop();
@@ -443,7 +479,7 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
             console.log('Timeout stop failed:', e);
           }
         }
-      }, 2000); // FAST 2 seconds like human conversation
+      }, 1500); // SUPER FAST 1.5 seconds like human conversation
       setListeningTimeout(timeout);
     };
 
