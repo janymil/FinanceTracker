@@ -109,35 +109,39 @@ async function manageCompleteConversation(
     
     console.log('🧠 [Conversation Parser] Extracted data:', accumulatedData);
 
-    const systemPrompt = `FAST transaction collection. Build on previous data.
+    const systemPrompt = `You are a transaction data collector. Extract data and respond in ${userLanguage === 'sk-sk' ? 'Slovak' : userLanguage === 'es-pe' ? 'Spanish' : 'English'}.
 
-ACCUMULATED DATA: ${JSON.stringify(accumulatedData)}
+CURRENT DATA: ${JSON.stringify(accumulatedData)}
+USER INPUT: "${transcript}"
 
-USER LANGUAGE: ${userLanguage === 'sk-sk' ? 'Slovak' : userLanguage === 'es-pe' ? 'Spanish' : 'English'}
-CURRENCY: ${userCurrency}
+REQUIRED RESPONSE FORMAT:
+{
+  "response": "Brief question in user's language (max 8 words)",
+  "complete": false,
+  "transactionData": {
+    "amount": number_or_null,
+    "description": "text_or_null", 
+    "type": "expense_or_income_or_null",
+    "date": "YYYY-MM-DD_or_null",
+    "note": "text_or_null",
+    "categoryName": "category_or_null"
+  }
+}
 
 RULES:
-1. NEVER repeat what user said
-2. EXTREMELY brief responses (5 words max)
-3. If you have amount+description+type → complete=true IMMEDIATELY
-4. Ask for ONLY next missing piece
-5. Extract ALL data from current+previous conversation
-
-Required: amount, description, type
-Optional: date, note
-
-Latest user input: "${transcript}"
-
-JSON only:`;
+- Extract ALL data from user input + current data
+- If amount+description+type exist → set complete=true and response="Perfektne!" (Slovak) or "Perfect!" (English)
+- Otherwise ask for missing data only
+- NEVER repeat user's words`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Extract data from: "${transcript}" + previous conversation. Return JSON with updated transactionData building on accumulated data. If amount+description+type exist, set complete=true.` }
+        { role: 'user', content: 'Process the user input and return the required JSON format.' }
       ],
       temperature: 0.1,
-      max_tokens: 200,
+      max_tokens: 150,
       response_format: { type: "json_object" }
     });
 
@@ -146,10 +150,50 @@ JSON only:`;
     if (response) {
       const parsed = JSON.parse(response);
       console.log('✅ [OpenAI Complete] Parsed response:', parsed);
+      
+      // Fix malformed OpenAI responses
+      let fixedResponse = parsed.response;
+      let isComplete = parsed.complete || false;
+      let transactionData = parsed.transactionData || parsed; // Sometimes OpenAI returns data directly
+      
+      // If no response text, generate appropriate question
+      if (!fixedResponse) {
+        if (accumulatedData.amount && accumulatedData.description && accumulatedData.type) {
+          fixedResponse = userLanguage === 'sk-sk' ? 'Perfektne! Ukladám transakciu.' : 
+                        userLanguage === 'es-pe' ? '¡Perfecto! Guardando transacción.' :
+                        'Perfect! Saving transaction.';
+          isComplete = true;
+        } else if (!accumulatedData.amount) {
+          fixedResponse = userLanguage === 'sk-sk' ? 'Koľko to stálo?' :
+                        userLanguage === 'es-pe' ? '¿Cuánto costó?' :
+                        'How much did it cost?';
+        } else if (!accumulatedData.description) {
+          fixedResponse = userLanguage === 'sk-sk' ? 'Čo si kúpil?' :
+                        userLanguage === 'es-pe' ? '¿Qué compraste?' :
+                        'What did you buy?';
+        } else {
+          fixedResponse = userLanguage === 'sk-sk' ? 'Povedz mi viac.' :
+                        userLanguage === 'es-pe' ? 'Cuéntame más.' :
+                        'Tell me more.';
+        }
+      }
+      
+      // Ensure transactionData has proper structure
+      if (transactionData && !transactionData.amount) {
+        transactionData = {
+          amount: accumulatedData.amount,
+          description: accumulatedData.description,
+          type: accumulatedData.type,
+          date: accumulatedData.date,
+          note: accumulatedData.note,
+          categoryName: accumulatedData.categoryName
+        };
+      }
+      
       return {
-        response: parsed.response,
-        isComplete: parsed.complete || false,
-        transactionData: parsed.transactionData
+        response: fixedResponse,
+        isComplete: isComplete,
+        transactionData: transactionData
       };
     }
 
