@@ -299,8 +299,8 @@ async function runMistralAnalysis(description: string, userId: string, userLangu
     const { mistralClient } = await import('../mistralClient.js');
     const client = mistralClient;
 
-    // Simple categorization call using user's language
-    const result = await client.categorizeExpense(
+    // Use processVoiceInput for categorization only
+    const result = await client.processVoiceInput(
       description,
       userCategories.map(cat => ({
         id: cat.id,
@@ -313,9 +313,9 @@ async function runMistralAnalysis(description: string, userId: string, userLangu
     console.log('✅ [VoiceConversation] Mistral categorization result:', result);
 
     return {
-      type: result.type,
-      categoryId: result.categoryId,
-      categoryName: result.categoryName
+      type: result.type || null,
+      categoryId: result.categoryId || null,
+      categoryName: result.categoryName || null
     };
     
   } catch (error: any) {

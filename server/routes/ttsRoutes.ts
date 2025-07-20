@@ -21,7 +21,7 @@ export function registerTTSRoutes(app: Router) {
   router.post('/speak', requireAuth(), async (req: Request, res: Response) => {
     try {
       const { text, voice, speed, language } = ttsSchema.parse(req.body);
-      const userId = req.auth?.userId;
+      const userId = (req as any).auth?.userId;
 
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
