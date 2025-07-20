@@ -152,16 +152,19 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         if (result.isComplete) {
           // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
+          conversationLockRef.current = false; // Release lock before saving
           await saveTransaction(updatedData);
         } else if (result.nextQuestion) {
           // Ask next question
           console.log('❓ Asking next question:', result.nextQuestion);
           setCurrentMessage(result.nextQuestion);
+          conversationLockRef.current = false; // Release lock before speaking
           speak(result.nextQuestion, () => {
             startListening();
           });
         } else {
           // Fallback - determine next question
+          conversationLockRef.current = false; // Release lock before fallback
           askNextQuestion(updatedData);
         }
       } else {
@@ -257,15 +260,23 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
   // Start listening
   const startListening = useCallback(() => {
-    if (recognitionRef.current && state !== 'listening') {
+    if (recognitionRef.current) {
       try {
         console.log('🎤 Starting to listen...');
+        setState('listening');
         recognitionRef.current.start();
       } catch (error) {
-        console.log('🎤 Recognition already running');
+        console.log('🎤 Recognition already running, stopping and restarting');
+        recognitionRef.current.stop();
+        setTimeout(() => {
+          if (recognitionRef.current) {
+            setState('listening');
+            recognitionRef.current.start();
+          }
+        }, 100);
       }
     }
-  }, [state]);
+  }, []);
 
   // Save transaction
   const saveTransaction = useCallback(async (data: TransactionData) => {
