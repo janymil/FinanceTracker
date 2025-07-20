@@ -214,7 +214,7 @@ Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|nul
     }
   });
 
-  // Conversation endpoint for voice conversation component
+  // Conversation endpoint for voice conversation component  
   router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
     try {
       const { transcript, sessionId, currentData, userLanguage, userCurrency } = req.body;
@@ -224,50 +224,85 @@ Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|nul
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      console.log('🗣️ [VoiceConversation] Processing:', {
-        userId: userId.substring(0, 8) + '...',
-        transcript,
-        currentData
-      });
+      console.log('🗣️ [VoiceConversation] Processing transcript:', transcript);
+      console.log('🗣️ [VoiceConversation] Current data:', currentData);
 
-      // Simple parsing approach for better accuracy
-      const newAmount = extractAmountFromText(transcript, userCurrency);
-      const newDescription = extractDescriptionFromText(transcript);
-      const newType = extractTransactionType(transcript);
+      // Process transcript using AI to extract/update transaction data
+      const prompt = `
+VOICE CONVERSATION PROCESSOR
+============================
 
-      // Merge with existing data (preserve what's already there)
-      const updatedData = {
-        amount: newAmount || currentData.amount,
-        description: newDescription || currentData.description,
-        type: newType || currentData.type,
-        categoryId: currentData.categoryId,
-        categoryName: currentData.categoryName,
-        date: currentData.date || new Date().toISOString().split('T')[0],
-        note: currentData.note
+CURRENT TRANSACTION DATA: ${JSON.stringify(currentData)}
+NEW USER INPUT: "${transcript}"
+
+TASK: Update transaction data with new information from user input.
+
+RULES:
+1. PRESERVE existing data unless user is correcting/updating it
+2. Extract new information from transcript
+3. NEVER automatically set date to today unless user specifically mentions "today"
+4. If user says amount, extract it to amount field
+5. If user describes what the transaction was for, extract it to description field
+
+RESPONSE FORMAT (JSON only):
+{
+  "amount": number | null,
+  "description": "string" | null,
+  "type": "income" | "expense" | null,
+  "categoryId": number | null,
+  "categoryName": "string" | null,
+  "date": "YYYY-MM-DD" | null,
+  "note": "string" | null
+}
+
+IMPORTANT: Only update fields that the user provided new information for. Keep existing values for all other fields.
+`;
+
+      // Use AI to process the conversation
+      const aiResult = await runAI("voice-conversation", userId, {
+        prompt,
+        language: userLanguage
+      }, "free");
+
+      let updatedData;
+      try {
+        updatedData = typeof aiResult === 'string' ? JSON.parse(aiResult) : aiResult;
+      } catch {
+        // Fallback: return current data unchanged if AI fails
+        updatedData = currentData;
+      }
+
+      // Ensure we preserve existing data
+      const finalData = {
+        amount: updatedData.amount !== undefined ? updatedData.amount : currentData.amount,
+        description: updatedData.description !== undefined ? updatedData.description : currentData.description,
+        type: updatedData.type !== undefined ? updatedData.type : currentData.type,
+        categoryId: updatedData.categoryId !== undefined ? updatedData.categoryId : currentData.categoryId,
+        categoryName: updatedData.categoryName !== undefined ? updatedData.categoryName : currentData.categoryName,
+        date: updatedData.date !== undefined ? updatedData.date : currentData.date,
+        note: updatedData.note !== undefined ? updatedData.note : currentData.note
       };
 
-      // Check if complete
-      const isComplete = updatedData.amount !== null && updatedData.description !== null;
+      // Check completion
+      const isComplete = finalData.amount !== null && finalData.description !== null && finalData.date !== null;
 
       // Generate next question
       let nextQuestion = null;
       if (!isComplete) {
-        if (!updatedData.amount) {
+        if (finalData.amount === null) {
           nextQuestion = "How much was it?";
-        } else if (!updatedData.description) {
-          nextQuestion = `What was this ${userCurrency}${updatedData.amount} for?`;
+        } else if (finalData.description === null) {
+          nextQuestion = `What was this ${userCurrency}${finalData.amount} for?`;
+        } else if (finalData.date === null) {
+          nextQuestion = "When did this happen? Today or another day?";
         }
       }
 
-      console.log('✅ [VoiceConversation] Result:', {
-        updatedData,
-        isComplete,
-        nextQuestion
-      });
+      console.log('✅ [VoiceConversation] Final data:', finalData);
 
       res.json({
         success: true,
-        data: updatedData,
+        data: finalData,
         isComplete,
         nextQuestion
       });
