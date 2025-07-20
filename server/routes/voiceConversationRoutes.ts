@@ -60,23 +60,54 @@ async function manageCompleteConversation(
       categoryName: null
     };
 
-    // Parse previous conversation to maintain state
-    conversationHistory.forEach(entry => {
-      if (entry.includes('amount:') || entry.includes('pivo') || entry.includes('€') || entry.includes('$')) {
-        // Extract data from previous conversation - this is a simplified parser
-        // In production, you'd want more robust parsing
-        const amountMatch = entry.match(/(\d+(?:\.\d+)?)/);
-        if (amountMatch) accumulatedData.amount = parseFloat(amountMatch[1]);
-        
-        if (entry.includes('pivo')) accumulatedData.description = 'pivo';
-        if (entry.includes('expense') || entry.includes('výdavok')) accumulatedData.type = 'expense';
-        if (entry.includes('včera') || entry.includes('yesterday')) {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          accumulatedData.date = yesterday.toISOString().split('T')[0];
-        }
+    // INTELLIGENT parsing of accumulated conversation data
+    const allConversationText = conversationHistory.join(' ').toLowerCase();
+    
+    // Extract amount from any mention of numbers with currency
+    const amountMatches = allConversationText.match(/(\d+(?:[.,]\d+)?)\s*(?:eur|euro|dollar|dolár|€|\$)/g);
+    if (amountMatches) {
+      const lastAmount = amountMatches[amountMatches.length - 1];
+      const numberMatch = lastAmount.match(/(\d+(?:[.,]\d+)?)/);
+      if (numberMatch) {
+        accumulatedData.amount = parseFloat(numberMatch[1].replace(',', '.'));
       }
-    });
+    }
+    
+    // Extract description from purchase context
+    const purchasePatterns = [
+      /(?:kúpil|bought|compré).*?(pivo|beer|cerveza|chlieb|bread|pan|mlieko|milk|leche|kávu|coffee|café)/gi,
+      /(?:zaplatil|paid|pagué).*?za\s+([^€$\d]*?)(?:\s|€|\$|\d)/gi
+    ];
+    
+    for (const pattern of purchasePatterns) {
+      const matches = allConversationText.match(pattern);
+      if (matches) {
+        const lastMatch = matches[matches.length - 1];
+        if (lastMatch.includes('pivo') || lastMatch.includes('beer')) accumulatedData.description = 'pivo';
+        if (lastMatch.includes('chlieb') || lastMatch.includes('bread')) accumulatedData.description = 'chlieb';
+        if (lastMatch.includes('kávu') || lastMatch.includes('coffee')) accumulatedData.description = 'káva';
+      }
+    }
+    
+    // Extract date from temporal expressions
+    if (allConversationText.includes('včera') || allConversationText.includes('yesterday') || allConversationText.includes('ayer')) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      accumulatedData.date = yesterday.toISOString().split('T')[0];
+    } else if (allConversationText.includes('dnes') || allConversationText.includes('today') || allConversationText.includes('hoy')) {
+      accumulatedData.date = new Date().toISOString().split('T')[0];
+    }
+    
+    // Detect expense vs income from context
+    if (allConversationText.includes('kúpil') || allConversationText.includes('bought') || allConversationText.includes('compré') ||
+        allConversationText.includes('zaplatil') || allConversationText.includes('paid') || allConversationText.includes('pagué')) {
+      accumulatedData.type = 'expense';
+    } else if (allConversationText.includes('dostal') || allConversationText.includes('received') || allConversationText.includes('recibí') ||
+               allConversationText.includes('výplata') || allConversationText.includes('salary') || allConversationText.includes('salario')) {
+      accumulatedData.type = 'income';
+    }
+    
+    console.log('🧠 [Conversation Parser] Extracted data:', accumulatedData);
 
     const systemPrompt = `FAST transaction collection. Build on previous data.
 
