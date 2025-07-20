@@ -167,32 +167,35 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       
       if (result.sessionId) setSessionId(result.sessionId);
 
-      // Step 2: Check ALL REQUIRED fields for complete transaction creation
-      const hasAmount = newExtractedData.amount && newExtractedData.amount > 0;
-      const hasVendor = newExtractedData.vendor && newExtractedData.vendor.trim();
-      const hasCategory = newExtractedData.category && newExtractedData.category.trim();
-      const hasDescription = newExtractedData.description && newExtractedData.description.trim();
-      const hasDate = newExtractedData.date || newExtractedData.parsedDate;
+      // Step 2: Check REQUIRED fields based on transaction schema
+      // REQUIRED: amount, description, type, date (userId handled automatically)
+      // OPTIONAL: categoryId, vendor, recurring fields
       
-      console.log('🔍 [SeamlessPopup] Field validation:', {
+      const hasAmount = newExtractedData.amount && newExtractedData.amount > 0;
+      const hasDescription = newExtractedData.description && newExtractedData.description.trim();
+      const hasType = newExtractedData.type && (newExtractedData.type === 'income' || newExtractedData.type === 'expense');
+      const hasDate = newExtractedData.date || newExtractedData.parsedDate || true; // Can default to today
+      
+      console.log('🔍 [SeamlessPopup] Required field validation:', {
         amount: newExtractedData.amount,
         hasAmount,
-        vendor: newExtractedData.vendor,
-        hasVendor,
-        category: newExtractedData.category,
-        hasCategory,
         description: newExtractedData.description,
         hasDescription,
-        date: newExtractedData.date,
-        hasDate
+        type: newExtractedData.type,
+        hasType,
+        date: newExtractedData.date || 'will default to today',
+        hasDate,
+        // Optional fields:
+        vendor: newExtractedData.vendor,
+        category: newExtractedData.category
       });
       
       const missingFields = [];
       if (!hasAmount) missingFields.push('amount');
-      if (!hasVendor) missingFields.push('vendor');
-      if (!hasCategory) missingFields.push('category');
       if (!hasDescription) missingFields.push('description');
-      // Date is optional - defaults to today if not provided
+      if (!hasType) missingFields.push('type');
+      // Date defaults to today if not provided
+      // Category and vendor are optional
       
       console.log('🔍 [SeamlessPopup] Missing fields:', missingFields);
       console.log('🎯 [SeamlessPopup] Field values:', {
@@ -309,20 +312,19 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       setIsProcessing(true);
       setCurrentMessage('Let me ask you about your transaction...');
       
-      // Determine ALL REQUIRED missing fields for complete transaction
+      // Determine REQUIRED missing fields based on transaction schema
+      // REQUIRED: amount, description, type (userId and date handled automatically)
       const REQUIRED_FIELDS = {
         amount: extractedData.amount,
-        vendor: extractedData.vendor,
-        category: extractedData.category,
         description: extractedData.description,
-        date: extractedData.date || extractedData.parsedDate
+        type: extractedData.type
       };
       
       const missingFields = Object.keys(REQUIRED_FIELDS).filter(field => {
-        // Date is optional - defaults to today
-        if (field === 'date') return false;
-        
         const value = REQUIRED_FIELDS[field];
+        if (field === 'type') {
+          return !value || (value !== 'income' && value !== 'expense');
+        }
         return !value || value === null || value === undefined || value === '' || value === 0;
       });
       
