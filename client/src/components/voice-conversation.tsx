@@ -105,11 +105,17 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     console.log('🎤 STT Language set to:', recognition.lang);
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript.trim();
-      console.log('🎤 Voice heard:', transcript);
-      if (transcript && !conversationLockRef.current) {
-        setState('processing');
-        processVoiceInput(transcript);
+      if (event.results && event.results.length > 0 && event.results[0] && event.results[0][0]) {
+        const transcript = event.results[0][0].transcript.trim();
+        console.log('🎤 Voice heard:', transcript);
+        if (transcript && transcript.length > 0 && !conversationLockRef.current) {
+          setState('processing');
+          processVoiceInput(transcript);
+        } else {
+          console.log('🎤 Empty or invalid transcript, ignoring:', { transcript, locked: conversationLockRef.current });
+        }
+      } else {
+        console.log('🎤 Invalid speech event structure:', event);
       }
     };
 
@@ -120,11 +126,19 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     recognition.onend = () => {
       console.log('🎤 Recognition ended');
+      // CRITICAL: Do not restart automatically on end
+      // Only restart if explicitly commanded
     };
 
     recognition.onerror = (event: any) => {
       console.error('🎤 Speech error:', event.error);
-      setState('error');
+      if (event.error === 'no-speech') {
+        console.log('🎤 No speech detected, waiting for user input...');
+        // Don't call API for no-speech errors
+        setState('listening'); // Keep listening
+      } else {
+        setState('error');
+      }
     };
 
     recognitionRef.current = recognition;
@@ -290,12 +304,9 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     } catch (error) {
       console.error('💥 Voice processing error:', error);
       setState('error');
-      setCurrentMessage('Sorry, something went wrong. Let\'s try again.');
+      setCurrentMessage('Sorry, something went wrong. Please try speaking again.');
       
-      setTimeout(() => {
-        startConversation();
-      }, 2000);
-    } finally {
+      // Don't automatically restart - wait for user action
       conversationLockRef.current = false;
     }
   }, [transactionData, sessionId, userLanguage, userCurrency]);
