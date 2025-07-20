@@ -227,8 +227,13 @@ function extractDataFromTranscript(transcript: string, userCurrency: string, use
   // Extract amount with user's currency - support both digits and words
   const currencySymbol = userCurrency === '€' ? '€' : '$';
   
-  // Try word numbers FIRST, then numeric patterns
-  amount = parseWordNumber(lower, userLanguage);
+  // Try ENGLISH word numbers first (even for Slovak users who might say English numbers)
+  amount = parseWordNumber(lower, 'en-us');
+  
+  // If no English word number found, try user's language
+  if (amount === null && userLanguage !== 'en-us') {
+    amount = parseWordNumber(lower, userLanguage);
+  }
   
   // If no word number found, try numeric patterns
   if (amount === null) {
