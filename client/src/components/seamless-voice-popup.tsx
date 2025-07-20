@@ -167,22 +167,32 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       
       if (result.sessionId) setSessionId(result.sessionId);
 
-      // Step 2: Check REQUIRED fields for transaction creation - SIMPLE: only amount needed
+      // Step 2: Check ALL REQUIRED fields for complete transaction creation
       const hasAmount = newExtractedData.amount && newExtractedData.amount > 0;
-      // For voice input "25", we'll auto-generate description, so don't require it
-      const hasDescription = true; // Always true - we'll create description from context
+      const hasVendor = newExtractedData.vendor && newExtractedData.vendor.trim();
+      const hasCategory = newExtractedData.category && newExtractedData.category.trim();
+      const hasDescription = newExtractedData.description && newExtractedData.description.trim();
+      const hasDate = newExtractedData.date || newExtractedData.parsedDate;
       
       console.log('🔍 [SeamlessPopup] Field validation:', {
         amount: newExtractedData.amount,
         hasAmount,
-        description: newExtractedData.description,
         vendor: newExtractedData.vendor,
-        hasDescription
+        hasVendor,
+        category: newExtractedData.category,
+        hasCategory,
+        description: newExtractedData.description,
+        hasDescription,
+        date: newExtractedData.date,
+        hasDate
       });
       
       const missingFields = [];
       if (!hasAmount) missingFields.push('amount');
-      // Don't require description - voice transactions can be minimal
+      if (!hasVendor) missingFields.push('vendor');
+      if (!hasCategory) missingFields.push('category');
+      if (!hasDescription) missingFields.push('description');
+      // Date is optional - defaults to today if not provided
       
       console.log('🔍 [SeamlessPopup] Missing fields:', missingFields);
       console.log('🎯 [SeamlessPopup] Field values:', {
@@ -299,12 +309,19 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       setIsProcessing(true);
       setCurrentMessage('Let me ask you about your transaction...');
       
-      // Determine REQUIRED missing field for transaction - SIMPLE: only amount needed
+      // Determine ALL REQUIRED missing fields for complete transaction
       const REQUIRED_FIELDS = {
-        amount: extractedData.amount
+        amount: extractedData.amount,
+        vendor: extractedData.vendor,
+        category: extractedData.category,
+        description: extractedData.description,
+        date: extractedData.date || extractedData.parsedDate
       };
       
       const missingFields = Object.keys(REQUIRED_FIELDS).filter(field => {
+        // Date is optional - defaults to today
+        if (field === 'date') return false;
+        
         const value = REQUIRED_FIELDS[field];
         return !value || value === null || value === undefined || value === '' || value === 0;
       });
