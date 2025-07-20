@@ -117,12 +117,24 @@ LEARNED PATTERN FOR THIS USER:
 - PRIORITIZE this learned pattern if merchant matches
 ` : ''}
 
-SMART CATEGORIZATION RULES:
+SMART CATEGORIZATION RULES - TWO-LAYER SYSTEM:
+
+LAYER 1: MERCHANT LOOKUP (JSON-based)
 1. Extract merchant name from transcript
 2. Check if merchant matches known businesses from examples above
-3. Match business type to user's available categories by purpose/keywords
-4. If NO confident match exists, set categoryId: null
-5. NEVER force into wrong category - better to leave null for manual selection
+3. If found in examples, use that business type with high confidence
+
+LAYER 2: AI MERCHANT INTELLIGENCE (for unknown merchants)
+1. If merchant NOT found in examples above, use AI intelligence:
+   - Analyze: "What type of business is this merchant?"
+   - Research the merchant name to understand their business type
+   - Examples: "papiernictvo" = stationery shop → office supplies
+   - Examples: "slovnaft" = Slovak gas company → transportation
+   - Examples: "tesco" = supermarket chain → groceries
+2. Match the discovered business type to user's available categories
+3. Use business intelligence, not hardcoded patterns
+4. If uncertain about category match (confidence < 0.7), set categoryId: null
+5. NEVER force into wrong category - better null for manual selection
 
 STRICT INSTRUCTIONS:
 1. Return ONLY valid JSON - no markdown code blocks, no explanations
