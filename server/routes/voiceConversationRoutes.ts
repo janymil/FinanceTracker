@@ -284,34 +284,30 @@ async function processWithMistralAsync(transactionData: any, userId: string, ses
   // This is non-blocking - just for future optimization
 }
 
-// Synchronous Mistral analysis for final transaction saving
-async function runMistralAnalysis(description: string, userId: string) {
+// Synchronous Mistral analysis for AI categorization ONLY
+async function runMistralAnalysis(description: string, userId: string, userLanguage?: string) {
   try {
-    console.log('🤖 [VoiceConversation] Running Mistral analysis for:', description);
+    console.log('🤖 [VoiceConversation] Running Mistral AI categorization for:', description);
 
     // Get user's categories for Mistral processing
     const userCategories = await storage.getCategories(userId);
     
-    // Use Mistral client for processing
+    // Use Mistral client for AI categorization only
     const { mistralClient } = await import('../mistralClient.js');
     const client = mistralClient;
 
-    // Call processVoiceInput ONLY for type detection and categorization
-    const result = await client.processVoiceInput(
-      `Analyze this transaction: "${description}" - determine if expense or income and appropriate category`,
+    // Simple categorization call using user's language
+    const result = await client.categorizeExpense(
+      description,
       userCategories.map(cat => ({
         id: cat.id,
         name: cat.name,
         type: cat.type
       })),
-      'en-us', // Note: Mistral analysis uses English for technical processing
-      'UTC', // TODO: Get from user settings
-      {
-        analysisOnly: true // Flag to indicate we only need type and category
-      }
+      userLanguage || 'en-us'
     );
 
-    console.log('✅ [VoiceConversation] Mistral analysis result:', result);
+    console.log('✅ [VoiceConversation] Mistral categorization result:', result);
 
     return {
       type: result.type,
@@ -320,7 +316,7 @@ async function runMistralAnalysis(description: string, userId: string) {
     };
     
   } catch (error: any) {
-    console.warn('⚠️ [VoiceConversation] Mistral analysis failed:', error.message);
+    console.warn('⚠️ [VoiceConversation] Mistral categorization failed:', error.message);
     return null;
   }
 }
