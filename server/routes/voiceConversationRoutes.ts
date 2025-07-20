@@ -63,13 +63,13 @@ export function registerVoiceConversationRoutes(app: Router) {
 
       // Merge new data with existing (preserve existing data, only add new non-null values)
       const updated = {
-        amount: newData.amount || existing.amount,
-        description: newData.description || existing.description,
-        type: newData.type || existing.type,
-        date: (newData as any).date || (existing as any).date,
+        amount: newData.amount !== null ? newData.amount : existing.amount,
+        description: newData.description !== null ? newData.description : existing.description,
+        type: newData.type !== null ? newData.type : existing.type,
+        date: (newData as any).date !== null && (newData as any).date !== undefined ? (newData as any).date : (existing as any).date,
         note: (newData as any).note !== undefined ? (newData as any).note : (existing as any).note,
-        categoryId: newData.categoryId || existing.categoryId,
-        categoryName: newData.categoryName || existing.categoryName
+        categoryId: newData.categoryId !== null ? newData.categoryId : existing.categoryId,
+        categoryName: newData.categoryName !== null ? newData.categoryName : existing.categoryName
       };
       
       console.log('🔄 [VoiceConversation] Data merge:', {
