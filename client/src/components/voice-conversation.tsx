@@ -36,6 +36,15 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     date: undefined,
     note: undefined
   });
+  
+  // Use ref to store current transaction data to avoid stale closures
+  const transactionDataRef = useRef<TransactionData>(transactionData);
+  
+  // Update ref whenever state changes
+  useEffect(() => {
+    transactionDataRef.current = transactionData;
+    console.log('📋 Transaction data updated:', transactionData);
+  }, [transactionData]);
 
   const recognitionRef = useRef<any>(null);
   const conversationLockRef = useRef<boolean>(false);
@@ -123,11 +132,14 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     try {
       console.log('📡 Processing voice input:', transcript);
 
-      // Call voice conversation API
+      // Get current transaction data using ref to avoid stale closure
+      const currentData = transactionDataRef.current;
+      console.log('📤 Sending to backend:', { transcript, sessionId, currentData });
+      
       const response = await apiRequest('POST', '/api/voice/conversation', {
         transcript,
         sessionId,
-        currentData: transactionData
+        currentData
       });
 
       const result = await response.json();
@@ -135,7 +147,13 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
       if (result.success) {
         const updatedData = result.data;
-        setTransactionData(updatedData);
+        console.log('📥 Updating frontend state with:', updatedData);
+        
+        // Update state immediately
+        setTransactionData(prevData => {
+          console.log('🔄 State update - Previous:', prevData, 'New:', updatedData);
+          return updatedData;
+        });
 
         if (result.isComplete) {
           // Transaction complete - save it
@@ -166,7 +184,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     } finally {
       conversationLockRef.current = false;
     }
-  }, [transactionData, sessionId]);
+  }, [sessionId]);
 
   // Determine and ask next question
   const askNextQuestion = useCallback((data: TransactionData) => {
