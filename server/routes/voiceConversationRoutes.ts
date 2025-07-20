@@ -58,16 +58,22 @@ export function registerVoiceConversationRoutes(app: Router) {
       const newData = extractDataFromTranscript(transcript, user.currency || '$');
       console.log('📝 [VoiceConversation] Extracted:', newData);
 
-      // Merge new data with existing (prioritize new data)
+      // Merge new data with existing (preserve existing data, only add new non-null values)
       const updated = {
         amount: newData.amount || existing.amount,
         description: newData.description || existing.description,
         type: newData.type || existing.type,
-        date: newData.date || existing.date,
-        note: newData.note !== undefined ? newData.note : existing.note,
+        date: (newData as any).date || (existing as any).date,
+        note: (newData as any).note !== undefined ? (newData as any).note : (existing as any).note,
         categoryId: newData.categoryId || existing.categoryId,
         categoryName: newData.categoryName || existing.categoryName
       };
+      
+      console.log('🔄 [VoiceConversation] Data merge:', {
+        existing,
+        newData,
+        updated
+      });
 
       // ONLY use Mistral AI for expense/income detection and categorization
       // This happens asynchronously AFTER we have description
@@ -162,14 +168,15 @@ export function registerVoiceConversationRoutes(app: Router) {
       }
 
       // Create transaction record
-      const transaction = await storage.addTransaction(userId, {
+      const transaction = await storage.createTransaction({
+        userId: userId,
         amount: transactionData.amount,
         description: transactionData.description,
         type: finalType,
         date: transactionData.date || new Date().toISOString().split('T')[0],
-        reference: transactionData.note || '',
+        referenceNote: transactionData.note || '',
         categoryId: finalCategoryId || null,
-        source: 'voice_conversation'
+        isRecurring: false
       });
 
       return res.json({
@@ -246,19 +253,23 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
     type = 'expense';
   }
 
-  // Extract description - clean transcript
+  // Extract description - clean transcript, but preserve meaningful words
   let cleanText = transcript
     .replace(/\$?\d+(?:\.\d{1,2})?\s?(?:dollars?|€|euros?)?/gi, '') // Remove amounts
-    .replace(/\b(?:for|at|from|to|on|income|expense|spent|bought|paid|purchase|received|earned|cost|dollars?|euros?)\b/gi, '') // Remove keywords
+    .replace(/\b(?:for|at|from|to|on|dollars?|euros?)\b/gi, '') // Remove only prepositions and currency words
     .replace(/\s+/g, ' ') // Clean multiple spaces
     .trim();
 
+  // If it's a simple word like "drugstore", "coffee", "groceries" - use it as description
   if (cleanText && cleanText.length > 1 && !isJustNumber(cleanText)) {
     description = cleanText;
   }
 
+  console.log('🔍 [VoiceConversation] Extraction result:', { amount, description, type, date, note });
   return { amount, description, type, date, note, categoryId: null, categoryName: null };
 }
+
+
 
 // Asynchronous Mistral processing for expense/income detection and categorization ONLY
 async function processWithMistralAsync(transactionData: any, userId: string, sessionId: string) {
@@ -277,8 +288,8 @@ async function runMistralAnalysis(description: string, userId: string) {
     const userCategories = await storage.getCategories(userId);
     
     // Use Mistral client for processing
-    const mistralClient = await import('../mistralClient.ts');
-    const client = new mistralClient.MistralClient();
+    const { mistralClient } = await import('../mistralClient.js');
+    const client = mistralClient;
 
     // Call processVoiceInput ONLY for type detection and categorization
     const result = await client.processVoiceInput(
