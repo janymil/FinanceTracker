@@ -3776,12 +3776,31 @@
   "voiceInput": {
     "listening": "Escuchando... Habla ahora",
     "notSupported": "La entrada de voz no es compatible con tu navegador",
+    "noSpeech": "No se detectó voz",
+    "tryAgain": "Por favor intenta nuevamente",
+    "processingError": "Error al procesar entrada de voz",
+    "transactionSaved": "Transacción guardada exitosamente",
+    "saveFailed": "Error al guardar transacción",
     "errors": {
       "noSpeech": "No se detectó voz. Por favor, intenta de nuevo.",
       "audioCapture": "Error al capturar audio. Verifica tu micrófono.",
       "notAllowed": "Acceso al micrófono denegado. Por favor, permite el acceso.",
       "network": "Error de red. Verifica tu conexión.",
       "generic": "Error de entrada de voz. Por favor, intenta de nuevo."
+    },
+    "seamless": {
+      "start": "Iniciar Entrada de Voz",
+      "stop": "Detener Entrada de Voz",
+      "greeting": "¡Hola! Cuéntame sobre tu compra. Por ejemplo, 'Gasté 45 soles en Wong en comestibles'",
+      "status": {
+        "idle": "Listo",
+        "listening": "Escuchando...",
+        "processing": "Procesando...",
+        "speaking": "Hablando...",
+        "complete": "Completo",
+        "error": "Error"
+      },
+      "extractedData": "Información Extraída"
     }
   },
 

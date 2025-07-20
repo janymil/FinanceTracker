@@ -5,8 +5,8 @@ import { runAI } from "../../lib/aiProcessor";
 import { getMerchantContextForAI, getCountryFromLanguage } from "../../lib/merchantLookup";
 import { getLanguageLabel } from "../../lib/languageUtils";
 import { db } from "../db";
-import { categories, aiUsage, users } from "../../shared/schema";
-import { eq, and, sql, gte } from "drizzle-orm";
+import { categories, aiUsage, users, transactions } from "../../shared/schema";
+import { eq, and, sql, gte, or, desc } from "drizzle-orm";
 import { storage } from "../storage";
 
 const voiceProcessSchema = z.object({
@@ -24,6 +24,16 @@ const conversationProcessSchema = z.object({
     extractedData: z.object({}).optional(),
     missingFields: z.array(z.string()).optional(),
   }).optional(),
+});
+
+const seamlessProcessSchema = z.object({
+  transcript: z.string().min(1),
+  sessionId: z.string(),
+  extractedData: z.object({}).optional(),
+  messages: z.array(z.object({
+    role: z.string(),
+    content: z.string()
+  })).optional()
 });
 
 export function registerVoiceRoutes(app: Router) {
@@ -60,27 +70,15 @@ export function registerVoiceRoutes(app: Router) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Get user's categories for better categorization
-      const userCategories = await db
-        .select()
-        .from(categories)
-        .where(
-          and(
-            eq(categories.type, 'expense'),
-            // Include both predefined and user categories
-            eq(categories.userId, userId)
-          )
-        );
-
-      const systemCategories = await db
-        .select()
-        .from(categories)
-        .where(
-          and(
-            eq(categories.type, 'expense'),
-            eq(categories.userId, null as any) // Predefined categories
-          )
-        );
+      // FAST category lookup - parallel queries
+      const [userCategories, systemCategories] = await Promise.all([
+        db.select().from(categories).where(
+          and(eq(categories.type, 'expense'), eq(categories.userId, userId))
+        ).limit(10), // Limit for speed
+        db.select().from(categories).where(
+          and(eq(categories.type, 'expense'), eq(categories.userId, null as any))
+        ).limit(20) // Limit system categories for speed
+      ]);
 
       const allCategories = [...systemCategories, ...userCategories];
       
@@ -91,209 +89,75 @@ export function registerVoiceRoutes(app: Router) {
         allCategoriesList: allCategories.map(cat => `${cat.name} (ID: ${cat.id})`)
       });
 
-      // Build the extraction prompt with smart merchant lookup and learning
-      const currentDate = new Date().toISOString();
-      const countryCode = getCountryFromLanguage(language);
-      const merchantContext = await getMerchantContextForAI(transcript, countryCode, 15);
-      
-      // Get learned patterns for this user/merchant
-      const { lookupMerchant } = await import('../../lib/merchantLookup');
-      const learnedMatch = await lookupMerchant(transcript, countryCode, userId);
-      
-      const prompt = `CRITICAL: You must respond with ONLY valid JSON. No explanations, no markdown, no additional text.
-CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).
-
-Extract financial transaction details from this voice transcript:
-"${transcript}"
-
-Context:
-- User Language: ${language}
-- Current Date: ${currentDate}
-- User Timezone: ${timezone || 'UTC'}
-- Country: ${countryCode.toUpperCase()}
-
-Available Categories:
-${allCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n')}
-
-${merchantContext}
-
-${learnedMatch ? `
-LEARNED PATTERN FOR THIS USER:
-- This merchant "${learnedMatch.matched_merchant}" was previously categorized by this user
-- Business Type: ${learnedMatch.business_type}
-- Confidence: ${learnedMatch.confidence}
-- Source: ${learnedMatch.source}
-- PRIORITIZE this learned pattern if merchant matches
-` : ''}
-
-SMART CATEGORIZATION RULES - TWO-LAYER SYSTEM:
-
-LAYER 1: MERCHANT LOOKUP (JSON-based)
-1. Extract merchant name from transcript
-2. Check if merchant matches known businesses from examples above
-3. If found in examples, use that business type with high confidence
-
-LAYER 2: AI MERCHANT INTELLIGENCE (for unknown merchants)
-1. If merchant NOT found in examples above, use AI intelligence:
-   - Analyze: "What type of business is this merchant?"
-   - Research the merchant name to understand their business type
-   - Examples: "papiernictvo" = stationery shop → office supplies
-   - Examples: "slovnaft" = Slovak gas company → transportation
-   - Examples: "tesco" = supermarket chain → groceries
-2. Match the discovered business type to user's available categories
-3. Use business intelligence, not hardcoded patterns
-4. If uncertain about category match (confidence < 0.7), set categoryId: null
-5. NEVER force into wrong category - better null for manual selection
-
-STRICT INSTRUCTIONS:
-1. Return ONLY valid JSON - no markdown code blocks, no explanations
-2. Extract: amount, vendor, category, date, type from transcript
-3. Use merchant recognition examples to identify business type
-4. Match business type to most relevant user category
-5. If uncertain about category (confidence < 0.7), set categoryId: null
-6. Parse natural dates like "yesterday", "last week" 
-7. Determine income vs expense from context
-
-JSON RESPONSE FORMAT:
-{
-  "amount": 52.00,
-  "currency": "USD",
-  "vendor": "Walmart", 
-  "description": "groceries",
-  "categoryId": 15,
-  "categoryName": "Food & Groceries",
-  "dateReference": "today",
-  "parsedDate": "2025-07-19",
-  "type": "expense",
-  "isRecurring": false,
-  "recurringFrequency": null,
-  "confidence": 0.9,
-  "ambiguities": [],
-  "followUpQuestions": []
-}
-
-EXAMPLES FOR ${countryCode.toUpperCase()}:
-- "I bought coffee at Starbucks" + available "Jedlo (ID: 5)" → categoryId: 5, categoryName: "Jedlo"
-- "Filled gas at Slovnaft" + available "Doprava (ID: 8)" → categoryId: 8, categoryName: "Doprava"
-- "Shopping at unknown store" → categoryId: null, categoryName: null (let user choose)
-
-CRITICAL: Better to return categoryId: null than wrong category. User can select manually.`;
-
-      // Call external AI processor (which uses Mistral first, then OpenAI fallback)
-      let completion;
-      let aiProcessingTime = 0;
-      const aiStartTime = Date.now();
-      
-      try {
-        const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'http://31.97.103.28:8080';
-        
-        console.log('🤖 [VoiceAPI] Calling external AI processor:', {
-          url: AI_PROCESSOR_URL,
-          model: 'mistral-small-2506',
-          promptLength: prompt.length,
-          timeout: '30s'
-        });
-        
-        const response = await fetch(`${AI_PROCESSOR_URL}/api/ai/voice-extract`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.AI_PROCESSOR_TOKEN || 'default'}`,
-          },
-          body: JSON.stringify({
-            prompt,
-            userId,
-            model: 'mistral-small-2506',
-            language
-          }),
-          signal: AbortSignal.timeout(30000) // 30 second timeout
-        });
-
-        if (!response.ok) {
-          throw new Error(`AI processor responded with ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        completion = data.result || data.completion;
-        aiProcessingTime = Date.now() - aiStartTime;
-        
-        console.log('🎉 [VoiceAPI] External AI processing successful:', {
-          processingTime: `${aiProcessingTime}ms`,
-          responseSize: JSON.stringify(data).length,
-          hasResult: !!completion
-        });
-        
-      } catch (aiProcessorError) {
-        aiProcessingTime = Date.now() - aiStartTime;
-        console.warn('⚠️ [VoiceAPI] External AI processor failed, using fallback:', {
-          error: aiProcessorError.message,
-          processingTime: `${aiProcessingTime}ms`,
-          fallbackMethod: 'local OpenAI'
-        });
-        
-        const fallbackStartTime = Date.now();
-        completion = await runAI("voice-extraction", userId, { prompt, language }, user?.plan || "free");
-        const fallbackTime = Date.now() - fallbackStartTime;
-        
-        console.log('🔄 [VoiceAPI] Fallback processing completed:', {
-          fallbackTime: `${fallbackTime}ms`,
-          totalTime: `${Date.now() - aiStartTime}ms`
-        });
-      }
-      
+      // FAST extraction - parse transcript directly first
       let extractedData;
+      const currentDate = new Date().toISOString().split('T')[0];
+      
       try {
-        // Parse the AI response with cleanup
-        console.log('🔍 [VoiceAPI] Parsing AI response:', {
-          rawResponse: completion,
-          responseLength: completion?.length
-        });
-        
-        // Clean up AI response - remove markdown code blocks if present
-        let cleanedResponse = completion;
-        if (typeof completion === 'string') {
-          cleanedResponse = completion
-            .replace(/```json\s*/g, '') // Remove ```json
-            .replace(/```\s*/g, '')     // Remove ```
-            .trim();
-        }
-        
-        extractedData = JSON.parse(cleanedResponse);
-        
-        console.log('✅ [VoiceAPI] AI response parsed successfully:', {
-          hasAmount: !!extractedData.amount,
-          hasVendor: !!extractedData.vendor,
-          hasType: !!extractedData.type,
-          confidence: extractedData.confidence,
-          ambiguities: extractedData.ambiguities?.length || 0
-        });
-        
-      } catch (error) {
-        console.error('💥 [VoiceAPI] Failed to parse AI response:', {
-          error: error.message,
-          rawResponse: completion,
-          responseType: typeof completion
-        });
-        
-        // Return a fallback response instead of failing completely
+        // Step 1: FAST direct parsing without AI
         extractedData = {
-          amount: null,
-          currency: "USD",
-          vendor: null,
-          description: transcript,
+          amount: parseAmountFromText(transcript),
+          vendor: parseVendorFromText(transcript),
+          description: transcript.trim(),
+          type: 'expense', // Default
+          dateReference: 'today',
+          parsedDate: currentDate,
           categoryId: null,
           categoryName: null,
-          dateReference: "today",
-          parsedDate: new Date().toISOString().split('T')[0],
-          type: "expense",
-          isRecurring: false,
-          recurringFrequency: null,
-          confidence: 0.3,
-          ambiguities: ["Failed to parse AI response - manual review needed"],
-          followUpQuestions: ["Please verify the transaction details"]
+          confidence: 0.8
         };
+
+        // Step 2: ONLY use AI for categorization if vendor is found but no category
+        if (extractedData.vendor && !extractedData.categoryId) {
+          console.log('🤖 [VoiceAPI] Using AI for categorization only:', extractedData.vendor);
+          
+          const categorizationPrompt = `ONLY categorize this merchant: "${extractedData.vendor}"
+Available categories: ${allCategories.map(cat => `${cat.name} (ID: ${cat.id})`).join(', ')}
+Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|null}`;
+          
+          try {
+            const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'http://31.97.103.28:8080';
+            const response = await fetch(`${AI_PROCESSOR_URL}/api/ai/voice-extract`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.AI_PROCESSOR_TOKEN || 'default'}`,
+              },
+              body: JSON.stringify({
+                prompt: categorizationPrompt,
+                userId,
+                model: 'gpt-4o-mini', // Fast model for simple categorization
+                language
+              }),
+              signal: AbortSignal.timeout(5000) // FAST 5-second timeout
+            });
+
+            if (response.ok) {
+              const aiResult = await response.json();
+              const categoryData = JSON.parse(aiResult.result || aiResult.completion);
+              extractedData.categoryId = categoryData.categoryId;
+              extractedData.categoryName = categoryData.categoryName;
+            }
+          } catch (aiError) {
+            console.log('⚡ [VoiceAPI] AI categorization skipped, user will choose manually');
+            // Continue without AI categorization - user can select manually
+          }
+        }
         
-        console.log('🔄 [VoiceAPI] Using fallback extracted data');
+        console.log('⚡ [VoiceAPI] FAST processing completed:', extractedData);
+        
+      } catch (parseError) {
+        console.error('❌ [VoiceAPI] Fast parsing failed, using fallback');
+        // Fallback to original AI processing only if fast parsing completely fails
+        extractedData = {
+          amount: null,
+          vendor: null,
+          description: transcript,
+          type: 'expense',
+          categoryId: null,
+          categoryName: null,
+          confidence: 0.3
+        };
       }
 
       // Validate and enhance the extracted data
@@ -603,6 +467,198 @@ MERGE STRATEGY: Previous context + new input = complete transaction data.
     }
   });
 
+  // Seamless voice processing endpoint with enhanced categorization
+  router.post('/seamless-process', requireAuth(), async (req: Request, res: Response) => {
+    const startTime = Date.now();
+    let userId: string | undefined;
+    
+    try {
+      const { transcript, sessionId, extractedData, messages } = seamlessProcessSchema.parse(req.body);
+      userId = req.auth?.userId;
+      const userLanguage = req.headers['x-user-language'] as string || 'en-us';
+      
+      console.log('🎤 [SeamlessVoice] Processing seamless voice input:', {
+        userId: (userId || 'unknown').substring(0, 8) + '...',
+        sessionId,
+        transcript,
+        hasExtractedData: !!extractedData,
+        messagesCount: messages?.length || 0
+      });
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get user for plan info
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get user's transaction history for better categorization
+      const userTransactions = await db
+        .select({
+          description: transactions.description,
+          vendor: transactions.vendor,
+          category: categories.name,
+          amount: transactions.amount
+        })
+        .from(transactions)
+        .leftJoin(categories, eq(transactions.categoryId, categories.id))
+        .where(eq(transactions.userId, userId))
+        .orderBy(desc(transactions.date))
+        .limit(100);
+
+      // Get all categories (user + system)
+      const allCategories = await db
+        .select()
+        .from(categories)
+        .where(
+          or(
+            eq(categories.userId, userId),
+            eq(categories.userId, null as any)
+          )
+        );
+
+      // Build conversation context
+      const conversationHistory = messages?.map(m => `${m.role}: ${m.content}`).join('\n') || '';
+      const currentExtracted = extractedData || {};
+      
+      // Determine what's missing
+      const requiredFields = ['amount', 'vendor', 'category'];
+      const missingFields = requiredFields.filter(field => !currentExtracted[field]);
+      
+      // FAST seamless processing - direct parsing + minimal AI
+      let aiResponse;
+      
+      // Step 1: Fast direct parsing of new input
+      const newData = {
+        amount: parseAmountFromText(transcript) || currentExtracted.amount,
+        vendor: parseVendorFromText(transcript) || currentExtracted.vendor,
+        description: transcript.trim(),
+        type: currentExtracted.type || 'expense',
+        date: new Date().toISOString().split('T')[0]
+      };
+      
+      // Step 2: Only use AI for categorization if needed
+      if (newData.vendor && !currentExtracted.categoryId && !currentExtracted.category) {
+        console.log('🤖 [SeamlessVoice] Quick categorization for:', newData.vendor);
+        
+        try {
+          const categorizationPrompt = `Categorize "${newData.vendor}":
+Categories: ${allCategories.map(cat => `${cat.name}(${cat.id})`).join(', ')}
+JSON: {"categoryId": number|null, "categoryName": "string"|null}`;
+          
+          const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'http://31.97.103.28:8080';
+          const response = await fetch(`${AI_PROCESSOR_URL}/api/ai/voice-extract`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.AI_PROCESSOR_TOKEN || 'default'}`,
+            },
+            body: JSON.stringify({
+              prompt: categorizationPrompt,
+              userId,
+              model: 'gpt-4o-mini',
+              language: userLanguage
+            }),
+            signal: AbortSignal.timeout(3000) // VERY FAST 3-second timeout
+          });
+
+          if (response.ok) {
+            const aiResult = await response.json();
+            const categoryData = JSON.parse(aiResult.result || aiResult.completion);
+            newData.categoryId = categoryData.categoryId;
+            newData.category = categoryData.categoryName;
+          }
+        } catch (aiError) {
+          console.log('⚡ [SeamlessVoice] Quick categorization skipped');
+        }
+      }
+      
+      // Prepare AI response structure
+      aiResponse = {
+        extractedData: newData,
+        isComplete: false,
+        needsMoreInfo: true
+      };
+
+      // Merge extracted data
+      const mergedData = {
+        ...currentExtracted,
+        ...aiResponse.extractedData
+      };
+
+      // Determine what's still missing after merging
+      const stillMissingFields = requiredFields.filter(field => !mergedData[field]);
+      const isComplete = stillMissingFields.length === 0;
+      
+      let responseText = '';
+      let audioData = null;
+      let transaction = null;
+
+      if (isComplete) {
+        // Generate confirmation using TTSService
+        const { TTSService } = await import('../ttsService');
+        responseText = TTSService.generateConfirmationMessage(mergedData, userLanguage);
+        
+        // Prepare transaction for saving
+        transaction = {
+          amount: mergedData.amount,
+          vendor: mergedData.vendor,
+          description: mergedData.description || `${mergedData.vendor} - ${mergedData.category}`,
+          category: mergedData.category,
+          categoryId: mergedData.categoryId,
+          date: mergedData.date || new Date().toISOString().split('T')[0],
+          type: mergedData.type || 'expense',
+          confidence: mergedData.confidence || 0.9
+        };
+      } else {
+        // Generate predefined question for next missing field using TTSService
+        const { TTSService } = await import('../ttsService');
+        const nextMissingField = stillMissingFields[0];
+        responseText = TTSService.generateQuestionForMissingField(nextMissingField, mergedData, userLanguage);
+      }
+
+      // Generate TTS audio for predefined response
+      if (user.plan !== 'free' && responseText) {
+        try {
+          const { TTSService } = await import('../ttsService');
+          const audioBuffer = await TTSService.generateSpeech({
+            text: responseText,
+            language: userLanguage
+          });
+          audioData = audioBuffer.toString('base64');
+        } catch (ttsError) {
+          console.error('TTS generation failed:', ttsError);
+        }
+      }
+
+      const processingTime = Date.now() - startTime;
+      console.log('✅ [SeamlessVoice] Processing complete:', {
+        processingTime: `${processingTime}ms`,
+        isComplete,
+        stillMissingFields,
+        hasAudio: !!audioData,
+        response: responseText.substring(0, 50) + '...'
+      });
+
+      res.json({
+        sessionId,
+        extractedData: mergedData,
+        response: responseText,
+        audioData,
+        isComplete,
+        needsMoreInfo: !isComplete,
+        transaction
+      });
+
+    } catch (error) {
+      console.error('❌ [SeamlessVoice] Processing error:', error);
+      res.status(500).json({ error: 'Failed to process voice input' });
+    }
+  });
+
   app.use('/api/voice', router);
 }
 
@@ -646,4 +702,48 @@ function calculateConfidence(data: any): number {
   }
   
   return Math.max(0, Math.min(1, confidence));
+}
+
+// FAST parsing functions for immediate extraction
+function parseAmountFromText(text: string): number | null {
+  // Look for currency patterns: $50, 50 dollars, 50.99, 50,99
+  const patterns = [
+    /\$(\d+(?:[.,]\d{2})?)/,           // $50.99
+    /(\d+(?:[.,]\d{2})?) *(?:dollar|euro|eur|usd)/i, // 50.99 dollars
+    /(\d+(?:[.,]\d{2})?) *(?:koruna|crown)/i,         // 50 koruna
+    /(\d+(?:[.,]\d{2})?)/             // Plain numbers
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const amount = parseFloat(match[1].replace(',', '.'));
+      if (!isNaN(amount) && amount > 0) {
+        return amount;
+      }
+    }
+  }
+  return null;
+}
+
+function parseVendorFromText(text: string): string | null {
+  // Look for common vendor patterns
+  const patterns = [
+    /(?:at|from|in) ([A-Za-z][A-Za-z0-9\s&'-]+?)(?:\s|$|,|\.)/i,  // "at Starbucks"
+    /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/,  // Proper nouns
+    /([a-zA-Z]+(?:\s+[a-zA-Z]+)*?)(?:\s+for|\s+was|\s+cost)/i  // "Starbucks for coffee"
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const vendor = match[1].trim();
+      // Filter out common words that aren't vendors
+      const stopWords = ['the', 'and', 'for', 'was', 'cost', 'bought', 'paid', 'spend', 'at'];
+      if (!stopWords.includes(vendor.toLowerCase()) && vendor.length > 2) {
+        return vendor;
+      }
+    }
+  }
+  return null;
 }

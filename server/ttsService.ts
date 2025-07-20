@@ -31,11 +31,11 @@ export class TTSService {
       });
 
       const response = await openai.audio.speech.create({
-        model: "tts-1", // Use tts-1-hd for higher quality if needed
+        model: "tts-1", // FAST model - not tts-1-hd for speed
         voice: request.voice || this.VOICE_MAPPING[normalizedLanguage] || 'alloy',
         input: request.text,
-        speed: request.speed || 1.0,
-        response_format: 'mp3'
+        speed: request.speed || 1.2, // FASTER speed - 1.2x for quicker conversation
+        response_format: 'mp3' // MP3 is smaller than wav for speed
       });
 
       const audioBuffer = Buffer.from(await response.arrayBuffer());
@@ -126,7 +126,7 @@ export class TTSService {
     const normalizedLanguage = normalizeLanguageCode(language);
 
     // SECURITY: Only allow specific transaction fields
-    const allowedFields = ['amount', 'vendor', 'category', 'date', 'type'];
+    const allowedFields = ['amount', 'vendor', 'category', 'date', 'type', 'description'];
     if (!allowedFields.includes(field)) {
       throw new Error(`Invalid field: ${field}. Only transaction fields allowed.`);
     }
@@ -183,6 +183,20 @@ export class TTSService {
         'sk-sk': (data: any) => {
           if (data.vendor) return `Akú kategóriu mám použiť pre ${data.vendor}?`;
           return 'Aký typ výdavku je toto?';
+        }
+      },
+      description: {
+        'en-us': (data: any) => {
+          if (data.amount) return `What was this ${data.amount} dollar purchase for?`;
+          return 'What was this purchase for?';
+        },
+        'es-pe': (data: any) => {
+          if (data.amount) return `¿Para qué fue esta compra de ${data.amount} dólares?`;
+          return '¿Para qué fue esta compra?';
+        },
+        'sk-sk': (data: any) => {
+          if (data.amount) return `Na čo bol tento nákup za ${data.amount} dolárov?`;
+          return 'Na čo bol tento nákup?';
         }
       }
     };

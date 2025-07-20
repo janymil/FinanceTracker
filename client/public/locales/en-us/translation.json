@@ -3714,12 +3714,31 @@
   "voiceInput": {
     "listening": "Listening... Speak now",
     "notSupported": "Voice input is not supported in your browser",
+    "noSpeech": "No speech detected",
+    "tryAgain": "Please try again",
+    "processingError": "Failed to process voice input",
+    "transactionSaved": "Transaction saved successfully",
+    "saveFailed": "Failed to save transaction",
     "errors": {
       "noSpeech": "No speech detected. Please try again.",
       "audioCapture": "Failed to capture audio. Please check your microphone.",
       "notAllowed": "Microphone access denied. Please allow microphone access.",
       "network": "Network error. Please check your connection.",
       "generic": "Voice input error. Please try again."
+    },
+    "seamless": {
+      "start": "Start Voice Input",
+      "stop": "Stop Voice Input",
+      "greeting": "Hi! Tell me about your purchase. For example, 'I spent $45 at Walmart for groceries'",
+      "status": {
+        "idle": "Ready",
+        "listening": "Listening...",
+        "processing": "Processing...",
+        "speaking": "Speaking...",
+        "complete": "Complete",
+        "error": "Error"
+      },
+      "extractedData": "Extracted Information"
     }
   },
 

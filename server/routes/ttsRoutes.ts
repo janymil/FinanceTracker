@@ -116,8 +116,8 @@ export function registerTTSRoutes(app: Express) {
       // Get user language
       const language = getUserLanguage(req);
 
-      // Generate contextual question
-      const questionText = await TTSService.generateQuestionForMissingField(
+      // Generate contextual question - FAST processing
+      const questionText = TTSService.generateQuestionForMissingField(
         field, 
         extractedData || {}, 
         language
@@ -126,19 +126,20 @@ export function registerTTSRoutes(app: Express) {
       const response: any = {
         question: questionText,
         field,
-        language,
-        estimatedCost: TTSService.estimateCost(questionText.length)
+        language
       };
 
-      // Generate audio if requested
+      // Generate audio IMMEDIATELY if requested - no cost calculation delays
       if (generateAudio) {
         try {
+          // FAST TTS generation - parallel processing
           const audioBuffer = await TTSService.generateSpeech({
             text: questionText,
-            language
+            language,
+            speed: 1.3 // EVEN FASTER for questions - quick conversation
           });
 
-          // Return audio as base64 for easy handling in frontend
+          // Return audio as base64 for immediate playback
           response.audioData = audioBuffer.toString('base64');
           response.audioFormat = 'mp3';
         } catch (audioError) {

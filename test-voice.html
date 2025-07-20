@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voice Recognition Test</title>
+</head>
+<body>
+    <h1>Speech Recognition Test</h1>
+    <button id="start">Start Listening</button>
+    <button id="stop">Stop Listening</button>
+    <p id="status">Click Start to begin</p>
+    <p id="transcript"></p>
+
+    <script>
+        const startBtn = document.getElementById('start');
+        const stopBtn = document.getElementById('stop');
+        const status = document.getElementById('status');
+        const transcript = document.getElementById('transcript');
+        
+        let recognition = null;
+        
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = () => {
+                status.textContent = 'Listening...';
+                console.log('Started listening');
+            };
+            
+            recognition.onresult = (event) => {
+                let result = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    result += event.results[i][0].transcript;
+                }
+                transcript.textContent = result;
+                console.log('Result:', result);
+            };
+            
+            recognition.onerror = (event) => {
+                status.textContent = 'Error: ' + event.error;
+                console.error('Error:', event.error);
+            };
+            
+            recognition.onend = () => {
+                status.textContent = 'Stopped listening';
+                console.log('Stopped listening');
+            };
+            
+            startBtn.onclick = () => {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.error('Start error:', e);
+                    status.textContent = 'Error starting: ' + e.message;
+                }
+            };
+            
+            stopBtn.onclick = () => {
+                recognition.stop();
+            };
+        } else {
+            status.textContent = 'Speech recognition not supported';
+        }
+    </script>
+</body>
+</html>

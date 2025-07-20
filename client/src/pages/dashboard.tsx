@@ -62,7 +62,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Repeat
+  Repeat,
+  MessageCircle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { VoiceInputWithPlan } from "@/components/voice-input-with-plan";
 import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
+import { SeamlessVoicePopup } from "@/components/seamless-voice-popup";
 
 interface Category {
   id: number;
@@ -146,6 +148,7 @@ export default function Dashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [seamlessVoiceOpen, setSeamlessVoiceOpen] = useState(false);
 
   // Defer expensive rendering to prevent Suspense errors
   const deferredSelectedMonth = useDeferredValue(selectedMonth);
@@ -470,6 +473,15 @@ export default function Dashboard() {
                     });
                   }}
                 />
+                <Button
+                  onClick={() => setSeamlessVoiceOpen(true)}
+                  variant="outline"
+                  size="icon"
+                  title="ChatGPT-style Voice Mode"
+                  className="border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -834,6 +846,19 @@ export default function Dashboard() {
           onClose={() => setVoiceDialogOpen(false)}
           transcript={voiceTranscript}
           onSuccess={() => {
+            // Refresh data after successful transaction creation
+            if (deferredUser) {
+              queryClient.invalidateQueries({ queryKey: ['transactions'] });
+              queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+            }
+          }}
+        />
+
+        {/* Seamless Voice Popup */}
+        <SeamlessVoicePopup
+          isOpen={seamlessVoiceOpen}
+          onClose={() => setSeamlessVoiceOpen(false)}
+          onComplete={() => {
             // Refresh data after successful transaction creation
             if (deferredUser) {
               queryClient.invalidateQueries({ queryKey: ['transactions'] });

@@ -3893,12 +3893,31 @@
   "voiceInput": {
     "listening": "Počúvam... Hovorte teraz",
     "notSupported": "Hlasový vstup nie je podporovaný vo vašom prehliadači",
+    "noSpeech": "Nebola zistená žiadna reč",
+    "tryAgain": "Skúste to prosím znova",
+    "processingError": "Nepodarilo sa spracovať hlasový vstup",
+    "transactionSaved": "Transakcia bola úspešne uložená",
+    "saveFailed": "Nepodarilo sa uložiť transakciu",
     "errors": {
       "noSpeech": "Nebola zistená žiadna reč. Skúste to znova.",
       "audioCapture": "Nepodarilo sa zachytiť zvuk. Skontrolujte mikrofón.",
       "notAllowed": "Prístup k mikrofónu bol zamietnutý. Povoľte prístup k mikrofónu.",
       "network": "Chyba siete. Skontrolujte pripojenie.",
       "generic": "Chyba hlasového vstupu. Skúste to znova."
+    },
+    "seamless": {
+      "start": "Spustiť hlasový vstup",
+      "stop": "Zastaviť hlasový vstup",
+      "greeting": "Ahoj! Povedz mi o svojom nákupe. Napríklad, 'Minul som 45 eur v Tescu na potraviny'",
+      "status": {
+        "idle": "Pripravený",
+        "listening": "Počúvam...",
+        "processing": "Spracúvam...",
+        "speaking": "Hovorím...",
+        "complete": "Dokončené",
+        "error": "Chyba"
+      },
+      "extractedData": "Extrahované informácie"
     }
   },
 
