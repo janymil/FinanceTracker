@@ -525,17 +525,28 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       transcriptRef.current = '';
       setCurrentMessage('Listening... speak now!');
       
-      // Set timeout for SUPER FAST conversation - 1.5 seconds like human talk
-      const timeout = setTimeout(() => {
-        console.log('⏰ [SeamlessPopup] 1.5-second timeout, stopping to ask question...');
-        if (recognitionRef.current && isListening) {
+      // Set timeout for CONVERSATIONAL FLOW - 1.5 seconds like human talk
+      const timeout = setTimeout(async () => {
+        console.log('⏰ [SeamlessPopup] 1.5-second timeout - triggering conversational flow...');
+        if (recognitionRef.current) {
           try {
             recognitionRef.current.stop();
+            
+            // CRITICAL: If user said something (partial), process it
+            // If user said nothing, ask for missing field
+            const currentTranscript = transcriptRef.current.trim();
+            if (currentTranscript) {
+              console.log('🗣️ [SeamlessPopup] Processing partial input from timeout:', currentTranscript);
+              processVoiceInput(currentTranscript);
+            } else {
+              console.log('❓ [SeamlessPopup] No input detected - asking for missing field...');
+              askForMissingField();
+            }
           } catch (e) {
             console.log('Timeout stop failed:', e);
           }
         }
-      }, 1500); // SUPER FAST 1.5 seconds like human conversation
+      }, 1500); // 1.5 seconds for natural conversation flow
       setListeningTimeout(timeout);
     };
 
@@ -615,16 +626,23 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
     recognition.onend = () => {
       console.log('🔍 [SeamlessPopup] Recognition ended');
       setIsListening(false);
+      
+      // Clear timeout since recognition ended
+      if (listeningTimeout) {
+        clearTimeout(listeningTimeout);
+        setListeningTimeout(null);
+      }
+      
       const finalTranscript = transcriptRef.current.trim();
       
       if (finalTranscript) {
-        console.log('📤 [SeamlessPopup] Processing transcript:', finalTranscript);
+        console.log('📤 [SeamlessPopup] Processing final transcript:', finalTranscript);
         setIsProcessing(true);
         setCurrentMessage('Processing...');
         processVoiceInput(finalTranscript);
       } else {
-        console.log('❓ [SeamlessPopup] No speech - asking question...');
-        // IMMEDIATELY ask for missing data
+        console.log('❓ [SeamlessPopup] No speech detected - asking for missing field...');
+        // Ask for missing field when no input received
         askForMissingField();
       }
     };
