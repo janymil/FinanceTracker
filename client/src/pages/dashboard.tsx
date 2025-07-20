@@ -75,7 +75,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { VoiceInputWithPlan } from "@/components/voice-input-with-plan";
 import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
-import { SeamlessVoiceTransaction } from "@/components/seamless-voice-transaction";
+import { VoiceConversation } from "@/components/voice-conversation";
 
 interface Category {
   id: number;
@@ -856,7 +856,7 @@ export default function Dashboard() {
 
         {/* Seamless Voice Transaction */}
         {seamlessVoiceOpen && (
-          <SeamlessVoiceTransaction
+          <VoiceConversation
             onClose={() => setSeamlessVoiceOpen(false)}
             onComplete={() => {
               // Refresh data after successful transaction creation
