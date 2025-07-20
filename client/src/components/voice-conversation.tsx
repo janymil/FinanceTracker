@@ -100,14 +100,40 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     const recognition = new (window as any).webkitSpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
+    recognition.maxAlternatives = 3; // Get multiple alternatives for better accuracy
     recognition.lang = getRecognitionLanguage(userLanguage);
     
-    console.log('🎤 STT Language set to:', recognition.lang);
+    console.log('🎤 STT configured:', {
+      language: recognition.lang,
+      maxAlternatives: recognition.maxAlternatives,
+      continuous: recognition.continuous
+    });
 
     recognition.onresult = (event: any) => {
       try {
-        const transcript = event.results[0][0].transcript.trim();
-        console.log('🎤 Voice heard:', transcript);
+        // Get the best transcript from alternatives
+        const result = event.results[0];
+        let bestTranscript = result[0].transcript.trim();
+        let bestConfidence = result[0].confidence || 0;
+        
+        // Check alternatives for better confidence
+        for (let i = 1; i < result.length && i < 3; i++) {
+          if (result[i].confidence > bestConfidence) {
+            bestTranscript = result[i].transcript.trim();
+            bestConfidence = result[i].confidence;
+          }
+        }
+        
+        console.log('🎤 STT Results:', {
+          best: bestTranscript,
+          confidence: bestConfidence,
+          alternatives: Array.from({length: result.length}, (_, i) => ({
+            text: result[i].transcript.trim(),
+            confidence: result[i].confidence
+          }))
+        });
+        
+        const transcript = bestTranscript;
         
         if (transcript && !conversationLockRef.current) {
           console.log('🎤 Processing transcript:', transcript);
@@ -490,7 +516,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
             <div className="flex justify-between items-center">
               <span className="font-medium">Amount:</span>
               <span className={transactionData.amount ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                {transactionData.amount ? `$${transactionData.amount}` : 'Waiting...'}
+                {transactionData.amount ? `${userCurrency}${transactionData.amount}` : 'Waiting...'}
               </span>
             </div>
             <div className="flex justify-between items-center">

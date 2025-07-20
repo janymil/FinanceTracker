@@ -214,5 +214,67 @@ Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|nul
     }
   });
 
+  // Conversation endpoint - minimal implementation for data persistence
+  router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const { transcript, currentData } = req.body;
+      const userId = req.auth?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Echo back the current data unchanged for now - frontend handles logic
+      res.json({
+        success: true,
+        data: currentData,
+        isComplete: false,
+        nextQuestion: null
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Processing failed"
+      });
+    }
+  });
+
+  // Complete endpoint - save transaction
+  router.post('/complete', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const { transactionData } = req.body;
+      const userId = req.auth?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Save transaction
+      const insertResult = await db.insert(transactions).values({
+        userId,
+        amount: transactionData.amount,
+        description: transactionData.description,
+        type: transactionData.type || 'expense',
+        categoryId: transactionData.categoryId || null,
+        date: transactionData.date || new Date().toISOString().split('T')[0],
+        notes: transactionData.note || null,
+        isRecurring: false,
+        paymentUrl: null
+      }).returning();
+
+      res.json({
+        success: true,
+        transaction: insertResult[0]
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Save failed"
+      });
+    }
+  });
+
   app.use('/api/voice', router);
 }
