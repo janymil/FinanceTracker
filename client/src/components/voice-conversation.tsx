@@ -22,7 +22,6 @@ interface TransactionData {
 export function VoiceConversation({ onClose, onComplete }: VoiceConversationProps) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [recognitionActive, setRecognitionActive] = useState(false);
   const [currentMessage, setCurrentMessage] = useState('Tell me about a transaction...');
   const [sessionId] = useState(`session_${Date.now()}`);
   const [transactionData, setTransactionData] = useState<TransactionData>({
@@ -57,7 +56,6 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       recognition.onend = () => {
         console.log('🎤 Recognition ended');
         setIsListening(false);
-        setRecognitionActive(false);
         
         // Auto restart with timeout if transaction not complete
         if (!isTransactionComplete() && !isProcessing) {
@@ -71,13 +69,11 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       recognition.onstart = () => {
         console.log('🎤 Recognition started successfully');
         setIsListening(true);
-        setRecognitionActive(true);
       };
 
       recognition.onerror = (event: any) => {
         console.error('🎤 Speech error:', event.error);
         setIsListening(false);
-        setRecognitionActive(false);
         
         if (event.error === 'no-speech') {
           // No speech detected - trigger follow-up after timeout
@@ -204,23 +200,16 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
   // Start listening
   const startListening = useCallback(() => {
-    if (recognitionRef.current && !isListening && !isProcessing && !recognitionActive) {
+    if (recognitionRef.current && !isListening && !isProcessing) {
       try {
         console.log('🎤 Attempting to start listening...');
         recognitionRef.current.start();
       } catch (error) {
-        console.log('🎤 Recognition start error:', error);
-        setIsListening(false);
-        setRecognitionActive(false);
+        console.log('🎤 Recognition start error (likely already started):', error);
+        // Don't set isListening to false here, let onstart/onend handle it
       }
-    } else {
-      console.log('🎤 Skipping start - already active or processing', {
-        isListening,
-        isProcessing, 
-        recognitionActive
-      });
     }
-  }, [isListening, isProcessing, recognitionActive]);
+  }, [isListening, isProcessing]);
 
   // Text-to-speech using OpenAI TTS
   const speak = useCallback(async (text: string) => {
