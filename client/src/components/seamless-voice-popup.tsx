@@ -169,7 +169,8 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
 
       // Step 2: Check REQUIRED fields for transaction creation - SIMPLE: only amount needed
       const hasAmount = newExtractedData.amount && newExtractedData.amount > 0;
-      const hasDescription = newExtractedData.description || newExtractedData.vendor;
+      // For voice input "25", we'll auto-generate description, so don't require it
+      const hasDescription = true; // Always true - we'll create description from context
       
       console.log('🔍 [SeamlessPopup] Field validation:', {
         amount: newExtractedData.amount,
@@ -181,7 +182,7 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       
       const missingFields = [];
       if (!hasAmount) missingFields.push('amount');
-      if (!hasDescription) missingFields.push('description');
+      // Don't require description - voice transactions can be minimal
       
       console.log('🔍 [SeamlessPopup] Missing fields:', missingFields);
       console.log('🎯 [SeamlessPopup] Field values:', {
@@ -213,13 +214,32 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
           const saveResponse = await apiRequest('POST', '/api/transactions', transactionData);
           
           if (saveResponse.ok) {
-            setCurrentMessage('✅ Transaction saved successfully!');
+            const savedTransaction = await saveResponse.json();
+            console.log('✅ [SeamlessPopup] Transaction saved:', savedTransaction);
+            
+            setCurrentMessage(`✅ Saved $${transactionData.amount} transaction!`);
+            
+            // Generate success TTS
+            const successTTS = await apiRequest('POST', '/api/tts/generate', {
+              text: `Perfect! I saved your ${transactionData.amount} dollar transaction.`,
+              generateAudio: true
+            });
+            
+            if (successTTS.ok) {
+              const successResult = await successTTS.json();
+              if (successResult.audioData) {
+                playTTSAudio(successResult.audioData).catch(console.error);
+              }
+            }
+            
             onComplete?.();
             
             // Auto-close after success
             setTimeout(() => {
               handleClose();
-            }, 1500);
+            }, 2500);
+          } else {
+            throw new Error('Save request failed');
           }
         } catch (saveError) {
           console.error('❌ [SeamlessPopup] Save failed:', saveError);
