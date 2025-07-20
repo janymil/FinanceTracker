@@ -88,26 +88,52 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     console.log('🎤 Initializing speech recognition with language:', userLanguage);
     
-    // Setup speech recognition with user's language
+    // Setup speech recognition with user's language (OpenAI-style continuous)
     const recognition = new (window as any).webkitSpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true;  // Enable continuous listening
+    recognition.interimResults = true;  // Get interim results for better UX
     recognition.lang = getRecognitionLanguage(userLanguage);
+    recognition.maxAlternatives = 1;
     
     console.log('🎤 STT Language set to:', recognition.lang);
 
+    // Enhanced speech recognition with natural pause detection
+    let speechTimeout: NodeJS.Timeout;
+    let lastSpeechTime = Date.now();
+    
     recognition.onresult = (event: any) => {
-      if (event.results && event.results.length > 0 && event.results[0] && event.results[0][0]) {
-        const transcript = event.results[0][0].transcript.trim();
-        console.log('🎤 Voice heard:', transcript);
-        if (transcript && transcript.length > 0 && !conversationLockRef.current) {
-          setState('processing');
-          processVoiceInput(transcript);
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      // Process all results
+      for (let i = 0; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
         } else {
-          console.log('🎤 Empty or invalid transcript, ignoring:', { transcript, locked: conversationLockRef.current });
+          interimTranscript += transcript;
+          lastSpeechTime = Date.now();
         }
-      } else {
-        console.log('🎤 Invalid speech event structure:', event);
+      }
+      
+      // Clear existing timeout
+      if (speechTimeout) clearTimeout(speechTimeout);
+      
+      // Process final results immediately
+      if (finalTranscript.trim() && !conversationLockRef.current) {
+        console.log('🎤 Final transcript:', finalTranscript);
+        setState('processing');
+        processVoiceInput(finalTranscript.trim());
+      } else if (interimTranscript.trim() && !conversationLockRef.current) {
+        console.log('🎤 Interim transcript:', interimTranscript);
+        // Wait for natural pause (2.5 seconds) before processing interim
+        speechTimeout = setTimeout(() => {
+          if (Date.now() - lastSpeechTime >= 2000 && !conversationLockRef.current) {
+            console.log('🎤 Processing after pause:', interimTranscript);
+            setState('processing');
+            processVoiceInput(interimTranscript.trim());
+          }
+        }, 2500);
       }
     };
 

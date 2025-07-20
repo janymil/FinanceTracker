@@ -60,54 +60,54 @@ async function manageCompleteConversation(
       categoryName: null
     };
 
-    // INTELLIGENT parsing of accumulated conversation data
-    const allConversationText = conversationHistory.join(' ').toLowerCase();
+    // EXTRACT accumulated data from conversation history + current input
+    const allText = [...conversationHistory, `User: ${transcript}`].join(' ').toLowerCase();
     
-    // Extract amount from any mention of numbers with currency
-    const amountMatches = allConversationText.match(/(\d+(?:[.,]\d+)?)\s*(?:eur|euro|dollar|dolár|€|\$)/g);
-    if (amountMatches) {
-      const lastAmount = amountMatches[amountMatches.length - 1];
-      const numberMatch = lastAmount.match(/(\d+(?:[.,]\d+)?)/);
-      if (numberMatch) {
-        accumulatedData.amount = parseFloat(numberMatch[1].replace(',', '.'));
-      }
-    }
-    
-    // Extract description from purchase context
-    const purchasePatterns = [
-      /(?:kúpil|bought|compré).*?(pivo|beer|cerveza|chlieb|bread|pan|mlieko|milk|leche|kávu|coffee|café)/gi,
-      /(?:zaplatil|paid|pagué).*?za\s+([^€$\d]*?)(?:\s|€|\$|\d)/gi
+    // Extract amount from conversation - check both history and current input
+    const amountPatterns = [
+      /(\d+(?:[.,]\d+)?)\s*(?:eur|euro|dollar|dolár|€|\$)/g,
+      /(?:stalo|cost|costó|bolo)\s*(?:to)?\s*(\d+)/g,
+      /(\d+)\s*(?:eur|euro|dollar|dolár|€|\$)/g
     ];
     
-    for (const pattern of purchasePatterns) {
-      const matches = allConversationText.match(pattern);
+    for (const pattern of amountPatterns) {
+      const matches = allText.match(pattern);
       if (matches) {
         const lastMatch = matches[matches.length - 1];
-        if (lastMatch.includes('pivo') || lastMatch.includes('beer')) accumulatedData.description = 'pivo';
-        if (lastMatch.includes('chlieb') || lastMatch.includes('bread')) accumulatedData.description = 'chlieb';
-        if (lastMatch.includes('kávu') || lastMatch.includes('coffee')) accumulatedData.description = 'káva';
+        const numberMatch = lastMatch.match(/(\d+(?:[.,]\d+)?)/);
+        if (numberMatch) {
+          accumulatedData.amount = parseFloat(numberMatch[1].replace(',', '.'));
+          break;
+        }
       }
     }
     
-    // Extract date from temporal expressions
-    if (allConversationText.includes('včera') || allConversationText.includes('yesterday') || allConversationText.includes('ayer')) {
+    // Extract description from purchase mentions
+    if (allText.includes('pivo') || allText.includes('beer')) accumulatedData.description = 'pivo';
+    if (allText.includes('chlieb') || allText.includes('bread')) accumulatedData.description = 'chlieb';
+    if (allText.includes('kávu') || allText.includes('coffee')) accumulatedData.description = 'káva';
+    if (allText.includes('mlieko') || allText.includes('milk')) accumulatedData.description = 'mlieko';
+    
+    // Extract date
+    if (allText.includes('včera') || allText.includes('yesterday')) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       accumulatedData.date = yesterday.toISOString().split('T')[0];
-    } else if (allConversationText.includes('dnes') || allConversationText.includes('today') || allConversationText.includes('hoy')) {
+    } else if (allText.includes('dnes') || allText.includes('today')) {
       accumulatedData.date = new Date().toISOString().split('T')[0];
     }
     
-    // Detect expense vs income from context
-    if (allConversationText.includes('kúpil') || allConversationText.includes('bought') || allConversationText.includes('compré') ||
-        allConversationText.includes('zaplatil') || allConversationText.includes('paid') || allConversationText.includes('pagué')) {
+    // AUTO-DETECT expense vs income (NO ASKING)
+    if (allText.includes('kúpil') || allText.includes('bought') || allText.includes('zaplatil') || 
+        allText.includes('paid') || allText.includes('výdavok') || allText.includes('expense')) {
       accumulatedData.type = 'expense';
-    } else if (allConversationText.includes('dostal') || allConversationText.includes('received') || allConversationText.includes('recibí') ||
-               allConversationText.includes('výplata') || allConversationText.includes('salary') || allConversationText.includes('salario')) {
+    } else if (allText.includes('dostal') || allText.includes('received') || allText.includes('výplata') || 
+               allText.includes('salary') || allText.includes('príjem') || allText.includes('income')) {
       accumulatedData.type = 'income';
     }
     
-    console.log('🧠 [Conversation Parser] Extracted data:', accumulatedData);
+    console.log('🧠 [Parser] Full text:', allText.substring(0, 100) + '...');
+    console.log('🧠 [Parser] Extracted:', accumulatedData);
 
     const systemPrompt = `You are a transaction data collector. Extract data and respond in ${userLanguage === 'sk-sk' ? 'Slovak' : userLanguage === 'es-pe' ? 'Spanish' : 'English'}.
 
@@ -128,11 +128,13 @@ REQUIRED RESPONSE FORMAT:
   }
 }
 
-RULES:
-- Extract ALL data from user input + current data
-- If amount+description+type exist → set complete=true and response="Perfektne!" (Slovak) or "Perfect!" (English)
-- Otherwise ask for missing data only
-- NEVER repeat user's words`;
+CRITICAL RULES:
+- NEVER ask for category - auto-categorize using AI
+- If amount+description+type exist → set complete=true immediately
+- Auto-detect expense/income from context (kúpil=expense, dostal=income)
+- Extract ALL data including from conversation history
+- Ask for missing required data ONLY (amount, description)
+- Brief responses (max 5 words)`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
