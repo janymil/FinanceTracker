@@ -51,9 +51,11 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     staleTime: 5 * 60 * 1000
   });
 
-  // Get user's language and currency
-  const userLanguage = i18n.language || 'en-us';
+  // Get user's ACTUAL language and currency from database/settings
+  const userLanguage = (user as any)?.language || i18n.language || 'en-us';
   const userCurrency = (user as any)?.currency || '$';
+  
+  console.log('🌍 Voice conversation using:', { userLanguage, userCurrency, i18nLang: i18n.language });
   
   // Language mapping for speech recognition
   const getRecognitionLanguage = (lang: string) => {
@@ -62,16 +64,18 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     return 'en-US';
   };
 
-  // Initialize and start conversation
+  // Initialize and start conversation when user data is available
   useEffect(() => {
-    initializeConversation();
+    if (user !== undefined) { // Wait for user data to load
+      initializeConversation();
+    }
     
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [user, userLanguage, userCurrency]);
 
   // Initialize speech recognition and start conversation
   const initializeConversation = useCallback(() => {
@@ -84,11 +88,15 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       return;
     }
 
+    console.log('🎤 Initializing speech recognition with language:', userLanguage);
+    
     // Setup speech recognition with user's language
     const recognition = new (window as any).webkitSpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = getRecognitionLanguage(userLanguage);
+    
+    console.log('🎤 STT Language set to:', recognition.lang);
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript.trim();
@@ -118,7 +126,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     // Start conversation
     startConversation();
-  }, []);
+  }, [userLanguage, userCurrency]);
 
   // Start the initial conversation
   const startConversation = useCallback(() => {
@@ -129,7 +137,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       // After speaking, start listening
       startListening();
     });
-  }, []);
+  }, [speak, startListening]);
 
   // Process voice input with AI
   const processVoiceInput = useCallback(async (transcript: string) => {
@@ -171,7 +179,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           conversationLockRef.current = false;
           setState('speaking');
           speak(result.nextQuestion, () => {
-            if (state !== 'complete') {
+            // Only start listening if we're not complete
+            if (state !== 'complete' && state !== 'error') {
               startListening();
             }
           });
@@ -194,7 +203,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     } finally {
       conversationLockRef.current = false;
     }
-  }, [transactionData, sessionId]);
+  }, [transactionData, sessionId, userLanguage, userCurrency]);
 
   // Determine and ask next question with user's currency
   const askNextQuestion = useCallback((data: TransactionData) => {
@@ -219,7 +228,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     setCurrentMessage(question);
     setState('speaking');
     speak(question, () => {
-      if (state !== 'complete') {
+      // Only start listening if we're not complete
+      if (state !== 'complete' && state !== 'error') {
         startListening();
       }
     });
@@ -235,7 +245,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       const response = await apiRequest('POST', '/api/tts/speak', {
         text,
         voice: 'alloy',
-        speed: 1.0
+        speed: 1.0,
+        language: userLanguage // Pass user's language to TTS service
       });
 
       if (response.ok) {
@@ -254,11 +265,21 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         
         source.start(0);
       } else {
-        // Fallback to browser TTS
+        // Fallback to browser TTS with user's language
         console.log('⚠️ Using browser TTS fallback');
         if ('speechSynthesis' in window) {
           speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(text);
+          
+          // Set language for browser TTS
+          if (userLanguage.startsWith('es')) {
+            utterance.lang = 'es-ES';
+          } else if (userLanguage.startsWith('sk')) {
+            utterance.lang = 'sk-SK';
+          } else {
+            utterance.lang = 'en-US';
+          }
+          
           utterance.onend = () => {
             if (onComplete) onComplete();
           };
@@ -271,7 +292,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       console.error('❌ TTS error:', error);
       if (onComplete) onComplete();
     }
-  }, []);
+  }, [userLanguage]);
 
   // Start listening with proper state management
   const startListening = useCallback(() => {
@@ -312,7 +333,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       // Use voice conversation complete endpoint
       const response = await apiRequest('POST', '/api/voice/complete', {
         transactionData: data,
-        sessionId: sessionId
+        sessionId: sessionId,
+        userLanguage: userLanguage // Pass user language for Mistral categorization
       });
 
       const result = await response.json();
@@ -330,7 +352,9 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         
         speak(successMessage, () => {
           // After success message, close modal
-          setTimeout(onClose, 1500);
+          setTimeout(() => {
+            onClose();
+          }, 1500);
         });
 
         toast({
@@ -357,7 +381,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
         variant: 'destructive'
       });
     }
-  }, [queryClient, onComplete, onClose]);
+  }, [queryClient, onComplete, onClose, userCurrency, userLanguage]);
 
   // UI helpers
   const getStatusIcon = () => {

@@ -125,7 +125,7 @@ export function registerVoiceConversationRoutes(app: Router) {
   // Complete and save transaction
   router.post('/complete', requireAuth(), async (req: Request, res: Response) => {
     try {
-      const { transactionData, sessionId } = req.body;
+      const { transactionData, sessionId, userLanguage } = req.body;
       const userId = (req as any).auth?.userId;
 
       if (!userId) {

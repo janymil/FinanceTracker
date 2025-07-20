@@ -10,7 +10,8 @@ const openai = new OpenAI({
 const ttsSchema = z.object({
   text: z.string().min(1).max(4000),
   voice: z.enum(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']).default('alloy'),
-  speed: z.number().min(0.25).max(4.0).default(1.0)
+  speed: z.number().min(0.25).max(4.0).default(1.0),
+  language: z.string().optional() // Add language parameter for voice conversation
 });
 
 export function registerTTSRoutes(app: Router) {
@@ -19,7 +20,7 @@ export function registerTTSRoutes(app: Router) {
   // Text-to-Speech endpoint
   router.post('/speak', requireAuth(), async (req: Request, res: Response) => {
     try {
-      const { text, voice, speed } = ttsSchema.parse(req.body);
+      const { text, voice, speed, language } = ttsSchema.parse(req.body);
       const userId = req.auth?.userId;
 
       if (!userId) {
@@ -30,7 +31,8 @@ export function registerTTSRoutes(app: Router) {
         userId: userId.substring(0, 8) + '...',
         text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
         voice,
-        speed
+        speed,
+        language: language || 'default'
       });
 
       // Generate speech using OpenAI TTS
