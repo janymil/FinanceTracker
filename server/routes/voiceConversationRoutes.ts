@@ -76,8 +76,8 @@ export function registerVoiceConversationRoutes(app: Router) {
       
       console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
 
-      // Extract information from current transcript using AI with existing data context
-      const newData = await extractDataFromTranscript(transcript, userCurrency || user.currency || '$', userLanguage, existing);
+      // Smart extraction: try simple patterns first, use AI only if needed
+      const newData = await smartExtractData(transcript, userCurrency || user.currency || '$', userLanguage, existing);
       console.log('📝 [VoiceConversation] Extracted:', newData);
 
       // Merge new data with existing (preserve existing data, only add new non-null values)
@@ -215,8 +215,38 @@ export function registerVoiceConversationRoutes(app: Router) {
   app.use('/api/voice', router);
 }
 
+// Smart extraction: simple patterns first, AI only when needed
+async function smartExtractData(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
+  console.log('🧠 [Smart Extraction] Analyzing:', { transcript, existingData });
+  
+  // First try simple pattern matching (cost-free)
+  const simpleResult = basicExtraction(transcript, userCurrency, userLanguage);
+  
+  // Check if simple extraction found useful data
+  const hasUsefulData = simpleResult.amount !== null || 
+                       simpleResult.description !== null || 
+                       simpleResult.type !== null ||
+                       simpleResult.date !== null;
+  
+  // Use AI only when:
+  // 1. Simple extraction failed AND transcript seems complex (multiple words)
+  // 2. OR when transcript contains complete sentence patterns
+  const needsAI = !hasUsefulData && (
+    transcript.split(' ').length >= 3 || // Multiple words
+    /\b(bought|paid|spent|kúpil|for|za|today|dnes)\b/i.test(transcript) // Complex patterns
+  );
+  
+  if (needsAI) {
+    console.log('🤖 [Smart Extraction] Using AI for complex transcript');
+    return await aiExtractData(transcript, userCurrency, userLanguage, existingData);
+  }
+  
+  console.log('⚡ [Smart Extraction] Using simple patterns (cost-free)');
+  return simpleResult;
+}
+
 // AI-powered conversational data extraction using Mistral
-async function extractDataFromTranscript(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
+async function aiExtractData(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
   try {
     // Use Mistral AI for intelligent extraction
     const mistralResponse = await runMistralAnalysis({
@@ -271,8 +301,9 @@ Return ONLY the JSON object, no explanation.`,
   return basicExtraction(transcript, userCurrency, userLanguage);
 }
 
-// Simple fallback extraction
+// Enhanced basic extraction for common patterns (cost-free)
 function basicExtraction(transcript: string, userCurrency: string, userLanguage: string) {
+  const original = transcript.trim();
   const lower = transcript.toLowerCase().trim();
   
   let amount = null;
@@ -281,20 +312,29 @@ function basicExtraction(transcript: string, userCurrency: string, userLanguage:
   let date = null;
   let note = null;
 
-  // Basic amount patterns
-  const numberMatch = lower.match(/(\d+(?:\.\d{1,2})?)/);
-  if (numberMatch) {
-    amount = parseFloat(numberMatch[1]);
+  // Enhanced amount detection
+  // 1. Numbers with currency: "5 euros", "€20", "$15"
+  const currencyMatch = lower.match(/(\d+(?:\.\d{1,2})?)\s*(?:euros?|€|\$|dollars?|korun|korún)/);
+  if (currencyMatch) {
+    amount = parseFloat(currencyMatch[1]);
+  }
+  
+  // 2. Just numbers if no currency found
+  if (amount === null) {
+    const numberMatch = lower.match(/(\d+(?:\.\d{1,2})?)/);
+    if (numberMatch) {
+      amount = parseFloat(numberMatch[1]);
+    }
   }
 
-  // Try word numbers for Slovak
+  // 3. Word numbers (Slovak: päť=5, etc.)
   if (amount === null) {
     amount = parseWordNumber(lower, userLanguage);
   }
 
-  // Basic type detection
-  const spendingWords = ['bought', 'paid', 'spent', 'kúpil', 'platil', 'výdavok'];
-  const earningWords = ['earned', 'received', 'dostal', 'príjem'];
+  // Enhanced type detection
+  const spendingWords = ['bought', 'paid', 'spent', 'purchase', 'cost', 'kúpil', 'platil', 'výdavok', 'expense'];
+  const earningWords = ['earned', 'received', 'salary', 'income', 'dostal', 'príjem'];
   
   if (spendingWords.some(word => lower.includes(word))) {
     type = 'expense';
@@ -302,23 +342,34 @@ function basicExtraction(transcript: string, userCurrency: string, userLanguage:
     type = 'income';
   }
 
-  // Basic date detection
+  // Enhanced date detection
   const today = new Date();
   if (lower.includes('today') || lower.includes('dnes')) {
     date = today.toISOString().split('T')[0];
+  } else if (lower.includes('yesterday') || lower.includes('včera')) {
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    date = yesterday.toISOString().split('T')[0];
   }
 
-  // Basic description - remove numbers and common words
-  let cleanText = transcript
-    .replace(/\d+(?:\.\d{1,2})?/g, '')
-    .replace(/\b(?:euros?|dollars?|€|\$|korun|today|dnes|paid|kúpil|bought|for|za)\b/gi, '')
-    .trim();
+  // Smart description extraction
+  if (original.split(' ').length === 1 && !amount && !type) {
+    // Single word likely description: "pivo", "coffee", "groceries"
+    description = original;
+  } else {
+    // Clean multi-word descriptions
+    let cleanText = original
+      .replace(/\d+(?:\.\d{1,2})?\s*(?:euros?|€|\$|dollars?|korun|korún)?/gi, '') // Remove amounts
+      .replace(/\b(?:bought|paid|spent|kúpil|platil|today|dnes|for|za|yesterday|včera)\b/gi, '') // Remove action words
+      .replace(/\s+/g, ' ')
+      .trim();
 
-  if (cleanText && cleanText.length > 1) {
-    description = cleanText;
+    if (cleanText && cleanText.length > 1) {
+      description = cleanText;
+    }
   }
 
-  console.log('🔍 [Basic Extraction] Result:', { amount, description, type, date, note });
+  console.log('⚡ [Basic Extraction] Result:', { amount, description, type, date, note });
   return { amount, description, type, date, note, categoryId: null, categoryName: null };
 }
 
