@@ -34,45 +34,31 @@ export function SeamlessVoiceTransaction({ onClose, onComplete }: SeamlessVoiceT
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onresult = (event: any) => {
-        // Get the latest final result
-        for (let i = event.results.length - 1; i >= 0; i--) {
-          if (event.results[i].isFinal) {
-            const transcript = event.results[i][0].transcript.trim();
-            if (transcript) {
-              console.log('🎤 Final transcript:', transcript);
-              handleVoiceInput(transcript);
-            }
-            break;
-          }
+        const transcript = event.results[0][0].transcript.trim();
+        console.log('🎤 Heard:', transcript);
+        if (transcript) {
+          handleVoiceInput(transcript);
         }
       };
 
       recognitionRef.current.onend = () => {
         console.log('🎤 Recognition ended');
         setIsListening(false);
-        
-        // Restart listening after processing if not complete
-        if (!isProcessing && !isTransactionComplete()) {
-          setTimeout(() => {
-            startListening();
-          }, 500);
-        }
       };
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('🎤 Recognition error:', event.error);
-        if (event.error !== 'no-speech' && event.error !== 'aborted') {
-          setCurrentMessage('❌ Speech recognition error. Try again.');
+        setIsListening(false);
+        if (event.error === 'no-speech') {
+          // No speech detected - ask question after timeout
           setTimeout(() => {
-            if (!isTransactionComplete()) {
-              askForMissingField();
-            }
-          }, 2000);
+            askForMissingField();
+          }, 100);
         }
       };
     }
@@ -96,14 +82,15 @@ export function SeamlessVoiceTransaction({ onClose, onComplete }: SeamlessVoiceT
       setIsListening(true);
       recognitionRef.current.start();
       
-      // Set silence timeout (1.5-2 seconds as requested)
+      // Set 1.8 second timeout for automatic follow-up
       silenceTimeoutRef.current = setTimeout(() => {
         console.log('🔇 Silence timeout - asking follow-up');
-        if (isListening && !isProcessing) {
+        if (recognitionRef.current) {
           recognitionRef.current.stop();
-          askForMissingField();
         }
-      }, 1800); // 1.8 second timeout
+        setIsListening(false);
+        askForMissingField();
+      }, 1800);
       
     } catch (error) {
       console.error('🎤 Start error:', error);
@@ -122,43 +109,41 @@ export function SeamlessVoiceTransaction({ onClose, onComplete }: SeamlessVoiceT
     }
     
     setIsProcessing(true);
-    setCurrentMessage('🤖 Processing...');
+    setCurrentMessage('Processing...');
     
     try {
-      // Extract transaction data from transcript
-      const extractedAmount = extractAmount(transcript);
-      const extractedDescription = extractDescription(transcript);
-      const extractedType = extractType(transcript);
+      // Extract data from what user said
+      const newAmount = extractAmount(transcript);
+      const newDescription = extractDescription(transcript);
+      const newType = extractType(transcript);
       
-      // Update transaction data with new information
-      const updatedData = {
-        amount: extractedAmount || transactionData.amount,
-        description: extractedDescription || transactionData.description,
-        type: extractedType || transactionData.type
+      // Update with new info
+      const updated = {
+        amount: newAmount || transactionData.amount,
+        description: newDescription || transactionData.description,
+        type: newType || transactionData.type
       };
       
-      console.log('📝 Updated data:', updatedData);
-      setTransactionData(updatedData);
+      console.log('📝 Updated:', updated);
+      setTransactionData(updated);
       
-      // Check if transaction is complete
-      const missingFields = getMissingFields(updatedData);
+      // Check what's still missing
+      const missing = getMissingFields(updated);
       
-      if (missingFields.length === 0) {
-        // Transaction complete - save it
-        console.log('✅ Transaction complete - saving');
-        await saveTransaction(updatedData as Required<TransactionData>);
+      if (missing.length === 0) {
+        // Complete - save it
+        await saveTransaction(updated as Required<TransactionData>);
       } else {
-        // Ask for missing information
-        console.log('❓ Missing fields:', missingFields);
-        askForMissingField(missingFields[0], updatedData);
+        // Ask for missing data
+        setTimeout(() => {
+          askForMissingField(missing[0], updated);
+        }, 500);
       }
       
     } catch (error) {
-      console.error('❌ Processing error:', error);
-      setCurrentMessage('❌ Processing failed. Please try again.');
-      setTimeout(() => {
-        askForMissingField();
-      }, 2000);
+      console.error('❌ Error:', error);
+      setCurrentMessage('Error. Try again.');
+      setTimeout(() => askForMissingField(), 2000);
     } finally {
       setIsProcessing(false);
     }
