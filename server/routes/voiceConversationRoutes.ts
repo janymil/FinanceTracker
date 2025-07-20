@@ -176,7 +176,7 @@ async function runAICategorizationForVoice(description: string, userId: string, 
     console.log('🤖 [VoiceConversation] Starting AI categorization:', { description, type });
 
     // Import the AI processor function from the correct path
-    const aiProcessor = await import('../../lib/aiProcessor.js');
+    const aiProcessor = await import('../../lib/aiProcessor.ts');
     const user = await storage.getUser(userId);
     
     if (!user) {
