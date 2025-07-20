@@ -64,6 +64,16 @@
       "category_keywords": ["food", "delivery", "service"],
       "typical_categories": ["Food & Dining", "Jedlo", "Comida"],
       "confidence": 0.8
+    },
+    "office_supplies": {
+      "category_keywords": ["office", "stationery", "supplies", "school"],
+      "typical_categories": ["Office Supplies", "Kancelárske potreby", "Suministros de oficina"],
+      "confidence": 0.9
+    },
+    "supermarket": {
+      "category_keywords": ["groceries", "supermarket", "food", "shopping"],
+      "typical_categories": ["Groceries", "Potraviny", "Supermercado"],
+      "confidence": 0.95
     }
   },
   "fallback_analysis": {

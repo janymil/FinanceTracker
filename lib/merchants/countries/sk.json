@@ -96,5 +96,28 @@
       "alza",
       "electroworld"
     ]
+  },
+  "stationery_shops": {
+    "business_type": "office_supplies",
+    "category_keywords": ["kancelarské potreby", "papiernictvo", "škola"],
+    "merchants": [
+      "papiernictvo",
+      "kancelárske potreby",
+      "office depot",
+      "book store",
+      "knihkupectvo"
+    ]
+  },
+  "supermarkets": {
+    "business_type": "supermarket",
+    "category_keywords": ["potraviny", "nakupovanie", "supermarket"],
+    "merchants": [
+      "tesco",
+      "kaufland",
+      "billa",
+      "lidl",
+      "metro",
+      "makro"
+    ]
   }
 }
