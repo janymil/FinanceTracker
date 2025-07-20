@@ -273,7 +273,9 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       if (result.success) {
         const updatedData = result.data;
         console.log('📥 Updating frontend state with:', updatedData);
+        console.log('🔄 Previous state was:', transactionData);
         setTransactionData(updatedData);
+        console.log('✅ State should now be:', updatedData);
 
         if (result.isComplete) {
           // Transaction complete - save it
