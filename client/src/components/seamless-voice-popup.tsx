@@ -163,12 +163,12 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       
       const newExtractedData = { 
         ...extractedData, 
-        // Extract from voice API response structure
+        // Extract from voice API response structure - NO DEFAULT FALLBACKS FOR REQUIRED FIELDS
         amount: voiceData.amount || extractedData.amount,
         vendor: voiceData.vendor || extractedData.vendor, 
         category: voiceData.categoryName || voiceData.category || extractedData.category,
         description: voiceData.description || extractedData.description,
-        type: voiceData.type || extractedData.type || 'expense',
+        type: voiceData.type || extractedData.type, // NO DEFAULT TO 'expense' - must be explicit
         date: voiceData.parsedDate || voiceData.date || extractedData.date,
         categoryId: voiceData.categoryId || extractedData.categoryId
       };

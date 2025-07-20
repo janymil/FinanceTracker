@@ -94,12 +94,12 @@ export function registerVoiceRoutes(app: Router) {
       const currentDate = new Date().toISOString().split('T')[0];
       
       try {
-        // Step 1: FAST direct parsing with user's currency
+        // Step 1: FAST direct parsing with user's currency - NO TYPE DEFAULT!
         extractedData = {
           amount: extractAmountFromText(transcript, user.currency || '$'),
           vendor: extractVendorFromText(transcript),
-          description: transcript.trim(),
-          type: 'expense', // Default
+          description: extractDescriptionFromText(transcript), // Better description extraction
+          type: extractTransactionType(transcript), // Only set if explicitly mentioned (income/expense/salary/etc)
           dateReference: 'today',
           parsedDate: currentDate,
           categoryId: null,
@@ -149,12 +149,12 @@ Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|nul
         
       } catch (parseError) {
         console.error('❌ [VoiceAPI] Fast parsing failed, using fallback');
-        // Fallback to original AI processing only if fast parsing completely fails
+        // Fallback - NO TYPE DEFAULT! Must be explicitly detected
         extractedData = {
           amount: null,
           vendor: null,
           description: transcript,
-          type: 'expense',
+          type: null, // No default - must be explicitly mentioned by user
           categoryId: null,
           categoryName: null,
           confidence: 0.3
@@ -693,6 +693,8 @@ function extractDescriptionFromText(text: string): string | null {
   // Return the full text as description if it seems meaningful
   return cleanText.length > 1 ? cleanText : null;
 }
+
+
 
 function extractTransactionType(text: string): 'income' | 'expense' | null {
   const lowerText = text.toLowerCase();
