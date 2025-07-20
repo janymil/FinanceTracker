@@ -191,15 +191,15 @@ export class TTSService {
       },
       description: {
         'en-us': (data: any) => {
-          if (data.amount) return `What was this ${data.amount} dollar purchase for?`;
+          if (data.amount) return `What was this purchase for?`;
           return 'What was this purchase for?';
         },
         'es-pe': (data: any) => {
-          if (data.amount) return `¿Para qué fue esta compra de ${data.amount} dólares?`;
+          if (data.amount) return `¿Para qué fue esta compra?`;
           return '¿Para qué fue esta compra?';
         },
         'sk-sk': (data: any) => {
-          if (data.amount) return `Na čo bol tento nákup za ${data.amount} dolárov?`;
+          if (data.amount) return `Na čo bol tento nákup?`;
           return 'Na čo bol tento nákup?';
         }
       }
