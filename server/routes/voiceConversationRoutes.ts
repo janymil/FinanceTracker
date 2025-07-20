@@ -72,11 +72,16 @@ async function manageCompleteConversation(
     // EXTRACT accumulated data from conversation history + current input
     const allText = [...conversationHistory, `User: ${transcript}`].join(' ').toLowerCase();
     
-    // Extract amount from conversation - check both history and current input
+    // Extract amount from conversation - support user's currency dynamically
+    const currencySymbols = userCurrency === '€' ? 'eur|euro|€' : 
+                           userCurrency === '$' ? 'dollar|dolár|\\$' :
+                           'eur|euro|dollar|dolár|€|\\$'; // fallback to all
+    
     const amountPatterns = [
-      /(\d+(?:[.,]\d+)?)\s*(?:eur|euro|dollar|dolár|€|\$)/g,
-      /(?:stalo|cost|costó|bolo)\s*(?:to)?\s*(\d+)/g,
-      /(\d+)\s*(?:eur|euro|dollar|dolár|€|\$)/g
+      new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*(?:${currencySymbols})`, 'gi'),
+      /(?:stalo|cost|costó|bolo)\s*(?:to)?\s*(\d+)/gi,
+      new RegExp(`(\\d+)\\s*(?:${currencySymbols})`, 'gi'),
+      /(\d+(?:[.,]\d+)?)/g // Any number as fallback
     ];
     
     for (const pattern of amountPatterns) {
@@ -91,11 +96,24 @@ async function manageCompleteConversation(
       }
     }
     
-    // Extract description from purchase mentions
-    if (allText.includes('pivo') || allText.includes('beer')) accumulatedData.description = 'pivo';
-    if (allText.includes('chlieb') || allText.includes('bread')) accumulatedData.description = 'chlieb';
-    if (allText.includes('kávu') || allText.includes('coffee')) accumulatedData.description = 'káva';
-    if (allText.includes('mlieko') || allText.includes('milk')) accumulatedData.description = 'mlieko';
+    // Extract description dynamically from conversation text instead of hardcoding
+    const descriptionPatterns = [
+      /(?:kúpil|bought|compré)\s+(?:som\s+)?(?:si\s+)?([^0-9€$\s]+)/gi,
+      /(?:zaplatil|paid|pagué)\s+za\s+([^0-9€$\s]+)/gi,
+      /(?:v|in|en)\s+\w+\s+([^0-9€$\s]+)/gi // "v migrose pivo"
+    ];
+    
+    for (const pattern of descriptionPatterns) {
+      const matches = allText.match(pattern);
+      if (matches && matches.length > 0) {
+        const lastMatch = matches[matches.length - 1];
+        const extracted = lastMatch.replace(/(?:kúpil|bought|zaplatil|paid|v|in|som|si|za|en)/gi, '').trim();
+        if (extracted && extracted.length > 1) {
+          accumulatedData.description = extracted;
+          break;
+        }
+      }
+    }
     
     // Extract date
     if (allText.includes('včera') || allText.includes('yesterday')) {

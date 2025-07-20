@@ -35,10 +35,25 @@ export function registerTTSRoutes(app: Router) {
         language: language || 'default'
       });
 
-      // Generate speech using OpenAI TTS
+      // Generate speech using OpenAI TTS with language-specific voice selection
+      let selectedVoice = voice;
+      
+      // Auto-select appropriate voice based on language for better pronunciation
+      if (language) {
+        if (language.startsWith('sk')) {
+          selectedVoice = 'echo'; // Better for Slovak pronunciation
+        } else if (language.startsWith('es')) {
+          selectedVoice = 'nova'; // Better for Spanish pronunciation
+        } else {
+          selectedVoice = voice; // Use provided voice for English
+        }
+      }
+      
+      console.log('🎙️ [TTS] Using voice for language:', { language, selectedVoice });
+      
       const mp3 = await openai.audio.speech.create({
         model: "tts-1",
-        voice: voice as any,
+        voice: selectedVoice as any,
         input: text,
         speed: speed,
       });
