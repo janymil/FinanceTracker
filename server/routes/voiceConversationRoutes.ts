@@ -186,8 +186,12 @@ export function registerVoiceConversationRoutes(app: Router) {
       
       console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
 
+      // Get proper user language and currency
+      const finalUserLanguage = userLanguage || user.language || 'en-us';
+      const finalUserCurrency = userCurrency || user.currency || '$';
+      
       // Smart extraction: try simple patterns first, use AI only if needed
-      const newData = await smartExtractData(transcript, userCurrency || user.currency || '$', userLanguage, existing);
+      const newData = await smartExtractData(transcript, finalUserCurrency, finalUserLanguage, existing);
       console.log('📝 [VoiceConversation] Extracted:', newData);
 
       // Merge new data with existing (preserve existing data, only add new non-null values)
@@ -225,7 +229,7 @@ export function registerVoiceConversationRoutes(app: Router) {
       // Generate natural conversation response using OpenAI TTS (transaction-limited)
       let nextQuestion = null;
       if (!isComplete) {
-        nextQuestion = await generateNaturalResponse(updated, missing, userLanguage, userCurrency || user.currency || '$');
+        nextQuestion = await generateNaturalResponse(updated, missing, finalUserLanguage, finalUserCurrency);
       }
 
       return res.json({
@@ -456,15 +460,18 @@ function basicExtraction(transcript: string, userCurrency: string, userLanguage:
     // Single word likely description: "pivo", "coffee", "groceries"
     description = original;
   } else {
-    // Clean multi-word descriptions
+    // Enhanced cleaning for better extraction
     let cleanText = original
       .replace(/\d+(?:\.\d{1,2})?\s*(?:euros?|€|\$|dollars?|korun|korún)?/gi, '') // Remove amounts
-      .replace(/\b(?:bought|paid|spent|kúpil|platil|today|dnes|for|za|yesterday|včera)\b/gi, '') // Remove action words
+      .replace(/\b(?:bought|paid|spent|kúpil|platil|today|dnes|for|za|yesterday|včera|som|si|v|at|in)\b/gi, '') // Remove action/filler words
       .replace(/\s+/g, ' ')
       .trim();
 
-    if (cleanText && cleanText.length > 1) {
-      description = cleanText;
+    // Extract meaningful items (nouns typically)
+    const words = cleanText.split(' ').filter(word => word.length > 1);
+    if (words.length > 0) {
+      // Prefer single meaningful items for transactions
+      description = words.length === 1 ? words[0] : words.slice(0, 2).join(' ');
     }
   }
 
