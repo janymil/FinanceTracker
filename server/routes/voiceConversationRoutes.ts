@@ -221,13 +221,18 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
   let date = null;
   let note = null;
 
-  // Extract amount with user's currency
+  // Extract amount with user's currency - support both digits and words
   const currencySymbol = userCurrency === '€' ? '€' : '$';
+  
+  // First try to find digit amounts
   const amountPattern = new RegExp(`\\${currencySymbol}?(\\d+(?:\\.\\d{1,2})?)\\s?(?:dollars?|euros?|€|\\$)?`, 'i');
   const amountMatch = lower.match(amountPattern);
   
   if (amountMatch) {
     amount = parseFloat(amountMatch[1]);
+  } else {
+    // Parse word numbers like "twenty", "fifty", "one hundred"
+    amount = parseWordNumber(lower);
   }
 
   // Extract date patterns
@@ -281,6 +286,45 @@ function extractDataFromTranscript(transcript: string, userCurrency: string) {
 
   console.log('🔍 [VoiceConversation] Extraction result:', { amount, description, type, date, note });
   return { amount, description, type, date, note, categoryId: null, categoryName: null };
+}
+
+// Check if text is just a number
+function isJustNumber(text: string): boolean {
+  return /^\d+(\.\d{1,2})?$/.test(text.trim());
+}
+
+// Parse word numbers to numeric values
+function parseWordNumber(text: string): number | null {
+  const wordNumbers = {
+    'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+    'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+    'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+    'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+    'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
+    'eighty': 80, 'ninety': 90, 'hundred': 100, 'thousand': 1000
+  };
+
+  const words = text.toLowerCase().split(/\s+/);
+  let total = 0;
+  let current = 0;
+
+  for (const word of words) {
+    if (wordNumbers.hasOwnProperty(word)) {
+      const value = wordNumbers[word as keyof typeof wordNumbers];
+      
+      if (value === 100) {
+        current *= 100;
+      } else if (value === 1000) {
+        total += current * 1000;
+        current = 0;
+      } else {
+        current += value;
+      }
+    }
+  }
+  
+  total += current;
+  return total > 0 ? total : null;
 }
 
 
