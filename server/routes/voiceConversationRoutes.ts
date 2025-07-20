@@ -353,59 +353,50 @@ async function smartExtractData(transcript: string, userCurrency: string, userLa
   return simpleResult;
 }
 
-// AI-powered conversational data extraction using Mistral
+// AI-powered conversational data extraction using external AI processor
 async function aiExtractData(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
   try {
-    // Use Mistral AI for intelligent extraction
-    const mistralResponse = await runMistralAnalysis({
-      prompt: `Extract transaction data from this natural conversation: "${transcript}"
-      
-Current partially collected data: ${JSON.stringify(existingData)}
-
-Extract and return ONLY a JSON object with these fields:
-{
-  "amount": number or null,
-  "description": "what was bought/paid for" or null,
-  "type": "expense" or "income" or null,
-  "date": "YYYY-MM-DD" or null,
-  "note": "additional details" or null
-}
-
-Examples:
-- "Today I bought pivo for 5 euros" → {"amount": 5, "description": "pivo", "type": "expense", "date": "${new Date().toISOString().split('T')[0]}", "note": null}
-- "päť" (when asking for amount) → {"amount": 5, "description": null, "type": null, "date": null, "note": null}
-- "pivo" (when asking what for) → {"amount": null, "description": "pivo", "type": null, "date": null, "note": null}
-
-Language context: ${userLanguage}
-User currency: ${userCurrency}
-
-Return ONLY the JSON object, no explanation.`,
-      language: userLanguage
+    console.log('🤖 [AI Extraction] Calling external AI processor for intelligent extraction');
+    
+    // Call external AI processor with the new extractConversationalTransactionData function
+    const response = await fetch('https://finanzerpro-ai-processor.fly.dev/execute-gpt-task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        task: 'voice-extraction',
+        userId: 'voice-system',
+        payload: {
+          transcript,
+          existingData,
+          userCurrency,
+          language: userLanguage
+        }
+      })
     });
 
-    if (mistralResponse && mistralResponse.result) {
-      console.log('🤖 [AI Extraction] Raw response:', mistralResponse.result);
+    if (response.ok) {
+      const aiResult = await response.json();
+      console.log('✅ [AI Extraction] External processor result:', aiResult);
       
-      // Parse AI response
-      const cleanResult = mistralResponse.result.replace(/```json|```/g, '').trim();
-      const extracted = JSON.parse(cleanResult);
-      
-      console.log('🔍 [AI Extraction] Parsed result:', extracted);
-      return { 
-        amount: extracted.amount, 
-        description: extracted.description, 
-        type: extracted.type, 
-        date: extracted.date, 
-        note: extracted.note,
+      return {
+        amount: aiResult.amount || null,
+        description: aiResult.description || null,
+        type: aiResult.type || null,
+        date: aiResult.date || null,
+        note: aiResult.note || null,
         categoryId: null,
         categoryName: null
       };
+    } else {
+      console.warn('⚠️ [AI Extraction] External processor failed, using fallback');
     }
   } catch (error) {
-    console.error('❌ [AI Extraction] Error:', error);
+    console.error('❌ [AI Extraction] External processor error:', error);
   }
 
-  // Fallback to simple pattern matching if AI fails
+  // Fallback to basic extraction if external AI fails
   return basicExtraction(transcript, userCurrency, userLanguage);
 }
 
