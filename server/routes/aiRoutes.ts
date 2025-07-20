@@ -4,6 +4,8 @@ import { storage } from "../storage";
 import { getUserLanguage } from "../categoryTranslations";
 import { 
   categorizeExpense,
+  categorizeExpenseWithUserCategories,
+  categorizeIncomeWithUserCategories,
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
@@ -41,6 +43,14 @@ export function registerAIRoutes(app: Express) {
         return res.json({ message: "No uncategorized transactions found" });
       }
 
+      // Get user's existing categories for AI categorization
+      const userCategories = await storage.getCategories(userId);
+      const categoryList = userCategories.map(cat => ({ 
+        id: cat.id, 
+        name: cat.name, 
+        type: cat.type 
+      }));
+
       // Process up to 10 transactions at a time to avoid rate limits
       const suggestions = [];
       const limit = Math.min(uncategorized.length, 10);
@@ -50,12 +60,32 @@ export function registerAIRoutes(app: Express) {
         try {
           // Get user language from consistent header detection
           const language = getUserLanguage(req);
-          const result = await categorizeExpense(transaction.description, parseFloat(transaction.amount), language);
+          
+          // Use the correct categorization function based on transaction type
+          let result;
+          if (transaction.type === 'income') {
+            result = await categorizeIncomeWithUserCategories(
+              transaction.description, 
+              parseFloat(transaction.amount), 
+              categoryList, 
+              language
+            );
+          } else {
+            result = await categorizeExpenseWithUserCategories(
+              transaction.description, 
+              parseFloat(transaction.amount), 
+              categoryList, 
+              language
+            );
+          }
+          
           suggestions.push({
             id: `suggestion-${transaction.id}`,
             transactionDescription: transaction.description,
-            suggestedCategory: result.category,
+            suggestedCategory: result.suggestedCategory || `Category ID: ${result.categoryId}`,
+            suggestedCategoryId: result.categoryId,
             confidence: result.confidence,
+            reasoning: result.reasoning,
             amount: parseFloat(transaction.amount),
             date: transaction.date.toISOString(),
             transactionId: transaction.id
@@ -86,16 +116,37 @@ export function registerAIRoutes(app: Express) {
         return res.status(403).json({ message: "AI categorization requires standard or premium plan" });
       }
 
-      const { description, amount } = req.body;
+      const { description, amount, type } = req.body;
 
       if (!description) {
         return res.status(400).json({ message: "Description is required" });
       }
 
+      // Get user's existing categories for AI categorization
+      const userCategories = await storage.getCategories(userId);
+      const categoryList = userCategories.map(cat => ({ 
+        id: cat.id, 
+        name: cat.name, 
+        type: cat.type 
+      }));
+
       // Get user language from consistent header detection
       const language = getUserLanguage(req);
-      const result = await categorizeExpense(description, amount, language);
-      return res.json({ category: result.category });
+      
+      // Use the correct categorization function based on transaction type
+      let result;
+      if (type === 'income') {
+        result = await categorizeIncomeWithUserCategories(description, amount || 0, categoryList, language);
+      } else {
+        result = await categorizeExpenseWithUserCategories(description, amount || 0, categoryList, language);
+      }
+      
+      return res.json({ 
+        category: result.suggestedCategory || `Category ID: ${result.categoryId}`,
+        categoryId: result.categoryId,
+        confidence: result.confidence,
+        reasoning: result.reasoning
+      });
     } catch (error) {
       console.error("Error categorizing expense:", error);
       return res.status(500).json({ message: "Failed to categorize expense" });

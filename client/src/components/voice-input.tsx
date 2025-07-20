@@ -18,6 +18,7 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
   const [transcript, setTranscript] = useState('');
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef<string>('');
+  const isCleaningUpRef = useRef(false);
 
   useEffect(() => {
     console.log('🔧 [VoiceInput] Initializing speech recognition...', {
@@ -95,16 +96,25 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
         message: event.message || 'No message provided',
         type: event.type,
         target: event.target?.constructor?.name,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        isCleaningUp: isCleaningUpRef.current
       });
       console.error('❌ [VoiceInput] Full error event:', event);
+      
+      // Don't show error to user if we're cleaning up (component unmounting)
+      if (isCleaningUpRef.current && event.error === 'aborted') {
+        console.log('✅ [VoiceInput] Ignoring aborted error during cleanup');
+        return;
+      }
+      
       setIsListening(false);
       
       const errorMessages: Record<string, string> = {
         'no-speech': t('voiceInput.errors.noSpeech'),
         'audio-capture': t('voiceInput.errors.audioCapture'),
         'not-allowed': t('voiceInput.errors.notAllowed'),
-        'network': t('voiceInput.errors.network')
+        'network': t('voiceInput.errors.network'),
+        'aborted': t('voiceInput.errors.aborted') || 'Voice input was cancelled'
       };
       
       onError?.(errorMessages[event.error] || t('voiceInput.errors.generic'));
@@ -139,8 +149,13 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
     recognitionRef.current = recognition;
 
     return () => {
+      isCleaningUpRef.current = true;
       if (recognitionRef.current) {
-        recognitionRef.current.abort();
+        try {
+          recognitionRef.current.stop();
+        } catch (error) {
+          console.log('🧹 [VoiceInput] Cleanup: Recognition already stopped');
+        }
       }
     };
   }, [language, i18n.language, onTranscript, onError, t]);
@@ -157,10 +172,28 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
     } else {
       console.log('▶️ [VoiceInput] Starting recognition...');
       try {
+        isCleaningUpRef.current = false;
+        transcriptRef.current = '';
+        setTranscript('');
         recognitionRef.current.start();
       } catch (error) {
         console.error('❌ [VoiceInput] Failed to start recognition:', error);
-        onError?.('Failed to start voice recognition');
+        
+        // Handle the case where recognition is already running
+        if (error instanceof Error && error.message.includes('already started')) {
+          console.log('🔄 [VoiceInput] Recognition already running, stopping first...');
+          recognitionRef.current.stop();
+          setTimeout(() => {
+            try {
+              recognitionRef.current.start();
+            } catch (retryError) {
+              console.error('❌ [VoiceInput] Retry failed:', retryError);
+              onError?.('Failed to start voice recognition');
+            }
+          }, 100);
+        } else {
+          onError?.('Failed to start voice recognition');
+        }
       }
     }
   };
