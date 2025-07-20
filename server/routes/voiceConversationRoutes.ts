@@ -34,7 +34,8 @@ export function registerVoiceConversationRoutes(app: Router) {
       console.log('🎯 [VoiceConversation] Processing:', {
         userId: userId.substring(0, 8) + '...',
         transcript,
-        sessionId
+        sessionId,
+        receivedCurrentData: currentData
       });
 
       // Get user for currency info
@@ -43,7 +44,7 @@ export function registerVoiceConversationRoutes(app: Router) {
         return res.status(404).json({ success: false, error: "User not found" });
       }
 
-      // Start with existing data
+      // Start with existing data from frontend
       const existing = currentData || { 
         amount: null, 
         description: null, 
@@ -53,6 +54,8 @@ export function registerVoiceConversationRoutes(app: Router) {
         categoryId: null,
         categoryName: null
       };
+      
+      console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
 
       // Extract information from current transcript
       const newData = extractDataFromTranscript(transcript, user.currency || '$');
