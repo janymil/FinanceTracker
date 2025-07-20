@@ -98,8 +98,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     
     // Setup speech recognition with user's language
     const recognition = new (window as any).webkitSpeechRecognition();
-    recognition.continuous = false;  // Single recognition per session
-    recognition.interimResults = false; // Only final results
+    recognition.continuous = false;
+    recognition.interimResults = false;
     recognition.lang = getRecognitionLanguage(userLanguage);
     
     console.log('🎤 STT Language set to:', recognition.lang);
