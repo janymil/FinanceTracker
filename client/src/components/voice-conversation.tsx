@@ -128,6 +128,88 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     startConversation();
   }, [userLanguage, userCurrency]);
 
+  // Text-to-speech with user's language
+  const speak = useCallback(async (text: string, onComplete?: () => void) => {
+    setState('speaking');
+    
+    try {
+      console.log('🔊 Speaking:', text);
+      
+      const response = await apiRequest('POST', '/api/tts/speak', {
+        text,
+        voice: 'alloy',
+        speed: 1.0,
+        language: userLanguage // Pass user's language to TTS service
+      });
+
+      if (response.ok) {
+        const audioBuffer = await response.arrayBuffer();
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioBufferDecoded = await audioContext.decodeAudioData(audioBuffer);
+        
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBufferDecoded;
+        source.connect(audioContext.destination);
+        
+        source.onended = () => {
+          console.log('✅ Speech finished');
+          if (onComplete) onComplete();
+        };
+        
+        source.start(0);
+      } else {
+        // Fallback to browser TTS with user's language
+        console.log('⚠️ Using browser TTS fallback');
+        if ('speechSynthesis' in window) {
+          speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          
+          // Set language for browser TTS
+          if (userLanguage.startsWith('es')) {
+            utterance.lang = 'es-ES';
+          } else if (userLanguage.startsWith('sk')) {
+            utterance.lang = 'sk-SK';
+          } else {
+            utterance.lang = 'en-US';
+          }
+          
+          utterance.onend = () => {
+            if (onComplete) onComplete();
+          };
+          speechSynthesis.speak(utterance);
+        } else if (onComplete) {
+          onComplete();
+        }
+      }
+    } catch (error) {
+      console.error('❌ TTS error:', error);
+      if (onComplete) onComplete();
+    }
+  }, [userLanguage]);
+
+  // Start listening with proper state management
+  const startListening = useCallback(() => {
+    if (recognitionRef.current && state !== 'complete') {
+      try {
+        console.log('🎤 Starting to listen...');
+        setState('listening');
+        recognitionRef.current.start();
+      } catch (error) {
+        console.log('🎤 Recognition error, retrying:', error);
+        if ((error as any)?.name === 'InvalidStateError') {
+          // Recognition is already running, stop and restart
+          recognitionRef.current.stop();
+          setTimeout(() => {
+            if (recognitionRef.current) {
+              setState('listening');
+              recognitionRef.current.start();
+            }
+          }, 300);
+        }
+      }
+    }
+  }, [state]);
+
   // Start the initial conversation
   const startConversation = useCallback(() => {
     const message = 'Tell me about your transaction';
@@ -137,7 +219,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       // After speaking, start listening
       startListening();
     });
-  }, [speak, startListening]);
+  }, [userLanguage]); // Only include userLanguage dependency to avoid circular reference
 
   // Process voice input with AI
   const processVoiceInput = useCallback(async (transcript: string) => {
@@ -235,87 +317,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     });
   }, [userCurrency, state]);
 
-  // Text-to-speech with callback
-  const speak = useCallback(async (text: string, onComplete?: () => void) => {
-    setState('speaking');
-    
-    try {
-      console.log('🔊 Speaking:', text);
-      
-      const response = await apiRequest('POST', '/api/tts/speak', {
-        text,
-        voice: 'alloy',
-        speed: 1.0,
-        language: userLanguage // Pass user's language to TTS service
-      });
 
-      if (response.ok) {
-        const audioBuffer = await response.arrayBuffer();
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const audioBufferDecoded = await audioContext.decodeAudioData(audioBuffer);
-        
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBufferDecoded;
-        source.connect(audioContext.destination);
-        
-        source.onended = () => {
-          console.log('✅ Speech finished');
-          if (onComplete) onComplete();
-        };
-        
-        source.start(0);
-      } else {
-        // Fallback to browser TTS with user's language
-        console.log('⚠️ Using browser TTS fallback');
-        if ('speechSynthesis' in window) {
-          speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
-          
-          // Set language for browser TTS
-          if (userLanguage.startsWith('es')) {
-            utterance.lang = 'es-ES';
-          } else if (userLanguage.startsWith('sk')) {
-            utterance.lang = 'sk-SK';
-          } else {
-            utterance.lang = 'en-US';
-          }
-          
-          utterance.onend = () => {
-            if (onComplete) onComplete();
-          };
-          speechSynthesis.speak(utterance);
-        } else if (onComplete) {
-          onComplete();
-        }
-      }
-    } catch (error) {
-      console.error('❌ TTS error:', error);
-      if (onComplete) onComplete();
-    }
-  }, [userLanguage]);
-
-  // Start listening with proper state management
-  const startListening = useCallback(() => {
-    if (recognitionRef.current && state !== 'complete') {
-      try {
-        console.log('🎤 Starting to listen...');
-        setState('listening');
-        recognitionRef.current.start();
-      } catch (error) {
-        console.log('🎤 Recognition error, retrying:', error);
-        if ((error as any)?.name === 'InvalidStateError') {
-          // Recognition is already running, stop and restart
-          recognitionRef.current.stop();
-          setTimeout(() => {
-            if (recognitionRef.current) {
-              setState('listening');
-              recognitionRef.current.start();
-            }
-          }, 300);
-        }
-      }
-    }
-  }, [state]);
 
   // Save transaction
   const saveTransaction = useCallback(async (data: TransactionData) => {
