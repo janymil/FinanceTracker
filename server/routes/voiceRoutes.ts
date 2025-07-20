@@ -668,11 +668,25 @@ function extractAmountFromText(text: string, userCurrency: string = '$'): number
   const currencySymbol = userCurrency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
   
   const amountPatterns = [
+    // PRIORITY 1: User's preferred currency first
     new RegExp(`(\\d+\\.?\\d*)\\s*${currencySymbol}`, 'gi'),  // 25€, 25.50€ (user currency)
     new RegExp(`${currencySymbol}(\\d+\\.?\\d*)`, 'gi'),      // €25, €25.50 (user currency prefix)
-    /(\d+\.?\d*)\s*\$|USD/gi,  // 25$, 25.50$, 25USD (dollar fallback)
-    /\$(\d+\.?\d*)/gi,         // $25, $25.50 (dollar fallback)
-    /(\d+\.?\d*)\s*(?:dollars?|euros?|czk|eur|usd|crowns?)/gi,  // 25 dollars, 25 euros, etc.
+    
+    // PRIORITY 2: Common currency fallbacks (only if user currency not found)
+    /(\d+\.?\d*)\s*\$/gi,           // 25$ 
+    /\$(\d+\.?\d*)/gi,              // $25, $25.50
+    /(\d+\.?\d*)\s*€/gi,            // 25€
+    /€(\d+\.?\d*)/gi,               // €25
+    /(\d+\.?\d*)\s*£/gi,            // 25£
+    /£(\d+\.?\d*)/gi,               // £25
+    /(\d+\.?\d*)\s*¥/gi,            // 25¥
+    /¥(\d+\.?\d*)/gi,               // ¥25
+    /(\d+\.?\d*)\s*Kč/gi,           // 25Kč
+    
+    // PRIORITY 3: Text-based currency recognition
+    /(\d+\.?\d*)\s*(?:dollars?|euros?|pounds?|yen|czk|eur|usd|gbp|crowns?)/gi,
+    
+    // PRIORITY 4: Decimal amounts and bare numbers (last resort)
     /(\d+[.,]\d{2})/g,         // 25.50, 25,50 (decimal amounts)
     /(\d+)/g                   // Just numbers as fallback
   ];
