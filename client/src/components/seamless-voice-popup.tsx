@@ -201,24 +201,24 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
         setCurrentMessage('💾 Saving transaction...');
         try {
           // STRICT validation - NO FALLBACKS for required fields
-          if (!updatedData.amount || updatedData.amount <= 0) {
+          if (!newExtractedData.amount || newExtractedData.amount <= 0) {
             throw new Error('Amount is required and must be greater than 0');
           }
-          if (!updatedData.description || !updatedData.description.trim()) {
+          if (!newExtractedData.description || !newExtractedData.description.trim()) {
             throw new Error('Description is required');
           }
-          if (!updatedData.type || (updatedData.type !== 'income' && updatedData.type !== 'expense')) {
+          if (!newExtractedData.type || (newExtractedData.type !== 'income' && newExtractedData.type !== 'expense')) {
             throw new Error('Type must be either income or expense');
           }
           
           const transactionData = {
-            amount: parseFloat(updatedData.amount),
-            type: updatedData.type,
-            description: updatedData.description.trim(),
-            date: updatedData.date || new Date().toISOString().split('T')[0],
+            amount: parseFloat(newExtractedData.amount),
+            type: newExtractedData.type,
+            description: newExtractedData.description.trim(),
+            date: newExtractedData.date || new Date().toISOString().split('T')[0],
             // Optional fields:
-            categoryId: updatedData.categoryId || null,
-            vendor: updatedData.vendor || null,
+            categoryId: newExtractedData.categoryId || null,
+            vendor: newExtractedData.vendor || null,
             isRecurring: false
           };
           
@@ -265,7 +265,7 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
         
         const ttsResponse = await apiRequest('POST', '/api/tts/question', {
           field: nextField,
-          extractedData: updatedData,
+          extractedData: newExtractedData,
           generateAudio: true
         });
         
@@ -313,7 +313,7 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       setCurrentMessage('Let me ask you about your transaction...');
       
       // Use the same single validation function
-      const missingFields = getMissingFields(extractedData);
+      const missingFields = validateRequiredFields(extractedData);
       
       // Ask for first missing required field, or amount if all good
       const nextField = missingFields[0] || 'amount';

@@ -19,7 +19,7 @@ interface MerchantLookupResult {
   category_keywords: string[];
   confidence: number;
   matched_merchant?: string;
-  source: 'country_specific' | 'global' | 'ai_analysis' | 'user_history' | 'learned_pattern';
+  source: 'country_specific' | 'global' | 'ai_analysis';
 }
 
 // Cache for loaded merchant data

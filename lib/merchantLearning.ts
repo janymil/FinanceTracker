@@ -97,8 +97,7 @@ async function updateMerchantPattern(data: MerchantLearningData): Promise<void> 
     if (existingPattern[0]) {
       // Update existing pattern - increase user count and confidence
       const newUserCount = existingPattern[0].userCount + 1;
-      const existingConfidence = parseFloat(existingPattern[0].confidence?.toString() || '0');
-      const newConfidence = Math.min(0.95, existingConfidence + 0.05);
+      const newConfidence = Math.min(0.95, existingPattern[0].confidence + 0.05);
 
       await db
         .update(merchantPatterns)
@@ -172,11 +171,11 @@ export async function getLearnedMerchantPattern(
       return {
         merchantName: patterns[0].merchantName,
         businessType: patterns[0].businessType,
-        categoryId: patterns[0].categoryId || 0,
-        categoryName: patterns[0].categoryName || '',
-        confidence: parseFloat(patterns[0].confidence?.toString() || '0'),
+        categoryId: patterns[0].categoryId,
+        categoryName: patterns[0].categoryName,
+        confidence: parseFloat(patterns[0].confidence),
         userCount: patterns[0].userCount,
-        source: patterns[0].source || 'unknown'
+        source: patterns[0].source
       };
     }
 
@@ -212,8 +211,8 @@ export async function getUserMerchantHistory(
 
     if (history[0]) {
       return {
-        categoryId: history[0].categoryId || 0,
-        confidence: parseFloat(history[0].confidence?.toString() || '0')
+        categoryId: history[0].categoryId,
+        confidence: parseFloat(history[0].confidence)
       };
     }
 
@@ -250,11 +249,11 @@ export async function getTopLearnedMerchants(
     return patterns.map(p => ({
       merchantName: p.merchantName,
       businessType: p.businessType,
-      categoryId: p.categoryId || 0,
+      categoryId: p.categoryId,
       categoryName: p.categoryName,
-      confidence: parseFloat(p.confidence?.toString() || '0'),
+      confidence: parseFloat(p.confidence),
       userCount: p.userCount,
-      source: p.source || 'unknown'
+      source: p.source
     }));
   } catch (error) {
     console.error('[MerchantLearning] Error getting top merchants:', error);

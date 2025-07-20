@@ -265,7 +265,7 @@ export function SeamlessVoiceInput({
         variant: 'destructive',
       });
     }
-  }, [sessionId, extractedData]);
+  }, [sessionId, extractedData, startListening, saveTransaction, playTTSAudio]);
 
   // Play TTS audio
   const playTTSAudio = useCallback(async (base64Data: string) => {

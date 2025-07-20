@@ -3742,32 +3742,6 @@
     }
   },
 
-  "voiceConversation": {
-    "listening": "Listening...",
-    "processing": "Processing...",
-    "speaking": "Speaking...",
-    "speak": "Speak",
-    "ask_question": "Ask Question",
-    "starting_conversation": "Starting conversation...",
-    "tell_me_about_transaction": "Tell me about a transaction",
-    "please_provide": "Please provide",
-    "mic_permission_denied": "Microphone access denied",
-    "audio_capture_failed": "Audio capture failed",
-    "network_error": "Network error",
-    "voice_recognition_error": "Voice recognition error",
-    "processing_error": "Processing error",
-    "saved": "Saved",
-    "transaction_saved": "Transaction saved",
-    "failed_to_save": "Failed to save transaction",
-    "waiting": "Waiting...",
-    "expense": "Expense",
-    "income": "Income",
-    "amount": "Amount",
-    "description": "Description",
-    "type": "Type",
-    "error": "Error"
-  },
-
   "voiceTransaction": {
     "title": "Review Voice Transaction",
     "description": "Review and confirm the transaction details extracted from your voice input",

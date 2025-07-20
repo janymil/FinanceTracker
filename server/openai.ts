@@ -480,17 +480,17 @@ export async function generateFinancialTips(
 
 Spending by Category:
 ${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
-  `- ${cat.category}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
 ).join('\n')}
 
 Income by Category:
 ${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => 
-  `- ${cat.category}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
 ).join('\n')}
 
 Recent Transactions (last 10):
 ${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.description}: $${t.amount} (${t.category || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
 ).join('\n')}
 
 Transaction Pattern Analysis:
@@ -516,7 +516,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
           userId: "system",
           payload: { ...financialData, language: normalizedLanguage }
         }),
-        signal: AbortSignal.timeout(30000) // 30 second timeout
+        timeout: 30000 // 30 second timeout
       });
 
       if (!aiResponse.ok) {
@@ -526,7 +526,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
       const aiData = await aiResponse.json();
       result = Array.isArray(aiData) ? aiData[0] : (aiData.tip || aiData);
     } catch (aiProcessorError) {
-      console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError instanceof Error ? aiProcessorError.message : 'Unknown error');
+      console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
       
       // Fallback to direct OpenAI call
       const response = await openai.chat.completions.create({
@@ -697,7 +697,7 @@ Respond with JSON array format:
           content: `Analyze these expense transactions:
 
 ${expenseTransactions.slice(0, 20).map(t => 
-  `- ${t.description}: $${t.amount} (${t.category || 'Uncategorized'}) on ${t.date}`
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) on ${t.date}`
 ).join('\n')}
 
 Total transactions: ${expenseTransactions.length}
@@ -834,7 +834,7 @@ Financial Summary:
 
 Transaction History (${transactions.length} transactions):
 ${transactions.slice(0, 20).map(t => 
-  `- ${t.description}: $${t.amount} (${t.category}) on ${t.date.split('T')[0]}`
+  `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 
 Budgets: ${budgets.length} active budgets
@@ -956,7 +956,7 @@ export async function generateTrendPredictions(
 
     transactions.forEach(t => {
       const month = t.date.slice(0, 7);
-      const category = t.category || 'Other';
+      const category = t.categoryName || 'Other';
       const amount = parseFloat(t.amount);
 
       if (!monthlyData.has(month)) {
@@ -988,7 +988,7 @@ export async function generateTrendPredictions(
           .map(([cat, amount]) => ({ category: cat, amount }))
       })).sort((a, b) => a.month.localeCompare(b.month)),
       categoryTotals: Array.from(categoryTotals.entries()).map(([cat, amount]) => ({ category: cat, amount })),
-      budgets: budgets.map(b => ({ category: b.category || 'Other', budgetAmount: parseFloat(b.amount) }))
+      budgets: budgets.map(b => ({ category: b.categoryName || 'Other', budgetAmount: parseFloat(b.amount) }))
     };
 
     const prompt = `Analyze this comprehensive financial data and provide AI-powered trend predictions and forecasting.
@@ -1135,7 +1135,7 @@ export async function generateExpensePredictions(
         description: t.description,
         date: t.date,
         type: t.type,
-        categoryName: t.category,
+        categoryName: t.categoryName,
         recurring: t.recurring
       }))
     };
@@ -1152,7 +1152,7 @@ export async function generateExpensePredictions(
     
     expenseTransactions.forEach(t => {
       const month = t.date.slice(0, 7); // YYYY-MM format
-      const category = t.category || 'Other';
+      const category = t.categoryName || 'Other';
       const amount = Math.abs(parseFloat(t.amount));
       
       // Track monthly spending by category
@@ -1193,7 +1193,7 @@ export async function generateExpensePredictions(
         date: t.date.slice(0, 10),
         description: t.description,
         amount: Math.abs(parseFloat(t.amount)),
-        category: t.category || 'Other',
+        category: t.categoryName || 'Other',
         recurring: t.recurring || false
       }))
     };
@@ -1377,7 +1377,7 @@ export async function generateDailyRecommendations(
     recentTransactions.forEach(t => {
       if (t.type === 'expense') {
         const amount = parseFloat(t.amount);
-        const categoryName = t.category || 'Other';
+        const categoryName = t.categoryName || 'Other';
         const date = new Date(t.date).toDateString();
         
         categorySpending.set(categoryName, (categorySpending.get(categoryName) || 0) + amount);
@@ -1594,17 +1594,17 @@ export async function generateContextualFinancialTips(
     // Analyze spending by category - use the correct field mapping
     const categorySpending = new Map();
     const categorizedCount = transactions.filter(t => {
-      const category = t.category;
+      const category = t.category || t.categoryName;
       return category && category !== 'Uncategorized';
     }).length;
     const uncategorizedCount = transactions.filter(t => {
-      const category = t.category;
+      const category = t.category || t.categoryName;
       return !category || category === 'Uncategorized';
     }).length;
     
     transactions.forEach(t => {
       if (t.amount > 0) {
-        const category = t.category || 'Uncategorized';
+        const category = t.category || t.categoryName || 'Uncategorized';
         const current = categorySpending.get(category) || 0;
         categorySpending.set(category, current + t.amount);
       }
@@ -1625,7 +1625,7 @@ export async function generateContextualFinancialTips(
     
     expenseTransactions.forEach(t => {
       const day = new Date(t.date).getDate();
-      const category = t.category || t.category || 'Uncategorized';
+      const category = t.category || t.categoryName || 'Uncategorized';
       dailySpending.set(day, (dailySpending.get(day) || 0) + t.amount);
       transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
     });
@@ -1646,14 +1646,14 @@ export async function generateContextualFinancialTips(
       budgets.forEach(budget => {
         if (budget.remaining < 0) {
           const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-          const categoryTransactions = expenseTransactions.filter(t => t.category === budget.category);
+          const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budget.categoryName);
           const avgTransactionInCategory = categoryTransactions.length > 0 ? 
             categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
           
-          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.category} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
         } else if (budget.remaining < budget.budgetAmount * 0.1) {
           // Budget almost exhausted
-          scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.category} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+          scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
         }
       });
     }
@@ -1730,7 +1730,7 @@ TOP SPENDING CATEGORIES:
 ${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
 
 BUDGET STATUS:
-${budgets.length > 0 ? budgets.map(b => `- ${b.category}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
+${budgets.length > 0 ? budgets.map(b => `- ${b.categoryName}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
 
 FINANCIAL GOALS:
 ${goals.length > 0 ? goals.map(g => `- ${g.name}: $${g.currentAmount.toLocaleString()}/$${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
@@ -1747,7 +1747,7 @@ IDENTIFIED FINANCIAL SCENARIOS:
 ${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
 
 RECENT TRANSACTIONS (last 8):
-${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.category || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
+${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.categoryName || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
 
 CONTEXTUAL ANALYSIS REQUIREMENTS:
 1. Address specific scenarios identified above with targeted, data-driven advice
@@ -1884,7 +1884,7 @@ export async function generateFinancialHealthScore(
         .map(t => ({
           amount: Math.round(parseFloat(t.amount)),
           type: t.type,
-          categoryName: t.category
+          categoryName: t.categoryName
         }))
     };
     
@@ -1902,8 +1902,8 @@ export async function generateFinancialHealthScore(
     const categorySpending = new Map();
     transactions.forEach(t => {
       if (t.type === 'expense') {
-        const current = categorySpending.get(t.category) || 0;
-        categorySpending.set(t.category, current + parseFloat(t.amount));
+        const current = categorySpending.get(t.categoryName) || 0;
+        categorySpending.set(t.categoryName, current + parseFloat(t.amount));
       }
     });
 
@@ -1960,7 +1960,7 @@ Financial Summary:
 
 Transaction History (${recentTransactions.length} transactions):
 ${recentTransactions.slice(0, 20).map(t => 
-  `- ${t.description}: $${t.amount} (${t.category}) on ${t.date.split('T')[0]}`
+  `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 
 Budgets: ${budgets.length} active budgets

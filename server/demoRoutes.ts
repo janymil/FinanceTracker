@@ -19,7 +19,7 @@ router.post('/generate-narration', async (req, res) => {
       
       if (featureScript && featureScript[language]) {
         // Combine all script steps into one narration
-        const steps = featureScript[language] as any;
+        const steps = featureScript[language];
         narrationText = `${steps.intro} ${steps.upload} ${steps.analysis} ${steps.result}`;
       }
     }

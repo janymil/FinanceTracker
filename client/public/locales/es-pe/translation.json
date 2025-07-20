@@ -3804,32 +3804,6 @@
     }
   },
 
-  "voiceConversation": {
-    "listening": "Escuchando...",
-    "processing": "Procesando...",
-    "speaking": "Hablando...",
-    "speak": "Hablar",
-    "ask_question": "Hacer Pregunta",
-    "starting_conversation": "Iniciando conversación...",
-    "tell_me_about_transaction": "Cuéntame sobre una transacción",
-    "please_provide": "Por favor proporciona",
-    "mic_permission_denied": "Acceso al micrófono denegado",
-    "audio_capture_failed": "Error al capturar audio",
-    "network_error": "Error de red",
-    "voice_recognition_error": "Error de reconocimiento de voz",
-    "processing_error": "Error de procesamiento",
-    "saved": "Guardado",
-    "transaction_saved": "Transacción guardada",
-    "failed_to_save": "Error al guardar transacción",
-    "waiting": "Esperando...",
-    "expense": "Gasto",
-    "income": "Ingreso",
-    "amount": "Cantidad",
-    "description": "Descripción",
-    "type": "Tipo",
-    "error": "Error"
-  },
-
   "voiceTransaction": {
     "title": "Revisar Transacción por Voz",
     "description": "Revisa y confirma los detalles de la transacción extraídos de tu entrada de voz",

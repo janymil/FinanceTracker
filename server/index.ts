@@ -13,8 +13,8 @@ if (process.env.NODE_ENV === 'development') {
     config({ path: envLocalPath, override: true });
     console.log('Development environment: Using .env.local for Clerk keys');
     console.log('Loaded dev keys:', {
-      publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY ? process.env.VITE_CLERK_PUBLISHABLE_KEY.substring(0, 20) + '...' : 'not set',
-      secret: process.env.CLERK_SECRET_KEY ? process.env.CLERK_SECRET_KEY.substring(0, 20) + '...' : 'not set'
+      publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
+      secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
     });
   }
 } else {
@@ -22,8 +22,8 @@ if (process.env.NODE_ENV === 'development') {
   config(); // Load .env as fallback
   console.log('Production environment: Using system environment variables');
   console.log('Production keys:', {
-    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY ? process.env.VITE_CLERK_PUBLISHABLE_KEY.substring(0, 20) + '...' : 'not set',
-    secret: process.env.CLERK_SECRET_KEY ? process.env.CLERK_SECRET_KEY.substring(0, 20) + '...' : 'not set'
+    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
+    secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
   });
 }
 
