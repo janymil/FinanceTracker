@@ -300,13 +300,13 @@ export function registerVoiceConversationRoutes(app: Router) {
       ];
 
       // CRITICAL: Pass accumulated data to frontend for memory persistence
-      const finalTransactionData = result.transactionData || accumulatedData;
+      const finalTransactionData = result.transactionData || currentTransactionData;
       
       console.log('🔄 [VoiceConversation] Returning to frontend:', {
         response: result.response,
         isComplete: result.isComplete,
         transactionData: finalTransactionData,
-        accumulatedData: accumulatedData
+        inputData: currentTransactionData
       });
 
       return res.json({
