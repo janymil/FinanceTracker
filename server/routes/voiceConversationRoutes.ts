@@ -403,7 +403,7 @@ Return only the category ID number that best matches this transaction. If no goo
       // Create transaction record
       const transaction = await storage.createTransaction({
         userId: userId,
-        amount: transactionData.amount,
+        amount: transactionData.amount.toString(), // Convert number to string for decimal field
         description: transactionData.description,
         type: transactionData.type,
         date: new Date(transactionData.date || new Date().toISOString().split('T')[0]),
