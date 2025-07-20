@@ -524,19 +524,22 @@ MERGE STRATEGY: Previous context + new input = complete transaction data.
       const conversationHistory = messages?.map(m => `${m.role}: ${m.content}`).join('\n') || '';
       const currentExtracted = extractedData || {};
       
-      // Determine what's missing
-      const requiredFields = ['amount', 'vendor', 'category'];
+      // Determine what's missing based on transaction schema
+      // REQUIRED: amount, description, type (userId and date handled automatically)
+      const requiredFields = ['amount', 'description', 'type'];
       const missingFields = requiredFields.filter(field => !currentExtracted[field]);
       
       // FAST seamless processing - direct parsing + minimal AI
       let aiResponse;
       
-      // Step 1: Fast direct parsing of new input
+      // Step 1: Fast direct parsing of new input for required fields
       const newData = {
         amount: parseAmountFromText(transcript) || currentExtracted.amount,
-        vendor: parseVendorFromText(transcript) || currentExtracted.vendor,
-        description: transcript.trim(),
-        type: currentExtracted.type || 'expense',
+        description: extractDescriptionFromText(transcript) || currentExtracted.description,
+        type: extractTransactionType(transcript) || currentExtracted.type || 'expense',
+        vendor: parseVendorFromText(transcript) || currentExtracted.vendor, // Optional field
+        category: currentExtracted.category, // Optional field
+        categoryId: currentExtracted.categoryId, // Optional field
         date: new Date().toISOString().split('T')[0]
       };
       
@@ -602,15 +605,15 @@ JSON: {"categoryId": number|null, "categoryName": "string"|null}`;
         const { TTSService } = await import('../ttsService');
         responseText = TTSService.generateConfirmationMessage(mergedData, userLanguage);
         
-        // Prepare transaction for saving
+        // Prepare transaction for saving with REQUIRED fields
         transaction = {
-          amount: mergedData.amount,
-          vendor: mergedData.vendor,
-          description: mergedData.description || `${mergedData.vendor} - ${mergedData.category}`,
-          category: mergedData.category,
-          categoryId: mergedData.categoryId,
-          date: mergedData.date || new Date().toISOString().split('T')[0],
-          type: mergedData.type || 'expense',
+          amount: mergedData.amount, // REQUIRED
+          description: mergedData.description, // REQUIRED
+          type: mergedData.type, // REQUIRED
+          date: mergedData.date || new Date().toISOString().split('T')[0], // REQUIRED but defaults to today
+          // Optional fields:
+          categoryId: mergedData.categoryId || null,
+          vendor: mergedData.vendor || null,
           confidence: mergedData.confidence || 0.9
         };
       } else {
@@ -663,6 +666,52 @@ JSON: {"categoryId": number|null, "categoryName": "string"|null}`;
 }
 
 // FAST parsing functions for voice input with user currency support
+
+function extractDescriptionFromText(text: string): string | null {
+  // Extract meaningful description from text
+  const cleanText = text.trim();
+  
+  // If it's just a number, return null (not a description)
+  if (/^\d+(\.\d+)?$/.test(cleanText)) {
+    return null;
+  }
+  
+  // If it contains amount info, try to extract description part
+  const amountMatch = cleanText.match(/\d+(\.\d+)?/);
+  if (amountMatch) {
+    // Remove amount and currency symbols, keep the rest as description
+    let description = cleanText
+      .replace(/\d+(\.\d+)?/g, '')
+      .replace(/[\$€£¥]/g, '')
+      .trim();
+    
+    if (description.length > 2) {
+      return description;
+    }
+  }
+  
+  // Return the full text as description if it seems meaningful
+  return cleanText.length > 1 ? cleanText : null;
+}
+
+function extractTransactionType(text: string): 'income' | 'expense' | null {
+  const lowerText = text.toLowerCase();
+  
+  // Income indicators
+  const incomeKeywords = ['income', 'salary', 'paid', 'earned', 'received', 'got paid', 'payment received'];
+  if (incomeKeywords.some(keyword => lowerText.includes(keyword))) {
+    return 'income';
+  }
+  
+  // Expense indicators  
+  const expenseKeywords = ['spent', 'bought', 'paid for', 'cost', 'expense', 'purchase'];
+  if (expenseKeywords.some(keyword => lowerText.includes(keyword))) {
+    return 'expense';
+  }
+  
+  return null; // Can't determine from text
+}
+
 function extractAmountFromText(text: string, userCurrency: string = '$'): number | null {
   // Create patterns based on user's currency and common formats
   const currencySymbol = userCurrency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars

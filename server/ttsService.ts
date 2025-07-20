@@ -126,81 +126,50 @@ export class TTSService {
   ): string {
     const normalizedLanguage = normalizeLanguageCode(language);
 
-    // SECURITY: Only allow specific transaction fields
-    const allowedFields = ['amount', 'vendor', 'category', 'date', 'type', 'description'];
+    // SECURITY: Only allow REQUIRED transaction fields based on schema
+    const allowedFields = ['amount', 'description', 'type'];
     if (!allowedFields.includes(field)) {
-      throw new Error(`Invalid field: ${field}. Only transaction fields allowed.`);
+      throw new Error(`Invalid field: ${field}. Only required transaction fields allowed: ${allowedFields.join(', ')}`);
     }
 
     const promptTemplates = {
       amount: {
         'en-us': (data: any, currency: string) => {
-          // Use the user's actual currency dynamically - no hardcoding
-          if (data.vendor) return `How much did you spend at ${data.vendor}?`;
-          if (data.category) return `How much did you spend on ${data.category}?`;
           return `How much was it?`;
         },
         'es-pe': (data: any, currency: string) => {
-          // Use the user's actual currency dynamically - no hardcoding
-          if (data.vendor) return `¿Cuánto gastaste en ${data.vendor}?`;
-          if (data.category) return `¿Cuánto gastaste en ${data.category}?`;
           return `¿Cuánto fue?`;
         },
         'sk-sk': (data: any, currency: string) => {
-          // Use the user's actual currency dynamically - no hardcoding
-          if (data.vendor) return `Koľko si minul v ${data.vendor}?`;
-          if (data.category) return `Koľko si minul na ${data.category}?`;
           return `Koľko to bolo?`;
-        }
-      },
-      vendor: {
-        'en-us': (data: any) => {
-          if (data.category === 'Food & Dining') return 'Where did you buy this food?';
-          if (data.category === 'Transportation') return 'Was this Uber, taxi, or something else?';
-          return 'Where did you make this purchase?';
-        },
-        'es-pe': (data: any) => {
-          if (data.category === 'Food & Dining') return '¿Dónde compraste esta comida?';
-          if (data.category === 'Transportation') return '¿Fue Uber, taxi, o algo más?';
-          return '¿Dónde hiciste esta compra?';
-        },
-        'sk-sk': (data: any) => {
-          if (data.category === 'Food & Dining') return 'Kde si kúpil toto jedlo?';
-          if (data.category === 'Transportation') return 'Bol to Uber, taxi, alebo niečo iné?';
-          return 'Kde si urobil tento nákup?';
-        }
-      },
-      date: {
-        'en-us': () => 'When did this transaction happen?',
-        'es-pe': () => '¿Cuándo ocurrió esta transacción?',
-        'sk-sk': () => 'Kedy sa táto transakcia stala?'
-      },
-      category: {
-        'en-us': (data: any) => {
-          if (data.vendor) return `What category should I use for ${data.vendor}?`;
-          return 'What type of expense is this?';
-        },
-        'es-pe': (data: any) => {
-          if (data.vendor) return `¿Qué categoría debo usar para ${data.vendor}?`;
-          return '¿Qué tipo de gasto es este?';
-        },
-        'sk-sk': (data: any) => {
-          if (data.vendor) return `Akú kategóriu mám použiť pre ${data.vendor}?`;
-          return 'Aký typ výdavku je toto?';
         }
       },
       description: {
         'en-us': (data: any) => {
-          if (data.amount) return `What was this purchase for?`;
-          return 'What was this purchase for?';
+          if (data.amount) return `What was this $${data.amount} for?`;
+          return 'What was this transaction for?';
         },
         'es-pe': (data: any) => {
-          if (data.amount) return `¿Para qué fue esta compra?`;
-          return '¿Para qué fue esta compra?';
+          if (data.amount) return `¿Para qué fueron estos $${data.amount}?`;
+          return '¿Para qué fue esta transacción?';
         },
         'sk-sk': (data: any) => {
-          if (data.amount) return `Na čo bol tento nákup?`;
-          return 'Na čo bol tento nákup?';
+          if (data.amount) return `Na čo bolo týchto $${data.amount}?`;
+          return 'Na čo bola táto transakcia?';
+        }
+      },
+      type: {
+        'en-us': (data: any) => {
+          if (data.description) return `Was "${data.description}" an expense or income?`;
+          return 'Was this an expense or income?';
+        },
+        'es-pe': (data: any) => {
+          if (data.description) return `¿Fue "${data.description}" un gasto o ingreso?`;
+          return '¿Fue esto un gasto o ingreso?';
+        },
+        'sk-sk': (data: any) => {
+          if (data.description) return `Bol "${data.description}" výdavok alebo príjem?`;
+          return 'Bol to výdavok alebo príjem?';
         }
       }
     };
@@ -215,15 +184,28 @@ export class TTSService {
       }
     }
 
-    // NO AI FALLBACK - Only predefined questions allowed
+    // NO AI FALLBACK - Only predefined questions allowed for required fields
     // Return a basic fallback question in the user's language
     const fallbackQuestions = {
-      'en-us': `Please provide the ${field}.`,
-      'es-pe': `Por favor proporciona ${field}.`,
-      'sk-sk': `Prosím poskytni ${field}.`
+      'en-us': {
+        amount: 'How much was it?',
+        description: 'What was this transaction for?',
+        type: 'Was this an expense or income?'
+      },
+      'es-pe': {
+        amount: '¿Cuánto fue?',
+        description: '¿Para qué fue esta transacción?',
+        type: '¿Fue esto un gasto o ingreso?'
+      },
+      'sk-sk': {
+        amount: 'Koľko to bolo?',
+        description: 'Na čo bola táto transakcia?',
+        type: 'Bol to výdavok alebo príjem?'
+      }
     };
 
-    return fallbackQuestions[normalizedLanguage] || fallbackQuestions['en-us'];
+    const languageQuestions = fallbackQuestions[normalizedLanguage] || fallbackQuestions['en-us'];
+    return languageQuestions[field] || `Please provide the ${field}.`;
   }
 
   /**
