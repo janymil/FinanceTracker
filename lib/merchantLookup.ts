@@ -104,8 +104,10 @@ async function findMerchantMatch(merchantName: string | null, merchantData: Reco
   
   for (const [businessType, data] of Object.entries(merchantData)) {
     for (const merchant of data.merchants) {
-      if (normalizedName.includes(merchant.toLowerCase()) || merchant.toLowerCase().includes(normalizedName)) {
-        // Load business types to get typical_categories
+      const normalizedMerchant = merchant.toLowerCase().trim();
+      
+      // Direct match
+      if (normalizedName === normalizedMerchant) {
         const businessTypes = await loadBusinessTypes();
         const mapping = businessTypes.business_type_mappings[data.business_type];
         
@@ -114,6 +116,24 @@ async function findMerchantMatch(merchantName: string | null, merchantData: Reco
           category_keywords: data.category_keywords,
           typical_categories: mapping?.typical_categories,
           confidence: 0.9,
+          matched_merchant: merchant,
+          source: 'country_specific'
+        };
+      }
+      
+      // Handle common spelling variations (like Bille -> billa)
+      if ((normalizedName === 'bille' && normalizedMerchant === 'billa') ||
+          (normalizedName === 'billa' && normalizedMerchant === 'bille') ||
+          normalizedName.includes(normalizedMerchant) || 
+          normalizedMerchant.includes(normalizedName)) {
+        const businessTypes = await loadBusinessTypes();
+        const mapping = businessTypes.business_type_mappings[data.business_type];
+        
+        return {
+          business_type: data.business_type,
+          category_keywords: data.category_keywords,
+          typical_categories: mapping?.typical_categories,
+          confidence: 0.8,
           matched_merchant: merchant,
           source: 'country_specific'
         };
@@ -285,8 +305,12 @@ export async function lookupMerchant(
 function extractMerchantName(transcript: string, userLanguage?: string): string | null {
   const text = transcript.toLowerCase().trim();
   
-  // Common patterns for merchant extraction
+  // Common patterns for merchant extraction - Slovak-specific patterns first
   const patterns = [
+    // Slovak patterns
+    /v\s+([A-Za-z][a-zA-Z0-9\s&'.,-]*?)(?:\s+za|\s+$)/,  // "v Bille za" -> "Bille"
+    /na\s+([A-Za-z][a-zA-Z0-9\s&'.,-]*?)(?:\s+za|\s+$)/, // "na Tesco za" -> "Tesco"
+    // English patterns
     /at\s+([a-zA-Z0-9\s&'.,-]+?)(?:\s+for|\s+to|\s*$)/,
     /from\s+([a-zA-Z0-9\s&'.,-]+?)(?:\s+for|\s+to|\s*$)/,
     /([a-zA-Z0-9\s&'.,-]+?)\s+store/,
@@ -303,16 +327,17 @@ function extractMerchantName(transcript: string, userLanguage?: string): string 
     }
   }
   
-  // Try to find proper nouns (capitalized words in original text)
+  // Try to find proper nouns (capitalized words in original text) - exclude common Slovak words
   const words = transcript.split(' ');
+  const commonWords = ['Kúpil', 'Som', 'Si', 'Pre', 'Do', 'Od', 'Na', 'Za', 'V', 'I', 'At', 'From', 'For', 'To', 'The', 'And', 'Or', 'But'];
   const properNouns = words.filter(word => 
     word.length > 2 && 
     /^[A-Z]/.test(word) && 
-    !/^(I|At|From|For|To|The|And|Or|But)$/i.test(word)
+    !commonWords.includes(word)
   );
   
   if (properNouns.length > 0) {
-    return properNouns.join(' ');
+    return properNouns[0]; // Return only the first proper noun, not all joined
   }
   
   // For simple words like "starbucks", return the first meaningful word from lowercase

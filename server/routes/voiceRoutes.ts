@@ -79,53 +79,34 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     }
   }
 
-  // Extract merchant name as description - will be enhanced by merchant lookup
-  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'kupil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'iba', 'len', 'this', 'that', 'and', 'or', 'but', 'compré', 'por', 'chlieb', 'bread', 'pan', 'milk', 'mlieko', 'leche'];
-  
-  // Find merchant/brand names - prioritize known merchants
-  const knownMerchants = ['billa', 'bille', 'tesco', 'kaufland', 'lidl', 'starbucks', 'mcdonalds', 'kfc', 'netflix', 'spotify', 'shell', 'bp', 'esso', 'costa'];
+  // Extract merchant name as description - will be enhanced by merchant lookup later
+  // Just extract the most likely merchant name, don't hardcode anything
+  const commonWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'kupil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'and', 'or', 'but', 'por'];
   
   let description = '';
   
-  // First look for known merchants (flexible matching)
-  for (const word of words) {
-    const clean = word.toLowerCase().replace(/[^\w]/g, '');
-    // Direct match
-    if (knownMerchants.includes(clean)) {
-      description = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      break;
-    }
-    // Similar spelling (for Bille/Billa)
-    if ((clean === 'bille' && knownMerchants.includes('billa')) || 
-        (clean === 'billa' && knownMerchants.includes('bille'))) {
-      description = 'Billa'; // Normalize to standard spelling
-      break;
-    }
-  }
+  // Look for capitalized words (proper nouns) first - likely merchant names
+  const properNouns = words.filter(word => 
+    /^[A-Z]/.test(word) && 
+    word.length > 2 && 
+    !commonWords.includes(word.toLowerCase())
+  );
   
-  // If no known merchant found, look for capitalized words (proper nouns)
-  if (!description) {
-    const properNouns = words.filter(word => /^[A-Z]/.test(word) && !stopWords.includes(word.toLowerCase()));
-    if (properNouns.length > 0) {
-      description = properNouns[0];
-    }
-  }
-  
-  // Fallback to first meaningful word
-  if (!description) {
+  if (properNouns.length > 0) {
+    description = properNouns[0];
+  } else {
+    // Fallback to meaningful words (not common words, numbers, or currencies)
     const meaningfulWords = words.filter(word => {
       const clean = word.toLowerCase().replace(/[^\w]/g, '');
       return clean.length > 2 && 
-             !stopWords.includes(clean) && 
+             !commonWords.includes(clean) && 
              !textNumbers[clean] &&
              !/^\d/.test(clean);
     });
     
-    if (meaningfulWords.length > 0) {
-      description = meaningfulWords[0].charAt(0).toUpperCase() + meaningfulWords[0].slice(1);
-    } else {
-      description = 'Purchase'; // Ultimate fallback
-    }
+    description = meaningfulWords.length > 0 ? 
+      meaningfulWords[0].charAt(0).toUpperCase() + meaningfulWords[0].slice(1) :
+      'Transaction';
   }
 
   // Detect transaction type
@@ -196,6 +177,13 @@ router.post('/parse', async (req, res) => {
         if (merchantResult?.business_type) {
           console.log('🏪 Found business_type:', merchantResult.business_type);
           console.log('🏪 typical_categories:', merchantResult.typical_categories);
+          console.log('🏪 matched_merchant:', merchantResult.matched_merchant);
+          
+          // Update description with proper merchant name if found
+          if (merchantResult.matched_merchant) {
+            parsed.description = merchantResult.matched_merchant.charAt(0).toUpperCase() + merchantResult.matched_merchant.slice(1);
+            console.log('🏪 Updated description to:', parsed.description);
+          }
           
           // If it has typical_categories, use the appropriate language one
           if (merchantResult.typical_categories && merchantResult.typical_categories.length > 0) {
