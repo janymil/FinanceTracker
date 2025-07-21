@@ -8,9 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { CategorySelector } from './CategorySelector';
-import { getCurrentLanguageForAPI } from '@/lib/queryClient';
-import { getIconEmoji } from '@/lib/iconUtils';
 
 interface SimpleVoiceInputProps {
   onClose: () => void;
@@ -512,19 +509,16 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               />
             </div>
 
-            <CategorySelector
-              selectedCategoryId={accumulatedData.categoryId}
-              suggestedCategory={accumulatedData.category || extractedCategory || ''}
-              transactionType={accumulatedData.type}
-              categories={categories}
-              onCategoryChange={(categoryId, categoryName) => {
-                setAccumulatedData(prev => ({
-                  ...prev,
-                  categoryId,
-                  category: categoryName
-                }));
-              }}
-            />
+            <div>
+              <Label htmlFor="category">{t('Category')}</Label>
+              <Input
+                id="category"
+                value={extractedCategory || accumulatedData.category || ''}
+                readOnly
+                className={extractedCategory || accumulatedData.category ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'bg-muted/50'}
+                placeholder={t('voice.category_auto')}
+              />
+            </div>
 
             <div>
               <Label htmlFor="type">{t('Type')}</Label>
