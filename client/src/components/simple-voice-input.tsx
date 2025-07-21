@@ -85,15 +85,34 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
+      recognitionRef.current.continuous = true;  // Keep listening continuously
+      recognitionRef.current.interimResults = true;  // Show interim results
+      recognitionRef.current.maxAlternatives = 1;
       recognitionRef.current.lang = getRecognitionLanguage(userLanguage);
 
       recognitionRef.current.onresult = (event: any) => {
-        const finalTranscript = event.results[0][0].transcript;
-        console.log('🎤 Voice captured:', finalTranscript);
-        setTranscript(finalTranscript);
-        processVoiceInput(finalTranscript);
+        let interimTranscript = '';
+        let finalTranscript = '';
+        
+        // Process all results
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            finalTranscript += result[0].transcript;
+          } else {
+            interimTranscript += result[0].transcript;
+          }
+        }
+        
+        // Update display with interim + final transcript
+        const currentTranscript = finalTranscript + interimTranscript;
+        console.log('🎤 Voice listening:', currentTranscript);
+        setTranscript(currentTranscript);
+        
+        // Only process when we have final results and user stops manually
+        if (finalTranscript && !isListening) {
+          processVoiceInput(finalTranscript);
+        }
       };
 
       recognitionRef.current.onerror = (event: any) => {
@@ -102,7 +121,22 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       };
 
       recognitionRef.current.onend = () => {
-        setIsListening(false);
+        // Only restart if user is still supposed to be listening
+        if (isListening) {
+          console.log('🔄 Speech recognition ended, restarting...');
+          setTimeout(() => {
+            if (recognitionRef.current && isListening) {
+              try {
+                recognitionRef.current.start();
+              } catch (error) {
+                console.log('Failed to restart recognition:', error);
+                setIsListening(false);
+              }
+            }
+          }, 100);
+        } else {
+          setIsListening(false);
+        }
       };
     }
 
@@ -184,6 +218,12 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       recognitionRef.current.stop();
     }
     setIsListening(false);
+    
+    // Process the final transcript when user manually stops
+    if (transcript.trim()) {
+      console.log('🛑 User stopped listening, processing:', transcript);
+      processVoiceInput(transcript.trim());
+    }
   };
 
   // Save transaction using accumulated data
@@ -258,12 +298,13 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               className="w-full"
             >
               {isListening ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-              {isListening ? t('voice.stop_listening') : t('voice.start_listening')}
+              {isListening ? 'Stop & Process' : 'Start Listening'}
             </Button>
             
             {transcript && (
               <div className="mt-2 bg-gray-50 dark:bg-gray-700 p-3 rounded text-sm">
                 <strong>{t('voice.transcript')}:</strong> {transcript}
+                {isListening && <span className="ml-2 animate-pulse text-blue-500">🎤 Listening...</span>}
               </div>
             )}
           </div>
