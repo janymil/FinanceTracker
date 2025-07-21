@@ -4,108 +4,117 @@ import { z } from "zod";
 import { storage } from "../storage";
 import { lookupMerchant } from "../../lib/merchantLookup";
 
-// Dynamic pattern-based transcript parsing (no AI required)
+// Intelligent parsing function for complete sentences
 function parseTranscriptWithPatterns(transcript: string, userLanguage: string): any {
-  const lowerText = transcript.toLowerCase();
-  const words = transcript.split(/\s+/);
+  const lowerText = transcript.toLowerCase().trim();
+  const words = transcript.split(/\s+/).filter(w => w.length > 0);
   
-  console.log('🔍 Parsing transcript words:', words);
+  console.log('🔍 Parsing COMPLETE transcript:', transcript);
+  console.log('🔍 Words found:', words);
   
-  // Dynamic amount extraction
+  // Amount extraction - look for numbers with currency indicators
   let amount = '';
   
-  // Text to number mapping for multiple languages
+  // Text to number mapping
   const numberWords: { [key: string]: string } = {
-    // Slovak
-    'jeden': '1', 'dva': '2', 'tri': '3', 'štyri': '4', 'päť': '5',
-    'šesť': '6', 'sedem': '7', 'osem': '8', 'deväť': '9', 'desať': '10',
-    'dvadsať': '20', 'tridsať': '30', 'štyridsať': '40', 'päťdesiat': '50',
-    // Spanish  
-    'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4', 'cinco': '5',
-    'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9', 'diez': '10',
-    'veinte': '20', 'treinta': '30', 'cuarenta': '40', 'cincuenta': '50',
-    // English
-    'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
-    'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
-    'twenty': '20', 'thirty': '30', 'forty': '40', 'fifty': '50'
+    'jeden': '1', 'dva': '2', 'tri': '3', 'štyri': '4', 'päť': '5', 'šesť': '6', 'sedem': '7', 'osem': '8', 'deväť': '9', 'desať': '10',
+    'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4', 'cinco': '5', 'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9', 'diez': '10',
+    'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10'
   };
 
-  // First look for numeric amounts
-  for (const word of words) {
-    const cleanWord = word.replace(/[^\d.,]/g, '');
-    if (/^\d+([.,]\d{1,2})?$/.test(cleanWord)) {
-      amount = cleanWord.replace(',', '.');
+  // Look for amounts in various formats
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    
+    // Numeric amounts like "5.50", "5:50", "5,50"
+    const numericMatch = word.match(/(\d+)[.:,](\d{1,2})/);
+    if (numericMatch) {
+      amount = numericMatch[1] + '.' + numericMatch[2];
+      console.log('💰 Found decimal amount:', amount);
+      break;
+    }
+    
+    // Simple numbers followed by currency
+    const simpleNumMatch = word.match(/^(\d+)$/);
+    if (simpleNumMatch && i < words.length - 1) {
+      const nextWord = words[i + 1].toLowerCase();
+      if (nextWord.includes('eur') || nextWord.includes('dol') || nextWord.includes('€') || nextWord.includes('$')) {
+        amount = simpleNumMatch[1];
+        console.log('💰 Found simple amount:', amount);
+        break;
+      }
+    }
+    
+    // Text numbers
+    const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
+    if (numberWords[cleanWord]) {
+      amount = numberWords[cleanWord];
+      console.log('💰 Found text amount:', amount);
       break;
     }
   }
 
-  // If no numeric amount, look for text numbers
-  if (!amount) {
-    for (const word of words) {
-      const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
-      if (numberWords[cleanWord]) {
-        amount = numberWords[cleanWord];
-        break;
-      }
-    }
-  }
-
-  // Dynamic description extraction - find meaningful business/item words
+  // Description extraction - find business/item names
   let description = '';
-  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', 'dolár', '$', '€'];
+  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', 'dolár', '$', '€', 'včera', 'yesterday', 'ayer', 'predvčerom', 'today', 'dnes', 'hoy'];
   
   const meaningfulWords = words.filter(word => {
     const clean = word.toLowerCase().replace(/[^\w]/g, '');
     return clean.length > 2 && 
            !stopWords.includes(clean) && 
            !Object.keys(numberWords).includes(clean) &&
-           !/^\d/.test(clean);
+           !/^\d+[.:,]?\d*$/.test(clean); // Skip pure numbers
   });
 
   if (meaningfulWords.length > 0) {
-    description = meaningfulWords.slice(0, 2).join(' ').trim();
+    description = meaningfulWords.join(' ').trim();
+    console.log('📝 Found description:', description);
   }
 
-  // Dynamic type detection
-  let type = ''; // Start empty, let user decide if not obvious
-  const expenseIndicators = ['kúpil', 'bought', 'zaplatil', 'paid', 'compré', 'pagué', 'spend', 'cost', 'stalo'];
-  const incomeIndicators = ['dostal', 'received', 'výplata', 'salary', 'recibí', 'earned', 'income', 'príjem'];
+  // Type detection based on action words
+  let type = '';
+  const expenseWords = ['kúpil', 'bought', 'zaplatil', 'paid', 'compré', 'pagué', 'spend', 'cost', 'stalo', 'purchase'];
+  const incomeWords = ['dostal', 'received', 'výplata', 'salary', 'recibí', 'earned', 'income', 'príjem', 'got', 'earn'];
   
-  const hasExpense = expenseIndicators.some(indicator => lowerText.includes(indicator));
-  const hasIncome = incomeIndicators.some(indicator => lowerText.includes(indicator));
+  const hasExpenseWord = expenseWords.some(word => lowerText.includes(word));
+  const hasIncomeWord = incomeWords.some(word => lowerText.includes(word));
   
-  if (hasExpense && !hasIncome) {
+  if (hasExpenseWord && !hasIncomeWord) {
     type = 'expense';
-  } else if (hasIncome && !hasExpense) {
+    console.log('💸 Detected expense type');
+  } else if (hasIncomeWord && !hasExpenseWord) {
     type = 'income';
+    console.log('💰 Detected income type');
   }
-  // If neither or both detected, leave empty for user to decide
 
-  // Dynamic date calculation - only set if mentioned
+  // Date extraction
   let date = '';
-  
   if (lowerText.includes('včera') || lowerText.includes('yesterday') || lowerText.includes('ayer')) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     date = yesterday.toISOString().split('T')[0];
+    console.log('📅 Found date: yesterday =', date);
   } else if (lowerText.includes('predvčerom') || lowerText.includes('day before yesterday') || lowerText.includes('anteayer')) {
     const dayBefore = new Date();
     dayBefore.setDate(dayBefore.getDate() - 2);
     date = dayBefore.toISOString().split('T')[0];
+    console.log('📅 Found date: day before yesterday =', date);
   } else if (lowerText.includes('dnes') || lowerText.includes('today') || lowerText.includes('hoy')) {
-    const today = new Date();
-    date = today.toISOString().split('T')[0];
+    date = new Date().toISOString().split('T')[0];
+    console.log('📅 Found date: today =', date);
   }
-  // If no date mentioned, leave empty
 
-  return {
+  const result = {
     amount,
-    description,
+    description, 
     type,
     date,
     note: transcript,
-    category: '' // Will be filled by merchant lookup
+    category: ''
   };
+  
+  console.log('✅ Final parsed result:', result);
+  return result;
 }
 
 const completeTransactionSchema = z.object({

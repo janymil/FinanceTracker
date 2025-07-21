@@ -80,20 +80,33 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
+      recognitionRef.current.continuous = false; // Stop after complete sentence
+      recognitionRef.current.interimResults = false; // Only final results
       recognitionRef.current.lang = getRecognitionLanguage(userLanguage);
 
       recognitionRef.current.onresult = (event: any) => {
+        let interimTranscript = '';
         let finalTranscript = '';
+        
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript + ' ';
+          } else {
+            interimTranscript += event.results[i][0].transcript;
           }
         }
-        if (finalTranscript) {
-          setTranscript(prev => prev + finalTranscript);
-          extractDataFromTranscript(finalTranscript);
+        
+        // Show interim results for user feedback
+        setTranscript(prev => {
+          const withoutInterim = prev.replace(/\s*\[interim\].*$/, '');
+          return withoutInterim + (finalTranscript || '') + 
+                 (interimTranscript ? ' [interim] ' + interimTranscript : '');
+        });
+        
+        // Only process final transcript when it's substantial
+        if (finalTranscript.trim().length > 3) {
+          console.log('🎤 FINAL transcript received:', finalTranscript.trim());
+          extractDataFromTranscript(finalTranscript.trim());
         }
       };
 
@@ -117,47 +130,42 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     };
   }, [userLanguage]);
 
-  // Dynamic voice parsing - send raw transcript to server for intelligent processing
+  // Process only COMPLETE transcript - no fragments!  
   const extractDataFromTranscript = async (text: string) => {
-    console.log('🎤 Processing transcript:', text);
+    if (!text.trim() || text.length < 10) return; // Only process substantial text
+    
+    console.log('🎤 Processing COMPLETE sentence:', text);
     
     try {
-      // Send raw transcript to server for dynamic parsing
-      const response = await apiRequest('POST', '/api/voice/parse', {
-        transcript: text,
-        userLanguage: userLanguage
+      const userLanguage = getCurrentLanguageForAPI();
+      
+      const response = await apiRequest('/api/voice/parse', {
+        method: 'POST',
+        body: JSON.stringify({
+          transcript: text,
+          userLanguage: userLanguage
+        })
       });
 
       if (response?.data) {
-        console.log('📋 Parsed transaction data:', response.data);
+        console.log('📋 Server parsed:', response.data);
         
-        // Update transaction data with parsed values
-        setTransactionData(prev => ({
-          ...prev,
-          amount: response.data.amount || prev.amount,
-          description: response.data.description || prev.description,
-          type: (response.data.type as 'income' | 'expense') || prev.type,
-          date: response.data.date || prev.date,
-          note: response.data.note || prev.note
-        }));
+        // Replace form data with extracted values - don't merge fragments
+        setTransactionData({
+          amount: response.data.amount || '',
+          description: response.data.description || '',
+          type: (response.data.type as 'income' | 'expense') || 'expense',
+          date: response.data.date || '',
+          note: response.data.note || ''
+        });
 
-        // Set category if found
+        // Set category
         if (response.data.category) {
           setExtractedCategory(response.data.category);
         }
       }
     } catch (error) {
-      console.error('❌ Failed to parse transcript:', error);
-      // Fallback: extract basic information without hardcoded patterns
-      const words = text.split(' ');
-      let description = words.filter(word => word.length > 2).slice(0, 3).join(' ');
-      
-      if (description) {
-        setTransactionData(prev => ({
-          ...prev,
-          description: description
-        }));
-      }
+      console.error('❌ Voice parsing failed:', error);
     }
   };
 
