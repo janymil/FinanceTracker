@@ -68,18 +68,21 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     }
   }
 
-  // Extract description (meaningful words)
-  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes'];
+  // Extract description (meaningful words) - improved filtering
+  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'iba', 'len', 'this', 'that', 'and', 'or', 'but'];
   
   const meaningfulWords = words.filter(word => {
     const clean = word.toLowerCase().replace(/[^\w]/g, '');
-    return clean.length > 2 && 
+    return clean.length > 1 && 
            !stopWords.includes(clean) && 
            !textNumbers[clean] &&
-           !/^\d/.test(clean);
+           !/^\d/.test(clean) &&
+           !/^[.:,€$]/.test(clean);
   });
 
-  const description = meaningfulWords.join(' ').trim();
+  // Keep original if no meaningful words found
+  const description = meaningfulWords.length > 0 ? meaningfulWords.join(' ').trim() : 
+                     words.filter(w => w.length > 1 && !/^\d/.test(w)).join(' ').trim();
 
   // Detect transaction type
   let type = 'expense'; // Default

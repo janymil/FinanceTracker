@@ -24,6 +24,14 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const { t, i18n } = useTranslation();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [accumulatedData, setAccumulatedData] = useState({
+    amount: '',
+    description: '',
+    type: 'expense' as 'expense' | 'income',
+    date: '',
+    category: '',
+    note: ''
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [extractedCategory, setExtractedCategory] = useState<string>('');
   
@@ -128,16 +136,31 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       if (data.success && data.data) {
         const parsed = data.data;
         
-        // Update form with extracted data
-        setTransactionData({
-          amount: parsed.amount || '',
-          description: parsed.description || '',
-          type: parsed.type || 'expense',
-          date: parsed.date || '',
-          note: parsed.note || text
+        // Accumulate data instead of overwriting - merge with existing data
+        setAccumulatedData(prev => {
+          const updated = {
+            amount: parsed.amount || prev.amount,
+            description: parsed.description || prev.description,
+            type: parsed.type || prev.type,
+            date: parsed.date || prev.date,
+            category: parsed.category || prev.category,
+            note: parsed.note || text
+          };
+          
+          console.log('🔄 Accumulated data:', updated);
+          return updated;
         });
+        
+        // Update transaction data for display
+        setTransactionData(prev => ({
+          amount: parsed.amount || prev.amount,
+          description: parsed.description || prev.description,
+          type: parsed.type || prev.type,
+          date: parsed.date || prev.date,
+          note: parsed.note || text
+        }));
 
-        // Set category
+        // Set category (accumulate)
         if (parsed.category) {
           setExtractedCategory(parsed.category);
         }
@@ -163,15 +186,19 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     setIsListening(false);
   };
 
-  // Save transaction
+  // Save transaction using accumulated data
   const handleSave = async () => {
-    if (!transactionData.amount || !transactionData.description) return;
+    if (!accumulatedData.amount || !accumulatedData.description) return;
 
     setIsSaving(true);
     try {
       await onComplete({
-        ...transactionData,
-        category: extractedCategory
+        amount: accumulatedData.amount,
+        description: accumulatedData.description,
+        type: accumulatedData.type,
+        date: accumulatedData.date,
+        note: accumulatedData.note,
+        category: accumulatedData.category || extractedCategory
       });
       onClose();
     } catch (error) {
@@ -207,6 +234,22 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             </Button>
           </div>
 
+          {/* Data Progress Indicator */}
+          {(accumulatedData.amount || accumulatedData.description) && (
+            <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+              <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-2">
+                📊 Captured Data:
+              </p>
+              <div className="text-xs text-green-600 dark:text-green-400 space-y-1">
+                {accumulatedData.amount && <div>✓ Amount: {accumulatedData.amount}</div>}
+                {accumulatedData.description && <div>✓ Description: {accumulatedData.description}</div>}
+                {accumulatedData.type && <div>✓ Type: {accumulatedData.type}</div>}
+                {accumulatedData.date && <div>✓ Date: {accumulatedData.date}</div>}
+                {accumulatedData.category && <div>✓ Category: {accumulatedData.category}</div>}
+              </div>
+            </div>
+          )}
+
           {/* Voice Controls */}
           <div>
             <Button
@@ -233,8 +276,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 id="amount"
                 type="number"
                 step="0.01"
-                value={transactionData.amount}
-                onChange={(e) => setTransactionData(prev => ({ ...prev, amount: e.target.value }))}
+                value={accumulatedData.amount}
+                onChange={(e) => setAccumulatedData(prev => ({ ...prev, amount: e.target.value }))}
                 placeholder="0.00"
               />
             </div>
@@ -243,8 +286,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               <Label htmlFor="description">{t('transaction.description')}</Label>
               <Input
                 id="description"
-                value={transactionData.description}
-                onChange={(e) => setTransactionData(prev => ({ ...prev, description: e.target.value }))}
+                value={accumulatedData.description}
+                onChange={(e) => setAccumulatedData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder={t('transaction.description_placeholder')}
               />
             </div>
@@ -264,9 +307,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             <div>
               <Label htmlFor="type">{t('transaction.type')}</Label>
               <Select 
-                value={transactionData.type} 
+                value={accumulatedData.type} 
                 onValueChange={(value: 'income' | 'expense') => 
-                  setTransactionData(prev => ({ ...prev, type: value }))
+                  setAccumulatedData(prev => ({ ...prev, type: value }))
                 }
               >
                 <SelectTrigger>
@@ -284,8 +327,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               <Input
                 id="date"
                 type="date"
-                value={transactionData.date}
-                onChange={(e) => setTransactionData(prev => ({ ...prev, date: e.target.value }))}
+                value={accumulatedData.date}
+                onChange={(e) => setAccumulatedData(prev => ({ ...prev, date: e.target.value }))}
               />
             </div>
           </div>
@@ -294,7 +337,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           <div className="flex gap-2 pt-4">
             <Button
               onClick={handleSave}
-              disabled={isSaving || !transactionData.amount || !transactionData.description}
+              disabled={isSaving || !accumulatedData.amount || !accumulatedData.description}
               className="flex-1"
             >
               {isSaving ? t('voice.saving') : t('voice.save_transaction')}
