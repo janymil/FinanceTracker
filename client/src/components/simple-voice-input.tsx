@@ -854,7 +854,12 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             </div>
 
             <div>
-              <Label htmlFor="category">{t('Category')}</Label>
+              <Label htmlFor="category">
+                {t('Category')} 
+                <span className="text-xs text-gray-500 ml-2">
+                  ({categories.length}/{allCategories?.length || 0} {accumulatedData.type} categories)
+                </span>
+              </Label>
               <Select 
                 value={accumulatedData.categoryId?.toString() || ''} 
                 onValueChange={(value) => {
