@@ -75,22 +75,28 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   });
 
   // Get categories for matching
-  const { data: allCategories } = useQuery({
+  const { data: allCategories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['/api/categories'],
     staleTime: 5 * 60 * 1000
   });
 
-  // Filter categories by transaction type
-  const categories = allCategories?.filter(cat => cat.type === accumulatedData.type) || [];
-  
-  // Debug logging for category filtering
-  console.log('🔍 [VOICE-INPUT] Category filtering debug:', {
-    totalCategories: allCategories?.length || 0,
-    transactionType: accumulatedData.type,
-    filteredCategories: categories.length,
-    allCategoryNames: allCategories?.map(c => `${c.name} (${c.type})`),
-    filteredCategoryNames: categories.map(c => `${c.name} (${c.type})`)
-  });
+  // Filter categories by transaction type - ensure we have data first
+  const categories = React.useMemo(() => {
+    if (!allCategories || allCategories.length === 0) {
+      console.log('🔍 [VOICE-INPUT] No categories available yet');
+      return [];
+    }
+    
+    const filtered = allCategories.filter(cat => cat.type === accumulatedData.type);
+    console.log('🔍 [VOICE-INPUT] Category filtering:', {
+      totalCategories: allCategories.length,
+      transactionType: accumulatedData.type,
+      filteredCategories: filtered.length,
+      sampleFiltered: filtered.slice(0, 3).map(c => c.name)
+    });
+    
+    return filtered;
+  }, [allCategories, accumulatedData.type]);
 
   const userLanguage = (user as any)?.language || i18n.language || 'en-us';
   const userCurrency = (user as any)?.currency || '$';
@@ -857,7 +863,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               <Label htmlFor="category">
                 {t('Category')} 
                 <span className="text-xs text-gray-500 ml-2">
-                  ({categories.length}/{allCategories?.length || 0} {accumulatedData.type} categories)
+                  {categoriesLoading ? 'Loading...' : `(${categories.length}/${allCategories?.length || 0} ${accumulatedData.type})`}
                 </span>
               </Label>
               <Select 
@@ -885,11 +891,18 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Debug information - Show total categories and filtering info */}
-                  {(!categories || categories.length === 0) && (
+                  {/* Show loading state */}
+                  {categoriesLoading && (
+                    <SelectItem value="loading" disabled>
+                      <span className="text-gray-500 text-xs">Loading categories...</span>
+                    </SelectItem>
+                  )}
+                  
+                  {/* Debug information when no categories match filter */}
+                  {!categoriesLoading && (!categories || categories.length === 0) && (
                     <SelectItem value="debug-info" disabled>
                       <span className="text-red-500 text-xs">
-                        Debug: Total categories: {allCategories?.length || 0}, Type: {accumulatedData.type}, Filtered: {categories.length}
+                        No {accumulatedData.type} categories found ({allCategories?.length || 0} total)
                       </span>
                     </SelectItem>
                   )}
