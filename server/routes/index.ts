@@ -28,6 +28,7 @@ import { registerTTSRoutes } from "./ttsRoutes.js";
 import { registerLearningRoutes } from "./learningRoutes.js";
 import { registerVoiceRoutes } from "./voiceRoutes.js";
 import groqVoiceRoutes from "./groqVoiceRoutes.js";
+import mistralVoiceRoutes from "./mistralVoiceRoutes.js";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -73,6 +74,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Groq voice processing routes
   app.use('/api/voice-groq', groqVoiceRoutes);
+  
+  // Mistral voice processing routes (better accuracy)
+  app.use('/api/voice-mistral', mistralVoiceRoutes);
   
   // Demo routes for interactive video features
   app.use('/api/demo', demoRoutes);

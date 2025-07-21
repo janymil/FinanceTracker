@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { UnifiedAICache } from "../lib/unifiedAICache";
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
-import { mistralClient } from "./mistralClient";
+import { MistralClient } from "./mistralClient.js";
 
 // Using gpt-4o-mini for cost optimization while maintaining quality for financial analysis
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
