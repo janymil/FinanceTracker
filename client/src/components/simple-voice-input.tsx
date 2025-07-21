@@ -120,20 +120,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       };
 
       recognitionRef.current.onend = () => {
-        // Keep the session alive by restarting recognition if user hasn't stopped manually
-        if (isListening) {
-          console.log('🔄 Browser stopped recognition, restarting to continue session...');
-          setTimeout(() => {
-            if (recognitionRef.current && isListening) {
-              try {
-                recognitionRef.current.start();
-              } catch (error) {
-                console.log('Failed to restart recognition:', error);
-                setIsListening(false);
-              }
-            }
-          }, 100);
-        }
+        console.log('🛑 Speech recognition ended naturally');
+        setIsListening(false);
       };
     }
 

@@ -107,11 +107,9 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
   // Simple transaction type detection
   let type = 'expense'; // Default
   // Basic income detection - can be enhanced later
-  if (text.includes('received') || text.includes('salary') || text.includes('income')) {
-    type = 'income';
-  }
-  
-  if (hasIncome) {
+  if (text.includes('received') || text.includes('salary') || text.includes('income') || 
+      text.includes('príjem') || text.includes('mzda') || text.includes('plat') ||
+      text.includes('ingreso') || text.includes('salario') || text.includes('sueldo')) {
     type = 'income';
   }
 
