@@ -246,15 +246,19 @@ export async function lookupMerchant(
       return directMatch;
     }
     
-    // Step 5: Try global merchant data if country-specific didn't work
-    if (countryCode !== 'global') {
-      const globalData = await loadMerchantData('global');
+    // Step 5: Try direct global merchant lookup using global.json
+    console.log(`[MerchantLookup] Trying global merchants from global.json...`);
+    try {
+      const globalPath = path.resolve(process.cwd(), 'lib', 'merchants', 'global.json');
+      const globalData = JSON.parse(await fs.readFile(globalPath, 'utf-8'));
       const globalMatch = await findMerchantMatch(merchantName, globalData);
       if (globalMatch) {
         globalMatch.source = 'global';
         console.log(`[MerchantLookup] Global match found:`, globalMatch);
         return globalMatch;
       }
+    } catch (globalError) {
+      console.log(`[MerchantLookup] Could not load global merchants:`, globalError.message);
     }
     
     // Step 6: Simple context analysis using country-specific merchant data
