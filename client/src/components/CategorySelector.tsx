@@ -35,7 +35,9 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   const [mode, setMode] = useState<'existing' | 'new'>('existing');
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  const filteredCategories = categories.filter(cat => cat.type === transactionType);
+  // Safety check for categories prop
+  const safeCategories = categories || [];
+  const filteredCategories = safeCategories.filter(cat => cat.type === transactionType);
   const hasExistingMatch = filteredCategories.some(cat => 
     cat.name.toLowerCase() === suggestedCategory.toLowerCase()
   );
@@ -62,7 +64,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
   const handleExistingCategoryChange = (value: string) => {
     const categoryId = parseInt(value);
-    const category = categories.find(c => c.id === categoryId);
+    const category = safeCategories.find(c => c.id === categoryId);
     if (category) {
       onCategoryChange(categoryId, category.name);
       setMode('existing');
@@ -117,28 +119,45 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
       )}
 
       {/* Mode Toggle Buttons */}
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          variant={mode === 'existing' ? 'default' : 'outline'}
-          size="sm"
-          onClick={switchToExistingCategory}
-          disabled={filteredCategories.length === 0}
-        >
-          Use Existing
-        </Button>
-        <Button
-          type="button"
-          variant={mode === 'new' ? 'default' : 'outline'}
-          size="sm"
-          onClick={switchToNewCategory}
-        >
-          Create New
-        </Button>
-      </div>
+      {filteredCategories.length > 0 && (
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant={mode === 'existing' ? 'default' : 'outline'}
+            size="sm"
+            onClick={switchToExistingCategory}
+            disabled={filteredCategories.length === 0}
+          >
+            Use Existing
+          </Button>
+          <Button
+            type="button"
+            variant={mode === 'new' ? 'default' : 'outline'}
+            size="sm"
+            onClick={switchToNewCategory}
+          >
+            Create New
+          </Button>
+        </div>
+      )}
+      
+      {/* If no existing categories, show create new button only */}
+      {filteredCategories.length === 0 && (
+        <div className="text-center">
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={switchToNewCategory}
+            className="w-full"
+          >
+            Create New Category
+          </Button>
+        </div>
+      )}
 
       {/* Existing Category Selector */}
-      {mode === 'existing' && (
+      {mode === 'existing' && filteredCategories.length > 0 && (
         <Select
           value={selectedCategoryId ? selectedCategoryId.toString() : ''}
           onValueChange={handleExistingCategoryChange}
