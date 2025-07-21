@@ -249,7 +249,18 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         setTranscript(result.data.transcript || '');
         
         // Intelligently match the suggested category with existing ones
-        const matchedCategory = await matchCategoryIntelligently(result.data.category, categories as any[]);
+        let matchedCategory: { name: string; id?: string | number } = { name: result.data.category };
+        
+        if (categories && categories.length > 0) {
+          console.log('🏷️ Starting intelligent category matching...');
+          console.log('🏷️ Parsed category from LLaMA:', result.data.category);
+          console.log('🏷️ Available user categories:', categories.map(c => c.name));
+          
+          matchedCategory = await matchCategoryIntelligently(result.data.category, categories as any[]);
+          console.log('🏷️ Final matched category:', matchedCategory);
+        } else {
+          console.log('⚠️ No user categories available, using raw category:', result.data.category);
+        }
         
         // Store the parsed data for form pre-filling
         setAccumulatedData({
@@ -258,7 +269,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           type: result.data.type || 'expense',
           date: result.data.date || new Date().toISOString().split('T')[0],
           category: matchedCategory.name,
-          categoryId: matchedCategory.id,
+          categoryId: matchedCategory.id || '',
           note: result.data.transcript || '' // Store transcript as note
         });
         
