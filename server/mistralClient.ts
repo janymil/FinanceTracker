@@ -39,7 +39,7 @@ export interface MistralResponse {
 export class MistralClient {
   private apiKey: string;
   private baseUrl = 'https://api.mistral.ai/v1';
-  private defaultModel = 'mistral-small-3.2';
+  private defaultModel = 'mistral-small-2506';
 
   constructor() {
     this.apiKey = process.env.MISTRAL_API_KEY || '';

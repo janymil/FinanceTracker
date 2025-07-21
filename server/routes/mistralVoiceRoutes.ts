@@ -21,46 +21,70 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     console.log('🎤 Mistral voice transcription and parsing request');
     console.log('🌍 User preferences:', { userLanguage, userCurrency });
 
-    // Step 1: Transcribe with Groq Distil-Whisper (STT)
-    console.log('🎙️ Step 1: Transcribing audio with Groq Distil-Whisper...');
-    const transcription = await transcribeAudioWithGroq(req.file.buffer);
+    // Get user ID from authentication
+    const userId = req.auth?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    // Step 1: Transcribe with Mistral Voxtral-mini (STT)
+    console.log('🎙️ Step 1: Transcribing audio with Mistral Voxtral-mini...');
+    const transcription = await mistralClient.transcribeAudio(req.file.buffer);
     console.log('🎙️ Transcription result:', transcription);
     
     if (!transcription || transcription.trim().length < 2) {
       return res.status(400).json({ error: 'No valid transcription received' });
     }
 
-    // Step 2: Parse with Mistral (better than LLaMA)
-    console.log('🧠 Step 2: Parsing transaction with Mistral...');
-    const parsedTransaction = await parseTransactionWithMistral(transcription, userLanguage, userCurrency);
+    // Step 2: Get user's existing categories from database
+    console.log('📂 Step 2: Fetching user categories...');
+    const userCategories = await storage.getCategoriesByUserId(userId);
+    console.log('📂 User has', userCategories.length, 'categories');
+
+    // Step 3: Parse with Mistral Small 2506 (with user categories)
+    console.log('🧠 Step 3: Parsing transaction with Mistral (with user categories)...');
+    const parsedTransaction = await parseTransactionWithMistral(transcription, userLanguage, userCurrency, userCategories);
     console.log('🧠 Mistral parsed transaction:', parsedTransaction);
 
-    // Step 3: Enhance category with merchant lookup (optional)
-    let enhancedCategory = parsedTransaction.category;
-    
-    if (parsedTransaction.description && parsedTransaction.description.length > 2) {
+    // Step 4: Match category intelligently with user's existing categories
+    console.log('🎯 Step 4: Intelligent category matching...');
+    const categoryMatchResult = await matchCategoryIntelligentlyMistral(
+      parsedTransaction.category,
+      userCategories,
+      userLanguage
+    );
+
+    let finalCategory = parsedTransaction.category;
+    let newCategoryId = null;
+
+    if (categoryMatchResult.createNew) {
+      // Create new category if AI suggests it
+      console.log('✨ Creating new category:', categoryMatchResult.newCategoryName);
       try {
-        const countryCode = userLanguage === 'sk-sk' ? 'sk' : 
-                          userLanguage === 'es-pe' ? 'pe' : 'us';
-        
-        console.log('🏪 Step 3: Enhancing category with merchant lookup...');
-        const merchantResult = await lookupMerchant(transcription, countryCode);
-        
-        if (merchantResult && merchantResult.typical_categories) {
-          const languageIndex = userLanguage === 'sk-sk' ? 1 : 
-                               userLanguage === 'es-pe' ? 2 : 0;
-          enhancedCategory = merchantResult.typical_categories[languageIndex] || parsedTransaction.category;
-          console.log('🏪 Enhanced category from merchant lookup:', enhancedCategory);
-        }
-      } catch (merchantError) {
-        console.log('🏪 Merchant lookup failed, using Mistral category:', merchantError instanceof Error ? merchantError.message : 'Unknown error');
+        const newCategory = await storage.createCategory({
+          userId,
+          name: categoryMatchResult.newCategoryName,
+          type: parsedTransaction.type,
+          icon: 'other',
+          color: '#6B7280'
+        });
+        finalCategory = newCategory.name;
+        newCategoryId = newCategory.id;
+      } catch (error) {
+        console.error('❌ Failed to create new category:', error);
+        finalCategory = parsedTransaction.category;
       }
+    } else if (categoryMatchResult.matchedCategory) {
+      // Use matched existing category
+      finalCategory = categoryMatchResult.matchedCategory.name;
+      newCategoryId = categoryMatchResult.matchedCategory.id;
     }
     
     const finalResult = {
       ...parsedTransaction,
-      category: enhancedCategory,
-      transcript: transcription // Include original transcript
+      category: finalCategory,
+      categoryId: newCategoryId,
+      transcript: transcription
     };
     
     console.log('✅ Final Mistral analysis result:', finalResult);
@@ -88,9 +112,19 @@ router.post('/parse-text', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Transcript is required' });
     }
     
+    // Get user ID from authentication
+    const userId = req.auth?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
     console.log('🧠 Testing Mistral text parsing:', transcript);
     
-    const result = await parseTransactionWithMistral(transcript, userLanguage, userCurrency);
+    // Get user's existing categories
+    const userCategories = await storage.getCategoriesByUserId(userId);
+    console.log('📂 User has', userCategories.length, 'categories for text parsing');
+    
+    const result = await parseTransactionWithMistral(transcript, userLanguage, userCurrency, userCategories);
     
     res.json({ success: true, data: result });
     
