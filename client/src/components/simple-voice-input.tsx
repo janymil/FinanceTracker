@@ -139,18 +139,54 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
     // Extract business/vendor - will be processed by AI categorization later
 
-    // Extract description/item - AI will categorize later
-    const itemKeywords = ['káva', 'coffee', 'café', 'jedlo', 'food', 'meal', 'chlieb', 'bread', 'mlieko', 'milk', 
-                         'pivo', 'beer', 'benzín', 'gas', 'nákup', 'shopping', 'autobus', 'taxi', 'vlak', 'uber'];
+    // Extract merchant/vendor and item description 
+    let extractedDescription = '';
     
-    for (const keyword of itemKeywords) {
-      if (lowerText.includes(keyword)) {
-        setTransactionData(prev => ({
-          ...prev,
-          description: keyword
-        }));
+    // Try to extract merchant first (this becomes the description)
+    const merchantPatterns = [
+      /(?:v|na|at|in|u)\s+([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+?)(?:\s+(?:za|for|cost|kúpil|bought))/gi,
+      /(?:kúpil|bought|compré)\s+(?:som\s+)?(?:si\s+)?(?:v|na|at|in|u)?\s*([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+?)(?:\s+(?:za|for))/gi,
+      /(?:obchod|shop|store|market|supermarket|restaurant|café|bar|hotel|reštaurácia|kaviareň)\s+([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+)/gi
+    ];
+
+    for (const pattern of merchantPatterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        extractedDescription = match[1].trim();
         break;
       }
+    }
+
+    // If no merchant found, try to extract item/service
+    if (!extractedDescription) {
+      const itemKeywords = ['káva', 'coffee', 'café', 'jedlo', 'food', 'meal', 'chlieb', 'bread', 'mlieko', 'milk', 
+                           'pivo', 'beer', 'benzín', 'gas', 'palivo', 'nákup', 'shopping', 'potraviny', 'groceries',
+                           'autobus', 'taxi', 'vlak', 'uber', 'metro', 'bus', 'train'];
+      
+      for (const keyword of itemKeywords) {
+        if (lowerText.includes(keyword)) {
+          extractedDescription = keyword;
+          break;
+        }
+      }
+    }
+
+    // If still nothing, extract any meaningful words (fallback)
+    if (!extractedDescription) {
+      const words = text.split(' ').filter(word => 
+        word.length > 2 && 
+        !['som', 'kúpil', 'bought', 'zaplatil', 'paid', 'za', 'for', 'eur', 'euro', 'dollar', 'dolár'].includes(word.toLowerCase())
+      );
+      if (words.length > 0) {
+        extractedDescription = words.slice(0, 2).join(' '); // Take first 2 meaningful words
+      }
+    }
+
+    if (extractedDescription) {
+      setTransactionData(prev => ({
+        ...prev,
+        description: extractedDescription
+      }));
     }
 
     // Auto-detect type with better patterns

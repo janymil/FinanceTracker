@@ -34,16 +34,15 @@ export function registerSimpleVoiceRoutes(app: Router) {
         type: transactionData.type
       });
 
-      // Create transaction record with all voice-extracted data
+      // Create transaction record - let existing AI categorization system handle this
       const transaction = await storage.createTransaction({
         userId: userId,
         amount: transactionData.amount.toString(),
         description: transactionData.description,
-        vendor: transactionData.vendor,
         type: transactionData.type,
         date: new Date(transactionData.date),
         referenceNote: transactionData.note || '',
-        categoryId: transactionData.categoryId,
+        categoryId: null, // Let the existing auto-categorization system handle this
         isRecurring: false
       });
 
