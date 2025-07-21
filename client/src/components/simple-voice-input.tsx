@@ -85,27 +85,18 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       recognitionRef.current.lang = getRecognitionLanguage(userLanguage);
 
       recognitionRef.current.onresult = (event: any) => {
-        let interimTranscript = '';
         let finalTranscript = '';
         
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        for (let i = 0; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript + ' ';
-          } else {
-            interimTranscript += event.results[i][0].transcript;
           }
         }
         
-        // Show interim results for user feedback
-        setTranscript(prev => {
-          const withoutInterim = prev.replace(/\s*\[interim\].*$/, '');
-          return withoutInterim + (finalTranscript || '') + 
-                 (interimTranscript ? ' [interim] ' + interimTranscript : '');
-        });
-        
-        // Only process final transcript when it's substantial
-        if (finalTranscript.trim().length > 3) {
-          console.log('🎤 FINAL transcript received:', finalTranscript.trim());
+        // Update display and process if we have substantial content
+        if (finalTranscript.trim()) {
+          setTranscript(finalTranscript.trim());
+          console.log('🎤 COMPLETE sentence received:', finalTranscript.trim());
           extractDataFromTranscript(finalTranscript.trim());
         }
       };
