@@ -994,9 +994,9 @@
 
   "voice": {
     "title": "Voice Transaction Input",
-    "instructions": "Press Start Listening button and speak briefly, simply. Say these data: merchant, product, amount, date.",
+    "instructions": "Press Start Speaking button and speak briefly, simply. Say these data: merchant, product, amount, date.",
     "play_example": "Play Example",
-    "start_listening": "Start Listening",
+    "start_listening": "Start Speaking",
     "stop_listening": "Stop & Process",
     "listening": "Listening...",
     "transcript": "Transcript",

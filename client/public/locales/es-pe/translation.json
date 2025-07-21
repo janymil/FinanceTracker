@@ -1026,9 +1026,9 @@
 
   "voice": {
     "title": "Entrada de Transacción por Voz",
-    "instructions": "Presiona el botón Start Listening y habla breve, simple. Di estos datos: comerciante, producto, monto, fecha.",
+    "instructions": "Presiona el botón Comenzar a Hablar y habla breve, simple. Di estos datos: comerciante, producto, monto, fecha.",
     "play_example": "Reproducir Ejemplo",
-    "start_listening": "Comenzar Escucha",
+    "start_listening": "Comenzar a Hablar",
     "stop_listening": "Detener y Procesar",
     "listening": "Escuchando...",
     "transcript": "Transcripción",
