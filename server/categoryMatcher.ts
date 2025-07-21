@@ -33,46 +33,69 @@ export function matchCategoryLocally(
     language
   });
 
-  // **SEMANTIC MATCHING RULES** - 100% accurate local logic
-  const semanticMatches = {
-    // Work/Salary Income
-    work: ['trabajo', 'work', 'salary', 'salario', 'job', 'employment', 'empleo', 'práca', 'výplata'],
+  // **INTELLIGENT SIMILARITY MATCHING** - Works with ANY user categories
+  
+  // Helper function to calculate similarity between two strings
+  function calculateSimilarity(str1: string, str2: string): number {
+    const s1 = str1.toLowerCase();
+    const s2 = str2.toLowerCase();
     
-    // Investment Income
-    investment: ['inversión', 'investment', 'dividendos', 'dividends', 'stocks', 'acciones', 'crypto', 
-                'bitcoin', 'trading', 'investície', 'akcie', 'dividend'],
+    // Exact match
+    if (s1 === s2) return 1.0;
     
-    // Freelance/Business Income
-    freelance: ['freelance', 'negocio', 'business', 'consulting', 'consultoría', 'cliente', 'client',
-               'proyecto', 'project', 'servicio', 'service', 'podnikanie', 'klient'],
+    // Contains match
+    if (s1.includes(s2) || s2.includes(s1)) return 0.9;
     
-    // Rental Income
-    rental: ['alquiler', 'rent', 'rental', 'propiedad', 'property', 'inmueble', 'real estate',
-            'prenájom', 'nehnuteľnosť'],
+    // Levenshtein distance similarity
+    const longer = s1.length > s2.length ? s1 : s2;
+    const shorter = s1.length > s2.length ? s2 : s1;
     
-    // General Income (fallback for any income)
-    income: ['ingresos', 'income', 'revenue', 'príjmy', 'earning', 'ganancia', 'profit', 'zisk'],
+    if (longer.length === 0) return 1.0;
     
-    // Food categories  
-    food: ['comida', 'food', 'grocery', 'restaurant', 'potraviny', 'jedlo', 'restauracia'],
+    const editDistance = levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+  
+  // Levenshtein distance calculation
+  function levenshteinDistance(str1: string, str2: string): number {
+    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
     
-    // Transport categories
-    transport: ['transporte', 'transport', 'gas', 'fuel', 'doprava', 'benzín'],
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
     
-    // Shopping categories
-    shopping: ['compras', 'shopping', 'retail', 'store', 'nakupovanie', 'obchod'],
+    for (let j = 1; j <= str2.length; j++) {
+      for (let i = 1; i <= str1.length; i++) {
+        const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[j][i] = Math.min(
+          matrix[j][i - 1] + 1,
+          matrix[j - 1][i] + 1,
+          matrix[j - 1][i - 1] + indicator
+        );
+      }
+    }
     
-    // Healthcare categories
-    health: ['salud', 'health', 'medical', 'doctor', 'zdravie', 'lekár'],
+    return matrix[str2.length][str1.length];
+  }
+  
+  // Universal translation keywords for common terms
+  const universalTranslations = {
+    // Income translations
+    'income': ['ingresos', 'príjmy', 'revenue', 'earning'],
+    'salary': ['salario', 'výplata', 'sueldo', 'wage'],
+    'work': ['trabajo', 'práca', 'job', 'employment'],
+    'investment': ['inversión', 'investície', 'stocks', 'akcie'],
+    'freelance': ['autónomo', 'podnikanie', 'consulting', 'cliente'],
+    'rental': ['alquiler', 'prenájom', 'rent', 'property'],
+    'business': ['negocio', 'podnikanie', 'empresa', 'company'],
     
-    // Entertainment categories
-    entertainment: ['entretenimiento', 'entertainment', 'movie', 'zábava', 'kino'],
-    
-    // Bills/Services categories
-    bills: ['servicios', 'bills', 'utilities', 'účty', 'služby'],
-    
-    // Housing categories
-    housing: ['vivienda', 'housing', 'rent', 'mortgage', 'bývanie', 'nájom']
+    // Expense translations  
+    'food': ['comida', 'jedlo', 'grocery', 'restaurant'],
+    'transport': ['transporte', 'doprava', 'gas', 'fuel'],
+    'shopping': ['compras', 'nakupovanie', 'retail', 'store'],
+    'health': ['salud', 'zdravie', 'medical', 'doctor'],
+    'entertainment': ['entretenimiento', 'zábava', 'movie', 'fun'],
+    'bills': ['servicios', 'účty', 'utilities', 'services'],
+    'housing': ['vivienda', 'bývanie', 'rent', 'mortgage']
   };
 
   // **STEP 1: Direct exact match**
@@ -90,57 +113,96 @@ export function matchCategoryLocally(
     };
   }
 
-  // **STEP 2: Semantic matching with user categories**
-  for (const [semantic, keywords] of Object.entries(semanticMatches)) {
-    // Check if AI suggestion matches semantic keywords
-    const aiMatchesSemantic = keywords.some(keyword => 
-      suggested.includes(keyword) || keyword.includes(suggested)
-    );
+  // **STEP 2: Intelligent similarity matching with user's actual categories**
+  let bestMatch: UserCategory | null = null;
+  let bestSimilarity = 0;
+  const SIMILARITY_THRESHOLD = 0.6; // Minimum similarity to consider a match
+  
+  for (const userCategory of userCategories) {
+    // Direct similarity between AI suggestion and user category name
+    let similarity = calculateSimilarity(suggested, userCategory.name);
     
-    if (aiMatchesSemantic) {
-      console.log(`🧠 AI suggestion "${suggested}" matches semantic group: ${semantic}`);
+    // Check if AI suggestion matches any universal translations of user category
+    for (const [englishTerm, translations] of Object.entries(universalTranslations)) {
+      // Check if user category matches any translation
+      const userCatSimilarity = Math.max(
+        calculateSimilarity(userCategory.name.toLowerCase(), englishTerm),
+        ...translations.map(translation => calculateSimilarity(userCategory.name.toLowerCase(), translation))
+      );
       
-      // Find user category that matches this semantic group
-      const userMatch = userCategories.find(cat => {
-        const catName = cat.name.toLowerCase();
-        return keywords.some(keyword => 
-          catName.includes(keyword) || keyword.includes(catName)
-        );
-      });
+      // Check if AI suggestion matches this universal term
+      const aiSimilarity = Math.max(
+        calculateSimilarity(suggested, englishTerm),
+        ...translations.map(translation => calculateSimilarity(suggested, translation))
+      );
       
-      if (userMatch) {
-        console.log(`✅ Semantic match found: "${suggested}" → "${userMatch.name}"`);
-        return {
-          matchedCategory: userMatch,
-          createNew: false,
-          newCategoryName: '',
-          confidence: 0.95
-        };
+      // If both match the same universal concept, boost similarity
+      if (userCatSimilarity > 0.7 && aiSimilarity > 0.7) {
+        similarity = Math.max(similarity, 0.95);
+        console.log(`🔗 Universal match: "${suggested}" and "${userCategory.name}" both relate to "${englishTerm}"`);
       }
     }
-  }
-
-  // **STEP 3: Fuzzy matching for typos/variations**
-  const fuzzyMatch = userCategories.find(cat => {
-    const catName = cat.name.toLowerCase();
     
-    // Check for partial matches (min 3 chars)
-    if (suggested.length >= 3 && catName.length >= 3) {
-      return catName.includes(suggested.slice(0, 3)) || 
-             suggested.includes(catName.slice(0, 3));
+    if (similarity > bestSimilarity && similarity >= SIMILARITY_THRESHOLD) {
+      bestMatch = userCategory;
+      bestSimilarity = similarity;
     }
-    return false;
-  });
-
-  if (fuzzyMatch) {
-    console.log(`🔍 Fuzzy match found: "${suggested}" → "${fuzzyMatch.name}"`);
+  }
+  
+  if (bestMatch) {
+    console.log(`✅ Best match found: "${suggested}" → "${bestMatch.name}" (${(bestSimilarity * 100).toFixed(1)}% similarity)`);
     return {
-      matchedCategory: fuzzyMatch,
+      matchedCategory: bestMatch,
       createNew: false,
       newCategoryName: '',
-      confidence: 0.8
+      confidence: bestSimilarity
     };
   }
+  
+  // **STEP 3: Type-based matching as fallback**
+  // If no good similarity match, try to find any category of the same type (income/expense)
+  const aiType = guessTransactionType(suggested, language);
+  const sameTypeCategories = userCategories.filter(cat => cat.type === aiType);
+  
+  if (sameTypeCategories.length > 0) {
+    // Find the most generic category of the same type
+    const genericCategory = sameTypeCategories.find(cat => {
+      const catName = cat.name.toLowerCase();
+      return universalTranslations.income?.some(term => catName.includes(term)) ||
+             (aiType === 'income' && (catName.includes('general') || catName.includes('otro')));
+    }) || sameTypeCategories[0]; // Fallback to first category of same type
+    
+    console.log(`🔄 Type fallback: "${suggested}" → "${genericCategory.name}" (same ${aiType} type)`);
+    return {
+      matchedCategory: genericCategory,
+      createNew: false,
+      newCategoryName: '',
+      confidence: 0.6
+    };
+  }
+  
+  // **STEP 4: Create new category**
+  console.log(`✨ No match found, suggesting new category: "${aiSuggestedCategory}"`);
+  return {
+    matchedCategory: null,
+    createNew: true,
+    newCategoryName: aiSuggestedCategory,
+    confidence: 0.7
+  };
+}
+
+// Helper function to guess transaction type from AI suggestion
+function guessTransactionType(suggestion: string, language: string): 'income' | 'expense' {
+  const incomeKeywords = ['income', 'salary', 'ingresos', 'salario', 'príjmy', 'výplata', 
+                         'investment', 'dividend', 'freelance', 'business', 'rental'];
+  
+  const suggestionLower = suggestion.toLowerCase();
+  const isIncome = incomeKeywords.some(keyword => 
+    suggestionLower.includes(keyword) || keyword.includes(suggestionLower)
+  );
+  
+  return isIncome ? 'income' : 'expense';
+
 
   // **STEP 4: Create new category if no matches**
   console.log(`✨ No match found, suggesting new category: "${aiSuggestedCategory}"`);
