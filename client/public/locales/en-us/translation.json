@@ -1019,7 +1019,23 @@
     "try_again": "Please try again",
     "button_text": "Voice Input",
     "button_title": "Add transaction using voice input",
-    "category_auto": "Category will be detected automatically..."
+    "category_auto": "Category will be detected automatically...",
+    "recording_started": "Recording started",
+    "speak_naturally": "Speak naturally about your transaction",
+    "recording_stopped": "Recording stopped",
+    "processing_with_groq": "Processing with AI...",
+    "processing_complete": "Processing complete",
+    "processing_failed": "Processing failed",
+    "review_and_save": "Review extracted data and save",
+    "error": "Error",
+    "microphone_error": "Microphone access denied or not available",
+    "review_transaction": "Review Transaction",
+    "auto_detected": "Auto-detected",
+    "missing_information": "Missing Information",
+    "please_provide": "Please provide",
+    "invalid_amount": "Invalid Amount",
+    "amount_greater_than_zero": "Amount must be greater than zero",
+    "unknown_error": "Unknown error occurred"
   },
 
   "require_plan": {

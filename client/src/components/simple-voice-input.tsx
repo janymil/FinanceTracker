@@ -49,6 +49,12 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   });
 
   const recognitionRef = useRef<any>(null);
+  
+  // Groq recording state
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Get user data
   const { data: user } = useQuery({
@@ -82,56 +88,15 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
   // Removed greeting audio - keeping only text info
 
-  // Initialize speech recognition
+  // Initialize Groq audio recording (replaces browser STT)
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;  // Keep listening continuously
-      recognitionRef.current.interimResults = true;  // Show interim results
-      recognitionRef.current.maxAlternatives = 1;
-      recognitionRef.current.lang = getRecognitionLanguage(userLanguage);
-
-      recognitionRef.current.onresult = (event: any) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-        
-        // Process all results and accumulate everything in this session
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalTranscript += result[0].transcript + ' ';
-          } else {
-            interimTranscript += result[0].transcript;
-          }
-        }
-        
-        // Show the complete session transcript (all sentences spoken so far)
-        const sessionTranscript = finalTranscript + interimTranscript;
-        console.log('🎤 Session transcript:', sessionTranscript);
-        setTranscript(sessionTranscript);
-        
-        // DO NOT process here - only when user manually stops the session
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        console.log('🛑 Speech recognition ended naturally');
-        setIsListening(false);
-      };
-    }
-
-    // No greeting audio - removed per user request
+    // No browser STT setup needed - using Groq instead
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
       }
     };
-  }, [userLanguage]);
+  }, []);
 
   // Process voice input - completely rewritten
   const processVoiceInput = async (text: string) => {
@@ -223,38 +188,137 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     }
   };
 
-  // Start/stop listening
-  const startListening = () => {
-    if (recognitionRef.current) {
-      setIsListening(true);
-      setTranscript(''); // Clear transcript to start fresh session
+  // Process audio with Groq (replaces old voice processing)
+  const processAudioWithGroq = async (audioBlob: Blob) => {
+    setIsProcessing(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
       
-      // Reset accumulated data but keep today's date as default
+      console.log('🎤 Sending audio to Groq for processing...');
+      
+      const response = await fetch('/api/voice-groq/transcribe-and-parse', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'x-user-language': getCurrentLanguageForAPI()
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Groq processing result:', result.data);
+      
+      if (result.success && result.data) {
+        // Set transcript from Groq STT
+        setTranscript(result.data.transcript || '');
+        
+        // Store the parsed data for form pre-filling
+        setAccumulatedData({
+          amount: result.data.amount || '',
+          description: result.data.description || '',
+          type: result.data.type || 'expense',
+          date: result.data.date || new Date().toISOString().split('T')[0],
+          category: result.data.category || '',
+          categoryId: null, // Will be set during save
+          note: result.data.transcript || '' // Store transcript as note
+        });
+        
+        setExtractedCategory(result.data.category || '');
+        
+        toast({
+          title: t('voice.processing_complete'),
+          description: t('voice.review_and_save'),
+        });
+        
+        console.log('✅ Groq voice data extracted successfully');
+      } else {
+        throw new Error('No data returned from Groq processing');
+      }
+      
+    } catch (error) {
+      console.error('❌ Groq processing failed:', error);
+      toast({
+        title: t('voice.processing_failed'),
+        description: error instanceof Error ? error.message : t('voice.unknown_error'),
+        variant: 'destructive'
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Start Groq recording
+  const startListening = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+      
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(audioBlob);
+        
+        // Stop all tracks to free up microphone
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Process audio with Groq
+        processAudioWithGroq(audioBlob);
+      };
+      
+      mediaRecorder.start();
+      setIsListening(true);
+      setTranscript('');
+      
+      // Reset form data
       setAccumulatedData({
         amount: '',
         description: '',
         type: 'expense',
-        date: new Date().toISOString().split('T')[0], // Always default to today
+        date: new Date().toISOString().split('T')[0],
         category: '',
         categoryId: null,
         note: ''
       });
       setExtractedCategory('');
       
-      recognitionRef.current.start();
+      toast({
+        title: t('voice.recording_started'),
+        description: t('voice.speak_naturally'),
+      });
+      
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      toast({
+        title: t('voice.error'),
+        description: t('voice.microphone_error'),
+        variant: 'destructive'
+      });
     }
   };
 
+  // Stop Groq recording
   const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    setIsListening(false);
-    
-    // Process the ENTIRE session transcript when user manually stops
-    if (transcript.trim()) {
-      console.log('🛑 User ended session, processing complete transcript:', transcript);
-      processVoiceInput(transcript.trim());
+    if (mediaRecorderRef.current && isListening) {
+      mediaRecorderRef.current.stop();
+      setIsListening(false);
+      
+      toast({
+        title: t('voice.recording_stopped'),
+        description: t('voice.processing_with_groq'),
+      });
     }
   };
 
@@ -351,15 +415,31 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               onClick={isListening ? stopListening : startListening}
               variant={isListening ? "destructive" : "default"}
               className="w-full"
+              disabled={isProcessing}
             >
-              {isListening ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-              {isListening ? t('voice.stop_listening') : t('voice.start_listening')}
+              {isProcessing ? (
+                <>
+                  <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full"></div>
+                  {t('voice.processing_with_groq')}
+                </>
+              ) : isListening ? (
+                <>
+                  <MicOff className="h-4 w-4 mr-2" />
+                  {t('voice.stop_listening')}
+                </>
+              ) : (
+                <>
+                  <Mic className="h-4 w-4 mr-2" />
+                  {t('voice.start_listening')}
+                </>
+              )}
             </Button>
             
-            {transcript && (
+            {(transcript || isProcessing) && (
               <div className="mt-2 bg-gray-50 dark:bg-gray-700 p-3 rounded text-sm">
-                <strong>{t('voice.transcript')}:</strong> {transcript}
+                <strong>{t('voice.transcript')}:</strong> {transcript || (isProcessing ? t('voice.processing_with_groq') + '...' : '')}
                 {isListening && <span className="ml-2 animate-pulse text-blue-500">🎤 {t('voice.listening')}</span>}
+                {isProcessing && <span className="ml-2 animate-pulse text-orange-500">🧠 {t('voice.processing_with_groq')}</span>}
               </div>
             )}
           </div>
