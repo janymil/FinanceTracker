@@ -193,9 +193,12 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         
         // Update transaction data for display - removed as we'll use accumulatedData directly
 
-        // Set category with proper matching to user's categories
+        // Set category - simple matching between backend result and user categories
         if (parsed.category && categories) {
-          // Try to match the parsed category to user's actual categories
+          console.log('🏷️ Parsed category from voice:', parsed.category);
+          console.log('🏷️ Available user categories:', (categories as any[]).map(c => c.name));
+          
+          // Find matching category (simple case-insensitive match first)
           const matchingCategory = (categories as any[]).find(cat => {
             const categoryName = cat.name.toLowerCase();
             const parsedCategoryLower = parsed.category.toLowerCase();
@@ -203,33 +206,21 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             // Direct match
             if (categoryName === parsedCategoryLower) return true;
             
-            // Partial matches
-            if (categoryName.includes(parsedCategoryLower) || 
-                parsedCategoryLower.includes(categoryName)) return true;
-            
-            // Language-specific matches
-            const categoryMappings: { [key: string]: string[] } = {
-              'food': ['jedlo', 'comida', 'food', 'dining', 'restaurant'],
-              'transportation': ['doprava', 'transporte', 'transport', 'fuel', 'gas'],
-              'shopping': ['nákupy', 'compras', 'shopping', 'retail'],
-              'entertainment': ['zábava', 'entretenimiento', 'entertainment'],
-              'healthcare': ['zdravie', 'salud', 'health', 'medical', 'pharmacy'],
-              'utilities': ['služby', 'servicios', 'utilities', 'bills'],
-              'groceries': ['potraviny', 'supermercado', 'grocery', 'market']
+            // Basic English-Slovak mapping (just essential ones)
+            const basicMappings: { [key: string]: string } = {
+              'food': 'jedlo',
+              'transportation': 'doprava', 
+              'shopping': 'nákupy',
+              'entertainment': 'zábava',
+              'healthcare': 'zdravie',
+              'utilities': 'služby'
             };
             
-            for (const [key, variations] of Object.entries(categoryMappings)) {
-              if (variations.some(v => 
-                parsedCategoryLower.includes(v) || categoryName.includes(v)
-              )) {
-                return true;
-              }
-            }
-            
-            return false;
+            return categoryName === basicMappings[parsedCategoryLower];
           });
           
           if (matchingCategory) {
+            console.log('✅ Matched category:', matchingCategory.name);
             setExtractedCategory(matchingCategory.name);
             setAccumulatedData(prev => ({ 
               ...prev, 
@@ -237,9 +228,14 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               categoryId: matchingCategory.id 
             }));
           } else {
+            console.log('❌ No matching category found, using raw category:', parsed.category);
             setExtractedCategory(parsed.category);
             setAccumulatedData(prev => ({ ...prev, category: parsed.category }));
           }
+        } else if (parsed.category) {
+          console.log('🏷️ Setting category without user categories:', parsed.category);
+          setExtractedCategory(parsed.category);
+          setAccumulatedData(prev => ({ ...prev, category: parsed.category }));
         }
       }
     } catch (error) {
@@ -284,10 +280,26 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
   // Save transaction using accumulated data
   const handleSave = async () => {
-    if (!accumulatedData.amount || !accumulatedData.description) {
+    // Check for missing critical information
+    const missingFields = [];
+    if (!accumulatedData.amount) missingFields.push('amount');
+    if (!accumulatedData.description) missingFields.push('description');
+    
+    if (missingFields.length > 0) {
       toast({
         title: 'Missing Information',
-        description: 'Please provide amount and description',
+        description: `Please provide: ${missingFields.join(', ')}. Try speaking again with more details.`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Validate amount is numeric
+    const numericAmount = parseFloat(accumulatedData.amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      toast({
+        title: 'Invalid Amount',
+        description: 'Please provide a valid amount greater than 0',
         variant: 'destructive'
       });
       return;
@@ -402,17 +414,16 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               />
             </div>
 
-            {extractedCategory && (
-              <div>
-                <Label htmlFor="category">{t('transaction.category')}</Label>
-                <Input
-                  id="category"
-                  value={extractedCategory}
-                  readOnly
-                  className="bg-muted/50"
-                />
-              </div>
-            )}
+            <div>
+              <Label htmlFor="category">{t('transaction.category')}</Label>
+              <Input
+                id="category"
+                value={extractedCategory || accumulatedData.category || ''}
+                readOnly
+                className={extractedCategory || accumulatedData.category ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'bg-muted/50'}
+                placeholder="Category will be detected automatically..."
+              />
+            </div>
 
             <div>
               <Label htmlFor="type">{t('transaction.type')}</Label>

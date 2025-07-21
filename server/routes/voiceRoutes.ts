@@ -31,7 +31,7 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
     
-    // Decimal formats: "5.50", "5,50", "5:50" or separate "5 50"
+    // Decimal formats: "5.50", "5,50", "5:50" - more flexible pattern
     const decimalMatch = word.match(/(\d+)[.:,](\d{1,2})/);
     if (decimalMatch) {
       amount = `${decimalMatch[1]}.${decimalMatch[2]}`;
@@ -39,7 +39,8 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
       break;
     }
     
-    // Handle speech recognition patterns like "5 50" meaning "5.50"
+    // Handle speech recognition patterns like "5 50" meaning "5.50" 
+    // Also handles "za 5 50" (Slovak: "for 5.50")
     if (/^\d+$/.test(word) && i < words.length - 1) {
       const nextWord = words[i + 1];
       if (/^\d{1,2}$/.test(nextWord) && parseInt(nextWord) < 100) {
@@ -49,11 +50,21 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
       }
     }
     
-    // Simple integers
-    if (/^\d+$/.test(word)) {
+    // Look for decimal after "za" (Slovak "for")
+    if ((word === 'za' || word === 'for' || word === 'por') && i < words.length - 2) {
+      const nextWord = words[i + 1];
+      const afterNext = words[i + 2];
+      if (/^\d+$/.test(nextWord) && /^\d{1,2}$/.test(afterNext) && parseInt(afterNext) < 100) {
+        amount = `${nextWord}.${afterNext.padStart(2, '0')}`;
+        console.log('💰 Found decimal after preposition:', amount);
+        break;
+      }
+    }
+    
+    // Simple integers as last resort
+    if (/^\d+$/.test(word) && !amount) {
       amount = word;
       console.log('💰 Found integer amount:', amount);
-      break;
     }
   }
 
@@ -68,21 +79,39 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     }
   }
 
-  // Extract description (meaningful words) - improved filtering
-  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'iba', 'len', 'this', 'that', 'and', 'or', 'but'];
+  // Extract vendor/merchant name as description
+  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'kupil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'iba', 'len', 'this', 'that', 'and', 'or', 'but', 'compré', 'por'];
   
+  // Find potential vendor names (usually brand names or merchant names)
   const meaningfulWords = words.filter(word => {
     const clean = word.toLowerCase().replace(/[^\w]/g, '');
-    return clean.length > 1 && 
+    return clean.length > 2 && 
            !stopWords.includes(clean) && 
            !textNumbers[clean] &&
            !/^\d/.test(clean) &&
            !/^[.:,€$]/.test(clean);
   });
 
-  // Keep original if no meaningful words found
-  const description = meaningfulWords.length > 0 ? meaningfulWords.join(' ').trim() : 
-                     words.filter(w => w.length > 1 && !/^\d/.test(w)).join(' ').trim();
+  // Prioritize known brands/merchants or capitalize words (likely proper nouns)
+  const knownBrands = ['nescafe', 'starbucks', 'mcdonalds', 'tesco', 'kaufland', 'lidl', 'shell', 'bp', 'esso'];
+  const brandWords = meaningfulWords.filter(word => 
+    knownBrands.includes(word.toLowerCase()) || 
+    /^[A-Z]/.test(word) || // Capitalized words
+    word.length > 4 // Longer words more likely to be brand names
+  );
+  
+  // Use brand/merchant name if found, otherwise use meaningful words
+  let description = '';
+  if (brandWords.length > 0) {
+    description = brandWords.slice(0, 2).join(' ').trim(); // Max 2 words
+  } else if (meaningfulWords.length > 0) {
+    description = meaningfulWords.slice(0, 2).join(' ').trim(); // Max 2 words  
+  } else {
+    description = words.filter(w => w.length > 2 && !/^\d/.test(w)).slice(0, 2).join(' ').trim();
+  }
+  
+  // Capitalize first letter
+  description = description.charAt(0).toUpperCase() + description.slice(1);
 
   // Detect transaction type
   let type = 'expense'; // Default
@@ -130,34 +159,50 @@ router.post('/parse', async (req, res) => {
     if (parsed.description) {
       try {
         console.log('🏪 Looking up merchant for transcript:', transcript);
-        const merchantResult = await lookupMerchant(transcript);
+        
+        // Get country code from user language
+        const getCountryCode = (lang: string) => {
+          if (lang.startsWith('es')) return 'pe'; // Spanish -> Peru
+          if (lang.startsWith('sk')) return 'sk'; // Slovak -> Slovakia  
+          return 'us'; // English -> US (default)
+        };
+        
+        const countryCode = getCountryCode(userLanguage);
+        console.log('🏪 Using country code:', countryCode);
+        
+        // Debug: Check if Slovak merchant file exists
+        const fs = require('fs').promises;
+        const path = require('path');
+        try {
+          const testPath = path.join(process.cwd(), 'lib', 'merchants', 'countries', 'sk.json');
+          console.log('🏪 Testing path:', testPath);
+          console.log('🏪 Current directory:', process.cwd());
+          const exists = require('fs').existsSync(testPath);
+          console.log('🏪 File exists:', exists);
+          if (exists) {
+            const data = JSON.parse(require('fs').readFileSync(testPath, 'utf8'));
+            console.log('🏪 SK file keys:', Object.keys(data));
+            console.log('🏪 Coffee shop keywords:', data.coffee_shops?.category_keywords);
+          }
+        } catch (e) {
+          console.log('🏪 File test error:', e.message);
+        }
+        
+        const merchantResult = await lookupMerchant(transcript, countryCode);
         console.log('🏪 Merchant lookup result:', merchantResult);
         
-        // Convert business_type to category name
+        // Use the category directly from merchant lookup - NO hardcoding
         if (merchantResult?.business_type) {
-          const businessTypeToCategory: { [key: string]: string } = {
-            'grocery': 'Food',
-            'food': 'Food', 
-            'restaurant': 'Food',
-            'cafe': 'Food',
-            'supermarket': 'Food',
-            'shopping': 'Shopping',
-            'retail': 'Shopping',
-            'clothing': 'Shopping',
-            'electronics': 'Shopping',
-            'transport': 'Transportation',
-            'fuel': 'Transportation',
-            'gas_station': 'Transportation',
-            'entertainment': 'Entertainment',
-            'healthcare': 'Healthcare',
-            'pharmacy': 'Healthcare',
-            'education': 'Education',
-            'utilities': 'Utilities',
-            'bank': 'Financial Services',
-            'atm': 'Financial Services'
-          };
-          
-          category = businessTypeToCategory[merchantResult.business_type.toLowerCase()] || 'Uncategorized';
+          // The merchant lookup should return the final category name
+          // If it has typical_categories, use the appropriate language one
+          if (merchantResult.typical_categories && merchantResult.typical_categories.length > 0) {
+            // Get the category based on user language
+            const langIndex = userLanguage.startsWith('es') ? 2 : userLanguage.startsWith('sk') ? 1 : 0;
+            category = merchantResult.typical_categories[langIndex] || merchantResult.typical_categories[0];
+          } else {
+            // Fallback - use business_type as category (but this shouldn't happen with proper merchant data)
+            category = merchantResult.business_type;
+          }
         } else {
           category = 'Uncategorized';
         }

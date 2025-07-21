@@ -36,12 +36,29 @@ async function loadMerchantData(countryCode: string = 'global'): Promise<Record<
   }
 
   try {
-    // Load country-specific merchants
-    const countryPath = path.join(process.cwd(), 'lib', 'merchants', 'countries', `${countryCode.toLowerCase()}.json`);
-    const countryData = JSON.parse(await fs.readFile(countryPath, 'utf-8'));
+    // Load country-specific merchants - try multiple possible paths
+    let countryPath = path.join(process.cwd(), 'lib', 'merchants', 'countries', `${countryCode.toLowerCase()}.json`);
+    let countryData: any;
+    
+    try {
+      countryData = JSON.parse(await fs.readFile(countryPath, 'utf-8'));
+      console.log(`[MerchantData] Loaded ${countryCode} from: ${countryPath}`);
+    } catch (e) {
+      // Try relative to this file's location
+      countryPath = path.join(__dirname, '..', 'merchants', 'countries', `${countryCode.toLowerCase()}.json`);
+      try {
+        countryData = JSON.parse(await fs.readFile(countryPath, 'utf-8'));
+        console.log(`[MerchantData] Loaded ${countryCode} from fallback path: ${countryPath}`);
+      } catch (e2) {
+        console.error(`[MerchantData] Failed to load ${countryCode} merchant data:`, e.message, e2.message);
+        throw e2;
+      }
+    }
+    
+    console.log(`[MerchantData] Loaded ${countryCode} data with keys:`, Object.keys(countryData));
     
     // Load global merchants as fallback
-    const globalPath = path.join(process.cwd(), 'lib', 'merchants', 'global.json');
+    const globalPath = path.join(path.dirname(countryPath), '..', 'global.json');
     const globalData = JSON.parse(await fs.readFile(globalPath, 'utf-8'));
     
     // Merge country-specific over global (country takes priority)
@@ -112,10 +129,56 @@ function findMerchantMatch(merchantName: string, merchantData: Record<string, Me
 /**
  * Analyze transaction context for business type
  */
-function analyzeTransactionContext(transcript: string, businessTypes: any): MerchantLookupResult | null {
+function analyzeTransactionContext(transcript: string, businessTypes: any, merchantData?: any): MerchantLookupResult | null {
   const normalizedTranscript = transcript.toLowerCase();
   const { fallback_analysis } = businessTypes;
   
+  // First check localized keywords from country-specific merchant data
+  console.log(`[Context] Analyzing transcript: "${transcript}"`);
+  if (merchantData) {
+    console.log(`[Context] Checking merchant data with types:`, Object.keys(merchantData));
+    for (const [merchantType, data] of Object.entries(merchantData)) {
+      if (typeof data === 'object' && data !== null && 'category_keywords' in data) {
+        const categoryKeywords = (data as any).category_keywords as string[];
+        console.log(`[Context] Checking ${merchantType} keywords:`, categoryKeywords);
+        const matchingKeywords = categoryKeywords.filter(keyword => 
+          normalizedTranscript.includes(keyword.toLowerCase())
+        );
+        const matchCount = matchingKeywords.length;
+        console.log(`[Context] Found ${matchCount} matching keywords:`, matchingKeywords);
+        
+        if (matchCount > 0) {
+          console.log(`[Context] Found localized keyword match in ${merchantType}:`, categoryKeywords.filter(k => normalizedTranscript.includes(k.toLowerCase())));
+          
+          // Map merchant type to business type for food-related categories
+          const merchantTypeToBusinessType: Record<string, string> = {
+            'coffee_shops': 'restaurant',
+            'restaurants': 'restaurant', 
+            'fast_food': 'restaurant',
+            'bakeries': 'restaurant',
+            'grocery_stores': 'grocery',
+            'supermarkets': 'grocery',
+            'gas_stations': 'gas_station',
+            'pharmacies': 'pharmacy',
+            'banks': 'bank'
+          };
+          
+          const businessType = merchantTypeToBusinessType[merchantType];
+          if (businessType && businessTypes.business_type_mappings[businessType]) {
+            const mapping = businessTypes.business_type_mappings[businessType];
+            return {
+              business_type: businessType,
+              category_keywords: mapping.category_keywords,
+              confidence: Math.max(0.7, matchCount * 0.3), // Higher confidence for localized matches
+              source: 'localized_context_analysis'
+            };
+          }
+        }
+      }
+    }
+  }
+  
+  // Fallback to English keywords if no localized match
   if (!fallback_analysis?.context_keywords) return null;
   
   for (const [category, keywords] of Object.entries(fallback_analysis.context_keywords)) {
@@ -141,7 +204,7 @@ function analyzeTransactionContext(transcript: string, businessTypes: any): Merc
           business_type: businessType,
           category_keywords: mapping.category_keywords,
           confidence: Math.max(0.6, matchCount * 0.2),
-          source: 'ai_analysis'
+          source: 'english_context_analysis'
         };
       }
     }
@@ -159,12 +222,15 @@ export async function lookupMerchant(
   userId?: string
 ): Promise<MerchantLookupResult | null> {
   try {
+    console.log(`[MerchantLookup] Starting lookup for transcript: "${transcript}" with country: ${countryCode}`);
+    
     // Extract potential merchant name from transcript
     const merchantName = extractMerchantName(transcript);
+    console.log(`[MerchantLookup] Extracted merchant name: "${merchantName}"`);
     
     if (!merchantName) {
-      console.log('[MerchantLookup] No merchant name found in transcript');
-      return null;
+      console.log('[MerchantLookup] No merchant name extracted, but continuing with context analysis');
+      // Don't return null - we can still do context analysis without extracted merchant name
     }
     
     console.log(`[MerchantLookup] Looking up merchant: "${merchantName}" for country: ${countryCode}`);
@@ -199,6 +265,7 @@ export async function lookupMerchant(
     
     // Step 3: Load merchant data for country (file-based)
     const merchantData = await loadMerchantData(countryCode);
+    console.log(`[MerchantLookup] Loaded merchant data for ${countryCode}:`, Object.keys(merchantData || {}));
     
     // Step 4: Try direct merchant match
     const directMatch = findMerchantMatch(merchantName, merchantData);
@@ -219,11 +286,14 @@ export async function lookupMerchant(
     }
     
     // Step 6: Context analysis fallback
+    console.log(`[MerchantLookup] No direct merchant match found, trying context analysis...`);
     const businessTypes = await loadBusinessTypes();
-    const contextMatch = analyzeTransactionContext(transcript, businessTypes);
+    const contextMatch = analyzeTransactionContext(transcript, businessTypes, merchantData);
     if (contextMatch) {
       console.log(`[MerchantLookup] Context match found:`, contextMatch);
       return contextMatch;
+    } else {
+      console.log(`[MerchantLookup] No context match found either`);
     }
     
     console.log('[MerchantLookup] No match found');
