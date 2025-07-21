@@ -1034,7 +1034,7 @@
     "save_transaction": "Uložiť Transakciu",
     "saving": "Ukladám...",
     "incomplete_data": "Neúplné Údaje",
-    "fill_required_fields": "Prosím vyplňte čiastku a popis",
+    "fill_required_fields": "Prosím vyplňte čiastku, popis a obchodníka",
     "transaction_saved": "Transakcia Uložená",
     "transaction_success": "Vaša transakcia bola úspešne uložená",
     "save_failed": "Uloženie Zlyhalo",

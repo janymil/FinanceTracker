@@ -18,6 +18,8 @@ interface SimpleVoiceInputProps {
 interface TransactionData {
   amount: string;
   description: string;
+  vendor: string;
+  categoryId: number | null;
   type: 'income' | 'expense';
   date: string;
   note: string;
@@ -29,6 +31,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const [transactionData, setTransactionData] = useState<TransactionData>({
     amount: '',
     description: '',
+    vendor: '',
+    categoryId: null,
     type: 'expense',
     date: new Date().toISOString().split('T')[0],
     note: ''
@@ -43,6 +47,12 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   // Get user data for language and currency
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
+    staleTime: 5 * 60 * 1000
+  });
+
+  // Get categories for dropdown
+  const { data: categories = [] } = useQuery<any[]>({
+    queryKey: ['/api/categories'],
     staleTime: 5 * 60 * 1000
   });
 
@@ -108,21 +118,23 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     };
   }, [userLanguage]);
 
-  // Simple pattern extraction without AI
+  // Enhanced pattern extraction for all required fields
   const extractDataFromTranscript = (text: string) => {
     console.log('🎤 Extracting from:', text);
+    const lowerText = text.toLowerCase();
 
-    // Extract amount (support multiple currencies)
+    // Extract amount with better patterns
     const amountPatterns = [
-      /(\d+(?:[.,]\d+)?)\s*(?:eur|euro|€|\$|dollar|dolár)/gi,
-      /(?:za|for|cost|stalo|costó)\s*(\d+(?:[.,]\d+)?)/gi,
-      /(\d+(?:[.,]\d+)?)\s*(?:eur|euro|€|\$|dollar|dolár)?/gi
+      /(\d+(?:[.,]\d{1,2})?)\s*(?:eur|euro|€)/gi,
+      /(\d+(?:[.,]\d{1,2})?)\s*(?:\$|dollar|dolár)/gi,
+      /(?:za|for|cost|stalo|costó|zaplatil|paid)\s*(\d+(?:[.,]\d{1,2})?)/gi,
+      /(\d+(?:[.,]\d{1,2})?)\s*(?:eur|euro|€|\$|dollar|dolár)/gi
     ];
 
     for (const pattern of amountPatterns) {
       const match = text.match(pattern);
       if (match) {
-        const numberMatch = match[0].match(/(\d+(?:[.,]\d+)?)/);
+        const numberMatch = match[0].match(/(\d+(?:[.,]\d{1,2})?)/);
         if (numberMatch) {
           setTransactionData(prev => ({
             ...prev,
@@ -133,41 +145,99 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       }
     }
 
-    // Extract description (common items)
-    const items = ['pivo', 'beer', 'chlieb', 'bread', 'káva', 'coffee', 'mlieko', 'milk', 
-                   'benzín', 'gas', 'jedlo', 'food', 'nákup', 'shopping'];
-    
-    for (const item of items) {
-      if (text.includes(item)) {
+    // Extract vendor/merchant with better patterns
+    const vendorPatterns = [
+      /(?:v|na|at|in|u)\s+([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+?)(?:\s+(?:za|for|cost))/gi,
+      /(?:kúpil|bought|compré)\s+(?:som\s+)?(?:si\s+)?([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+?)(?:\s+(?:za|for|v|na|at))/gi,
+      /(?:obchod|shop|store|market|supermarket|restaurant|café|bar|hotel)\s+([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+)/gi
+    ];
+
+    for (const pattern of vendorPatterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
         setTransactionData(prev => ({
           ...prev,
-          description: item
+          vendor: match[1].trim()
         }));
         break;
       }
     }
 
-    // Auto-detect type
-    if (text.includes('kúpil') || text.includes('bought') || text.includes('zaplatil') || 
-        text.includes('paid') || text.includes('compré') || text.includes('pagué')) {
+    // Extract description/item with enhanced patterns
+    const itemPatterns = {
+      'coffee': ['káva', 'coffee', 'café', 'espresso', 'cappuccino'],
+      'food': ['jedlo', 'food', 'meal', 'obed', 'lunch', 'dinner', 'večera'],
+      'bread': ['chlieb', 'bread', 'bageta', 'rožok'],
+      'milk': ['mlieko', 'milk', 'yogurt', 'jogurt'],
+      'beer': ['pivo', 'beer', 'ale'],
+      'gas': ['benzín', 'gas', 'fuel', 'palivo', 'gasoline'],
+      'shopping': ['nákup', 'shopping', 'groceries', 'potraviny'],
+      'transport': ['bus', 'autobus', 'taxi', 'train', 'vlak', 'metro', 'uber'],
+      'medicine': ['liek', 'medicine', 'pharmacy', 'lekáreň', 'tablet']
+    };
+
+    for (const [description, keywords] of Object.entries(itemPatterns)) {
+      for (const keyword of keywords) {
+        if (lowerText.includes(keyword)) {
+          setTransactionData(prev => ({
+            ...prev,
+            description: description
+          }));
+          
+          // Auto-select category based on description
+          const category = categories.find((cat: any) => {
+            const catName = cat.name.toLowerCase();
+            if (description === 'coffee' || description === 'food') return catName.includes('food') || catName.includes('jedlo');
+            if (description === 'gas' || description === 'transport') return catName.includes('transport') || catName.includes('doprava');
+            if (description === 'medicine') return catName.includes('health') || catName.includes('zdravie');
+            if (description === 'shopping') return catName.includes('shopping') || catName.includes('nakup');
+            return false;
+          });
+          
+          if (category) {
+            setTransactionData(prev => ({
+              ...prev,
+              categoryId: category.id
+            }));
+          }
+          break;
+        }
+      }
+      if (transactionData.description) break;
+    }
+
+    // Auto-detect type with better patterns
+    const expenseKeywords = ['kúpil', 'bought', 'zaplatil', 'paid', 'compré', 'pagué', 'spend', 'cost', 'stalo'];
+    const incomeKeywords = ['dostal', 'received', 'výplata', 'salary', 'recibí', 'earned', 'income', 'príjem'];
+    
+    const hasExpenseKeyword = expenseKeywords.some(keyword => lowerText.includes(keyword));
+    const hasIncomeKeyword = incomeKeywords.some(keyword => lowerText.includes(keyword));
+    
+    if (hasExpenseKeyword && !hasIncomeKeyword) {
       setTransactionData(prev => ({ ...prev, type: 'expense' }));
-    } else if (text.includes('dostal') || text.includes('received') || text.includes('výplata') || 
-               text.includes('salary') || text.includes('recibí')) {
+    } else if (hasIncomeKeyword && !hasExpenseKeyword) {
       setTransactionData(prev => ({ ...prev, type: 'income' }));
     }
 
-    // Extract date
-    if (text.includes('včera') || text.includes('yesterday') || text.includes('ayer')) {
+    // Extract date with better patterns
+    if (lowerText.includes('včera') || lowerText.includes('yesterday') || lowerText.includes('ayer')) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       setTransactionData(prev => ({
         ...prev,
         date: yesterday.toISOString().split('T')[0]
       }));
-    } else if (text.includes('dnes') || text.includes('today') || text.includes('hoy')) {
+    } else if (lowerText.includes('dnes') || lowerText.includes('today') || lowerText.includes('hoy')) {
       setTransactionData(prev => ({
         ...prev,
         date: new Date().toISOString().split('T')[0]
+      }));
+    } else if (lowerText.includes('minulý týždeň') || lowerText.includes('last week') || lowerText.includes('semana pasada')) {
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      setTransactionData(prev => ({
+        ...prev,
+        date: lastWeek.toISOString().split('T')[0]
       }));
     }
   };
@@ -187,7 +257,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   };
 
   const handleSave = async () => {
-    if (!transactionData.amount || !transactionData.description) {
+    if (!transactionData.amount || !transactionData.description || !transactionData.vendor) {
       toast({
         title: t('voice.incomplete_data'),
         description: t('voice.fill_required_fields'),
@@ -202,6 +272,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         transactionData: {
           amount: parseFloat(transactionData.amount),
           description: transactionData.description,
+          vendor: transactionData.vendor,
+          categoryId: transactionData.categoryId,
           type: transactionData.type,
           date: transactionData.date,
           note: transactionData.note || transcript
@@ -306,6 +378,37 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           </div>
 
           <div>
+            <Label htmlFor="vendor">{t('transaction.vendor')}</Label>
+            <Input
+              id="vendor"
+              value={transactionData.vendor}
+              onChange={(e) => setTransactionData(prev => ({ ...prev, vendor: e.target.value }))}
+              placeholder={t('transaction.vendor_placeholder')}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="category">{t('transaction.category')}</Label>
+            <Select 
+              value={transactionData.categoryId?.toString() || ''} 
+              onValueChange={(value) => 
+                setTransactionData(prev => ({ ...prev, categoryId: value ? parseInt(value) : null }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t('transaction.select_category')} />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category: any) => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <Label htmlFor="type">{t('transaction.type')}</Label>
             <Select 
               value={transactionData.type} 
@@ -338,7 +441,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         <div className="flex gap-2 mt-6">
           <Button
             onClick={handleSave}
-            disabled={isSaving || !transactionData.amount || !transactionData.description}
+            disabled={isSaving || !transactionData.amount || !transactionData.description || !transactionData.vendor}
             className="flex-1"
           >
             {isSaving ? t('voice.saving') : t('voice.save_transaction')}

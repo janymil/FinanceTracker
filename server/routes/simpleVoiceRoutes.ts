@@ -7,6 +7,8 @@ const completeTransactionSchema = z.object({
   transactionData: z.object({
     amount: z.number(),
     description: z.string(),
+    vendor: z.string(),
+    categoryId: z.number().nullable(),
     type: z.enum(['income', 'expense']),
     date: z.string(),
     note: z.string().optional()
@@ -34,15 +36,16 @@ export function registerSimpleVoiceRoutes(app: Router) {
         type: transactionData.type
       });
 
-      // Create transaction record - let existing system handle categorization
+      // Create transaction record with all voice-extracted data
       const transaction = await storage.createTransaction({
         userId: userId,
         amount: transactionData.amount.toString(),
         description: transactionData.description,
+        vendor: transactionData.vendor,
         type: transactionData.type,
         date: new Date(transactionData.date),
         referenceNote: transactionData.note || '',
-        categoryId: null, // Let the existing auto-categorization system handle this
+        categoryId: transactionData.categoryId,
         isRecurring: false
       });
 

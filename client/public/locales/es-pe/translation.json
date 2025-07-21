@@ -1034,7 +1034,7 @@
     "save_transaction": "Guardar Transacción",
     "saving": "Guardando...",
     "incomplete_data": "Datos Incompletos",
-    "fill_required_fields": "Por favor complete cantidad y descripción",
+    "fill_required_fields": "Por favor complete cantidad, descripción y comerciante",
     "transaction_saved": "Transacción Guardada",
     "transaction_success": "Su transacción ha sido guardada exitosamente",
     "save_failed": "Error al Guardar",
