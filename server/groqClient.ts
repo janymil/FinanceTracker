@@ -124,3 +124,88 @@ IMPORTANT:
     throw new Error(`Transaction parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
+
+// Intelligent category matching using Groq LLaMA
+export async function matchCategoryIntelligently(
+  suggestedCategory: string,
+  existingCategories: Array<{id: number, name: string, type: string}>,
+  userLanguage: string = 'en-us'
+): Promise<{
+  matchedCategory?: {id: number, name: string},
+  createNew?: boolean,
+  newCategoryName?: string
+}> {
+  try {
+    console.log('🧠 Starting intelligent category matching with Groq LLaMA...');
+    
+    const languageMap: { [key: string]: string } = {
+      'en-us': 'English',
+      'es-pe': 'Spanish', 
+      'sk-sk': 'Slovak'
+    };
+    
+    const language = languageMap[userLanguage] || 'English';
+    
+    const systemPrompt = `You are an expert at matching financial categories intelligently. Your task is to find the best logical match between a suggested category and existing user categories.
+
+USER PREFERENCES:
+- Language: ${language}
+
+RESPOND ONLY WITH VALID JSON:
+{
+  "matchedCategory": {"id": 123, "name": "Matched Category Name"},
+  "createNew": false,
+  "newCategoryName": ""
+}
+
+MATCHING RULES:
+1. EXACT MATCH: If suggested category matches exactly (case-insensitive), return that category
+2. LOGICAL MATCH: Find the closest logical meaning match:
+   - "Food" matches "Jedlo", "Comida", "Alimentación", "Groceries", "Restaurant" 
+   - "Transport" matches "Doprava", "Transporte", "Car", "Gas", "Uber"
+   - "Shopping" matches "Nákupy", "Compras", "Retail", "Clothes", "Electronics"
+   - "Entertainment" matches "Zábava", "Entretenimiento", "Movies", "Games"
+   - "Bills" matches "Účty", "Servicios", "Utilities", "Internet", "Phone"
+   - "Healthcare" matches "Zdravie", "Salud", "Medical", "Pharmacy", "Doctor"
+3. SEMANTIC SIMILARITY: Consider synonyms and related concepts
+4. CREATE NEW: Only if no logical match exists at all
+
+IMPORTANT:
+- Prioritize logical meaning over exact words
+- Consider multilingual equivalents
+- Return the existing category that makes most sense
+- Only create new category if truly no match exists`;
+
+    const userPrompt = `SUGGESTED CATEGORY: "${suggestedCategory}"
+
+EXISTING CATEGORIES:
+${existingCategories.map(cat => `- ${cat.name} (ID: ${cat.id}, Type: ${cat.type})`).join('\n')}
+
+Find the best match or decide if new category should be created.`;
+
+    const response = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.1,
+      max_tokens: 200,
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No response from Groq LLaMA');
+    }
+
+    const result = JSON.parse(content.trim());
+    console.log('🧠 Groq category matching result:', result);
+
+    return result;
+
+  } catch (error) {
+    console.error('❌ Groq category matching failed:', error);
+    throw new Error(`Category matching failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}

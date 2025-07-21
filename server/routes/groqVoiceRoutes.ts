@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import multer from "multer";
 import { z } from "zod";
-import { transcribeAudioWithGroq, parseTransactionWithGroq } from "../groqClient";
+import { transcribeAudioWithGroq, parseTransactionWithGroq, matchCategoryIntelligently } from "../groqClient";
 import { lookupMerchant } from "../../lib/merchantLookup";
 
 const router = Router();
@@ -111,6 +111,36 @@ router.post('/parse-text', async (req: Request, res: Response) => {
     console.error('❌ Groq text parsing failed:', error);
     res.status(500).json({ 
       error: 'Text parsing failed', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Intelligent category matching endpoint
+router.post('/match-category', async (req: Request, res: Response) => {
+  try {
+    const { suggestedCategory, existingCategories } = req.body;
+    const userLanguage = req.headers['x-user-language'] as string || 'en-us';
+    
+    if (!suggestedCategory || !existingCategories) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    console.log('🎯 Intelligent category matching request:', {
+      suggestedCategory,
+      existingCount: existingCategories.length,
+      language: userLanguage
+    });
+
+    const result = await matchCategoryIntelligently(suggestedCategory, existingCategories, userLanguage);
+    
+    console.log('✅ Category matching result:', result);
+    res.json(result);
+    
+  } catch (error) {
+    console.error('❌ Category matching failed:', error);
+    res.status(500).json({ 
+      error: 'Category matching failed', 
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }

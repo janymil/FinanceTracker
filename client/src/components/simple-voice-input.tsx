@@ -71,6 +71,78 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const userLanguage = (user as any)?.language || i18n.language || 'en-us';
   const userCurrency = (user as any)?.currency || '$';
 
+  // Intelligent category matching function
+  const matchCategoryIntelligently = async (suggestedCategory: string, categories: any[]) => {
+    if (!suggestedCategory || !categories) {
+      return { name: '', id: null };
+    }
+
+    console.log('🎯 Starting intelligent category matching for:', suggestedCategory);
+    console.log('🎯 Available categories:', categories.map(c => c.name));
+
+    // Step 1: Exact match (case-insensitive)
+    const exactMatch = categories.find(cat => 
+      cat.name.toLowerCase() === suggestedCategory.toLowerCase()
+    );
+    
+    if (exactMatch) {
+      console.log('✅ Found exact match:', exactMatch.name);
+      return { name: exactMatch.name, id: exactMatch.id };
+    }
+
+    // Step 2: Send to backend for intelligent matching
+    try {
+      const response = await apiRequest('/api/voice-groq/match-category', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-language': getCurrentLanguageForAPI(),
+        },
+        body: JSON.stringify({
+          suggestedCategory,
+          existingCategories: categories.map(c => ({ id: c.id, name: c.name, type: c.type }))
+        })
+      });
+
+      if (response.matchedCategory) {
+        console.log('✅ Backend found intelligent match:', response.matchedCategory.name);
+        return {
+          name: response.matchedCategory.name,
+          id: response.matchedCategory.id
+        };
+      }
+
+      // Step 3: Create new category if no match found
+      if (response.createNew) {
+        console.log('🆕 Creating new category:', response.newCategoryName);
+        const newCategoryResponse = await apiRequest('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: response.newCategoryName,
+            type: 'expense', // Default to expense
+            color: '#6366f1' // Default color
+          })
+        });
+
+        if (newCategoryResponse.id) {
+          console.log('✅ New category created:', newCategoryResponse.name);
+          return {
+            name: newCategoryResponse.name,
+            id: newCategoryResponse.id
+          };
+        }
+      }
+
+    } catch (error) {
+      console.error('❌ Category matching failed:', error);
+    }
+
+    // Fallback: return suggested category without ID
+    console.log('⚠️ Falling back to suggested category:', suggestedCategory);
+    return { name: suggestedCategory, id: null };
+  };
+
   // Get API language
   const getCurrentLanguageForAPI = () => {
     const currentLang = i18n.language || 'en';
@@ -218,18 +290,21 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         // Set transcript from Groq STT
         setTranscript(result.data.transcript || '');
         
+        // Intelligently match the suggested category with existing ones
+        const matchedCategory = await matchCategoryIntelligently(result.data.category, categories);
+        
         // Store the parsed data for form pre-filling
         setAccumulatedData({
           amount: result.data.amount || '',
           description: result.data.description || '',
           type: result.data.type || 'expense',
           date: result.data.date || new Date().toISOString().split('T')[0],
-          category: result.data.category || '',
-          categoryId: null, // Will be set during save
+          category: matchedCategory.name,
+          categoryId: matchedCategory.id,
           note: result.data.transcript || '' // Store transcript as note
         });
         
-        setExtractedCategory(result.data.category || '');
+        setExtractedCategory(matchedCategory.name);
         
         toast({
           title: t('voice.processing_complete'),
