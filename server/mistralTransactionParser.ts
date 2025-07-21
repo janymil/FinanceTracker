@@ -71,11 +71,17 @@ For "[NUMBER] [CURRENCY] [NUMBER]" format:
 - Result = First.Second (e.g., "15 euros 75" = 15.75)
 
 CATEGORIZATION PRIORITY:
-1. Analyze merchant/business TYPE first
-2. Grocery stores/supermarkets → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-3. Restaurants/cafes/food → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-4. Gas/fuel/transport → ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
-5. Default retail → ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}`;
+1. Analyze PRODUCT TYPE first (most important!)
+2. Detergent/cleaning products/limpieza → ${language === 'Spanish' ? 'Hogar' : language === 'Slovak' ? 'Domácnosť' : 'Household'}
+3. Pharmacy/medicine/farmacia → ${language === 'Spanish' ? 'Salud' : language === 'Slovak' ? 'Zdravie' : 'Healthcare'}
+4. Food/groceries/comida → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
+5. Gas/fuel/transport → ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
+6. General shopping/retail → ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}
+
+CRITICAL EXAMPLES:
+- "detergente" = cleaning product → ${language === 'Spanish' ? 'Hogar' : language === 'Slovak' ? 'Domácnosť' : 'Household'} (NOT Food!)
+- "medicinas" = medicine → ${language === 'Spanish' ? 'Salud' : language === 'Slovak' ? 'Zdravie' : 'Healthcare'}
+- "pan" = food → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [

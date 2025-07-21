@@ -39,7 +39,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     const mistralResponse = await fetch('https://api.mistral.ai/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
-        'x-api-key': process.env.MISTRAL_API_KEY
+        'x-api-key': process.env.MISTRAL_API_KEY!
       },
       body: formData
     });
