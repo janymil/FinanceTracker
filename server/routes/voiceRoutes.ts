@@ -19,12 +19,25 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     // Slovak
     'jeden': '1', 'dva': '2', 'tri': '3', 'štyri': '4', 'päť': '5',
     'šesť': '6', 'sedem': '7', 'osem': '8', 'deväť': '9', 'desať': '10',
+    'jedenásť': '11', 'dvanásť': '12', 'trinásť': '13', 'štrnásť': '14', 'pätnásť': '15',
+    'šestnásť': '16', 'sedemnásť': '17', 'osemnásť': '18', 'devätnásť': '19', 'dvadsať': '20',
+    'tridsať': '30', 'tridsatpet': '35', 'štyridsať': '40', 'päťdesiat': '50',
+    'šesťdesiat': '60', 'sedemdesiat': '70', 'osemdesiat': '80', 'deväťdesiat': '90',
+    'sto': '100',
     // Spanish  
     'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4', 'cinco': '5',
     'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9', 'diez': '10',
+    'once': '11', 'doce': '12', 'trece': '13', 'catorce': '14', 'quince': '15',
+    'dieciséis': '16', 'diecisiete': '17', 'dieciocho': '18', 'diecinueve': '19', 'veinte': '20',
+    'treinta': '30', 'cuarenta': '40', 'cincuenta': '50', 'sesenta': '60',
+    'setenta': '70', 'ochenta': '80', 'noventa': '90', 'cien': '100',
     // English
     'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
-    'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10'
+    'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
+    'eleven': '11', 'twelve': '12', 'thirteen': '13', 'fourteen': '14', 'fifteen': '15',
+    'sixteen': '16', 'seventeen': '17', 'eighteen': '18', 'nineteen': '19', 'twenty': '20',
+    'thirty': '30', 'forty': '40', 'fifty': '50', 'sixty': '60',
+    'seventy': '70', 'eighty': '80', 'ninety': '90', 'hundred': '100'
   };
 
   // Look for numeric amounts - improved decimal recognition
@@ -113,14 +126,18 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     type = 'income';
   }
 
-  // Simple date extraction
+  // Simple date extraction - multilingual support
   let date = '';
-  if (text.includes('yesterday')) {
+  const lowerText = text.toLowerCase();
+  console.log('🗓️ Date parsing - lowerText:', lowerText);
+  if (lowerText.includes('yesterday') || lowerText.includes('včera') || lowerText.includes('ayer')) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     date = yesterday.toISOString().split('T')[0];
-  } else if (text.includes('today')) {
+    console.log('🗓️ Found yesterday keyword, date set to:', date);
+  } else if (lowerText.includes('today') || lowerText.includes('dnes') || lowerText.includes('hoy')) {
     date = new Date().toISOString().split('T')[0];
+    console.log('🗓️ Found today keyword, date set to:', date);
   }
 
   return {
