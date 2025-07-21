@@ -70,18 +70,29 @@ For "[NUMBER] [CURRENCY] [NUMBER]" format:
 - Second number = cents/centavos  
 - Result = First.Second (e.g., "15 euros 75" = 15.75)
 
-CATEGORIZATION PRIORITY:
-1. Analyze PRODUCT TYPE first (most important!)
-2. Detergent/cleaning products/limpieza → ${language === 'Spanish' ? 'Hogar' : language === 'Slovak' ? 'Domácnosť' : 'Household'}
-3. Pharmacy/medicine/farmacia → ${language === 'Spanish' ? 'Salud' : language === 'Slovak' ? 'Zdravie' : 'Healthcare'}
-4. Food/groceries/comida → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-5. Gas/fuel/transport → ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
-6. General shopping/retail → ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}
+USER'S AVAILABLE CATEGORIES:
+${userCategories.map(cat => `- "${cat.name}" (${cat.type})`).join('\n')}
 
-CRITICAL EXAMPLES:
-- "detergente" = cleaning product → ${language === 'Spanish' ? 'Hogar' : language === 'Slovak' ? 'Domácnosť' : 'Household'} (NOT Food!)
-- "medicinas" = medicine → ${language === 'Spanish' ? 'Salud' : language === 'Slovak' ? 'Zdravie' : 'Healthcare'}
-- "pan" = food → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}`;
+CATEGORIZATION RULES:
+1. ONLY use categories from the user's list above
+2. Match by product type, NOT by store location
+3. Analyze what the user actually bought:
+
+PRODUCT TYPE MATCHING:
+- Detergent/cleaning products/soap → Look for categories like: Hogar, Casa, Limpieza, Household, Home, Cleaning
+- Medicine/pharmacy items → Look for: Salud, Zdravie, Healthcare, Medical, Farmacia
+- Food/groceries → Look for: Comida, Food, Potraviny, Groceries, Alimentación  
+- Transport/fuel → Look for: Transporte, Transport, Doprava, Gas, Combustible
+- General shopping → Look for: Compras, Shopping, Nakupovanie, Retail
+
+CRITICAL EXAMPLES WITH USER CATEGORIES:
+- "detergente" + user has "Casa y Limpieza" → use "Casa y Limpieza"
+- "detergente" + user has "Hogar" → use "Hogar"  
+- "detergente" + user has "Household" → use "Household"
+- "medicinas" + user has "Salud y Bienestar" → use "Salud y Bienestar"
+- "pan" + user has "Comida y Bebida" → use "Comida y Bebida"
+
+If no perfect match, choose the most logical category from user's list.`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [
