@@ -1026,7 +1026,7 @@
 
   "voice": {
     "title": "Hlasový Vstup Transakcie", 
-    "instructions": "Povedzte jasne a jednoducho: sumu, názov obchodu (Tesco, Billa, Starbucks...), a kedy sa to stalo. Systém automaticky rozpozná typ a kategóriu transakcie. Napríklad: 'Kúpil som v Bille za 25 eur včera'.",
+    "instructions": "Hovorte jasne a krátko: sumu, obchod, kedy.",
     "play_example": "Prehrať Príklad",
     "start_listening": "Začať Počúvanie",
     "stop_listening": "Zastaviť Počúvanie",

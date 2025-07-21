@@ -1026,7 +1026,7 @@
 
   "voice": {
     "title": "Entrada de Transacción por Voz",
-    "instructions": "Cuéntame sobre tu transacción. Necesito el monto, qué compraste, cuándo pasó, y si fue un gasto o ingreso.",
+    "instructions": "Habla claro y corto: monto, tienda, cuándo.",
     "play_example": "Reproducir Ejemplo",
     "start_listening": "Comenzar Escucha",
     "stop_listening": "Detener Escucha",

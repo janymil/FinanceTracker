@@ -994,7 +994,7 @@
 
   "voice": {
     "title": "Voice Transaction Input",
-    "instructions": "Tell me about your transaction. I need the amount, what you bought, when it happened, and if it was an expense or income.",
+    "instructions": "Speak clearly and short: amount, merchant, when.",
     "play_example": "Play Example",
     "start_listening": "Start Listening",
     "stop_listening": "Stop Listening",
