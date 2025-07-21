@@ -86,7 +86,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         }
         if (finalTranscript) {
           setTranscript(prev => prev + finalTranscript);
-          extractDataFromTranscript(finalTranscript.toLowerCase());
+          extractDataFromTranscript(finalTranscript);
         }
       };
 
@@ -110,167 +110,36 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     };
   }, [userLanguage]);
 
-  // Enhanced pattern extraction for all required fields
-  const extractDataFromTranscript = (text: string) => {
-    console.log('🎤 Extracting from:', text);
-    const lowerText = text.toLowerCase();
-
-    // Text-to-number conversion for multiple languages
-    const textToNumber = (text: string): string => {
-      const numberWords: { [key: string]: string } = {
-        // Slovak
-        'jeden': '1', 'dva': '2', 'tri': '3', 'štyri': '4', 'päť': '5', 
-        'šesť': '6', 'sedem': '7', 'osem': '8', 'deväť': '9', 'desať': '10',
-        'dvadsať': '20', 'tridsať': '30', 'štyridsať': '40', 'päťdesiat': '50',
-        // Spanish
-        'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4', 'cinco': '5',
-        'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9', 'diez': '10',
-        'veinte': '20', 'treinta': '30', 'cuarenta': '40', 'cincuenta': '50',
-        // English
-        'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
-        'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
-        'twenty': '20', 'thirty': '30', 'forty': '40', 'fifty': '50'
-      };
-
-      for (const [word, number] of Object.entries(numberWords)) {
-        if (text.includes(word)) {
-          return number;
-        }
-      }
-      return text;
-    };
-
-    // Extract amount with improved patterns including text numbers
-    let extractedAmount = '';
+  // Dynamic voice parsing - send raw transcript to server for intelligent processing
+  const extractDataFromTranscript = async (text: string) => {
+    console.log('🎤 Processing transcript:', text);
     
-    // First try numeric patterns
-    const numericPatterns = [
-      /(\d+(?:[.,]\d{1,2})?)\s*(?:eur|euro|€)/gi,
-      /(\d+(?:[.,]\d{1,2})?)\s*(?:\$|dollar|dolár)/gi,
-      /(?:za|for|cost|stalo|costó|zaplatil|paid)\s*(\d+(?:[.,]\d{1,2})?)/gi,
-      /(\d+(?:[.,]\d{1,2})?)\s*(?:eur|euro|€|\$|dollar|dolár)/gi
-    ];
+    try {
+      // Send raw transcript to server for dynamic parsing
+      const response = await apiRequest('POST', '/api/voice/parse', {
+        transcript: text,
+        userLanguage: userLanguage
+      });
 
-    for (const pattern of numericPatterns) {
-      const match = text.match(pattern);
-      if (match) {
-        const numberMatch = match[0].match(/(\d+(?:[.,]\d{1,2})?)/);
-        if (numberMatch) {
-          extractedAmount = numberMatch[1].replace(',', '.');
-          break;
-        }
+      if (response && response.data) {
+        console.log('📋 Parsed transaction data:', response.data);
+        setTransactionData(prev => ({
+          ...prev,
+          ...response.data
+        }));
       }
-    }
-
-    // If no numeric amount found, try text patterns
-    if (!extractedAmount) {
-      const textPatterns = [
-        /(?:za|for|cost|stalo|costó|zaplatil|paid)\s+(jeden|dva|tri|štyri|päť|šesť|sedem|osem|deväť|desať|dvadsať|tridsať|štyridsať|päťdesiat|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|veinte|treinta|cuarenta|cincuenta|one|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|forty|fifty)\s*(?:eur|euro|€|\$|dollar|dolár)/gi,
-        /(jeden|dva|tri|štyri|päť|šesť|sedem|osem|deväť|desať|dvadsať|tridsať|štyridsať|päťdesiat|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|veinte|treinta|cuarenta|cincuenta|one|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|forty|fifty)\s*(?:eur|euro|€|\$|dollar|dolár)/gi
-      ];
-
-      for (const pattern of textPatterns) {
-        const match = text.match(pattern);
-        if (match && match[1]) {
-          extractedAmount = textToNumber(match[1].toLowerCase());
-          break;
-        }
-      }
-    }
-
-    if (extractedAmount) {
-      setTransactionData(prev => ({
-        ...prev,
-        amount: extractedAmount
-      }));
-      console.log('💰 Extracted amount:', extractedAmount);
-    }
-
-    // Extract business/vendor - will be processed by AI categorization later
-
-    // Extract merchant/vendor and item description 
-    let extractedDescription = '';
-    
-    // Try to extract merchant first (this becomes the description)
-    const merchantPatterns = [
-      /(?:v|na|at|in|u)\s+([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+?)(?:\s+(?:za|for|cost|kúpil|bought))/gi,
-      /(?:kúpil|bought|compré)\s+(?:som\s+)?(?:si\s+)?(?:v|na|at|in|u)?\s*([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+?)(?:\s+(?:za|for))/gi,
-      /(?:obchod|shop|store|market|supermarket|restaurant|café|bar|hotel|reštaurácia|kaviareň)\s+([a-zA-ZčšľťžýáíéóúňäôöüýČŠĽŤŽÝÁÍÉÓÚŇÄÔÖÜ\s]+)/gi
-    ];
-
-    for (const pattern of merchantPatterns) {
-      const match = text.match(pattern);
-      if (match && match[1]) {
-        extractedDescription = match[1].trim();
-        break;
-      }
-    }
-
-    // If no merchant found, try to extract item/service
-    if (!extractedDescription) {
-      const itemKeywords = ['káva', 'coffee', 'café', 'jedlo', 'food', 'meal', 'chlieb', 'bread', 'mlieko', 'milk', 
-                           'pivo', 'beer', 'benzín', 'gas', 'palivo', 'nákup', 'shopping', 'potraviny', 'groceries',
-                           'autobus', 'taxi', 'vlak', 'uber', 'metro', 'bus', 'train'];
+    } catch (error) {
+      console.error('❌ Failed to parse transcript:', error);
+      // Fallback: extract basic information without hardcoded patterns
+      const words = text.split(' ');
+      let description = words.filter(word => word.length > 2).slice(0, 3).join(' ');
       
-      for (const keyword of itemKeywords) {
-        if (lowerText.includes(keyword)) {
-          extractedDescription = keyword;
-          break;
-        }
+      if (description) {
+        setTransactionData(prev => ({
+          ...prev,
+          description: description
+        }));
       }
-    }
-
-    // If still nothing, extract any meaningful words (fallback)
-    if (!extractedDescription) {
-      const words = text.split(' ').filter(word => 
-        word.length > 2 && 
-        !['som', 'kúpil', 'bought', 'zaplatil', 'paid', 'za', 'for', 'eur', 'euro', 'dollar', 'dolár'].includes(word.toLowerCase())
-      );
-      if (words.length > 0) {
-        extractedDescription = words.slice(0, 2).join(' '); // Take first 2 meaningful words
-      }
-    }
-
-    if (extractedDescription) {
-      setTransactionData(prev => ({
-        ...prev,
-        description: extractedDescription
-      }));
-    }
-
-    // Auto-detect type with better patterns
-    const expenseKeywords = ['kúpil', 'bought', 'zaplatil', 'paid', 'compré', 'pagué', 'spend', 'cost', 'stalo'];
-    const incomeKeywords = ['dostal', 'received', 'výplata', 'salary', 'recibí', 'earned', 'income', 'príjem'];
-    
-    const hasExpenseKeyword = expenseKeywords.some(keyword => lowerText.includes(keyword));
-    const hasIncomeKeyword = incomeKeywords.some(keyword => lowerText.includes(keyword));
-    
-    if (hasExpenseKeyword && !hasIncomeKeyword) {
-      setTransactionData(prev => ({ ...prev, type: 'expense' }));
-    } else if (hasIncomeKeyword && !hasExpenseKeyword) {
-      setTransactionData(prev => ({ ...prev, type: 'income' }));
-    }
-
-    // Extract date with better patterns
-    if (lowerText.includes('včera') || lowerText.includes('yesterday') || lowerText.includes('ayer')) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      setTransactionData(prev => ({
-        ...prev,
-        date: yesterday.toISOString().split('T')[0]
-      }));
-    } else if (lowerText.includes('dnes') || lowerText.includes('today') || lowerText.includes('hoy')) {
-      setTransactionData(prev => ({
-        ...prev,
-        date: new Date().toISOString().split('T')[0]
-      }));
-    } else if (lowerText.includes('minulý týždeň') || lowerText.includes('last week') || lowerText.includes('semana pasada')) {
-      const lastWeek = new Date();
-      lastWeek.setDate(lastWeek.getDate() - 7);
-      setTransactionData(prev => ({
-        ...prev,
-        date: lastWeek.toISOString().split('T')[0]
-      }));
     }
   };
 
