@@ -15,7 +15,8 @@ const mistralClient = new MistralClient();
 export async function parseTransactionWithMistral(
   transcript: string,
   userLanguage: string = 'en-us',
-  userCurrency: string = '$'
+  userCurrency: string = '$',
+  userCategories: Array<{id: number, name: string, type: string}> = []
 ): Promise<ParsedTransaction> {
   const normalizedLanguage = normalizeLanguageCode(userLanguage);
   const language = getLanguageLabel(normalizedLanguage);
@@ -42,10 +43,16 @@ MERCHANT INTELLIGENCE:
 - Shell, BP = gas stations = ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
 - Amazon, Walmart = retail shopping = ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}
 
-CATEGORIES FOR ${language}:
-${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servicios, Salud, Ingresos, Otros' : 
-  language === 'Slovak' ? 'Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie, Príjmy, Ostatné' :
-  'Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other'}
+USER'S EXISTING CATEGORIES:
+${userCategories.length > 0 ? userCategories.map(cat => `- ${cat.name} (${cat.type})`).join('\n') : 'No existing categories'}
+
+INTELLIGENT CATEGORY MATCHING RULES:
+1. ALWAYS prefer matching to user's existing categories when logical
+2. Only create NEW category if NO existing category makes sense
+3. Never force-fit transactions into wrong existing categories
+4. For NEW categories, use these defaults: ${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servicios, Salud' : 
+  language === 'Slovak' ? 'Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie' :
+  'Food, Transport, Shopping, Entertainment, Bills, Healthcare'}
 
 CRITICAL AMOUNT PARSING:
 - "cinco ochenta" = 5.80 (NOT 580!)

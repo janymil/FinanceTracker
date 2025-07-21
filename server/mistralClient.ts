@@ -39,7 +39,7 @@ export interface MistralResponse {
 export class MistralClient {
   private apiKey: string;
   private baseUrl = 'https://api.mistral.ai/v1';
-  private defaultModel = 'mistral-small-2506';
+  private defaultModel = 'mistral-small-3.2';
 
   constructor() {
     this.apiKey = process.env.MISTRAL_API_KEY || '';
@@ -49,7 +49,46 @@ export class MistralClient {
   }
 
   /**
-   * Create chat completion using Mistral Small 2506
+   * Transcribe audio using Mistral Voxtral-mini
+   */
+  async transcribeAudio(audioBuffer: Buffer): Promise<string> {
+    if (!this.apiKey) {
+      throw new Error('Mistral API key not configured');
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', new Blob([audioBuffer]), 'audio.wav');
+      formData.append('model', 'voxtral-mini-2411');
+      formData.append('language', 'auto'); // Auto-detect language
+      formData.append('response_format', 'text');
+
+      console.log('🎙️ [Mistral] Transcribing audio with Voxtral-mini...');
+
+      const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Mistral transcription failed: ${response.statusText}`);
+      }
+
+      const transcription = await response.text();
+      console.log('🎙️ [Mistral] Transcription successful:', transcription.slice(0, 100));
+      return transcription.trim();
+
+    } catch (error) {
+      console.error('❌ [Mistral] Transcription failed:', error);
+      throw new Error(`Mistral transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Create chat completion using Mistral Small 3.2
    */
   async createChatCompletion(request: MistralRequest): Promise<MistralResponse> {
     if (!this.apiKey) {
