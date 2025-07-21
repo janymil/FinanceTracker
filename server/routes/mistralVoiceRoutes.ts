@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
-import { transcribeAudioWithGroq } from '../groqClient.js';
+import { MistralClient } from '../mistralClient.js';
 import { parseTransactionWithMistral, matchCategoryIntelligentlyMistral } from '../mistralTransactionParser.js';
-import { lookupMerchant } from '../../lib/merchantLookup.js';
+import { storage } from '../storage.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
+const mistralClient = new MistralClient();
 
 // Mistral voice transcription and parsing endpoint
 router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request, res: Response) => {
