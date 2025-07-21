@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
-// Using our own transcription - removing Groq dependency for now
+import { transcribeAudioWithGroq } from '../groqClient.js';
 import { parseTransactionWithMistral, matchCategoryIntelligentlyMistral } from '../mistralTransactionParser.js';
 import { lookupMerchant } from '../../lib/merchantLookup.js';
 
@@ -20,11 +20,13 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     console.log('🎤 Mistral voice transcription and parsing request');
     console.log('🌍 User preferences:', { userLanguage, userCurrency });
 
-    // Step 1: For now, use text input (we'll add STT later)
-    const transcription = req.body.transcript || '';
+    // Step 1: Transcribe with Groq Distil-Whisper (STT)
+    console.log('🎙️ Step 1: Transcribing audio with Groq Distil-Whisper...');
+    const transcription = await transcribeAudioWithGroq(req.file.buffer);
+    console.log('🎙️ Transcription result:', transcription);
     
     if (!transcription || transcription.trim().length < 2) {
-      return res.status(400).json({ error: 'No transcript provided. Use parse-text endpoint.' });
+      return res.status(400).json({ error: 'No valid transcription received' });
     }
 
     // Step 2: Parse with Mistral (better than LLaMA)
