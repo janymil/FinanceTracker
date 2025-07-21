@@ -365,13 +365,13 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               className="w-full"
             >
               {isListening ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-              {isListening ? 'Stop & Process' : 'Start Listening'}
+              {isListening ? t('voice.stop_listening') : t('voice.start_listening')}
             </Button>
             
             {transcript && (
               <div className="mt-2 bg-gray-50 dark:bg-gray-700 p-3 rounded text-sm">
                 <strong>{t('voice.transcript')}:</strong> {transcript}
-                {isListening && <span className="ml-2 animate-pulse text-blue-500">🎤 Listening...</span>}
+                {isListening && <span className="ml-2 animate-pulse text-blue-500">🎤 {t('voice.listening')}</span>}
               </div>
             )}
           </div>
@@ -409,7 +409,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 value={extractedCategory || accumulatedData.category || ''}
                 readOnly
                 className={extractedCategory || accumulatedData.category ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'bg-muted/50'}
-                placeholder="Category will be detected automatically..."
+                placeholder={t('voice.category_auto')}
               />
             </div>
 

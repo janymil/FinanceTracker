@@ -1029,7 +1029,8 @@
     "instructions": "Presiona el botón Start Listening y habla breve, simple. Di estos datos: comerciante, producto, monto, fecha.",
     "play_example": "Reproducir Ejemplo",
     "start_listening": "Comenzar Escucha",
-    "stop_listening": "Detener Escucha",
+    "stop_listening": "Detener y Procesar",
+    "listening": "Escuchando...",
     "transcript": "Transcripción",
     "save_transaction": "Guardar Transacción",
     "saving": "Guardando...",
@@ -1041,7 +1042,8 @@
     "save_failed": "Error al Guardar",
     "try_again": "Por favor intente nuevamente",
     "button_text": "Entrada de Voz",
-    "button_title": "Agregar transacción usando entrada de voz"
+    "button_title": "Agregar transacción usando entrada de voz",
+    "category_auto": "La categoría se detectará automáticamente..."
   },
   "Scan receipts on mobile, process on desktop": "Escanear recibos en móvil, procesar en escritorio",
   "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso móvil anónimo, sondeo en tiempo real, población automática de formularios",

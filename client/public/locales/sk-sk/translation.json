@@ -1029,7 +1029,8 @@
     "instructions": "Stisknite tlačidlo Start Listening a hovorte stručne, jednoducho. Povedzte tieto údaje: obchodník, tovar, suma, dátum.",
     "play_example": "Prehrať Príklad",
     "start_listening": "Začať Počúvanie",
-    "stop_listening": "Zastaviť Počúvanie",
+    "stop_listening": "Zastaviť a Spracovať",
+    "listening": "Počúvam...",
     "transcript": "Prepis",
     "save_transaction": "Uložiť Transakciu",
     "saving": "Ukladám...",
@@ -1040,6 +1041,7 @@
     "transaction_success": "Vaša transakcia bola úspešne uložená",
     "save_failed": "Uloženie Zlyhalo",
     "try_again": "Prosím skúste znovu",
+    "category_auto": "Kategória sa rozpozná automaticky...",
     "button_text": "Hlasový Vstup",
     "button_title": "Pridať transakciu pomocou hlasového vstupu"
   },

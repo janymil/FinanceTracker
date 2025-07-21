@@ -997,7 +997,8 @@
     "instructions": "Press Start Listening button and speak briefly, simply. Say these data: merchant, product, amount, date.",
     "play_example": "Play Example",
     "start_listening": "Start Listening",
-    "stop_listening": "Stop Listening",
+    "stop_listening": "Stop & Process",
+    "listening": "Listening...",
     "transcript": "Transcript",
     "save_transaction": "Save Transaction",
     "saving": "Saving...",
@@ -1009,7 +1010,8 @@
     "save_failed": "Save Failed",
     "try_again": "Please try again",
     "button_text": "Voice Input",
-    "button_title": "Add transaction using voice input"
+    "button_title": "Add transaction using voice input",
+    "category_auto": "Category will be detected automatically..."
   },
 
   "require_plan": {
