@@ -9,18 +9,21 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 const mistralClient = new MistralClient();
 
-// Mistral voice transcription and parsing endpoint
-router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request, res: Response) => {
+// Mistral text parsing endpoint (using browser STT instead of Mistral STT)
+router.post('/parse-text', async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No audio file uploaded' });
+    const { transcript } = req.body;
+    
+    if (!transcript || transcript.trim().length < 2) {
+      return res.status(400).json({ error: 'No valid transcript provided' });
     }
 
     const userLanguage = req.headers['x-user-language'] as string || 'en-us';
     const userCurrency = req.headers['x-user-currency'] as string || '$';
     
-    console.log('🎤 Mistral voice transcription and parsing request');
+    console.log('🎤 Mistral text parsing request');
     console.log('🌍 User preferences:', { userLanguage, userCurrency });
+    console.log('📝 Transcript to parse:', transcript);
 
     // Get user ID from authentication
     const userId = (req as any).auth?.userId;
@@ -28,27 +31,18 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    // Step 1: Transcribe with Mistral Voxtral-mini (STT)
-    console.log('🎙️ Step 1: Transcribing audio with Mistral Voxtral-mini...');
-    const transcription = await mistralClient.transcribeAudio(req.file.buffer);
-    console.log('🎙️ Transcription result:', transcription);
-    
-    if (!transcription || transcription.trim().length < 2) {
-      return res.status(400).json({ error: 'No valid transcription received' });
-    }
-
-    // Step 2: Get user's existing categories from database
-    console.log('📂 Step 2: Fetching user categories...');
+    // Step 1: Get user's existing categories from database
+    console.log('📂 Step 1: Fetching user categories...');
     const userCategories = await storage.getCategories(userId);
     console.log('📂 User has', userCategories.length, 'categories');
 
-    // Step 3: Parse with Mistral Small 2506 (with user categories)
-    console.log('🧠 Step 3: Parsing transaction with Mistral (with user categories)...');
-    const parsedTransaction = await parseTransactionWithMistral(transcription, userLanguage, userCurrency, userCategories);
+    // Step 2: Parse with Mistral Small 2506 (with user categories)
+    console.log('🧠 Step 2: Parsing transaction with Mistral (with user categories)...');
+    const parsedTransaction = await parseTransactionWithMistral(transcript, userLanguage, userCurrency, userCategories);
     console.log('🧠 Mistral parsed transaction:', parsedTransaction);
 
-    // Step 4: Local category matching (100% accurate)
-    console.log('🎯 Step 4: Local intelligent category matching...');
+    // Step 3: Local category matching (100% accurate)
+    console.log('🎯 Step 3: Local intelligent category matching...');
     const categoryMatchResult = matchCategoryLocally(
       parsedTransaction.category,
       userCategories,
