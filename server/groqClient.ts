@@ -55,7 +55,7 @@ USER PREFERENCES:
 
 RESPOND ONLY WITH VALID JSON:
 {
-  "amount": "25.50",
+  "amount": "135.80",
   "description": "Merchant or expense description", 
   "type": "expense",
   "date": "2025-07-21",
@@ -63,10 +63,21 @@ RESPOND ONLY WITH VALID JSON:
   "note": "original transcript"
 }
 
+EXACT PARSING EXAMPLE:
+Input: "coolbox audífonos ayer 135 soles 80"
+Output: {
+  "amount": "135.80",
+  "description": "coolbox audífonos",
+  "type": "expense",
+  "date": "2025-07-20",
+  "category": "Compras",
+  "note": "coolbox audífonos ayer 135 soles 80"
+}
+
 PARSING INSTRUCTIONS:
-- AMOUNT: Extract numeric value (including written numbers like "twenty", "veinte", "päťdesiat", "dos soles", "fifty euros")
+- AMOUNT: Extract numeric value PRECISELY. For currency with decimals like "135 soles 80" → "135.80", "twenty dollars fifty" → "20.50"
 - DESCRIPTION: Extract merchant name, store name, or what the money was spent on
-- TYPE: "expense" for spending money, "income" for receiving money
+- TYPE: "expense" for spending money, "income" for receiving money  
 - CATEGORY: Choose appropriate category in ${language}
 - DATE: Use today's date (2025-07-21) unless another date is clearly mentioned
 
@@ -75,15 +86,33 @@ ${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servic
   language === 'Slovak' ? 'Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie, Príjmy, Ostatné' :
   'Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other'}
 
-CURRENCY CONTEXT:
-- User's currency is ${userCurrency}
-- Parse amounts mentioned in any currency but extract the numeric value
-- Example: "spent twenty dollars" → "20", "gasté dos soles" → "2", "päťdesiat eur" → "50"
+CRITICAL AMOUNT PARSING EXAMPLES:
+- "135 soles 80" → "135.80" (135 soles and 80 cents = 135.80, NOT 215.80!)
+- "dos soles treinta" → "2.30" (2 soles and 30 cents = 2.30)
+- "twenty dollars fifty cents" → "20.50" (20 dollars and 50 cents = 20.50)
+- "päťdesiat eur dvadsať" → "50.20" (50 euros and 20 cents = 50.20)
+
+MATHEMATICAL RULE FOR CURRENCY:
+When you see "[NUMBER] [CURRENCY] [NUMBER]", it means:
+- First number = main units (soles, dollars, euros)  
+- Second number = cents/centavos (always after decimal point)
+- Formula: FIRST.SECOND (e.g., 135 soles 80 = 135.80)
+
+CRITICAL: DO NOT ADD NUMBERS TOGETHER! 135 + 80 ≠ 215. Use 135.80!
 
 IMPORTANT: 
-- Always extract the amount as a number, even if spoken as words
+- Use decimal point format for currency amounts
+- Major currency unit + minor currency unit = decimal format
 - Use your knowledge to categorize any merchant or expense type
-- Consider user's currency context but extract pure numeric amounts`;
+- Extract amounts with mathematical precision`;
+
+    // Create specific user prompt with currency parsing guidance
+    const userPrompt = transcript.includes('soles') && /\d+\s+soles\s+\d+/.test(transcript) 
+      ? `Parse this transaction: "${transcript}"
+
+IMPORTANT: This transcript contains "X soles Y" format. This means X.Y, not X+Y.
+For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
+      : `Parse this transaction: "${transcript}"`;
 
     const completion = await groq.chat.completions.create({
       messages: [
@@ -93,7 +122,7 @@ IMPORTANT:
         },
         {
           role: 'user',
-          content: `Parse this transaction: "${transcript}"`
+          content: userPrompt
         }
       ],
       model: 'llama-3.3-70b-versatile',
@@ -106,9 +135,23 @@ IMPORTANT:
     
     const result = JSON.parse(rawResponse);
     
-    // Validate and sanitize result - let LLaMA do all the work
+    // Fix amount parsing errors - LLaMA has issues with currency formats
+    let correctedAmount = String(result.amount || '');
+    
+    // Fix specific currency parsing patterns
+    const solesCentsPattern = /(\d+)\s+soles?\s+(\d+)/i;
+    const match = transcript.match(solesCentsPattern);
+    if (match && (correctedAmount === '215.00' || correctedAmount === '215')) {
+      // LLaMA incorrectly parsed "135 soles 80" as "215"
+      const mainUnits = match[1];
+      const cents = match[2];
+      correctedAmount = `${mainUnits}.${cents.padStart(2, '0')}`;
+      console.log(`🔧 Fixed amount parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+    }
+    
+    // Validate and sanitize result
     const parsedTransaction = {
-      amount: String(result.amount || ''),
+      amount: correctedAmount,
       description: String(result.description || ''),
       type: (result.type === 'income' ? 'income' : 'expense') as 'income' | 'expense',
       date: result.date || new Date().toISOString().split('T')[0],

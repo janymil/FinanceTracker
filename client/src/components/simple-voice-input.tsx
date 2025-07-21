@@ -92,7 +92,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
     // Step 2: Send to backend for intelligent matching
     try {
-      const response = await apiRequest('/api/voice-groq/match-category', {
+      const response = await fetch('/api/voice-groq/match-category', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,22 +104,23 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         })
       });
 
-      if (response.matchedCategory) {
-        console.log('✅ Backend found intelligent match:', response.matchedCategory.name);
+      const result = await response.json();
+
+      if (result.matchedCategory) {
+        console.log('✅ Backend found intelligent match:', result.matchedCategory.name);
         return {
-          name: response.matchedCategory.name,
-          id: response.matchedCategory.id
+          name: result.matchedCategory.name,
+          id: result.matchedCategory.id
         };
       }
 
       // Step 3: Create new category if no match found
-      if (response.createNew) {
-        console.log('🆕 Creating new category:', response.newCategoryName);
+      if (result.createNew) {
+        console.log('🆕 Creating new category:', result.newCategoryName);
         const newCategoryResponse = await apiRequest('/api/categories', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: response.newCategoryName,
+            name: result.newCategoryName,
             type: 'expense', // Default to expense
             color: '#6366f1' // Default color
           })
@@ -210,50 +211,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         
         // Update transaction data for display - removed as we'll use accumulatedData directly
 
-        // Set category - simple matching between backend result and user categories
-        if (parsed.category && categories) {
-          console.log('🏷️ Parsed category from voice:', parsed.category);
-          console.log('🏷️ Available user categories:', (categories as any[]).map(c => c.name));
-          
-          // Find matching category (simple case-insensitive match first)
-          const matchingCategory = (categories as any[]).find(cat => {
-            const categoryName = cat.name.toLowerCase();
-            const parsedCategoryLower = parsed.category.toLowerCase();
-            
-            // Direct match
-            if (categoryName === parsedCategoryLower) return true;
-            
-            // Basic English-Slovak mapping (just essential ones)
-            const basicMappings: { [key: string]: string } = {
-              'food': 'jedlo',
-              'transportation': 'doprava', 
-              'shopping': 'nákupy',
-              'entertainment': 'zábava',
-              'healthcare': 'zdravie',
-              'utilities': 'služby'
-            };
-            
-            return categoryName === basicMappings[parsedCategoryLower];
-          });
-          
-          if (matchingCategory) {
-            console.log('✅ Matched category:', matchingCategory.name);
-            setExtractedCategory(matchingCategory.name);
-            setAccumulatedData(prev => ({ 
-              ...prev, 
-              category: matchingCategory.name,
-              categoryId: matchingCategory.id 
-            }));
-          } else {
-            console.log('❌ No matching category found, using raw category:', parsed.category);
-            setExtractedCategory(parsed.category);
-            setAccumulatedData(prev => ({ ...prev, category: parsed.category }));
-          }
-        } else if (parsed.category) {
-          console.log('🏷️ Setting category without user categories:', parsed.category);
-          setExtractedCategory(parsed.category);
-          setAccumulatedData(prev => ({ ...prev, category: parsed.category }));
-        }
+        // This old category matching logic is removed - now handled by intelligent matching
       }
     } catch (error) {
       console.error('❌ Voice processing failed:', error);
@@ -291,7 +249,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         setTranscript(result.data.transcript || '');
         
         // Intelligently match the suggested category with existing ones
-        const matchedCategory = await matchCategoryIntelligently(result.data.category, categories);
+        const matchedCategory = await matchCategoryIntelligently(result.data.category, categories as any[]);
         
         // Store the parsed data for form pre-filling
         setAccumulatedData({
