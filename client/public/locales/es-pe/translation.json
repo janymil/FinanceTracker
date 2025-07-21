@@ -1067,7 +1067,17 @@
     "please_provide": "Por favor proporciona",
     "invalid_amount": "Cantidad Inválida",
     "amount_greater_than_zero": "La cantidad debe ser mayor que cero",
-    "unknown_error": "Ocurrió un error desconocido"
+    "unknown_error": "Ocurrió un error desconocido",
+    "select_category": "Seleccionar categoría",
+    "ai_suggested": "Sugerido por IA",
+    "ai_suggested_short": "IA",
+    "create_new_category": "Crear nueva categoría",
+    "new_category_name": "Nombre de Nueva Categoría",
+    "category_name_placeholder": "Nombre de categoría",
+    "retry": "Reintentar",
+    "rate_limit_error": "Demasiadas solicitudes. Intenta de nuevo en unos segundos.",
+    "network_error": "Error de red. Verifica tu conexión.",
+    "auth_error": "Error de autenticación. Contacta a soporte."
   },
   "Scan receipts on mobile, process on desktop": "Escanear recibos en móvil, procesar en escritorio",
   "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso móvil anónimo, sondeo en tiempo real, población automática de formularios",

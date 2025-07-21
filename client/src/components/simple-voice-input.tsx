@@ -75,10 +75,13 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   });
 
   // Get categories for matching
-  const { data: categories } = useQuery({
+  const { data: allCategories } = useQuery({
     queryKey: ['/api/categories'],
     staleTime: 5 * 60 * 1000
   });
+
+  // Filter categories by transaction type
+  const categories = allCategories?.filter(cat => cat.type === accumulatedData.type) || [];
 
   const userLanguage = (user as any)?.language || i18n.language || 'en-us';
   const userCurrency = (user as any)?.currency || '$';
@@ -863,7 +866,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 }}
               >
                 <SelectTrigger className={accumulatedData.category ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}>
-                  <SelectValue placeholder={t('voice.select_category') || 'Select category'}>
+                  <SelectValue placeholder={t('voice.select_category')}>
                     {accumulatedData.category || (extractedCategory || t('voice.category_auto'))}
                   </SelectValue>
                 </SelectTrigger>
@@ -871,18 +874,18 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                   {/* Show AI suggested category first if it's not in existing categories */}
                   {extractedCategory && !categories?.find(cat => cat.name === extractedCategory) && (
                     <SelectItem value="ai-suggestion" disabled>
-                      <span className="text-blue-600 font-medium">🤖 AI Suggested: {extractedCategory}</span>
+                      <span className="text-blue-600 font-medium">🤖 {t('voice.ai_suggested')}: {extractedCategory}</span>
                     </SelectItem>
                   )}
                   
-                  {/* Show existing user categories */}
+                  {/* Show existing user categories (filtered by transaction type) */}
                   {categories?.map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
                       <div className="flex items-center gap-2">
                         <span className={`w-3 h-3 rounded-full`} style={{ backgroundColor: category.color }}></span>
                         {category.name}
                         {category.name === extractedCategory && (
-                          <span className="text-blue-500 text-xs">🤖 AI</span>
+                          <span className="text-blue-500 text-xs">🤖 {t('voice.ai_suggested_short')}</span>
                         )}
                       </div>
                     </SelectItem>
@@ -890,7 +893,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                   
                   {/* Option to create new category */}
                   <SelectItem value="create-new">
-                    <span className="text-green-600 font-medium">+ {t('voice.create_new_category') || 'Create new category'}</span>
+                    <span className="text-green-600 font-medium">+ {t('voice.create_new_category')}</span>
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -898,7 +901,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               {/* Show AI confidence if available */}
               {extractedCategory && accumulatedData.category === extractedCategory && (
                 <p className="text-xs text-gray-500 mt-1">
-                  🤖 {t('voice.ai_suggested') || 'AI suggested'}: {extractedCategory}
+                  🤖 {t('voice.ai_suggested')}: {extractedCategory}
                 </p>
               )}
               
@@ -906,14 +909,14 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               {isCreatingNewCategory && (
                 <div className="mt-2 p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
                   <Label htmlFor="newCategoryName" className="text-sm font-medium">
-                    {t('voice.new_category_name') || 'New Category Name'}
+                    {t('voice.new_category_name')}
                   </Label>
                   <div className="flex gap-2 mt-1">
                     <Input
                       id="newCategoryName"
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
-                      placeholder={extractedCategory || 'Category name'}
+                      placeholder={extractedCategory || t('voice.category_name_placeholder')}
                       className="flex-1"
                     />
                     <Button

@@ -1035,7 +1035,17 @@
     "please_provide": "Please provide",
     "invalid_amount": "Invalid Amount",
     "amount_greater_than_zero": "Amount must be greater than zero",
-    "unknown_error": "Unknown error occurred"
+    "unknown_error": "Unknown error occurred",
+    "select_category": "Select category",
+    "ai_suggested": "AI suggested",
+    "ai_suggested_short": "AI",
+    "create_new_category": "Create new category",
+    "new_category_name": "New Category Name",
+    "category_name_placeholder": "Category name",
+    "retry": "Retry",
+    "rate_limit_error": "Too many requests. Please try again in a few seconds.",
+    "network_error": "Network error. Please check your connection.",
+    "auth_error": "Authentication error. Please contact support."
   },
 
   "require_plan": {
