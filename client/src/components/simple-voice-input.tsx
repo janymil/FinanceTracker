@@ -63,6 +63,10 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const MAX_RECORDING_SECONDS = 60;
+  
+  // New category creation state
+  const [isCreatingNewCategory, setIsCreatingNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   // Get user data
   const { data: user } = useQuery({
@@ -839,13 +843,132 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
             <div>
               <Label htmlFor="category">{t('Category')}</Label>
-              <Input
-                id="category"
-                value={extractedCategory || accumulatedData.category || ''}
-                readOnly
-                className={extractedCategory || accumulatedData.category ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'bg-muted/50'}
-                placeholder={t('voice.category_auto')}
-              />
+              <Select 
+                value={accumulatedData.categoryId?.toString() || ''} 
+                onValueChange={(value) => {
+                  if (value === 'create-new') {
+                    setIsCreatingNewCategory(true);
+                    setNewCategoryName(extractedCategory || '');
+                  } else {
+                    const selectedCategory = categories?.find(cat => cat.id.toString() === value);
+                    if (selectedCategory) {
+                      setAccumulatedData(prev => ({ 
+                        ...prev, 
+                        category: selectedCategory.name,
+                        categoryId: selectedCategory.id 
+                      }));
+                      setExtractedCategory(selectedCategory.name);
+                    }
+                  }
+                }}
+              >
+                <SelectTrigger className={accumulatedData.category ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}>
+                  <SelectValue placeholder={t('voice.select_category') || 'Select category'}>
+                    {accumulatedData.category || (extractedCategory || t('voice.category_auto'))}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {/* Show AI suggested category first if it's not in existing categories */}
+                  {extractedCategory && !categories?.find(cat => cat.name === extractedCategory) && (
+                    <SelectItem value="ai-suggestion" disabled>
+                      <span className="text-blue-600 font-medium">🤖 AI Suggested: {extractedCategory}</span>
+                    </SelectItem>
+                  )}
+                  
+                  {/* Show existing user categories */}
+                  {categories?.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full`} style={{ backgroundColor: category.color }}></span>
+                        {category.name}
+                        {category.name === extractedCategory && (
+                          <span className="text-blue-500 text-xs">🤖 AI</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                  
+                  {/* Option to create new category */}
+                  <SelectItem value="create-new">
+                    <span className="text-green-600 font-medium">+ {t('voice.create_new_category') || 'Create new category'}</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {/* Show AI confidence if available */}
+              {extractedCategory && accumulatedData.category === extractedCategory && (
+                <p className="text-xs text-gray-500 mt-1">
+                  🤖 {t('voice.ai_suggested') || 'AI suggested'}: {extractedCategory}
+                </p>
+              )}
+              
+              {/* New category creation */}
+              {isCreatingNewCategory && (
+                <div className="mt-2 p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <Label htmlFor="newCategoryName" className="text-sm font-medium">
+                    {t('voice.new_category_name') || 'New Category Name'}
+                  </Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      id="newCategoryName"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder={extractedCategory || 'Category name'}
+                      className="flex-1"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        if (newCategoryName.trim()) {
+                          try {
+                            const newCategory = await apiRequest('/api/categories', {
+                              method: 'POST',
+                              body: JSON.stringify({
+                                name: newCategoryName.trim(),
+                                type: accumulatedData.type,
+                                color: '#6366f1'
+                              })
+                            });
+                            
+                            setAccumulatedData(prev => ({
+                              ...prev,
+                              category: newCategory.name,
+                              categoryId: newCategory.id
+                            }));
+                            setExtractedCategory(newCategory.name);
+                            setIsCreatingNewCategory(false);
+                            setNewCategoryName('');
+                            
+                            toast({
+                              title: t('voice.category_created') || 'Category created',
+                              description: newCategory.name,
+                            });
+                          } catch (error) {
+                            toast({
+                              title: t('common.error'),
+                              description: t('voice.category_creation_failed') || 'Failed to create category',
+                              variant: 'destructive'
+                            });
+                          }
+                        }
+                      }}
+                      disabled={!newCategoryName.trim()}
+                    >
+                      {t('common.create') || 'Create'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setIsCreatingNewCategory(false);
+                        setNewCategoryName('');
+                      }}
+                    >
+                      {t('common.cancel') || 'Cancel'}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
