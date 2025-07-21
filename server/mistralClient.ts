@@ -58,17 +58,16 @@ export class MistralClient {
 
     try {
       const formData = new FormData();
-      formData.append('file', new Blob([audioBuffer]), 'audio.wav');
-      formData.append('model', 'voxtral-mini-2411');
-      formData.append('language', 'auto'); // Auto-detect language
-      formData.append('response_format', 'text');
+      formData.append('file', new Blob([audioBuffer]), 'audio.webm');
+      formData.append('model', 'voxtral-mini-2507');
+      formData.append('temperature', '0.0');
 
-      console.log('🎙️ [Mistral] Transcribing audio with Voxtral-mini...');
+      console.log('🎙️ [Mistral] Transcribing audio with Voxtral-mini-2507...');
 
       const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`
+          'x-api-key': this.apiKey
         },
         body: formData
       });
@@ -77,7 +76,8 @@ export class MistralClient {
         throw new Error(`Mistral transcription failed: ${response.statusText}`);
       }
 
-      const transcription = await response.text();
+      const result = await response.json();
+      const transcription = result.text;
       console.log('🎙️ [Mistral] Transcription successful:', transcription.slice(0, 100));
       return transcription.trim();
 

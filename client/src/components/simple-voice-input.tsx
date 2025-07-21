@@ -226,25 +226,15 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
       
-      console.log('🎤 Processing voice with browser STT + Mistral parsing...');
+      console.log('🎤 Sending audio to Mistral for processing...');
       
-      // Convert audio to browser STT first (cost-free)
-      const transcriptText = await convertAudioToText(audioBlob);
-      if (!transcriptText) {
-        throw new Error('Browser STT failed - no transcript generated');
-      }
-      
-      console.log('🎙️ Browser STT result:', transcriptText);
-      
-      // Send transcript to Mistral for parsing (cost-efficient)
-      const response = await fetch('/api/voice-mistral/parse-text', {
+      const response = await fetch('/api/voice-mistral/transcribe-and-parse', {
         method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'application/json',
           'x-user-language': getCurrentLanguageForAPI(),
           'x-user-currency': userCurrency
-        },
-        body: JSON.stringify({ transcript: transcriptText })
+        }
       });
       
       if (!response.ok) {
