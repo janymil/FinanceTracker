@@ -79,27 +79,22 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     }
   }
 
-  // Extract merchant name as description - will be enhanced by merchant lookup later
-  // Just extract the most likely merchant name, don't hardcode anything
-  const commonWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'kupil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'and', 'or', 'but', 'por'];
-  
+  // Simple description extraction - merchant lookup will enhance this later
   let description = '';
   
-  // Look for capitalized words (proper nouns) first - likely merchant names
+  // Look for capitalized words (likely merchant names)
   const properNouns = words.filter(word => 
     /^[A-Z]/.test(word) && 
-    word.length > 2 && 
-    !commonWords.includes(word.toLowerCase())
+    word.length > 2
   );
   
   if (properNouns.length > 0) {
     description = properNouns[0];
   } else {
-    // Fallback to meaningful words (not common words, numbers, or currencies)
+    // Fallback to first meaningful word
     const meaningfulWords = words.filter(word => {
       const clean = word.toLowerCase().replace(/[^\w]/g, '');
       return clean.length > 2 && 
-             !commonWords.includes(clean) && 
              !textNumbers[clean] &&
              !/^\d/.test(clean);
     });
@@ -109,22 +104,24 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
       'Transaction';
   }
 
-  // Detect transaction type
+  // Simple transaction type detection
   let type = 'expense'; // Default
-  const incomeWords = ['dostal', 'received', 'výplata', 'salary', 'recibí', 'earned', 'income', 'príjem'];
-  const hasIncome = incomeWords.some(word => text.includes(word));
+  // Basic income detection - can be enhanced later
+  if (text.includes('received') || text.includes('salary') || text.includes('income')) {
+    type = 'income';
+  }
   
   if (hasIncome) {
     type = 'income';
   }
 
-  // Extract date
+  // Simple date extraction
   let date = '';
-  if (text.includes('včera') || text.includes('yesterday')) {
+  if (text.includes('yesterday')) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     date = yesterday.toISOString().split('T')[0];
-  } else if (text.includes('dnes') || text.includes('today')) {
+  } else if (text.includes('today')) {
     date = new Date().toISOString().split('T')[0];
   }
 

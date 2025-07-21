@@ -327,37 +327,20 @@ function extractMerchantName(transcript: string, userLanguage?: string): string 
     }
   }
   
-  // Try to find proper nouns (capitalized words in original text) - exclude common Slovak words
+  // Simple extraction - try to find proper nouns (capitalized words)
   const words = transcript.split(' ');
-  const commonWords = ['Kúpil', 'Som', 'Si', 'Pre', 'Do', 'Od', 'Na', 'Za', 'V', 'I', 'At', 'From', 'For', 'To', 'The', 'And', 'Or', 'But'];
   const properNouns = words.filter(word => 
     word.length > 2 && 
-    /^[A-Z]/.test(word) && 
-    !commonWords.includes(word)
+    /^[A-Z]/.test(word)
   );
   
   if (properNouns.length > 0) {
-    return properNouns[0]; // Return only the first proper noun, not all joined
+    return properNouns[0]; // Return first proper noun
   }
   
-  // For simple words like "starbucks", return the first meaningful word from lowercase
-  // Multilingual exclusion words
-  const getExclusionPattern = (userLanguage?: string) => {
-    const baseWords = ['at', 'from', 'for', 'to', 'the', 'and', 'or', 'but', 'in', 'on', 'with', 'by'];
-    
-    if (userLanguage?.startsWith('sk')) {
-      return [...baseWords, 'za', 'v', 'som', 'si', 'na', 'pre', 'do', 'od', 'eur', 'euro'];
-    } else if (userLanguage?.startsWith('es')) {
-      return [...baseWords, 'para', 'en', 'de', 'por', 'con', 'desde', 'hasta', 'eur', 'euro', 'euros'];
-    } else {
-      return [...baseWords, 'eur', 'usd', 'czk', 'euro', 'euros', 'dollar', 'dollars'];
-    }
-  };
-  
-  const exclusionWords = getExclusionPattern(userLanguage);
+  // Fallback to meaningful words from lowercase
   const meaningfulWords = text.split(' ').filter(word => 
     word.length >= 3 && 
-    !exclusionWords.includes(word.toLowerCase()) &&
     !/^\d+/.test(word) && // not starting with number
     !/^\d+[\.,]\d+$/.test(word) // not a decimal number like 5.50 or 5,50
   );
