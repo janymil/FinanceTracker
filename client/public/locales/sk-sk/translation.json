@@ -1039,7 +1039,9 @@
     "transaction_saved": "Transakcia Uložená",
     "transaction_success": "Vaša transakcia bola úspešne uložená",
     "save_failed": "Uloženie Zlyhalo",
-    "try_again": "Prosím skúste znovu"
+    "try_again": "Prosím skúste znovu",
+    "button_text": "Hlasový Vstup",
+    "button_title": "Pridať transakciu pomocou hlasového vstupu"
   },
   "Budget alerts, goal reminders, transaction notifications, email preferences": "Rozpočtové upozornenia, pripomienky cieľov, notifikácie transakcií, emailové preferencie",
   "Mobile Features": "Mobilné Funkcie",

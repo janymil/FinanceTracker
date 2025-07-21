@@ -36,6 +36,7 @@ import { useDateFormat } from "@/hooks/useDateFormat";
 import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 import TransactionFilters from "@/components/TransactionFilters";
+import SimpleVoiceButton from "@/components/simple-voice-button";
 
 
 // Helper functions for category localization
@@ -385,6 +386,9 @@ export default function Expenses() {
                 }}
                 buttonText={t("upload.button_text")}
               />
+              <SimpleVoiceButton onComplete={() => {
+                refetchTransactions();
+              }} />
 
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>

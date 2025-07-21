@@ -1007,7 +1007,9 @@
     "transaction_saved": "Transaction Saved",
     "transaction_success": "Your transaction has been saved successfully",
     "save_failed": "Save Failed",
-    "try_again": "Please try again"
+    "try_again": "Please try again",
+    "button_text": "Voice Input",
+    "button_title": "Add transaction using voice input"
   },
 
   "require_plan": {

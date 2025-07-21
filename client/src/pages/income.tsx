@@ -38,6 +38,7 @@ import { useDateFormat } from "@/hooks/useDateFormat";
 import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 import TransactionFilters from "@/components/TransactionFilters";
+import SimpleVoiceButton from "@/components/simple-voice-button";
 
 
 // Helper functions for category localization
@@ -402,6 +403,9 @@ export default function Income() {
           
           <div className="flex flex-col sm:flex-row gap-2">
             <UploadReceiptModal onReceiptProcessed={handleReceiptProcessed} buttonText={t("upload.button_text")} />
+            <SimpleVoiceButton onComplete={() => {
+              refetchTransactions();
+            }} />
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="w-full sm:w-auto">

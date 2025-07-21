@@ -73,6 +73,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
+import SimpleVoiceButton from "@/components/simple-voice-button";
 
 
 interface Category {
@@ -456,6 +457,12 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex gap-2">
+                <SimpleVoiceButton onComplete={() => {
+                  if (user) {
+                    queryClient.invalidateQueries({ queryKey: ['transactions'] });
+                    queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+                  }
+                }} />
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
