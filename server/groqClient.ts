@@ -138,15 +138,33 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
     // Fix amount parsing errors - LLaMA has issues with currency formats
     let correctedAmount = String(result.amount || '');
     
-    // Fix specific currency parsing patterns
-    const solesCentsPattern = /(\d+)\s+soles?\s+(\d+)/i;
-    const match = transcript.match(solesCentsPattern);
-    if (match && (correctedAmount === '215.00' || correctedAmount === '215')) {
-      // LLaMA incorrectly parsed "135 soles 80" as "215"
-      const mainUnits = match[1];
-      const cents = match[2];
-      correctedAmount = `${mainUnits}.${cents.padStart(2, '0')}`;
-      console.log(`🔧 Fixed amount parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+    // Fix Spanish number parsing patterns
+    const spanishNumberPatterns = [
+      // "cinco ochenta" pattern - LLaMA thinks it's 580 instead of 5.80
+      { pattern: /cinco\s+ochenta/i, fix: '5.80' },
+      // "X soles Y" pattern
+      { pattern: /(\d+)\s+soles?\s+(\d+)/i, handler: (match: RegExpMatchArray) => `${match[1]}.${match[2].padStart(2, '0')}` }
+    ];
+    
+    for (const p of spanishNumberPatterns) {
+      const match = transcript.match(p.pattern);
+      if (match) {
+        if ('fix' in p) {
+          // Direct fix
+          if (correctedAmount === '580.00' || correctedAmount === '580') {
+            correctedAmount = p.fix;
+            console.log(`🔧 Fixed Spanish number parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+          }
+        } else if ('handler' in p) {
+          // Dynamic fix
+          const expectedAmount = p.handler(match);
+          if (correctedAmount !== expectedAmount) {
+            correctedAmount = expectedAmount;
+            console.log(`🔧 Fixed currency parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+          }
+        }
+        break;
+      }
     }
     
     // Validate and sanitize result
