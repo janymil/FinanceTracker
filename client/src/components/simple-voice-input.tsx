@@ -29,9 +29,16 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const [transactionData, setTransactionData] = useState<TransactionData>({
     amount: '',
     description: '',
-    type: 'expense',
-    date: new Date().toISOString().split('T')[0],
+    type: 'expense' as 'income' | 'expense',
+    date: '',
     note: ''
+  });
+  const [extractedCategory, setExtractedCategory] = useState<string>('');
+
+  // Get categories for display
+  const { data: categories } = useQuery({
+    queryKey: ['/api/categories'],
+    staleTime: 5 * 60 * 1000
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -121,12 +128,23 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         userLanguage: userLanguage
       });
 
-      if (response && response.data) {
+      if (response?.data) {
         console.log('📋 Parsed transaction data:', response.data);
+        
+        // Update transaction data with parsed values
         setTransactionData(prev => ({
           ...prev,
-          ...response.data
+          amount: response.data.amount || prev.amount,
+          description: response.data.description || prev.description,
+          type: (response.data.type as 'income' | 'expense') || prev.type,
+          date: response.data.date || prev.date,
+          note: response.data.note || prev.note
         }));
+
+        // Set category if found
+        if (response.data.category) {
+          setExtractedCategory(response.data.category);
+        }
       }
     } catch (error) {
       console.error('❌ Failed to parse transcript:', error);
@@ -279,6 +297,20 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               placeholder={t('transaction.description_placeholder')}
             />
           </div>
+
+          {/* Category Field */}
+          {extractedCategory && (
+            <div>
+              <Label htmlFor="category">{t('transaction.category')}</Label>
+              <Input
+                id="category"
+                value={extractedCategory}
+                readOnly
+                className="bg-muted/50"
+                placeholder={t('transaction.category_detected')}
+              />
+            </div>
+          )}
 
           <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">
             <p>{t('voice.ai_categorization_note')}</p>

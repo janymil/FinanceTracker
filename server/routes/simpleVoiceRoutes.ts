@@ -67,37 +67,44 @@ function parseTranscriptWithPatterns(transcript: string, userLanguage: string): 
   }
 
   // Dynamic type detection
-  let type = 'expense'; // default
+  let type = ''; // Start empty, let user decide if not obvious
   const expenseIndicators = ['kúpil', 'bought', 'zaplatil', 'paid', 'compré', 'pagué', 'spend', 'cost', 'stalo'];
   const incomeIndicators = ['dostal', 'received', 'výplata', 'salary', 'recibí', 'earned', 'income', 'príjem'];
   
   const hasExpense = expenseIndicators.some(indicator => lowerText.includes(indicator));
   const hasIncome = incomeIndicators.some(indicator => lowerText.includes(indicator));
   
-  if (hasIncome && !hasExpense) {
+  if (hasExpense && !hasIncome) {
+    type = 'expense';
+  } else if (hasIncome && !hasExpense) {
     type = 'income';
   }
+  // If neither or both detected, leave empty for user to decide
 
-  // Dynamic date calculation
-  const today = new Date();
-  let date = today.toISOString().split('T')[0];
+  // Dynamic date calculation - only set if mentioned
+  let date = '';
   
   if (lowerText.includes('včera') || lowerText.includes('yesterday') || lowerText.includes('ayer')) {
-    const yesterday = new Date(today);
+    const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     date = yesterday.toISOString().split('T')[0];
   } else if (lowerText.includes('predvčerom') || lowerText.includes('day before yesterday') || lowerText.includes('anteayer')) {
-    const dayBefore = new Date(today);
+    const dayBefore = new Date();
     dayBefore.setDate(dayBefore.getDate() - 2);
     date = dayBefore.toISOString().split('T')[0];
+  } else if (lowerText.includes('dnes') || lowerText.includes('today') || lowerText.includes('hoy')) {
+    const today = new Date();
+    date = today.toISOString().split('T')[0];
   }
+  // If no date mentioned, leave empty
 
   return {
     amount,
     description,
     type,
     date,
-    note: transcript // Keep original as note
+    note: transcript,
+    category: '' // Will be filled by merchant lookup
   };
 }
 
@@ -138,6 +145,18 @@ export function registerSimpleVoiceRoutes(app: Router) {
 
       // Use pattern-based parsing (no AI required)
       const parsedData = parseTranscriptWithPatterns(transcript, userLanguage || 'en-us');
+      
+      // Try to get category from merchant lookup if description exists
+      if (parsedData.description) {
+        try {
+          const merchantResult = await lookupMerchant(parsedData.description, 'us');
+          if (merchantResult && merchantResult.category_keywords.length > 0) {
+            parsedData.category = merchantResult.category_keywords[0]; // Use first suggested category
+          }
+        } catch (error) {
+          console.error('⚠️ [VoiceParse] Merchant lookup failed:', error);
+        }
+      }
       
       console.log('✅ [VoiceParse] Extracted data:', parsedData);
 
