@@ -1026,7 +1026,7 @@
 
   "voice": {
     "title": "Entrada de Transacción por Voz",
-    "instructions": "Habla naturalmente sobre tu transacción. Ejemplo: 'Compré café por 5 dólares ayer' o 'I bought coffee for 5 dollars yesterday'",
+    "instructions": "Cuéntame sobre tu transacción. Necesito el monto, qué compraste, cuándo pasó, y si fue un gasto o ingreso.",
     "play_example": "Reproducir Ejemplo",
     "start_listening": "Comenzar Escucha",
     "stop_listening": "Detener Escucha",

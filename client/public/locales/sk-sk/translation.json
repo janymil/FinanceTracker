@@ -1026,7 +1026,7 @@
 
   "voice": {
     "title": "Hlasový Vstup Transakcie",
-    "instructions": "Hovorte prirodzene o vašej transakcii. Príklad: 'Kúpil som kávu za 5 eur včera' alebo 'I bought coffee for 5 dollars yesterday'",
+    "instructions": "Povedzte mi o vašej transakcii. Potrebujem sumu, čo ste si kúpili, kedy sa to stalo, a či to bol výdavok alebo príjem.",
     "play_example": "Prehrať Príklad",
     "start_listening": "Začať Počúvanie",
     "stop_listening": "Zastaviť Počúvanie",

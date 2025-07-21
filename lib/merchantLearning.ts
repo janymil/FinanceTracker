@@ -147,6 +147,11 @@ export async function getLearnedMerchantPattern(
   countryCode: string
 ): Promise<LearnedMerchantPattern | null> {
   try {
+    // Return null if merchantName is null or empty
+    if (!merchantName || merchantName.trim() === '') {
+      return null;
+    }
+    
     const patterns = await db
       .select({
         merchantName: merchantPatterns.merchantName,

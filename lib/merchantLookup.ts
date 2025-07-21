@@ -17,9 +17,10 @@ interface BusinessTypeMapping {
 interface MerchantLookupResult {
   business_type: string;
   category_keywords: string[];
+  typical_categories?: string[];
   confidence: number;
   matched_merchant?: string;
-  source: 'country_specific' | 'global' | 'ai_analysis';
+  source: 'country_specific' | 'global' | 'ai_analysis' | 'context_analysis' | 'english_context_analysis';
 }
 
 // Cache for loaded merchant data
@@ -36,29 +37,17 @@ async function loadMerchantData(countryCode: string = 'global'): Promise<Record<
   }
 
   try {
-    // Load country-specific merchants - try multiple possible paths
-    let countryPath = path.join(process.cwd(), 'lib', 'merchants', 'countries', `${countryCode.toLowerCase()}.json`);
-    let countryData: any;
+    // Direct path from workspace root
+    const countryPath = path.resolve(process.cwd(), 'lib', 'merchants', 'countries', `${countryCode.toLowerCase()}.json`);
+    console.log(`[MerchantData] Loading from: ${countryPath}`);
+    console.log(`[MerchantData] Current working directory: ${process.cwd()}`);
     
-    try {
-      countryData = JSON.parse(await fs.readFile(countryPath, 'utf-8'));
-      console.log(`[MerchantData] Loaded ${countryCode} from: ${countryPath}`);
-    } catch (e) {
-      // Try relative to this file's location
-      countryPath = path.join(__dirname, '..', 'merchants', 'countries', `${countryCode.toLowerCase()}.json`);
-      try {
-        countryData = JSON.parse(await fs.readFile(countryPath, 'utf-8'));
-        console.log(`[MerchantData] Loaded ${countryCode} from fallback path: ${countryPath}`);
-      } catch (e2) {
-        console.error(`[MerchantData] Failed to load ${countryCode} merchant data:`, e.message, e2.message);
-        throw e2;
-      }
-    }
+    const countryData = JSON.parse(await fs.readFile(countryPath, 'utf-8'));
     
     console.log(`[MerchantData] Loaded ${countryCode} data with keys:`, Object.keys(countryData));
     
     // Load global merchants as fallback
-    const globalPath = path.join(path.dirname(countryPath), '..', 'global.json');
+    const globalPath = path.resolve(process.cwd(), 'lib', 'merchants', 'global.json');
     const globalData = JSON.parse(await fs.readFile(globalPath, 'utf-8'));
     
     // Merge country-specific over global (country takes priority)
@@ -106,15 +95,24 @@ async function loadBusinessTypes(): Promise<any> {
 /**
  * Find merchant match by name
  */
-function findMerchantMatch(merchantName: string, merchantData: Record<string, MerchantData>): MerchantLookupResult | null {
+async function findMerchantMatch(merchantName: string | null, merchantData: Record<string, MerchantData>): Promise<MerchantLookupResult | null> {
+  if (!merchantName || merchantName.trim() === '') {
+    return null;
+  }
+  
   const normalizedName = merchantName.toLowerCase().trim();
   
   for (const [businessType, data] of Object.entries(merchantData)) {
     for (const merchant of data.merchants) {
       if (normalizedName.includes(merchant.toLowerCase()) || merchant.toLowerCase().includes(normalizedName)) {
+        // Load business types to get typical_categories
+        const businessTypes = await loadBusinessTypes();
+        const mapping = businessTypes.business_type_mappings[data.business_type];
+        
         return {
           business_type: data.business_type,
           category_keywords: data.category_keywords,
+          typical_categories: mapping?.typical_categories,
           confidence: 0.9,
           matched_merchant: merchant,
           source: 'country_specific'
@@ -150,17 +148,17 @@ function analyzeTransactionContext(transcript: string, businessTypes: any, merch
         if (matchCount > 0) {
           console.log(`[Context] Found localized keyword match in ${merchantType}:`, categoryKeywords.filter(k => normalizedTranscript.includes(k.toLowerCase())));
           
-          // Map merchant type to business type for food-related categories
+          // Map merchant type to business type from business-types.json
           const merchantTypeToBusinessType: Record<string, string> = {
-            'coffee_shops': 'restaurant',
+            'coffee_shops': 'coffee_shop',
             'restaurants': 'restaurant', 
-            'fast_food': 'restaurant',
+            'fast_food': 'fast_food',
             'bakeries': 'restaurant',
-            'grocery_stores': 'grocery',
-            'supermarkets': 'grocery',
+            'grocery_stores': 'grocery_store',
+            'supermarkets': 'supermarket',
             'gas_stations': 'gas_station',
             'pharmacies': 'pharmacy',
-            'banks': 'bank'
+            'banks': 'financial_institution'
           };
           
           const businessType = merchantTypeToBusinessType[merchantType];
@@ -169,8 +167,9 @@ function analyzeTransactionContext(transcript: string, businessTypes: any, merch
             return {
               business_type: businessType,
               category_keywords: mapping.category_keywords,
+              typical_categories: mapping.typical_categories,
               confidence: Math.max(0.7, matchCount * 0.3), // Higher confidence for localized matches
-              source: 'localized_context_analysis'
+              source: 'context_analysis'
             };
           }
         }
@@ -203,6 +202,7 @@ function analyzeTransactionContext(transcript: string, businessTypes: any, merch
         return {
           business_type: businessType,
           category_keywords: mapping.category_keywords,
+          typical_categories: mapping.typical_categories,
           confidence: Math.max(0.6, matchCount * 0.2),
           source: 'english_context_analysis'
         };
@@ -216,16 +216,22 @@ function analyzeTransactionContext(transcript: string, businessTypes: any, merch
 /**
  * Main merchant lookup function with learning integration
  */
+function getUserLanguage(): string | undefined {
+  // This will be passed from the voice routes
+  return undefined;
+}
+
 export async function lookupMerchant(
   transcript: string, 
   countryCode: string = 'global',
-  userId?: string
+  userId?: string,
+  userLanguage?: string
 ): Promise<MerchantLookupResult | null> {
   try {
     console.log(`[MerchantLookup] Starting lookup for transcript: "${transcript}" with country: ${countryCode}`);
     
     // Extract potential merchant name from transcript
-    const merchantName = extractMerchantName(transcript);
+    const merchantName = extractMerchantName(transcript, userLanguage);
     console.log(`[MerchantLookup] Extracted merchant name: "${merchantName}"`);
     
     if (!merchantName) {
@@ -268,7 +274,7 @@ export async function lookupMerchant(
     console.log(`[MerchantLookup] Loaded merchant data for ${countryCode}:`, Object.keys(merchantData || {}));
     
     // Step 4: Try direct merchant match
-    const directMatch = findMerchantMatch(merchantName, merchantData);
+    const directMatch = await findMerchantMatch(merchantName, merchantData);
     if (directMatch) {
       console.log(`[MerchantLookup] Direct match found:`, directMatch);
       return directMatch;
@@ -277,7 +283,7 @@ export async function lookupMerchant(
     // Step 5: Try global merchant data if country-specific didn't work
     if (countryCode !== 'global') {
       const globalData = await loadMerchantData('global');
-      const globalMatch = findMerchantMatch(merchantName, globalData);
+      const globalMatch = await findMerchantMatch(merchantName, globalData);
       if (globalMatch) {
         globalMatch.source = 'global';
         console.log(`[MerchantLookup] Global match found:`, globalMatch);
@@ -308,8 +314,8 @@ export async function lookupMerchant(
 /**
  * Extract merchant name from transcript
  */
-function extractMerchantName(transcript: string): string | null {
-  const text = transcript.toLowerCase();
+function extractMerchantName(transcript: string, userLanguage?: string): string | null {
+  const text = transcript.toLowerCase().trim();
   
   // Common patterns for merchant extraction
   const patterns = [
@@ -329,7 +335,7 @@ function extractMerchantName(transcript: string): string | null {
     }
   }
   
-  // If no pattern match, try to find proper nouns (capitalized words)
+  // Try to find proper nouns (capitalized words in original text)
   const words = transcript.split(' ');
   const properNouns = words.filter(word => 
     word.length > 2 && 
@@ -339,6 +345,32 @@ function extractMerchantName(transcript: string): string | null {
   
   if (properNouns.length > 0) {
     return properNouns.join(' ');
+  }
+  
+  // For simple words like "starbucks", return the first meaningful word from lowercase
+  // Multilingual exclusion words
+  const getExclusionPattern = (userLanguage?: string) => {
+    const baseWords = ['at', 'from', 'for', 'to', 'the', 'and', 'or', 'but', 'in', 'on', 'with', 'by'];
+    
+    if (userLanguage?.startsWith('sk')) {
+      return [...baseWords, 'za', 'v', 'som', 'si', 'na', 'pre', 'do', 'od', 'eur', 'euro'];
+    } else if (userLanguage?.startsWith('es')) {
+      return [...baseWords, 'para', 'en', 'de', 'por', 'con', 'desde', 'hasta', 'eur', 'euro', 'euros'];
+    } else {
+      return [...baseWords, 'eur', 'usd', 'czk', 'euro', 'euros', 'dollar', 'dollars'];
+    }
+  };
+  
+  const exclusionWords = getExclusionPattern(userLanguage);
+  const meaningfulWords = text.split(' ').filter(word => 
+    word.length >= 3 && 
+    !exclusionWords.includes(word.toLowerCase()) &&
+    !/^\d+/.test(word) && // not starting with number
+    !/^\d+[\.,]\d+$/.test(word) // not a decimal number like 5.50 or 5,50
+  );
+  
+  if (meaningfulWords.length > 0) {
+    return meaningfulWords[0];
   }
   
   return null;

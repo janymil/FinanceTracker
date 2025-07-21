@@ -156,7 +156,9 @@ router.post('/parse', async (req, res) => {
     
     // Get category using merchant lookup
     let category = '';
-    if (parsed.description) {
+    // Always try merchant lookup - use transcript if no description
+    const textToAnalyze = parsed.description || transcript;
+    if (textToAnalyze) {
       try {
         console.log('🏪 Looking up merchant for transcript:', transcript);
         
@@ -170,37 +172,24 @@ router.post('/parse', async (req, res) => {
         const countryCode = getCountryCode(userLanguage);
         console.log('🏪 Using country code:', countryCode);
         
-        // Debug: Check if Slovak merchant file exists
-        const fs = require('fs').promises;
-        const path = require('path');
-        try {
-          const testPath = path.join(process.cwd(), 'lib', 'merchants', 'countries', 'sk.json');
-          console.log('🏪 Testing path:', testPath);
-          console.log('🏪 Current directory:', process.cwd());
-          const exists = require('fs').existsSync(testPath);
-          console.log('🏪 File exists:', exists);
-          if (exists) {
-            const data = JSON.parse(require('fs').readFileSync(testPath, 'utf8'));
-            console.log('🏪 SK file keys:', Object.keys(data));
-            console.log('🏪 Coffee shop keywords:', data.coffee_shops?.category_keywords);
-          }
-        } catch (e) {
-          console.log('🏪 File test error:', e.message);
-        }
+
         
-        const merchantResult = await lookupMerchant(transcript, countryCode);
-        console.log('🏪 Merchant lookup result:', merchantResult);
+        const merchantResult = await lookupMerchant(transcript, countryCode, undefined, userLanguage);
+        console.log('🏪 Merchant lookup result:', JSON.stringify(merchantResult, null, 2));
         
-        // Use the category directly from merchant lookup - NO hardcoding
+        // Use the category from merchant lookup with proper language mapping
         if (merchantResult?.business_type) {
-          // The merchant lookup should return the final category name
+          console.log('🏪 Found business_type:', merchantResult.business_type);
+          console.log('🏪 typical_categories:', merchantResult.typical_categories);
+          
           // If it has typical_categories, use the appropriate language one
           if (merchantResult.typical_categories && merchantResult.typical_categories.length > 0) {
-            // Get the category based on user language
+            // Get the category based on user language: [English, Slovak, Spanish]
             const langIndex = userLanguage.startsWith('es') ? 2 : userLanguage.startsWith('sk') ? 1 : 0;
             category = merchantResult.typical_categories[langIndex] || merchantResult.typical_categories[0];
+            console.log('🏪 Selected category by language index', langIndex, ':', category);
           } else {
-            // Fallback - use business_type as category (but this shouldn't happen with proper merchant data)
+            // Fallback - use business_type as category (shouldn't happen with proper merchant data)
             category = merchantResult.business_type;
           }
         } else {
