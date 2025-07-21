@@ -82,6 +82,15 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
   // Filter categories by transaction type
   const categories = allCategories?.filter(cat => cat.type === accumulatedData.type) || [];
+  
+  // Debug logging for category filtering
+  console.log('🔍 [VOICE-INPUT] Category filtering debug:', {
+    totalCategories: allCategories?.length || 0,
+    transactionType: accumulatedData.type,
+    filteredCategories: categories.length,
+    allCategoryNames: allCategories?.map(c => `${c.name} (${c.type})`),
+    filteredCategoryNames: categories.map(c => `${c.name} (${c.type})`)
+  });
 
   const userLanguage = (user as any)?.language || i18n.language || 'en-us';
   const userCurrency = (user as any)?.currency || '$';
@@ -871,6 +880,15 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
+                  {/* Debug information - Show total categories and filtering info */}
+                  {(!categories || categories.length === 0) && (
+                    <SelectItem value="debug-info" disabled>
+                      <span className="text-red-500 text-xs">
+                        Debug: Total categories: {allCategories?.length || 0}, Type: {accumulatedData.type}, Filtered: {categories.length}
+                      </span>
+                    </SelectItem>
+                  )}
+                  
                   {/* Show AI suggested category first if it's not in existing categories */}
                   {extractedCategory && !categories?.find(cat => cat.name === extractedCategory) && (
                     <SelectItem value="ai-suggestion" disabled>
@@ -890,6 +908,23 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                       </div>
                     </SelectItem>
                   ))}
+                  
+                  {/* Show all categories for debugging if none match the filter */}
+                  {categories.length === 0 && allCategories && allCategories.length > 0 && (
+                    <>
+                      <SelectItem value="separator" disabled>
+                        <span className="text-gray-400 text-xs">--- All Categories (Debug) ---</span>
+                      </SelectItem>
+                      {allCategories.map((category) => (
+                        <SelectItem key={`debug-${category.id}`} value={category.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <span className={`w-3 h-3 rounded-full`} style={{ backgroundColor: category.color }}></span>
+                            {category.name} ({category.type})
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
                   
                   {/* Option to create new category */}
                   <SelectItem value="create-new">
