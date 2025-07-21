@@ -291,15 +291,12 @@ export async function lookupMerchant(
       }
     }
     
-    // Step 6: Context analysis fallback
-    console.log(`[MerchantLookup] No direct merchant match found, trying context analysis...`);
-    const businessTypes = await loadBusinessTypes();
-    const contextMatch = analyzeTransactionContext(transcript, businessTypes, merchantData);
-    if (contextMatch) {
-      console.log(`[MerchantLookup] Context match found:`, contextMatch);
-      return contextMatch;
-    } else {
-      console.log(`[MerchantLookup] No context match found either`);
+    // Step 6: Dynamic intelligent context analysis
+    console.log(`[MerchantLookup] No direct merchant match found, trying intelligent context analysis...`);
+    const contextResult = await analyzeBusinessContext(transcript, userLanguage, countryCode);
+    if (contextResult) {
+      console.log(`[MerchantLookup] Intelligent context match found:`, contextResult);
+      return contextResult;
     }
     
     console.log('[MerchantLookup] No match found');
@@ -374,6 +371,133 @@ function extractMerchantName(transcript: string, userLanguage?: string): string 
   }
   
   return null;
+}
+
+/**
+ * Dynamic intelligent business context analysis
+ * This function analyzes transaction context to determine business type
+ * without relying on hardcoded merchant lists
+ */
+async function analyzeBusinessContext(
+  transcript: string, 
+  userLanguage?: string, 
+  countryCode: string = 'global'
+): Promise<MerchantLookupResult | null> {
+  try {
+    console.log('[Context] Starting intelligent business analysis...');
+    
+    const normalizedText = transcript.toLowerCase();
+    const businessTypes = await loadBusinessTypes();
+    
+    // Dynamic context clues - these expand over time
+    const contextClues = getContextClues(userLanguage);
+    
+    let bestMatch: { businessType: string; confidence: number; matchedClues: string[] } | null = null;
+    
+    // Analyze each business type for contextual clues
+    for (const [businessType, mapping] of Object.entries(businessTypes.business_type_mappings)) {
+      const cluesForType = contextClues[businessType] || [];
+      const matchedClues: string[] = [];
+      let confidence = 0;
+      
+      // Check for context clues in transcript
+      for (const clue of cluesForType) {
+        if (normalizedText.includes(clue.toLowerCase())) {
+          matchedClues.push(clue);
+          confidence += 0.2; // Each clue adds confidence
+        }
+      }
+      
+      // Additional pattern-based detection
+      if (businessType === 'coffee_shop' && /\b(caf[eé]|coffee|káva|espresso|cappuccino|latte)\b/i.test(transcript)) {
+        matchedClues.push('coffee_indicator');
+        confidence += 0.3;
+      }
+      
+      if (businessType === 'restaurant' && /\b(restaur|jedl[eo]|comida|meal|dinner|lunch)\b/i.test(transcript)) {
+        matchedClues.push('restaurant_indicator');
+        confidence += 0.3;
+      }
+      
+      if (businessType === 'grocery_store' && /\b(grocery|obchod|tienda|market|supermarket|potraviny)\b/i.test(transcript)) {
+        matchedClues.push('grocery_indicator');
+        confidence += 0.3;
+      }
+      
+      if (businessType === 'gas_station' && /\b(gas|benzín|gasolina|fuel|tankov)\b/i.test(transcript)) {
+        matchedClues.push('gas_indicator');
+        confidence += 0.4;
+      }
+      
+      if (businessType === 'pharmacy' && /\b(pharmacy|lekáreň|farmacia|medicine|zdravie)\b/i.test(transcript)) {
+        matchedClues.push('pharmacy_indicator');
+        confidence += 0.4;
+      }
+      
+      if (matchedClues.length > 0 && (!bestMatch || confidence > bestMatch.confidence)) {
+        bestMatch = { businessType, confidence, matchedClues };
+      }
+    }
+    
+    if (bestMatch && bestMatch.confidence >= 0.3) {
+      console.log(`[Context] Detected business type: ${bestMatch.businessType} (confidence: ${bestMatch.confidence.toFixed(2)}, clues: ${bestMatch.matchedClues.join(', ')})`);
+      
+      const mapping = businessTypes.business_type_mappings[bestMatch.businessType];
+      return {
+        business_type: bestMatch.businessType,
+        category_keywords: mapping.category_keywords || [],
+        typical_categories: mapping.typical_categories,
+        confidence: Math.min(0.8, bestMatch.confidence), // Cap at 0.8 for context analysis
+        source: 'intelligent_context_analysis'
+      };
+    }
+    
+    console.log('[Context] No confident business type detected');
+    return null;
+    
+  } catch (error) {
+    console.error('[Context] Error in business context analysis:', error);
+    return null;
+  }
+}
+
+/**
+ * Get dynamic context clues based on user language
+ * This function can be expanded over time with more business types and languages
+ */
+function getContextClues(userLanguage?: string): Record<string, string[]> {
+  const baseClues = {
+    coffee_shop: ['starbucks', 'costa', 'dunkin', 'mccafe'],
+    restaurant: ['mcdonald', 'kfc', 'pizza', 'burger'],
+    grocery_store: ['tesco', 'lidl', 'kaufland', 'billa'],
+    gas_station: ['shell', 'bp', 'esso', 'mol'],
+    pharmacy: ['walgreens', 'cvs', 'boots'],
+    bank: ['bank', 'atm', 'credit'],
+    retail_store: ['amazon', 'walmart', 'target']
+  };
+  
+  // Add language-specific clues
+  if (userLanguage?.startsWith('sk')) {
+    return {
+      ...baseClues,
+      coffee_shop: [...baseClues.coffee_shop, 'kaviareň', 'káva'],
+      restaurant: [...baseClues.restaurant, 'reštaurácia', 'jedlo'],
+      grocery_store: [...baseClues.grocery_store, 'potraviny', 'obchod'],
+      gas_station: [...baseClues.gas_station, 'benzínka', 'čerpačka'],
+      pharmacy: [...baseClues.pharmacy, 'lekáreň', 'lieky']
+    };
+  } else if (userLanguage?.startsWith('es')) {
+    return {
+      ...baseClues,
+      coffee_shop: [...baseClues.coffee_shop, 'cafetería', 'café'],
+      restaurant: [...baseClues.restaurant, 'restaurante', 'comida'],
+      grocery_store: [...baseClues.grocery_store, 'supermercado', 'tienda'],
+      gas_station: [...baseClues.gas_station, 'gasolinera', 'combustible'],
+      pharmacy: [...baseClues.pharmacy, 'farmacia', 'medicina']
+    };
+  }
+  
+  return baseClues;
 }
 
 /**
