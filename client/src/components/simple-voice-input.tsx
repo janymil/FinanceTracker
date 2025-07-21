@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Mic, MicOff, X, Play } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface SimpleVoiceInputProps {
   onClose: () => void;
@@ -22,14 +24,16 @@ interface TransactionData {
 
 export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps) {
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [accumulatedData, setAccumulatedData] = useState({
     amount: '',
     description: '',
     type: 'expense' as 'expense' | 'income',
-    date: '',
+    date: new Date().toISOString().split('T')[0], // Default to today
     category: '',
+    categoryId: null as number | null,
     note: ''
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -49,6 +53,12 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   // Get user data
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
+    staleTime: 5 * 60 * 1000
+  });
+
+  // Get categories for matching
+  const { data: categories } = useQuery({
+    queryKey: ['/api/categories'],
     staleTime: 5 * 60 * 1000
   });
 
@@ -171,8 +181,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             amount: parsed.amount || prev.amount,
             description: parsed.description || prev.description,
             type: parsed.type || prev.type,
-            date: parsed.date || prev.date,
+            date: parsed.date || prev.date, // Keep existing date if no new date parsed
             category: parsed.category || prev.category,
+            categoryId: prev.categoryId, // Preserve categoryId
             note: parsed.note || text
           };
           
@@ -180,18 +191,55 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           return updated;
         });
         
-        // Update transaction data for display
-        setTransactionData(prev => ({
-          amount: parsed.amount || prev.amount,
-          description: parsed.description || prev.description,
-          type: parsed.type || prev.type,
-          date: parsed.date || prev.date,
-          note: parsed.note || text
-        }));
+        // Update transaction data for display - removed as we'll use accumulatedData directly
 
-        // Set category (accumulate)
-        if (parsed.category) {
-          setExtractedCategory(parsed.category);
+        // Set category with proper matching to user's categories
+        if (parsed.category && categories) {
+          // Try to match the parsed category to user's actual categories
+          const matchingCategory = (categories as any[]).find(cat => {
+            const categoryName = cat.name.toLowerCase();
+            const parsedCategoryLower = parsed.category.toLowerCase();
+            
+            // Direct match
+            if (categoryName === parsedCategoryLower) return true;
+            
+            // Partial matches
+            if (categoryName.includes(parsedCategoryLower) || 
+                parsedCategoryLower.includes(categoryName)) return true;
+            
+            // Language-specific matches
+            const categoryMappings: { [key: string]: string[] } = {
+              'food': ['jedlo', 'comida', 'food', 'dining', 'restaurant'],
+              'transportation': ['doprava', 'transporte', 'transport', 'fuel', 'gas'],
+              'shopping': ['nákupy', 'compras', 'shopping', 'retail'],
+              'entertainment': ['zábava', 'entretenimiento', 'entertainment'],
+              'healthcare': ['zdravie', 'salud', 'health', 'medical', 'pharmacy'],
+              'utilities': ['služby', 'servicios', 'utilities', 'bills'],
+              'groceries': ['potraviny', 'supermercado', 'grocery', 'market']
+            };
+            
+            for (const [key, variations] of Object.entries(categoryMappings)) {
+              if (variations.some(v => 
+                parsedCategoryLower.includes(v) || categoryName.includes(v)
+              )) {
+                return true;
+              }
+            }
+            
+            return false;
+          });
+          
+          if (matchingCategory) {
+            setExtractedCategory(matchingCategory.name);
+            setAccumulatedData(prev => ({ 
+              ...prev, 
+              category: matchingCategory.name,
+              categoryId: matchingCategory.id 
+            }));
+          } else {
+            setExtractedCategory(parsed.category);
+            setAccumulatedData(prev => ({ ...prev, category: parsed.category }));
+          }
         }
       }
     } catch (error) {
@@ -204,6 +252,19 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     if (recognitionRef.current) {
       setIsListening(true);
       setTranscript(''); // Clear transcript to start fresh session
+      
+      // Reset accumulated data but keep today's date as default
+      setAccumulatedData({
+        amount: '',
+        description: '',
+        type: 'expense',
+        date: new Date().toISOString().split('T')[0], // Always default to today
+        category: '',
+        categoryId: null,
+        note: ''
+      });
+      setExtractedCategory('');
+      
       recognitionRef.current.start();
     }
   };
@@ -223,21 +284,46 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
   // Save transaction using accumulated data
   const handleSave = async () => {
-    if (!accumulatedData.amount || !accumulatedData.description) return;
+    if (!accumulatedData.amount || !accumulatedData.description) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please provide amount and description',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     setIsSaving(true);
     try {
-      await onComplete({
-        amount: accumulatedData.amount,
+      console.log('💾 Saving transaction:', accumulatedData);
+
+      // Create transaction using the main API
+      const response = await apiRequest('POST', '/api/transactions', {
+        amount: parseFloat(accumulatedData.amount),
         description: accumulatedData.description,
         type: accumulatedData.type,
-        date: accumulatedData.date,
-        note: accumulatedData.note,
-        category: accumulatedData.category || extractedCategory
+        date: accumulatedData.date || new Date().toISOString().split('T')[0],
+        categoryId: accumulatedData.categoryId || null, // Use matched category ID if available
+        referenceNote: accumulatedData.note || transcript || ''
       });
+
+      const result = await response.json();
+      
+      toast({
+        title: 'Success',
+        description: `Transaction saved: ${accumulatedData.description}`,
+      });
+      
+      // Call onComplete to refresh the transaction list
+      onComplete(result);
       onClose();
     } catch (error) {
       console.error('Failed to save transaction:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save transaction',
+        variant: 'destructive'
+      });
     } finally {
       setIsSaving(false);
     }
@@ -301,6 +387,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 value={accumulatedData.amount}
                 onChange={(e) => setAccumulatedData(prev => ({ ...prev, amount: e.target.value }))}
                 placeholder="0.00"
+                className={accumulatedData.amount ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               />
             </div>
 
@@ -311,6 +398,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 value={accumulatedData.description}
                 onChange={(e) => setAccumulatedData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder={t('transaction.description_placeholder')}
+                className={accumulatedData.description ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               />
             </div>
 
@@ -334,7 +422,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                   setAccumulatedData(prev => ({ ...prev, type: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className={accumulatedData.type === 'income' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -351,6 +439,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 type="date"
                 value={accumulatedData.date}
                 onChange={(e) => setAccumulatedData(prev => ({ ...prev, date: e.target.value }))}
+                className={accumulatedData.date && accumulatedData.date !== new Date().toISOString().split('T')[0] ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               />
             </div>
           </div>
