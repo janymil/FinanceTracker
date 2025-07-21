@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { requireAuth } from "@clerk/express";
 import { z } from "zod";
 import { storage } from "../storage";
+import { lookupMerchant } from "../../lib/merchantLookup";
 
 const completeTransactionSchema = z.object({
   transactionData: z.object({
@@ -34,7 +35,34 @@ export function registerSimpleVoiceRoutes(app: Router) {
         type: transactionData.type
       });
 
-      // Create transaction record - let existing AI categorization system handle this
+      // Use local merchant categorization system
+      let categoryId = null;
+      try {
+        const user = await storage.getUser(parseInt(userId.replace('user_', '')));
+        const userCountry = user?.country || 'us';
+        
+        const merchantResult = await lookupMerchant(transactionData.description, userCountry);
+        console.log('🏪 [SimpleVoice] Merchant lookup result:', merchantResult);
+        
+        if (merchantResult && merchantResult.category_keywords.length > 0) {
+          // Try to match with existing user categories
+          const categories = await storage.getCategories(userId);
+          const matchedCategory = categories.find(cat => 
+            merchantResult.category_keywords.some(keyword => 
+              cat.name.toLowerCase().includes(keyword.toLowerCase())
+            )
+          );
+          
+          if (matchedCategory) {
+            categoryId = matchedCategory.id;
+            console.log('✅ [SimpleVoice] Found matching category:', matchedCategory.name);
+          }
+        }
+      } catch (error) {
+        console.error('⚠️ [SimpleVoice] Local categorization failed:', error);
+      }
+
+      // Create transaction record with local categorization
       const transaction = await storage.createTransaction({
         userId: userId,
         amount: transactionData.amount.toString(),
@@ -42,7 +70,7 @@ export function registerSimpleVoiceRoutes(app: Router) {
         type: transactionData.type,
         date: new Date(transactionData.date),
         referenceNote: transactionData.note || '',
-        categoryId: null, // Let the existing auto-categorization system handle this
+        categoryId: categoryId,
         isRecurring: false
       });
 

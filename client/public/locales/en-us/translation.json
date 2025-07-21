@@ -1003,7 +1003,7 @@
     "saving": "Saving...",
     "incomplete_data": "Incomplete Data",
     "fill_required_fields": "Please fill in amount and description",
-    "ai_categorization_note": "AI will automatically categorize this transaction based on the description you provide.",
+    "ai_categorization_note": "Local system will automatically categorize this transaction based on merchant patterns.",
     "transaction_saved": "Transaction Saved",
     "transaction_success": "Your transaction has been saved successfully",
     "save_failed": "Save Failed",

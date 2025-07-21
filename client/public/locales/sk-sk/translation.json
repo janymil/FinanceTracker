@@ -1035,7 +1035,7 @@
     "saving": "Ukladám...",
     "incomplete_data": "Neúplné Údaje",
     "fill_required_fields": "Prosím vyplňte čiastku a popis",
-    "ai_categorization_note": "AI automaticky kategorizuje túto transakciu na základe popisu, ktorý poskytnete.",
+    "ai_categorization_note": "Lokálny systém automaticky kategorizuje túto transakciu na základe vzorov obchodníkov.",
     "transaction_saved": "Transakcia Uložená",
     "transaction_success": "Vaša transakcia bola úspešne uložená",
     "save_failed": "Uloženie Zlyhalo",
