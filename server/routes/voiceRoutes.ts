@@ -27,18 +27,32 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10'
   };
 
-  // Look for numeric amounts
-  for (const word of words) {
-    // Decimal formats: "5.50", "5,50", "5:50"
+  // Look for numeric amounts - improved decimal recognition
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    
+    // Decimal formats: "5.50", "5,50", "5:50" or separate "5 50"
     const decimalMatch = word.match(/(\d+)[.:,](\d{1,2})/);
     if (decimalMatch) {
       amount = `${decimalMatch[1]}.${decimalMatch[2]}`;
+      console.log('💰 Found decimal amount:', amount);
       break;
+    }
+    
+    // Handle speech recognition patterns like "5 50" meaning "5.50"
+    if (/^\d+$/.test(word) && i < words.length - 1) {
+      const nextWord = words[i + 1];
+      if (/^\d{1,2}$/.test(nextWord) && parseInt(nextWord) < 100) {
+        amount = `${word}.${nextWord.padStart(2, '0')}`;
+        console.log('💰 Found split decimal amount:', amount);
+        break;
+      }
     }
     
     // Simple integers
     if (/^\d+$/.test(word)) {
       amount = word;
+      console.log('💰 Found integer amount:', amount);
       break;
     }
   }
@@ -112,9 +126,42 @@ router.post('/parse', async (req, res) => {
     let category = '';
     if (parsed.description) {
       try {
-        const merchantResult = lookupMerchant(parsed.description);
-        category = merchantResult?.category || 'Uncategorized';
+        console.log('🏪 Looking up merchant for transcript:', transcript);
+        const merchantResult = await lookupMerchant(transcript);
+        console.log('🏪 Merchant lookup result:', merchantResult);
+        
+        // Convert business_type to category name
+        if (merchantResult?.business_type) {
+          const businessTypeToCategory: { [key: string]: string } = {
+            'grocery': 'Food',
+            'food': 'Food', 
+            'restaurant': 'Food',
+            'cafe': 'Food',
+            'supermarket': 'Food',
+            'shopping': 'Shopping',
+            'retail': 'Shopping',
+            'clothing': 'Shopping',
+            'electronics': 'Shopping',
+            'transport': 'Transportation',
+            'fuel': 'Transportation',
+            'gas_station': 'Transportation',
+            'entertainment': 'Entertainment',
+            'healthcare': 'Healthcare',
+            'pharmacy': 'Healthcare',
+            'education': 'Education',
+            'utilities': 'Utilities',
+            'bank': 'Financial Services',
+            'atm': 'Financial Services'
+          };
+          
+          category = businessTypeToCategory[merchantResult.business_type.toLowerCase()] || 'Uncategorized';
+        } else {
+          category = 'Uncategorized';
+        }
+        
+        console.log('🏪 Final category:', category);
       } catch (error) {
+        console.log('🏪 Merchant lookup error:', error);
         category = 'Uncategorized';
       }
     }
