@@ -64,25 +64,30 @@ User's preferred currency: ${userCurrency}
 Format amounts as: ${userCurrency}XX.XX (e.g., ${userCurrency}35.80)
 
 INTELLIGENT CATEGORIZATION LOGIC:
-1. Analyze the PRODUCT/SERVICE TYPE (not store location)
-2. Search through user's ACTUAL categories for semantic matches
-3. If NO good match exists, suggest appropriate NEW category name in user's language
 
-SEMANTIC MATCHING RULES:
-- Look for keywords in user's category names that match transaction type
-- Consider multiple languages and synonyms
-- Focus on WHAT was purchased, not WHERE
+STEP 1: ANALYZE WHAT WAS PURCHASED (PRODUCT INTELLIGENCE)
+- DETERGENTE/CLEANING = Household/Home products → Look for: Housing, Casa, Hogar, Home, Limpieza, Household
+- MEDICINA/FARMACIA = Healthcare products → Look for: Healthcare, Salud, Zdravie, Medical
+- COMIDA/FOOD = Food products → Look for: Food, Comida, Potraviny, Groceries, Alimentación
+- GASOLINA/FUEL = Transport → Look for: Transport, Transporte, Doprava, Gas, Combustible
+- ROPA/CLOTHES = General shopping → Look for: Shopping, Compras, Nakupovanie, Clothes
 
-DECISION PROCESS:
-Step 1: Scan user's categories for relevant keywords
-Step 2: If good semantic match found → use that category
-Step 3: If NO match found → suggest new category name appropriate for product type
-Step 4: Return EXACT category name from user's list OR new category suggestion
+STEP 2: INTELLIGENT CATEGORY MATCHING
+Scan user's categories for SEMANTIC matches based on product type:
+- If user has "Housing" and product is "detergente" → USE "Housing" (perfect match)
+- If user has "Casa" and product is "detergente" → USE "Casa" (perfect match)
+- If user has "Shopping" and product is "detergente" → DON'T use "Shopping" (wrong match)
 
-CRITICAL: 
-- Use user's actual category names exactly as they appear
-- Never invent categories that don't exist in user's list
-- If suggesting new category, make it appropriate for the product type in user's language`;
+STEP 3: IF NO LOGICAL MATCH EXISTS
+Suggest NEW category name appropriate for product type in user's language:
+- For cleaning products → suggest "Hogar" (Spanish), "Dom" (Slovak), "Household" (English)
+- For healthcare → suggest "Salud" (Spanish), "Zdravie" (Slovak), "Healthcare" (English)
+
+CRITICAL INTELLIGENCE RULES:
+- DETERGENTE is NOT Shopping - it's household/cleaning
+- MEDICINA is NOT Shopping - it's healthcare  
+- GASOLINA is NOT Shopping - it's transport
+- Use LOGIC, not just keyword matching`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [
@@ -91,7 +96,20 @@ CRITICAL:
     { pattern: /tres\s+veinte/i, expectedAmount: '3.20' }
   ];
 
-  let userPrompt = `Parse this transaction: "${transcript}"`;
+  let userPrompt = `Parse this transaction: "${transcript}"
+
+PRODUCT INTELLIGENCE ANALYSIS:
+1. What specific PRODUCT/SERVICE is mentioned in the transcript?
+2. What TYPE of product is it? (cleaning/healthcare/food/transport/entertainment)
+3. Which of user's categories logically fits this product type?
+
+CRITICAL EXAMPLES FOR PROPER CATEGORIZATION:
+- "detergente" = cleaning product → Housing/Casa/Hogar (NOT Shopping!)
+- "medicina" = healthcare product → Healthcare/Salud (NOT Shopping!)  
+- "gasolina" = fuel → Transport/Transporte (NOT Shopping!)
+- "comida" = food product → Food/Comida (correct)
+
+ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user's list.`;
   
   // Add specific guidance for known Spanish patterns
   for (const p of spanishPatterns) {
