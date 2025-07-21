@@ -44,26 +44,8 @@ DESCRIPTION FORMAT RULES:
 - Examples: "Metro - detergente", "McDonald's - almuerzo", "Shell - gasolina"
 - Format: "[STORE] - [PRODUCT]" or "[STORE] [PRODUCT]"
 
-MERCHANT INTELLIGENCE:
-- Migros = Swiss grocery store = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-- McDonald's = fast food restaurant = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-- Shell, BP = gas stations = ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
-- Amazon, Walmart = retail shopping = ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}
-
-USER'S EXISTING CATEGORIES:
-${userCategories.length > 0 ? userCategories.map(cat => `- ${cat.name} (${cat.type})`).join('\n') : 'No existing categories'}
-
-CATEGORY MATCHING PRIORITY (CRITICAL):
-1. MANDATORY: Choose from user's existing categories ONLY
-2. Look for semantic matches: salary/trabajo/work → "Trabajo", food/comida → "Comida"  
-3. ONLY use exact category names from user's list above
-4. If NO user category matches AT ALL, use first available category from user's list
-
-EXAMPLES WITH USER CATEGORIES:
-- Salary/trabajo/work + user has "Trabajo" → use "Trabajo"
-- Food/comida + user has "Comida" → use "Comida"
-- Shopping + user has "Compras" → use "Compras"
-- ANY transaction + no good match → use most appropriate category from user's list
+USER'S ACTUAL CATEGORIES (REAL DATA FROM DATABASE):
+${userCategories.length > 0 ? userCategories.map(cat => `- "${cat.name}" (${cat.type})`).join('\n') : 'No existing categories - will suggest new category'}
 
 CRITICAL AMOUNT PARSING:
 - "cinco ochenta" = 5.80 (NOT 580!)
@@ -81,35 +63,26 @@ CURRENCY FORMAT:
 User's preferred currency: ${userCurrency}
 Format amounts as: ${userCurrency}XX.XX (e.g., ${userCurrency}35.80)
 
-USER'S EXISTING CATEGORIES:
-${userCategories.map(cat => `- "${cat.name}" (${cat.type})`).join('\n')}
-
-CATEGORIZATION STRATEGY:
+INTELLIGENT CATEGORIZATION LOGIC:
 1. Analyze the PRODUCT/SERVICE TYPE (not store location)
-2. Find best semantic match from user's existing categories
-3. If NO good match exists, suggest appropriate NEW category name
+2. Search through user's ACTUAL categories for semantic matches
+3. If NO good match exists, suggest appropriate NEW category name in user's language
 
-PRODUCT TYPE → CATEGORY MATCHING:
-- Detergent/cleaning products → Look for: Hogar, Casa, Limpieza, Household, Home, Cleaning, Housing
-- Medicine/pharmacy items → Look for: Salud, Zdravie, Healthcare, Medical, Farmacia
-- Food/groceries/meals → Look for: Comida, Food, Potraviny, Groceries, Alimentación  
-- Transport/fuel/gas → Look for: Transporte, Transport, Doprava, Gas, Combustible
-- Gym/fitness → Look for: Fitness, Gym, Deporte, Sport, Exercise
-- Education/school → Look for: Educación, Education, Škola, Learning
+SEMANTIC MATCHING RULES:
+- Look for keywords in user's category names that match transaction type
+- Consider multiple languages and synonyms
+- Focus on WHAT was purchased, not WHERE
 
-SMART CATEGORIZATION EXAMPLES:
-✅ "detergente" + user has "Housing" → use "Housing" (cleaning products = home category)
-✅ "detergente" + user has "Casa" → use "Casa" (house category for cleaning)
-✅ "detergente" + user has "Hogar" → use "Hogar" (home category for cleaning)
-✅ "medicinas" + user has "Healthcare" → use "Healthcare"  
-✅ "comida" + user has "Food" → use "Food"
-❌ "detergente" + user only has "Food, Transport" → suggest "Hogar" or "Limpieza"
-❌ "gym" + user only has "Food, Shopping" → suggest "Fitness" or "Deporte"
+DECISION PROCESS:
+Step 1: Scan user's categories for relevant keywords
+Step 2: If good semantic match found → use that category
+Step 3: If NO match found → suggest new category name appropriate for product type
+Step 4: Return EXACT category name from user's list OR new category suggestion
 
-CRITICAL RULES:
-1. DETERGENT/CLEANING PRODUCTS = HOUSING/HOME/HOGAR/CASA category
-2. Analyze WHAT the user bought, not WHERE they bought it!
-3. Look for semantic meaning: Housing, Casa, Hogar, Home = cleaning/household items`;
+CRITICAL: 
+- Use user's actual category names exactly as they appear
+- Never invent categories that don't exist in user's list
+- If suggesting new category, make it appropriate for the product type in user's language`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [
