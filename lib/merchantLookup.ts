@@ -125,13 +125,12 @@ async function findMerchantMatch(merchantName: string | null, merchantData: Reco
 }
 
 /**
- * Analyze transaction context for business type
+ * Simple context analysis using country-specific merchant data
  */
 function analyzeTransactionContext(transcript: string, businessTypes: any, merchantData?: any): MerchantLookupResult | null {
   const normalizedTranscript = transcript.toLowerCase();
-  const { fallback_analysis } = businessTypes;
   
-  // First check localized keywords from country-specific merchant data
+  // Check keywords from country-specific merchant data
   console.log(`[Context] Analyzing transcript: "${transcript}"`);
   if (merchantData) {
     console.log(`[Context] Checking merchant data with types:`, Object.keys(merchantData));
@@ -146,9 +145,9 @@ function analyzeTransactionContext(transcript: string, businessTypes: any, merch
         console.log(`[Context] Found ${matchCount} matching keywords:`, matchingKeywords);
         
         if (matchCount > 0) {
-          console.log(`[Context] Found localized keyword match in ${merchantType}:`, categoryKeywords.filter(k => normalizedTranscript.includes(k.toLowerCase())));
+          console.log(`[Context] Found keyword match in ${merchantType}:`, matchingKeywords);
           
-          // Map merchant type to business type from business-types.json
+          // Map merchant type to business type
           const merchantTypeToBusinessType: Record<string, string> = {
             'coffee_shops': 'coffee_shop',
             'restaurants': 'restaurant', 
@@ -168,44 +167,11 @@ function analyzeTransactionContext(transcript: string, businessTypes: any, merch
               business_type: businessType,
               category_keywords: mapping.category_keywords,
               typical_categories: mapping.typical_categories,
-              confidence: Math.max(0.7, matchCount * 0.3), // Higher confidence for localized matches
+              confidence: 0.7,
               source: 'context_analysis'
             };
           }
         }
-      }
-    }
-  }
-  
-  // Fallback to English keywords if no localized match
-  if (!fallback_analysis?.context_keywords) return null;
-  
-  for (const [category, keywords] of Object.entries(fallback_analysis.context_keywords)) {
-    const keywordArray = keywords as string[];
-    const matchCount = keywordArray.filter(keyword => 
-      normalizedTranscript.includes(keyword.toLowerCase())
-    ).length;
-    
-    if (matchCount > 0) {
-      // Map category to business type
-      const businessTypeMap: Record<string, string> = {
-        'food_related': 'restaurant',
-        'transport_related': 'transportation_service',
-        'shopping_related': 'retail',
-        'health_related': 'pharmacy',
-        'entertainment_related': 'entertainment_streaming'
-      };
-      
-      const businessType = businessTypeMap[category];
-      if (businessType && businessTypes.business_type_mappings[businessType]) {
-        const mapping = businessTypes.business_type_mappings[businessType];
-        return {
-          business_type: businessType,
-          category_keywords: mapping.category_keywords,
-          typical_categories: mapping.typical_categories,
-          confidence: Math.max(0.6, matchCount * 0.2),
-          source: 'english_context_analysis'
-        };
       }
     }
   }
@@ -291,12 +257,13 @@ export async function lookupMerchant(
       }
     }
     
-    // Step 6: Dynamic intelligent context analysis
-    console.log(`[MerchantLookup] No direct merchant match found, trying intelligent context analysis...`);
-    const contextResult = await analyzeBusinessContext(transcript, userLanguage, countryCode);
-    if (contextResult) {
-      console.log(`[MerchantLookup] Intelligent context match found:`, contextResult);
-      return contextResult;
+    // Step 6: Simple context analysis using country-specific merchant data
+    console.log(`[MerchantLookup] No direct merchant match found, trying context analysis...`);
+    const businessTypes = await loadBusinessTypes();
+    const contextMatch = analyzeTransactionContext(transcript, businessTypes, merchantData);
+    if (contextMatch) {
+      console.log(`[MerchantLookup] Context match found:`, contextMatch);
+      return contextMatch;
     }
     
     console.log('[MerchantLookup] No match found');
@@ -373,132 +340,7 @@ function extractMerchantName(transcript: string, userLanguage?: string): string 
   return null;
 }
 
-/**
- * Dynamic intelligent business context analysis
- * This function analyzes transaction context to determine business type
- * without relying on hardcoded merchant lists
- */
-async function analyzeBusinessContext(
-  transcript: string, 
-  userLanguage?: string, 
-  countryCode: string = 'global'
-): Promise<MerchantLookupResult | null> {
-  try {
-    console.log('[Context] Starting intelligent business analysis...');
-    
-    const normalizedText = transcript.toLowerCase();
-    const businessTypes = await loadBusinessTypes();
-    
-    // Dynamic context clues - these expand over time
-    const contextClues = getContextClues(userLanguage);
-    
-    let bestMatch: { businessType: string; confidence: number; matchedClues: string[] } | null = null;
-    
-    // Analyze each business type for contextual clues
-    for (const [businessType, mapping] of Object.entries(businessTypes.business_type_mappings)) {
-      const cluesForType = contextClues[businessType] || [];
-      const matchedClues: string[] = [];
-      let confidence = 0;
-      
-      // Check for context clues in transcript
-      for (const clue of cluesForType) {
-        if (normalizedText.includes(clue.toLowerCase())) {
-          matchedClues.push(clue);
-          confidence += 0.2; // Each clue adds confidence
-        }
-      }
-      
-      // Additional pattern-based detection
-      if (businessType === 'coffee_shop' && /\b(caf[eé]|coffee|káva|espresso|cappuccino|latte)\b/i.test(transcript)) {
-        matchedClues.push('coffee_indicator');
-        confidence += 0.3;
-      }
-      
-      if (businessType === 'restaurant' && /\b(restaur|jedl[eo]|comida|meal|dinner|lunch)\b/i.test(transcript)) {
-        matchedClues.push('restaurant_indicator');
-        confidence += 0.3;
-      }
-      
-      if (businessType === 'grocery_store' && /\b(grocery|obchod|tienda|market|supermarket|potraviny)\b/i.test(transcript)) {
-        matchedClues.push('grocery_indicator');
-        confidence += 0.3;
-      }
-      
-      if (businessType === 'gas_station' && /\b(gas|benzín|gasolina|fuel|tankov)\b/i.test(transcript)) {
-        matchedClues.push('gas_indicator');
-        confidence += 0.4;
-      }
-      
-      if (businessType === 'pharmacy' && /\b(pharmacy|lekáreň|farmacia|medicine|zdravie)\b/i.test(transcript)) {
-        matchedClues.push('pharmacy_indicator');
-        confidence += 0.4;
-      }
-      
-      if (matchedClues.length > 0 && (!bestMatch || confidence > bestMatch.confidence)) {
-        bestMatch = { businessType, confidence, matchedClues };
-      }
-    }
-    
-    if (bestMatch && bestMatch.confidence >= 0.3) {
-      console.log(`[Context] Detected business type: ${bestMatch.businessType} (confidence: ${bestMatch.confidence.toFixed(2)}, clues: ${bestMatch.matchedClues.join(', ')})`);
-      
-      const mapping = businessTypes.business_type_mappings[bestMatch.businessType];
-      return {
-        business_type: bestMatch.businessType,
-        category_keywords: mapping.category_keywords || [],
-        typical_categories: mapping.typical_categories,
-        confidence: Math.min(0.8, bestMatch.confidence), // Cap at 0.8 for context analysis
-        source: 'intelligent_context_analysis'
-      };
-    }
-    
-    console.log('[Context] No confident business type detected');
-    return null;
-    
-  } catch (error) {
-    console.error('[Context] Error in business context analysis:', error);
-    return null;
-  }
-}
-
-/**
- * Get dynamic context clues based on user language
- * This function can be expanded over time with more business types and languages
- */
-function getContextClues(userLanguage?: string): Record<string, string[]> {
-  const baseClues = {
-    coffee_shop: ['starbucks', 'costa', 'dunkin', 'mccafe'],
-    restaurant: ['mcdonald', 'kfc', 'pizza', 'burger'],
-    grocery_store: ['tesco', 'lidl', 'kaufland', 'billa'],
-    gas_station: ['shell', 'bp', 'esso', 'mol'],
-    pharmacy: ['walgreens', 'cvs', 'boots'],
-    bank: ['bank', 'atm', 'credit'],
-    retail_store: ['amazon', 'walmart', 'target']
-  };
-  
-  // Add language-specific clues
-  if (userLanguage?.startsWith('sk')) {
-    return {
-      ...baseClues,
-      coffee_shop: [...baseClues.coffee_shop, 'kaviareň', 'káva'],
-      restaurant: [...baseClues.restaurant, 'reštaurácia', 'jedlo'],
-      grocery_store: [...baseClues.grocery_store, 'potraviny', 'obchod'],
-      gas_station: [...baseClues.gas_station, 'benzínka', 'čerpačka'],
-      pharmacy: [...baseClues.pharmacy, 'lekáreň', 'lieky']
-    };
-  } else if (userLanguage?.startsWith('es')) {
-    return {
-      ...baseClues,
-      coffee_shop: [...baseClues.coffee_shop, 'cafetería', 'café'],
-      restaurant: [...baseClues.restaurant, 'restaurante', 'comida'],
-      grocery_store: [...baseClues.grocery_store, 'supermercado', 'tienda'],
-      gas_station: [...baseClues.gas_station, 'gasolinera', 'combustible'],
-      pharmacy: [...baseClues.pharmacy, 'farmacia', 'medicina']
-    };
-  }
-  
-  return baseClues;
-}
+// Removed overcomplicated intelligent analysis - using simple country JSON lookup instead
 
 /**
  * Get merchant context for AI prompt
