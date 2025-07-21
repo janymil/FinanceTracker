@@ -35,9 +35,23 @@ export function matchCategoryLocally(
 
   // **SEMANTIC MATCHING RULES** - 100% accurate local logic
   const semanticMatches = {
-    // Work/Salary/Income categories - ALL INCOME TYPES
-    work: ['trabajo', 'work', 'salary', 'salario', 'job', 'employment', 'empleo', 'práca', 'výplata', 
-           'ingresos', 'income', 'revenue', 'príjmy', 'earning'], // Include income keywords in work group
+    // Work/Salary Income
+    work: ['trabajo', 'work', 'salary', 'salario', 'job', 'employment', 'empleo', 'práca', 'výplata'],
+    
+    // Investment Income
+    investment: ['inversión', 'investment', 'dividendos', 'dividends', 'stocks', 'acciones', 'crypto', 
+                'bitcoin', 'trading', 'investície', 'akcie', 'dividend'],
+    
+    // Freelance/Business Income
+    freelance: ['freelance', 'negocio', 'business', 'consulting', 'consultoría', 'cliente', 'client',
+               'proyecto', 'project', 'servicio', 'service', 'podnikanie', 'klient'],
+    
+    // Rental Income
+    rental: ['alquiler', 'rent', 'rental', 'propiedad', 'property', 'inmueble', 'real estate',
+            'prenájom', 'nehnuteľnosť'],
+    
+    // General Income (fallback for any income)
+    income: ['ingresos', 'income', 'revenue', 'príjmy', 'earning', 'ganancia', 'profit', 'zisk'],
     
     // Food categories  
     food: ['comida', 'food', 'grocery', 'restaurant', 'potraviny', 'jedlo', 'restauracia'],
