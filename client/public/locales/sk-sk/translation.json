@@ -1025,8 +1025,8 @@
   "Control alert and reminder settings": "Ovládať nastavenia upozornení a pripomienok",
 
   "voice": {
-    "title": "Hlasový Vstup Transakcie",
-    "instructions": "Povedzte mi o vašej transakcii. Potrebujem sumu, čo ste si kúpili, kedy sa to stalo, a či to bol výdavok alebo príjem.",
+    "title": "Hlasový Vstup Transakcie", 
+    "instructions": "Povedzte jasne a jednoducho: sumu, názov obchodu (Tesco, Billa, Starbucks...), a kedy sa to stalo. Systém automaticky rozpozná typ a kategóriu transakcie. Napríklad: 'Kúpil som v Bille za 25 eur včera'.",
     "play_example": "Prehrať Príklad",
     "start_listening": "Začať Počúvanie",
     "stop_listening": "Zastaviť Počúvanie",
