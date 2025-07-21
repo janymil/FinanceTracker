@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mic, MicOff, X, Play } from 'lucide-react';
+import { Mic, MicOff, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
@@ -353,10 +353,6 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             <p className="text-sm text-blue-700 dark:text-blue-300">
               {t('voice.instructions')}
             </p>
-            <Button variant="ghost" size="sm" className="mt-2" onClick={playGreeting}>
-              <Play className="h-4 w-4 mr-2" />
-              {t('voice.play_example')}
-            </Button>
           </div>
 
 
