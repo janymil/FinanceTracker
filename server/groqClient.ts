@@ -103,7 +103,10 @@ CRITICAL: DO NOT ADD NUMBERS TOGETHER! 135 + 80 ≠ 215. Use 135.80!
 IMPORTANT: 
 - Use decimal point format for currency amounts
 - Major currency unit + minor currency unit = decimal format
-- Use your knowledge to categorize any merchant or expense type
+- Use your knowledge of GLOBAL merchants and businesses to categorize correctly
+- Examples: Migros = grocery store = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}, McDonald's = restaurant = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
+- CRITICAL: Grocery stores, supermarkets, food stores → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'} (NOT Shopping/Compras)
+- Be intelligent about merchant types regardless of country
 - Extract amounts with mathematical precision`;
 
     // Create specific user prompt with currency parsing guidance
