@@ -286,8 +286,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <div className="flex justify-between items-center mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="flex justify-between items-center p-6 border-b flex-shrink-0">
           <h2 className="text-lg font-semibold">{t('voice.title')}</h2>
           <Button
             variant="ghost"
@@ -298,8 +299,11 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           </Button>
         </div>
 
-        {/* Instructions */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+
+          {/* Instructions */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
           <p className="text-sm text-blue-700 dark:text-blue-300">
             {t('voice.instructions')}
           </p>
@@ -312,10 +316,10 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             <Play className="h-4 w-4 mr-2" />
             {t('voice.play_example')}
           </Button>
-        </div>
+          </div>
 
-        {/* Voice Input */}
-        <div className="mb-4">
+          {/* Voice Input */}
+          <div>
           <div className="flex items-center gap-2 mb-2">
             <Button
               onClick={isListening ? stopListening : startListening}
@@ -389,24 +393,26 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               onChange={(e) => setTransactionData(prev => ({ ...prev, date: e.target.value }))}
             />
           </div>
-        </div>
+          </div>
 
-        {/* Actions */}
-        <div className="flex gap-2 mt-6">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || !transactionData.amount || !transactionData.description}
-            className="flex-1"
-          >
-            {isSaving ? t('voice.saving') : t('voice.save_transaction')}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1"
-          >
-            {t('common.cancel')}
-          </Button>
+          {/* Actions */}
+          <div className="flex gap-2 mt-6">
+            <Button
+              onClick={handleSave}
+              disabled={isSaving || !transactionData.amount || !transactionData.description}
+              className="flex-1"
+            >
+              {isSaving ? t('voice.saving') : t('voice.save_transaction')}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+            >
+              {t('common.cancel')}
+            </Button>
+          </div>
+
         </div>
       </div>
     </div>
