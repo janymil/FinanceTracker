@@ -94,25 +94,22 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         let interimTranscript = '';
         let finalTranscript = '';
         
-        // Process all results
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        // Process all results and accumulate everything in this session
+        for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           if (result.isFinal) {
-            finalTranscript += result[0].transcript;
+            finalTranscript += result[0].transcript + ' ';
           } else {
             interimTranscript += result[0].transcript;
           }
         }
         
-        // Update display with interim + final transcript
-        const currentTranscript = finalTranscript + interimTranscript;
-        console.log('🎤 Voice listening:', currentTranscript);
-        setTranscript(currentTranscript);
+        // Show the complete session transcript (all sentences spoken so far)
+        const sessionTranscript = finalTranscript + interimTranscript;
+        console.log('🎤 Session transcript:', sessionTranscript);
+        setTranscript(sessionTranscript);
         
-        // Only process when we have final results and user stops manually
-        if (finalTranscript && !isListening) {
-          processVoiceInput(finalTranscript);
-        }
+        // DO NOT process here - only when user manually stops the session
       };
 
       recognitionRef.current.onerror = (event: any) => {
@@ -121,9 +118,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       };
 
       recognitionRef.current.onend = () => {
-        // Only restart if user is still supposed to be listening
+        // Keep the session alive by restarting recognition if user hasn't stopped manually
         if (isListening) {
-          console.log('🔄 Speech recognition ended, restarting...');
+          console.log('🔄 Browser stopped recognition, restarting to continue session...');
           setTimeout(() => {
             if (recognitionRef.current && isListening) {
               try {
@@ -134,8 +131,6 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               }
             }
           }, 100);
-        } else {
-          setIsListening(false);
         }
       };
     }
@@ -208,7 +203,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const startListening = () => {
     if (recognitionRef.current) {
       setIsListening(true);
-      setTranscript('');
+      setTranscript(''); // Clear transcript to start fresh session
       recognitionRef.current.start();
     }
   };
@@ -219,9 +214,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     }
     setIsListening(false);
     
-    // Process the final transcript when user manually stops
+    // Process the ENTIRE session transcript when user manually stops
     if (transcript.trim()) {
-      console.log('🛑 User stopped listening, processing:', transcript);
+      console.log('🛑 User ended session, processing complete transcript:', transcript);
       processVoiceInput(transcript.trim());
     }
   };
