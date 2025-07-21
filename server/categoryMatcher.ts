@@ -35,9 +35,9 @@ export function matchCategoryLocally(
 
   // **SEMANTIC MATCHING RULES** - 100% accurate local logic
   const semanticMatches = {
-    // Work/Salary/Income categories
-    work: ['trabajo', 'work', 'salary', 'salario', 'job', 'employment', 'empleo', 'práca', 'výplata'],
-    income: ['ingresos', 'income', 'revenue', 'príjmy', 'earning'],
+    // Work/Salary/Income categories - ALL INCOME TYPES
+    work: ['trabajo', 'work', 'salary', 'salario', 'job', 'employment', 'empleo', 'práca', 'výplata', 
+           'ingresos', 'income', 'revenue', 'príjmy', 'earning'], // Include income keywords in work group
     
     // Food categories  
     food: ['comida', 'food', 'grocery', 'restaurant', 'potraviny', 'jedlo', 'restauracia'],
