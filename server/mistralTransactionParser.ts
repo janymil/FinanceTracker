@@ -23,17 +23,19 @@ export async function parseTransactionWithMistral(
 
   const systemPrompt = `You are a financial expert specializing in transaction categorization. Parse the user's speech into structured transaction data.
 
+CRITICAL: You MUST respond exclusively in ${language} language. All categories, descriptions, and text MUST be in ${language}.
+
 USER PREFERENCES:
 - Language: ${language}
 - Currency: ${userCurrency}
 
-RESPOND ONLY WITH VALID JSON:
+RESPOND ONLY WITH VALID JSON (all text fields in ${language}):
 {
-  "amount": "5.80",
-  "description": "Merchant or expense description", 
+  "amount": "${userCurrency}5.80",
+  "description": "Merchant or expense description in ${language}", 
   "type": "expense",
   "date": "2025-07-21",
-  "category": "Category name",
+  "category": "Category name in ${language}",
   "note": "original transcript"
 }
 
@@ -69,6 +71,10 @@ For "[NUMBER] [CURRENCY] [NUMBER]" format:
 - First number = main units
 - Second number = cents/centavos  
 - Result = First.Second (e.g., "15 euros 75" = 15.75)
+
+CURRENCY FORMAT:
+User's preferred currency: ${userCurrency}
+Format amounts as: ${userCurrency}XX.XX (e.g., ${userCurrency}35.80)
 
 USER'S EXISTING CATEGORIES:
 ${userCategories.map(cat => `- "${cat.name}" (${cat.type})`).join('\n')}

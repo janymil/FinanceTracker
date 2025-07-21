@@ -35,6 +35,11 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     formData.append('file', new Blob([req.file.buffer]), 'audio.webm');
     formData.append('model', 'voxtral-mini-2507');
     formData.append('temperature', '0.0');
+    
+    // Set language for better transcription accuracy
+    const mistralLanguage = userLanguage.startsWith('es') ? 'es' : 
+                           userLanguage.startsWith('sk') ? 'sk' : 'en';
+    formData.append('language', mistralLanguage);
 
     const mistralResponse = await fetch('https://api.mistral.ai/v1/audio/transcriptions', {
       method: 'POST',
