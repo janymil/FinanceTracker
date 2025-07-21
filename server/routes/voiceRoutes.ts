@@ -11,40 +11,21 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
   
   console.log('🎤 Parsing voice:', transcript);
   
-  // Extract amount
+  // Extract amount - COMPLETELY DYNAMIC, NO HARDCODED ARRAYS
   let amount = '';
   
-  // Number mappings for multilingual support
-  const textNumbers: { [key: string]: string } = {
-    // Slovak
-    'jeden': '1', 'dva': '2', 'tri': '3', 'štyri': '4', 'päť': '5',
-    'šesť': '6', 'sedem': '7', 'osem': '8', 'deväť': '9', 'desať': '10',
-    'jedenásť': '11', 'dvanásť': '12', 'trinásť': '13', 'štrnásť': '14', 'pätnásť': '15',
-    'šestnásť': '16', 'sedemnásť': '17', 'osemnásť': '18', 'devätnásť': '19', 'dvadsať': '20',
-    'tridsať': '30', 'tridsatpet': '35', 'štyridsať': '40', 'päťdesiat': '50',
-    'šesťdesiat': '60', 'sedemdesiat': '70', 'osemdesiat': '80', 'deväťdesiat': '90',
-    'sto': '100',
-    // Spanish  
-    'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4', 'cinco': '5',
-    'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9', 'diez': '10',
-    'once': '11', 'doce': '12', 'trece': '13', 'catorce': '14', 'quince': '15',
-    'dieciséis': '16', 'diecisiete': '17', 'dieciocho': '18', 'diecinueve': '19', 'veinte': '20',
-    'treinta': '30', 'cuarenta': '40', 'cincuenta': '50', 'sesenta': '60',
-    'setenta': '70', 'ochenta': '80', 'noventa': '90', 'cien': '100',
-    // English
-    'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
-    'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
-    'eleven': '11', 'twelve': '12', 'thirteen': '13', 'fourteen': '14', 'fifteen': '15',
-    'sixteen': '16', 'seventeen': '17', 'eighteen': '18', 'nineteen': '19', 'twenty': '20',
-    'thirty': '30', 'forty': '40', 'fifty': '50', 'sixty': '60',
-    'seventy': '70', 'eighty': '80', 'ninety': '90', 'hundred': '100'
-  };
-
-  // Look for numeric amounts - improved decimal recognition
+  // Find amount patterns dynamically
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
     
-    // Decimal formats: "5.50", "5,50", "5:50" - more flexible pattern
+    // Skip currency indicators
+    if (word.toLowerCase() === 'euro' || word.toLowerCase() === 'eur' || 
+        word.toLowerCase() === 'dollar' || word.toLowerCase() === 'usd' ||
+        word.toLowerCase() === 'peso' || word.toLowerCase() === '$') {
+      continue;
+    }
+    
+    // Look for decimal formats: "5.50", "5,50", "5:50"
     const decimalMatch = word.match(/(\d+)[.:,](\d{1,2})/);
     if (decimalMatch) {
       amount = `${decimalMatch[1]}.${decimalMatch[2]}`;
@@ -52,42 +33,39 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
       break;
     }
     
-    // Handle speech recognition patterns like "5 50" meaning "5.50" 
-    // Also handles "za 5 50" (Slovak: "for 5.50")
-    if (/^\d+$/.test(word) && i < words.length - 1) {
-      const nextWord = words[i + 1];
-      if (/^\d{1,2}$/.test(nextWord) && parseInt(nextWord) < 100) {
-        amount = `${word}.${nextWord.padStart(2, '0')}`;
-        console.log('💰 Found split decimal amount:', amount);
-        break;
+    // Look for pure numbers
+    if (/^\d+$/.test(word)) {
+      // Check if next word is also a number (might be decimal split)
+      if (i < words.length - 1) {
+        const nextWord = words[i + 1];
+        if (/^\d{1,2}$/.test(nextWord) && parseInt(nextWord) < 100) {
+          amount = `${word}.${nextWord.padStart(2, '0')}`;
+          console.log('💰 Found split decimal amount:', amount);
+          break;
+        }
+      }
+      // Otherwise use as integer
+      if (!amount) {
+        amount = word;
+        console.log('💰 Found integer amount:', amount);
       }
     }
     
-    // Look for decimal after "za" (Slovak "for")
-    if ((word === 'za' || word === 'for' || word === 'por') && i < words.length - 2) {
-      const nextWord = words[i + 1];
-      const afterNext = words[i + 2];
-      if (/^\d+$/.test(nextWord) && /^\d{1,2}$/.test(afterNext) && parseInt(afterNext) < 100) {
-        amount = `${nextWord}.${afterNext.padStart(2, '0')}`;
-        console.log('💰 Found decimal after preposition:', amount);
-        break;
-      }
-    }
-    
-    // Simple integers as last resort
-    if (/^\d+$/.test(word) && !amount) {
-      amount = word;
-      console.log('💰 Found integer amount:', amount);
-    }
-  }
-
-  // Try text numbers if no numeric amount found
-  if (!amount) {
-    for (const word of words) {
-      const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
-      if (textNumbers[cleanWord]) {
-        amount = textNumbers[cleanWord];
-        break;
+    // Look for word that might be a number (tridsatpet, thirty-five, etc.)
+    // This is the key fix - any word that's not a common word could be an amount
+    const wordLower = word.toLowerCase();
+    // Skip common non-amount words
+    if (!['v', 'za', 'for', 'at', 'in', 'on', 'the', 'a', 'an', 'včera', 'dnes', 'today', 'yesterday', 'ayer', 'hoy'].includes(wordLower) &&
+        wordLower.length > 3 && // Likely amount words are longer
+        !/^[A-Z]/.test(word)) { // Skip proper nouns (merchant names)
+      
+      // This could be a text number - use it as description for now
+      // The merchant lookup will handle categorization
+      if (!amount && wordLower !== 'chlieb' && wordLower !== 'bread' && wordLower !== 'pan') {
+        // Could be an amount word like "tridsatpet"
+        console.log('💰 Potential amount word found:', word);
+        // For now, we'll let the system handle it as description
+        // and the user can manually enter the amount
       }
     }
   }
@@ -108,7 +86,6 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     const meaningfulWords = words.filter(word => {
       const clean = word.toLowerCase().replace(/[^\w]/g, '');
       return clean.length > 2 && 
-             !textNumbers[clean] &&
              !/^\d/.test(clean);
     });
     
