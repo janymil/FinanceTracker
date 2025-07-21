@@ -1026,7 +1026,7 @@
 
   "voice": {
     "title": "Entrada de Transacción por Voz",
-    "instructions": "Habla claro y corto: monto, tienda, cuándo.",
+    "instructions": "Presiona el botón Start Listening y habla breve, simple. Di estos datos: comerciante, producto, monto, fecha.",
     "play_example": "Reproducir Ejemplo",
     "start_listening": "Comenzar Escucha",
     "stop_listening": "Detener Escucha",

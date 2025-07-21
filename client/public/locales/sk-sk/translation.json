@@ -1026,7 +1026,7 @@
 
   "voice": {
     "title": "Hlasový Vstup Transakcie", 
-    "instructions": "Hovorte jasne a krátko: sumu, obchod, kedy.",
+    "instructions": "Stisknite tlačidlo Start Listening a hovorte stručne, jednoducho. Povedzte tieto údaje: obchodník, tovar, suma, dátum.",
     "play_example": "Prehrať Príklad",
     "start_listening": "Začať Počúvanie",
     "stop_listening": "Zastaviť Počúvanie",
