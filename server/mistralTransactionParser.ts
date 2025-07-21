@@ -12,17 +12,10 @@ interface ParsedTransaction {
 
 const mistralClient = new MistralClient();
 
-interface UserCategory {
-  id: number;
-  name: string;
-  type: 'expense' | 'income';
-}
-
 export async function parseTransactionWithMistral(
   transcript: string,
   userLanguage: string = 'en-us',
-  userCurrency: string = '$',
-  existingCategories: UserCategory[] = []
+  userCurrency: string = '$'
 ): Promise<ParsedTransaction> {
   const normalizedLanguage = normalizeLanguageCode(userLanguage);
   const language = getLanguageLabel(normalizedLanguage);
@@ -32,12 +25,6 @@ export async function parseTransactionWithMistral(
 USER PREFERENCES:
 - Language: ${language}
 - Currency: ${userCurrency}
-
-USER'S EXISTING CATEGORIES:
-${existingCategories.length > 0 
-  ? existingCategories.map(cat => `- ${cat.name} (${cat.type})`).join('\n')
-  : '- No existing categories yet'
-}
 
 RESPOND ONLY WITH VALID JSON:
 {
@@ -63,43 +50,28 @@ INCOME VS EXPENSE INTELLIGENCE:
 - If user mentions investment, dividend, return → type: "income", category: "${language === 'Spanish' ? 'Inversiones' : language === 'Slovak' ? 'Investície' : 'Investments'}"
 - If user mentions purchase, buy, store, merchant → type: "expense", analyze merchant type for category
 
-CRITICAL AMOUNT PARSING (STT often misrecognizes numbers):
-- "two thousand nine hundred" = 2900.00 (NOT 2.90!)
-- "twenty nine hundred" = 2900.00 (NOT 29.00!)
-- "cinco mil ochocientos" = 5800.00 (NOT 5.80!)
-- "fifteen hundred" = 1500.00 (NOT 15.00!)
+CRITICAL AMOUNT PARSING:
+- "cinco ochenta" = 5.80 (NOT 580!)
+- "135 soles 80" = 135.80 (NOT 215!)
+- "dos euros cincuenta" = 2.50
+- "twenty dollars" = 20.00
 
-COMMON STT ERRORS TO FIX:
-- STT says "2.90" but user meant "2900" → Check context for large amounts
-- STT says "five eighty" → Could be 5.80 OR 580, decide from context
-- Company names get garbled → Use best guess for description
-
-DECIMAL DETECTION:
-- If amount sounds like large income (salary, rent) → Likely whole number
-- If amount sounds like small expense (coffee, snacks) → Likely has decimals
-- "Microsoft 5000" = salary = 5000.00 (NOT 50.00!)
-- "coffee shop five fifty" = coffee = 5.50
+MATHEMATICAL RULE:
+For "[NUMBER] [CURRENCY] [NUMBER]" format:
+- First number = main units
+- Second number = cents/centavos  
+- Result = First.Second (e.g., "15 euros 75" = 15.75)
 
 TRANSACTION ANALYSIS PRIORITY:
 1. FIRST: Determine if this is INCOME or EXPENSE based on context
 2. SECOND: For expenses - analyze what TYPE of business/merchant this is
 3. THIRD: For income - determine the SOURCE type (work, investments, etc.)
 
-CATEGORY MATCHING INTELLIGENCE:
-1. FIRST: Try to match with user's existing categories
-2. SECOND: If no good match exists, create a logical new category name
-3. NEVER use generic "Income" or "Expense" - always be specific
-
-CATEGORY PRIORITY:
-- If user has "Salary" category → use "Salary" for work income
-- If user has "Groceries" category → use "Groceries" for food
-- If user has "Gas" category → use "Gas" for fuel
-- If NO match exists → create new specific category:
-  * Work income → "${language === 'Spanish' ? 'Trabajo' : language === 'Slovak' ? 'Práca' : 'Work'}"
-  * Food expenses → "${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}"
-  * Transport → "${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}"
-
-CRITICAL: Always prefer user's existing category names when they logically match!`;
+NEVER use generic categories like "Income" or "Expense" - always be specific:
+- Work income = "${language === 'Spanish' ? 'Trabajo' : language === 'Slovak' ? 'Práca' : 'Work'}"
+- Investment income = "${language === 'Spanish' ? 'Inversiones' : language === 'Slovak' ? 'Investície' : 'Investments'}"
+- Food purchases = "${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}"
+- Transport = "${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}"`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [

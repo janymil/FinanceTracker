@@ -3,7 +3,6 @@ import multer from 'multer';
 import { transcribeAudioWithGroq } from '../groqClient.js';
 import { parseTransactionWithMistral, matchCategoryIntelligentlyMistral } from '../mistralTransactionParser.js';
 import { lookupMerchant } from '../../lib/merchantLookup.js';
-import { storage } from '../storage.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -17,53 +16,22 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 
     const userLanguage = req.headers['x-user-language'] as string || 'en-us';
     const userCurrency = req.headers['x-user-currency'] as string || '$';
-    const userId = (req as any).auth?.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'User not authenticated' });
-    }
     
     console.log('🎤 Mistral voice transcription and parsing request');
-    console.log('🌍 User preferences:', { userLanguage, userCurrency, userId });
+    console.log('🌍 User preferences:', { userLanguage, userCurrency });
 
-    // Step 0: Get user's existing categories for intelligent matching
-    console.log('📋 Step 0: Getting user\'s existing categories...');
-    const existingCategories = await storage.getCategories(userId);
-    console.log('📋 User has', existingCategories.length, 'existing categories:', existingCategories.map(c => c.name));
-
-    // Step 1: Transcribe with Groq Distil-Whisper (STT) 
+    // Step 1: Transcribe with Groq Distil-Whisper (STT)
     console.log('🎙️ Step 1: Transcribing audio with Groq Distil-Whisper...');
     const transcription = await transcribeAudioWithGroq(req.file.buffer);
-    console.log('🎙️ Raw STT transcription:', transcription);
+    console.log('🎙️ Transcription result:', transcription);
     
     if (!transcription || transcription.trim().length < 2) {
-      return res.status(400).json({ error: 'No valid transcription received from STT' });
+      return res.status(400).json({ error: 'No valid transcription received' });
     }
 
-    // Step 1.5: Apply STT corrections for known issues
-    let correctedTranscription = transcription;
-    
-    // Fix common STT number errors
-    correctedTranscription = correctedTranscription
-      .replace(/\b2\.90?\b/gi, '2900') // "2.90" likely means "2900"
-      .replace(/\b5\.80?\b/gi, '580')   // "5.80" could be "580"
-      .replace(/\bfive eighty\b/gi, '580')
-      .replace(/\btwo ninety\b/gi, '290')
-      .replace(/\btwenty nine hundred\b/gi, '2900')
-      .replace(/\bfifteen hundred\b/gi, '1500');
-    
-    if (correctedTranscription !== transcription) {
-      console.log('🔧 STT corrections applied:', transcription, '→', correctedTranscription);
-    }
-
-    // Step 2: Parse with Mistral (with user's categories for intelligence)
-    console.log('🧠 Step 2: Parsing transaction with Mistral (with user categories)...');
-    const parsedTransaction = await parseTransactionWithMistral(
-      correctedTranscription, 
-      userLanguage, 
-      userCurrency,
-      existingCategories.map(cat => ({ id: cat.id, name: cat.name, type: cat.type as 'expense' | 'income' }))
-    );
+    // Step 2: Parse with Mistral (better than LLaMA)
+    console.log('🧠 Step 2: Parsing transaction with Mistral...');
+    const parsedTransaction = await parseTransactionWithMistral(transcription, userLanguage, userCurrency);
     console.log('🧠 Mistral parsed transaction:', parsedTransaction);
 
     // Step 3: Enhance category with merchant lookup (optional)
@@ -91,8 +59,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     const finalResult = {
       ...parsedTransaction,
       category: enhancedCategory,
-      transcript: correctedTranscription, // Include corrected transcript
-      originalTranscript: transcription // Also include original for debugging
+      transcript: transcription // Include original transcript
     };
     
     console.log('✅ Final Mistral analysis result:', finalResult);
@@ -114,10 +81,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 // Test endpoint for text-only parsing (for debugging)
 router.post('/parse-text', async (req: Request, res: Response) => {
   try {
-    const { transcript } = req.body;
-    const userLanguage = req.headers['x-user-language'] as string || 'en-us';
-    const userCurrency = req.headers['x-user-currency'] as string || '$';
-    const userId = (req as any).auth?.userId;
+    const { transcript, userLanguage = 'en-us', userCurrency = '$' } = req.body;
     
     if (!transcript) {
       return res.status(400).json({ error: 'Transcript is required' });
@@ -125,21 +89,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
     
     console.log('🧠 Testing Mistral text parsing:', transcript);
     
-    // Get user categories if authenticated (for testing with user context)
-    let existingCategories: any[] = [];
-    if (userId) {
-      existingCategories = await storage.getCategories(userId);
-      console.log('📋 User has', existingCategories.length, 'existing categories for testing');
-    } else {
-      console.log('📋 No user authentication - using general AI categories');
-    }
-    
-    const result = await parseTransactionWithMistral(
-      transcript, 
-      userLanguage, 
-      userCurrency,
-      existingCategories.map(cat => ({ id: cat.id, name: cat.name, type: cat.type as 'expense' | 'income' }))
-    );
+    const result = await parseTransactionWithMistral(transcript, userLanguage, userCurrency);
     
     res.json({ success: true, data: result });
     
