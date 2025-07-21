@@ -55,6 +55,14 @@
   "Transaction description": "Popis transakcie",
   "Type": "Typ",
   "Category": "Kategória",
+  "transaction": {
+    "amount": "Suma",
+    "description": "Popis",
+    "category": "Kategória",
+    "type": "Typ",
+    "date": "Dátum",
+    "description_placeholder": "Popis transakcie"
+  },
   "Select category": "Vyberte kategóriu",
   "Select a category": "Vyberte kategóriu",
   "No categories available for": "Žiadne kategórie nie sú dostupné pre",

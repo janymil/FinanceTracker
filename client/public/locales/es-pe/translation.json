@@ -55,6 +55,14 @@
   "Transaction description": "Descripción de la transacción",
   "Type": "Tipo",
   "Category": "Categoría",
+  "transaction": {
+    "amount": "Monto",
+    "description": "Descripción",
+    "category": "Categoría",
+    "type": "Tipo",
+    "date": "Fecha",
+    "description_placeholder": "Descripción de la transacción"
+  },
   "Select category": "Selecciona categoría",
   "Select a category": "Selecciona una categoría",
   "No categories available for": "No hay categorías disponibles para",

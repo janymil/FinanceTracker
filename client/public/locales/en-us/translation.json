@@ -55,6 +55,14 @@
   "Transaction description": "Transaction description",
   "Type": "Type",
   "Category": "Category",
+  "transaction": {
+    "amount": "Amount",
+    "description": "Description",
+    "category": "Category",
+    "type": "Type",
+    "date": "Date",
+    "description_placeholder": "Transaction description"
+  },
   "Select category": "Select category",
   "Select a category": "Select a category",
   "No categories available for": "No categories available for",
