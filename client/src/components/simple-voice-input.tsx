@@ -92,7 +92,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
     // Step 2: Send to backend for intelligent matching
     try {
-      const response = await fetch('/api/voice-groq/match-category', {
+      const response = await fetch('/api/voice-mistral/match-category', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -219,16 +219,16 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   };
 
   // Process audio with Groq (replaces old voice processing)
-  const processAudioWithGroq = async (audioBlob: Blob) => {
+  const processAudioWithMistral = async (audioBlob: Blob) => {
     setIsProcessing(true);
     
     try {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
       
-      console.log('🎤 Sending audio to Groq for processing...');
+      console.log('🎤 Sending audio to Mistral for processing...');
       
-      const response = await fetch('/api/voice-groq/transcribe-and-parse', {
+      const response = await fetch('/api/voice-mistral/transcribe-and-parse', {
         method: 'POST',
         body: formData,
         headers: {
@@ -242,25 +242,19 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       }
       
       const result = await response.json();
-      console.log('✅ Groq processing result:', result.data);
+      console.log('✅ Mistral processing result:', result.data);
       
       if (result.success && result.data) {
-        // Set transcript from Groq STT
+        // Set transcript from Mistral STT
         setTranscript(result.data.transcript || '');
         
-        // Intelligently match the suggested category with existing ones
-        let matchedCategory: { name: string; id?: string | number } = { name: result.data.category };
+        // Category is already intelligently matched by Mistral system
+        const finalCategory = {
+          name: result.data.category,
+          id: result.data.categoryId
+        };
         
-        if (categories && categories.length > 0) {
-          console.log('🏷️ Starting intelligent category matching...');
-          console.log('🏷️ Parsed category from LLaMA:', result.data.category);
-          console.log('🏷️ Available user categories:', categories.map(c => c.name));
-          
-          matchedCategory = await matchCategoryIntelligently(result.data.category, categories as any[]);
-          console.log('🏷️ Final matched category:', matchedCategory);
-        } else {
-          console.log('⚠️ No user categories available, using raw category:', result.data.category);
-        }
+        console.log('🏷️ Mistral intelligently matched category:', finalCategory);
         
         // Store the parsed data for form pre-filling
         setAccumulatedData({
@@ -268,25 +262,25 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           description: result.data.description || '',
           type: result.data.type || 'expense',
           date: result.data.date || new Date().toISOString().split('T')[0],
-          category: matchedCategory.name,
-          categoryId: matchedCategory.id || '',
+          category: finalCategory.name,
+          categoryId: finalCategory.id || '',
           note: result.data.transcript || '' // Store transcript as note
         });
         
-        setExtractedCategory(matchedCategory.name);
+        setExtractedCategory(finalCategory.name);
         
         toast({
           title: t('voice.processing_complete'),
           description: t('voice.review_and_save'),
         });
         
-        console.log('✅ Groq voice data extracted successfully');
+        console.log('✅ Mistral voice data extracted successfully');
       } else {
-        throw new Error('No data returned from Groq processing');
+        throw new Error('No data returned from Mistral processing');
       }
       
     } catch (error) {
-      console.error('❌ Groq processing failed:', error);
+      console.error('❌ Mistral processing failed:', error);
       toast({
         title: t('voice.processing_failed'),
         description: error instanceof Error ? error.message : t('voice.unknown_error'),
@@ -319,8 +313,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         // Stop all tracks to free up microphone
         stream.getTracks().forEach(track => track.stop());
         
-        // Process audio with Groq
-        processAudioWithGroq(audioBlob);
+        // Process audio with Mistral
+        processAudioWithMistral(audioBlob);
       };
       
       mediaRecorder.start();

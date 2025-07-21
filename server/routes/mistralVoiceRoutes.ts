@@ -23,7 +23,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     console.log('🌍 User preferences:', { userLanguage, userCurrency });
 
     // Get user ID from authentication
-    const userId = req.auth?.userId;
+    const userId = (req as any).auth?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
     }
@@ -39,7 +39,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 
     // Step 2: Get user's existing categories from database
     console.log('📂 Step 2: Fetching user categories...');
-    const userCategories = await storage.getCategoriesByUserId(userId);
+    const userCategories = await storage.getCategories(userId);
     console.log('📂 User has', userCategories.length, 'categories');
 
     // Step 3: Parse with Mistral Small 2506 (with user categories)
@@ -114,7 +114,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
     }
     
     // Get user ID from authentication
-    const userId = req.auth?.userId;
+    const userId = (req as any).auth?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
     }
@@ -122,7 +122,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
     console.log('🧠 Testing Mistral text parsing:', transcript);
     
     // Get user's existing categories
-    const userCategories = await storage.getCategoriesByUserId(userId);
+    const userCategories = await storage.getCategories(userId);
     console.log('📂 User has', userCategories.length, 'categories for text parsing');
     
     const result = await parseTransactionWithMistral(transcript, userLanguage, userCurrency, userCategories);
