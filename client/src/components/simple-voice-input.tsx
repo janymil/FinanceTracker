@@ -1,12 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mic, MicOff, X } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 interface SimpleVoiceInputProps {
@@ -18,19 +14,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  
-  // Form data state
-  const [transactionData, setTransactionData] = useState({
-    amount: '',
-    description: '',
-    type: 'expense' as 'expense' | 'income',
-    date: new Date().toISOString().split('T')[0],
-    categoryId: null as number | null,
-    note: ''
-  });
+  const [transcript, setTranscript] = useState('');
+  const [parsedResult, setParsedResult] = useState<any>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
