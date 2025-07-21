@@ -28,7 +28,7 @@ export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<stri
 }
 
 // Groq LLaMA for intelligent transaction parsing
-export async function parseTransactionWithGroq(transcript: string, userLanguage: string): Promise<{
+export async function parseTransactionWithGroq(transcript: string, userLanguage: string, userCurrency: string = '$'): Promise<{
   amount: string;
   description: string;
   type: 'income' | 'expense';
@@ -49,6 +49,10 @@ export async function parseTransactionWithGroq(transcript: string, userLanguage:
     
     const systemPrompt = `You are an expert at parsing financial transactions from natural speech. Parse the user's speech into structured transaction data.
 
+USER PREFERENCES:
+- Language: ${language}
+- Currency: ${userCurrency}
+
 RESPOND ONLY WITH VALID JSON:
 {
   "amount": "25.50",
@@ -60,7 +64,7 @@ RESPOND ONLY WITH VALID JSON:
 }
 
 PARSING INSTRUCTIONS:
-- AMOUNT: Extract any numeric value mentioned (including written numbers like "twenty", "veinte", "päťdesiat")
+- AMOUNT: Extract numeric value (including written numbers like "twenty", "veinte", "päťdesiat", "dos soles", "fifty euros")
 - DESCRIPTION: Extract merchant name, store name, or what the money was spent on
 - TYPE: "expense" for spending money, "income" for receiving money
 - CATEGORY: Choose appropriate category in ${language}
@@ -71,10 +75,15 @@ ${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servic
   language === 'Slovak' ? 'Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie, Príjmy, Ostatné' :
   'Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other'}
 
+CURRENCY CONTEXT:
+- User's currency is ${userCurrency}
+- Parse amounts mentioned in any currency but extract the numeric value
+- Example: "spent twenty dollars" → "20", "gasté dos soles" → "2", "päťdesiat eur" → "50"
+
 IMPORTANT: 
 - Always extract the amount as a number, even if spoken as words
 - Use your knowledge to categorize any merchant or expense type
-- If unclear, make your best intelligent guess based on context`;
+- Consider user's currency context but extract pure numeric amounts`;
 
     const completion = await groq.chat.completions.create({
       messages: [

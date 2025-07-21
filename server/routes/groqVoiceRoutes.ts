@@ -30,6 +30,9 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     }
     
     const userLanguage = req.headers['x-user-language'] as string || 'en-us';
+    const userCurrency = req.headers['x-user-currency'] as string || '$';
+    
+    console.log('🌍 User preferences:', { userLanguage, userCurrency });
     
     // Step 1: Groq STT with Distil-Whisper
     console.log('🎙️ Step 1: Transcribing audio with Groq Distil-Whisper...');
@@ -41,9 +44,9 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     
     console.log('🎙️ Transcription result:', transcript);
     
-    // Step 2: Groq LLaMA intelligent parsing
+    // Step 2: Groq LLaMA intelligent parsing with user preferences
     console.log('🧠 Step 2: Parsing transaction with Groq LLaMA...');
-    const parsedTransaction = await parseTransactionWithGroq(transcript, userLanguage);
+    const parsedTransaction = await parseTransactionWithGroq(transcript, userLanguage, userCurrency);
     
     // Step 3: Enhanced category matching with merchant lookup (optional enhancement)
     let enhancedCategory = parsedTransaction.category;
@@ -92,7 +95,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 // Test endpoint for text-only parsing (for debugging)
 router.post('/parse-text', async (req: Request, res: Response) => {
   try {
-    const { transcript, userLanguage = 'en-us' } = req.body;
+    const { transcript, userLanguage = 'en-us', userCurrency = '$' } = req.body;
     
     if (!transcript) {
       return res.status(400).json({ error: 'Transcript is required' });
@@ -100,7 +103,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
     
     console.log('🧠 Testing Groq LLaMA text parsing:', transcript);
     
-    const result = await parseTransactionWithGroq(transcript, userLanguage);
+    const result = await parseTransactionWithGroq(transcript, userLanguage, userCurrency);
     
     res.json({ success: true, data: result });
     

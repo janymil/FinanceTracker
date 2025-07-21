@@ -202,7 +202,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         method: 'POST',
         body: formData,
         headers: {
-          'x-user-language': getCurrentLanguageForAPI()
+          'x-user-language': getCurrentLanguageForAPI(),
+          'x-user-currency': userCurrency
         }
       });
       
