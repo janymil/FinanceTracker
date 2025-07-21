@@ -267,8 +267,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     
     if (missingFields.length > 0) {
       toast({
-        title: 'Missing Information',
-        description: `Please provide: ${missingFields.join(', ')}. Try speaking again with more details.`,
+        title: t('voice.incomplete_data'),
+        description: `${t('voice.fill_required_fields')}. ${t('voice.try_again')}.`,
         variant: 'destructive'
       });
       return;
@@ -278,8 +278,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     const numericAmount = parseFloat(accumulatedData.amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
       toast({
-        title: 'Invalid Amount',
-        description: 'Please provide a valid amount greater than 0',
+        title: t('common.error'),
+        description: t('voice.fill_required_fields'),
         variant: 'destructive'
       });
       return;
@@ -302,8 +302,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       const result = await response.json();
       
       toast({
-        title: 'Success',
-        description: `Transaction saved: ${accumulatedData.description}`,
+        title: t('voice.transaction_saved'),
+        description: t('voice.transaction_success'),
       });
       
       // Call onComplete to refresh the transaction list
@@ -312,8 +312,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     } catch (error) {
       console.error('Failed to save transaction:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to save transaction',
+        title: t('voice.save_failed'),
+        description: t('voice.try_again'),
         variant: 'destructive'
       });
     } finally {
@@ -374,7 +374,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 step="0.01"
                 value={accumulatedData.amount}
                 onChange={(e) => setAccumulatedData(prev => ({ ...prev, amount: e.target.value }))}
-                placeholder="0.00"
+                placeholder={userCurrency + "0.00"}
                 className={accumulatedData.amount ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               />
             </div>
@@ -413,8 +413,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="expense">{t('types.expense')}</SelectItem>
-                  <SelectItem value="income">{t('types.income')}</SelectItem>
+                  <SelectItem value="expense">{t('Expense')}</SelectItem>
+                  <SelectItem value="income">{t('Income')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
