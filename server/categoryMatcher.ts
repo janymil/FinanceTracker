@@ -80,7 +80,7 @@ export function matchCategoryLocally(
   // Universal translation keywords for common terms
   const universalTranslations = {
     // Income translations
-    'income': ['ingresos', 'príjmy', 'revenue', 'earning'],
+    'income': ['príjmy', 'revenue', 'earning'],
     'salary': ['salario', 'výplata', 'sueldo', 'wage'],
     'work': ['trabajo', 'práca', 'job', 'employment'],
     'investment': ['inversión', 'investície', 'stocks', 'akcie'],

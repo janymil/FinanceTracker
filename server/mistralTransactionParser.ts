@@ -47,16 +47,16 @@ USER'S EXISTING CATEGORIES:
 ${userCategories.length > 0 ? userCategories.map(cat => `- ${cat.name} (${cat.type})`).join('\n') : 'No existing categories'}
 
 CATEGORY MATCHING PRIORITY (CRITICAL):
-1. MANDATORY: Choose from user's existing categories if ANY logical match exists
+1. MANDATORY: Choose from user's existing categories ONLY
 2. Look for semantic matches: salary/trabajo/work → "Trabajo", food/comida → "Comida"  
 3. ONLY use exact category names from user's list above
-4. If NO user category matches, use generic: ${language === 'Spanish' ? 'Ingresos/Gastos' : 
-  language === 'Slovak' ? 'Príjmy/Výdavky' : 'Income/Expense'}
+4. If NO user category matches AT ALL, use first available category from user's list
 
 EXAMPLES WITH USER CATEGORIES:
-- Salary/trabajo/work + user has "Trabajo" → use "Trabajo" (NOT "Ingresos")
+- Salary/trabajo/work + user has "Trabajo" → use "Trabajo"
 - Food/comida + user has "Comida" → use "Comida"
 - Shopping + user has "Compras" → use "Compras"
+- ANY transaction + no good match → use most appropriate category from user's list
 
 CRITICAL AMOUNT PARSING:
 - "cinco ochenta" = 5.80 (NOT 580!)
