@@ -36,19 +36,16 @@ RESPOND ONLY WITH VALID JSON:
   "note": "original transcript"
 }
 
-INTELLIGENT BUSINESS ANALYSIS:
-- Analyze what TYPE of business this merchant is
-- Grocery stores/supermarkets → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-- Restaurants/cafes/food delivery → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-- Gas stations/fuel/transport → ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
-- Retail stores/shopping → ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}
-- Salary/work income → ${language === 'Spanish' ? 'Trabajo' : language === 'Slovak' ? 'Práca' : 'Work'}
-- Investment income → ${language === 'Spanish' ? 'Inversiones' : language === 'Slovak' ? 'Investície' : 'Investments'}
+MERCHANT INTELLIGENCE:
+- Migros = Swiss grocery store = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
+- McDonald's = fast food restaurant = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
+- Shell, BP = gas stations = ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
+- Amazon, Walmart = retail shopping = ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}
 
-INCOME VS EXPENSE INTELLIGENCE:
-- If user mentions salary, work, employer, job → type: "income", category: "${language === 'Spanish' ? 'Trabajo' : language === 'Slovak' ? 'Práca' : 'Work'}"
-- If user mentions investment, dividend, return → type: "income", category: "${language === 'Spanish' ? 'Inversiones' : language === 'Slovak' ? 'Investície' : 'Investments'}"
-- If user mentions purchase, buy, store, merchant → type: "expense", analyze merchant type for category
+CATEGORIES FOR ${language}:
+${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servicios, Salud, Ingresos, Otros' : 
+  language === 'Slovak' ? 'Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie, Príjmy, Ostatné' :
+  'Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other'}
 
 CRITICAL AMOUNT PARSING:
 - "cinco ochenta" = 5.80 (NOT 580!)
@@ -62,16 +59,12 @@ For "[NUMBER] [CURRENCY] [NUMBER]" format:
 - Second number = cents/centavos  
 - Result = First.Second (e.g., "15 euros 75" = 15.75)
 
-TRANSACTION ANALYSIS PRIORITY:
-1. FIRST: Determine if this is INCOME or EXPENSE based on context
-2. SECOND: For expenses - analyze what TYPE of business/merchant this is
-3. THIRD: For income - determine the SOURCE type (work, investments, etc.)
-
-NEVER use generic categories like "Income" or "Expense" - always be specific:
-- Work income = "${language === 'Spanish' ? 'Trabajo' : language === 'Slovak' ? 'Práca' : 'Work'}"
-- Investment income = "${language === 'Spanish' ? 'Inversiones' : language === 'Slovak' ? 'Investície' : 'Investments'}"
-- Food purchases = "${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}"
-- Transport = "${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}"`;
+CATEGORIZATION PRIORITY:
+1. Analyze merchant/business TYPE first
+2. Grocery stores/supermarkets → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
+3. Restaurants/cafes/food → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
+4. Gas/fuel/transport → ${language === 'Spanish' ? 'Transporte' : language === 'Slovak' ? 'Doprava' : 'Transport'}
+5. Default retail → ${language === 'Spanish' ? 'Compras' : language === 'Slovak' ? 'Nakupovanie' : 'Shopping'}`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [
