@@ -447,7 +447,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           {/* Form Fields */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="amount">{t('transaction.amount')} ({userCurrency})</Label>
+              <Label htmlFor="amount">{t('Amount')} ({userCurrency})</Label>
               <Input
                 id="amount"
                 type="number"
@@ -460,18 +460,18 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             </div>
 
             <div>
-              <Label htmlFor="description">{t('transaction.description')}</Label>
+              <Label htmlFor="description">{t('Description')}</Label>
               <Input
                 id="description"
                 value={accumulatedData.description}
                 onChange={(e) => setAccumulatedData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder={t('transaction.description_placeholder')}
+                placeholder={t('Transaction description')}
                 className={accumulatedData.description ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               />
             </div>
 
             <div>
-              <Label htmlFor="category">{t('transaction.category')}</Label>
+              <Label htmlFor="category">{t('Category')}</Label>
               <Input
                 id="category"
                 value={extractedCategory || accumulatedData.category || ''}
@@ -482,7 +482,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             </div>
 
             <div>
-              <Label htmlFor="type">{t('transaction.type')}</Label>
+              <Label htmlFor="type">{t('Type')}</Label>
               <Select 
                 value={accumulatedData.type} 
                 onValueChange={(value: 'income' | 'expense') => 
@@ -500,7 +500,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             </div>
 
             <div>
-              <Label htmlFor="date">{t('transaction.date')}</Label>
+              <Label htmlFor="date">{t('Date')}</Label>
               <Input
                 id="date"
                 type="date"

@@ -47,40 +47,42 @@ export async function parseTransactionWithGroq(transcript: string, userLanguage:
     
     const language = languageMap[userLanguage] || 'English';
     
-    const systemPrompt = `You are a financial transaction parser. Analyze the user's speech transcript and extract transaction data.
+    const systemPrompt = `You are a financial transaction parser. Extract transaction data from speech transcripts.
 
-CRITICAL REQUIREMENTS:
-- Respond ONLY with valid JSON in exactly this format
-- Use the user's language (${language}) for category names
-- Always set a date (use today if not specified)
-- Amount must be numeric string or empty string
-- Type must be "income" or "expense"
-
-JSON FORMAT:
+RESPOND ONLY WITH VALID JSON IN THIS EXACT FORMAT:
 {
   "amount": "25.50",
-  "description": "Merchant Name",
+  "description": "Coffee at Starbucks",
   "type": "expense",
   "date": "2025-07-21",
-  "category": "Food",
-  "note": "Original transcript"
+  "category": "Comida",
+  "note": "original transcript"
 }
 
-LANGUAGE-SPECIFIC CATEGORIES:
-English: Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other
-Spanish: Supermercado, Transporte, Compras, Entretenimiento, Servicios, Salud, Ingresos, Otros  
-Slovak: Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie, Príjmy, Ostatné
+CRITICAL PARSING RULES:
+1. AMOUNT EXTRACTION - Look for:
+   - Numbers: "25", "25.50", "dos soles", "thirty-five", "päťdesiat eur"
+   - Words: "veinte soles" = "20", "twenty dollars" = "20", "päťdesiat" = "50"
+   - Currency mentions: "soles", "dollars", "euros", "pesos"
+   
+2. DESCRIPTION - Extract merchant/purpose:
+   - "compré en Totus" → "Totus"
+   - "gasté en KFC" → "KFC" 
+   - "pago de Netflix" → "Netflix"
 
-DATE PARSING:
-- "today/dnes/hoy" → today's date
-- "yesterday/včera/ayer" → yesterday's date
-- Otherwise use today's date
+3. CATEGORIES in ${language}:
+   ${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servicios, Salud, Ingresos, Otros' : 
+     language === 'Slovak' ? 'Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie, Príjmy, Ostatné' :
+     'Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other'}
 
-AMOUNT PARSING:
-- Extract numeric amounts: "25", "25.50", "twenty-five"
-- Slovak: "tridsatpet" = "35", "päťdesiat" = "50"
-- Spanish: "treinta y cinco" = "35"
-- If no clear amount, leave empty string`;
+4. TYPE: Usually "expense" unless clearly income ("salary", "sueldo", "plat")
+
+5. DATE: Today unless specified ("ayer"→yesterday, "yesterday"→yesterday)
+
+EXAMPLES:
+"gasté veinte soles en Totus" → {"amount":"20","description":"Totus","type":"expense","category":"Comida"}
+"paid 35 dollars at KFC yesterday" → {"amount":"35","description":"KFC","type":"expense","category":"Food","date":"2025-07-20"}
+"dostal som päťdesiat eur plat" → {"amount":"50","description":"Salary","type":"income","category":"Príjmy"}`;
 
     const completion = await groq.chat.completions.create({
       messages: [
@@ -98,15 +100,62 @@ AMOUNT PARSING:
       response_format: { type: 'json_object' }
     });
 
-    const result = JSON.parse(completion.choices[0].message.content || '{}');
+    const rawResponse = completion.choices[0].message.content || '{}';
+    console.log('🧠 Raw LLaMA response:', rawResponse);
     
-    // Validate and sanitize result
+    const result = JSON.parse(rawResponse);
+    
+    // Validate and sanitize result with fallback parsing
+    let amount = String(result.amount || '');
+    let description = String(result.description || '');
+    let category = String(result.category || '');
+    
+    // Fallback parsing if LLaMA failed
+    if (!amount || !description) {
+      console.log('⚠️ LLaMA parsing incomplete, applying fallback logic...');
+      
+      // Try to extract amount with regex
+      const amountMatches = transcript.match(/(\d+(?:\.\d{2})?)|(\b(?:one|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\b)|(\b(?:un|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|veinte|treinta|cuarenta|cincuenta)\b)/gi);
+      if (amountMatches && !amount) {
+        const match = amountMatches[0];
+        if (/^\d+/.test(match)) {
+          amount = match;
+        } else {
+          // Basic word-to-number conversion
+          const wordToNum: {[key: string]: string} = {
+            'dos': '2', 'tres': '3', 'cuatro': '4', 'cinco': '5',
+            'two': '2', 'three': '3', 'four': '4', 'five': '5',
+            'veinte': '20', 'twenty': '20', 'treinta': '30', 'thirty': '30'
+          };
+          amount = wordToNum[match.toLowerCase()] || '';
+        }
+      }
+      
+      // Extract merchant/description
+      if (!description) {
+        // Look for common patterns
+        const merchantPattern = /(?:en|at|from|de)\s+([A-Za-z]+)/i;
+        const merchantMatch = transcript.match(merchantPattern);
+        description = merchantMatch ? merchantMatch[1] : transcript.trim();
+      }
+      
+      // Default category based on language
+      if (!category) {
+        const defaultCategories = {
+          'Spanish': 'Otros',
+          'Slovak': 'Ostatné', 
+          'English': 'Other'
+        };
+        category = defaultCategories[language] || 'Other';
+      }
+    }
+
     const parsedTransaction = {
-      amount: String(result.amount || ''),
-      description: String(result.description || 'Transaction'),
+      amount: amount,
+      description: description || 'Transaction',
       type: (result.type === 'income' ? 'income' : 'expense') as 'income' | 'expense',
       date: result.date || new Date().toISOString().split('T')[0],
-      category: String(result.category || 'Other'),
+      category: category,
       note: transcript
     };
     
