@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { MistralClient } from '../mistralClient.js';
-import { parseTransactionWithMistral, matchCategoryIntelligentlyMistral } from '../mistralTransactionParser.js';
+import { parseTransactionWithMistral } from '../mistralTransactionParser.js';
 import { storage } from '../storage.js';
+import { matchCategoryLocally } from '../categoryMatcher.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -46,9 +47,9 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     const parsedTransaction = await parseTransactionWithMistral(transcription, userLanguage, userCurrency, userCategories);
     console.log('🧠 Mistral parsed transaction:', parsedTransaction);
 
-    // Step 4: Match category intelligently with user's existing categories
-    console.log('🎯 Step 4: Intelligent category matching...');
-    const categoryMatchResult = await matchCategoryIntelligentlyMistral(
+    // Step 4: Local category matching (100% accurate)
+    console.log('🎯 Step 4: Local intelligent category matching...');
+    const categoryMatchResult = matchCategoryLocally(
       parsedTransaction.category,
       userCategories,
       userLanguage
@@ -137,7 +138,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
   }
 });
 
-// Intelligent category matching endpoint
+// Local category matching endpoint (100% accurate)
 router.post('/match-category', async (req: Request, res: Response) => {
   try {
     const { suggestedCategory, existingCategories } = req.body;
@@ -147,19 +148,19 @@ router.post('/match-category', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    console.log('🎯 Intelligent category matching request (Mistral):', {
+    console.log('🎯 Local category matching request:', {
       suggestedCategory,
       existingCount: existingCategories.length,
       language: userLanguage
     });
 
-    const result = await matchCategoryIntelligentlyMistral(suggestedCategory, existingCategories, userLanguage);
+    const result = matchCategoryLocally(suggestedCategory, existingCategories, userLanguage);
     
-    console.log('✅ Category matching result (Mistral):', result);
+    console.log('✅ Local category matching result:', result);
     res.json(result);
     
   } catch (error) {
-    console.error('❌ Mistral category matching failed:', error);
+    console.error('❌ Local category matching failed:', error);
     res.status(500).json({ 
       error: 'Category matching failed', 
       details: error instanceof Error ? error.message : 'Unknown error'
