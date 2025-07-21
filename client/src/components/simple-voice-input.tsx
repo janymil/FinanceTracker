@@ -115,26 +115,75 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     console.log('🎤 Extracting from:', text);
     const lowerText = text.toLowerCase();
 
-    // Extract amount with better patterns
-    const amountPatterns = [
+    // Text-to-number conversion for multiple languages
+    const textToNumber = (text: string): string => {
+      const numberWords: { [key: string]: string } = {
+        // Slovak
+        'jeden': '1', 'dva': '2', 'tri': '3', 'štyri': '4', 'päť': '5', 
+        'šesť': '6', 'sedem': '7', 'osem': '8', 'deväť': '9', 'desať': '10',
+        'dvadsať': '20', 'tridsať': '30', 'štyridsať': '40', 'päťdesiat': '50',
+        // Spanish
+        'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4', 'cinco': '5',
+        'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9', 'diez': '10',
+        'veinte': '20', 'treinta': '30', 'cuarenta': '40', 'cincuenta': '50',
+        // English
+        'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
+        'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
+        'twenty': '20', 'thirty': '30', 'forty': '40', 'fifty': '50'
+      };
+
+      for (const [word, number] of Object.entries(numberWords)) {
+        if (text.includes(word)) {
+          return number;
+        }
+      }
+      return text;
+    };
+
+    // Extract amount with improved patterns including text numbers
+    let extractedAmount = '';
+    
+    // First try numeric patterns
+    const numericPatterns = [
       /(\d+(?:[.,]\d{1,2})?)\s*(?:eur|euro|€)/gi,
       /(\d+(?:[.,]\d{1,2})?)\s*(?:\$|dollar|dolár)/gi,
       /(?:za|for|cost|stalo|costó|zaplatil|paid)\s*(\d+(?:[.,]\d{1,2})?)/gi,
       /(\d+(?:[.,]\d{1,2})?)\s*(?:eur|euro|€|\$|dollar|dolár)/gi
     ];
 
-    for (const pattern of amountPatterns) {
+    for (const pattern of numericPatterns) {
       const match = text.match(pattern);
       if (match) {
         const numberMatch = match[0].match(/(\d+(?:[.,]\d{1,2})?)/);
         if (numberMatch) {
-          setTransactionData(prev => ({
-            ...prev,
-            amount: numberMatch[1].replace(',', '.')
-          }));
+          extractedAmount = numberMatch[1].replace(',', '.');
           break;
         }
       }
+    }
+
+    // If no numeric amount found, try text patterns
+    if (!extractedAmount) {
+      const textPatterns = [
+        /(?:za|for|cost|stalo|costó|zaplatil|paid)\s+(jeden|dva|tri|štyri|päť|šesť|sedem|osem|deväť|desať|dvadsať|tridsať|štyridsať|päťdesiat|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|veinte|treinta|cuarenta|cincuenta|one|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|forty|fifty)\s*(?:eur|euro|€|\$|dollar|dolár)/gi,
+        /(jeden|dva|tri|štyri|päť|šesť|sedem|osem|deväť|desať|dvadsať|tridsať|štyridsať|päťdesiat|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|veinte|treinta|cuarenta|cincuenta|one|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|forty|fifty)\s*(?:eur|euro|€|\$|dollar|dolár)/gi
+      ];
+
+      for (const pattern of textPatterns) {
+        const match = text.match(pattern);
+        if (match && match[1]) {
+          extractedAmount = textToNumber(match[1].toLowerCase());
+          break;
+        }
+      }
+    }
+
+    if (extractedAmount) {
+      setTransactionData(prev => ({
+        ...prev,
+        amount: extractedAmount
+      }));
+      console.log('💰 Extracted amount:', extractedAmount);
     }
 
     // Extract business/vendor - will be processed by AI categorization later
