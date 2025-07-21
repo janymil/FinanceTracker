@@ -7,8 +7,6 @@ const completeTransactionSchema = z.object({
   transactionData: z.object({
     amount: z.number(),
     description: z.string(),
-    vendor: z.string(),
-    categoryId: z.number().nullable(),
     type: z.enum(['income', 'expense']),
     date: z.string(),
     note: z.string().optional()
