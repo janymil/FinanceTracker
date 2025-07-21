@@ -79,39 +79,54 @@ function parseVoiceInput(transcript: string, userLanguage: string) {
     }
   }
 
-  // Extract vendor/merchant name as description
-  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'kupil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'iba', 'len', 'this', 'that', 'and', 'or', 'but', 'compré', 'por'];
+  // Extract merchant name as description - will be enhanced by merchant lookup
+  const stopWords = ['som', 'si', 'za', 'v', 'na', 'kúpil', 'kupil', 'bought', 'paid', 'for', 'at', 'in', 'the', 'a', 'an', 'eur', 'euro', 'dollar', '$', '€', 'včera', 'yesterday', 'today', 'dnes', 'iba', 'len', 'this', 'that', 'and', 'or', 'but', 'compré', 'por', 'chlieb', 'bread', 'pan', 'milk', 'mlieko', 'leche'];
   
-  // Find potential vendor names (usually brand names or merchant names)
-  const meaningfulWords = words.filter(word => {
-    const clean = word.toLowerCase().replace(/[^\w]/g, '');
-    return clean.length > 2 && 
-           !stopWords.includes(clean) && 
-           !textNumbers[clean] &&
-           !/^\d/.test(clean) &&
-           !/^[.:,€$]/.test(clean);
-  });
-
-  // Prioritize known brands/merchants or capitalize words (likely proper nouns)
-  const knownBrands = ['nescafe', 'starbucks', 'mcdonalds', 'tesco', 'kaufland', 'lidl', 'shell', 'bp', 'esso'];
-  const brandWords = meaningfulWords.filter(word => 
-    knownBrands.includes(word.toLowerCase()) || 
-    /^[A-Z]/.test(word) || // Capitalized words
-    word.length > 4 // Longer words more likely to be brand names
-  );
+  // Find merchant/brand names - prioritize known merchants
+  const knownMerchants = ['billa', 'bille', 'tesco', 'kaufland', 'lidl', 'starbucks', 'mcdonalds', 'kfc', 'netflix', 'spotify', 'shell', 'bp', 'esso', 'costa'];
   
-  // Use brand/merchant name if found, otherwise use meaningful words
   let description = '';
-  if (brandWords.length > 0) {
-    description = brandWords.slice(0, 2).join(' ').trim(); // Max 2 words
-  } else if (meaningfulWords.length > 0) {
-    description = meaningfulWords.slice(0, 2).join(' ').trim(); // Max 2 words  
-  } else {
-    description = words.filter(w => w.length > 2 && !/^\d/.test(w)).slice(0, 2).join(' ').trim();
+  
+  // First look for known merchants (flexible matching)
+  for (const word of words) {
+    const clean = word.toLowerCase().replace(/[^\w]/g, '');
+    // Direct match
+    if (knownMerchants.includes(clean)) {
+      description = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      break;
+    }
+    // Similar spelling (for Bille/Billa)
+    if ((clean === 'bille' && knownMerchants.includes('billa')) || 
+        (clean === 'billa' && knownMerchants.includes('bille'))) {
+      description = 'Billa'; // Normalize to standard spelling
+      break;
+    }
   }
   
-  // Capitalize first letter
-  description = description.charAt(0).toUpperCase() + description.slice(1);
+  // If no known merchant found, look for capitalized words (proper nouns)
+  if (!description) {
+    const properNouns = words.filter(word => /^[A-Z]/.test(word) && !stopWords.includes(word.toLowerCase()));
+    if (properNouns.length > 0) {
+      description = properNouns[0];
+    }
+  }
+  
+  // Fallback to first meaningful word
+  if (!description) {
+    const meaningfulWords = words.filter(word => {
+      const clean = word.toLowerCase().replace(/[^\w]/g, '');
+      return clean.length > 2 && 
+             !stopWords.includes(clean) && 
+             !textNumbers[clean] &&
+             !/^\d/.test(clean);
+    });
+    
+    if (meaningfulWords.length > 0) {
+      description = meaningfulWords[0].charAt(0).toUpperCase() + meaningfulWords[0].slice(1);
+    } else {
+      description = 'Purchase'; // Ultimate fallback
+    }
+  }
 
   // Detect transaction type
   let type = 'expense'; // Default

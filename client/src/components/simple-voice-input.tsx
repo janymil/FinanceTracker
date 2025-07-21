@@ -80,15 +80,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     return 'en-US';
   };
 
-  // Play greeting
-  const playGreeting = () => {
-    const audioFile = userLanguage.startsWith('sk') ? '/audio/voice-greeting-sk.mp3' :
-                     userLanguage.startsWith('es') ? '/audio/voice-greeting-es.mp3' :
-                     '/audio/voice-greeting-en.mp3';
-    
-    const audio = new Audio(audioFile);
-    audio.play().catch(console.error);
-  };
+  // Removed greeting audio - keeping only text info
 
   // Initialize speech recognition
   useEffect(() => {
@@ -145,7 +137,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       };
     }
 
-    playGreeting();
+    // No greeting audio - removed per user request
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
