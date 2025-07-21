@@ -38,8 +38,7 @@ import { useDateFormat } from "@/hooks/useDateFormat";
 import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 import TransactionFilters from "@/components/TransactionFilters";
-import { VoiceInput } from "@/components/voice-input";
-import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
+
 
 // Helper functions for category localization
 const isPredefinedCategory = (category: Category): boolean => {
@@ -403,19 +402,6 @@ export default function Income() {
           
           <div className="flex flex-col sm:flex-row gap-2">
             <UploadReceiptModal onReceiptProcessed={handleReceiptProcessed} buttonText={t("upload.button_text")} />
-            <VoiceInput 
-              onTranscript={(transcript) => {
-                setVoiceTranscript(transcript);
-                setVoiceDialogOpen(true);
-              }}
-              onError={(error) => {
-                toast({
-                  title: t("Error"),
-                  description: error,
-                  variant: "destructive",
-                });
-              }}
-            />
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="w-full sm:w-auto">
@@ -856,15 +842,7 @@ export default function Income() {
         </Dialog>
       )}
 
-      {/* Voice Transaction Dialog */}
-        <VoiceTransactionDialog
-          isOpen={voiceDialogOpen}
-          onClose={() => setVoiceDialogOpen(false)}
-          transcript={voiceTranscript}
-          onSuccess={() => {
-            refetchTransactions();
-          }}
-        />
+
     </div>
   );
 }

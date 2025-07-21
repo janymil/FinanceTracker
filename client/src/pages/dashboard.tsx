@@ -73,9 +73,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
-import { VoiceInputWithPlan } from "@/components/voice-input-with-plan";
-import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
-import { VoiceConversation } from "@/components/voice-conversation";
+
 
 interface Category {
   id: number;
@@ -146,9 +144,7 @@ export default function Dashboard() {
   // Combine month and year for API calls
   const selectedMonth = `${selectedYear}-${selectedMonthNum}`;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
-  const [voiceTranscript, setVoiceTranscript] = useState("");
-  const [voiceConversationOpen, setVoiceConversationOpen] = useState(false);
+
 
   // Defer expensive rendering to prevent Suspense errors
   const deferredSelectedMonth = useDeferredValue(selectedMonth);
@@ -460,28 +456,6 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <VoiceInputWithPlan 
-                  onTranscript={(transcript) => {
-                    setVoiceTranscript(transcript);
-                    setVoiceDialogOpen(true);
-                  }}
-                  onError={(error) => {
-                    toast({
-                      title: t("Error"),
-                      description: error,
-                      variant: "destructive",
-                    });
-                  }}
-                />
-                <Button
-                  onClick={() => setVoiceConversationOpen(true)}
-                  variant="outline"
-                  size="icon"
-                  title="ChatGPT-style Voice Conversation"
-                  className="border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -840,34 +814,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Voice Transaction Dialog */}
-        <VoiceTransactionDialog
-          isOpen={voiceDialogOpen}
-          onClose={() => setVoiceDialogOpen(false)}
-          transcript={voiceTranscript}
-          onSuccess={() => {
-            // Refresh data after successful transaction creation
-            if (deferredUser) {
-              queryClient.invalidateQueries({ queryKey: ['transactions'] });
-              queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
-            }
-          }}
-        />
 
-        {/* Voice Conversation - ChatGPT-style Voice Mode */}
-        {voiceConversationOpen && (
-          <VoiceConversation
-            onClose={() => setVoiceConversationOpen(false)}
-            onComplete={() => {
-              // Refresh data after successful transaction creation
-              if (deferredUser) {
-                queryClient.invalidateQueries({ queryKey: ['transactions'] });
-                queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
-                queryClient.invalidateQueries({ queryKey: ['budgets'] });
-              }
-            }}
-          />
-        )}
         
         </div>
       </div>

@@ -1,1 +1,0 @@
-export { SimpleVoiceInput as VoiceConversation } from './simple-voice-input';

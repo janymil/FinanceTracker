@@ -36,8 +36,7 @@ import { useDateFormat } from "@/hooks/useDateFormat";
 import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 import TransactionFilters from "@/components/TransactionFilters";
-import { VoiceInput } from "@/components/voice-input";
-import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
+
 
 // Helper functions for category localization
 const isPredefinedCategory = (category: Category): boolean => {
@@ -89,8 +88,7 @@ export default function Expenses() {
   const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
-  const [voiceTranscript, setVoiceTranscript] = useState("");
+
   
   const [newExpense, setNewExpense] = useState({
     amount: "",
@@ -387,19 +385,7 @@ export default function Expenses() {
                 }}
                 buttonText={t("upload.button_text")}
               />
-              <VoiceInput 
-                onTranscript={(transcript) => {
-                  setVoiceTranscript(transcript);
-                  setVoiceDialogOpen(true);
-                }}
-                onError={(error) => {
-                  toast({
-                    title: t("Error"),
-                    description: error,
-                    variant: "destructive",
-                  });
-                }}
-              />
+
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
@@ -830,15 +816,7 @@ export default function Expenses() {
           </CardContent>
         </Card>
 
-        {/* Voice Transaction Dialog */}
-        <VoiceTransactionDialog
-          isOpen={voiceDialogOpen}
-          onClose={() => setVoiceDialogOpen(false)}
-          transcript={voiceTranscript}
-          onSuccess={() => {
-            refetchTransactions();
-          }}
-        />
+
       </div>
     </div>
     </div>
