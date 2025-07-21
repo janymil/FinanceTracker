@@ -70,29 +70,32 @@ For "[NUMBER] [CURRENCY] [NUMBER]" format:
 - Second number = cents/centavos  
 - Result = First.Second (e.g., "15 euros 75" = 15.75)
 
-USER'S AVAILABLE CATEGORIES:
+USER'S EXISTING CATEGORIES:
 ${userCategories.map(cat => `- "${cat.name}" (${cat.type})`).join('\n')}
 
-CATEGORIZATION RULES:
-1. ONLY use categories from the user's list above
-2. Match by product type, NOT by store location
-3. Analyze what the user actually bought:
+CATEGORIZATION STRATEGY:
+1. First, try to find a good match from user's existing categories
+2. If NO good match exists, suggest a NEW appropriate category name
+3. Match by product type, NOT by store location
 
-PRODUCT TYPE MATCHING:
-- Detergent/cleaning products/soap → Look for categories like: Hogar, Casa, Limpieza, Household, Home, Cleaning
-- Medicine/pharmacy items → Look for: Salud, Zdravie, Healthcare, Medical, Farmacia
-- Food/groceries → Look for: Comida, Food, Potraviny, Groceries, Alimentación  
-- Transport/fuel → Look for: Transporte, Transport, Doprava, Gas, Combustible
-- General shopping → Look for: Compras, Shopping, Nakupovanie, Retail
+PRODUCT TYPE MATCHING GUIDE:
+- Detergent/cleaning → Hogar, Casa, Limpieza, Household, Home, Cleaning
+- Medicine/pharmacy → Salud, Zdravie, Healthcare, Medical, Farmacia  
+- Food/groceries → Comida, Food, Potraviny, Groceries, Alimentación
+- Transport/fuel → Transporte, Transport, Doprava, Gas, Combustible
+- Gym/fitness → Fitness, Gym, Deporte, Sport, Exercise
+- Education → Educación, Education, Škola, Learning
+- Entertainment → Entretenimiento, Entertainment, Zábava
 
-CRITICAL EXAMPLES WITH USER CATEGORIES:
-- "detergente" + user has "Casa y Limpieza" → use "Casa y Limpieza"
-- "detergente" + user has "Hogar" → use "Hogar"  
-- "detergente" + user has "Household" → use "Household"
-- "medicinas" + user has "Salud y Bienestar" → use "Salud y Bienestar"
-- "pan" + user has "Comida y Bebida" → use "Comida y Bebida"
+DECISION LOGIC:
+✅ GOOD MATCH: "detergente" + user has "Casa y Limpieza" → use "Casa y Limpieza"
+✅ GOOD MATCH: "medicinas" + user has "Salud" → use "Salud"
+❌ NO GOOD MATCH: "gym membership" + user only has "Food, Transport" → suggest NEW category like "Fitness" 
+❌ NO GOOD MATCH: "university tuition" + user only has "Food, Shopping" → suggest NEW category like "Education"
 
-If no perfect match, choose the most logical category from user's list.`;
+RESPONSE FORMAT:
+- If using existing category: return that exact category name
+- If creating new category: return appropriate new category name in user's language`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [
