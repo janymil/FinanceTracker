@@ -111,7 +111,8 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       ...parsedTransaction,
       category: finalCategory,
       categoryId: newCategoryId,
-      transcript: transcription
+      transcript: transcription,
+      categoryConfidence: categoryMatchResult.confidence
     };
     
     console.log('✅ Final Mistral analysis result:', finalResult);

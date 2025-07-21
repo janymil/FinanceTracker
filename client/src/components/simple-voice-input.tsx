@@ -47,6 +47,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     date: '',
     note: ''
   });
+  
+  // Draft key for localStorage
+  const VOICE_DRAFT_KEY = 'voice_transaction_draft';
 
   const recognitionRef = useRef<any>(null);
   
@@ -55,6 +58,11 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const audioChunksRef = useRef<Blob[]>([]);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Recording timer state
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const MAX_RECORDING_SECONDS = 60;
 
   // Get user data
   const { data: user } = useQuery({
@@ -119,11 +127,11 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         console.log('🆕 Creating new category:', result.newCategoryName);
         const newCategoryResponse = await apiRequest('/api/categories', {
           method: 'POST',
-          body: JSON.stringify({
+          body: {
             name: result.newCategoryName,
             type: 'expense', // Default to expense
             color: '#6366f1' // Default color
-          })
+          }
         });
 
         if (newCategoryResponse.id) {
@@ -161,6 +169,40 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
 
   // Removed greeting audio - keeping only text info
 
+  // Load draft on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(VOICE_DRAFT_KEY);
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        // Check if draft is recent (within last 24 hours)
+        if (draft.timestamp && Date.now() - draft.timestamp < 24 * 60 * 60 * 1000) {
+          setAccumulatedData(draft.data);
+          setExtractedCategory(draft.data.category || '');
+          console.log('📝 Loaded voice transaction draft');
+        } else {
+          // Clear old draft
+          localStorage.removeItem(VOICE_DRAFT_KEY);
+        }
+      } catch (error) {
+        console.error('Failed to load draft:', error);
+        localStorage.removeItem(VOICE_DRAFT_KEY);
+      }
+    }
+  }, []);
+  
+  // Save draft whenever accumulated data changes
+  useEffect(() => {
+    if (accumulatedData.amount || accumulatedData.description) {
+      const draft = {
+        data: accumulatedData,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(VOICE_DRAFT_KEY, JSON.stringify(draft));
+      console.log('💾 Saved voice transaction draft');
+    }
+  }, [accumulatedData]);
+
   // Initialize Groq audio recording (replaces browser STT)
   useEffect(() => {
     // No browser STT setup needed - using Groq instead
@@ -168,14 +210,81 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
       }
+      // Clear timer on unmount
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+      }
     };
   }, []);
+
+  // Detect voice commands
+  const detectVoiceCommand = (text: string): string | null => {
+    const cleanText = text.toLowerCase().trim();
+    
+    // Cancel commands (multilingual)
+    const cancelCommands = ['cancel', 'cancelar', 'zrušiť', 'stop', 'alto', 'parar'];
+    if (cancelCommands.some(cmd => cleanText.includes(cmd))) {
+      return 'cancel';
+    }
+    
+    // Save commands
+    const saveCommands = ['save', 'guardar', 'uložiť', 'ok', 'confirm', 'confirmar', 'potvrdiť'];
+    if (saveCommands.some(cmd => cleanText.includes(cmd))) {
+      return 'save';
+    }
+    
+    // Repeat/retry commands
+    const repeatCommands = ['repeat', 'repetir', 'opakovať', 'again', 'otra vez', 'znovu'];
+    if (repeatCommands.some(cmd => cleanText.includes(cmd))) {
+      return 'repeat';
+    }
+    
+    return null;
+  };
 
   // Process voice input - completely rewritten
   const processVoiceInput = async (text: string) => {
     if (!text.trim() || text.length < 5) return;
     
     console.log('🔍 Processing voice input:', text);
+    
+    // Check for voice commands first
+    const command = detectVoiceCommand(text);
+    if (command) {
+      console.log('🎙️ Voice command detected:', command);
+      
+      switch (command) {
+        case 'cancel':
+          onClose();
+          return;
+        case 'save':
+          if (accumulatedData.amount && accumulatedData.description) {
+            handleSave();
+          } else {
+            toast({
+              title: t('voice.incomplete_data'),
+              description: t('voice.fill_required_fields'),
+              variant: 'destructive'
+            });
+          }
+          return;
+        case 'repeat':
+          // Clear current data and start fresh recording
+          setAccumulatedData({
+            amount: '',
+            description: '',
+            type: 'expense',
+            date: new Date().toISOString().split('T')[0],
+            category: '',
+            categoryId: null,
+            note: ''
+          });
+          setExtractedCategory('');
+          setTranscript('');
+          startListening();
+          return;
+      }
+    }
     
     try {
       const response = await fetch('/api/voice/parse', {
@@ -218,7 +327,99 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     }
   };
 
-  // Process audio with Groq (replaces old voice processing)
+  // Process audio with Groq fallback
+  const processAudioWithGroq = async (audioBlob: Blob) => {
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      
+      console.log('🎯 Trying Groq as fallback...');
+      
+      const response = await fetch('/api/voice-groq/transcribe-and-parse', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'x-user-language': getCurrentLanguageForAPI(),
+          'x-user-currency': userCurrency
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Groq HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Groq processing result:', result.data);
+      
+      if (result.success && result.data) {
+        // Set transcript from Groq STT
+        const transcript = result.data.transcript || '';
+        setTranscript(transcript);
+        
+        // Check for voice commands in transcript
+        const command = detectVoiceCommand(transcript);
+        if (command) {
+          console.log('🎙️ Voice command detected in Groq transcript:', command);
+          
+          switch (command) {
+            case 'cancel':
+              onClose();
+              return;
+            case 'save':
+              if (accumulatedData.amount && accumulatedData.description) {
+                handleSave();
+              } else {
+                toast({
+                  title: t('voice.incomplete_data'),
+                  description: t('voice.fill_required_fields'),
+                  variant: 'destructive'
+                });
+              }
+              return;
+            case 'repeat':
+              startListening();
+              return;
+          }
+        }
+        
+        // Category matched by Groq system
+        const finalCategory = {
+          name: result.data.category,
+          id: result.data.categoryId
+        };
+        
+        console.log('🏷️ Groq matched category:', finalCategory);
+        
+        // Store the parsed data for form pre-filling
+        setAccumulatedData({
+          amount: result.data.amount || '',
+          description: result.data.description || '',
+          type: result.data.type || 'expense',
+          date: result.data.date || new Date().toISOString().split('T')[0],
+          category: finalCategory.name,
+          categoryId: finalCategory.id || '',
+          note: transcript
+        });
+        
+        setExtractedCategory(finalCategory.name);
+        
+        toast({
+          title: t('voice.processing_complete'),
+          description: t('voice.review_and_save'),
+        });
+        
+        console.log('✅ Groq voice data extracted successfully');
+        return true; // Success
+      } else {
+        throw new Error('No data returned from Groq processing');
+      }
+    } catch (error) {
+      console.error('❌ Groq processing also failed:', error);
+      throw error;
+    }
+  };
+
+  // Process audio with Mistral (with automatic Groq fallback)
   const processAudioWithMistral = async (audioBlob: Blob) => {
     setIsProcessing(true);
     
@@ -246,7 +447,34 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       
       if (result.success && result.data) {
         // Set transcript from Mistral STT
-        setTranscript(result.data.transcript || '');
+        const transcript = result.data.transcript || '';
+        setTranscript(transcript);
+        
+        // Check for voice commands in transcript
+        const command = detectVoiceCommand(transcript);
+        if (command) {
+          console.log('🎙️ Voice command detected in Mistral transcript:', command);
+          
+          switch (command) {
+            case 'cancel':
+              onClose();
+              return;
+            case 'save':
+              if (accumulatedData.amount && accumulatedData.description) {
+                handleSave();
+              } else {
+                toast({
+                  title: t('voice.incomplete_data'),
+                  description: t('voice.fill_required_fields'),
+                  variant: 'destructive'
+                });
+              }
+              return;
+            case 'repeat':
+              startListening();
+              return;
+          }
+        }
         
         // Category is already intelligently matched by Mistral system
         const finalCategory = {
@@ -256,15 +484,29 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         
         console.log('🏷️ Mistral intelligently matched category:', finalCategory);
         
+        // Clean amount - remove currency symbols and ensure numeric format
+        let cleanAmount = result.data.amount || '';
+        if (typeof cleanAmount === 'string') {
+          // Remove currency symbols: $, €, £, etc.
+          cleanAmount = cleanAmount.replace(/[^0-9.,]/g, '');
+          // Ensure proper decimal format
+          cleanAmount = cleanAmount.replace(',', '.');
+        }
+        
+        console.log('💰 Amount processing:', {
+          original: result.data.amount,
+          cleaned: cleanAmount
+        });
+        
         // Store the parsed data for form pre-filling
         setAccumulatedData({
-          amount: result.data.amount || '',
+          amount: cleanAmount,
           description: result.data.description || '',
           type: result.data.type || 'expense',
           date: result.data.date || new Date().toISOString().split('T')[0],
           category: finalCategory.name,
           categoryId: finalCategory.id || '',
-          note: result.data.transcript || '' // Store transcript as note
+          note: transcript // Store transcript as note
         });
         
         setExtractedCategory(finalCategory.name);
@@ -281,11 +523,55 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       
     } catch (error) {
       console.error('❌ Mistral processing failed:', error);
-      toast({
-        title: t('voice.processing_failed'),
-        description: error instanceof Error ? error.message : t('voice.unknown_error'),
-        variant: 'destructive'
-      });
+      
+      // Try Groq as fallback
+      try {
+        console.log('🔄 Attempting automatic fallback to Groq...');
+        await processAudioWithGroq(audioBlob);
+        console.log('✅ Groq fallback successful');
+      } catch (groqError) {
+        // Both failed, show detailed error
+        let errorMessage = t('voice.processing_failed');
+        let errorDescription = '';
+        
+        // Determine error type
+        if (error instanceof Error) {
+          if (error.message.includes('HTTP 429') || error.message.includes('rate limit')) {
+            errorDescription = t('voice.rate_limit_error') || 'Too many requests. Please try again in a few seconds.';
+          } else if (error.message.includes('HTTP 5') || error.message.includes('network')) {
+            errorDescription = t('voice.network_error') || 'Network error. Please check your connection.';
+          } else if (error.message.includes('HTTP 401') || error.message.includes('unauthorized')) {
+            errorDescription = t('voice.auth_error') || 'Authentication error. Please contact support.';
+          } else {
+            errorDescription = error.message;
+          }
+        }
+        
+        toast({
+          title: errorMessage,
+          description: (
+            <div>
+              <p>{errorDescription}</p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="mt-2"
+                onClick={() => {
+                  setIsProcessing(false);
+                  // Retry with the same audio blob
+                  if (audioBlob) {
+                    processAudioWithMistral(audioBlob);
+                  }
+                }}
+              >
+                {t('voice.retry') || 'Retry'}
+              </Button>
+            </div>
+          ) as any,
+          variant: 'destructive',
+          duration: 10000 // Show for longer to allow retry
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -313,6 +599,13 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         // Stop all tracks to free up microphone
         stream.getTracks().forEach(track => track.stop());
         
+        // Clear timer
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+        setRecordingSeconds(0);
+        
         // Process audio with Mistral
         processAudioWithMistral(audioBlob);
       };
@@ -320,6 +613,21 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       mediaRecorder.start();
       setIsListening(true);
       setTranscript('');
+      setRecordingSeconds(0);
+      
+      // Start recording timer
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingSeconds(prev => {
+          const newSeconds = prev + 1;
+          if (newSeconds >= MAX_RECORDING_SECONDS) {
+            // Auto-stop at max time
+            console.log('⏱️ Max recording time reached, auto-stopping...');
+            stopListening();
+            return MAX_RECORDING_SECONDS;
+          }
+          return newSeconds;
+        });
+      }, 1000);
       
       // Reset form data
       setAccumulatedData({
@@ -340,9 +648,21 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       
     } catch (error) {
       console.error('Failed to start recording:', error);
+      
+      let errorDescription = t('voice.microphone_error');
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+          errorDescription = t('voice.microphone_permission_denied') || 'Microphone permission denied. Please allow access in your browser settings.';
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+          errorDescription = t('voice.microphone_not_found') || 'No microphone found. Please connect a microphone and try again.';
+        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+          errorDescription = t('voice.microphone_in_use') || 'Microphone is already in use by another application.';
+        }
+      }
+      
       toast({
         title: t('voice.error'),
-        description: t('voice.microphone_error'),
+        description: errorDescription,
         variant: 'destructive'
       });
     }
@@ -409,6 +729,9 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         description: t('voice.transaction_success'),
       });
       
+      // Clear draft after successful save
+      localStorage.removeItem(VOICE_DRAFT_KEY);
+      
       // Call onComplete to refresh the transaction list
       onComplete(result);
       onClose();
@@ -474,10 +797,15 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
               )}
             </Button>
             
-            {(transcript || isProcessing) && (
+            {(transcript || isProcessing || isListening) && (
               <div className="mt-2 bg-gray-50 dark:bg-gray-700 p-3 rounded text-sm">
                 <strong>{t('voice.transcript')}:</strong> {transcript || (isProcessing ? t('voice.processing_with_groq') + '...' : '')}
-                {isListening && <span className="ml-2 animate-pulse text-blue-500">🎤 {t('voice.listening')}</span>}
+                {isListening && (
+                  <>
+                    <span className="ml-2 animate-pulse text-blue-500">🎤 {t('voice.listening')}</span>
+                    <span className="ml-2 text-gray-500">({recordingSeconds}s / {MAX_RECORDING_SECONDS}s)</span>
+                  </>
+                )}
                 {isProcessing && <span className="ml-2 animate-pulse text-orange-500">🧠 {t('voice.processing_with_groq')}</span>}
               </div>
             )}

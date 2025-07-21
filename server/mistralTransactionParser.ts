@@ -31,13 +31,18 @@ USER PREFERENCES:
 
 RESPOND ONLY WITH VALID JSON (all text fields in ${language}):
 {
-  "amount": "${userCurrency}5.80",
-  "description": "Merchant or expense description in ${language}", 
+  "amount": "5.80",
+  "description": "Store/Merchant + Product/Service in ${language}", 
   "type": "expense",
   "date": "2025-07-21",
   "category": "Category name in ${language}",
   "note": "original transcript"
 }
+
+DESCRIPTION FORMAT RULES:
+- ALWAYS include store/merchant name + product/service
+- Examples: "Metro - detergente", "McDonald's - almuerzo", "Shell - gasolina"
+- Format: "[STORE] - [PRODUCT]" or "[STORE] [PRODUCT]"
 
 MERCHANT INTELLIGENCE:
 - Migros = Swiss grocery store = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
@@ -80,28 +85,31 @@ USER'S EXISTING CATEGORIES:
 ${userCategories.map(cat => `- "${cat.name}" (${cat.type})`).join('\n')}
 
 CATEGORIZATION STRATEGY:
-1. First, try to find a good match from user's existing categories
-2. If NO good match exists, suggest a NEW appropriate category name
-3. Match by product type, NOT by store location
+1. Analyze the PRODUCT/SERVICE TYPE (not store location)
+2. Find best semantic match from user's existing categories
+3. If NO good match exists, suggest appropriate NEW category name
 
-PRODUCT TYPE MATCHING GUIDE:
-- Detergent/cleaning → Hogar, Casa, Limpieza, Household, Home, Cleaning
-- Medicine/pharmacy → Salud, Zdravie, Healthcare, Medical, Farmacia  
-- Food/groceries → Comida, Food, Potraviny, Groceries, Alimentación
-- Transport/fuel → Transporte, Transport, Doprava, Gas, Combustible
-- Gym/fitness → Fitness, Gym, Deporte, Sport, Exercise
-- Education → Educación, Education, Škola, Learning
-- Entertainment → Entretenimiento, Entertainment, Zábava
+PRODUCT TYPE → CATEGORY MATCHING:
+- Detergent/cleaning products → Look for: Hogar, Casa, Limpieza, Household, Home, Cleaning, Housing
+- Medicine/pharmacy items → Look for: Salud, Zdravie, Healthcare, Medical, Farmacia
+- Food/groceries/meals → Look for: Comida, Food, Potraviny, Groceries, Alimentación  
+- Transport/fuel/gas → Look for: Transporte, Transport, Doprava, Gas, Combustible
+- Gym/fitness → Look for: Fitness, Gym, Deporte, Sport, Exercise
+- Education/school → Look for: Educación, Education, Škola, Learning
 
-DECISION LOGIC:
-✅ GOOD MATCH: "detergente" + user has "Casa y Limpieza" → use "Casa y Limpieza"
-✅ GOOD MATCH: "medicinas" + user has "Salud" → use "Salud"
-❌ NO GOOD MATCH: "gym membership" + user only has "Food, Transport" → suggest NEW category like "Fitness" 
-❌ NO GOOD MATCH: "university tuition" + user only has "Food, Shopping" → suggest NEW category like "Education"
+SMART CATEGORIZATION EXAMPLES:
+✅ "detergente" + user has "Housing" → use "Housing" (cleaning products = home category)
+✅ "detergente" + user has "Casa" → use "Casa" (house category for cleaning)
+✅ "detergente" + user has "Hogar" → use "Hogar" (home category for cleaning)
+✅ "medicinas" + user has "Healthcare" → use "Healthcare"  
+✅ "comida" + user has "Food" → use "Food"
+❌ "detergente" + user only has "Food, Transport" → suggest "Hogar" or "Limpieza"
+❌ "gym" + user only has "Food, Shopping" → suggest "Fitness" or "Deporte"
 
-RESPONSE FORMAT:
-- If using existing category: return that exact category name
-- If creating new category: return appropriate new category name in user's language`;
+CRITICAL RULES:
+1. DETERGENT/CLEANING PRODUCTS = HOUSING/HOME/HOGAR/CASA category
+2. Analyze WHAT the user bought, not WHERE they bought it!
+3. Look for semantic meaning: Housing, Casa, Hogar, Home = cleaning/household items`;
 
   // Spanish number pattern fixes
   const spanishPatterns = [
