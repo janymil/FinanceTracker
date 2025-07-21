@@ -274,21 +274,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             </Button>
           </div>
 
-          {/* Data Progress Indicator */}
-          {(accumulatedData.amount || accumulatedData.description) && (
-            <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-              <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-2">
-                📊 Captured Data:
-              </p>
-              <div className="text-xs text-green-600 dark:text-green-400 space-y-1">
-                {accumulatedData.amount && <div>✓ Amount: {accumulatedData.amount}</div>}
-                {accumulatedData.description && <div>✓ Description: {accumulatedData.description}</div>}
-                {accumulatedData.type && <div>✓ Type: {accumulatedData.type}</div>}
-                {accumulatedData.date && <div>✓ Date: {accumulatedData.date}</div>}
-                {accumulatedData.category && <div>✓ Category: {accumulatedData.category}</div>}
-              </div>
-            </div>
-          )}
+
 
           {/* Voice Controls */}
           <div>
