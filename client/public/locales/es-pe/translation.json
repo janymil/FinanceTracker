@@ -1023,6 +1023,23 @@
   "Direct camera access for receipt scanning": "Acceso directo a cámara para escaneo de recibos",
   "Camera capture, gallery selection, image preview, auto-focus optimization": "Captura de cámara, selección de galería, vista previa de imagen, optimización de auto-enfoque",
   "QR Code Cross-Device Upload": "Subida QR de Dispositivo Cruzado",
+
+  "voice": {
+    "title": "Entrada de Transacción por Voz",
+    "instructions": "Habla naturalmente sobre tu transacción. Ejemplo: 'Compré café por 5 dólares ayer' o 'I bought coffee for 5 dollars yesterday'",
+    "play_example": "Reproducir Ejemplo",
+    "start_listening": "Comenzar Escucha",
+    "stop_listening": "Detener Escucha",
+    "transcript": "Transcripción",
+    "save_transaction": "Guardar Transacción",
+    "saving": "Guardando...",
+    "incomplete_data": "Datos Incompletos",
+    "fill_required_fields": "Por favor complete cantidad y descripción",
+    "transaction_saved": "Transacción Guardada",
+    "transaction_success": "Su transacción ha sido guardada exitosamente",
+    "save_failed": "Error al Guardar",
+    "try_again": "Por favor intente nuevamente"
+  },
   "Scan receipts on mobile, process on desktop": "Escanear recibos en móvil, procesar en escritorio",
   "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso móvil anónimo, sondeo en tiempo real, población automática de formularios",
 

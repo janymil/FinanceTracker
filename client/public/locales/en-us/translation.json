@@ -992,6 +992,23 @@
 
   "Ask about FinanzerPro features...": "Ask about FinanzerPro features...",
 
+  "voice": {
+    "title": "Voice Transaction Input",
+    "instructions": "Speak naturally about your transaction. Example: 'I bought coffee for 5 dollars yesterday' or 'Kúpil som kávu za 5 eur včera'",
+    "play_example": "Play Example",
+    "start_listening": "Start Listening",
+    "stop_listening": "Stop Listening",
+    "transcript": "Transcript",
+    "save_transaction": "Save Transaction",
+    "saving": "Saving...",
+    "incomplete_data": "Incomplete Data",
+    "fill_required_fields": "Please fill in amount and description",
+    "transaction_saved": "Transaction Saved",
+    "transaction_success": "Your transaction has been saved successfully",
+    "save_failed": "Save Failed",
+    "try_again": "Please try again"
+  },
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Feature",
