@@ -1077,7 +1077,14 @@
     "retry": "Skúsiť znovu",
     "rate_limit_error": "Príliš veľa požiadaviek. Skúste znovu o pár sekúnd.",
     "network_error": "Chyba siete. Skontrolujte pripojenie.",
-    "auth_error": "Chyba autentifikácie. Kontaktujte podporu."
+    "auth_error": "Chyba autentifikácie. Kontaktujte podporu.",
+    "experimental_feature": "Experimentálna Funkcia",
+    "experimental_warning": "Rozpoznávanie reči môže robiť chyby. Prosím skontrolujte všetky detaily pred uložením transakcie.",
+    "category_created": "Kategória vytvorená",
+    "category_creation_failed": "Chyba pri vytváraní kategórie",
+    "microphone_permission_denied": "Povolenie mikrofónu odmietnuté. Prosím povoľte prístup v nastaveniach prehliadača.",
+    "microphone_not_found": "Mikrofón nenájdený. Prosím pripojte mikrofón a skúste znovu.",
+    "microphone_in_use": "Mikrofón už používa iná aplikácia."
   },
   "Budget alerts, goal reminders, transaction notifications, email preferences": "Rozpočtové upozornenia, pripomienky cieľov, notifikácie transakcií, emailové preferencie",
   "Mobile Features": "Mobilné Funkcie",

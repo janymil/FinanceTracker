@@ -38,6 +38,7 @@ import { useTranslation } from "react-i18next";
 import TransactionFilters from "@/components/TransactionFilters";
 import { useDateFormat } from "@/hooks/useDateFormat";
 import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
+import SimpleVoiceButton from "@/components/simple-voice-button";
 
 interface Transaction {
   id: number;
@@ -420,6 +421,14 @@ export default function Transactions() {
                   refetchTransactions();
                 }}
                 buttonText={t("transactions.uploadImage")}
+              />
+              <SimpleVoiceButton 
+                onComplete={() => {
+                  if (user) {
+                    queryClient.invalidateQueries({ queryKey: ['transactions'] });
+                    refetchTransactions();
+                  }
+                }} 
               />
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>

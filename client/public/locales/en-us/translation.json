@@ -1045,7 +1045,14 @@
     "retry": "Retry",
     "rate_limit_error": "Too many requests. Please try again in a few seconds.",
     "network_error": "Network error. Please check your connection.",
-    "auth_error": "Authentication error. Please contact support."
+    "auth_error": "Authentication error. Please contact support.",
+    "experimental_feature": "Experimental Feature",
+    "experimental_warning": "Voice recognition may make errors. Please review all details before saving your transaction.",
+    "category_created": "Category created",
+    "category_creation_failed": "Failed to create category",
+    "microphone_permission_denied": "Microphone permission denied. Please allow access in your browser settings.",
+    "microphone_not_found": "No microphone found. Please connect a microphone and try again.",
+    "microphone_in_use": "Microphone is already in use by another application."
   },
 
   "require_plan": {

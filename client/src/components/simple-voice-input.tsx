@@ -77,6 +77,11 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   // Get categories for matching
   const { data: allCategories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/categories');
+      return response.json();
+    },
+    enabled: !!user?.id,
     staleTime: 5 * 60 * 1000
   });
 

@@ -1077,7 +1077,14 @@
     "retry": "Reintentar",
     "rate_limit_error": "Demasiadas solicitudes. Intenta de nuevo en unos segundos.",
     "network_error": "Error de red. Verifica tu conexión.",
-    "auth_error": "Error de autenticación. Contacta a soporte."
+    "auth_error": "Error de autenticación. Contacta a soporte.",
+    "experimental_feature": "Función Experimental",
+    "experimental_warning": "El reconocimiento de voz puede cometer errores. Por favor revisa todos los detalles antes de guardar tu transacción.",
+    "category_created": "Categoría creada",
+    "category_creation_failed": "Error al crear categoría",
+    "microphone_permission_denied": "Permiso de micrófono denegado. Por favor permite el acceso en la configuración de tu navegador.",
+    "microphone_not_found": "No se encontró micrófono. Por favor conecta un micrófono e intenta de nuevo.",
+    "microphone_in_use": "El micrófono ya está siendo usado por otra aplicación."
   },
   "Scan receipts on mobile, process on desktop": "Escanear recibos en móvil, procesar en escritorio",
   "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso móvil anónimo, sondeo en tiempo real, población automática de formularios",
