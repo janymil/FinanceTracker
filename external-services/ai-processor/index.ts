@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import OpenAI from "openai";
+import { createRoutedClient, getProviderStatus } from './providers';
 import axios from "axios";
 import dotenv from "dotenv";
 
@@ -53,7 +53,7 @@ app.use(express.json({ limit: '10mb' }));
 
 
 // External AI processor using cost-effective models while maintaining quality for financial analysis
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = createRoutedClient();
 
 // Mistral API client - mimics OpenAI interface
 class MistralClient {
@@ -112,11 +112,14 @@ class DeepSeekClient {
       create: async (params: any) => {
         try {
           const response = await axios.post(`${this.baseURL}/chat/completions`, {
-            model: params.model,
+            model: params.model || 'deepseek-flash',
             messages: params.messages,
-            temperature: params.temperature || 0.7,
-            max_tokens: params.max_tokens || 4000,
-            response_format: params.response_format
+            temperature: params.temperature ?? 0.7,
+            max_tokens: params.max_tokens ?? 4000,
+            response_format: params.response_format,
+            // DeepSeek defaults to thinking mode; short structured tasks then return
+            // empty content because the whole budget goes to reasoning tokens.
+            thinking: { type: 'disabled' }
           }, {
             headers: {
               'Authorization': `Bearer ${this.apiKey}`,
@@ -2097,8 +2100,13 @@ Return ONLY the JSON object, no explanation.`;
 }
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-6-luna' });
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'ai-processor',
+    version: process.env.npm_package_version || '1.0.0',
+    ...getProviderStatus(),
+  });
 });
 
 // Unified AI endpoint - stateless processing only
@@ -2328,7 +2336,7 @@ CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language || 'en-us'
  */
 async function parseBankStatement(text: string, language: string): Promise<any> {
   const languageLabel = getLanguageLabel(language);
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const openai = createRoutedClient();
 
   const bankStatementPrompt = `You are an expert financial data extraction system specialized in bank statement analysis. 
 

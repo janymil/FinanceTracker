@@ -51,10 +51,18 @@ Target: `162.35.25.125` → `ai-processor.formatika.dev` (not live yet).
 
 | Variable | Required | Notes |
 |---|---|---|
-| `OPENAI_API_KEY` | yes | Model calls (currently `gpt-6-luna`) |
-| `MISTRAL_API_KEY` | for voice | `voxtral-mini-transcribe-3` / `mistral-ocr-latest` |
-| `PORT` | no | default 3000; use 8080 behind the proxy |
-| `AI_REQUEST_TIMEOUT_MS` | no | provider timeout |
+| `OPENAI_API_KEY` | yes | Model calls (`gpt-6-luna` by default) |
+| `DEEPSEEK_API_KEY` | recommended | First fallback (`deepseek-flash`, thinking disabled) |
+| `GROQ_API_KEY` | recommended | Second fallback (`openai/gpt-oss-20b`) |
+| `MISTRAL_API_KEY` | for voice/OCR | `voxtral-mini-transcribe-3` / `mistral-ocr-latest` |
+| `AI_DEFAULT_MODEL` | no | default `gpt-6-luna`; any id from `providers.ts` |
+| `AI_REASONING_EFFORT` | no | `none` (default) / `minimal` / `low` / `medium` |
+| `AI_REQUEST_TIMEOUT_MS` | no | default 90000 |
+| `PORT` | no | default 8080 behind the proxy |
+
+Model ids and prices live in `providers.ts`. Add a provider there and it is available to
+every route — `chat.completions.create` is normalised (`max_tokens` → `max_completion_tokens`,
+`reasoning_effort`, DeepSeek `thinking: disabled`) and retried on the fallback chain.
 
 ## Enabling it in the main app
 
