@@ -1,9 +1,7 @@
-import OpenAI from "openai";
+import { createRoutedClient, AI_MODELS } from "../lib/aiProvider";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || 'missing-openai-api-key'
-});
+// Routed through lib/aiProvider (gpt-6-luna by default, DeepSeek/Groq fallbacks).
+const openai = createRoutedClient();
 
 export interface CourseModule {
   id: string;
@@ -107,7 +105,7 @@ Make the content engaging with:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.generation,
       messages: [
         {
           role: "system",
@@ -167,7 +165,7 @@ Make descriptions motivational and achievements feel rewarding.
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.generation,
       messages: [
         {
           role: "system", 

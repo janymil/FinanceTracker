@@ -1,6 +1,5 @@
 
-import OpenAI from 'openai';
+import { createRoutedClient } from '../lib/aiProvider';
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'missing-openai-api-key',
-});
+// Routed through lib/aiProvider (gpt-6-luna by default, DeepSeek/Groq fallbacks).
+export const openai = createRoutedClient();

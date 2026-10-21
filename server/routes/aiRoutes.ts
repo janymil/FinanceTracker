@@ -9,6 +9,7 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
+import { getAIProviderStatus } from "../../lib/aiProvider";
 import { UnifiedAICache } from "../../lib/unifiedAICache";
 import { 
   transactions, 
@@ -21,6 +22,17 @@ import {
 import { eq, desc, lt, gte, sql, and } from "drizzle-orm";
 
 export function registerAIRoutes(app: Express) {
+  // Provider/routing diagnostics. Exposes configuration only (never keys).
+  app.get('/api/ai/health', (_req, res) => {
+    res.json({
+      ...getAIProviderStatus(),
+      processor: {
+        enabled: process.env.AI_PROCESSOR_ENABLED === 'true',
+        url: process.env.AI_PROCESSOR_URL || null,
+      },
+    });
+  });
+
   // Auto-categorization endpoint for bulk processing
   app.post('/api/auto-categorize', isAuthenticated, async (req: any, res) => {
     try {
@@ -1090,9 +1102,9 @@ export function registerAIRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: `You are a helpful assistant for FinanzerPro, a personal finance management application. 
+            content: `You are a helpful assistant for Kaptia, a personal finance management application. 
 
-FinanzerPro offers three subscription tiers:
+Kaptia offers three subscription tiers:
 - Free Plan: Basic transaction tracking (up to 100 transactions)
 - Standard Plan ($4.99/month or $49.90/year): Enhanced features including budgeting, goals, transaction reminders, AI categorization, receipt OCR processing
 - Premium Plan ($9.99/month or $99.90/year): Unlimited transactions, advanced analytics, AI insights, data export/import, cloud backup, predictions, recommendations

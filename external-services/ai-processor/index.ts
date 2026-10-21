@@ -69,7 +69,7 @@ class MistralClient {
       create: async (params: any) => {
         try {
           const response = await axios.post(`${this.baseURL}/chat/completions`, {
-            model: params.model || 'mistral-small-2506',
+            model: params.model || 'mistral-small-latest',
             messages: params.messages,
             temperature: params.temperature || 0.1,
             max_tokens: params.max_tokens || 1000,
@@ -242,7 +242,7 @@ export async function categorizeExpenseWithUserCategories(
     const userCategoryList = userCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n');
     
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-6-luna",
       messages: [
         {
           role: "system",
@@ -365,7 +365,7 @@ export async function categorizeExpense(
       .join('\n');
 
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-6-luna",
       messages: [
         {
           role: "system",
@@ -727,7 +727,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 }`;
 
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini", // Using DeepSeek-R1 instead of GPT-4o
+      model: "gpt-6-luna", // Using DeepSeek-R1 instead of GPT-4o
       messages: [
         {
           role: "system",
@@ -868,7 +868,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
 
     // Direct OpenAI call (no recursion - this IS the AI processor)
     const response = await getAIClient().chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-6-luna",
         messages: [
           {
             role: "system",
@@ -1030,7 +1030,7 @@ export async function generateSpendingInsights(transactions: Array<{
     const totalAmount = recentTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
     
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini", // Use faster model for spending insights
+      model: "gpt-6-luna", // Use faster model for spending insights
       messages: [
         {
           role: "system",
@@ -1125,7 +1125,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     // No caching in Fly.io - caching handled by main application
 
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-6-luna",
       messages: [
         {
           role: "system",
@@ -1335,7 +1335,7 @@ Analysis Requirements:
 - Analyze budget adherence and variance predictions`;
 
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini", // Using cost-effective DeepSeek model for financial forecasting
+      model: "gpt-6-luna", // Using cost-effective DeepSeek model for financial forecasting
       messages: [
         {
           role: "system",
@@ -1549,7 +1549,7 @@ ANALYSIS GUIDELINES:
 - Ensure all numeric values are provided (no null/undefined)`;
 
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-6-luna",
       messages: [
         {
           role: "system",
@@ -1733,7 +1733,7 @@ Focus on:
 Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
 
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini", // Using cost-effective DeepSeek model for daily recommendations
+      model: "gpt-6-luna", // Using cost-effective DeepSeek model for daily recommendations
       messages: [
         {
           role: "system",
@@ -1850,7 +1850,7 @@ export async function generateFinancialHealthScore(financialData: {
     const savingsRate = summary.totalIncome > 0 ? ((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100) : 0;
     
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-6-luna",
       messages: [
         {
           role: "system",
@@ -2048,7 +2048,7 @@ Return ONLY the JSON object, no explanation.`;
 
     const client = getAIClient('mistral');
     const completion = await client.chat.completions.create({
-      model: 'mistral-small-2506',
+      model: 'mistral-small-latest',
       messages: [
         {
           role: 'system',
@@ -2098,7 +2098,7 @@ Return ONLY the JSON object, no explanation.`;
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-4o-mini' });
+  res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-6-luna' });
 });
 
 // Unified AI endpoint - stateless processing only
@@ -2226,7 +2226,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         }
         
         const completion = await getAIClient('mistral').chat.completions.create({
-          model: 'mistral-small-2506',
+          model: 'mistral-small-latest',
           messages: [
             {
               role: 'system',
@@ -2291,7 +2291,7 @@ app.post('/api/ai/voice-extract', async (req, res) => {
     console.log(`[voice-extract] Processing voice extraction for user ${userId?.substring(0, 8)}...`);
     
     const completion = await getAIClient('mistral').chat.completions.create({
-      model: model || 'mistral-small-2506',
+      model: model || 'mistral-small-latest',
       messages: [
         {
           role: 'system',
@@ -2369,7 +2369,7 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
 
   try {
     const response = await getAIClient().chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-6-luna",
       messages: [
         {
           role: "system",

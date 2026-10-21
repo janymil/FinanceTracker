@@ -1,10 +1,11 @@
-import OpenAI from "openai";
 import { UnifiedAICache } from "../lib/unifiedAICache";
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
 import { MistralClient } from "./mistralClient.js";
+import { createRoutedClient, AI_MODELS } from "../lib/aiProvider";
 
-// Using gpt-4o-mini for cost optimization while maintaining quality for financial analysis
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'missing-openai-api-key' });
+// All model calls go through lib/aiProvider: gpt-6-luna by default, with DeepSeek/Groq
+// fallbacks, JSON fence stripping and real token/cost accounting.
+const openai = createRoutedClient();
 
 export interface ExpenseCategorizationResult {
   category: string;
@@ -91,7 +92,7 @@ export async function categorizeIncomeWithUserCategories(
     const userCategoryList = userCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n');
     
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -180,7 +181,7 @@ export async function categorizeExpenseWithUserCategories(
     const userCategoryList = userCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n');
     
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -330,7 +331,7 @@ export async function categorizeExpense(
       .join('\n');
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -530,7 +531,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
       
       // Fallback to direct OpenAI call
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: AI_MODELS.default,
         messages: [
           {
             role: "system",
@@ -655,7 +656,7 @@ export async function generateSpendingInsights(
     }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -782,7 +783,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     // Cache system removed - direct processing only
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -1031,7 +1032,7 @@ Analysis Requirements:
 - Analyze budget adherence and variance predictions`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -1264,7 +1265,7 @@ ANALYSIS GUIDELINES:
 - Ensure all numeric values are provided (no null/undefined)`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -1453,7 +1454,7 @@ Focus on:
 Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -1779,7 +1780,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -1909,7 +1910,7 @@ export async function generateFinancialHealthScore(
     });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -2083,7 +2084,7 @@ CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)
 
     // Fallback to OpenAI
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",
@@ -2151,7 +2152,7 @@ CRITICAL QUALITY STANDARDS:
 Respond ONLY with valid JSON. No explanations or additional text.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.default,
       messages: [
         {
           role: "system",

@@ -39,7 +39,7 @@ export interface MistralResponse {
 export class MistralClient {
   private apiKey: string;
   private baseUrl = 'https://api.mistral.ai/v1';
-  private defaultModel = 'mistral-small-2506';
+  private defaultModel = 'mistral-small-latest';
 
   constructor() {
     this.apiKey = process.env.MISTRAL_API_KEY || '';
@@ -59,10 +59,10 @@ export class MistralClient {
     try {
       const formData = new FormData();
       formData.append('file', new Blob([audioBuffer]), 'audio.webm');
-      formData.append('model', 'voxtral-mini-2507');
+      formData.append('model', 'voxtral-mini-transcribe-3');
       formData.append('temperature', '0.0');
 
-      console.log('🎙️ [Mistral] Transcribing audio with Voxtral-mini-2507...');
+      console.log('🎙️ [Mistral] Transcribing audio with voxtral-mini-transcribe-3...');
 
       const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
         method: 'POST',

@@ -15,7 +15,7 @@ export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<stri
     
     const transcription = await groq.audio.transcriptions.create({
       file: new File([audioBuffer], 'audio.wav', { type: 'audio/wav' }),
-      model: 'distil-whisper-large-v3-en',
+      model: 'whisper-large-v3-turbo',
       response_format: 'text'
     });
 

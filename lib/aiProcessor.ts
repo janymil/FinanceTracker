@@ -1,6 +1,7 @@
 // Centralized AI Processor with Fly.io Primary + Local Fallback
 import crypto from 'crypto';
 import { storage } from '../server/storage.js';
+import { collectAIUsage, type AIUsageRecord } from './aiProvider';
 import { 
   generateContextualFinancialTips,
   generateFinancialTips,
@@ -27,9 +28,10 @@ async function trackAIUsage(
   fn: () => Promise<any>
 ): Promise<any> {
   const startTime = Date.now();
-  let result = null;
+  let result: any = null;
   let status = 'success';
-  let errorMessage = null;
+  let errorMessage: string | null = null;
+  let usageRecords: AIUsageRecord[] = [];
 
   try {
     // Check usage limits before processing
@@ -38,9 +40,15 @@ async function trackAIUsage(
       throw new Error(accessCheck.reason || 'Usage limit exceeded');
     }
 
-    // Execute the AI function
-    result = await fn();
-    
+    // Execute the AI function and capture real provider usage
+    const collected = await collectAIUsage(fn);
+    result = collected.result;
+    usageRecords = collected.records;
+
+    if (usageRecords.some((record) => record.fallback)) {
+      status = 'fallback';
+    }
+
     return result;
   } catch (error: any) {
     status = 'error';
@@ -49,16 +57,19 @@ async function trackAIUsage(
   } finally {
     const executionTime = Date.now() - startTime;
     
-    // Log usage data (basic tracking for now)
+    // Log usage data with real token counts and cost
+    const promptTokens = usageRecords.reduce((total, record) => total + record.inputTokens, 0);
+    const completionTokens = usageRecords.reduce((total, record) => total + record.outputTokens, 0);
+    const totalCost = usageRecords.reduce((total, record) => total + record.costUsd, 0);
     try {
       await storage.recordAIUsage({
         userId,
         functionName,
-        model: 'gpt-4o', // Default model
-        cost: '0.001', // Default cost, will be updated with real data later
-        tokensUsed: 0,
-        promptTokens: 0,
-        completionTokens: 0,
+        model: usageRecords[0]?.model ?? 'none',
+        cost: totalCost.toFixed(6),
+        tokensUsed: promptTokens + completionTokens,
+        promptTokens,
+        completionTokens,
         executionTime,
         language: 'en-us',
         plan: userPlan,
@@ -77,6 +88,63 @@ async function trackAIUsage(
 }
 
 /**
+ * Optional AI processor service (external-services/ai-processor).
+ *
+ * Disabled by default: the app calls OpenAI/DeepSeek/Groq directly through lib/aiProvider.
+ * Once the service is deployed (162.35.25.125 / ai-processor.formatika.dev), set:
+ *   AI_PROCESSOR_ENABLED=true
+ *   AI_PROCESSOR_URL=https://ai-processor.formatika.dev
+ * A failed processor is skipped for 5 minutes so a dead host never adds latency.
+ */
+const PROCESSOR_TIMEOUT_MS = Number(process.env.AI_PROCESSOR_TIMEOUT_MS) || 20_000;
+const PROCESSOR_COOLDOWN_MS = Number(process.env.AI_PROCESSOR_COOLDOWN_MS) || 300_000;
+let processorDownUntil = 0;
+
+function isProcessorEnabled(): boolean {
+  return process.env.AI_PROCESSOR_ENABLED === 'true' && Boolean(process.env.AI_PROCESSOR_URL);
+}
+
+async function callAIProcessor(task: string, userId: string, payload: Record<string, any>): Promise<any | null> {
+  if (!isProcessorEnabled() || Date.now() < processorDownUntil) return null;
+
+  const baseUrl = String(process.env.AI_PROCESSOR_URL).replace(/\/+$/, '');
+  const timeoutMs = task === 'parseBankStatement'
+    ? Math.max(PROCESSOR_TIMEOUT_MS, 120_000)
+    : PROCESSOR_TIMEOUT_MS;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(`${baseUrl}/execute-gpt-task`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task, userId, payload }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`processor HTTP ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (!result || result.error || (Array.isArray(result) && result.length === 0)) {
+      throw new Error('empty processor response');
+    }
+
+    return result;
+  } catch (error: any) {
+    processorDownUntil = Date.now() + PROCESSOR_COOLDOWN_MS;
+    console.warn(
+      `[AI ${task}] AI processor unavailable (${error?.message || error}); ` +
+      `using direct providers for ${Math.round(PROCESSOR_COOLDOWN_MS / 60000)} min`,
+    );
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
  * Centralized AI Processor for Fly.io Integration
  * Simple interface: runAI(task, userId, payload, userPlan)
  * Handles: GPT Execution, Retry/Fallback, OpenAI Key Handling, Usage Tracking
@@ -84,10 +152,13 @@ async function trackAIUsage(
 export async function runAI(task: string, userId: string, payload: Record<string, any>, userPlan: string = 'free') {
   // Wrap the AI execution with usage tracking
   return await trackAIUsage(userId, task, userPlan, async () => {
-    console.log(`[AI ${task}] Direct Fly.io call with local fallback`);
+    console.log(`[AI ${task}] Processing (AI processor ${isProcessorEnabled() ? 'enabled' : 'disabled'}, direct providers ready)`);
 
     try {
-    console.log(`[AI ${task}] Calling Fly.io processor...`);
+    if (!isProcessorEnabled() || Date.now() < processorDownUntil) {
+      throw new Error('AI processor disabled or cooling down');
+    }
+    console.log(`[AI ${task}] Calling AI processor...`);
     
     // Log contextual tips specific data
     if (task === 'contextual-tips') {
@@ -101,9 +172,9 @@ export async function runAI(task: string, userId: string, payload: Record<string
     
     // Create AbortController for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout for bank statement processing
+    const timeoutId = setTimeout(() => controller.abort(), PROCESSOR_TIMEOUT_MS);
     
-    const response = await fetch("http://31.97.103.28:8080/execute-gpt-task", {
+    const response = await fetch(`${String(process.env.AI_PROCESSOR_URL || 'https://ai-processor.formatika.dev').replace(/\/+$/, '')}/execute-gpt-task`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -145,7 +216,8 @@ export async function runAI(task: string, userId: string, payload: Record<string
     return result;
 
     } catch (error: any) {
-      console.error(`[AI ${task}] Fly.io service failed:`, error.message || error);
+      processorDownUntil = Date.now() + PROCESSOR_COOLDOWN_MS;
+      console.error(`[AI ${task}] AI processor unavailable:`, error.message || error);
       
       try {
         console.log(`[AI ${task}] Attempting local fallback...`);

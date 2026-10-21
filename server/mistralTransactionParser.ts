@@ -125,7 +125,7 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'mistral-small-2506',
+      model: 'mistral-small-latest',
       temperature: 0.1,
       response_format: { type: 'json_object' }
     });
@@ -212,7 +212,7 @@ Find the best match or suggest creating a new category.`;
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'mistral-small-2506',
+      model: 'mistral-small-latest',
       temperature: 0.1,
       response_format: { type: 'json_object' }
     });

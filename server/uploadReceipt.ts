@@ -8,6 +8,7 @@ import { users } from '../shared/schema.ts';
 import { eq } from 'drizzle-orm';
 import fetch from 'node-fetch';
 import { openai } from './openaiClient';
+import { AI_MODELS } from '../lib/aiProvider';
 import { categorizeExpense } from './openai';
 
 // Configure multer for file upload
@@ -33,7 +34,7 @@ const hasGoogleCloudConfig = Boolean(
 );
 
 if (!hasGoogleCloudConfig) {
-  console.warn('Missing Google Cloud environment variables - Receipt OCR will be unavailable until configured.');
+  console.warn('Google Cloud Vision not configured - OCR will rely on Mistral OCR (no Vision fallback).');
 }
 
 // Initialize Google Cloud Vision client with environment variables if available
@@ -78,10 +79,49 @@ export async function uploadReceiptFile(fileName: string, fileBuffer: Buffer, mi
 // Legacy alias
 export const uploadToBunny = uploadReceiptFile;
 
-// Perform OCR using Google Cloud Vision
+// Perform OCR. Mistral OCR 4.x is the primary engine (better structure on receipts and
+// scanned documents); Google Cloud Vision remains the fallback.
 export async function performOCR(imageBuffer: Buffer): Promise<string> {
+  const mistralKey = process.env.MISTRAL_API_KEY;
+
+  if (mistralKey) {
+    try {
+      const response = await fetch('https://api.mistral.ai/v1/ocr', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${mistralKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: process.env.MISTRAL_OCR_MODEL || 'mistral-ocr-latest',
+          document: {
+            type: 'image_url',
+            image_url: `data:image/jpeg;base64,${imageBuffer.toString('base64')}`,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Mistral OCR HTTP ${response.status}`);
+      }
+
+      const payload: any = await response.json();
+      const text = (payload?.pages ?? [])
+        .map((page: any) => page?.markdown ?? '')
+        .join('\n\n')
+        .trim();
+
+      if (text) {
+        return text;
+      }
+      throw new Error('Mistral OCR returned no text');
+    } catch (error) {
+      console.warn('[OCR] Mistral OCR failed, falling back to Google Vision:', (error as Error).message);
+    }
+  }
+
   if (!visionClient) {
-    throw new Error('Google Cloud Vision configuration is incomplete');
+    throw new Error('No OCR provider configured (set MISTRAL_API_KEY or Google Cloud Vision credentials)');
   }
   try {
     const [result] = await visionClient.textDetection({
@@ -111,7 +151,7 @@ export async function extractStructuredData(ocrText: string): Promise<{
 }> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: AI_MODELS.parsing,
       messages: [
         {
           role: "system",
