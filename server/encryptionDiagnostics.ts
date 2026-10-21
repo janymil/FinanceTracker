@@ -43,7 +43,8 @@ export async function checkEncryptionKey(): Promise<void> {
         `[ENCRYPTION] KEY MISMATCH - ${unreadable} encrypted field(s) in ${rows.length} sampled transactions cannot be ` +
         `decrypted with the configured ENCRYPTION_KEY (${process.env.ENCRYPTION_KEY?.length ?? 0} chars). ` +
         `Encrypted text will render as "${DataEncryption.UNREADABLE}". ` +
-        'Restore the ENCRYPTION_KEY that encrypted this database; rotating it makes existing rows unreadable.'
+        'Restore the ENCRYPTION_KEY that encrypted this database, or accept the loss for ' +
+        'legacy rows and run "npx tsx scripts/relabel-legacy-encrypted.ts" (dry run first).'
       );
     } else {
       console.log(`[ENCRYPTION] key verified against ${rows.length} encrypted transaction row(s)`);
