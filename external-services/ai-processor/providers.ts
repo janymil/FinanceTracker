@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 /**
  * Provider routing for the standalone AI processor.
  *
@@ -46,12 +48,14 @@ const BASE_URLS: Record<Provider, string> = {
   mistral: 'https://api.mistral.ai/v1',
 };
 
-const API_KEYS: Record<Provider, string | undefined> = {
-  openai: process.env.OPENAI_API_KEY,
-  deepseek: process.env.DEEPSEEK_API_KEY,
-  groq: process.env.GROQ_API_KEY,
-  mistral: process.env.MISTRAL_API_KEY,
-};
+function getApiKey(provider: Provider): string | undefined {
+  switch (provider) {
+    case 'openai': return process.env.OPENAI_API_KEY;
+    case 'deepseek': return process.env.DEEPSEEK_API_KEY;
+    case 'groq': return process.env.GROQ_API_KEY;
+    case 'mistral': return process.env.MISTRAL_API_KEY;
+  }
+}
 
 const TIMEOUT_MS = Number(process.env.AI_REQUEST_TIMEOUT_MS) || 90_000;
 
@@ -95,7 +99,7 @@ function buildBody(spec: ModelSpec, params: any): any {
 }
 
 async function callProvider(spec: ModelSpec, params: any): Promise<any> {
-  const apiKey = API_KEYS[spec.provider];
+  const apiKey = getApiKey(spec.provider);
   if (!apiKey) throw new Error(`No API key for provider "${spec.provider}"`);
 
   const controller = new AbortController();
@@ -148,7 +152,7 @@ async function routeChat(params: any): Promise<any> {
 
   for (const name of chain) {
     const spec = resolveSpec(name);
-    if (!API_KEYS[spec.provider]) {
+    if (!getApiKey(spec.provider)) {
       lastError = new Error(`Provider ${spec.provider} not configured`);
       continue;
     }
@@ -172,12 +176,13 @@ export function createRoutedClient(): any {
 }
 
 export function getProviderStatus() {
+  const providers: Provider[] = ['openai', 'deepseek', 'groq', 'mistral'];
   return {
     defaultModel: DEFAULT_MODEL,
     reasoningEffort: process.env.AI_REASONING_EFFORT || 'none',
-    providers: (Object.keys(API_KEYS) as Provider[]).map((provider) => ({
+    providers: providers.map((provider) => ({
       provider,
-      configured: Boolean(API_KEYS[provider]),
+      configured: Boolean(getApiKey(provider)),
     })),
     fallbacks: FALLBACKS[DEFAULT_MODEL] ?? FALLBACKS.default,
   };

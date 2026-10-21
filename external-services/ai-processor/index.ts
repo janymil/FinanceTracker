@@ -48,6 +48,31 @@ const port = parseInt(process.env.PORT || '8080', 10);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// API key authentication middleware (protects all routes except /health and CORS preflight)
+app.use((req, res, next) => {
+  if (req.path === '/health' || req.method === 'OPTIONS') {
+    return next();
+  }
+
+  const expectedKey = process.env.AI_PROCESSOR_API_KEY;
+  if (!expectedKey) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  const bearerKey = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const apiKey = (req.headers['x-api-key'] as string) || (req.headers['x-api-token'] as string) || bearerKey;
+
+  if (!apiKey || apiKey !== expectedKey) {
+    return res.status(401).json({
+      error: 'Unauthorized: Invalid or missing API key. Provide via x-api-key header or Authorization: Bearer <key>.'
+    });
+  }
+
+  next();
+});
+
+
 
 
 
@@ -2105,6 +2130,7 @@ app.get('/health', (_req, res) => {
     status: 'ok',
     service: 'ai-processor',
     version: process.env.npm_package_version || '1.0.0',
+    authRequired: Boolean(process.env.AI_PROCESSOR_API_KEY),
     ...getProviderStatus(),
   });
 });

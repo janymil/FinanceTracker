@@ -178,6 +178,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(process.env.AI_PROCESSOR_API_KEY ? { "x-api-key": process.env.AI_PROCESSOR_API_KEY } : {}),
       },
       body: JSON.stringify({
         task,
