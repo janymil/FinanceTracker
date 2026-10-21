@@ -12,4 +12,8 @@ vite.config.ts.*
 service-account.json
 *-service-account.json
 google-cloud-credentials.json
-gcp-*.json
+gcp-*.json
+
+# Local data backups (may contain personal data)
+backups/
+

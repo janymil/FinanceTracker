@@ -61,6 +61,7 @@ interface Goal {
   status: string;
   createdBy: string;
   isPublic: boolean;
+  isParticipant?: boolean;
   goalDetails?: any;
   coverImage?: string;
   participants: Array<{
@@ -122,6 +123,7 @@ export default function CollaborativeGoalDetailPage() {
   const [isInviting, setIsInviting] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [isJoining, setIsJoining] = useState(false);
 
   // Fetch goal data
   const fetchGoal = async () => {
@@ -316,6 +318,32 @@ export default function CollaborativeGoalDetailPage() {
     }
   };
 
+  /** Join the goal from an invite link (previously this action did not exist). */
+  const handleJoin = async () => {
+    if (!id || isJoining) return;
+    setIsJoining(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/collaborative-goals/${id}/join`, {
+        method: 'POST',
+        headers
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.message || 'Failed to join goal');
+      }
+      toast({
+        title: t('collaborative_goal_detail.messages.joined', 'Joined goal'),
+        description: t('collaborative_goal_detail.messages.joined_description', 'You can now contribute to this goal.')
+      });
+      await fetchGoal();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error?.message || 'Failed to join goal' });
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -400,6 +428,23 @@ export default function CollaborativeGoalDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {goal && goal.isParticipant === false && (
+        <div className="border-b border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+          <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p className="text-sm text-amber-900 dark:text-amber-100">
+              {t(
+                'collaborative_goal_detail.join_prompt',
+                'You have been invited to join this goal. Join to see contributions and add your own.'
+              )}
+            </p>
+            <Button size="sm" onClick={handleJoin} disabled={isJoining}>
+              {isJoining
+                ? t('common.loading', 'Loading...')
+                : t('collaborative_goal_detail.buttons.join', 'Join goal')}
+            </Button>
+          </div>
+        </div>
+      )}
       {/* Header Navigation */}
       <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">

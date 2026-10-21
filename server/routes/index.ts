@@ -79,8 +79,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mistral voice processing routes (better accuracy)
   app.use('/api/voice-mistral', mistralVoiceRoutes);
   
-  // Mistral test routes (no auth required)
-  app.use('/api/mistral-test', mistralTestRoutes);
+  // Mistral test routes (no auth required) - development only, they call a paid API
+  if (process.env.NODE_ENV !== 'production') {
+    app.use('/api/mistral-test', mistralTestRoutes);
+  }
   
   // Demo routes for interactive video features
   app.use('/api/demo', demoRoutes);

@@ -1,50 +1,65 @@
 import { Response } from 'express';
 
-// Store all connected SSE clients
-const clients: Map<string, Response> = new Map();
+// One user can have several tabs open, so each user maps to a set of streams.
+const clients: Map<string, Set<Response>> = new Map();
 
 export function addSSEClient(userId: string, res: Response) {
-  // Set up SSE headers
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Cache-Control',
+    'X-Accel-Buffering': 'no',
   });
 
-  // Send initial connection confirmation
   res.write(`data: {"type":"connected"}\n\n`);
 
-  // Store client
-  clients.set(userId, res);
+  const streams = clients.get(userId) ?? new Set<Response>();
+  streams.add(res);
+  clients.set(userId, streams);
 
-  // Clean up on disconnect
+  // Keep proxies from closing an idle stream.
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(': ping\n\n');
+    } catch {
+      // stream already gone; the close handler below cleans up
+    }
+  }, 25_000);
+
   res.on('close', () => {
-    clients.delete(userId);
+    clearInterval(heartbeat);
+    const current = clients.get(userId);
+    if (!current) return;
+    current.delete(res);
+    if (current.size === 0) clients.delete(userId);
   });
 }
 
 export function notifyDataChange(userId: string, changeType: 'transaction' | 'budget' | 'goal') {
-  const client = clients.get(userId);
-  if (client) {
-    const message = JSON.stringify({
-      type: 'dataChange',
-      changeType,
-      timestamp: new Date().toISOString()
-    });
-    client.write(`data: ${message}\n\n`);
+  const streams = clients.get(userId);
+  if (!streams || streams.size === 0) return;
+
+  const message = `data: ${JSON.stringify({
+    type: 'dataChange',
+    changeType,
+    timestamp: new Date().toISOString(),
+  })}\n\n`;
+
+  for (const stream of Array.from(streams)) {
+    try {
+      stream.write(message);
+    } catch {
+      streams.delete(stream);
+    }
   }
 }
 
 export function notifyAllClients(changeType: 'transaction' | 'budget' | 'goal') {
-  const message = JSON.stringify({
-    type: 'dataChange',
-    changeType,
-    timestamp: new Date().toISOString()
-  });
-  
-  clients.forEach((client) => {
-    client.write(`data: ${message}\n\n`);
-  });
+  for (const userId of Array.from(clients.keys())) {
+    notifyDataChange(userId, changeType);
+  }
+}
+
+export function getConnectedUserCount(): number {
+  return clients.size;
 }

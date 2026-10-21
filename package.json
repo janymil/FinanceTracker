@@ -8,8 +8,15 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
+    "audit:flows": "tsx scripts/audit-flows.ts",
     "auth:check": "node scripts/check-clerk-config.mjs",
-    "db:push": "drizzle-kit push"
+    "auth:clean-users": "node scripts/clean-clerk-users.mjs",
+    "auth:clean-users:prod": "node scripts/clean-clerk-users.mjs --prod",
+    "db:push": "drizzle-kit push",
+    "db:audit-users": "node scripts/db-user-audit.mjs",
+    "db:verify-globals": "node scripts/db-verify-globals.mjs",
+    "db:clean-users": "node scripts/clean-user-data.mjs",
+    "db:clean-users:prod": "node scripts/clean-user-data.mjs --prod"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1154.0",

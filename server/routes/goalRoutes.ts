@@ -1,3 +1,5 @@
+import { notifyDataChange } from "../realtime";
+
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
@@ -52,6 +54,7 @@ export function registerGoalRoutes(app: Express) {
       };
 
       const goal = await storage.createGoal(goalData);
+      notifyDataChange(userId, 'goal');
       return res.json(goal);
     } catch (error) {
       console.error("Error creating goal:", error);
@@ -89,6 +92,7 @@ export function registerGoalRoutes(app: Express) {
       if (currentAmount !== undefined) updateData.currentAmount = String(currentAmount);
 
       const goal = await storage.updateGoal(id, userId, updateData);
+      notifyDataChange(userId, 'goal');
       return res.json(goal);
     } catch (error) {
       console.error("Error updating goal:", error);
@@ -110,6 +114,7 @@ export function registerGoalRoutes(app: Express) {
 
       const id = parseInt(req.params.id);
       await storage.deleteGoal(id, userId);
+      notifyDataChange(userId, 'goal');
       return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting goal:", error);

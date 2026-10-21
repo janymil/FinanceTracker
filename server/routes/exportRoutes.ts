@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
-import { generatePdfReport } from "../generatePdf";
+import { getUserLanguage } from "../categoryTranslations";
+import { buildMonthlyPayload, requestPdf, PdfProcessorError } from "../pdfProcessorClient";
 import { cloudStorage } from "../cloudStorage";
 
 export function registerExportRoutes(app: Express) {
@@ -132,7 +133,7 @@ export function registerExportRoutes(app: Express) {
       // Get all user data
       const transactions = await storage.getUserTransactions(userId);
       const budgets = await storage.getUserBudgets(userId);
-      let goals = [];
+      let goals: any[] = [];
       try {
         goals = await storage.getUserGoals(userId);
       } catch (error) {
@@ -163,47 +164,66 @@ export function registerExportRoutes(app: Express) {
           categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
         });
 
-      // Prepare PDF data with proper data transformation
-      const pdfData = {
-        transactions: monthlyTransactions.map(t => ({
-          id: t.id,
-          amount: t.amount,
-          description: t.description,
-          date: t.date.toISOString(),
-          type: t.type as 'income' | 'expense',
-          categoryId: t.categoryId?.toString() || null
-        })),
-        budgets: budgets.map(b => ({
-          id: b.id,
-          name: b.categoryId?.toString() || "Uncategorized", 
-          amount: b.amount,
-          spent: "0", // Calculate spent amount from transactions
-          categoryId: b.categoryId || 0,
-          period: b.period
-        })),
-        goals: goals.map((g: any) => ({
-          id: g.id,
-          name: g.name,
-          targetAmount: g.targetAmount,
-          currentAmount: g.currentAmount,
-          targetDate: g.targetDate
-        })),
-        summary: {
-          totalIncome: income,
-          totalExpenses: expenses,
-          netAmount: income - expenses,
-          transactionCount: monthlyTransactions.length,
-          categoryBreakdown,
-          month: month || new Date().toLocaleDateString('en-US', { month: 'long' }),
-          year: targetYear
-        },
-        userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
-      };
+      // Map category ids to readable names for the report
+      const categoryNames = new Map<number, string>();
+      try {
+        const userCategories = await storage.getCategories(userId);
+        for (const category of userCategories) {
+          categoryNames.set(category.id, category.name);
+        }
+      } catch (error) {
+        console.warn(
+          '[PDF] Could not load category names:',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
 
-      console.log('PDF Data prepared:', JSON.stringify(pdfData, null, 2));
+      const reportPeriod = `${month || new Date().toLocaleDateString('en-US', { month: 'long' })} ${targetYear}`;
+      const spentByCategory = new Map<number, number>();
+      for (const transaction of monthlyTransactions) {
+        if (transaction.type !== 'expense' || transaction.categoryId == null) continue;
+        spentByCategory.set(
+          transaction.categoryId,
+          (spentByCategory.get(transaction.categoryId) || 0) + parseFloat(transaction.amount)
+        );
+      }
 
-      // Generate PDF
-      const pdfBuffer = await generatePdfReport(pdfData);
+      // Hand the report to the independent PDF processor.
+      const payload = buildMonthlyPayload({
+        userName:
+          user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user.email || 'User',
+        email: user.email || undefined,
+        language: getUserLanguage(req),
+        period: reportPeriod,
+        totals: { income, expenses },
+        transactions: monthlyTransactions.map((transaction) => ({
+          date: transaction.date,
+          description: transaction.description,
+          amount: transaction.amount,
+          type: transaction.type,
+          categoryName:
+            transaction.categoryId != null ? categoryNames.get(transaction.categoryId) : undefined,
+        })),
+        categories: Object.entries(categoryBreakdown)
+          .filter(([key]) => key !== 'Other')
+          .map(([key, amount]) => ({ name: categoryNames.get(Number(key)) || 'Other', amount })),
+        budgets: budgets.map((budget) => ({
+          categoryName:
+            budget.categoryId != null ? categoryNames.get(budget.categoryId) : undefined,
+          amount: budget.amount,
+          spent:
+            budget.categoryId != null ? spentByCategory.get(budget.categoryId) || 0 : 0,
+        })),
+        goals: goals.map((goal: any) => ({
+          name: goal.name,
+          targetAmount: goal.targetAmount,
+          currentAmount: goal.currentAmount,
+        })),
+      });
+
+      const pdfBuffer = await requestPdf(payload);
       
       // Send PDF response
       res.setHeader('Content-Type', 'application/pdf');
@@ -213,6 +233,12 @@ export function registerExportRoutes(app: Express) {
     } catch (error) {
       console.error("Error generating PDF:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      if (error instanceof PdfProcessorError) {
+        return res.status(error.statusCode).json({
+          message: error.message,
+          details: error.details
+        });
+      }
       return res.status(500).json({ 
         message: "Failed to generate PDF report", 
         error: error instanceof Error ? error.message : 'Unknown error' 
@@ -294,12 +320,108 @@ export function registerExportRoutes(app: Express) {
         } else {
           return res.status(400).json({ message: "CSV export requires transactions to be included" });
         }
+      } else if (format === 'excel') {
+        // The UI offers Excel; build a real .xlsx workbook with the `xlsx` package.
+        const XLSX = await import('xlsx');
+        const workbook = XLSX.utils.book_new();
+
+        if (exportData.transactions?.length) {
+          const rows = exportData.transactions.map((t: any) => ({
+            Date: (t.date instanceof Date ? t.date : new Date(t.date)).toISOString().split('T')[0],
+            Description: t.description,
+            Amount: Number(t.amount),
+            Type: t.type,
+            Category: t.categoryName || 'Uncategorized'
+          }));
+          XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Transactions');
+        }
+
+        if (exportData.budgets?.length) {
+          const rows = exportData.budgets.map((b: any) => ({
+            Category: b.categoryName || String(b.categoryId ?? ''),
+            Budget: Number(b.amount),
+            Spent: Number(b.spent ?? 0),
+            Remaining: Number(b.remaining ?? 0),
+            Period: b.period
+          }));
+          XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Budgets');
+        }
+
+        if (exportData.goals?.length) {
+          const rows = exportData.goals.map((g: any) => ({
+            Goal: g.name,
+            Target: Number(g.targetAmount),
+            Current: Number(g.currentAmount ?? 0),
+            TargetDate: g.targetDate ? String(g.targetDate).split('T')[0] : ''
+          }));
+          XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Goals');
+        }
+
+        if (workbook.SheetNames.length === 0) {
+          return res.status(400).json({ message: "Nothing selected to export" });
+        }
+
+        const workbookBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="kaptia-export.xlsx"');
+        return res.send(workbookBuffer);
+      } else if (format === 'pdf') {
+        // PDF rendering belongs to the independent processor (see pdfProcessorClient).
+        const rows: any[] = exportData.transactions ?? [];
+        const totals = rows.reduce(
+          (acc: { income: number; expenses: number }, t: any) => {
+            const amount = Number(t.amount) || 0;
+            if (t.type === 'income') acc.income += amount;
+            else acc.expenses += amount;
+            return acc;
+          },
+          { income: 0, expenses: 0 }
+        );
+
+        const byCategory = new Map<string, number>();
+        for (const t of rows) {
+          if (t.type !== 'expense') continue;
+          const name = t.categoryName || 'Uncategorized';
+          byCategory.set(name, (byCategory.get(name) || 0) + (Number(t.amount) || 0));
+        }
+
+        const periodLabel =
+          dateRange === 'custom' && startDate && endDate
+            ? `${startDate} - ${endDate}`
+            : dateRange || 'all time';
+
+        const pdfBuffer = await requestPdf(
+          buildMonthlyPayload({
+            userName: exportData.userName,
+            email: user.email || undefined,
+            language: getUserLanguage(req),
+            period: periodLabel,
+            totals,
+            transactions: rows.map((t: any) => ({
+              date: t.date,
+              description: t.description,
+              amount: t.amount,
+              type: t.type,
+              categoryName: t.categoryName || undefined
+            })),
+            categories: Array.from(byCategory.entries()).map(([name, amount]) => ({ name, amount })),
+            budgets: exportData.budgets ?? [],
+            goals: exportData.goals ?? []
+          })
+        );
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="kaptia-export.pdf"');
+        return res.send(pdfBuffer);
       } else {
         return res.status(400).json({ message: "Unsupported export format" });
       }
 
     } catch (error) {
       console.error("Error exporting data:", error);
+      if (error instanceof PdfProcessorError) {
+        return res.status(error.statusCode).json({ message: error.message, details: error.details });
+      }
       return res.status(500).json({ message: "Failed to export data" });
     }
   });

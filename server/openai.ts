@@ -502,8 +502,8 @@ Transaction Pattern Analysis:
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 
-    // Call the Fly.io AI processor service with fallback to direct OpenAI
-    let result;
+    // Call the optional AI processor service with fallback to direct OpenAI
+    let result: any;
     try {
       const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://ai-processor.formatika.dev';
       
@@ -518,7 +518,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
           userId: "system",
           payload: { ...financialData, language: normalizedLanguage }
         }),
-        timeout: 30000 // 30 second timeout
+        signal: AbortSignal.timeout(30000) // 30 second timeout
       });
 
       if (!aiResponse.ok) {
@@ -528,7 +528,10 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
       const aiData = await aiResponse.json();
       result = Array.isArray(aiData) ? aiData[0] : (aiData.tip || aiData);
     } catch (aiProcessorError) {
-      console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
+      console.warn(
+        'AI processor service unavailable, falling back to direct OpenAI:',
+        aiProcessorError instanceof Error ? aiProcessorError.message : String(aiProcessorError)
+      );
       
       // Fallback to direct OpenAI call
       const response = await openai.chat.completions.create({
@@ -585,7 +588,7 @@ Return comprehensive analysis in JSON:
     }
 
     // Handle comprehensive analysis response
-    const processedTips = result.title && result.description ? [{
+    const processedTips: FinancialTip[] = result.title && result.description ? [{
       title: result.title,
       description: result.description,
       category: result.category || 'comprehensive',
@@ -902,7 +905,13 @@ Provide an AI-powered financial health score that adapts to this user's specific
       aiAnalysis: {
         personalizedFactors: [],
         riskAssessment: 'Unable to assess risk',
-        recommendations: ['Please try again later'],
+        recommendations: [
+          {
+            action: 'Please try again later',
+            impact: 'Health score could not be calculated right now',
+            priority: 'medium'
+          }
+        ],
         confidence: 0
       }
     };
@@ -936,7 +945,15 @@ export async function generateTrendPredictions(
           budgetVariance: 0,
           confidence: 0,
           keyInsights: ['Add transactions to generate AI-powered financial forecasts'],
-          recommendations: ['Start tracking your expenses to receive personalized predictions'],
+          recommendations: [
+            {
+              id: 'rec-start-tracking',
+              title: 'Start tracking your expenses',
+              description: 'Add transactions to receive personalized predictions',
+              priority: 'medium',
+              actionable: true
+            }
+          ],
           riskFactors: []
         }
       };
@@ -953,8 +970,8 @@ export async function generateTrendPredictions(
     }
 
     // Prepare comprehensive financial data for AI analysis
-    const monthlyData = new Map();
-    const categoryTotals = new Map();
+    const monthlyData = new Map<string, { income: number; expenses: number; categories: Map<string, number> }>();
+    const categoryTotals = new Map<string, number>();
 
     transactions.forEach(t => {
       const month = t.date.slice(0, 7);
@@ -966,6 +983,8 @@ export async function generateTrendPredictions(
       }
 
       const monthData = monthlyData.get(month);
+      if (!monthData) return;
+
       if (t.type === 'income') {
         monthData.income += amount;
       } else {
@@ -1288,7 +1307,7 @@ You are an advanced financial forecasting AI specializing in expense prediction 
     
     // Ensure all required fields are present with proper data types
     const categoryPredictions = Array.isArray(aiResponse.categoryPredictions) 
-      ? aiResponse.categoryPredictions.map(pred => ({
+      ? aiResponse.categoryPredictions.map((pred: any) => ({
           category: pred.category || 'Unknown',
           currentMonth: Number(pred.currentMonth) || 0,
           predictedNext: Number(pred.predictedNext) || 0,
@@ -1299,7 +1318,7 @@ You are an advanced financial forecasting AI specializing in expense prediction 
       : [];
 
     const monthlyPredictions = Array.isArray(aiResponse.monthlyPredictions)
-      ? aiResponse.monthlyPredictions.map(month => ({
+      ? aiResponse.monthlyPredictions.map((month: any) => ({
           month: month.month || 'Unknown',
           predicted: Number(month.predicted) || 0,
           confidence: Number(month.confidence) || 0.5,
@@ -1477,7 +1496,7 @@ You are an expert financial advisor who provides personalized, actionable recomm
     
     // Ensure proper data structure
     const recommendations = Array.isArray(aiResponse.recommendations) 
-      ? aiResponse.recommendations.map((rec, index) => ({
+      ? aiResponse.recommendations.map((rec: any, index: number) => ({
           id: rec.id || `rec-${index + 1}`,
           type: rec.type || 'general',
           priority: rec.priority || 'medium',
@@ -1490,7 +1509,7 @@ You are an expert financial advisor who provides personalized, actionable recomm
       : [];
 
     const insights = Array.isArray(aiResponse.insights)
-      ? aiResponse.insights.map((insight, index) => ({
+      ? aiResponse.insights.map((insight: any, index: number) => ({
           id: insight.id || `insight-${index + 1}`,
           insight: insight.insight || 'Financial insight based on your data',
           basedOn: insight.basedOn || 'Transaction analysis',
@@ -1531,12 +1550,14 @@ export async function generateContextualFinancialTips(
       description: string;
       amount: number;
       category: string;
+      categoryName?: string;
       date: string;
       type?: 'income' | 'expense';
       recurring?: boolean;
     }>;
     budgets: Array<{
       category: string;
+      categoryName?: string;
       budgetAmount: number;
       spent: number;
       remaining: number;
@@ -1822,7 +1843,15 @@ You are an expert financial advisor who provides personalized, contextual recomm
 
   } catch (error) {
     console.error('Error generating contextual financial tips (local fallback):', error);
-    const fallbackResult = {
+    type ContextualTip = {
+      id: string;
+      title: string;
+      description: string;
+      category: 'spending' | 'saving' | 'budgeting' | 'income';
+      priority: 'high' | 'medium' | 'low';
+      actionable: boolean;
+    };
+    const fallbackResult: { tips: ContextualTip[] } = {
       tips: [{
         id: 'fallback_tip',
         title: 'Track Your Progress',

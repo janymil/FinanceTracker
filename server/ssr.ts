@@ -1020,13 +1020,13 @@ function getPageContent(route: string, lang: string = 'en'): string {
     }
   };
 
-  const langContent = content[lang as keyof typeof content];
+  const langContent = content[lang as keyof typeof content] as Record<string, string> | undefined;
   if (langContent && langContent[route]) {
     return langContent[route];
   }
 
   // Fallback to English
-  const englishContent = content['en'];
+  const englishContent = content['en'] as Record<string, string> | undefined;
   if (englishContent && englishContent[route]) {
     return englishContent[route];
   }

@@ -1,3 +1,5 @@
+import AchievementsCard from "@/components/achievements-card";
+
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -757,6 +759,8 @@ export default function Goals() {
             })}
           </div>
         )}
+
+        <AchievementsCard className="mt-6" />
       </div>
     </RequirePlan>
   );

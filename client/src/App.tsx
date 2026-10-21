@@ -1,3 +1,5 @@
+import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
+
 import { Switch, Route, useLocation, useRouter } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
@@ -216,6 +218,9 @@ export function AuthenticatedApp() {
   const [currentPath, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Refresh caches when another tab changes transactions, budgets or goals.
+  useRealtimeUpdates();
 
   // Keep the language prefix when bouncing an anonymous visitor to sign-in
   const currentLang = currentPath.match(/^\/([a-z]{2})(\/|$)/)?.[1] || 'en';

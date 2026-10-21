@@ -5,6 +5,114 @@ import { storage } from "../storage";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
+type PlanKey = 'standard' | 'standard-yearly' | 'premium' | 'premium-yearly';
+
+/**
+ * The deployment `.env` stores Stripe **product** ids (`prod_…`) under the
+ * `STRIPE_*_PEN_PRICE_ID` names. Stripe does not accept a product id in
+ * `line_items[].price` — it needs a `price_…` id — so product references are
+ * resolved through the API to the product's `default_price` (or its only active
+ * price) and cached in memory.
+ *
+ * `price_…` values are used directly, so either form works.
+ */
+const PRICE_ENV_KEYS: Record<PlanKey, string[]> = {
+  'standard': ['STRIPE_STANDARD_MONTHLY_PRICE_ID', 'STRIPE_STANDARD_MONTHLY_PEN_PRICE_ID'],
+  'standard-yearly': ['STRIPE_STANDARD_YEARLY_PRICE_ID', 'STRIPE_STANDARD_YEARLY_PEN_PRICE_ID'],
+  'premium': ['STRIPE_PREMIUM_MONTHLY_PRICE_ID', 'STRIPE_PREMIUM_MONTHLY_PEN_PRICE_ID'],
+  'premium-yearly': ['STRIPE_PREMIUM_YEARLY_PRICE_ID', 'STRIPE_PREMIUM_YEARLY_PEN_PRICE_ID'],
+};
+
+function readConfiguredReference(plan: PlanKey): string | undefined {
+  for (const key of PRICE_ENV_KEYS[plan]) {
+    const raw = process.env[key];
+    if (!raw) continue;
+    const value = raw.trim().replace(/^["']|["']$/g, '');
+    if (value) return value;
+  }
+  return undefined;
+}
+
+const resolvedPriceCache = new Map<string, string>();
+
+/** Accepts `price_…` as-is; resolves `prod_…` to the product's price id. */
+async function resolvePriceId(reference: string | undefined): Promise<string | undefined> {
+  if (!reference) return undefined;
+  if (reference.startsWith('price_')) return reference;
+
+  if (!reference.startsWith('prod_') || !stripe) {
+    console.warn('[Billing] Unsupported price reference in env:', reference);
+    return undefined;
+  }
+
+  const cached = resolvedPriceCache.get(reference);
+  if (cached) return cached;
+
+  try {
+    const product = await stripe.products.retrieve(reference, { expand: ['default_price'] });
+    const defaultPrice = product.default_price;
+    let priceId =
+      typeof defaultPrice === 'string'
+        ? defaultPrice
+        : defaultPrice && typeof defaultPrice === 'object'
+          ? defaultPrice.id
+          : undefined;
+
+    if (!priceId) {
+      const prices = await stripe.prices.list({ product: reference, active: true, limit: 1 });
+      priceId = prices.data[0]?.id;
+    }
+
+    if (!priceId) {
+      console.warn(`[Billing] Product ${reference} has no active price`);
+      return undefined;
+    }
+
+    resolvedPriceCache.set(reference, priceId);
+    return priceId;
+  } catch (error) {
+    console.warn(
+      `[Billing] Could not resolve a price for ${reference}:`,
+      error instanceof Error ? error.message : String(error)
+    );
+    return undefined;
+  }
+}
+
+const intervalChecked = new Set<string>();
+
+/**
+ * Warns when a plan's price has the wrong recurring interval. The account
+ * currently has both "Anual" products priced with `interval: month`, which
+ * would bill the yearly amount every month. Never blocks checkout.
+ */
+async function warnIfIntervalMismatch(plan: PlanKey, priceId: string): Promise<void> {
+  if (!stripe || intervalChecked.has(priceId)) return;
+  intervalChecked.add(priceId);
+
+  try {
+    const price = await stripe.prices.retrieve(priceId);
+    const actual = price.recurring?.interval;
+    const expected = plan.endsWith('-yearly') ? 'year' : 'month';
+    if (actual && actual !== expected) {
+      console.warn(
+        `[Billing] ${plan} uses price ${priceId} with interval "${actual}" but "${expected}" is expected. ` +
+        `Fix the price interval in Stripe or point ${PRICE_ENV_KEYS[plan][0]} at a price_… id with the right interval.`
+      );
+    }
+  } catch {
+    // The interval check is advisory only.
+  }
+}
+
+async function getPlanPriceId(plan: string): Promise<string | undefined> {
+  if (!(plan in PRICE_ENV_KEYS)) return undefined;
+  const key = plan as PlanKey;
+  const priceId = await resolvePriceId(readConfiguredReference(key));
+  if (priceId) await warnIfIntervalMismatch(key, priceId);
+  return priceId;
+}
+
 // Handle subscription changes (upgrade/downgrade) with proper proration
 async function handleSubscriptionChange(user: any, newPlan: string, res: Response) {
   if (!stripe) {
@@ -15,15 +123,8 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
     // Get current subscription
     const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
     
-    // Plan pricing mapping using environment variables
-    const planPrices = {
-      'standard': process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
-      'standard-yearly': process.env.STRIPE_STANDARD_YEARLY_PRICE_ID,
-      'premium': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
-      'premium-yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
-    };
-
-    const newPriceId = planPrices[newPlan as keyof typeof planPrices];
+    // Resolve the target plan to a Stripe price id (env may hold prod_ or price_)
+    const newPriceId = await getPlanPriceId(newPlan);
     if (!newPriceId) {
       return res.status(400).json({ error: "Invalid plan selected" });
     }
@@ -133,20 +234,13 @@ export function registerStripeRoutes(app: Express) {
       const successUrl = `${baseUrl}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${baseUrl}/subscribe`;
 
-      // Plan pricing using real Stripe Price IDs from environment variables
-      const planPriceIds = {
-        'standard': process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
-        'standard-yearly': process.env.STRIPE_STANDARD_YEARLY_PRICE_ID,
-        'premium': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
-        'premium-yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
-      };
-      
-      console.log('Environment variables check:');
-      console.log('STRIPE_STANDARD_MONTHLY_PRICE_ID:', process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID);
-      console.log('STRIPE_STANDARD_YEARLY_PRICE_ID:', process.env.STRIPE_STANDARD_YEARLY_PRICE_ID);
-      console.log('STRIPE_PREMIUM_MONTHLY_PRICE_ID:', process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID);
-      console.log('STRIPE_PREMIUM_YEARLY_PRICE_ID:', process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID);
-      console.log('Plan price IDs object:', planPriceIds);
+      // Plan references come from the environment and are resolved to price ids.
+      console.log('Plan price references:', {
+        standard: readConfiguredReference('standard'),
+        'standard-yearly': readConfiguredReference('standard-yearly'),
+        premium: readConfiguredReference('premium'),
+        'premium-yearly': readConfiguredReference('premium-yearly'),
+      });
 
       let sessionConfig: any;
 
@@ -167,14 +261,12 @@ export function registerStripeRoutes(app: Express) {
           }
         };
       } else {
-        // For paid plans, create subscription using real Stripe Price IDs
-        const priceId = planPriceIds[plan as keyof typeof planPriceIds];
-        console.log('Available plans:', Object.keys(planPriceIds));
-        console.log('Requested plan:', plan);
-        console.log('Found price ID:', priceId);
-        
+        // For paid plans, create the subscription with the resolved price id.
+        const priceId = await getPlanPriceId(plan);
+        console.log('Requested plan:', plan, '-> price:', priceId);
+
         if (!priceId) {
-          console.error('Invalid plan requested:', plan, 'Available plans:', Object.keys(planPriceIds));
+          console.error('Invalid plan requested:', plan, 'Configured plans:', Object.keys(PRICE_ENV_KEYS));
           return res.status(400).json({ error: "Invalid plan selected" });
         }
         
@@ -394,13 +486,13 @@ export function registerStripeRoutes(app: Express) {
         return res.status(400).json({ success: false, error: "Missing subscriptionId or newPriceId" });
       }
 
-      // Hardcoded price weights for plan hierarchy
-      const priceWeights = {
-        'price_1RcxhjFlf8efPaoOWM6JarOv': 1, // standard_monthly
-        'price_1RcxhhFlf8efPaoOoxa7StkA': 2, // standard_yearly
-        'price_1RcxhfFlf8efPaoOAYNVWEDc': 3, // premium_monthly
-        'price_1RcxhaFlf8efPaoOrkTMX7BZ': 4, // premium_yearly
-      };
+      // Plan hierarchy weights, keyed by the price ids actually in use.
+      const planKeyOrder: PlanKey[] = ['standard', 'standard-yearly', 'premium', 'premium-yearly'];
+      const resolvedPlanPrices = await Promise.all(planKeyOrder.map((key) => getPlanPriceId(key)));
+      const priceWeights: Record<string, number> = {};
+      resolvedPlanPrices.forEach((priceId, index) => {
+        if (priceId) priceWeights[priceId] = index + 1;
+      });
 
       // Validate price IDs
       if (!priceWeights[newPriceId as keyof typeof priceWeights]) {

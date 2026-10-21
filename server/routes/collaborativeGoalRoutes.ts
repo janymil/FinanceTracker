@@ -56,6 +56,23 @@ function getLocalizedMessage(language: string, key: string): string {
 }
 
 export function registerCollaborativeGoalRoutes(app: Express) {
+  /**
+   * A contribution may only come from an active participant of the goal.
+   * Without this check any signed-in user could write into someone else's goal.
+   */
+  async function requireActiveParticipant(goalId: number, userId: string) {
+    const participant = await storage.getGoalParticipant(goalId, userId);
+    return participant && participant.status === 'active' ? participant : null;
+  }
+
+  /** Shared parsing for both contribution endpoints (they must accept the same input). */
+  function parseContribution(body: any): { amount: string; description: string | null } | null {
+    const amount = Number(body?.amount);
+    if (!Number.isFinite(amount) || amount <= 0) return null;
+    const note = typeof body?.note === 'string' ? body.note.trim() : '';
+    return { amount: amount.toFixed(2), description: note || null };
+  }
+
   // Friend management routes
   app.post('/api/friends/request', isAuthenticated, async (req: any, res) => {
     try {
@@ -69,7 +86,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       return res.json(friendship);
     } catch (error) {
       console.error("Error sending friend request:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -85,7 +102,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       return res.json(friendship);
     } catch (error) {
       console.error("Error accepting friend request:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -101,7 +118,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       res.status(204).send();
     } catch (error) {
       console.error("Error rejecting friend request:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -150,7 +167,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       return res.json(goal);
     } catch (error) {
       console.error("Error creating collaborative goal:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -178,10 +195,22 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       
       const goal = await storage.getCollaborativeGoal(goalId, userId);
       if (!goal) {
-        return res.status(404).json({ message: "Goal not found or access denied" });
+        // Not a member yet: return a minimal preview so the invite link can
+        // offer a "Join" action (previously this was a hard 404).
+        const preview = await storage.getCollaborativeGoalPreview(goalId);
+        if (!preview) {
+          return res.status(404).json({ message: "Goal not found" });
+        }
+        return res.json({
+          ...preview,
+          isParticipant: false,
+          participants: [],
+          contributions: [],
+          activities: []
+        });
       }
-      
-      return res.json(goal);
+
+      return res.json({ ...goal, isParticipant: true });
     } catch (error) {
       console.error("Error fetching collaborative goal:", error);
       return res.status(500).json({ message: "Failed to fetch goal" });
@@ -201,7 +230,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       return res.json(participant);
     } catch (error) {
       console.error("Error joining collaborative goal:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -217,7 +246,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       res.status(204).send();
     } catch (error) {
       console.error("Error leaving collaborative goal:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -233,7 +262,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       return res.json(goal);
     } catch (error) {
       console.error("Error updating collaborative goal:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -249,7 +278,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting collaborative goal:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -261,18 +290,27 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const goalId = parseInt(req.params.id);
-      
-      const contributionData = {
-        ...req.body,
+
+      const participant = await requireActiveParticipant(goalId, userId);
+      if (!participant) {
+        return res.status(403).json({ message: "You are not a participant of this goal" });
+      }
+
+      const parsed = parseContribution(req.body);
+      if (!parsed) {
+        return res.status(400).json({ message: "A positive amount is required" });
+      }
+
+      const contribution = await storage.addGoalContribution({
         goalId,
         userId,
-      };
-      
-      const contribution = await storage.addGoalContribution(contributionData);
+        amount: parsed.amount,
+        description: parsed.description,
+      });
       return res.json(contribution);
     } catch (error) {
       console.error("Error adding contribution:", error);
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -404,16 +442,23 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const goalId = parseInt(req.params.id);
-      const { amount, note } = req.body;
 
-      const contributionData = {
+      const participant = await requireActiveParticipant(goalId, userId);
+      if (!participant) {
+        return res.status(403).json({ message: "You are not a participant of this goal" });
+      }
+
+      const parsed = parseContribution(req.body);
+      if (!parsed) {
+        return res.status(400).json({ message: "A positive amount is required" });
+      }
+
+      const contribution = await storage.addGoalContribution({
         goalId,
         userId,
-        amount: amount.toString(),
-        description: note || null,
-      };
-      
-      const contribution = await storage.addGoalContribution(contributionData);
+        amount: parsed.amount,
+        description: parsed.description,
+      });
       return res.json(contribution);
     } catch (error: any) {
       console.error("Error adding contribution:", error);

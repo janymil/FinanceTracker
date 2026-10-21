@@ -4,9 +4,7 @@ import { storage } from '../storage';
 import { transactions, categories, users } from '../../shared/schema';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { translateCategoryName, getUserLanguage } from '../categoryTranslations';
-import fetch from 'node-fetch';
-
-const PDF_SERVICE_URL = process.env.PDF_SERVICE_URL || 'https://finanzerpro-pdf.fly.dev';
+import { buildTrendsPayload, requestPdf, PdfProcessorError } from '../pdfProcessorClient';
 
 export function registerPDFRoutes(app: any) {
   // Generate PDF report for trends data - Premium plan required
@@ -88,6 +86,8 @@ export function registerPDFRoutes(app: any) {
 
       // Get category breakdown
       const categoryBreakdown = [];
+      const categoryNameById = new Map<number, string>();
+      const spentByCategory = new Map<number, number>();
       const expenseTransactions = periodTransactions.filter((t: any) => t.type === 'expense');
       
       if (expenseTransactions.length > 0) {
@@ -96,22 +96,30 @@ export function registerPDFRoutes(app: any) {
         
         for (const transaction of expenseTransactions) {
           const categoryId = transaction.categoryId;
+          if (categoryId == null) continue;
           if (!categoryData.has(categoryId)) {
             // Get category details
             const category = await storage.getCategory(categoryId);
             
             if (category) {
+              const localizedName = translateCategoryName(category.name, language);
+              categoryNameById.set(categoryId, localizedName);
               categoryData.set(categoryId, {
                 id: categoryId,
-                name: translateCategoryName(category.name, language),
+                name: localizedName,
                 color: category.color || '#3b82f6',
                 amount: 0
               });
             }
           }
           
+          spentByCategory.set(
+            categoryId,
+            (spentByCategory.get(categoryId) || 0) + (Number(transaction.amount) || 0)
+          );
+          
           if (categoryData.has(categoryId)) {
-            categoryData.get(categoryId).amount += transaction.amount;
+            categoryData.get(categoryId).amount += Number(transaction.amount) || 0;
           }
         }
 
@@ -133,47 +141,52 @@ export function registerPDFRoutes(app: any) {
 
       console.log('Category breakdown:', categoryBreakdown.length, 'categories');
 
-      // Prepare PDF data
-      const webUrl = `${req.protocol}://${req.get('host')}/${language}/trends?period=${period}`;
-      
-      const pdfData = {
-        user: userData,
-        period: period,
-        language: language,
-        totalIncome: totalIncome,
-        totalExpenses: totalExpenses,
-        netBalance: netBalance,
-        currency: currency,
-        trends: trendsData,
-        categories: categoryBreakdown,
-        webUrl: webUrl
-      };
-
-      console.log('Calling PDF service at:', PDF_SERVICE_URL);
-
-      // Call PDF service
-      const pdfResponse = await fetch(`${PDF_SERVICE_URL}/generate-pdf`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ data: pdfData }),
-        timeout: 60000 // 60 second timeout
-      });
-
-      if (!pdfResponse.ok) {
-        const errorText = await pdfResponse.text();
-        console.error('PDF service error:', pdfResponse.status, errorText);
-        return res.status(500).json({ 
-          error: 'PDF generation failed',
-          details: errorText
-        });
+      // Budgets and goals add extra sections to the processor report.
+      let budgets: any[] = [];
+      let goals: any[] = [];
+      try {
+        budgets = await storage.getUserBudgets(userId);
+        goals = await storage.getUserGoals(userId);
+      } catch (error) {
+        console.warn(
+          '[PDF] Could not load budgets/goals for the report:',
+          error instanceof Error ? error.message : String(error)
+        );
       }
 
-      console.log('PDF generated successfully');
+      console.log('[PDF] Generating report. Currency:', currency, '| period:', period);
 
-      // Get PDF buffer
-      const pdfBuffer = await pdfResponse.buffer();
+      // Hand the report to the independent PDF processor. The payload matches
+      // the processor's contract (see server/pdfProcessorClient.ts).
+      const payload = buildTrendsPayload({
+        userName: userData.name,
+        email: userData.email,
+        language,
+        period,
+        monthly: trendsData,
+        categories: categoryBreakdown,
+        transactions: periodTransactions.map((t: any) => ({
+          date: t.date,
+          description: t.description || 'Transaction',
+          amount: t.amount,
+          type: t.type,
+          categoryName: t.categoryId != null ? categoryNameById.get(t.categoryId) : undefined,
+        })),
+        budgets: budgets.map((b: any) => ({
+          categoryName: b.categoryId != null ? categoryNameById.get(b.categoryId) : undefined,
+          amount: b.amount,
+          spent: b.categoryId != null ? spentByCategory.get(b.categoryId) || 0 : 0,
+        })),
+        goals: goals.map((g: any) => ({
+          name: g.name,
+          targetAmount: g.targetAmount,
+          currentAmount: g.currentAmount,
+        })),
+      });
+
+      const pdfBuffer = await requestPdf(payload);
+
+      console.log('PDF generated successfully:', pdfBuffer.length, 'bytes');
 
       // Set response headers
       res.setHeader('Content-Type', 'application/pdf');
@@ -181,10 +194,16 @@ export function registerPDFRoutes(app: any) {
       res.setHeader('Content-Length', pdfBuffer.length);
 
       // Send PDF
-      res.send(pdfBuffer);
+      return res.send(pdfBuffer);
 
     } catch (error) {
       console.error('PDF generation error:', error);
+      if (error instanceof PdfProcessorError) {
+        return res.status(error.statusCode).json({
+          error: error.message,
+          details: error.details
+        });
+      }
       res.status(500).json({ 
         error: 'PDF generation failed',
         details: error instanceof Error ? error.message : 'Unknown error'

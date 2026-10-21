@@ -76,8 +76,8 @@ export class MistralClient {
         throw new Error(`Mistral transcription failed: ${response.statusText}`);
       }
 
-      const result = await response.json();
-      const transcription = result.text;
+      const result = (await response.json()) as { text?: string };
+      const transcription = result.text ?? '';
       console.log('🎙️ [Mistral] Transcription successful:', transcription.slice(0, 100));
       return transcription.trim();
 

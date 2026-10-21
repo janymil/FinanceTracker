@@ -216,11 +216,11 @@ export const uploadReceiptHandler = [
   async (req: Request, res: Response) => {
     try {
       // Check for internal authentication from mobile uploads
-      let userId = req.headers['x-internal-auth'] as string;
+      let userId: string | undefined = req.headers['x-internal-auth'] as string | undefined;
       
       // If no internal auth, use standard Clerk authentication
       if (!userId) {
-        userId = getUserId(req);
+        userId = getUserId(req) ?? undefined;
         if (!userId) {
           return res.status(401).json({ error: 'Authentication required' });
         }

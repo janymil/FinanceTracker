@@ -485,7 +485,7 @@ export function registerAIRoutes(app: Express) {
 
       // Create categories object for the payload
       const categoriesData = await storage.getCategories(userId);
-      const categories = {};
+      const categories: Record<number, string> = {};
       categoriesData.forEach(cat => {
         categories[cat.id] = cat.name;
       });
@@ -503,7 +503,7 @@ export function registerAIRoutes(app: Express) {
           type: t.type,
           categoryName: t.categoryName
         })),
-        budgets: budgets.map(b => ({
+        budgets: budgets.map((b: any) => ({
           id: b.id,
           name: b.name,
           amount: String(b.amount),
@@ -1041,9 +1041,9 @@ export function registerAIRoutes(app: Express) {
 
       // Filter expense transactions for consistent cache hashing
       const expenseTransactions = transactions
-        .filter(t => t.type === 'expense')
+        .filter((t: any) => t.type === 'expense')
         .slice(0, 100)
-        .map(t => ({
+        .map((t: any) => ({
           id: t.id,
           amount: t.amount,
           description: t.description,
@@ -1171,7 +1171,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
       
       console.log('🎯 [CONTEXTUAL-TIPS] Budget Analysis:', {
         budgetCount: safeBudgets.length,
-        budgets: safeBudgets.map(b => ({
+        budgets: safeBudgets.map((b: any) => ({
           category: b.categoryName,
           amount: b.amount,
           spent: b.spent,

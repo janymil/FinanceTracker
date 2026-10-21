@@ -111,7 +111,7 @@ function generateHTMLTemplate(data: any): string {
 
       <div class="section">
         <h2>Recent Transactions</h2>
-        ${transactions.slice(0, 10).map(t => `
+        ${transactions.slice(0, 10).map((t: any) => `
           <div class="transaction">
             <div>${t.description || 'Transaction'}</div>
             <div>${t.type === 'income' ? '+' : '-'}$${Math.abs(parseFloat(t.amount)).toFixed(2)}</div>
@@ -190,5 +190,5 @@ export async function generatePDF(data: any): Promise<Buffer> {
   });
 
   await browser.close();
-  return pdfBuffer;
+  return Buffer.from(pdfBuffer);
 }

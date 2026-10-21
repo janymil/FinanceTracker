@@ -1,3 +1,5 @@
+import { notifyDataChange } from "../realtime";
+
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
@@ -61,6 +63,7 @@ export function registerTransactionRoutes(app: Express) {
 
       // Save transaction to database immediately
       const transaction = await storage.createTransaction(validatedData);
+      notifyDataChange(userId, 'transaction');
 
       // Return response immediately to user
       res.json(transaction);
@@ -113,7 +116,8 @@ export function registerTransactionRoutes(app: Express) {
                 const categories = await storage.getCategories(userId);
                 const matchingCategory = categories.find(cat => cat.name === categorization.category);
                 if (matchingCategory) {
-                  await storage.updateTransaction(transaction.id, { categoryId: matchingCategory.id });
+                  // userId is required by storage.updateTransaction's ownership guard
+                  await storage.updateTransaction(transaction.id, { categoryId: matchingCategory.id, userId } as any);
                   console.log(`Auto-categorized transaction ${transaction.id} as ${categorization.category}`);
                 }
               }
@@ -183,9 +187,6 @@ export function registerTransactionRoutes(app: Express) {
 
       const transactionId = parseInt(req.params.id);
 
-      console.log('=== TRANSACTION UPDATE DEBUG ===');
-      console.log('Request body received:', JSON.stringify(req.body, null, 2));
-
       // Only update fields that are actually provided in the request
       const updateData: any = { userId }; // Always include userId for security
 
@@ -220,12 +221,8 @@ export function registerTransactionRoutes(app: Express) {
         updateData.referenceNote = req.body.referenceNote;
       }
 
-      console.log('Final updateData being sent to storage:', JSON.stringify(updateData, null, 2));
-
       const transaction = await storage.updateTransaction(transactionId, updateData);
-
-      console.log('Transaction returned from storage:', JSON.stringify(transaction, null, 2));
-      console.log('=== END TRANSACTION UPDATE DEBUG ===');
+      notifyDataChange(userId, 'transaction');
 
       return res.json(transaction);
     } catch (error) {
@@ -244,6 +241,7 @@ export function registerTransactionRoutes(app: Express) {
 
       const transactionId = parseInt(req.params.id);
       await storage.deleteTransaction(transactionId, userId);
+      notifyDataChange(userId, 'transaction');
       return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting transaction:", error);

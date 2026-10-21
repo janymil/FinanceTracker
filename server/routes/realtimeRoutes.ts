@@ -1,35 +1,27 @@
 import type { Express } from "express";
 import { addSSEClient, notifyDataChange } from "../realtime";
+import { isAuthenticated, getUserId } from "../clerkAuth";
 
 export function registerRealtimeRoutes(app: Express) {
-  // SSE endpoint for real-time updates
-  app.get('/api/events', (req, res) => {
-    // Set headers for SSE
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Cache-Control'
-    });
-
-    // Add client to SSE clients list
-    const clientId = Date.now().toString();
-    addSSEClient(clientId, res);
-
-    // Send initial connection message
-    res.write(`data: ${JSON.stringify({ type: 'connected', clientId })}\n\n`);
-
-    // Handle client disconnect
-    req.on('close', () => {
-      console.log(`SSE client ${clientId} disconnected`);
-    });
+  // Server-sent events for the signed-in user. Streams are keyed by userId so a
+  // mutation in one tab refreshes the others.
+  app.get('/api/events', isAuthenticated, (req: any, res) => {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).end();
+    }
+    addSSEClient(userId, res);
   });
 
-  // Endpoint to trigger notifications (for testing)
-  app.post('/api/notify', (req, res) => {
-    const { type, data } = req.body;
-    notifyDataChange(type, data);
-    res.json({ success: true, message: 'Notification sent' });
-  });
+  // Manual fan-out trigger, development only (no auth by design, never in prod).
+  if (process.env.NODE_ENV !== 'production') {
+    app.post('/api/notify', (req, res) => {
+      const { userId, type } = req.body || {};
+      if (!userId || !type) {
+        return res.status(400).json({ success: false, error: 'userId and type are required' });
+      }
+      notifyDataChange(userId, type);
+      return res.json({ success: true, message: 'Notification sent' });
+    });
+  }
 }

@@ -890,21 +890,33 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
   const [availableBackups, setAvailableBackups] = useState<any[]>([]);
   const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
 
-  // Load backup status when backup tab is accessed
+  // Load backup status + the list of restorable backups when backup tab is accessed
+  const fetchBackupData = async () => {
+    const token = await getToken();
+    if (!token) return;
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    const [statusResponse, backupsResponse] = await Promise.all([
+      fetch('/api/backup/status', { headers }),
+      fetch('/api/available-backups', { headers }),
+    ]);
+
+    if (statusResponse.ok) {
+      setBackupStatusData(await statusResponse.json());
+    }
+
+    if (backupsResponse.ok) {
+      const payload = await backupsResponse.json();
+      setAvailableBackups(Array.isArray(payload) ? payload : payload?.backups ?? []);
+    }
+  };
+
   const loadBackupStatus = async () => {
     if (!isReady || !user?.id || isLoadingBackupStatus) return;
     
     setIsLoadingBackupStatus(true);
     try {
-      const token = await getToken();
-      if (token) {
-        const response = await fetch('/api/backup/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-          setBackupStatusData(await response.json());
-        }
-      }
+      await fetchBackupData();
     } catch (error) {
       console.error('Error fetching backup status:', error);
     } finally {
@@ -918,15 +930,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
     setIsLoadingBackupStatus(true);
     try {
-      const token = await getToken();
-      if (token) {
-        const response = await fetch('/api/backup/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-          setBackupStatusData(await response.json());
-        }
-      }
+      await fetchBackupData();
     } catch (error) {
       console.error('Error refetching backup status:', error);
     } finally {

@@ -1,3 +1,5 @@
+import { notifyDataChange } from "../realtime";
+
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
@@ -30,6 +32,7 @@ export function registerBudgetRoutes(app: Express) {
       };
 
       const budget = await storage.createBudget(budgetData);
+      notifyDataChange(userId, 'budget');
       return res.json(budget);
     } catch (error) {
       console.error("Error creating budget:", error);
@@ -74,6 +77,7 @@ export function registerBudgetRoutes(app: Express) {
 
       console.log('Update data being sent:', updateData);
       const budget = await storage.updateBudget(id, updateData);
+      notifyDataChange(userId, 'budget');
       return res.json(budget);
     } catch (error) {
       console.error("Error updating budget:", error);
@@ -96,6 +100,7 @@ export function registerBudgetRoutes(app: Express) {
 
       const id = parseInt(req.params.id);
       await storage.deleteBudget(id, userId);
+      notifyDataChange(userId, 'budget');
       return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting budget:", error);

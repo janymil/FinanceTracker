@@ -1,12 +1,42 @@
 import { MailService } from '@sendgrid/mail';
+import nodemailer, { type Transporter } from 'nodemailer';
 
-if (!process.env.SENDGRID_API_KEY) {
-  console.warn("SENDGRID_API_KEY environment variable not set. Email notifications will be disabled.");
+const hasSendGrid = Boolean(process.env.SENDGRID_API_KEY);
+const hasSmtp = Boolean(process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS);
+
+if (!hasSendGrid && !hasSmtp) {
+  console.warn("No email transport configured (SENDGRID_API_KEY or EMAIL_*). Email notifications will be disabled.");
+} else if (!hasSendGrid) {
+  console.log("Email notifications use the SMTP transport (EMAIL_* configured).");
 }
 
 const mailService = new MailService();
 if (process.env.SENDGRID_API_KEY) {
   mailService.setApiKey(process.env.SENDGRID_API_KEY);
+}
+
+let smtpTransporter: Transporter | null = null;
+
+function getSmtpTransporter(): Transporter | null {
+  if (!hasSmtp) return null;
+  if (!smtpTransporter) {
+    const port = parseInt(process.env.EMAIL_PORT || '587', 10);
+    smtpTransporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST as string,
+      port,
+      secure: port === 465,
+      auth: {
+        user: process.env.EMAIL_USER as string,
+        pass: process.env.EMAIL_PASS as string,
+      },
+    });
+  }
+  return smtpTransporter;
+}
+
+/** True when at least one email transport (SendGrid or SMTP) is configured. */
+export function isEmailConfigured(): boolean {
+  return hasSendGrid || hasSmtp;
 }
 
 interface EmailParams {
@@ -18,22 +48,36 @@ interface EmailParams {
 }
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
-  if (!process.env.SENDGRID_API_KEY) {
-    console.log('SendGrid API key not configured, skipping email:', params.subject);
+  const message = {
+    to: params.to,
+    from: params.from,
+    subject: params.subject,
+    text: params.text ?? '',
+    html: params.html,
+  };
+
+  // Prefer SendGrid when a key is present, otherwise use SMTP.
+  if (hasSendGrid) {
+    try {
+      await mailService.send(message);
+      return true;
+    } catch (error) {
+      console.error('SendGrid email error:', error);
+      if (!hasSmtp) return false;
+    }
+  }
+
+  const transporter = getSmtpTransporter();
+  if (!transporter) {
+    console.log('Email transport not configured, skipping email:', params.subject);
     return false;
   }
 
   try {
-    await mailService.send({
-      to: params.to,
-      from: params.from,
-      subject: params.subject,
-      text: params.text,
-      html: params.html,
-    });
+    await transporter.sendMail(message);
     return true;
   } catch (error) {
-    console.error('SendGrid email error:', error);
+    console.error('SMTP email error:', error);
     return false;
   }
 }

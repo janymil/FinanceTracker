@@ -79,7 +79,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
-import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, inArray } from "drizzle-orm";
 
 // Verified identity fields fetched from Clerk (see server/routes/authRoutes.ts)
 export interface ClerkProfile {
@@ -179,6 +179,7 @@ export interface IStorage {
   createCollaborativeGoal(goal: InsertCollaborativeGoal): Promise<CollaborativeGoal>;
   getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: CollaborativeGoalParticipant[], creator: User }>>;
   getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: Array<GoalContribution & { user: User }>, activities: ChallengeActivity[] }) | undefined>;
+  getCollaborativeGoalPreview(goalId: number): Promise<(CollaborativeGoal & { creator: User; participantCount: number }) | undefined>;
   getGoalParticipant(goalId: number, userId: string): Promise<CollaborativeGoalParticipant | undefined>;
   joinCollaborativeGoal(goalId: number, userId: string, personalTarget?: number): Promise<CollaborativeGoalParticipant>;
   leaveCollaborativeGoal(goalId: number, userId: string): Promise<void>;
@@ -1501,13 +1502,13 @@ export class DatabaseStorage implements IStorage {
       const deletedTransactions = await db.delete(transactions).where(eq(transactions.userId, userId)).execute();
       console.log(`Deleted transactions for user: ${userId}`);
 
+      // Budgets reference categories, so they must be deleted BEFORE categories
+      const deletedBudgets = await db.delete(budgets).where(eq(budgets.userId, userId)).execute();
+      console.log(`Deleted budgets for user: ${userId}`);
+
       // Delete all user categories
       const deletedCategories = await db.delete(categories).where(eq(categories.userId, userId)).execute();
       console.log(`Deleted categories for user: ${userId}`);
-
-      // Delete all user budgets
-      const deletedBudgets = await db.delete(budgets).where(eq(budgets.userId, userId)).execute();
-      console.log(`Deleted budgets for user: ${userId}`);
 
       // Delete all user goals
       const deletedGoals = await db.delete(goals).where(eq(goals.userId, userId)).execute();
@@ -1548,6 +1549,17 @@ export class DatabaseStorage implements IStorage {
       // Delete all redeem codes associated with the user
       const deletedRedeemCodes = await db.delete(redeemCodes).where(eq(redeemCodes.userId, userId)).execute();
       console.log(`Deleted redeem codes for user: ${userId}`);
+
+      // Remaining user-owned data (each of these has a FK to users without CASCADE)
+      await db.delete(goalMessages).where(eq(goalMessages.userId, userId)).execute();
+      await db.delete(courseProgress).where(eq(courseProgress.userId, userId)).execute();
+      await db.delete(userAchievements).where(eq(userAchievements.userId, userId)).execute();
+      await db.delete(learningStats).where(eq(learningStats.userId, userId)).execute();
+      await db.delete(backupSettings).where(eq(backupSettings.userId, userId)).execute();
+      await db.delete(importLogs).where(eq(importLogs.userId, userId)).execute();
+      await db.delete(aiCache).where(eq(aiCache.userId, userId)).execute();
+      await db.delete(paymentFailures).where(eq(paymentFailures.userId, userId)).execute();
+      await db.delete(recurringTransactions).where(eq(recurringTransactions.userId, userId)).execute();
 
       // Finally delete the user record
       const deletedUser = await db.delete(users).where(eq(users.id, userId)).execute();
@@ -1846,6 +1858,32 @@ export class DatabaseStorage implements IStorage {
     }
 
     return result;
+  }
+
+  /**
+   * Minimal, non-member view of a collaborative goal so an invite link can
+   * render a "Join" action instead of a 404.
+   */
+  async getCollaborativeGoalPreview(goalId: number): Promise<(CollaborativeGoal & { creator: User; participantCount: number }) | undefined> {
+    const [row] = await db
+      .select({ goal: collaborativeGoals, creator: users })
+      .from(collaborativeGoals)
+      .innerJoin(users, eq(collaborativeGoals.createdBy, users.id))
+      .where(eq(collaborativeGoals.id, goalId));
+
+    if (!row) return undefined;
+
+    const participants = await db
+      .select({ id: collaborativeGoalParticipants.id })
+      .from(collaborativeGoalParticipants)
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, goalId),
+          eq(collaborativeGoalParticipants.status, 'active')
+        )
+      );
+
+    return { ...row.goal, creator: row.creator, participantCount: participants.length };
   }
 
   async getGoalParticipant(goalId: number, userId: string): Promise<CollaborativeGoalParticipant | undefined> {
@@ -2265,10 +2303,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserAchievements(userId: string): Promise<MilestoneAchievement[]> {
+    // Percentage milestones are stored with userId = null because they belong to
+    // the whole group. Include those for every goal the user takes part in,
+    // otherwise GET /api/achievements would always return an empty list.
+    const participations = await db
+      .select({ goalId: collaborativeGoalParticipants.goalId })
+      .from(collaborativeGoalParticipants)
+      .where(eq(collaborativeGoalParticipants.userId, userId));
+
+    const goalIds = participations.map((p) => p.goalId);
+
     return await db
       .select()
       .from(milestoneAchievements)
-      .where(eq(milestoneAchievements.userId, userId))
+      .where(
+        goalIds.length > 0
+          ? or(
+              eq(milestoneAchievements.userId, userId),
+              inArray(milestoneAchievements.goalId, goalIds)
+            )
+          : eq(milestoneAchievements.userId, userId)
+      )
       .orderBy(desc(milestoneAchievements.achievedAt));
   }
 

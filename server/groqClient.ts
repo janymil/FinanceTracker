@@ -142,7 +142,10 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
     let correctedAmount = String(result.amount || '');
     
     // Fix Spanish number parsing patterns
-    const spanishNumberPatterns = [
+    const spanishNumberPatterns: Array<
+      | { pattern: RegExp; fix: string; handler?: undefined }
+      | { pattern: RegExp; handler: (match: RegExpMatchArray) => string; fix?: undefined }
+    > = [
       // "cinco ochenta" pattern - LLaMA thinks it's 580 instead of 5.80
       { pattern: /cinco\s+ochenta/i, fix: '5.80' },
       // "X soles Y" pattern
@@ -152,13 +155,13 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
     for (const p of spanishNumberPatterns) {
       const match = transcript.match(p.pattern);
       if (match) {
-        if ('fix' in p) {
+        if (p.fix !== undefined) {
           // Direct fix
           if (correctedAmount === '580.00' || correctedAmount === '580') {
             correctedAmount = p.fix;
             console.log(`🔧 Fixed Spanish number parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
           }
-        } else if ('handler' in p) {
+        } else if (p.handler) {
           // Dynamic fix
           const expectedAmount = p.handler(match);
           if (correctedAmount !== expectedAmount) {

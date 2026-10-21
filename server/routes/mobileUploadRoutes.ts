@@ -101,7 +101,17 @@ export function registerMobileUploadRoutes(app: any) {
       }
 
       // Process OCR directly without HTTP calls to avoid timeout issues in production
-      let ocrResult;
+      let ocrResult: {
+        text: string;
+        extracted: {
+          amount?: number;
+          date?: string;
+          vendor?: string;
+          error?: string;
+        };
+        imageUrl?: string;
+        category?: string;
+      };
       try {
         console.log('Processing OCR directly...');
         
