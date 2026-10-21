@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Cloudflare IP ranges for the origin firewall (boot + monthly)
+
+[Timer]
+OnBootSec=2min
+OnCalendar=monthly
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

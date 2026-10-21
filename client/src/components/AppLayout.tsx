@@ -49,7 +49,7 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
     } else {
       // Anonymous user on public page - show anonymous header
       return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white flex flex-col">
           <AnonymousHeader />
           <main className="flex-1">
             {children}
@@ -92,7 +92,7 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
 
   // Fallback for unauthenticated access to private pages
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white flex flex-col">
       <AnonymousHeader />
       <main className="flex-1">
         {children}

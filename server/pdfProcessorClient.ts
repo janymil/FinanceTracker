@@ -1,10 +1,12 @@
 /**
- * Client for the independent PDF processor (`external-services/pdf-processor`).
+ * Client for the independent PDF processor (`external-services/pdf-processor`),
+ * deployed as a standalone app on https://pdf-processor.formatika.dev.
  *
  * The processor owns rendering. This module only builds the payload it expects
- * and streams the returned PDF back. Contract (see external-services/pdf-processor/index.ts):
+ * and streams the returned PDF back. Contract (see the processor's README):
  *
  *   POST {PDF_SERVICE_URL}/generate-pdf
+ *   x-api-key: {PDF_API_KEY}
  *   {
  *     userData:    { firstName, lastName, email },
  *     transactions:[{ month, balance, date, description, categoryName, amount, type }],
@@ -13,10 +15,13 @@
  *     goals:       [{ name, targetAmount, currentAmount }],
  *     insights:    [{ title, description }],
  *     language:    'en-us',
- *     period:      '2026-10'
+ *     period:      '2026-10',
+ *     currency:    '€'            // display symbol, not an ISO code
  *   }
  */
 import fetch from 'node-fetch';
+
+const DEFAULT_SERVICE_URL = 'https://pdf-processor.formatika.dev';
 
 export class PdfProcessorError extends Error {
   constructor(message: string, public statusCode = 502, public details?: string) {
@@ -26,15 +31,15 @@ export class PdfProcessorError extends Error {
 }
 
 function serviceUrl(): string {
-  return (process.env.PDF_SERVICE_URL || '').trim().replace(/\/+$/, '');
+  return (process.env.PDF_SERVICE_URL || DEFAULT_SERVICE_URL).trim().replace(/\/+$/, '');
+}
+
+function apiKey(): string {
+  return (process.env.PDF_API_KEY || '').trim();
 }
 
 function timeoutMs(): number {
   return Number(process.env.PDF_SERVICE_TIMEOUT_MS || 60000);
-}
-
-export function isPdfProcessorConfigured(): boolean {
-  return serviceUrl().length > 0;
 }
 
 export interface ProcessorTransaction {
@@ -56,23 +61,23 @@ export interface ProcessorPayload {
   insights?: Array<{ title: string; description: string }>;
   language?: string;
   period?: string;
+  /** Display currency symbol (`$`, `€`, `Kč`, …) — not an ISO code. */
+  currency?: string;
 }
 
 /** Sends the payload to the processor and returns the PDF bytes. */
 export async function requestPdf(payload: ProcessorPayload): Promise<Buffer> {
   const url = serviceUrl();
-  if (!url) {
-    throw new PdfProcessorError(
-      'PDF_SERVICE_URL is not configured. Deploy external-services/pdf-processor and set PDF_SERVICE_URL.',
-      503
-    );
-  }
+  const key = apiKey();
 
   let response;
   try {
     response = await fetch(`${url}/generate-pdf`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(key ? { 'x-api-key': key } : {}),
+      },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(timeoutMs()),
     });
@@ -101,6 +106,11 @@ function splitName(name?: string | null): { firstName: string; lastName: string 
   const parts = (name || '').trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return { firstName: 'Kaptia', lastName: 'User' };
   return { firstName: parts[0], lastName: parts.slice(1).join(' ') || ' ' };
+}
+
+/** The processor renders a currency symbol (`$`, `€`, `Kč`), max 5 characters. */
+function normalizeCurrency(currency?: string | null): string {
+  return (currency || '').trim().slice(0, 5) || '$';
 }
 
 interface SourceTransaction {
@@ -160,6 +170,7 @@ export interface TrendsPayloadInput {
   email?: string | null;
   language: string;
   period: string;
+  currency?: string;
   monthly: Array<{ period: string; income: number; expenses: number; netBalance: number }>;
   categories: Array<{ name: string; amount: number; percentage?: number; color?: string }>;
   transactions: SourceTransaction[];
@@ -193,6 +204,7 @@ export function buildTrendsPayload(input: TrendsPayloadInput): ProcessorPayload 
     insights: buildInsights(totals, input.categories),
     language: input.language,
     period: input.period,
+    currency: normalizeCurrency(input.currency),
   };
 }
 
@@ -201,6 +213,7 @@ export interface MonthlyPayloadInput {
   email?: string | null;
   language: string;
   period: string;
+  currency?: string;
   totals: { income: number; expenses: number };
   transactions: SourceTransaction[];
   categories: Array<{ name: string; amount: number }>;
@@ -237,5 +250,6 @@ export function buildMonthlyPayload(input: MonthlyPayloadInput): ProcessorPayloa
     insights: buildInsights(input.totals, input.categories),
     language: input.language,
     period: input.period,
+    currency: normalizeCurrency(input.currency),
   };
 }

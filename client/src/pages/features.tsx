@@ -3,106 +3,57 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocation } from 'wouter';
 import { AppLayout } from '@/components/AppLayout';
+import { SEO } from '@/components/SEO';
 import { ExpenseCalculatorModal, DebtCalculatorModal } from '@/components/CalculatorModals';
 
 import { 
   Brain, 
   Target, 
   BarChart3, 
-  Heart, 
   TrendingUp, 
   Calendar,
-  Lightbulb,
-  Settings,
-  Scale,
+  Sparkles, 
+  Shield, 
+  Zap, 
+  FileText, 
+  Calculator as CalculatorIcon, 
+  Receipt, 
+  Users, 
+  PieChart, 
+  Download, 
+  RefreshCw, 
   Globe,
-  Sparkles,
-  Clock,
-  DollarSign,
-  Shield,
-  Zap,
-  FileText,
-  Calculator as CalculatorIcon,
-  Receipt,
-  Users,
-  PieChart,
-  Wallet,
-  CreditCard,
-  Upload,
-  Download,
-  Lock,
-  Smartphone,
-  RefreshCw,
-  BookOpen,
-  Bell
+  Heart,
+  Lightbulb
 } from 'lucide-react';
 
-// Feature showcase component
-function FeatureShowcaseCard({ title, description, icon: Icon, features }: { 
-  title: string; 
-  description: string; 
-  icon: any;
-  features: string[];
-}) {
-  return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon className="h-5 w-5 text-primary" />
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm">
-              <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-              <span>{feature}</span>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function FeaturesPage() {
-  const { t, i18n } = useTranslation();
-  const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState('categorization');
-  const [demoLoading, setDemoLoading] = useState(false);
+  const { t } = useTranslation();
+  const [location, setLocation] = useLocation();
+  const [categoryTab, setCategoryTab] = useState('ai');
+  const [activeAiTab, setActiveAiTab] = useState('categorization');
   
-  // Modal states
+  // Modals for calculators
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
   const [debtModalOpen, setDebtModalOpen] = useState(false);
-  
-  
-  // Calculator states
-  const [transactions, setTransactions] = useState([100]);
-  const [expenses, setExpenses] = useState([5000]);
-  const [businessSize, setBusinessSize] = useState([2]);
-  const [savingsRate, setSavingsRate] = useState([15]);
-  const [budgetAdherence, setBudgetAdherence] = useState([80]);
-  const [dataMonths, setDataMonths] = useState([12]);
-  const [trendStrength, setTrendStrength] = useState([3]);
-  const [pagesInStatement, setPagesInStatement] = useState([5]);
-  const [historicalMonths, setHistoricalMonths] = useState([6]);
-  const [recsFollowed, setRecsFollowed] = useState([4]);
-  const [contextFactors, setContextFactors] = useState([5]);
-  const [primaryScore, setPrimaryScore] = useState([75]);
+
+  // Interactive demo sliders
+  const [statementPages, setStatementPages] = useState([5]);
+  const [historyMonths, setHistoryMonths] = useState([6]);
+
+  // Language from route
+  const langMatch = location.match(/^\/([a-z]{2})(?:\/|$)/);
+  const currentLang = langMatch ? langMatch[1] : (localStorage.getItem('preferredLanguage') || 'en');
 
   const handleSignUp = () => {
-    setLocation('/auth');
+    setLocation(`/${currentLang}/auth#sign-up`);
   };
 
-
+  // AI features defined with proper translation keys
   const aiFeatures = [
     {
       id: 'categorization',
@@ -111,7 +62,7 @@ export default function FeaturesPage() {
       badge: t('features.categorization.badge', 'Standard+'),
       description: t('features.categorization.description', 'AI-powered automatic categorization of all your transactions with continuous learning and improvement'),
       benefits: [
-        { title: t('features.categorization.benefits.instant.title', 'Instant Recognition'), desc: t('features.categorization.benefits.instant.desc', 'Immediately categorizes transactions as they\'re added') },
+        { title: t('features.categorization.benefits.instant.title', 'Instant Recognition'), desc: t('features.categorization.benefits.instant.desc', 'Immediately categorizes transactions as they are added') },
         { title: t('features.categorization.benefits.learning.title', 'Continuous Learning'), desc: t('features.categorization.benefits.learning.desc', 'Gets smarter with each transaction you process') },
         { title: t('features.categorization.benefits.custom.title', 'Custom Categories'), desc: t('features.categorization.benefits.custom.desc', 'Adapts to your unique spending patterns and categories') }
       ]
@@ -124,8 +75,8 @@ export default function FeaturesPage() {
       description: t('features.contextual.description', 'Receive personalized financial advice based on your specific transaction patterns and spending behavior'),
       benefits: [
         { title: t('features.contextual.benefits.realtime.title', 'Real-time Analysis'), desc: t('features.contextual.benefits.realtime.desc', 'Instant insights based on your current financial activity') },
-        { title: t('features.contextual.benefits.budget.title', 'Budget Awareness'), desc: t('features.contextual.benefits.budget.desc', 'Advice that considers your current budget and spending limits') },
-        { title: t('features.contextual.benefits.goal.title', 'Goal-Oriented'), desc: t('features.contextual.benefits.goal.desc', 'Tips aligned with your specific financial goals and targets') }
+        { title: t('features.contextual.benefits.budget.title', 'Budget Awareness'), desc: t('features.contextual.benefits.budget.desc', 'Tips that consider your budget limits and goals') },
+        { title: t('features.contextual.benefits.goal.title', 'Goal-oriented'), desc: t('features.contextual.benefits.goal.desc', 'Advice tailored to help you achieve your financial objectives') }
       ]
     },
     {
@@ -137,8 +88,7 @@ export default function FeaturesPage() {
       benefits: [
         { title: t('features.tips.benefits.patterns.title', 'Spending Patterns'), desc: t('features.tips.benefits.patterns.desc', 'Deep analysis of your spending behaviors and trends') },
         { title: t('features.tips.benefits.strategies.title', 'Saving Strategies'), desc: t('features.tips.benefits.strategies.desc', 'Personalized recommendations to optimize your cash flow') },
-        { title: t('features.tips.benefits.optimization.title', 'Budget Optimization'), desc: t('features.tips.benefits.optimization.desc', 'Smart adjustments to maximize your budget efficiency') },
-        { title: t('features.tips.benefits.analysis.title', 'Advanced Analysis'), desc: t('features.tips.benefits.analysis.desc', 'Professional-grade financial insights and forecasting') }
+        { title: t('features.tips.benefits.optimization.title', 'Budget Optimization'), desc: t('features.tips.benefits.optimization.desc', 'Smart adjustments to maximize your budget efficiency') }
       ]
     },
     {
@@ -178,30 +128,6 @@ export default function FeaturesPage() {
       ]
     },
     {
-      id: 'predictions',
-      icon: Calendar,
-      title: t('features.predictions.title', 'Expense Predictions'),
-      badge: t('features.predictions.badge', 'Premium'),
-      description: t('features.predictions.description', 'Advanced AI algorithms predict your future expenses to help you plan and budget more effectively'),
-      benefits: [
-        { title: t('features.predictions.benefits.forecasting.title', 'Smart Forecasting'), desc: t('features.predictions.benefits.forecasting.desc', 'Predict expenses up to 12 months ahead') },
-        { title: t('features.predictions.benefits.seasonal.title', 'Seasonal Patterns'), desc: t('features.predictions.benefits.seasonal.desc', 'Recognizes seasonal spending variations') },
-        { title: t('features.predictions.benefits.planning.title', 'Planning Support'), desc: t('features.predictions.benefits.planning.desc', 'Better budget planning with future insights') }
-      ]
-    },
-    {
-      id: 'recommendations',
-      icon: Sparkles,
-      title: t('features.recommendations.title', 'Daily Recommendations'),
-      badge: t('features.recommendations.badge', 'Premium'),
-      description: t('features.recommendations.description', 'Personalized daily financial recommendations powered by AI to optimize your spending and savings'),
-      benefits: [
-        { title: t('features.recommendations.benefits.daily.title', 'Daily Updates'), desc: t('features.recommendations.benefits.daily.desc', 'Fresh recommendations delivered every day') },
-        { title: t('features.recommendations.benefits.action.title', 'Actionable Advice'), desc: t('features.recommendations.benefits.action.desc', 'Practical steps you can take immediately') },
-        { title: t('features.recommendations.benefits.priority.title', 'Priority-based'), desc: t('features.recommendations.benefits.priority.desc', 'Focus on what matters most for your finances') }
-      ]
-    },
-    {
       id: 'statements',
       icon: FileText,
       title: t('features.statements.title', 'Bank Statement Processing'),
@@ -215,540 +141,313 @@ export default function FeaturesPage() {
     }
   ];
 
-  const activeFeature = aiFeatures.find(f => f.id === activeTab) || aiFeatures[0];
-
-  // Calculator helper functions
-  const calculateTimeSaved = () => {
-    return (transactions[0] * 2 / 60).toFixed(1);
-  };
-
-  const calculateSavings = () => {
-    const minSavings = Math.floor(expenses[0] * 0.05);
-    const maxSavings = Math.floor(expenses[0] * 0.15);
-    return `$${minSavings} - $${maxSavings}`;
-  };
-
-  const calculateHealthScore = () => {
-    return Math.min(100, Math.floor((savingsRate[0] * 1.5) + (budgetAdherence[0] * 0.5)));
-  };
-
-  const calculatePredictionAccuracy = () => {
-    return Math.min(95, Math.floor(60 + (dataMonths[0] * 1.2)));
-  };
-
-  const calculateExtractedTransactions = () => {
-    return Math.floor(pagesInStatement[0] * 8.5); // Average 8.5 transactions per page
-  };
-
-  const calculatePredictionRange = () => {
-    return Math.min(12, Math.floor(historicalMonths[0] * 1.5)); // Max 12 months prediction
-  };
+  const currentAiFeature = aiFeatures.find(f => f.id === activeAiTab) || aiFeatures[0];
 
   return (
     <AppLayout isPublicPage={true}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-700 text-white">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+      <SEO 
+        title={`${t('Features')} | Kaptia`}
+        description={t('features.hero.subtitle', 'Advanced artificial intelligence meets personal finance management')}
+        keywords="kaptia features, ai finance, receipt scanning, budget management"
+        canonical="https://kaptia.app/features"
+      />
+
+      <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">
+        {/* Glow accent */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          {/* Hero Section */}
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 dark:border-white/10 bg-indigo-50/70 dark:bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">
+              <Sparkles className="h-3.5 w-3.5" />
+              {t('Features')}
+            </span>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mt-4">
               {t('features.hero.title', 'AI-Powered Financial Intelligence')}
             </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-4xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mt-3 max-w-2xl mx-auto">
               {t('features.hero.subtitle', 'Advanced artificial intelligence meets personal finance management')}
             </p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold">9</div>
-                <div className="text-sm opacity-80">{t('features.hero.stats.ai_functions', 'AI Functions')}</div>
+
+            {/* Metrics cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-4xl mx-auto">
+              <div className="glass-card rounded-2xl p-4 text-center border border-gray-200/80 dark:border-white/10">
+                <div className="font-display text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">9</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('features.hero.stats.ai_functions', 'AI Functions')}</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold">3</div>
-                <div className="text-sm opacity-80">{t('features.hero.stats.languages', 'Languages')}</div>
+              <div className="glass-card rounded-2xl p-4 text-center border border-gray-200/80 dark:border-white/10">
+                <div className="font-display text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400">3</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('features.hero.stats.languages', 'Languages')}</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold">95%</div>
-                <div className="text-sm opacity-80">{t('features.hero.stats.accuracy_rate', 'Accuracy Rate')}</div>
+              <div className="glass-card rounded-2xl p-4 text-center border border-gray-200/80 dark:border-white/10">
+                <div className="font-display text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">95%</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('features.hero.stats.accuracy_rate', 'Accuracy Rate')}</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold">24/7</div>
-                <div className="text-sm opacity-80">{t('features.hero.stats.ai_availability', '24/7 AI Availability')}</div>
+              <div className="glass-card rounded-2xl p-4 text-center border border-gray-200/80 dark:border-white/10">
+                <div className="font-display text-2xl sm:text-3xl font-extrabold text-purple-600 dark:text-purple-400">24/7</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('features.hero.stats.ai_availability', '24/7 AI Availability')}</div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Core Features Section */}
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.core_features.title')}</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              {t('features.core_features.subtitle')}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureShowcaseCard
-              title={t('features.core_features.budgets.title')}
-              description={t('features.core_features.budgets.description')}
-              icon={PieChart}
-              features={[
-                t('features.core_features.budgets.features.categories'),
-                t('features.core_features.budgets.features.tracking'),
-                t('features.core_features.budgets.features.comparison'),
-                t('features.core_features.budgets.features.alerts')
-              ]}
-            />
-            <FeatureShowcaseCard
-              title={t('features.core_features.goals.title')}
-              description={t('features.core_features.goals.description')}
-              icon={Target}
-              features={[
-                t('features.core_features.goals.features.types'),
-                t('features.core_features.goals.features.sharing'),
-                t('features.core_features.goals.features.visualization'),
-                t('features.core_features.goals.features.predictions')
-              ]}
-            />
-            <FeatureShowcaseCard
-              title={t('features.core_features.receipts.title')}
-              description={t('features.core_features.receipts.description')}
-              icon={Receipt}
-              features={[
-                t('features.core_features.receipts.features.extraction'),
-                t('features.core_features.receipts.features.categorization'),
-                t('features.core_features.receipts.features.storage'),
-                t('features.core_features.receipts.features.reports')
-              ]}
-            />
-            <FeatureShowcaseCard
-              title={t('features.core_features.recurring.title')}
-              description={t('features.core_features.recurring.description')}
-              icon={RefreshCw}
-              features={[
-                t('features.core_features.recurring.features.frequency'),
-                t('features.core_features.recurring.features.automation'),
-                t('features.core_features.recurring.features.flexibility'),
-                t('features.core_features.recurring.features.reminders')
-              ]}
-            />
-            <FeatureShowcaseCard
-              title={t('features.core_features.currency.title')}
-              description={t('features.core_features.currency.description')}
-              icon={Globe}
-              features={[
-                t('features.core_features.currency.features.support'),
-                t('features.core_features.currency.features.interface'),
-                t('features.core_features.currency.features.consistency'),
-                t('features.core_features.currency.features.preference')
-              ]}
-            />
-            <FeatureShowcaseCard
-              title={t('features.core_features.export.title')}
-              description={t('features.core_features.export.description')}
-              icon={Download}
-              features={[
-                t('features.core_features.export.features.formats'),
-                t('features.core_features.export.features.import'),
-                t('features.core_features.export.features.ranges'),
-                t('features.core_features.export.features.tax_reports')
-              ]}
-            />
-            <FeatureShowcaseCard
-              title={t('features.core_features.collaboration.title')}
-              description={t('features.core_features.collaboration.description')}
-              icon={Users}
-              features={[
-                t('features.core_features.collaboration.features.shared_goals'),
-                t('features.core_features.collaboration.features.planning'),
-                t('features.core_features.collaboration.features.updates'),
-                t('features.core_features.collaboration.features.notifications')
-              ]}
-            />
-            <FeatureShowcaseCard
-              title={t('features.core_features.security.title')}
-              description={t('features.core_features.security.description')}
-              icon={Shield}
-              features={[
-                t('features.core_features.security.features.encryption'),
-                t('features.core_features.security.features.privacy'),
-                t('features.core_features.security.features.authentication'),
-                t('features.core_features.security.features.audits')
-              ]}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.section.title', 'AI-Powered Financial Features')}</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              {t('features.section.subtitle', 'Experience the future of personal finance with our intelligent automation suite')}
-            </p>
-          </div>
-
-          {/* Feature Tabs */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {aiFeatures.map((feature) => (
-              <Button
-                key={feature.id}
-                variant={activeTab === feature.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab(feature.id)}
-                className="text-xs"
+          {/* Segmented Category Tabs */}
+          <Tabs value={categoryTab} onValueChange={setCategoryTab} className="w-full">
+            <TabsList className="grid grid-cols-3 h-auto p-1.5 rounded-2xl bg-white/70 dark:bg-white/[0.04] backdrop-blur-xl border border-gray-200/80 dark:border-white/10 shadow-sm gap-1 mb-8 max-w-xl mx-auto">
+              <TabsTrigger 
+                value="ai" 
+                className="py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
               >
-                <feature.icon className="mr-1 h-3 w-3" />
-                {feature.title.split(' ').slice(0, 2).join(' ')}
-              </Button>
-            ))}
-          </div>
+                <Brain className="h-4 w-4" />
+                <span>{t('AI Features', 'AI Features')}</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="core" 
+                className="py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
+              >
+                <Target className="h-4 w-4" />
+                <span>{t('Budgets & Goals', 'Budgets & Goals')}</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="tools" 
+                className="py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
+              >
+                <CalculatorIcon className="h-4 w-4" />
+                <span>{t('Calculators & Tools', 'Tools')}</span>
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Active Feature Content */}
-          <Card className="border-0 shadow-xl">
-            <CardHeader>
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-700 text-white rounded-lg">
-                    <activeFeature.icon className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl">{activeFeature.title}</CardTitle>
-                  </div>
+            {/* TAB 1: AI FEATURES */}
+            <TabsContent value="ai" className="space-y-6 focus-visible:outline-none">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* AI feature list */}
+                <div className="space-y-2 lg:col-span-1">
+                  {aiFeatures.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setActiveAiTab(f.id)}
+                      className={`w-full text-left p-3.5 rounded-xl transition-all border flex items-center gap-3 ${
+                        activeAiTab === f.id
+                          ? "bg-white dark:bg-white/10 border-indigo-500/60 shadow-md text-gray-900 dark:text-white"
+                          : "glass-card border-gray-200/60 dark:border-white/5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg shrink-0 ${
+                        activeAiTab === f.id ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-white/5"
+                      }`}>
+                        <f.icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-xs sm:text-sm truncate">{f.title}</div>
+                        <div className="text-[11px] text-gray-400 dark:text-gray-500">{f.badge}</div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <Badge variant="secondary" className="bg-gradient-to-r from-blue-600 to-purple-700 text-white">
-                  {activeFeature.badge}
-                </Badge>
-              </div>
-              <CardDescription className="text-base leading-relaxed mt-4">
-                {activeFeature.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                {activeFeature.benefits.map((benefit, index) => (
-                  <div key={index} className="p-4 bg-blue-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                    <h4 className="font-semibold mb-2">{benefit.title}</h4>
-                    <p className="text-sm text-muted-foreground">{benefit.desc}</p>
-                  </div>
-                ))}
-              </div>
 
-              {/* Interactive Calculator based on active tab */}
-              {activeTab === 'categorization' && (
-                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('features.calculators.categorization.title', 'Categorization Accuracy Calculator')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span>{t('features.calculators.categorization.transactions_label', 'Transactions per month:')}</span>
-                          <span className="font-semibold">{transactions[0]}</span>
+                {/* AI active showcase card */}
+                <div className="lg:col-span-2 glass-card rounded-2xl p-6 sm:p-8 border border-gray-200/80 dark:border-white/10 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md">
+                          <currentAiFeature.icon className="h-6 w-6" />
                         </div>
-                        <Slider
-                          value={transactions}
-                          onValueChange={setTransactions}
-                          max={1000}
-                          min={50}
-                          step={10}
-                        />
-                      </div>
-                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">{t('features.calculators.categorization.time_saved', 'Time saved per month:')}</div>
-                        <div className="text-xl font-bold text-blue-600">{calculateTimeSaved()} {t('features.calculators.categorization.hours', 'hours')}</div>
+                        <div>
+                          <h3 className="font-display text-xl sm:text-2xl font-bold">{currentAiFeature.title}</h3>
+                          <Badge variant="outline" className="mt-1 text-xs border-indigo-200 dark:border-indigo-400/30 text-indigo-600 dark:text-indigo-400">
+                            {currentAiFeature.badge}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
 
-              {activeTab === 'tips' && (
-                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('features.calculators.savings.title', 'Potential Savings Calculator')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span>{t('features.calculators.savings.expenses_label', 'Monthly expenses:')}</span>
-                          <span className="font-semibold">${expenses[0]}</span>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+                      {currentAiFeature.description}
+                    </p>
+
+                    <div className="grid sm:grid-cols-3 gap-3 mb-6">
+                      {currentAiFeature.benefits.map((b, i) => (
+                        <div key={i} className="p-3.5 rounded-xl bg-indigo-50/50 dark:bg-white/[0.02] border border-indigo-100/60 dark:border-white/5">
+                          <h4 className="font-semibold text-xs text-gray-900 dark:text-white mb-1">{b.title}</h4>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">{b.desc}</p>
                         </div>
-                        <Slider
-                          value={expenses}
-                          onValueChange={setExpenses}
-                          max={20000}
-                          min={1000}
-                          step={100}
-                        />
-                      </div>
-                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">{t('features.calculators.savings.potential_savings', 'Potential monthly savings (5-15%):')}</div>
-                        <div className="text-xl font-bold text-blue-600">{calculateSavings()}</div>
-                      </div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
 
-              {activeTab === 'health' && (
-                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('features.calculators.health.title', 'Health Score Simulator')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span>{t('features.calculators.health.savings_rate', 'Savings rate:')}</span>
-                          <span className="font-semibold">{savingsRate[0]}%</span>
+                    {/* Interactive Statement Simulator */}
+                    {activeAiTab === 'statements' && (
+                      <div className="p-4 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200/60 dark:border-white/5 space-y-3">
+                        <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
+                          <span>{t('features.calculators.statements.pages_label', 'Statement pages:')} {statementPages[0]}</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">~{statementPages[0] * 8} {t('features.calculators.statements.extracted', 'transactions')}</span>
                         </div>
                         <Slider
-                          value={savingsRate}
-                          onValueChange={setSavingsRate}
-                          max={50}
-                          min={0}
-                          step={1}
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span>{t('features.calculators.health.budget_adherence', 'Budget adherence:')}</span>
-                          <span className="font-semibold">{budgetAdherence[0]}%</span>
-                        </div>
-                        <Slider
-                          value={budgetAdherence}
-                          onValueChange={setBudgetAdherence}
-                          max={100}
-                          min={0}
-                          step={1}
-                        />
-                      </div>
-                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">{t('features.calculators.health.estimated_score', 'Estimated Financial Health Score:')}</div>
-                        <div className="text-xl font-bold text-blue-600">{calculateHealthScore()}/100</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeTab === 'predictions' && (
-                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('features.calculators.predictions.title', 'Prediction Range Calculator')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span>{t('features.calculators.predictions.historical_months', 'Historical data months:')}</span>
-                          <span className="font-semibold">{historicalMonths[0]} {t('features.calculators.predictions.months', 'months')}</span>
-                        </div>
-                        <Slider
-                          value={historicalMonths}
-                          onValueChange={setHistoricalMonths}
-                          max={24}
-                          min={3}
-                          step={1}
-                        />
-                      </div>
-                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">{t('features.calculators.predictions.prediction_range', 'Prediction range:')}</div>
-                        <div className="text-xl font-bold text-blue-600">{calculatePredictionRange()} {t('features.calculators.predictions.months_ahead', 'months ahead')}</div>
-                      </div>
-                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-green-600">
-                        <div className="text-sm text-muted-foreground">{t('features.calculators.predictions.prediction_accuracy', 'Prediction accuracy:')}</div>
-                        <div className="text-xl font-bold text-green-600">{Math.min(95, Math.floor(65 + (historicalMonths[0] * 1.1)))}%</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeTab === 'statements' && (
-                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('features.calculators.statements.title', 'Statement Processing Calculator')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span>{t('features.calculators.statements.pages', 'Pages in statement:')}</span>
-                          <span className="font-semibold">{pagesInStatement[0]} {t('features.calculators.statements.pages_unit', 'pages')}</span>
-                        </div>
-                        <Slider
-                          value={pagesInStatement}
-                          onValueChange={setPagesInStatement}
-                          max={20}
+                          value={statementPages}
+                          onValueChange={setStatementPages}
                           min={1}
+                          max={25}
                           step={1}
                         />
                       </div>
-                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">{t('features.calculators.statements.estimated_transactions', 'Estimated transactions:')}</div>
-                        <div className="text-xl font-bold text-blue-600">{calculateExtractedTransactions()} {t('features.calculators.statements.transactions', 'transactions')}</div>
-                      </div>
-                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-green-600">
-                        <div className="text-sm text-muted-foreground">{t('features.calculators.statements.processing_time', 'Processing time saved:')}</div>
-                        <div className="text-xl font-bold text-green-600">{Math.floor(calculateExtractedTransactions() * 1.5)} {t('features.calculators.statements.minutes', 'minutes')}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    )}
 
-        {/* Multilingual Support */}
-        <Card className="mb-16 border-0 shadow-xl bg-gradient-to-r from-blue-600 to-purple-700 text-white">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl mb-4 text-white">{t('features.multilingual.title', 'Full Multilingual Support')}</CardTitle>
-            <CardDescription className="text-blue-100 text-lg">
-              {t('features.multilingual.subtitle', 'Native language support for English, Spanish, and Slovak with culturally aware AI responses')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center p-6 bg-white/10 backdrop-blur rounded-lg">
-                <Globe className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{t('features.multilingual.english.title', 'English (Global)')}</h3>
-                <p className="text-blue-100 text-sm">
-                  {t('features.multilingual.english.description', 'Complete AI analysis in English with global financial context and best practices')}
-                </p>
-              </div>
-              <div className="text-center p-6 bg-white/10 backdrop-blur rounded-lg">
-                <Globe className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{t('features.multilingual.spanish.title', 'Español (Latinoamérica)')}</h3>
-                <p className="text-blue-100 text-sm">
-                  {t('features.multilingual.spanish.description', 'Complete AI analysis in Spanish with Latin American business context and cultural understanding')}
-                </p>
-              </div>
-              <div className="text-center p-6 bg-white/10 backdrop-blur rounded-lg">
-                <Globe className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{t('features.multilingual.slovak.title', 'Slovenčina (Europa)')}</h3>
-                <p className="text-blue-100 text-sm">
-                  {t('features.multilingual.slovak.description', 'Complete AI analysis in Slovak with European business context and regulations')}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Free Financial Calculators */}
-        <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.tools.title', 'Free Financial Tools')}</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              {t('features.tools.subtitle', 'Essential tools to manage your finances effectively')}
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
-            {/* Expense Estimation Calculator Card */}
-            <Card className="border-0 shadow-xl hover:shadow-2xl transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <CalculatorIcon className="h-6 w-6 text-green-600" />
+                    {/* Interactive Prediction Simulator */}
+                    {activeAiTab === 'trends' && (
+                      <div className="p-4 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200/60 dark:border-white/5 space-y-3">
+                        <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
+                          <span>{t('features.calculators.predictions.historical_months', 'Historical months:')} {historyMonths[0]}</span>
+                          <span className="text-indigo-600 dark:text-indigo-400 font-bold">~{Math.min(95, 65 + historyMonths[0] * 4)}% {t('features.hero.stats.accuracy_rate', 'Accuracy')}</span>
+                        </div>
+                        <Slider
+                          value={historyMonths}
+                          onValueChange={setHistoryMonths}
+                          min={1}
+                          max={12}
+                          step={1}
+                        />
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <CardTitle className="text-xl">{t('features.calculators.expense.title', 'Expense Estimation Calculator')}</CardTitle>
-                    <CardDescription className="text-base">
-                      {t('features.calculators.expense.description', 'Quick "Can I afford this?" analysis - no account required!')}
-                    </CardDescription>
+
+                  <div className="pt-6 border-t border-gray-100 dark:border-white/5 mt-6">
+                    <Button 
+                      onClick={handleSignUp} 
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-xl shadow-md text-sm"
+                    >
+                      {t('Try this feature free')}
+                    </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-sm text-muted-foreground">
-                    {t('features.calculators.expense.features', 'Features:')}
+              </div>
+            </TabsContent>
+
+            {/* TAB 2: CORE FEATURES (BUDGETS, GOALS, RECEIPTS, SECURITY) */}
+            <TabsContent value="core" className="space-y-6 focus-visible:outline-none">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 w-fit mb-3">
+                    <PieChart className="h-6 w-6" />
                   </div>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• {t('features.calculators.expense.feature1', 'Affordability analysis')}</li>
-                    <li>• {t('features.calculators.expense.feature2', 'Savings timeline calculation')}</li>
-                    <li>• {t('features.calculators.expense.feature3', 'Monthly budget recommendations')}</li>
-                  </ul>
+                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.budgets.title', 'Smart Budget Management')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t('features.core_features.budgets.description', 'Take control of your spending with intuitive budget tracking')}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 w-fit mb-3">
+                    <Target className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.goals.title', 'Savings Goals')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t('features.core_features.goals.description', 'Set and achieve financial targets with visual progress tracking')}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 w-fit mb-3">
+                    <Receipt className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.receipts.title', 'Receipt Processing')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t('features.core_features.receipts.description', 'Digitize receipts instantly with camera upload and automatic extraction')}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 w-fit mb-3">
+                    <RefreshCw className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.recurring.title', 'Recurring Transactions')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t('features.core_features.recurring.description', 'Automate regular expenses with smart reminder notifications')}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 w-fit mb-3">
+                    <Shield className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.security.title', 'Bank-Grade Security')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t('features.core_features.security.description', 'Enterprise security with end-to-end data encryption')}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 w-fit mb-3">
+                    <Download className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.export.title', 'Data Export & Reports')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t('features.core_features.export.description', 'Export your financial data in CSV and PDF formats')}
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* TAB 3: TOOLS & CALCULATORS */}
+            <TabsContent value="tools" className="space-y-6 focus-visible:outline-none">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10 flex flex-col justify-between">
+                  <div>
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 w-fit mb-3">
+                      <CalculatorIcon className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold mb-2">{t('features.calculators.expense.title', 'Expense Estimation Calculator')}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                      {t('features.calculators.expense.description', 'Quick "Can I afford this?" analysis - no account required!')}
+                    </p>
+                  </div>
                   <Button 
                     onClick={() => setExpenseModalOpen(true)}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-                    size="lg"
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl"
                   >
                     <CalculatorIcon className="h-4 w-4 mr-2" />
                     {t('features.calculators.expense.open_button', 'Open Calculator')}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Debt Payoff Calculator Card */}
-            <Card className="border-0 shadow-xl hover:shadow-2xl transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-red-100 rounded-lg">
-                    <Target className="h-6 w-6 text-red-600" />
-                  </div>
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10 flex flex-col justify-between">
                   <div>
-                    <CardTitle className="text-xl">{t('features.calculators.debt.title', 'Debt Payoff Visualizer')}</CardTitle>
-                    <CardDescription className="text-base">
-                      {t('features.calculators.debt.description', 'Compare snowball vs avalanche strategies to crush your debt faster!')}
-                    </CardDescription>
+                    <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 w-fit mb-3">
+                      <Target className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold mb-2">{t('features.calculators.debt.title', 'Debt Payoff Visualizer')}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                      {t('features.calculators.debt.description', 'Compare snowball vs avalanche strategies to crush debt faster')}
+                    </p>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-sm text-muted-foreground">
-                    {t('features.calculators.debt.features', 'Features:')}
-                  </div>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• {t('features.calculators.debt.feature1', 'Snowball vs Avalanche comparison')}</li>
-                    <li>• {t('features.calculators.debt.feature2', 'Interest savings calculation')}</li>
-                    <li>• {t('features.calculators.debt.feature3', 'Payoff timeline visualization')}</li>
-                  </ul>
                   <Button 
                     onClick={() => setDebtModalOpen(true)}
-                    className="w-full bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700"
-                    size="lg"
+                    className="w-full bg-red-600 hover:bg-red-500 text-white rounded-xl"
                   >
                     <Target className="h-4 w-4 mr-2" />
                     {t('features.calculators.debt.open_button', 'Open Calculator')}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+            </TabsContent>
+          </Tabs>
 
-        {/* Call to Action */}
-        <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl mb-4">{t('features.cta.title', 'Ready to Transform Your Financial Management?')}</CardTitle>
-            <CardDescription className="text-lg max-w-2xl mx-auto">
-              {t('features.cta.subtitle', 'Join thousands of entrepreneurs who have revolutionized their business finances with AI-powered insights')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Button size="lg" onClick={handleSignUp} className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800">
-                <Zap className="mr-2 h-4 w-4" />
-                {t('features.cta.start_free', 'Start with Free Account')}
-              </Button>
-            </div>
-            
-          </CardContent>
-        </Card>
+          {/* Bottom CTA Banner */}
+          <div className="mt-14 glass-card rounded-3xl p-8 sm:p-10 border border-indigo-200/60 dark:border-white/10 bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 text-center">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              {t('features.cta.title', 'Ready to Transform Your Financial Management?')}
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-xl mx-auto mb-6">
+              {t('features.cta.subtitle', 'Join thousands of users who have revolutionized their personal finances with AI-powered insights')}
+            </p>
+            <Button
+              onClick={handleSignUp}
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-indigo-500/25 rounded-xl px-8"
+            >
+              <Zap className="mr-2 h-4 w-4" />
+              {t('features.cta.start_free', 'Start with Free Account')}
+            </Button>
+          </div>
         </div>
       </div>
 

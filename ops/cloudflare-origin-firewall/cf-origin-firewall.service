@@ -1,0 +1,15 @@
+[Unit]
+Description=Restrict origin HTTP/HTTPS (80/443) to Cloudflare IP ranges
+Documentation=file:/var/www/kaptia/ops/cloudflare-origin-firewall/README.md
+Wants=network-online.target
+After=network-online.target docker.service ufw.service
+Before=caddy.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/cf-origin-firewall.sh apply
+ExecStop=/usr/local/sbin/cf-origin-firewall.sh remove
+
+[Install]
+WantedBy=multi-user.target

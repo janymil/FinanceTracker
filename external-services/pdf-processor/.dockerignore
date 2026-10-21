@@ -8,4 +8,10 @@ dist
 .env.local
 .env.production
 .env.test
+cloudflare-worker
 README.md
+DEPLOYMENT.md
+deploy.sh
+fly.toml
+docker-compose*.yml
+Dockerfile

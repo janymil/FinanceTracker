@@ -6,11 +6,11 @@
   "Budget": "Rozpočet",
   "Categories": "Kategórie",
   "Goals": "Ciele",
-  "Collaborative Goals": "Spoločné ciele",
+  "Collaborative Goals": "Kolaboratívne Ciele",
   "Reports": "Správy",
   "Trends": "Trendy",
   "Calendar View": "Kalendárne zobrazenie",
-  "Data Management": "Správa údajov",
+  "Data Management": "Správa Údajov",
   "Month": "Mesiac",
   "Year": "Rok",
   "Standard": "Štandardný",
@@ -37,7 +37,7 @@
   "Upgrade for unlimited transaction storage": "Inovovať pre neobmedzené ukladanie transakcií",
   "Redeem Code": "Uplatniť kód",
   "Add Transaction": "Pridať transakciu",
-  "Make this a recurring transaction": "Spraviť z toho opakujúcu sa transakciu",
+  "Make this a recurring transaction": "Urobiť z toho opakujúcu sa transakciu",
   "Frequency": "Frekvencia",
   "End Date (Optional)": "Dátum ukončenia (Voliteľné)",
   "Payment URL (Optional)": "URL platby (Voliteľné)",
@@ -55,14 +55,7 @@
   "Transaction description": "Popis transakcie",
   "Type": "Typ",
   "Category": "Kategória",
-  "transaction": {
-    "amount": "Suma",
-    "description": "Popis",
-    "category": "Kategória",
-    "type": "Typ",
-    "date": "Dátum",
-    "description_placeholder": "Popis transakcie"
-  },
+  "transaction": "transakcia",
   "Select category": "Vyberte kategóriu",
   "Select a category": "Vyberte kategóriu",
   "No categories available for": "Žiadne kategórie nie sú dostupné pre",
@@ -87,20 +80,16 @@
   "Consider reviewing your {{category}} expenses": "Zvaž kontrolu svojich výdavkov na {{category}}",
   "Great job! You're maintaining healthy finances": "Výborne! Udržiavaš zdravé financie",
   "Smart Bill Assistant": "Inteligentný asistent účtov",
-  "Payment URL (Optional)": "URL platby (Voliteľné)",
   "Link to where you can pay this bill": "Odkaz kde môžete zaplatiť tento účet",
   "Reference Note (Optional)": "Referenčná poznámka (Voliteľné)",
   "Note": "Poznámka",
   "Account #123456, Reference: ABC789": "Účet #123456, Referencia: ABC789",
   "Account number or other reference information": "Číslo účtu alebo iné referenčné informácie",
-  "Make this a recurring transaction": "Urobiť z toho opakujúcu sa transakciu",
-  "Frequency": "Frekvencia",
   "Select frequency": "Vyberte frekvenciu",
   "Daily": "Denne",
   "Weekly": "Týždenne",
   "Monthly": "Mesačne",
   "Yearly": "Ročne",
-  "End Date (Optional)": "Dátum ukončenia (Voliteľné)",
   "Cancel": "Zrušiť",
   "Add": "Pridať",
   "AI Financial Tips": "AI finančné tipy",
@@ -111,7 +100,7 @@
   "Welcome to your new plan! All features are now available.": "Vitajte vo vašom novom pláne! Všetky funkcie sú teraz dostupné.",
   "Help": "Pomoc",
   "Contact": "Kontakt",
-  "AI Features": "AI Funkcie",
+  "AI Features": "Umelá inteligencia (AI)",
   "Sign In": "Prihlásiť sa",
   "Take Control of Your": "Prevezmite kontrolu nad",
   "Financial Future": "finančnou budúcnosťou",
@@ -130,8 +119,6 @@
   "Choose Your Perfect": "Vyberte si váš perfektný",
   "Financial Plan": "finančný plán",
   "From basic expense tracking to AI-powered financial insights, we have the right plan for every financial journey.": "Od základného sledovania výdavkov po AI finančné poznatky, máme správny plán pre každú finančnú cestu.",
-  "Monthly": "Mesačne",
-  "Yearly": "Ročne",
   "Free": "Zadarmo",
   "month": "mesiac",
   "Perfect for getting started with expense tracking": "Ideálne na začiatok so sledovaním výdavkov",
@@ -141,7 +128,6 @@
   "Simple financial overview": "Jednoduchý finančný prehľad",
   "Personalized financial tips": "Personalizované finančné tipy",
   "Most Popular": "Najpopulárnejší",
-  "Standard": "Štandardný",
   "For users serious about financial management": "Pre používateľov, ktorí to myslia vážne s finančným riadením",
   "Everything in Free plan": "Všetko zo zadarmo plánu",
   "Goals and budget management": "Správa cieľov a rozpočtu",
@@ -150,7 +136,6 @@
   "Calendar view and reminders": "Kalendárne zobrazenie a pripomienky",
   "Unlimited transaction history": "Neobmedzená história transakcií",
   "Subscribe Now": "Predplatiť si teraz",
-  "Premium": "Premium",
   "Complete AI-powered financial automation": "Kompletná AI finančná automatizácia",
   "Everything in Standard plan": "Všetko zo štandardného plánu",
   "AI financial tips and insights": "AI finančné tipy a poznatky",
@@ -169,8 +154,8 @@
   "See exactly what's included in each plan": "Pozrite si presne čo je zahrnuté v každom pláne",
   "Features": "Funkcie",
   "Overview": "Prehľad",
-  "Plans": "Plány", 
-  "User Guide": "Používateľská Príručka",
+  "Plans": "Plány",
+  "User Guide": "Návody",
   "FAQ": "Často Kladené Otázky",
   "Welcome to Kaptia": "Vitajte v Kaptia",
   "Your comprehensive personal finance management solution": "Vaše komplexné riešenie správy osobných financií",
@@ -196,7 +181,7 @@
   "Transaction editing and deletion": "Úprava a mazanie transakcií",
   "Bulk operations and imports": "Hromadné operácie a importy",
   "Custom category creation": "Tvorba vlastných kategórií",
-  "Budgets & Goals": "Rozpočty a Ciele",
+  "Budgets & Goals": "Rozpočty a ciele",
   "Set monthly spending limits by category": "Nastaviť mesačné limity výdavkov podľa kategórie",
   "Track progress with visual indicators": "Sledovať pokrok s vizuálnymi indikátormi",
   "Create savings goals with deadlines": "Vytvoriť úsporné ciele s termínmi",
@@ -226,7 +211,6 @@
   "Daily AI-powered financial tips": "Denné finančné tipy poháňané AI",
   "Transaction reminders and alerts": "Pripomienky a upozornenia transakcií",
   "Multi-device receipt scanning": "Skenovanie účteniek na viacerých zariadeniach",
-  "Data Management": "Správa Údajov",
   "Cloud storage and backup (Premium)": "Cloudové úložisko a zálohovanie (Premium)",
   "Import from CSV, Excel, JSON formats": "Import z formátov CSV, Excel, JSON",
   "Export to multiple file formats": "Export do viacerých formátov súborov",
@@ -244,7 +228,6 @@
   "Secure API endpoints": "Bezpečné API endpoints",
   "Regular security audits": "Pravidelné bezpečnostné audity",
   "Data ownership transparency": "Transparentnosť vlastníctva údajov",
-  "Most Popular": "Najpopulárnejší",
   "Getting Started": "Začíname",
   "Quick Start Guide": "Rýchla Príručka",
   "Create Your Account": "Vytvorte Svoj Účet",
@@ -262,7 +245,6 @@
   "Financial Summary Cards": "Karty Finančného Súhrnu",
   "Location": "Umiestnenie",
   "Function": "Funkcia",
-  "Features": "Funkcie",
   "Top of dashboard": "Vrchná časť dashboardu",
   "Display total income, expenses, and balance for selected month": "Zobraziť celkové príjmy, výdavky a zostatok pre vybraný mesiac",
   "Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values": "Automaticky sa aktualizuje s novými transakciami, klikateľné pre podrobný rozpis, farebne kódované pozitívne/negatívne hodnoty",
@@ -272,21 +254,21 @@
   "Form validation, category selection, date picker, recurring transaction option (Standard+), receipt upload (Standard+)": "Validácia formulára, výber kategórie, výber dátumu, opcia opakujúcich sa transakcií (Štandard+), nahrávanie účteniek (Štandard+)",
   "Recent Transactions Widget": "Widget Nedávnych Transakcií",
   "Left column of dashboard": "Ľavý stĺpec dashboardu",
-  "Shows last 5 transactions with edit/delete options": "Zobrazuje posledných 5 transakcií s možnosťami úpravy/mazania",
-  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Úprava jedným klikom, ikony kategórií, formátovanie súm, miniatúry účteniek, indikátory opakujúcich sa transakcií",
-  "Budget Overview Widget (Standard+)": "Widget Prehľadu Rozpočtu (Štandard+)",
+  "Shows last 5 transactions with edit/delete options": "Zobrazuje posledných 5 transakcií s možnosťami úpravy/vymazania",
+  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Úprava jedným kliknutím, ikony kategórií, formátovanie súm, miniatúry účteniek, indikátory opakujúcich sa transakcií",
+  "Budget Overview Widget (Standard+)": "Widget Prehľadu Rozpočtu (Standard+)",
   "Right column of dashboard": "Pravý stĺpec dashboardu",
-  "Monitor budget progress across all categories": "Sledovať pokrok rozpočtu vo všetkých kategóriách",
-  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Indikátory pokroku, percentuálne dokončenie, farebne kódovaný stav (zelená/žltá/červená), upozornenia na prekročenie",
+  "Monitor budget progress across all categories": "Monitoruje pokrok rozpočtu vo všetkých kategóriách",
+  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Pokrokové lišty, percentuálne dokončenie, farebne kódovaný stav (zelená/žltá/červená), upozornenia na prekročenie rozpočtu",
   "Financial Health Score": "Skóre Finančného Zdravia",
-  "Calculate and display financial wellness score": "Vypočítať a zobraziť skóre finančného wellness",
+  "Calculate and display financial wellness score": "Vypočíta a zobrazí skóre finančného wellness",
   "Free Users": "Bezplatní Používatelia",
-  "Simple calculation based on income/expense ratio": "Jednoduchý výpočet založený na pomere príjmy/výdavky",
-  "Standard+ Users": "Štandard+ Používatelia",
+  "Simple calculation based on income/expense ratio": "Jednoduchý výpočet založený na pomere príjmov/výdavkov",
+  "Standard+ Users": "Standard+ Používatelia",
   "AI-powered analysis with detailed recommendations and improvement suggestions": "AI analýza s podrobnými odporúčaniami a návrhmi na zlepšenie",
   "AI Financial Tips (Premium)": "AI Finančné Tipy (Premium)",
-  "Personalized financial advice based on spending patterns": "Personalizované finančné rady založené na vzorcoch výdavkov",
-  "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "AI generované tipy, analýza trendov, uskutočniteľné odporúčania, trvalé naprieč reláciami",
+  "Personalized financial advice based on spending patterns": "Personalizované finančné poradenstvo založené na vzoroch utrácania",
+  "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "AI generované tipy, analýza trendov, uskutočniteľné odporúčania, perzistentné medzi sedeniami",
   "Basic expense tracking": "Základné sledovanie výdavkov",
   "Transaction history": "História transakcií",
   "Up to 100": "Až 100",
@@ -458,8 +440,6 @@
   "We may update this Cookie Policy from time to time. Any changes will be posted on this page with an updated revision date.": "Môžeme aktualizovať tieto zásady cookies z času na čas. Všetky zmeny budú zverejnené na tejto stránke s aktualizovaným dátumom revízie.",
   "8. Contact Us": "8. Kontaktujte nás",
   "If you have any questions about our use of cookies, please contact us at:": "Ak máte akékoľvek otázky o našom používaní cookies, kontaktujte nás na:",
-
-  "Kaptia": "Kaptia",
   "Take control of your finances with intelligent expense tracking, budgeting, and AI-powered insights.": "Prevezmite kontrolu nad financiami s inteligentným sledovaním výdavkov, rozpočtovaním a AI poznatkami.",
   "NutriNova LLC": "NutriNova LLC",
   "2105 Vista Oeste NW": "2105 Vista Oeste NW",
@@ -469,12 +449,6 @@
   "Support": "Podpora",
   "Contact Us": "Kontaktujte nás",
   "Help Center": "Centrum pomoci",
-  "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. Všetky práva vyhradené.",
-  "Privacy Policy": "Zásady ochrany súkromia",
-  "Terms of Service": "Podmienky služby",
-  "Cookie Policy": "Zásady cookies",
-  "Contact": "Kontakt",
-
   "Jan": "Jan",
   "Feb": "Feb",
   "Mar": "Mar",
@@ -511,8 +485,7 @@
   "Last Month": "Minulý Mesiac",
   "This Month": "Tento Mesiac",
   "All Types": "Všetky Typy",
-  "Income": "Príjmy",
-  "Expense": "Výdavky",
+  "Expense": "Výdavok",
   "All Categories": "Všetky Kategórie",
   "All Transactions": "Všetky Transakcie",
   "voiceConversation": {
@@ -545,14 +518,11 @@
   "Recurring Only": "Len Opakujúce sa",
   "One-time Only": "Len Jednorazové",
   "Date Range": "Časové Rozpätie",
-  "Type": "Typ",
-  "Category": "Kategória",
   "Recurring": "Opakujúce sa",
   "Filters": "Filtre",
   "Active": "Aktívne",
-
   "Food": "Jedlo",
-  "Entertainment": "Zábava", 
+  "Entertainment": "Zábava",
   "Housing": "Bývanie",
   "Transportation": "Doprava",
   "Healthcare": "Zdravotníctvo",
@@ -567,12 +537,10 @@
   "Debt Payoff": "Splácanie dlhov",
   "Retirement": "Dôchodok",
   "Other": "Iné",
-
   "Category Management": "Správa Kategórií",
   "Organize your income and expense sources": "Organizujte svoje príjmy a výdavky",
-  "Expense Categories": "Kategórie Výdavkov", 
+  "Expense Categories": "Kategórie Výdavkov",
   "Income Categories": "Kategórie Príjmov",
-  "Expenses": "Výdavky",
   "Manage categories for your expenses and spending": "Spravujte kategórie pre vaše výdavky a nakupovanie",
   "Manage categories for your income sources": "Spravujte kategórie pre vaše zdroje príjmov",
   "New Category": "Nová Kategória",
@@ -583,10 +551,8 @@
   "Category Name": "Názov Kategórie",
   "Enter category name": "Zadajte názov kategórie",
   "Category Type": "Typ Kategórie",
-  "Expense": "Výdavok",
   "Icon": "Ikona",
   "Color": "Farba",
-  "Cancel": "Zrušiť",
   "Update": "Aktualizovať",
   "Create": "Vytvoriť",
   "No Expense Categories": "Žiadne Kategórie Výdavkov",
@@ -597,7 +563,6 @@
   "Add Income Category": "Pridať Kategóriu Príjmov",
   "In use": "Používa sa",
   "Recent Transactions": "Nedávne Transakcie",
-  "Search transactions...": "Hľadať transakcie...",
   "Filter by type": "Filtrovať podľa typu",
   "All transactions": "Všetky transakcie",
   "Expenses only": "Len výdavky",
@@ -611,7 +576,6 @@
   "Total Expenses": "Celkové Výdavky",
   "Net Balance": "Čistý Zostatok",
   "Budget Status": "Stav Rozpočtu",
-  "transaction": "transakcia",
   "transactionPlural": "transakcie",
   "Auto": "Auto",
   "Manual": "Manuálne",
@@ -649,12 +613,10 @@
   "No Timeline Data Available": "Nie sú K Dispozícii Údaje Časovej Osi",
   "Add transactions to generate timeline expense predictions": "Pridajte transakcie na vygenerovanie predikcie výdavkov časovej osi",
   "AI-powered expense predictions help you plan your budget with machine learning insights": "AI predikcie výdavkov vám pomôžu plánovať rozpočet s poznatkami strojového učenia",
-
   "total": "celkom",
   "No Budget Set": "Žiadny Rozpočet",
   "Financial Trends": "Finančné Trendy",
   "Evolution of your income, expenses and net balance over the last months": "Vývoj vašich príjmov, výdavkov a čistého zostatku za posledné mesiace",
-  "Premium": "Premium",
   "Expense Breakdown": "Rozdelenie Výdavkov",
   "Your spending by category": "Vaše výdavky podľa kategórií",
   "Your spending by category this month": "Vaše výdavky podľa kategórií tento mesiac",
@@ -681,7 +643,36 @@
   "financialHealthMascot": "Maskot finančného zdravia",
   "healthScore": "Skóre zdravia",
   "achievements": "Úspechy",
-  "insights": "Poznatky",
+  "insights": {
+    "title": "Poznatky",
+    "description": "Matematické poznatky založené na vašich finančných údajach a trendoch míňania",
+    "loading": "Načítavam poznatky...",
+    "no_insights": "Žiadne poznatky nie sú k dispozícii",
+    "add_transactions": "Pridajte transakcie na generovanie finančných poznatkov",
+    "upgrade_for_insights": "Vylepšite na Standard alebo Premium plán pre prístup k poznatkom",
+    "impact_high": "Vysoký",
+    "impact_medium": "Stredný",
+    "impact_low": "Nízky",
+    "recommendation": "Odporúčanie",
+    "take_action": "Vykonať Akciu",
+    "high_spending_alert": "Upozornenie na Vysoké Výdavky",
+    "high_spending_description": "Minuli ste {{percentage}}% svojho príjmu tento mesiac",
+    "review_expense_categories": "Zvážte preskúmanie najväčších kategórií výdavkov",
+    "category_focus_opportunity": "Príležitosť na Zameranie Kategórie",
+    "category_spending_percentage": "{{category}} predstavuje {{percentage}}% vašich výdavkov",
+    "consider_budget_limit": "Zvážte nastavenie rozpočtového limitu pre {{category}}",
+    "positive_cash_flow": "Pozitívny Peňažný Tok",
+    "savings_rate": "Šetríte {{rate}}% svojho príjmu tento mesiac",
+    "increase_savings_rate": "Zvážte zvýšenie miery úspor na 20%",
+    "excellent_savings": "Vynikajúca miera úspor!",
+    "spending_increased": "Výdavky sa Zvýšili",
+    "spending_decreased": "Výdavky sa Znížili",
+    "spending_change_description": "Vaše výdavky sa {{direction}} o {{percentage}}% oproti minulému mesiacu",
+    "increased": "zvýšili",
+    "decreased": "znížili",
+    "review_recent_purchases": "Preskúmajte nedávne nákupy na identifikáciu nárastu výdavkov",
+    "great_expense_reduction": "Skvelá práca pri znižovaní výdavkov!"
+  },
   "alerts": "Upozornenia",
   "hideDetails": "Skryť podrobnosti",
   "showDetails": "Zobraziť podrobnosti",
@@ -782,7 +773,6 @@
   },
   "aiAnalysisSection": "Sekcia AI analýzy",
   "analysisInProgress": "Analýza prebieha...",
-
   "financial_health": {
     "title": "Skóre Finančného Zdravia",
     "spending_control": "Kontrola Výdavkov",
@@ -814,120 +804,68 @@
       "score_ranges_detail": "80-100: Výborné | 65-79: Dobré | 50-64: Uspokojivé | Pod 50: Potrebuje Zlepšenie"
     }
   },
-
-  "Frequently Asked Questions": "Často Kladené Otázky",
   "AI Assistant": "AI Asistent",
   "Ask me anything about Kaptia": "Opýtajte sa ma čokoľvek o Kaptia",
-
   "How do I get started with Kaptia?": "Ako začnem s Kaptia?",
   "Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions.": "Jednoducho si vytvorte účet a začnite pridaním svojej prvej transakcie. Môžete manuálne zadať výdavky a príjmy, alebo použiť našu funkciu AI kategorizácie (Standard+ plány) na automatickú klasifikáciu vašich transakcií.",
-
   "What are the differences between subscription plans?": "Aké sú rozdiely medzi predplatnými plánmi?",
   "Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export.": "Bezplatný plán umožňuje 100 transakcií, Standard plán ($4.99/mesiac) zahŕňa až 100 transakcií s AI funkciami, rozpočtovaním a cieľmi. Premium plán ($9.99/mesiac) ponúka neobmedzené transakcie, pokročilé analýzy, cloudové zálohovanie a import/export údajov.",
-
   "Is my financial data secure?": "Sú moje finančné údaje bezpečné?",
   "Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.": "Áno, používame štandardné priemyselné šifrovanie a bezpečnostné opatrenia. Vaše údaje sú bezpečne uložené s PostgreSQL a ponúkame cloudové zálohovanie pre Premium používateľov. Nikdy nezdieľame vaše osobné finančné informácie.",
-
   "How does AI categorization work?": "Ako funguje AI kategorizácia?",
   "Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.": "Naša AI analyzuje popisy a sumy vašich transakcií na automatické navrhovanie najvhodnejšej kategórie. Učí sa z vašich vzorov a časom sa stáva presnejšou. Dostupné pre Standard a Premium plány.",
-
   "How does receipt scanning work?": "Ako funguje skenovanie účteniek?",
   "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.": "Nahrajte fotografie účteniek pomocou tlačidla 'Nahrať Obrázok' na ktorejkoľvek stránke transakcií. Naša OCR technológia automaticky extrahuje názov obchodníka, sumu a dátum. Standard+ používatelia dostávajú AI návrhy kategórií. Funguje s mobilnou kamerou alebo fotkami z galérie.",
-
   "How does mobile QR code upload work?": "Ako funguje mobilné nahrávanie QR kódu?",
   "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.": "Kliknite na 'Nahrať Obrázok' na vašom počítači a vyberte 'Skenovať s Telefónom'. Na obrazovke sa zobrazí QR kód. Naskenujte ho kamerou telefónu na otvorenie mobilnej stránky nahrávania. Odfotografujte účtenku na telefóne a extrahované údaje sa automaticky zobrazia vo formulári transakcie na počítači. Perfektné pre bezproblémové skenovanie účteniek medzi zariadeniami.",
-
   "What if OCR doesn't read my receipt correctly?": "Čo keď OCR neprečíta moju účtenku správne?",
   "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results.": "Môžete upraviť akékoľvek extrahované informácie pred uložením. Systém zobrazuje extrahované údaje v upraviteľných poliach, umožňujúc vám opraviť názvy obchodníkov, sumy alebo dátumy. Jasné, dobre osvetlené fotky poskytujú najlepšie výsledky.",
-
   "What types of receipts are supported?": "Aké typy účteniek sú podporované?",
   "All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions.": "Všetky štandardné účtenky vrátane reštauračných účtov, obchodov s potravinami, čerpacích staníc, maloobchodných nákupov a servisných účteniek. Systém funguje najlepšie s tlačenými účtenkami, ktoré majú jasný text a sú odfotografované v dobrých svetelných podmienkach.",
-
   "How do I set up budgets and goals?": "Ako nastavím rozpočty a ciele?",
   "Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.": "Prejdite do sekcie Rozpočty alebo Ciele z bočného panela. Nastavte mesačné limity výdavkov podľa kategórie pre rozpočty, alebo vytvorte úsporné ciele s termínmi. Aplikácia bude automaticky sledovať váš pokrok.",
-
   "Can I export my data?": "Môžem exportovať svoje údaje?",
   "Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.": "Áno, Premium používatelia môžu exportovať údaje vo formátoch CSV, Excel alebo JSON. Môžete tiež nastaviť automatické cloudové zálohovanie a importovať údaje z iných finančných aplikácií ako Mint, QuickBooks a YNAB.",
-
   "Is Kaptia available on mobile?": "Je Kaptia dostupné na mobile?",
   "Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "Kaptia je responzívna webová aplikácia, ktorá funguje perfektne v mobilných prehliadačoch. Jednoducho si označte stránku v telefóne pre ľahký prístup kdekoľvek.",
-
   "What widgets are available on the dashboard?": "Aké widgety sú dostupné na nástenke?",
   "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.": "Nástenka zahŕňa Karty Finančného Súhrnu (príjmy/výdavky/bilancia), widget Nedávnych Transakcií, Prehľad Rozpočtu (Standard+), Skóre Finančného Zdravia, AI Finančné Tipy (Premium), Finančnú Maskota (Premium) a Pripomienky Transakcií (Standard+). Všetky widgety sa aktualizujú automaticky.",
-
   "How do I edit or delete transactions?": "Ako upravím alebo zmažem transakcie?",
   "Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads.": "Kliknite na akúkoľvek transakciu v zoznamoch alebo widgetoch nástenky na úpravu. Upravte sumu, popis, dátum, kategóriu alebo poznámky. Použite tlačidlo vymazania na odstránenie transakcií. Zmeny sa aktualizujú okamžite bez obnovenia stránky.",
-
   "How do recurring transactions work?": "Ako fungujú opakujúce sa transakcie?",
   "Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills.": "Standard+ používatelia môžu označiť transakcie ako opakujúce sa (týždenne, mesačne, ročne). Systém zobrazuje nadchádzajúce pripomienky vo widgete nástenky a automaticky detekuje vzory. Nastavte koncové dátumy alebo ich nechajte otvorené pre pokračujúce účty.",
-
   "Can I create custom categories?": "Môžem vytvoriť vlastné kategórie?",
   "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus.": "Áno, vytvorte neobmedzené vlastné kategórie s personalizovanými názvami, farbami a ikonami. Vyberte si z typov príjmov, výdavkov alebo cieľov. Vlastné kategórie sa zobrazujú spolu s viac ako 15 preddefinovanými kategóriami vo všetkých rozbaľovacích ponukách.",
-
   "How is the Financial Health Score calculated?": "Ako sa počíta Skóre Finančného Zdravia?",
   "Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations.": "Bezplatní používatelia vidia jednoduchý výpočet založený na pomere príjmov/výdavkov. Standard+ používatelia dostávajú AI analýzu hodnotiacu návyky utrácania, dodržiavanie rozpočtu, úspornú mieru a pokrok cieľov s podrobnými odporúčaniami na zlepšenie.",
-
   "How does budget tracking work?": "Ako funguje sledovanie rozpočtu?",
   "Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically.": "Standard+ používatelia vytvárajú rozpočty pre kategórie s týždennými/mesačnými/ročnými limitmi. Pokrokové lišty zobrazujú výdavky s farebne kódovaným stavom: zelená (pod rozpočtom), žltá (blíži sa k limitu), červená (nad rozpočtom). Automaticky dostávajte upozornenia na prekročenie rozpočtu.",
-
   "Can I share goals with family members?": "Môžem zdieľať ciele s rodinnými príslušníkmi?",
   "Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts.": "Áno, Standard+ používatelia môžu vytvárať kolaboratívne ciele a pozývať rodinnýich príslušníkov alebo partnerov. Sledujte zdieľané príspevky, spoločne sledujte pokrok a oslavujte úspechy ako tím pre spoločné úsporné úsilie.",
-
   "What is the calendar view feature?": "Čo je funkcia kalendárového zobrazenia?",
   "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.": "Standard+ používatelia môžu zobrazovať transakcie v mesačnej kalendárovej mriežke zobrazujúcej denné súčty výdavkov a náhľady transakcií. Navigujte medzi mesiacmi pre zobrazenie vzorov utrácania v čase s mobilne responzívnym dizajnom.",
-
   "What are AI trend predictions?": "Čo sú AI predpovede trendov?",
   "Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends.": "Premium používatelia dostávajú AI finančné prognózy zobrazujúce predpovede výdavkov, projekcie príjmov, odporúčania rozpočtu a odhady časových plánov cieľov. Používa strojové učenie na analýzu vzorov a predpovedanie budúcich finančných trendov.",
-
   "What is the Financial Mascot feature?": "Čo je funkcia Finančnej Maskoty?",
   "Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored.": "Premium používatelia dostávajú personalizovaného AI spoločníka, ktorý odráža finančné zdravie prostredníctvom zmien nálady a vizuálnych indikátorov. Maskota sa dá presúvať po obrazovke, má jedinečné vlastnosti založené na vašom profile a môže sa skryť/obnoviť.",
-
   "How does cloud backup work?": "Ako funguje cloudové zálohovanie?",
   "Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data.": "Premium používatelia dostávajú automatické denné zálohy o 2:00 ráno bezpečne ukladajúce všetky transakcie, rozpočty, ciele, kategórie a obrázky účteniek. Dostupné sú možnosti manuálneho zálohovania s kompletnou funkciou obnovy na obnovenie všetkých údajov.",
-
   "Can I import data from other financial apps?": "Môžem importovať údaje z iných finančných aplikácií?",
   "Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling.": "Premium používatelia môžu importovať z Mint, QuickBooks, YNAB, Personal Capital a bankových exportov. Funkcie zahŕňajú mapovanie stĺpcov, validáciu údajov, náhľad pred importom a dávkové spracovanie s riešením chýb.",
-
   "Can I use my phone's camera for receipts?": "Môžem použiť kameru telefónu na účtenky?",
   "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.": "Áno, mobilné prehliadače podporujú priamy prístup ku kamere. Vyberte 'Odfotiť' na použitie kamery alebo 'Vybrať z Galérie' na výber existujúcich fotiek. Skenovanie QR kódu umožňuje nahrávanie medzi zariadeniami z telefónu na počítač.",
-
   "How do I filter and view reports?": "Ako filtrujem a zobrazujem reporty?",
   "Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports.": "Použite rozbaľovacie ponuky mesiacov a filtre období (týždeň/mesiac/štvrťrok/rok) na stránke Reportov. Zobrazujte finančné prehľady, rozdelenia kategórií a analýzy. Premium používatelia dostávajú pokročilé analýzy trendov a porovnávacie reporty.",
-
   "How do plan upgrades and downgrades work?": "Ako fungujú aktualizácie a zníženia plánov?",
   "Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration.": "Aktualizácie sa aplikujú okamžite s pomernou fakturáciou. Zníženia sú naplánované na koniec vášho aktuálneho fakturačného obdobia. Prístup k správe predplatného cez stránku Profilu s úplnou transparentnosťou fakturácie a integráciou Stripe zákazníckeho portálu.",
-
   "Is the app fully mobile-friendly?": "Je aplikácia plne kompatibilná s mobiles?",
   "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.": "Áno, kompletný responzívny dizajn s dotykovými rozhraniami, mobilnou navigáciou, zbaliteľnými filtrami, optimalizovanými formulármi a integráciou kamery. Všetky desktop funkcie sú dostupné v mobilných prehliadačoch bez potreby sťahovania aplikácií.",
-
   "How can I get help or support?": "Ako môžem získať pomoc alebo podporu?",
   "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.": "Použite tohto AI chat asistenta pre okamžitú pomoc, skontrolujte našu kompletnú dokumentáciu nižšie, alebo kontaktujte náš tím podpory cez stránku kontaktov pre personalizovanú pomoc.",
-
-  "Recent Transactions Widget": "Widget Nedávnych Transakcií",
-  "Shows last 5 transactions with edit/delete options": "Zobrazuje posledných 5 transakcií s možnosťami úpravy/vymazania",
-  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Úprava jedným kliknutím, ikony kategórií, formátovanie súm, miniatúry účteniek, indikátory opakujúcich sa transakcií",
-
-  "Budget Overview Widget (Standard+)": "Widget Prehľadu Rozpočtu (Standard+)",
-  "Monitor budget progress across all categories": "Monitoruje pokrok rozpočtu vo všetkých kategóriách",
-  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Pokrokové lišty, percentuálne dokončenie, farebne kódovaný stav (zelená/žltá/červená), upozornenia na prekročenie rozpočtu",
-
-  "Financial Health Score": "Skóre Finančného Zdravia",
-  "Calculate and display financial wellness score": "Vypočíta a zobrazí skóre finančného wellness",
-  "Free Users": "Bezplatní Používatelia",
-  "Simple calculation based on income/expense ratio": "Jednoduchý výpočet založený na pomere príjmov/výdavkov",
-  "Standard+ Users": "Standard+ Používatelia",
-  "AI-powered analysis with detailed recommendations and improvement suggestions": "AI analýza s podrobnými odporúčaniami a návrhmi na zlepšenie",
-
-  "AI Financial Tips (Premium)": "AI Finančné Tipy (Premium)",
-  "Personalized financial advice based on spending patterns": "Personalizované finančné poradenstvo založené na vzoroch utrácania",
-  "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "AI generované tipy, analýza trendov, uskutočniteľné odporúčania, perzistentné medzi sedeniami",
-
   "Financial Mascot (Premium)": "Finančná Maskota (Premium)",
   "Floating on dashboard": "Plávajúca na nástenke",
   "Personalized AI companion reflecting financial health": "Personalizovaný AI spoločník odrážajúci finančné zdravie",
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Presúvateľné umiestnenie, zmeny nálady na základe utrácania, jedinečné vlastnosti pre každého používateľa, možnosti skrytia/obnovenia",
-
-  "Transaction Management": "Správa Transakcií",
   "Transaction Entry Forms": "Formuláre na Zadávanie Transakcií",
   "Expenses, Income, and Transactions pages": "Stránky Výdavkov, Príjmov a Transakcií",
   "Add new financial transactions with complete details": "Pridanie nových finančných transakcií s kompletnými detailmi",
@@ -950,8 +888,6 @@
   "Upload Image buttons on transaction pages": "Tlačidlá Nahrať Obrázok na stránkach transakcií",
   "Extract transaction data from receipt photos": "Extrahovanie údajov transakcií z fotiek účteniek",
   "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "Google Cloud Vision OCR, AI kategorizácia, podpora mobilnej kamery, QR kód nahrávanie medzi zariadeniami",
-
-  "Category Management": "Správa Kategórií",
   "Category Creation and Editing": "Tvorba a Úprava Kategórií",
   "Categories page": "Stránka Kategórií",
   "Create custom expense and income categories": "Vytvoriť vlastné kategórie výdavkov a príjmov",
@@ -965,7 +901,6 @@
   "AI Auto-Categorization (Standard+)": "AI Auto-Kategorizácia (Standard+)",
   "Automatically suggest categories based on transaction descriptions": "Automaticky navrhovať kategórie na základe popisov transakcií",
   "Machine learning analysis, merchant recognition, user preference learning, manual override options": "Analýza strojového učenia, rozpoznávanie obchodníkov, učenie sa preferencií používateľa, možnosti manuálneho prepísania",
-
   "Budget and Goals (Standard+)": "Rozpočty a Ciele (Standard+)",
   "Budget Creation and Management": "Tvorba a Správa Rozpočtov",
   "Budgets page": "Stránka Rozpočtov",
@@ -979,10 +914,8 @@
   "Types": "Typy",
   "Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement": "Núdzový Fond, Dovolenka, Záloha na Dom, Kúpa Auta, Splácanie Dlhov, Dôchodok",
   "Progress tracking, milestone celebrations, contribution history, deadline reminders": "Sledovanie pokroku, oslavy míľnikov, história príspevkov, pripomienky termínov",
-  "Collaborative Goals": "Kolaboratívne Ciele",
   "Share goals with family members or partners": "Zdieľanie cieľov s rodinnými príslušníkmi alebo partnermi",
   "Friend invitations, shared contributions, progress visibility, achievement tracking": "Pozvánky priateľov, zdieľané príspevky, viditeľnosť pokroku, sledovanie úspechov",
-
   "Reports and Analytics": "Reporty a Analýzy",
   "Financial Overview Reports": "Reporty Finančného Prehľadu",
   "Reports page - Overview tab": "Stránka Reportov - Záložka Prehľad",
@@ -1000,7 +933,6 @@
   "Calendar page": "Stránka Kalendára",
   "Monthly grid view of all transactions": "Mesačné mriežkové zobrazenie všetkých transakcií",
   "Daily spending totals, transaction previews, monthly navigation, mobile responsive grid": "Denné súčty výdavkov, náhľady transakcií, mesačná navigácia, mobilne responzívna mriežka",
-
   "Data Management (Premium)": "Správa Údajov (Premium)",
   "Cloud Backup System": "Systém Cloudových Záloh",
   "Data Management page - Backup tab": "Stránka Správy Údajov - Záložka Záloha",
@@ -1018,7 +950,6 @@
   "Supported": "Podporované",
   "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, bankové exporty",
   "Column mapping, data validation, preview before import, batch processing": "Mapovanie stĺpcov, validácia údajov, náhľad pred importom, dávkové spracovanie",
-
   "Profile and Settings": "Profil a Nastavenia",
   "Account Management": "Správa Účtu",
   "Profile page - Account tab": "Stránka Profilu - Záložka Účet",
@@ -1031,9 +962,8 @@
   "Notification Preferences": "Preferencie Notifikácií",
   "Profile page - Notifications tab": "Stránka Profilu - Záložka Notifikácie",
   "Control alert and reminder settings": "Ovládať nastavenia upozornení a pripomienok",
-
   "voice": {
-    "title": "Hlasový Vstup Transakcie", 
+    "title": "Hlasový Vstup Transakcie",
     "instructions": "Stisknite tlačidlo Začať Hovoriť a hovorte stručne, jednoducho. Povedzte tieto údaje: obchodník, tovar, suma, dátum.",
     "play_example": "Prehrať Príklad",
     "start_listening": "Začať Hovoriť",
@@ -1097,10 +1027,8 @@
   "QR Code Cross-Device Upload": "QR Kód Nahrávanie Medzi Zariadeniami",
   "Scan receipts on mobile, process on desktop": "Skenovať účtenky na mobile, spracovať na desktope",
   "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generovanie QR kódu, anonymný mobilný prístup, real-time polling, automatické vyplňovanie formulárov",
-
   "Fields": "Polia",
   "Validation": "Validácia",
-
   "Receipt OCR Scanning (Standard+)": "OCR Skenovanie Účteniek (Standard+)",
   "Available for Standard and Premium subscribers": "Dostupné pre Standard a Premium predplatiteľov",
   "How to Scan Receipts": "Ako Skenovať Účtenky",
@@ -1132,15 +1060,12 @@
   "Check extracted data before saving the transaction": "Skontrolovať extrahované údaje pred uložením transakcie",
   "Editing Extracted Data": "Úprava Extrahovaných Údajov",
   "All extracted information appears in editable form fields. You can modify any details before saving the transaction. The original receipt image is stored and can be viewed later by clicking on receipt thumbnails in transaction lists.": "Všetky extrahované informácie sa objavia v editovateľných poliach formulára. Môžete upraviť akékoľvek detaily pred uložením transakcie. Originálny obrázok účtenky je uložený a môže byť neskôr zobrazený kliknutím na miniatúry účteniek v zoznamoch transakcií.",
-
   "Troubleshooting": "Riešenie Problémov",
   "If OCR fails, manually enter transaction details": "Ak OCR zlyhá, manuálne zadajte detaily transakcie",
   "Poor image quality may affect extraction accuracy": "Slabá kvalita obrázka môže ovplyvniť presnosť extrakcie",
   "Handwritten receipts work better when text is clear": "Ručne písané účtenky fungujú lepšie keď je text jasný",
   "Multiple items on one receipt create one transaction for the total": "Viacero položiek na jednej účtenke vytvorí jednu transakciu za celkový súčet",
-
   "Ask about Kaptia features...": "Opýtajte sa na funkcie Kaptia...",
-
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Funkcia",
@@ -1230,12 +1155,11 @@
       }
     }
   },
-
   "reports": {
     "title": "Pokročilé Prehľady a Analýzy",
     "subtitle": "AI-poháňané poznatky, interaktívne grafy a komplexná finančná analýza",
     "this_week": "Tento Týždeň",
-    "this_month": "Tento Mesiac", 
+    "this_month": "Tento Mesiac",
     "this_quarter": "Tento Štvrťrok",
     "this_year": "Tento Rok",
     "custom_range": "Vlastný Rozsah",
@@ -1293,7 +1217,6 @@
     "get_ai_insights": "Získaj AI poznatky, interaktívne grafy, nástroje exportu a automatickú kategorizáciu",
     "upgrade_now": "Vylepšiť Teraz"
   },
-
   "ai_insights": {
     "title": "AI-Poháňané Poznatky",
     "description": "Personalizované odporúčania založené na tvojich vzoroch výdavkov",
@@ -1305,7 +1228,6 @@
     "impact_medium": "stredný vplyv",
     "impact_low": "nízky vplyv"
   },
-
   "calendar": {
     "title": "Kalendárny Pohľad",
     "description": "Zobrazenie finančných transakcií v kalendárnom formáte",
@@ -1327,7 +1249,6 @@
       "saturday": "So"
     }
   },
-
   "charts": {
     "date": "Dátum",
     "income": "Príjem",
@@ -1462,15 +1383,12 @@
     "of": "z",
     "transactions": "transakcií"
   },
-  "transaction": "transakcia",
   "transactions_count": "transakcií",
-
   "frequencies": {
     "weekly": "Týždenne",
-    "monthly": "Mesačne", 
+    "monthly": "Mesačne",
     "yearly": "Ročne"
   },
-
   "income": {
     "title": "Príjmy",
     "subtitle": "Sledujte a spravujte svoje zdroje príjmov",
@@ -1500,7 +1418,6 @@
     "confirm_delete": "Ste si istí, že chcete vymazať tento príjem?",
     "adding": "Pridávam..."
   },
-
   "expenses": {
     "title": "Správa Výdavkov",
     "subtitle": "Sledujte a spravujte všetky vaše výdavky a míňanie",
@@ -1536,7 +1453,7 @@
     "loading_expenses": "Načítavam výdavky...",
     "no_expenses_found": "Nenašli sa Žiadne Výdavky",
     "try_adjusting_filters": "Skúste upraviť vaše filtre alebo hľadané výrazy",
-    "add_first_expense": "Pridajte vašu prvú transakciu výdavku na začiatok",
+    "add_first_expense": "Pridajte svoju prvú transakciu výdavku na začiatok",
     "note_prefix": "Poznámka:",
     "expense_added": "Výdavok Pridaný",
     "expense_added_description": "Transakcia výdavku bola úspešne vytvorená",
@@ -1548,9 +1465,7 @@
     "filtered_transactions": "Filtrované transakcie výdavkov",
     "all_transactions": "Všetky vaše transakcie výdavkov",
     "loading": "Načítavam výdavky...",
-    "no_expenses_found": "Nenašli sa Žiadne Výdavky",
     "adjust_filters": "Skúste upraviť vaše filtre alebo hľadané výrazy",
-    "add_first_expense": "Pridajte svoju prvú transakciu výdavku na začiatok",
     "note": "Poznámka",
     "charts": {
       "trend_title": "Mesačný Trend Výdavkov",
@@ -1585,7 +1500,6 @@
       "update": "Aktualizovať"
     }
   },
-
   "expense_reminders": {
     "reminder_created": "Pripomienka Vytvorená",
     "created_successfully": "Pripomienka výdavku bola úspešne nastavená",
@@ -1601,7 +1515,6 @@
     "create_reminder_button": "Vytvoriť Pripomienku",
     "copied_to_clipboard": "Referenčná poznámka skopírovaná do schránky"
   },
-
   "reminders": {
     "notifications_not_supported": "Notifikácie nie sú podporované",
     "browser_not_support": "Váš prehliadač nepodporuje notifikácie",
@@ -1612,29 +1525,11 @@
     "notifications_denied": "Notifikácie zamietnuté",
     "wont_receive_notifications": "Nebudete dostávať notifikácie z prehliadača"
   },
-
   "transaction_reminders": {
     "failed_to_create": "Nepodarilo sa vytvoriť pripomienku",
     "failed_to_complete": "Nepodarilo sa dokončiť pripomienku",
     "failed_to_delete": "Nepodarilo sa odstrániť pripomienku"
   },
-
-  "categories": {
-    "category_created": "Kategória Vytvorená",
-    "category_added_successfully": "Nová kategória bola úspešne pridaná"
-  },
-
-  "colors": {
-    "blue": "Modrá",
-    "green": "Zelená",
-    "purple": "Fialová",
-    "red": "Červená",
-    "orange": "Oranžová",
-    "pink": "Ružová",
-    "indigo": "Indigo",
-    "teal": "Tyrkysová"
-  },
-
   "categories": {
     "food": "Jedlo",
     "transportation": "Doprava",
@@ -1651,13 +1546,21 @@
     "freelance": "Voľná práca",
     "investments": "Investície"
   },
-
+  "colors": {
+    "blue": "Modrá",
+    "green": "Zelená",
+    "purple": "Fialová",
+    "red": "Červená",
+    "orange": "Oranžová",
+    "pink": "Ružová",
+    "indigo": "Indigo",
+    "teal": "Tyrkysová"
+  },
   "types": {
     "expense": "výdavok",
     "income": "príjem",
     "goal": "cieľ"
   },
-
   "goals": {
     "title": "Ciele",
     "subtitle": "Nastavte a sledujte vaše finančné ciele",
@@ -1724,7 +1627,6 @@
       "failed_delete": "Nepodarilo sa vymazať cieľ"
     }
   },
-
   "dashboard": {
     "total_income": "Celkové Príjmy",
     "total_expenses": "Celkové Výdavky",
@@ -1738,12 +1640,10 @@
     "utilized": "využité",
     "remaining": "Zostávajúce"
   },
-
   "plans": {
     "standard": "Štandard",
     "premium": "Premium"
   },
-
   "currency": {
     "welcome_title": "Vitajte v Kaptia! 🌎",
     "welcome_description": "Prosím vyberte svoju preferovanú menu na začiatok. Môžete ju zmeniť neskôr, kým nepridáte vašu prvú transakciu.",
@@ -1753,11 +1653,10 @@
     "error_title": "Chyba",
     "error_description": "Nepodarilo sa nastaviť menu. Prosím skúste to znovu."
   },
-
   "upgrade": {
     "standard_name": "Štandard",
     "standard_price": "$4.99/mesiac",
-    "premium_name": "Premium", 
+    "premium_name": "Premium",
     "premium_price": "$9.99/mesiac",
     "complete_upgrade": "Dokončite vašu {{plan}} aktualizáciu",
     "ready_to_activate": "Pripravené na aktiváciu",
@@ -1771,7 +1670,7 @@
     "standard_features": {
       "goals": "Správa cieľov a rozpočtov",
       "charts": "Interaktívne grafy a správy",
-      "ai_categorization": "AI kategorizácia výdavkov", 
+      "ai_categorization": "AI kategorizácia výdavkov",
       "calendar": "Kalendárny pohľad a pripomienky",
       "unlimited_history": "Neobmedzená história transakcií"
     },
@@ -1779,33 +1678,37 @@
       "everything": "Všetko zo Štandardného plánu",
       "ai_tips": "AI finančné tipy a poznatky",
       "trends": "Pokročilá analýza trendov",
-      "prediction": "Predikcia výdavkov", 
+      "prediction": "Predikcia výdavkov",
       "recommendations": "Denné personalizované odporúčania",
       "backup": "Zálohovanie údajov v cloude",
       "data_management": "Správa údajov (CSV, PDF)"
     }
   },
-
   "upload": {
-    "invalid_file_type": "Neplatný typ súboru",
-    "please_select_image": "Prosím vyberte obrázok",
-    "upload_failed": "Nahrávanie zlyhalo",
-    "please_try_again": "Prosím skúste to znovu",
-    "missing_information": "Chýbajúce informácie",
-    "please_fill_required": "Prosím vyplňte všetky povinné polia",
-    "transaction_saved": "Transakcia uložená",
-    "receipt_saved_description": "Údaje z účtenky boli uložené ako transakcia",
-    "save_failed": "Ukladanie zlyhalo",
-    "save_failed_description": "Nepodarilo sa uložiť transakciu. Prosím skúste to znovu.",
-    "transaction_description_placeholder": "Popis transakcie",
-    "select_category_placeholder": "Vybrať kategóriu",
-    "qr_code_error": "Chyba QR Kódu",
-    "failed_to_generate_qr": "Nepodarilo sa vygenerovať QR kód",
-    "upload_error": "Chyba Nahrávania",
-    "failed_to_process_mobile": "Nepodarilo sa spracovať mobilné nahrávanie",
-    "timeout": "Časový Limit Prekročený"
+    "drag_drop": "Pretiahnite a pustite obrázok sem, alebo kliknite na prehliadanie",
+    "processing": "Spracovávam váš účet...",
+    "analysing": "Analyzujem obrázok pomocou AI...",
+    "try_again": "Skúsiť Znovu",
+    "upload_receipt": "Nahrať Účet",
+    "or": "alebo",
+    "select_file": "Vybrať súbor",
+    "scan_phone": "Skenovať Telefónom",
+    "scan_qr": "Naskenujte QR kód svojim telefónom",
+    "qr_step_1": "1. Naskenujte tento QR kód kamerou vášho telefónu",
+    "qr_step_2": "2. Odfotografujte váš účet",
+    "qr_step_3": "3. Údaje sa tu zobrazia automaticky",
+    "waiting_upload": "Čakám na nahranie z mobilu...",
+    "cancel_qr": "Zrušiť QR Skenovanie",
+    "edit_details": "Upraviť Detaily Transakcie",
+    "amount_required": "Suma *",
+    "save_transaction": "Uložiť Transakciu",
+    "recognized_text": "Rozpoznaný Text:",
+    "upload_another": "Nahrať ďalší účet",
+    "close": "Zavrieť",
+    "modal_title": "Nahrať Účet",
+    "modal_subtitle": "Nahrajte fotografiu účtu na automatické extrakcie údajov transakcie",
+    "button_text": "Nahrať Obrázok"
   },
-
   "trends": {
     "title": "Pokročilá analýza trendov",
     "subtitle": "Hlboké poznatky o vašich finančných vzorcoch a prognózach",
@@ -1814,21 +1717,18 @@
     "export_error": "Nepodarilo sa vygenerovať PDF správu",
     "uncategorized": "Nekategorizované",
     "other": "Iné",
-    
     "periods": {
       "last_30_days": "Posledných 30 dní",
-      "last_12_weeks": "Posledných 12 týždňov", 
+      "last_12_weeks": "Posledných 12 týždňov",
       "last_6_months": "Posledných 6 mesiacov",
       "last_2_years": "Posledné 2 roky"
     },
-
     "tabs": {
       "overview": "Prehľad",
       "by_category": "Podľa kategórie",
       "patterns": "Vzorce",
       "forecasts": "Prognózy"
     },
-
     "overview": {
       "trend_direction": "Smer trendu",
       "positive": "Pozitívny",
@@ -1842,24 +1742,21 @@
       "financial_trends_title": "Prehľad finančných trendov",
       "financial_trends_description": "Príjmy, výdavky a čistý zostatok za {{period}}"
     },
-
     "chart": {
       "income": "Príjmy",
-      "expenses": "Výdavky", 
+      "expenses": "Výdavky",
       "net_balance": "Čistý zostatok",
       "amount": "Suma"
     },
-
     "days": {
       "sunday": "Nedeľa",
       "monday": "Pondelok",
       "tuesday": "Utorok",
-      "wednesday": "Streda", 
+      "wednesday": "Streda",
       "thursday": "Štvrtok",
       "friday": "Piatok",
       "saturday": "Sobota"
     },
-
     "insights": {
       "no_data": "Žiadne údaje o výdavkoch nie sú k dispozícii.",
       "weekend_higher": "Cez víkendy míňate viac ({{weekendAmount}}) ako počas týždňa. {{maxDay}} je váš deň s najvyššími výdavkami.",
@@ -1868,7 +1765,6 @@
       "month_end_higher": "Máte tendenciu míňať viac na konci mesiaca ({{lastWeekAvg}} priemer) ako na začiatku ({{firstWeekAvg}} priemer).",
       "consistent_spending": "Vaše výdavky sú relatívne konzistentné počas celého mesiaca."
     },
-
     "patterns": {
       "day_of_week_title": "Vzorce podľa dňa v týždni",
       "day_of_week_description": "Vaše správanie pri míňaní v rôzne dni",
@@ -1880,7 +1776,6 @@
       "total": "Celkom",
       "average": "Priemer"
     },
-
     "forecasts": {
       "ai_forecasts_title": "AI finančné prognózy",
       "ai_forecasts_description": "Predpovede poháňané AI na základe vašich historických dátových vzorov",
@@ -1903,39 +1798,37 @@
       "no_predictions_title": "Žiadne predpovede nie sú k dispozícii",
       "no_predictions_description": "Pridajte viac transakcií na generovanie finančných prognóz poháňaných AI"
     },
-
     "categories": {
       "total_spent": "Celkom Minulé:",
       "monthly_average": "Mesačný Priemer:"
     },
-
     "trend": {
       "increasing": "rastúci",
-      "decreasing": "klesajúci", 
+      "decreasing": "klesajúci",
       "stable": "stabilný"
     }
   },
-
   "export": {
     "page_title": "Správa Údajov",
     "page_description": "Exportujte a importujte vaše finančné údaje s pokročilými možnosťami",
-    
     "tab_export": "Exportovať",
-    "tab_import": "Importovať", 
+    "tab_import": "Importovať",
     "tab_backup": "Zálohovať",
     "export_tab": "Export",
     "import_tab": "Import",
-    
     "export_title": "Exportovať Finančné Údaje",
     "export_description": "Stiahnite si vaše transakcie, rozpočty, ciele a viac v rôznych formátoch",
-    
-    "format": "Formát",
+    "format": {
+      "pdf": "PDF",
+      "csv": "CSV",
+      "excel": "Excel",
+      "json": "JSON"
+    },
     "format_description": "Vyberte váš preferovaný formát exportu",
     "pdf": "PDF",
     "csv": "CSV",
     "excel": "Excel",
     "json": "JSON",
-    
     "date_range": "Rozsah Dátumov",
     "date_range_description": "Vyberte časové obdobie pre váš export",
     "all": "Celý Čas",
@@ -1945,7 +1838,6 @@
     "custom": "Vlastný Rozsah",
     "start_date": "Začiatočný Dátum",
     "end_date": "Konečný Dátum",
-    
     "data_selection": "Výber Údajov",
     "data_selection_description": "Vyberte čo zahrnúť do vášho exportu",
     "include_transactions": "Transakcie",
@@ -1954,79 +1846,57 @@
     "include_summary": "Finančný Súhrn",
     "include_charts": "Grafy a Vizualizácie",
     "include_label": "Zahrnúť",
-    
     "format_label": "Formát",
     "date_range_label": "Rozsah Dátumov",
-    
     "range": {
       "all": "Všetky Časy",
-      "month": "Tento Mesiac", 
+      "month": "Tento Mesiac",
       "quarter": "Tento Štvrťrok",
       "year": "Tento Rok",
       "custom": "Vlastný Rozsah"
     },
-    
-    "format": {
-      "pdf": "PDF",
-      "csv": "CSV", 
-      "excel": "Excel",
-      "json": "JSON"
-    },
-    
     "format_pdf": "PDF",
-    "format_csv": "CSV", 
+    "format_csv": "CSV",
     "format_excel": "Excel",
     "format_json": "JSON",
-    
     "range_all": "Všetky Časy",
-    "range_month": "Tento Mesiac", 
+    "range_month": "Tento Mesiac",
     "range_quarter": "Tento Štvrťrok",
     "range_year": "Tento Rok",
     "range_custom": "Vlastný Rozsah",
-    
     "coming_soon": "Funkcia exportu bude čoskoro dostupná",
     "coming_soon_desc": "Podpora pre PDF, CSV, Excel, JSON a viac",
-    
     "import_title": "Importovať Finančné Údaje",
     "import_description": "Importujte transakcie, rozpočty, ciele a kategórie z CSV alebo JSON súborov",
-    
     "step1_title": "Stiahnuť Ukážkový Súbor",
     "step1_description": "Stiahnite si náš ukážkový CSV súbor a pozrite si správny formát pre vaše údaje",
     "download_example_csv": "Stiahnuť Ukážkový CSV",
-    
-    "step2_title": "Vybrať Formát Súboru", 
+    "step2_title": "Vybrať Formát Súboru",
     "csv_file": "CSV Súbor",
     "csv_description": "Formát hodnôt oddelených čiarkami (odporúčané)",
-    "json_file": "JSON Súbor", 
+    "json_file": "JSON Súbor",
     "json_description": "Formát JavaScript Object Notation",
-    
     "step3_title": "Nahrať Váš Súbor",
     "drop_file_text": "Pretiahnite a pustite váš súbor sem, alebo kliknite na prehliadanie",
     "supports_files": "Podporuje súbory",
-    
     "toast_import_failed": "Import zlyhal. Skontrolujte formát súboru a skúste znovu.",
     "toast_backup_failed": "Vytvorenie zálohy zlyhalo. Skúste znovu.",
-    
     "backup_created": "Záloha Úspešne Vytvorená",
     "backup_created_desc": "Vaše údaje boli bezpečne zálohované do cloudového úložiska",
-    "backup_failed": "Vytvorenie Zálohy Zlyhalo", 
+    "backup_failed": "Vytvorenie Zálohy Zlyhalo",
     "backup_failed_desc": "Vytvorenie zálohy zlyhalo. Skúste znovu.",
-    
     "export_successful": "Export Úspešne Dokončený",
     "export_successful_desc": "Vaše údaje boli exportované vo formáte {{format}}",
     "export_failed": "Export Zlyhal",
     "export_failed_desc": "Export údajov zlyhal. Skúste znovu.",
-    
-    "restore_successful": "Obnovenie Úspešne Dokončené", 
+    "restore_successful": "Obnovenie Úspešne Dokončené",
     "restore_successful_desc": "Úspešne obnovených {{transactions}} transakcií a {{budgets}} rozpočtov z {{filename}}",
     "restore_failed": "Obnovenie Zlyhalo",
     "restore_failed_desc": "Obnovenie zálohy zlyhalo. Skontrolujte váš súbor zálohy.",
-    
     "no_backups_available": "Žiadne Zálohy K Dispozícii",
     "no_backups_found": "Nenašli sa žiadne súbory zálohy. Najprv vytvorte zálohu.",
     "toast_export_failed": "Export zlyhal. Skúste znovu neskôr.",
     "toast_restore_failed": "Obnovenie zlyhalo. Skontrolujte váš súbor zálohy.",
-    
     "imported_count": "{{count}} importovaných",
     "collaborative": "Spolupracovný",
     "warnings_count": "Upozornenia ({{count}})",
@@ -2034,7 +1904,6 @@
     "recent_imports": "Nedávne Importy",
     "records_count": "{{count}} záznamov",
     "no_import_history": "Zatiaľ žiadna história importu",
-    
     "pdf_security": {
       "modal_title": "Banková Bezpečnosť pre Spracovanie PDF",
       "modal_description": "Pred spracovaním vášho bankového výpisu si prečítajte naše komplexné bezpečnostné opatrenia.",
@@ -2074,7 +1943,6 @@
       "cancel": "Zrušiť",
       "consent_button": "Súhlasím s Bezpečným Spracovaním"
     },
-    
     "duplicate_warning": {
       "title": "Zistené Možné Duplicitné Transakcie",
       "description": "Našli sme transakcie, ktoré už môžu existovať vo vašom účte. Skontrolujte zhody nižšie a vyberte, ktoré transakcie importovať.",
@@ -2095,7 +1963,6 @@
       "proceeding_title": "Pokračuje Import",
       "proceeding_description": "Importuje sa {{count}} vybraných transakcií"
     },
-    
     "backup_tab": "Záloha",
     "cloud_backup_status": "Stav Zálohy v Cloude",
     "automatic_backup_enabled": "Automatická Záloha Aktivovaná",
@@ -2120,125 +1987,17 @@
     "restoring": "Obnovujem...",
     "restore": "Obnoviť"
   },
-
-  "insights": {
-    "title": "Poznatky",
-    "description": "Matematické poznatky založené na vašich finančných údajach a trendoch míňania",
-    "loading": "Načítavam poznatky...",
-    "no_insights": "Žiadne poznatky nie sú k dispozícii",
-    "add_transactions": "Pridajte transakcie na generovanie finančných poznatkov",
-    "upgrade_for_insights": "Vylepšite na Standard alebo Premium plán pre prístup k poznatkom",
-    "impact_high": "Vysoký",
-    "impact_medium": "Stredný", 
-    "impact_low": "Nízky",
-    "recommendation": "Odporúčanie",
-    "take_action": "Vykonať Akciu",
-    "high_spending_alert": "Upozornenie na Vysoké Výdavky",
-    "high_spending_description": "Minuli ste {{percentage}}% svojho príjmu tento mesiac",
-    "review_expense_categories": "Zvážte preskúmanie najväčších kategórií výdavkov",
-    "category_focus_opportunity": "Príležitosť na Zameranie Kategórie",
-    "category_spending_percentage": "{{category}} predstavuje {{percentage}}% vašich výdavkov",
-    "consider_budget_limit": "Zvážte nastavenie rozpočtového limitu pre {{category}}",
-    "positive_cash_flow": "Pozitívny Peňažný Tok",
-    "savings_rate": "Šetríte {{rate}}% svojho príjmu tento mesiac",
-    "increase_savings_rate": "Zvážte zvýšenie miery úspor na 20%",
-    "excellent_savings": "Vynikajúca miera úspor!",
-    "spending_increased": "Výdavky sa Zvýšili",
-    "spending_decreased": "Výdavky sa Znížili",
-    "spending_change_description": "Vaše výdavky sa {{direction}} o {{percentage}}% oproti minulému mesiacu",
-    "increased": "zvýšili",
-    "decreased": "znížili",
-    "review_recent_purchases": "Preskúmajte nedávne nákupy na identifikáciu nárastu výdavkov",
-    "great_expense_reduction": "Skvelá práca pri znižovaní výdavkov!"
-  },
-
-  "upload": {
-    "drag_drop": "Pretiahnite a pustite obrázok sem, alebo kliknite na prehliadanie",
-    "processing": "Spracovávam váš účet...",
-    "analysing": "Analyzujem obrázok pomocou AI...",
-    "try_again": "Skúsiť Znovu",
-    "upload_receipt": "Nahrať Účet",
-    "or": "alebo",
-    "select_file": "Vybrať súbor",
-    "scan_phone": "Skenovať Telefónom",
-    "scan_qr": "Naskenujte QR kód svojim telefónom",
-    "qr_step_1": "1. Naskenujte tento QR kód kamerou vášho telefónu",
-    "qr_step_2": "2. Odfotografujte váš účet",
-    "qr_step_3": "3. Údaje sa tu zobrazia automaticky",
-    "waiting_upload": "Čakám na nahranie z mobilu...",
-    "cancel_qr": "Zrušiť QR Skenovanie",
-    "edit_details": "Upraviť Detaily Transakcie",
-    "amount_required": "Suma *",
-    "save_transaction": "Uložiť Transakciu",
-    "recognized_text": "Rozpoznaný Text:",
-    "upload_another": "Nahrať ďalší účet",
-    "close": "Zavrieť",
-    "modal_title": "Nahrať Účet",
-    "modal_subtitle": "Nahrajte fotografiu účtu na automatické extrakcie údajov transakcie",
-    "button_text": "Nahrať Obrázok"
-  },
-
   "upcomingReminders": {
     "title": "Nadchádzajúce Pripomienky",
-    "description": "Automatické pripomienky z transakcií a manuálne platobné pripomienky",
-    "addReminder": "Pridať Pripomienku",
-    "createReminder": "Vytvoriť Pripomienku",
-    "editReminder": "Upraviť Pripomienku", 
-    "reminderDescription": "Nastavte si pripomienku, aby ste mali prehľad o svojich výdavkoch",
-    "noReminders": "Žiadne Pripomienky",
-    "noRemindersDescription": "Pridajte manuálne pripomienky alebo nastavte opakujúce sa transakcie pre zobrazenie nadchádzajúcich platieb",
-    "reminder": "Pripomienka",
-    "customReminder": "Vlastná Pripomienka",
-    "priority": {
-      "high": "vysoká",
-      "medium": "stredná",
-      "low": "nízka",
-      "normal": "normálna"
-    },
-    "form": {
-      "title": "Názov",
-      "titlePlaceholder": "napr. Platba nájmu",
-      "description": "Popis",
-      "descriptionPlaceholder": "Dodatočné detaily o tejto pripomienke",
-      "amount": "Suma",
-      "dueDate": "Dátum splatnosti",
-      "category": "Kategória",
-      "selectCategory": "Vybrať kategóriu",
-      "remindMe": "Pripomenúť mi",
-      "onDueDate": "V deň splatnosti",
-      "dayBefore": "{{count}} deň pred",
-      "daysBefore": "{{count}} dní pred",
-      "weekBefore": "1 týždeň pred",
-      "oneDayBefore": "1 deň pred",
-      "threeDaysBefore": "3 dni pred",
-      "oneWeekBefore": "1 týždeň pred",
-      "recurringReminder": "Opakujúca sa pripomienka",
-      "frequency": "Frekvencia",
-      "weekly": "Týždenne",
-      "monthly": "Mesačne",
-      "yearly": "Ročne",
-      "endDate": "Dátum ukončenia",
-      "paymentUrl": "Platobná URL",
-      "referenceNote": "Referenčná poznámka", 
-      "referenceNotePlaceholder": "Číslo účtu alebo iné referenčné informácie"
-    },
-    "reminderCreated": "Pripomienka Vytvorená",
-    "reminderCreatedDescription": "Pripomienka výdavku bola úspešne nastavená",
-    "reminderCompleted": "Pripomienka Dokončená",
-    "reminderCompletedDescription": "Pripomienka označená ako dokončená",
-    "reminderDeleted": "Pripomienka Odstránená",
-    "reminderDeletedDescription": "Pripomienka bola odstránená",
-    "failedToCreate": "Chyba pri vytváraní pripomienky",
-    "failedToComplete": "Chyba pri dokončovaní pripomienky",
-    "failedToDelete": "Chyba pri odstraňovaní pripomienky",
     "description": "Zostaňte v obraze so svojimi účtami a platbami",
     "addReminder": "Pridať Pripomienku",
-    "reminder": "Pripomienka",
     "createReminder": "Vytvoriť Pripomienku",
     "editReminder": "Upraviť Pripomienku",
     "reminderDescription": "Voliteľný popis",
     "noReminders": "Žiadne nadchádzajúce pripomienky",
     "noRemindersDescription": "Vytvorte budúce transakcie alebo pridajte manuálne pripomienky pre ich zobrazenie",
+    "reminder": "Pripomienka",
+    "customReminder": "Vlastná Pripomienka",
     "priority": {
       "high": "Vysoká",
       "medium": "Stredná",
@@ -2287,7 +2046,7 @@
   "aiPoweredInsights": "AI-Powered Insights",
   "premium": "Premium",
   "spendingManagement": "Správa výdavkov",
-  "incomeAnalysis": "Analýza príjmov", 
+  "incomeAnalysis": "Analýza príjmov",
   "expensePatterns": "Vzory výdavkov",
   "financialHealth": "Finančné zdravie",
   "riskAssessment": "Hodnotenie rizika",
@@ -2311,7 +2070,6 @@
   "AI Processing:": "AI spracovanie:",
   "OpenAI for anonymized financial insights (as detailed in section 3 above)": "OpenAI pre anonymizované finančné poznatky (ako je podrobne uvedené v sekcii 3 vyššie)",
   "5. Data Security": "5. Bezpečnosť údajov",
-  "6. Data Retention": "6. Uchovávanie údajov",
   "7. Your Rights": "7. Vaše práva",
   "8. Cookies and Tracking": "8. Cookies a sledovanie",
   "9. Changes to This Policy": "9. Zmeny v tejto politike",
@@ -2320,13 +2078,11 @@
   "I agree to the": "Súhlasím s",
   "and": "a",
   "Please accept Terms & Privacy Policy to continue": "Prosím prijmite Podmienky a Politiku ochrany súkromia pre pokračovanie",
-
   "nav": {
     "features": "Funkcie",
     "help": "Pomoc",
     "contact": "Kontakt"
   },
-
   "contact": {
     "page_title": "Kontaktujte nás",
     "seo_title": "Kontaktujte nás - Podpora Kaptia | Získajte pomoc a pošlite správy",
@@ -2365,7 +2121,6 @@
     "faq_q3": "Môžem exportovať moje údaje?",
     "faq_a3": "Používatelia Standard a Premium môžu exportovať svoje údaje v rôznych formátoch prostredníctvom stránky Správy údajov."
   },
-
   "auth": {
     "signUp": "Registrácia",
     "signIn": "Prihlásenie",
@@ -2381,17 +2136,15 @@
     "securePrivate": "Bezpečné a Súkromné",
     "securePrivateDesc": "Bezpečnosť priemyselného štandardu udržuje vaše údaje chránené"
   },
-
   "seo": {
     "authTitle": "Prihlásenie | Registrácia - Kaptia",
     "authDescription": "Vytvor si svoj Kaptia účet alebo sa prihlás pre prístup k svojmu panelu výdavkov. Začni sledovať výdavky, spravovať rozpočty a dosahovať svoje sporiteľské ciele ešte dnes.",
     "authKeywords": "kaptia prihlásenie, registrácia finančná aplikácia, osobný finančný účet, registrácia sledovač výdavkov, prihlásenie rozpočtová aplikácia"
   },
-
   "factors": {
     "budgetManagement": "Správa Rozpočtu",
     "adaptiveSpendingControl": "Adaptívna Kontrola Výdavkov",
-    "expenseVolatility": "Volatilita Výdavkov", 
+    "expenseVolatility": "Volatilita Výdavkov",
     "financialResilience": "Finančná Odolnosť",
     "savingsRate": "Miera Úspor",
     "debtManagement": "Správa Dlhov",
@@ -2427,10 +2180,9 @@
   },
   "recurring": {
     "weekly": "Týždenne",
-    "monthly": "Mesačne", 
+    "monthly": "Mesačne",
     "yearly": "Ročne"
   },
-
   "budget": {
     "total_budget_for": "Celkový rozpočet pre",
     "new_budget": "Nový Rozpočet",
@@ -2565,7 +2317,6 @@
       "enter_email": "Prosím zadajte e-mailovú adresu"
     }
   },
-
   "collaborative_goal_detail": {
     "messages": {
       "contribution_added": "Príspevok Pridaný",
@@ -2625,7 +2376,7 @@
     },
     "goal_categories": {
       "vacation": "Dovolenka",
-      "wedding": "Svadba", 
+      "wedding": "Svadba",
       "home": "Dom",
       "education": "Vzdelanie",
       "emergency": "Núdzové",
@@ -2672,7 +2423,7 @@
     },
     "actions": {
       "share_goal": "Zdieľať Cieľ",
-      "invite_friends": "Pozvať Priateľov", 
+      "invite_friends": "Pozvať Priateľov",
       "invite_description": "Pošlite pozvánku priateľom, aby sa pripojili k tomuto spoločnému cieľu.",
       "email_placeholder": "Zadajte email priateľa",
       "send_invitation": "Poslať Pozvánku",
@@ -2722,7 +2473,6 @@
       "no_date": "Žiadny dátum"
     }
   },
-
   "redeem": {
     "seo": {
       "title": "Uplatniť AppSumo Kód - Kaptia",
@@ -2778,7 +2528,6 @@
       "status": "Načítavam stav uplatnenia..."
     }
   },
-
   "help": {
     "seo": {
       "title": "Pomoc a Dokumentácia - Používateľská Príručka Kaptia | Funkcie a Podpora",
@@ -2791,7 +2540,7 @@
     },
     "tabs": {
       "overview": "Prehľad",
-      "features": "Funkcie", 
+      "features": "Funkcie",
       "plans": "Plány",
       "guide": "Používateľská Príručka",
       "faq": "Často Kladené Otázky"
@@ -2855,7 +2604,7 @@
       "title": "Predplatné Plány",
       "description": "Vyberte si plán, ktorý najlepšie vyhovuje vašim potrebám finančnej správy",
       "free": "Bezplatný",
-      "standard": "Štandardný", 
+      "standard": "Štandardný",
       "premium": "Premium",
       "price_free": "$0",
       "price_standard": "$4.99",
@@ -2864,14 +2613,14 @@
       "features": {
         "free": [
           "Až 100 transakcií",
-          "Základné sledovanie transakcií", 
+          "Základné sledovanie transakcií",
           "Jednoduchý panel",
           "Responzívny mobilný dizajn"
         ],
         "standard": [
           "Až 100 transakcií",
           "OCR skenovanie účteniek",
-          "AI kategorizácia výdavkov", 
+          "AI kategorizácia výdavkov",
           "Správa rozpočtov",
           "Finančné ciele",
           "Pripomienky transakcií",
@@ -2883,7 +2632,7 @@
           "Pokročilé AI poznatky",
           "Predpovede trendov",
           "Cloudové zálohovanie a synchronizácia",
-          "Import/export údajov", 
+          "Import/export údajov",
           "Pokročilé analýzy",
           "Prioritná podpora",
           "Viacero formátov údajov"
@@ -2891,7 +2640,6 @@
       }
     }
   },
-
   "cookies": {
     "seo": {
       "title": "Pravidlá používania cookies - Kaptia",
@@ -2996,7 +2744,6 @@
       "back": "Späť"
     }
   },
-
   "gdpr": {
     "title": "Európske práva na súkromie (GDPR)",
     "legal_basis": {
@@ -3085,7 +2832,6 @@
       "response_desc": "Odpovieme na vašu žiadosť do 30 dní (predĺžiteľné o 60 dní pre komplexné žiadosti)"
     }
   },
-
   "ccpa": {
     "title": "Kalifornské práva spotrebiteľov na súkromie (CCPA)",
     "consumer_rights": {
@@ -3159,7 +2905,6 @@
       "procedure": "Môžeme požiadať o dodatočné informácie na overenie vašej identity, ako sú podrobnosti účtu alebo informácie o nedávnych transakciách."
     }
   },
-
   "financial_compliance": {
     "title": "Súlad s finančnými službami",
     "bsa": {
@@ -3219,7 +2964,6 @@
       "cfpb_desc": "Súlad s Consumer Financial Protection Bureau pre spotrebiteľské finančné služby"
     }
   },
-
   "ai_act_compliance": {
     "title": "Súlad s EU AI Act (2024)",
     "classification": {
@@ -3244,7 +2988,6 @@
       "measures": "Pravidelné testovanie zaujatosti, rozmanité trénovacie údaje a hodnotenia algoritmickej spravodlivosti zabezpečujú spravodlivý výkon AI naprieč všetkými demografiami používateľov."
     }
   },
-
   "data_transfers": {
     "title": "Medzinárodné prenosy údajov",
     "scc": {
@@ -3269,7 +3012,6 @@
       "monitoring": "Pokračujúce monitorovanie: Pravidelné hodnotenia súladu a postupy auditu"
     }
   },
-
   "compliance": {
     "detecting_location": "Detekuje sa poloha...",
     "gdpr": {
@@ -3281,7 +3023,6 @@
       "notice": "Obyvatelia Kalifornie majú špecifické práva na súkromie podľa CCPA. Môžete požiadať o informácie o zbere údajov a odmietnuť predaj údajov."
     }
   },
-
   "privacy": {
     "title": "Zásady ochrany súkromia",
     "last_updated": "Posledná aktualizácia: 14. júna 2025",
@@ -3459,13 +3200,11 @@
       }
     }
   },
-
   "admin": {
     "failed_to_clear_function_cache": "Nepodarilo sa vymazať cache funkcií",
     "failed_to_clear_user_cache": "Nepodarilo sa vymazať cache používateľa",
     "failed_to_cleanup_expired_cache": "Nepodarilo sa vyčistiť expirovanú cache"
   },
-
   "profile": {
     "Loading...": "Načítava sa...",
     "No Stripe Subscription": "Žiadne Stripe Predplatné",
@@ -3532,7 +3271,6 @@
     "Upgrade Your Plan": "Vylepšiť Váš Plán",
     "View Pricing Plans": "Zobraziť Cenové Plány",
     "Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Vylepšite na Štandardný ($4.99/mesiac) alebo Prémiový ($9.99/mesiac) pre pokročilé funkcie",
-
     "profile.Loading...": "Načítava sa...",
     "profile.No Stripe Subscription": "Žiadne Stripe Predplatné",
     "profile.You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.": "Aktuálne máte prémiový prístup, ale žiadne Stripe predplatné. Kontaktujte podporu alebo navštívte stránku s cenami pre nastavenie účtovania.",
@@ -3590,7 +3328,6 @@
     "profile.View Pricing Plans": "Zobraziť Cenové Plány",
     "profile.Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Vylepšite na Štandardný ($4.99/mesiac) alebo Prémiový ($9.99/mesiac) pre pokročilé funkcie"
   },
-
   "pdf": {
     "anonymization_preview": {
       "title": "Náhľad Anonymizácie Údajov",
@@ -3646,7 +3383,6 @@
       "transactions_processed": "Spracované {{processed}} z {{total}} transakcií"
     }
   },
-
   "features": {
     "hero": {
       "title": "AI-poháňaná inteligencia míňania",
@@ -3684,40 +3420,36 @@
       }
     },
     "calculators": {
-      "categorization": {
-        "title": "Kalkulačka Presnosti Kategorizácie",
-        "transactions_label": "Transakcie za mesiac:",
-        "time_saved": "Ušetrený čas za mesiac:",
-        "hours": "hodín"
-      },
-      "savings": {
-        "title": "Kalkulačka Potenciálnych Úspor",
-        "expenses_label": "Mesačné výdavky:",
-        "potential_savings": "Potenciálne mesačné úspory (5-15%):"
-      },
-      "health": {
-        "title": "Simulátor Skóre Zdravia",
-        "savings_rate": "Miera úspor:",
-        "budget_adherence": "Dodržiavanie rozpočtu:",
-        "estimated_score": "Odhadované Skóre Finančného Zdravia:"
-      },
-      "predictions": {
-        "title": "Kalkulačka Rozsahu Predpovedí",
-        "historical_months": "Mesiace historických údajov:",
-        "months": "mesiacov",
-        "prediction_range": "Dostupný rozsah predpovedí:",
-        "months_ahead": "mesiacov dopredu",
-        "prediction_accuracy": "Presnosť predpovedí:"
-      },
-      "statements": {
-        "title": "Kalkulačka Spracovania Výpisov",
-        "pages": "Stránky vo výpise:",
-        "pages_unit": "stránok",
-        "estimated_transactions": "Odhadované extrahované transakcie:",
-        "transactions": "transakcií",
-        "processing_time": "Ušetrený čas spracovania:",
-        "minutes": "minút"
-      }
+      "business_impact": "Kalkulačka podnikového dopadu",
+      "scoring": "Simulátor hodnotenia",
+      "prediction_range": "Kalkulačka rozsahu predpovedí",
+      "statement_processing": "Kalkulačka spracovania výpisov",
+      "trend_strength": "Kalkulačka sily trendov",
+      "recommendation_effectiveness": "Kalkulačka účinnosti odporúčaní",
+      "contextual_relevance": "Kalkulačka kontextovej relevantnosti",
+      "monthly_transactions": "Mesačné transakcie",
+      "monthly_expenses": "Mesačné výdavky",
+      "business_size": "Veľkosť firmy (zamestnanci)",
+      "savings_rate": "Miera úspor",
+      "budget_adherence": "Dodržiavanie rozpočtu",
+      "historical_months": "Mesiace historických údajov",
+      "pages_statement": "Strán vo výpise",
+      "trend_strength_level": "Sila trendu",
+      "recommendations_followed": "Nasledované odporúčania",
+      "contextual_factors": "Zohľadnené kontextové faktory",
+      "estimated_time_saved": "Odhadovaný ušetrený čas",
+      "predicted_accuracy": "Predpovedaná presnosť",
+      "estimated_health_score": "Odhadované skóre finančného zdravia",
+      "prediction_range_available": "Dostupný rozsah predpovedí",
+      "estimated_transactions": "Odhadované extraktované transakcie",
+      "processing_time_saved": "Ušetrený čas spracovania",
+      "trend_confidence": "Úroveň dôvery trendu",
+      "weekly_value": "Týždenná generovaná hodnota",
+      "relevance_score": "Skóre relevantnosti",
+      "months_ahead": "mesiacov dopredu",
+      "transactions": "transakcie",
+      "minutes": "minúty",
+      "per_week": "za týždeň"
     },
     "cta": {
       "title": "Pripravení Transformovať Svoje Sledovanie Výdavkov?",
@@ -3755,7 +3487,7 @@
         "description": "Sledujte ako naša AI inteligentne kategorizuje vaše transakcie na základe vzorcov obchodníkov a správania výdajov."
       },
       "tips": {
-        "title": "Finančné poznatky", 
+        "title": "Finančné poznatky",
         "description": "Objavte ako AI analyzuje vaše vzorce výdajov na poskytnutie personalizovaných finančných odporúčaní."
       },
       "health": {
@@ -3947,41 +3679,8 @@
           "desc": "Zohľadňuje vaše rozpočtové obmedzenia a ciele"
         }
       }
-    },
-    "calculators": {
-      "business_impact": "Kalkulačka podnikového dopadu",
-      "scoring": "Simulátor hodnotenia",
-      "prediction_range": "Kalkulačka rozsahu predpovedí",
-      "statement_processing": "Kalkulačka spracovania výpisov",
-      "trend_strength": "Kalkulačka sily trendov",
-      "recommendation_effectiveness": "Kalkulačka účinnosti odporúčaní",
-      "contextual_relevance": "Kalkulačka kontextovej relevantnosti",
-      "monthly_transactions": "Mesačné transakcie",
-      "monthly_expenses": "Mesačné výdavky",
-      "business_size": "Veľkosť firmy (zamestnanci)",
-      "savings_rate": "Miera úspor",
-      "budget_adherence": "Dodržiavanie rozpočtu",
-      "historical_months": "Mesiace historických údajov",
-      "pages_statement": "Strán vo výpise",
-      "trend_strength_level": "Sila trendu",
-      "recommendations_followed": "Nasledované odporúčania",
-      "contextual_factors": "Zohľadnené kontextové faktory",
-      "estimated_time_saved": "Odhadovaný ušetrený čas",
-      "predicted_accuracy": "Predpovedaná presnosť",
-      "estimated_health_score": "Odhadované skóre finančného zdravia",
-      "prediction_range_available": "Dostupný rozsah predpovedí",
-      "estimated_transactions": "Odhadované extraktované transakcie",
-      "processing_time_saved": "Ušetrený čas spracovania",
-      "trend_confidence": "Úroveň dôvery trendu",
-      "weekly_value": "Týždenná generovaná hodnota",
-      "relevance_score": "Skóre relevantnosti",
-      "months_ahead": "mesiacov dopredu",
-      "transactions": "transakcie",
-      "minutes": "minúty",
-      "per_week": "za týždeň"
     }
   },
-
   "voiceInput": {
     "listening": "Počúvam... Hovorte teraz",
     "notSupported": "Hlasový vstup nie je podporovaný vo vašom prehliadači",
@@ -4012,7 +3711,6 @@
       "extractedData": "Extrahované informácie"
     }
   },
-
   "voiceTransaction": {
     "title": "Skontrolovať hlasovú transakciu",
     "description": "Skontrolujte a potvrďte podrobnosti transakcie extrahované z vášho hlasového vstupu",
@@ -4031,7 +3729,6 @@
     "extracted": "Extrahované",
     "at": "v"
   },
-
   "Take Photo": "Odfotiť",
   "Choose from Gallery": "Vybrať z Galérie",
   "What was this transaction for?": "Na čo bola táto transakcia?",
@@ -4132,5 +3829,26 @@
   "Confidence": "Istota",
   "Premium Feature": "Prémiová funkcia",
   "Trend": "Trend",
-  "Could not find matching category ID": "Nepodarilo sa nájsť zodpovedajúcu kategóriu"
+  "Could not find matching category ID": "Nepodarilo sa nájsť zodpovedajúcu kategóriu",
+  "Back to Home": "Späť na hlavnú stránku",
+  "Back": "Späť",
+  "Help Center & Documentation": "Centrum pomoci & Dokumentácia",
+  "How can we help you?": "Ako vám môžeme pomôcť?",
+  "Search questions or topics...": "Vyhľadajte otázku alebo tému...",
+  "Quick Start": "Začíname",
+  "Guides": "Návody",
+  "Plans & Pricing": "Plány a Cenník",
+  "Online • Ask anything": "Online • Spýtajte sa čokoľvek",
+  "Type your question here...": "Napíšte svoju otázku sem...",
+  "Hello! I am your Kaptia AI assistant. How can I help you today?": "Dobrý deň! Som váš AI asistent Kaptia. Ako vám môžem dnes pomôcť?",
+  "All Features": "Všetky funkcie",
+  "Calculators & Tools": "Kalkulačky a nástroje",
+  "Open Calculator": "Otvoriť kalkulačku",
+  "Try this feature free": "Vyskúšať funkciu zadarmo",
+  "Looking for instant answers?": "Hľadáte rýchlu odpoveď?",
+  "Visit Help Center": "Prejsť do Centra pomoci",
+  "No questions matched your search.": "Na váš dotaz sme nenašli žiadne otázky.",
+  "Clear search": "Zrušiť vyhľadávanie",
+  "Ready to transform your financial management?": "Pripravení zjednodušiť si správu výdavkov?",
+  "Start free with no credit card required.": "Začnite zadarmo ešte dnes bez kreditnej karty."
 }

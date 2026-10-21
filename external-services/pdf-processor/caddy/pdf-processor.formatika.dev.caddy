@@ -1,0 +1,25 @@
+# Site block for the standalone PDF processor.
+# Install by appending to /etc/caddy/Caddyfile, then:
+#   caddy validate --config /etc/caddy/Caddyfile
+#   systemctl reload caddy
+pdf-processor.formatika.dev {
+	encode gzip zstd
+
+	# Report payloads can be large (transactions, budgets, goals).
+	request_body {
+		max_size 60MB
+	}
+
+	# Rendering is CPU-bound; keep the proxy timeouts generous.
+	reverse_proxy 127.0.0.1:8082 {
+		transport http {
+			read_timeout 120s
+			write_timeout 120s
+		}
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

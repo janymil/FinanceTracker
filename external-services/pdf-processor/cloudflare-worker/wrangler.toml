@@ -1,0 +1,8 @@
+name = "kaptia-pdf-worker"
+main = "src/worker.tsx"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+APP_URL = "https://kaptia.app"
+

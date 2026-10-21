@@ -1,73 +1,52 @@
+#!/usr/bin/env bash
+#
+# Deploy the standalone PDF processor on this VPS (pm2 + Caddy).
+#
+#   ./deploy.sh              # build + (re)start the pm2 process
+#   SKIP_INSTALL=1 ./deploy.sh
+#
+# TLS and the public hostname are handled by Caddy; see caddy/.
+set -euo pipefail
 
-#!/bin/bash
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="${APP_DIR:-/var/www/pdf-processor}"
+APP_NAME="${APP_NAME:-pdf-processor}"
+HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:8082/health}"
 
-echo "=== DEPLOYING PDF PROCESSOR TO FLY.IO ==="
+echo "=== Deploying ${APP_NAME} ==="
+echo "Source: ${SRC_DIR}"
+echo "Target: ${APP_DIR}"
 
-# Get the absolute path to the pdf-processor directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+mkdir -p "${APP_DIR}/logs"
 
-echo "Working directory: $(pwd)"
-echo "Files in directory:"
-ls -la
+rsync -a --delete \
+  --exclude 'node_modules' \
+  --exclude 'dist' \
+  --exclude 'logs' \
+  --exclude '.env' \
+  --exclude 'cloudflare-worker' \
+  --exclude 'caddy' \
+  "${SRC_DIR}/" "${APP_DIR}/"
 
-# Verify required files exist
-REQUIRED_FILES=("Dockerfile" "fly.toml" "package.json" "index.ts")
-for file in "${REQUIRED_FILES[@]}"; do
-    if [[ ! -f "$file" ]]; then
-        echo "Error: Required file '$file' not found in $(pwd)"
-        exit 1
-    fi
-done
+cd "${APP_DIR}"
 
-echo "✓ All required files found"
-
-# Check if flyctl is installed
-if ! command -v flyctl &> /dev/null; then
-    echo "Error: flyctl is not installed. Please install Fly.io CLI first."
-    echo "Visit: https://fly.io/docs/hands-on/install-flyctl/"
-    exit 1
+if [[ ! -f .env ]]; then
+  cp .env.example .env
+  chmod 600 .env
+  echo "!! Created ${APP_DIR}/.env from .env.example - set PDF_API_KEY before exposing the service."
 fi
 
-echo "✓ Fly.io CLI found"
-
-# Check if logged in to Fly.io
-if ! flyctl auth whoami &> /dev/null; then
-    echo "Error: Not logged in to Fly.io. Please run 'flyctl auth login' first."
-    exit 1
+if [[ "${SKIP_INSTALL:-0}" != "1" ]]; then
+  npm ci
 fi
 
-echo "✓ Authenticated with Fly.io"
+npm run build
 
-# Check if app exists, if not create it
-if ! flyctl status &> /dev/null; then
-    echo "App doesn't exist, launching new app..."
-    flyctl launch --no-deploy --ha=false
-fi
+pm2 startOrReload ecosystem.config.cjs --update-env
+pm2 save
 
-echo "Building and deploying PDF processor..."
-
-# First try to build locally to test Dockerfile
-echo "Testing Dockerfile build locally..."
-if command -v docker &> /dev/null; then
-    docker build -t test-pdf-processor . || echo "Local Docker build failed, but continuing with Fly.io deployment..."
-fi
-
-# Deploy to Fly.io with explicit options
-echo "Deploying to Fly.io..."
-flyctl deploy --ha=false --local-only --verbose
-
-if [ $? -eq 0 ]; then
-    echo ""
-    echo "✓ Deployment successful!"
-    echo ""
-    echo "Next steps:"
-    echo "• Check status: flyctl status"
-    echo "• View logs: flyctl logs"
-    echo "• Test health: curl https://finanzerpro-pdf.fly.dev/health"
-else
-    echo ""
-    echo "✗ Deployment failed!"
-    echo "Check the logs above for error details."
-    exit 1
-fi
+sleep 2
+echo "--- Health check: ${HEALTH_URL}"
+curl -fsS "${HEALTH_URL}"
+echo
+echo "Deployed. Public endpoint: https://pdf-processor.formatika.dev"

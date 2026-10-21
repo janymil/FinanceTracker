@@ -201,8 +201,8 @@ Backend: `routes/goalRoutes.ts`, `routes/collaborativeGoalRoutes.ts`.
 | Month selector + filtered aggregates | `components/month-filter.tsx` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Trends page with charts (category & time) | `pages/trends.tsx` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Reports page (period comparisons, category report) | `pages/reports.tsx` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
-| Report export to PDF (server-generated, Puppeteer) | `POST /api/export-pdf` → `server/generatePdf.ts` | ![needs service](https://img.shields.io/badge/needs%20service-d1242f?style=flat-square) |
-| Premium "trends PDF" via external service | `POST /api/generate-trends-pdf` → `PDF_SERVICE_URL` | ![needs service](https://img.shields.io/badge/needs%20service-d1242f?style=flat-square) see §18.2 |
+| Report export to PDF (server-generated, `@react-pdf/renderer`) | `POST /api/export-pdf` → `server/pdfProcessorClient.ts` → `pdf-processor.formatika.dev` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
+| Premium "trends PDF" via external service | `POST /api/generate-trends-pdf` → `pdf-processor.formatika.dev` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) see §18.2 |
 
 ## 8. Import, Export, Backups & Mobile upload
 
@@ -349,7 +349,7 @@ Page: `pages/admin-analytics.tsx`. Backend: `routes/adminRoutes.ts`, `server/adm
 | Stripe | Subscriptions & portal | `STRIPE_SECRET_KEY`, 4 × `STRIPE_*_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) — annual prices need fixing (§11) |
 | Google Analytics | Product analytics | `VITE_GA_MEASUREMENT_ID` | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) optional |
 | **AI processor (Fly.io / VPS)** | Optional financial-tips analysis service | `AI_PROCESSOR_ENABLED`, `AI_PROCESSOR_URL` | ![partial](https://img.shields.io/badge/partial-8b949e?style=flat-square) disabled by default — direct provider routing |
-| **PDF processor (Fly.io)** | Trends + report PDF rendering | `PDF_SERVICE_URL` | ![needs service](https://img.shields.io/badge/needs%20service-d1242f?style=flat-square) **not deployed** |
+| **PDF processor (this VPS)** | Trends + report PDF rendering | `PDF_SERVICE_URL`, `PDF_API_KEY` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) `pdf-processor.formatika.dev` |
 
 ## 18. Services kept outside the main app
 
@@ -399,29 +399,34 @@ Page: `pages/admin-analytics.tsx`. Backend: `routes/adminRoutes.ts`, `server/adm
 - The deploy scripts still reference the old app names on purpose (`deploy-fixes.sh`, `deploy-update.sh`, `fly.toml`). If you rename the Fly app, update **all three** plus `AI_PROCESSOR_URL`, otherwise deploys will target the wrong app.
 - `external-services/ai-processor/README.md` and `.env.example` contain the original deployment notes.
 
-### 18.2 PDF processor (`external-services/pdf-processor`) — ![needs service](https://img.shields.io/badge/needs%20service-d1242f?style=flat-square) NOT WORKING
+### 18.2 PDF processor (`external-services/pdf-processor`) — ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) standalone app
 
-**What it is:** a Puppeteer/Chart.js service exposing `POST /generate-pdf` and `GET /health`; renders premium multi-page PDF reports with charts.
-**Where Kaptia calls it:** `server/routes/pdfRoutes.ts` → `POST /api/generate-trends-pdf` (Premium "Trends PDF"), and `server/routes/exportRoutes.ts` → `POST /api/export` with `format: "pdf"`. The URL comes only from `PDF_SERVICE_URL` — there is no hard-coded default any more.
-**Current behavior when unreachable:** `503` when `PDF_SERVICE_URL` is unset, `502` when the processor answers with an error. No local fallback: the processor owns rendering.
+**What it is:** an Express service using **`@react-pdf/renderer`** (ESM, Node 20+) exposing `POST /generate-pdf`, `GET /health` and `GET /`; renders multi-page PDF reports with pure vector SVG charts (no Puppeteer/Chromium, no Cairo). Deployed as its own app on this VPS: `/var/www/pdf-processor`, pm2 process `pdf-processor`, Caddy site `pdf-processor.formatika.dev` → `127.0.0.1:8082`.
+**Where Kaptia calls it:** `server/pdfProcessorClient.ts` (payload builders + `x-api-key`), used by `server/routes/pdfRoutes.ts` → `POST /api/generate-trends-pdf` (Premium "Trends PDF"), `server/routes/exportRoutes.ts` → `POST /api/export-pdf` and `POST /api/export` with `format: "pdf"`. URL comes from `PDF_SERVICE_URL` (default `https://pdf-processor.formatika.dev`); the key comes from `PDF_API_KEY`.
+**Current behavior when unreachable:** `502` when the processor is down or rejects the request; rendering failures inside the processor return `500` and are surfaced as `502` by the app. There is no local fallback: the processor owns rendering.
 
-**What is needed to restore it:**
-1. Deploy:
+**Deploying / updating it:**
+1. Edit the source in `external-services/pdf-processor`, then:
    ```bash
    cd external-services/pdf-processor
-   fly deploy
+   cp .env.example .env    # first time only; set PDF_API_KEY
+   ./deploy.sh             # rsync → npm ci → tsc → pm2 startOrReload + save
    ```
 2. Verify:
    ```bash
-   curl https://<app>.fly.dev/health
+   curl https://pdf-processor.formatika.dev/health
+   curl -X POST https://pdf-processor.formatika.dev/generate-pdf \
+     -H "x-api-key: $PDF_API_KEY" -H 'Content-Type: application/json' \
+     -d '{"userData":{"firstName":"Jan","lastName":"Novak","email":"jan@example.com"}}' -o report.pdf
    ```
-3. Set in the main app environment:
+3. Main app environment:
    ```
-   PDF_SERVICE_URL=https://<app>.fly.dev
+   PDF_SERVICE_URL=https://pdf-processor.formatika.dev
+   PDF_API_KEY=<same key as the service>
    ```
-4. Or run it locally: `cd external-services/pdf-processor && npm install && npm run dev`, then `PDF_SERVICE_URL=http://localhost:3000`.
+4. Logs: `pm2 logs pdf-processor` or `/var/www/pdf-processor/logs/{out,err}.log`.
 
-**Note:** `server/generatePdf.ts` is no longer called by any route — its in-app renderer is intentionally disabled, and all PDF output goes through the processor.
+**Note:** `server/generatePdf.ts` is no longer called by any route — its in-app renderer is intentionally disabled, and all PDF output goes through the processor. The `cloudflare-worker/` variant is kept as an experiment only (react-pdf needs Node `fs`/pdfkit and `qrcode` needs a canvas); do not deploy it.
 
 ### 18.3 Other setup-dependent functions (not “broken”, just unconfigured)
 
@@ -451,7 +456,7 @@ Page: `pages/admin-analytics.tsx`. Backend: `routes/adminRoutes.ts`, `server/adm
 | `OPENAI_API_KEY` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | AI wrappers |
 | `MISTRAL_API_KEY`, `GROQ_API_KEY` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | voice / fallbacks |
 | `AI_PROCESSOR_URL` | ![partial](https://img.shields.io/badge/partial-8b949e?style=flat-square) | financial tips |
-| `PDF_SERVICE_URL` | ![needs service](https://img.shields.io/badge/needs%20service-d1242f?style=flat-square) | trends PDF |
+| `PDF_SERVICE_URL` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | trends/report PDF (`pdf-processor.formatika.dev`) |
 | `GOOGLE_CLOUD_*` | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) | receipt OCR |
 | `ELEVENLABS_API_KEY` | ![partial](https://img.shields.io/badge/partial-8b949e?style=flat-square) | TTS |
 | `SENDGRID_API_KEY`, `EMAIL_*` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | email |

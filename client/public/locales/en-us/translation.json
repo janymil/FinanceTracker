@@ -55,14 +55,7 @@
   "Transaction description": "Transaction description",
   "Type": "Type",
   "Category": "Category",
-  "transaction": {
-    "amount": "Amount",
-    "description": "Description",
-    "category": "Category",
-    "type": "Type",
-    "date": "Date",
-    "description_placeholder": "Transaction description"
-  },
+  "transaction": "transaction",
   "Select category": "Select category",
   "Select a category": "Select a category",
   "No categories available for": "No categories available for",
@@ -87,20 +80,16 @@
   "Consider reviewing your {{category}} expenses": "Consider reviewing your {{category}} expenses",
   "Great job! You're maintaining healthy finances": "Great job! You're maintaining healthy finances",
   "Smart Bill Assistant": "Smart Bill Assistant",
-  "Payment URL (Optional)": "Payment URL (Optional)",
   "Link to where you can pay this bill": "Link to where you can pay this bill",
   "Reference Note (Optional)": "Reference Note (Optional)",
   "Note": "Note",
   "Account #123456, Reference: ABC789": "Account #123456, Reference: ABC789",
   "Account number or other reference information": "Account number or other reference information",
-  "Make this a recurring transaction": "Make this a recurring transaction",
-  "Frequency": "Frequency",
   "Select frequency": "Select frequency",
   "Daily": "Daily",
   "Weekly": "Weekly",
   "Monthly": "Monthly",
   "Yearly": "Yearly",
-  "End Date (Optional)": "End Date (Optional)",
   "Cancel": "Cancel",
   "Add": "Add",
   "AI Financial Tips": "AI Financial Tips",
@@ -130,8 +119,6 @@
   "Choose Your Perfect": "Choose Your Perfect",
   "Financial Plan": "Financial Plan",
   "From basic expense tracking to AI-powered financial insights, we have the right plan for every financial journey.": "From basic expense tracking to AI-powered financial insights, we have the right plan for every financial journey.",
-  "Monthly": "Monthly",
-  "Yearly": "Yearly",
   "Free": "Free",
   "month": "month",
   "Perfect for getting started with expense tracking": "Perfect for getting started with expense tracking",
@@ -141,7 +128,6 @@
   "Simple financial overview": "Simple financial overview",
   "Personalized financial tips": "Personalized financial tips",
   "Most Popular": "Most Popular",
-  "Standard": "Standard",
   "For users serious about financial management": "For users serious about financial management",
   "Everything in Free plan": "Everything in Free plan",
   "Goals and budget management": "Goals and budget management",
@@ -150,7 +136,6 @@
   "Calendar view and reminders": "Calendar view and reminders",
   "Unlimited transaction history": "Unlimited transaction history",
   "Subscribe Now": "Subscribe Now",
-  "Premium": "Premium",
   "Complete AI-powered financial automation": "Complete AI-powered financial automation",
   "Everything in Standard plan": "Everything in Standard plan",
   "AI financial tips and insights": "AI financial tips and insights",
@@ -169,7 +154,7 @@
   "See exactly what's included in each plan": "See exactly what's included in each plan",
   "Features": "Features",
   "Overview": "Overview",
-  "Plans": "Plans", 
+  "Plans": "Plans",
   "User Guide": "User Guide",
   "FAQ": "FAQ",
   "Welcome to Kaptia": "Welcome to Kaptia",
@@ -226,7 +211,6 @@
   "Daily AI-powered financial tips": "Daily AI-powered financial tips",
   "Transaction reminders and alerts": "Transaction reminders and alerts",
   "Multi-device receipt scanning": "Multi-device receipt scanning",
-  "Data Management": "Data Management",
   "Cloud storage and backup (Premium)": "Cloud storage and backup (Premium)",
   "Import from CSV, Excel, JSON formats": "Import from CSV, Excel, JSON formats",
   "Export to multiple file formats": "Export to multiple file formats",
@@ -244,7 +228,6 @@
   "Secure API endpoints": "Secure API endpoints",
   "Regular security audits": "Regular security audits",
   "Data ownership transparency": "Data ownership transparency",
-  "Most Popular": "Most Popular",
   "Getting Started": "Getting Started",
   "Quick Start Guide": "Quick Start Guide",
   "Create Your Account": "Create Your Account",
@@ -262,7 +245,6 @@
   "Financial Summary Cards": "Financial Summary Cards",
   "Location": "Location",
   "Function": "Function",
-  "Features": "Features",
   "Top of dashboard": "Top of dashboard",
   "Display total income, expenses, and balance for selected month": "Display total income, expenses, and balance for selected month",
   "Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values": "Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values",
@@ -353,7 +335,7 @@
   "We may modify these terms at any time. We will notify users of significant changes via email or through the service. Continued use constitutes acceptance of modified terms.": "We may modify these terms at any time. We will notify users of significant changes via email or through the service. Continued use constitutes acceptance of modified terms.",
   "12. Contact Information": "12. Contact Information",
   "For questions about these Terms of Service, please contact us at:": "For questions about these Terms of Service, please contact us at:",
-  "Email: info@kaptia.app": "Email: info@kaptia.app",
+  "Email: info@kaptia.app": "info@kaptia.app",
   "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120": "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120",
   "Privacy Policy": "Privacy Policy",
   "1. Information We Collect": "1. Information We Collect",
@@ -405,10 +387,7 @@
   "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date.": "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date.",
   "9. Contact Us": "Contact Us",
   "If you have any questions about this Privacy Policy, please contact us at:": "If you have any questions about this Privacy Policy, please contact us at:",
-  "Email: info@kaptia.app": "info@kaptia.app",
-
   "Cookie Policy": "Cookie Policy",
-  "Last updated: June 14, 2025": "Last updated: June 14, 2025",
   "1. What Are Cookies": "What Are Cookies",
   "Cookies are small text files that are stored on your device when you visit our website. They help us provide you with a better experience by remembering your preferences and enabling essential website functionality.": "Cookies are small text files that are stored on your device when you visit our website. They help us provide you with a better experience by remembering your preferences and enabling essential website functionality.",
   "2. How We Use Cookies": "How We Use Cookies",
@@ -461,7 +440,6 @@
   "Cookie Name": "Cookie Name",
   "Purpose": "Purpose",
   "Duration": "Duration",
-  "Type": "Type",
   "Session management and authentication": "Session management and authentication",
   "7 days": "7 days",
   "Essential": "Essential",
@@ -473,8 +451,6 @@
   "We may update this Cookie Policy from time to time. Any changes will be posted on this page with an updated revision date.": "We may update this Cookie Policy from time to time. Any changes will be posted on this page with an updated revision date.",
   "8. Contact Us": "Contact Us",
   "If you have any questions about our use of cookies, please contact us at:": "If you have any questions about our use of cookies, please contact us at:",
-
-  "Kaptia": "Kaptia",
   "Take control of your finances with intelligent expense tracking, budgeting, and AI-powered insights.": "Take control of your finances with intelligent expense tracking, budgeting, and AI-powered insights.",
   "NutriNova LLC": "NutriNova LLC",
   "2105 Vista Oeste NW": "2105 Vista Oeste NW",
@@ -484,12 +460,6 @@
   "Support": "Support",
   "Contact Us": "Contact Us",
   "Help Center": "Help Center",
-  "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. All rights reserved.",
-  "Privacy Policy": "Privacy Policy",
-  "Terms of Service": "Terms of Service",
-  "Cookie Policy": "Cookie Policy",
-  "Contact": "Contact",
-
   "Jan": "Jan",
   "Feb": "Feb",
   "Mar": "Mar",
@@ -553,21 +523,17 @@
   "Last Month": "Last Month",
   "This Month": "This Month",
   "All Types": "All Types",
-  "Income": "Income",
   "Expense": "Expense",
   "All Categories": "All Categories",
   "All Transactions": "All Transactions",
   "Recurring Only": "Recurring Only",
   "One-time Only": "One-time Only",
   "Date Range": "Date Range",
-  "Type": "Type",
-  "Category": "Category",
   "Recurring": "Recurring",
   "Filters": "Filters",
   "Active": "Active",
-
   "Food": "Food",
-  "Entertainment": "Entertainment", 
+  "Entertainment": "Entertainment",
   "Housing": "Housing",
   "Transportation": "Transportation",
   "Healthcare": "Healthcare",
@@ -582,12 +548,10 @@
   "Debt Payoff": "Debt Payoff",
   "Retirement": "Retirement",
   "Other": "Other",
-
   "Category Management": "Category Management",
   "Organize your income and expense sources": "Organize your income and expense sources",
-  "Expense Categories": "Expense Categories", 
+  "Expense Categories": "Expense Categories",
   "Income Categories": "Income Categories",
-  "Expenses": "Expenses",
   "Manage categories for your expenses and spending": "Manage categories for your expenses and spending",
   "Manage categories for your income sources": "Manage categories for your income sources",
   "New Category": "New Category",
@@ -598,10 +562,8 @@
   "Category Name": "Category Name",
   "Enter category name": "Enter category name",
   "Category Type": "Category Type",
-  "Expense": "Expense",
   "Icon": "Icon",
   "Color": "Color",
-  "Cancel": "Cancel",
   "Update": "Update",
   "Create": "Create",
   "No Expense Categories": "No Expense Categories",
@@ -612,7 +574,6 @@
   "Add Income Category": "Add Income Category",
   "In use": "In use",
   "Recent Transactions": "Recent Transactions",
-  "Search transactions...": "Search transactions...",
   "Filter by type": "Filter by type",
   "All transactions": "All transactions",
   "Expenses only": "Expenses only",
@@ -626,7 +587,6 @@
   "Total Expenses": "Total Expenses",
   "Net Balance": "Net Balance",
   "Budget Status": "Budget Status",
-  "transaction": "transaction",
   "transactionPlural": "transactions",
   "Auto": "Auto",
   "Manual": "Manual",
@@ -636,14 +596,11 @@
   "monthly": "monthly",
   "Financial Trends": "Financial Trends",
   "Evolution of your income, expenses and net balance over the last months": "Evolution of your income, expenses and net balance over the last months",
-  "Premium": "Premium",
   "Expense Breakdown": "Expense Breakdown",
   "Your spending by category": "Your spending by category",
   "Your spending by category this month": "Your spending by category this month",
   "No Expenses to Display": "No Expenses to Display",
   "Add some expense transactions to see your spending breakdown": "Add some expense transactions to see your spending breakdown",
-  "Amount": "Amount",
-  "Category": "Category",
   "total": "total",
   "No Budget Set": "No Budget Set",
   "Healthy": "Healthy",
@@ -688,7 +645,36 @@
   "financialHealthMascot": "Financial Health Mascot",
   "healthScore": "Health Score",
   "achievements": "Achievements",
-  "insights": "Insights",
+  "insights": {
+    "title": "Insights",
+    "description": "Mathematical insights based on your financial data and spending trends",
+    "loading": "Loading insights...",
+    "no_insights": "No insights available",
+    "add_transactions": "Add transactions to generate financial insights",
+    "upgrade_for_insights": "Upgrade to Standard or Premium plan for access to insights",
+    "impact_high": "High",
+    "impact_medium": "Medium",
+    "impact_low": "Low",
+    "recommendation": "Recommendation",
+    "take_action": "Take Action",
+    "high_spending_alert": "High Spending Alert",
+    "high_spending_description": "You've spent {{percentage}}% of your income this month",
+    "review_expense_categories": "Consider reviewing your largest expense categories",
+    "category_focus_opportunity": "Category Focus Opportunity",
+    "category_spending_percentage": "{{category}} represents {{percentage}}% of your spending",
+    "consider_budget_limit": "Consider setting a budget limit for {{category}}",
+    "positive_cash_flow": "Positive Cash Flow",
+    "savings_rate": "You're saving {{rate}}% of your income this month",
+    "increase_savings_rate": "Consider increasing your savings rate to 20%",
+    "excellent_savings": "Excellent savings rate!",
+    "spending_increased": "Spending Increased",
+    "spending_decreased": "Spending Decreased",
+    "spending_change_description": "Your spending has {{direction}} by {{percentage}}% compared to last month",
+    "increased": "increased",
+    "decreased": "decreased",
+    "review_recent_purchases": "Review recent purchases to identify spending increase",
+    "great_expense_reduction": "Great work on reducing expenses!"
+  },
   "alerts": "Alerts",
   "hideDetails": "Hide Details",
   "showDetails": "Show Details",
@@ -767,24 +753,22 @@
     "healthScore": "Health Score",
     "aiInsights": "AI Insights"
   },
-
   "AI Expense Prediction": "AI Expense Prediction",
   "Machine learning predictions based on your spending patterns": "Machine learning predictions based on your spending patterns",
   "By Category": "By Category",
-  "Timeline": "Timeline",  
+  "Timeline": "Timeline",
   "Prediction Error": "Prediction Error",
   "Failed to generate predictions. Please try again later.": "Failed to generate predictions. Please try again later.",
   "Next Month": "Next Month",
   "Predicted total expenses": "Predicted total expenses",
-  "Average prediction accuracy": "Average prediction accuracy", 
+  "Average prediction accuracy": "Average prediction accuracy",
   "vs current month": "vs current month",
   "No Prediction Data Available": "No Prediction Data Available",
   "Add more transactions to generate AI-powered expense predictions": "Add more transactions to generate AI-powered expense predictions",
   "confidence": "confidence",
   "increasing": "increasing",
-  "decreasing": "decreasing", 
+  "decreasing": "decreasing",
   "stable": "stable",
-
   "financial_health": {
     "title": "Financial Health Score",
     "spending_control": "Spending Control",
@@ -816,32 +800,10 @@
       "score_ranges_detail": "80-100: Excellent | 65-79: Good | 50-64: Fair | Below 50: Needs Improvement"
     }
   },
-
-  "Recent Transactions Widget": "Recent Transactions Widget",
-  "Shows last 5 transactions with edit/delete options": "Shows last 5 transactions with edit/delete options",
-  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators",
-
-  "Budget Overview Widget (Standard+)": "Budget Overview Widget (Standard+)", 
-  "Monitor budget progress across all categories": "Monitor budget progress across all categories",
-  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts",
-
-  "Financial Health Score": "Financial Health Score",
-  "Calculate and display financial wellness score": "Calculate and display financial wellness score",
-  "Free Users": "Free Users",
-  "Simple calculation based on income/expense ratio": "Simple calculation based on income/expense ratio",
-  "Standard+ Users": "Standard+ Users",
-  "AI-powered analysis with detailed recommendations and improvement suggestions": "AI-powered analysis with detailed recommendations and improvement suggestions",
-
-  "AI Financial Tips (Premium)": "AI Financial Tips (Premium)",
-  "Personalized financial advice based on spending patterns": "Personalized financial advice based on spending patterns",
-  "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions",
-
   "Financial Mascot (Premium)": "Financial Mascot (Premium)",
   "Floating on dashboard": "Floating on dashboard",
   "Personalized AI companion reflecting financial health": "Personalized AI companion reflecting financial health",
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options",
-
-  "Transaction Management": "Transaction Management",
   "Transaction Entry Forms": "Transaction Entry Forms",
   "Expenses, Income, and Transactions pages": "Expenses, Income, and Transactions pages",
   "Add new financial transactions with complete details": "Add new financial transactions with complete details",
@@ -864,8 +826,6 @@
   "Upload Image buttons on transaction pages": "Upload Image buttons on transaction pages",
   "Extract transaction data from receipt photos": "Extract transaction data from receipt photos",
   "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload",
-
-  "Category Management": "Category Management",
   "Category Creation and Editing": "Category Creation and Editing",
   "Categories page": "Categories page",
   "Create custom expense and income categories": "Create custom expense and income categories",
@@ -879,7 +839,6 @@
   "AI Auto-Categorization (Standard+)": "AI Auto-Categorization (Standard+)",
   "Automatically suggest categories based on transaction descriptions": "Automatically suggest categories based on transaction descriptions",
   "Machine learning analysis, merchant recognition, user preference learning, manual override options": "Machine learning analysis, merchant recognition, user preference learning, manual override options",
-
   "Budget and Goals (Standard+)": "Budget and Goals (Standard+)",
   "Budget Creation and Management": "Budget Creation and Management",
   "Budgets page": "Budgets page",
@@ -893,10 +852,8 @@
   "Types": "Types",
   "Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement": "Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement",
   "Progress tracking, milestone celebrations, contribution history, deadline reminders": "Progress tracking, milestone celebrations, contribution history, deadline reminders",
-  "Collaborative Goals": "Collaborative Goals",
   "Share goals with family members or partners": "Share goals with family members or partners",
   "Friend invitations, shared contributions, progress visibility, achievement tracking": "Friend invitations, shared contributions, progress visibility, achievement tracking",
-
   "Reports and Analytics": "Reports and Analytics",
   "Financial Overview Reports": "Financial Overview Reports",
   "Reports page - Overview tab": "Reports page - Overview tab",
@@ -914,7 +871,6 @@
   "Calendar page": "Calendar page",
   "Monthly grid view of all transactions": "Monthly grid view of all transactions",
   "Daily spending totals, transaction previews, monthly navigation, mobile responsive grid": "Daily spending totals, transaction previews, monthly navigation, mobile responsive grid",
-
   "Data Management (Premium)": "Data Management (Premium)",
   "Cloud Backup System": "Cloud Backup System",
   "Data Management page - Backup tab": "Data Management page - Backup tab",
@@ -932,7 +888,6 @@
   "Supported": "Supported",
   "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, bank exports",
   "Column mapping, data validation, preview before import, batch processing": "Column mapping, data validation, preview before import, batch processing",
-
   "Profile and Settings": "Profile and Settings",
   "Account Management": "Account Management",
   "Profile page - Account tab": "Profile page - Account tab",
@@ -956,10 +911,8 @@
   "QR Code Cross-Device Upload": "QR Code Cross-Device Upload",
   "Scan receipts on mobile, process on desktop": "Scan receipts on mobile, process on desktop",
   "QR code generation, anonymous mobile access, real-time polling, automatic form population": "QR code generation, anonymous mobile access, real-time polling, automatic form population",
-
   "Fields": "Fields",
   "Validation": "Validation",
-
   "Receipt OCR Scanning (Standard+)": "Receipt OCR Scanning (Standard+)",
   "Available for Standard and Premium subscribers": "Available for Standard and Premium subscribers",
   "How to Scan Receipts": "How to Scan Receipts",
@@ -991,15 +944,12 @@
   "Check extracted data before saving the transaction": "Check extracted data before saving the transaction",
   "Editing Extracted Data": "Editing Extracted Data",
   "All extracted information appears in editable form fields. You can modify any details before saving the transaction. The original receipt image is stored and can be viewed later by clicking on receipt thumbnails in transaction lists.": "All extracted information appears in editable form fields. You can modify any details before saving the transaction. The original receipt image is stored and can be viewed later by clicking on receipt thumbnails in transaction lists.",
-
   "Troubleshooting": "Troubleshooting",
   "If OCR fails, manually enter transaction details": "If OCR fails, manually enter transaction details",
   "Poor image quality may affect extraction accuracy": "Poor image quality may affect extraction accuracy",
   "Handwritten receipts work better when text is clear": "Handwritten receipts work better when text is clear",
   "Multiple items on one receipt create one transaction for the total": "Multiple items on one receipt create one transaction for the total",
-
   "Ask about Kaptia features...": "Ask about Kaptia features...",
-
   "voice": {
     "title": "Voice Transaction Input",
     "instructions": "Press Start Speaking button and speak briefly, simply. Say these data: merchant, product, amount, date.",
@@ -1054,7 +1004,6 @@
     "microphone_not_found": "No microphone found. Please connect a microphone and try again.",
     "microphone_in_use": "Microphone is already in use by another application."
   },
-
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Feature",
@@ -1144,12 +1093,11 @@
       }
     }
   },
-
   "reports": {
     "title": "Advanced Reports & Analytics",
     "subtitle": "AI-powered insights, interactive charts, and comprehensive financial analysis",
     "this_week": "This Week",
-    "this_month": "This Month", 
+    "this_month": "This Month",
     "this_quarter": "This Quarter",
     "this_year": "This Year",
     "custom_range": "Custom Range",
@@ -1205,7 +1153,6 @@
     "get_ai_insights": "Get AI insights, interactive charts, export tools, and auto-categorization",
     "upgrade_now": "Upgrade Now"
   },
-
   "ai_insights": {
     "title": "AI-Powered Insights",
     "description": "Personalized recommendations based on your spending patterns",
@@ -1217,7 +1164,6 @@
     "impact_medium": "medium impact",
     "impact_low": "low impact"
   },
-
   "calendar": {
     "title": "Calendar View",
     "description": "View your financial transactions in a calendar format",
@@ -1239,7 +1185,6 @@
       "saturday": "Sat"
     }
   },
-
   "charts": {
     "date": "Date",
     "income": "Income",
@@ -1259,7 +1204,6 @@
     "30d": "30D",
     "90d": "90D"
   },
-
   "budget": {
     "total_budget_for": "Total budget for",
     "new_budget": "New Budget",
@@ -1299,7 +1243,6 @@
     "failed_to_update_budget": "Failed to update budget",
     "failed_to_delete_budget": "Failed to delete budget"
   },
-
   "common": {
     "success": "Success",
     "auto": "Auto",
@@ -1329,15 +1272,12 @@
     "of": "of",
     "transactions": "transactions"
   },
-  "transaction": "transaction",
   "transactions_count": "transactions",
-
   "frequencies": {
     "weekly": "Weekly",
-    "monthly": "Monthly", 
+    "monthly": "Monthly",
     "yearly": "Yearly"
   },
-
   "income": {
     "title": "Income",
     "subtitle": "Track and manage your income sources",
@@ -1362,12 +1302,11 @@
     "update_income": "Update Income",
     "added_title": "Income Added",
     "added_description": "Income transaction has been created successfully",
-    "updated_title": "Income Updated", 
+    "updated_title": "Income Updated",
     "updated_description": "Income transaction has been updated successfully",
     "confirm_delete": "Are you sure you want to delete this income?",
     "adding": "Adding..."
   },
-
   "expenses": {
     "title": "Expense Management",
     "subtitle": "Track and manage all your expenses and spending",
@@ -1415,14 +1354,12 @@
     "filtered_transactions": "Filtered expense transactions",
     "all_transactions": "All your expense transactions",
     "loading": "Loading expenses...",
-    "no_expenses_found": "No Expenses Found",
     "adjust_filters": "Try adjusting your filters or search terms",
-    "add_first_expense": "Add your first expense transaction to get started",
     "note": "Note",
     "charts": {
       "trend_title": "Monthly Expense Trend",
       "trend_description": "Monthly expenses over time",
-      "category_title": "Expenses by Category", 
+      "category_title": "Expenses by Category",
       "category_description": "Distribution of spending categories",
       "expenses_label": "Expenses",
       "amount_label": "Amount"
@@ -1445,14 +1382,13 @@
       "frequency": "Frequency",
       "frequency_placeholder": "Select frequency",
       "weekly": "Weekly",
-      "monthly": "Monthly", 
+      "monthly": "Monthly",
       "yearly": "Yearly",
       "end_date": "End Date (Optional)",
       "add_expense": "Add Expense",
       "update": "Update"
     }
   },
-
   "expense_reminders": {
     "reminder_created": "Reminder Created",
     "created_successfully": "Expense reminder has been set successfully",
@@ -1468,7 +1404,6 @@
     "create_reminder_button": "Create Reminder",
     "copied_to_clipboard": "Reference note copied to clipboard"
   },
-
   "reminders": {
     "notifications_not_supported": "Notifications not supported",
     "browser_not_support": "Your browser doesn't support notifications",
@@ -1479,61 +1414,47 @@
     "notifications_denied": "Notifications denied",
     "wont_receive_notifications": "You won't receive browser notifications"
   },
-
   "transaction_reminders": {
     "failed_to_create": "Failed to create reminder",
     "failed_to_complete": "Failed to complete reminder",
     "failed_to_delete": "Failed to delete reminder"
   },
-
   "categories": {
-    "category_created": "Category Created",
-    "category_added_successfully": "New category has been added successfully"
+    "food": "Food",
+    "transportation": "Transportation",
+    "housing": "Housing",
+    "entertainment": "Entertainment",
+    "healthcare": "Healthcare",
+    "shopping": "Shopping",
+    "utilities": "Utilities",
+    "education": "Education",
+    "travel": "Travel",
+    "business": "Business",
+    "other": "Other",
+    "salary": "Salary",
+    "freelance": "Freelance",
+    "investments": "Investments"
   },
-
   "colors": {
     "blue": "Blue",
     "green": "Green",
     "purple": "Purple",
     "red": "Red",
     "orange": "Orange",
-    "pink": "Pink", 
+    "pink": "Pink",
     "indigo": "Indigo",
     "teal": "Teal"
   },
-
-  "categories": {
-    "voľná_práca": "Freelance",
-    "plat": "Salary",
-    "investície": "Investments",
-    "doprava": "Transportation",
-    "jedlo_&_reštaurácie": "Food & Dining",
-    "nakupovanie": "Shopping",
-    "nákupy": "Shopping",
-    "účty_&_služby": "Bills & Utilities",
-    "zdravotníctvo": "Healthcare",
-    "zábava": "Entertainment",
-    "bývanie": "Housing",
-    "jedlo": "Food",
-    "freelancing": "Freelancing",
-    "salary": "Salary",
-    "freelance": "Freelance",
-    "investments": "Investments"
-  },
-
   "admin": {
     "failed_to_clear_function_cache": "Failed to clear function cache",
     "failed_to_clear_user_cache": "Failed to clear user cache",
     "failed_to_cleanup_expired_cache": "Failed to cleanup expired cache"
   },
-
-
   "types": {
     "expense": "expense",
     "income": "income",
     "goal": "goal"
   },
-
   "goals": {
     "title": "Goals",
     "subtitle": "Set and track your financial goals",
@@ -1600,7 +1521,6 @@
       "failed_delete": "Failed to delete goal"
     }
   },
-
   "dashboard": {
     "total_income": "Total Income",
     "total_expenses": "Total Expenses",
@@ -1614,12 +1534,10 @@
     "utilized": "utilized",
     "remaining": "Remaining"
   },
-
   "plans": {
     "standard": "Standard",
     "premium": "Premium"
   },
-
   "currency": {
     "welcome_title": "Welcome to Kaptia! 🌎",
     "welcome_description": "Please choose your preferred currency to get started. You can change this later until you add your first transaction.",
@@ -1629,11 +1547,10 @@
     "error_title": "Error",
     "error_description": "Failed to set currency. Please try again."
   },
-
   "upgrade": {
     "standard_name": "Standard",
     "standard_price": "$4.99/month",
-    "premium_name": "Premium", 
+    "premium_name": "Premium",
     "premium_price": "$9.99/month",
     "complete_upgrade": "Complete Your {{plan}} Upgrade",
     "ready_to_activate": "Ready to activate",
@@ -1647,7 +1564,7 @@
     "standard_features": {
       "goals": "Goals and budget management",
       "charts": "Interactive charts and reports",
-      "ai_categorization": "AI expense categorization", 
+      "ai_categorization": "AI expense categorization",
       "calendar": "Calendar view and reminders",
       "unlimited_history": "Unlimited transaction history"
     },
@@ -1655,33 +1572,37 @@
       "everything": "Everything in Standard plan",
       "ai_tips": "AI financial tips and insights",
       "trends": "Advanced trends analysis",
-      "prediction": "Expense prediction", 
+      "prediction": "Expense prediction",
       "recommendations": "Daily personalized recommendations",
       "backup": "Cloud data backup",
       "data_management": "Data management (CSV, PDF)"
     }
   },
-
   "upload": {
-    "invalid_file_type": "Invalid file type",
-    "please_select_image": "Please select an image",
-    "upload_failed": "Upload failed",
-    "please_try_again": "Please try again",
-    "missing_information": "Missing information",
-    "please_fill_required": "Please fill in all required fields",
-    "transaction_saved": "Transaction saved",
-    "receipt_saved_description": "Receipt data has been saved as a transaction",
-    "save_failed": "Save failed",
-    "save_failed_description": "Failed to save transaction. Please try again.",
-    "transaction_description_placeholder": "Transaction description",
-    "select_category_placeholder": "Select category",
-    "qr_code_error": "QR Code Error",
-    "failed_to_generate_qr": "Failed to generate QR code",
-    "upload_error": "Upload Error",
-    "failed_to_process_mobile": "Failed to process mobile upload",
-    "timeout": "Timeout"
+    "drag_drop": "Drag and drop an image here, or click to browse",
+    "processing": "Processing your receipt...",
+    "analysing": "Analysing image with AI...",
+    "try_again": "Try Again",
+    "upload_receipt": "Upload Receipt",
+    "or": "or",
+    "select_file": "Select file",
+    "scan_phone": "Scan with Phone",
+    "scan_qr": "Scan QR Code with Your Phone",
+    "qr_step_1": "1. Scan this QR code with your phone camera",
+    "qr_step_2": "2. Take a photo of your receipt",
+    "qr_step_3": "3. The data will appear here automatically",
+    "waiting_upload": "Waiting for mobile upload...",
+    "cancel_qr": "Cancel QR Scan",
+    "edit_details": "Edit Transaction Details",
+    "amount_required": "Amount *",
+    "save_transaction": "Save Transaction",
+    "recognized_text": "Recognized Text:",
+    "upload_another": "Upload another receipt",
+    "close": "Close",
+    "modal_title": "Upload Receipt",
+    "modal_subtitle": "Upload a receipt photo to automatically extract transaction data",
+    "button_text": "Upload Image"
   },
-
   "trends": {
     "title": "Advanced Trends Analysis",
     "subtitle": "Deep insights into your financial patterns and forecasting",
@@ -1690,21 +1611,18 @@
     "export_error": "Failed to generate PDF report",
     "uncategorized": "Uncategorized",
     "other": "Other",
-    
     "periods": {
       "last_30_days": "Last 30 Days",
-      "last_12_weeks": "Last 12 Weeks", 
+      "last_12_weeks": "Last 12 Weeks",
       "last_6_months": "Last 6 Months",
       "last_2_years": "Last 2 Years"
     },
-
     "tabs": {
       "overview": "Overview",
       "by_category": "By Category",
       "patterns": "Patterns",
       "forecasts": "Forecasts"
     },
-
     "overview": {
       "trend_direction": "Trend Direction",
       "positive": "Positive",
@@ -1718,24 +1636,21 @@
       "financial_trends_title": "Financial Trends Overview",
       "financial_trends_description": "Income, expenses, and net balance over {{period}}"
     },
-
     "chart": {
       "income": "Income",
-      "expenses": "Expenses", 
+      "expenses": "Expenses",
       "net_balance": "Net Balance",
       "amount": "Amount"
     },
-
     "days": {
       "sunday": "Sunday",
       "monday": "Monday",
       "tuesday": "Tuesday",
-      "wednesday": "Wednesday", 
+      "wednesday": "Wednesday",
       "thursday": "Thursday",
       "friday": "Friday",
       "saturday": "Saturday"
     },
-
     "insights": {
       "no_data": "No spending data available.",
       "weekend_higher": "You spend more on weekends ({{weekendAmount}}) than weekdays. {{maxDay}} is your highest spending day.",
@@ -1744,7 +1659,6 @@
       "month_end_higher": "You tend to spend more at the end of the month ({{lastWeekAvg}} avg) than at the beginning ({{firstWeekAvg}} avg).",
       "consistent_spending": "Your spending is relatively consistent throughout the month."
     },
-
     "patterns": {
       "day_of_week_title": "Day of Week Patterns",
       "day_of_week_description": "Your spending behavior across different days",
@@ -1756,7 +1670,6 @@
       "total": "Total",
       "average": "Average"
     },
-
     "forecasts": {
       "ai_forecasts_title": "AI Financial Forecasts",
       "ai_forecasts_description": "AI-powered predictions based on your historical data patterns",
@@ -1779,39 +1692,37 @@
       "no_predictions_title": "No Predictions Available",
       "no_predictions_description": "Add more transactions to generate AI-powered financial forecasts"
     },
-
     "categories": {
       "total_spent": "Total Spent:",
       "monthly_average": "Monthly Average:"
     },
-
     "trend": {
       "increasing": "increasing",
-      "decreasing": "decreasing", 
+      "decreasing": "decreasing",
       "stable": "stable"
     }
   },
-
   "export": {
     "page_title": "Data Management",
     "page_description": "Export and import your financial data with advanced options",
-    
     "tab_export": "Export",
-    "tab_import": "Import", 
+    "tab_import": "Import",
     "tab_backup": "Backup",
     "export_tab": "Export",
     "import_tab": "Import",
-    
     "export_title": "Export Financial Data",
     "export_description": "Download your transactions, budgets, goals, and more in various formats",
-    
-    "format": "Format",
+    "format": {
+      "pdf": "PDF",
+      "csv": "CSV",
+      "excel": "Excel",
+      "json": "JSON"
+    },
     "format_description": "Choose your preferred export format",
     "pdf": "PDF",
     "csv": "CSV",
     "excel": "Excel",
     "json": "JSON",
-    
     "date_range": "Date Range",
     "date_range_description": "Select the time period for your export",
     "all": "All Time",
@@ -1821,7 +1732,6 @@
     "custom": "Custom Range",
     "start_date": "Start Date",
     "end_date": "End Date",
-    
     "data_selection": "Data Selection",
     "data_selection_description": "Choose what to include in your export",
     "include_transactions": "Transactions",
@@ -1830,79 +1740,57 @@
     "include_summary": "Financial Summary",
     "include_charts": "Charts & Visualizations",
     "include_label": "Include",
-    
     "format_label": "Format",
     "date_range_label": "Date Range",
-    
     "range": {
       "all": "All Time",
-      "month": "This Month", 
+      "month": "This Month",
       "quarter": "This Quarter",
       "year": "This Year",
       "custom": "Custom Range"
     },
-    
-    "format": {
-      "pdf": "PDF",
-      "csv": "CSV", 
-      "excel": "Excel",
-      "json": "JSON"
-    },
-    
     "format_pdf": "PDF",
-    "format_csv": "CSV", 
+    "format_csv": "CSV",
     "format_excel": "Excel",
     "format_json": "JSON",
-    
     "range_all": "All Time",
-    "range_month": "This Month", 
+    "range_month": "This Month",
     "range_quarter": "This Quarter",
     "range_year": "This Year",
     "range_custom": "Custom Range",
-    
     "coming_soon": "Export functionality coming soon",
     "coming_soon_desc": "Support for PDF, CSV, Excel, JSON, and more",
-    
     "import_title": "Import Financial Data",
     "import_description": "Import transactions, budgets, goals, and categories from CSV or JSON files",
-    
     "step1_title": "Download Example File",
     "step1_description": "Download our example CSV file to see the correct format for your data",
     "download_example_csv": "Download Example CSV",
-    
-    "step2_title": "Choose File Format", 
+    "step2_title": "Choose File Format",
     "csv_file": "CSV File",
     "csv_description": "Comma-separated values format (recommended)",
-    "json_file": "JSON File", 
+    "json_file": "JSON File",
     "json_description": "JavaScript Object Notation format",
-    
     "step3_title": "Upload Your File",
     "drop_file_text": "Drag and drop your file here, or click to browse",
     "supports_files": "Supports files",
-    
     "toast_import_failed": "Import failed. Please check your file format and try again.",
     "toast_backup_failed": "Failed to create backup. Please try again.",
-    
     "backup_created": "Backup Created Successfully",
     "backup_created_desc": "Your data has been securely backed up to cloud storage",
-    "backup_failed": "Backup Creation Failed", 
+    "backup_failed": "Backup Creation Failed",
     "backup_failed_desc": "Failed to create backup. Please try again.",
-    
     "export_successful": "Export Completed Successfully",
     "export_successful_desc": "Your data has been exported in {{format}} format",
     "export_failed": "Export Failed",
     "export_failed_desc": "Failed to export data. Please try again.",
-    
-    "restore_successful": "Restore Completed Successfully", 
+    "restore_successful": "Restore Completed Successfully",
     "restore_successful_desc": "Successfully restored {{transactions}} transactions and {{budgets}} budgets from {{filename}}",
     "restore_failed": "Restore Failed",
     "restore_failed_desc": "Failed to restore backup. Please check your backup file.",
-    
     "no_backups_available": "No Backups Available",
     "no_backups_found": "No backup files found. Create a backup first.",
     "toast_export_failed": "Export failed. Please try again later.",
     "toast_restore_failed": "Restore failed. Please check your backup file.",
-    
     "imported_count": "{{count}} imported",
     "collaborative": "Collaborative",
     "warnings_count": "Warnings ({{count}})",
@@ -1911,7 +1799,6 @@
     "records_count": "{{count}} records",
     "no_import_history": "No import history yet",
     "processing_error": "Processing Error",
-    
     "pdf_security": {
       "modal_title": "Bank-Grade Security for PDF Processing",
       "modal_description": "Before processing your bank statement, please review our comprehensive security measures.",
@@ -1951,7 +1838,6 @@
       "cancel": "Cancel",
       "consent_button": "I Consent to Secure Processing"
     },
-    
     "duplicate_warning": {
       "title": "Potential Duplicate Transactions Detected",
       "description": "We found transactions that may already exist in your account. Review the matches below and choose which transactions to import.",
@@ -1972,7 +1858,6 @@
       "proceeding_title": "Proceeding with Import",
       "proceeding_description": "Importing {{count}} selected transactions"
     },
-    
     "backup_tab": "Backup",
     "cloud_backup_status": "Cloud Backup Status",
     "automatic_backup_enabled": "Automatic Backup Enabled",
@@ -1997,41 +1882,14 @@
     "restoring": "Restoring...",
     "restore": "Restore"
   },
-
-  "upload": {
-    "drag_drop": "Drag and drop an image here, or click to browse",
-    "processing": "Processing your receipt...",
-    "analysing": "Analysing image with AI...",
-    "try_again": "Try Again",
-    "upload_receipt": "Upload Receipt",
-    "or": "or",
-    "select_file": "Select file",
-    "scan_phone": "Scan with Phone",
-    "scan_qr": "Scan QR Code with Your Phone",
-    "qr_step_1": "1. Scan this QR code with your phone camera",
-    "qr_step_2": "2. Take a photo of your receipt",
-    "qr_step_3": "3. The data will appear here automatically",
-    "waiting_upload": "Waiting for mobile upload...",
-    "cancel_qr": "Cancel QR Scan",
-    "edit_details": "Edit Transaction Details",
-    "amount_required": "Amount *",
-    "save_transaction": "Save Transaction",
-    "recognized_text": "Recognized Text:",
-    "upload_another": "Upload another receipt",
-    "close": "Close",
-    "modal_title": "Upload Receipt",
-    "modal_subtitle": "Upload a receipt photo to automatically extract transaction data",
-    "button_text": "Upload Image"
-  },
-
   "upcomingReminders": {
     "title": "Upcoming Reminders",
     "customReminder": "Custom Reminder",
     "priority": {
-      "high": "high",
-      "medium": "medium", 
-      "low": "low",
-      "normal": "normal"
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "normal": "Normal"
     },
     "description": "Stay on top of your bills and payments",
     "addReminder": "Add Reminder",
@@ -2041,16 +1899,10 @@
     "reminderDescription": "Optional description",
     "noReminders": "No upcoming reminders",
     "noRemindersDescription": "Create future-dated transactions or add manual reminders to see them here",
-    "priority": {
-      "high": "High",
-      "medium": "Medium", 
-      "low": "Low",
-      "normal": "Normal"
-    },
     "form": {
       "title": "Title",
       "titlePlaceholder": "Reminder title",
-      "description": "Description", 
+      "description": "Description",
       "descriptionPlaceholder": "Optional description",
       "amount": "Amount",
       "amountPlaceholder": "0.00",
@@ -2090,7 +1942,7 @@
   "vs": "vs",
   "current": "current",
   "Prediction factors": "Prediction factors",
-  "No Category Data Available": "No Category Data Available", 
+  "No Category Data Available": "No Category Data Available",
   "Add transactions to generate category-specific expense predictions": "Add transactions to generate category-specific expense predictions",
   "Timeline Forecast": "Timeline Forecast",
   "1 Month": "1 Month",
@@ -2101,7 +1953,6 @@
   "No Timeline Data Available": "No Timeline Data Available",
   "Add transactions to generate timeline expense predictions": "Add transactions to generate timeline expense predictions",
   "AI-powered expense predictions help you plan your budget with machine learning insights": "AI-powered expense predictions help you plan your budget with machine learning insights",
-
   "Auto-Categorization": "Auto-Categorization",
   "AI-powered transaction categorization with machine learning": "AI-powered transaction categorization with machine learning",
   "Smart Transaction Analysis": "Smart Transaction Analysis",
@@ -2173,36 +2024,6 @@
       "low": "low"
     }
   },
-  "insights": {
-    "title": "Insights",
-    "description": "Mathematical insights based on your financial data and spending trends",
-    "loading": "Loading insights...",
-    "no_insights": "No insights available",
-    "add_transactions": "Add transactions to generate financial insights",
-    "upgrade_for_insights": "Upgrade to Standard or Premium plan for access to insights",
-    "impact_high": "High",
-    "impact_medium": "Medium", 
-    "impact_low": "Low",
-    "recommendation": "Recommendation",
-    "take_action": "Take Action",
-    "high_spending_alert": "High Spending Alert",
-    "high_spending_description": "You've spent {{percentage}}% of your income this month",
-    "review_expense_categories": "Consider reviewing your largest expense categories",
-    "category_focus_opportunity": "Category Focus Opportunity",
-    "category_spending_percentage": "{{category}} represents {{percentage}}% of your spending",
-    "consider_budget_limit": "Consider setting a budget limit for {{category}}",
-    "positive_cash_flow": "Positive Cash Flow",
-    "savings_rate": "You're saving {{rate}}% of your income this month",
-    "increase_savings_rate": "Consider increasing your savings rate to 20%",
-    "excellent_savings": "Excellent savings rate!",
-    "spending_increased": "Spending Increased",
-    "spending_decreased": "Spending Decreased",
-    "spending_change_description": "Your spending has {{direction}} by {{percentage}}% compared to last month",
-    "increased": "increased",
-    "decreased": "decreased",
-    "review_recent_purchases": "Review recent purchases to identify spending increase",
-    "great_expense_reduction": "Great work on reducing expenses!"
-  },
   "aiPoweredInsights": "AI-Powered Insights",
   "premium": "Premium",
   "spendingManagement": "Spending Management",
@@ -2239,13 +2060,11 @@
   "I agree to the": "I agree to the",
   "and": "and",
   "Please accept Terms & Privacy Policy to continue": "Please accept Terms & Privacy Policy to continue",
-
   "nav": {
     "features": "Features",
     "help": "Help",
     "contact": "Contact"
   },
-
   "contact": {
     "page_title": "Contact Us",
     "seo_title": "Contact Us - Kaptia Support | Get Help & Send Messages",
@@ -2284,7 +2103,6 @@
     "faq_q3": "Can I export my data?",
     "faq_a3": "Standard and Premium users can export their data in various formats through the Data Management page."
   },
-
   "auth": {
     "signUp": "Sign Up",
     "signIn": "Sign In",
@@ -2300,17 +2118,15 @@
     "securePrivate": "Secure & Private",
     "securePrivateDesc": "Industry-standard security keeps your data protected"
   },
-
   "seo": {
     "authTitle": "Sign In | Sign Up - Kaptia",
     "authDescription": "Create your Kaptia account or sign in to access your spending dashboard. Start tracking expenses, managing budgets, and reaching your savings goals today.",
     "authKeywords": "kaptia login, sign up finance app, personal finance account, expense tracker registration, budget app login"
   },
-
   "factors": {
     "budgetManagement": "Budget Management",
     "adaptiveSpendingControl": "Adaptive Spending Control",
-    "expenseVolatility": "Expense Volatility", 
+    "expenseVolatility": "Expense Volatility",
     "financialResilience": "Financial Resilience",
     "savingsRate": "Savings Rate",
     "debtManagement": "Debt Management",
@@ -2347,7 +2163,7 @@
   },
   "recurring": {
     "weekly": "Weekly",
-    "monthly": "Monthly", 
+    "monthly": "Monthly",
     "yearly": "Yearly"
   },
   "collaborative_goals": {
@@ -2445,7 +2261,6 @@
       "enter_email": "Please enter an email address"
     }
   },
-
   "collaborative_goal_detail": {
     "messages": {
       "contribution_added": "Contribution Added",
@@ -2507,7 +2322,7 @@
     },
     "goal_categories": {
       "vacation": "Vacation",
-      "wedding": "Wedding", 
+      "wedding": "Wedding",
       "home": "Home",
       "education": "Education",
       "emergency": "Emergency",
@@ -2554,7 +2369,7 @@
     },
     "actions": {
       "share_goal": "Share Goal",
-      "invite_friends": "Invite Friends", 
+      "invite_friends": "Invite Friends",
       "invite_description": "Send an invitation to friends to join this collaborative goal.",
       "email_placeholder": "Enter friend's email address",
       "send_invitation": "Send Invitation",
@@ -2604,7 +2419,6 @@
       "no_date": "No date"
     }
   },
-
   "redeem": {
     "seo": {
       "title": "Redeem AppSumo Code - Kaptia",
@@ -2660,7 +2474,6 @@
       "status": "Loading redemption status..."
     }
   },
-
   "help": {
     "seo": {
       "title": "Help & Documentation - Kaptia User Guide | Features & Support",
@@ -2673,7 +2486,7 @@
     },
     "tabs": {
       "overview": "Overview",
-      "features": "Features", 
+      "features": "Features",
       "plans": "Plans",
       "guide": "User Guide",
       "faq": "FAQ"
@@ -2737,7 +2550,7 @@
       "title": "Subscription Plans",
       "description": "Choose the plan that best fits your financial management needs",
       "free": "Free",
-      "standard": "Standard", 
+      "standard": "Standard",
       "premium": "Premium",
       "price_free": "$0",
       "price_standard": "$4.99",
@@ -2746,14 +2559,14 @@
       "features": {
         "free": [
           "Up to 100 transactions",
-          "Basic transaction tracking", 
+          "Basic transaction tracking",
           "Simple dashboard",
           "Mobile responsive design"
         ],
         "standard": [
           "Up to 100 transactions",
           "Receipt OCR scanning",
-          "AI expense categorization", 
+          "AI expense categorization",
           "Budget management",
           "Financial goals",
           "Transaction reminders",
@@ -2765,7 +2578,7 @@
           "Advanced AI insights",
           "Trend predictions",
           "Cloud backup & sync",
-          "Data import/export", 
+          "Data import/export",
           "Advanced analytics",
           "Priority support",
           "Multiple data formats"
@@ -2773,7 +2586,6 @@
       }
     }
   },
-
   "cookies": {
     "seo": {
       "title": "Cookie Policy - Kaptia",
@@ -2878,7 +2690,6 @@
       "back": "Back"
     }
   },
-
   "gdpr": {
     "title": "European Privacy Rights (GDPR)",
     "legal_basis": {
@@ -2967,7 +2778,6 @@
       "response_desc": "We will respond to your request within 30 days (extendable by 60 days for complex requests)"
     }
   },
-
   "ccpa": {
     "title": "California Consumer Privacy Rights (CCPA)",
     "consumer_rights": {
@@ -3041,7 +2851,6 @@
       "procedure": "We may request additional information to verify your identity, such as account details or recent transaction information."
     }
   },
-
   "financial_compliance": {
     "title": "Financial Services Compliance",
     "bsa": {
@@ -3101,7 +2910,6 @@
       "cfpb_desc": "Consumer Financial Protection Bureau compliance for consumer financial services"
     }
   },
-
   "ai_act_compliance": {
     "title": "EU AI Act Compliance (2024)",
     "classification": {
@@ -3126,7 +2934,6 @@
       "measures": "Regular bias testing, diverse training data, and algorithmic fairness assessments ensure equitable AI performance across all user demographics."
     }
   },
-
   "data_transfers": {
     "title": "International Data Transfers",
     "scc": {
@@ -3151,7 +2958,6 @@
       "monitoring": "Ongoing monitoring: Regular compliance assessments and audit procedures"
     }
   },
-
   "compliance": {
     "detecting_location": "Detecting location...",
     "gdpr": {
@@ -3159,11 +2965,10 @@
       "notice": "As an EU resident, you have enhanced privacy rights under GDPR. See our Privacy Policy for details about your rights to access, rectify, and delete your data."
     },
     "ccpa": {
-      "title": "California Privacy Rights", 
+      "title": "California Privacy Rights",
       "notice": "California residents have specific privacy rights under CCPA. You can request information about data collection and opt-out of data sales."
     }
   },
-
   "privacy": {
     "title": "Privacy Policy",
     "last_updated": "Last updated: June 14, 2025",
@@ -3341,14 +3146,13 @@
       }
     }
   },
-
   "profile": {
     "Profile Settings": "Profile Settings",
     "Manage your account settings and preferences": "Manage your account settings and preferences",
     "User": "User",
     "{{plan}} Plan": "{{plan}} Plan",
     "Profile": "Profile",
-    "Notifications": "Notifications", 
+    "Notifications": "Notifications",
     "Preferences": "Preferences",
     "Subscription": "Subscription",
     "Account Management": "Account Management",
@@ -3411,7 +3215,6 @@
     "Error": "Error",
     "Failed to open subscription management: {{errorMessage}}": "Failed to open subscription management: {{errorMessage}}"
   },
-
   "pdf": {
     "anonymization_preview": {
       "title": "Data Anonymization Preview",
@@ -3467,7 +3270,6 @@
       "transactions_processed": "Processed {{processed}} of {{total}} transactions"
     }
   },
-
   "features": {
     "hero": {
       "title": "AI-Powered Spending Intelligence",
@@ -3505,40 +3307,36 @@
       }
     },
     "calculators": {
-      "categorization": {
-        "title": "Categorization Accuracy Calculator",
-        "transactions_label": "Transactions per month:",
-        "time_saved": "Time saved per month:",
-        "hours": "hours"
-      },
-      "savings": {
-        "title": "Potential Savings Calculator",
-        "expenses_label": "Monthly expenses:",
-        "potential_savings": "Potential monthly savings (5-15%):"
-      },
-      "health": {
-        "title": "Health Score Simulator",
-        "savings_rate": "Savings rate:",
-        "budget_adherence": "Budget adherence:",
-        "estimated_score": "Estimated Financial Health Score:"
-      },
-      "predictions": {
-        "title": "Prediction Range Calculator",
-        "historical_months": "Historical data months:",
-        "months": "months",
-        "prediction_range": "Prediction range available:",
-        "months_ahead": "months ahead",
-        "prediction_accuracy": "Prediction accuracy:"
-      },
-      "statements": {
-        "title": "Statement Processing Calculator",
-        "pages": "Pages in statement:",
-        "pages_unit": "pages",
-        "estimated_transactions": "Estimated transactions extracted:",
-        "transactions": "transactions",
-        "processing_time": "Processing time saved:",
-        "minutes": "minutes"
-      }
+      "business_impact": "Business Impact Calculator",
+      "scoring": "Scoring Simulator",
+      "prediction_range": "Prediction Range Calculator",
+      "statement_processing": "Statement Processing Calculator",
+      "trend_strength": "Trend Strength Calculator",
+      "recommendation_effectiveness": "Recommendation Effectiveness Calculator",
+      "contextual_relevance": "Contextual Relevance Calculator",
+      "monthly_transactions": "Monthly transactions",
+      "monthly_expenses": "Monthly expenses",
+      "business_size": "Business size (employees)",
+      "savings_rate": "Savings rate",
+      "budget_adherence": "Budget adherence",
+      "historical_months": "Historical data months",
+      "pages_statement": "Pages in statement",
+      "trend_strength_level": "Trend strength",
+      "recommendations_followed": "Recommendations followed",
+      "contextual_factors": "Contextual factors considered",
+      "estimated_time_saved": "Estimated time saved",
+      "predicted_accuracy": "Predicted accuracy",
+      "estimated_health_score": "Estimated Financial Health Score",
+      "prediction_range_available": "Prediction range available",
+      "estimated_transactions": "Estimated transactions extracted",
+      "processing_time_saved": "Processing time saved",
+      "trend_confidence": "Trend confidence level",
+      "weekly_value": "Weekly value generated",
+      "relevance_score": "Relevance score",
+      "months_ahead": "months ahead",
+      "transactions": "transactions",
+      "minutes": "minutes",
+      "per_week": "per week"
     },
     "cta": {
       "title": "Ready to Transform How You Track Spending?",
@@ -3576,7 +3374,7 @@
         "description": "Watch how our AI intelligently categorizes your transactions based on merchant patterns and spending behavior."
       },
       "tips": {
-        "title": "Financial Insights", 
+        "title": "Financial Insights",
         "description": "Discover how AI analyzes your spending patterns to provide personalized financial recommendations."
       },
       "health": {
@@ -3768,41 +3566,8 @@
           "desc": "Considers your budget constraints and targets"
         }
       }
-    },
-    "calculators": {
-      "business_impact": "Business Impact Calculator",
-      "scoring": "Scoring Simulator",
-      "prediction_range": "Prediction Range Calculator",
-      "statement_processing": "Statement Processing Calculator",
-      "trend_strength": "Trend Strength Calculator",
-      "recommendation_effectiveness": "Recommendation Effectiveness Calculator",
-      "contextual_relevance": "Contextual Relevance Calculator",
-      "monthly_transactions": "Monthly transactions",
-      "monthly_expenses": "Monthly expenses",
-      "business_size": "Business size (employees)",
-      "savings_rate": "Savings rate",
-      "budget_adherence": "Budget adherence",
-      "historical_months": "Historical data months",
-      "pages_statement": "Pages in statement",
-      "trend_strength_level": "Trend strength",
-      "recommendations_followed": "Recommendations followed",
-      "contextual_factors": "Contextual factors considered",
-      "estimated_time_saved": "Estimated time saved",
-      "predicted_accuracy": "Predicted accuracy",
-      "estimated_health_score": "Estimated Financial Health Score",
-      "prediction_range_available": "Prediction range available",
-      "estimated_transactions": "Estimated transactions extracted",
-      "processing_time_saved": "Processing time saved",
-      "trend_confidence": "Trend confidence level",
-      "weekly_value": "Weekly value generated",
-      "relevance_score": "Relevance score",
-      "months_ahead": "months ahead",
-      "transactions": "transactions",
-      "minutes": "minutes",
-      "per_week": "per week"
     }
   },
-
   "voiceInput": {
     "listening": "Listening... Speak now",
     "notSupported": "Voice input is not supported in your browser",
@@ -3833,7 +3598,6 @@
       "extractedData": "Extracted Information"
     }
   },
-
   "voiceTransaction": {
     "title": "Review Voice Transaction",
     "description": "Review and confirm the transaction details extracted from your voice input",
@@ -3849,23 +3613,6 @@
     "descriptionPlaceholder": "Enter description",
     "selectCategory": "Select a category",
     "followUp": "Additional information needed"
-  },
-
-  "categories": {
-    "food": "Food",
-    "transportation": "Transportation",
-    "housing": "Housing",
-    "entertainment": "Entertainment",
-    "healthcare": "Healthcare",
-    "shopping": "Shopping",
-    "utilities": "Utilities",
-    "education": "Education",
-    "travel": "Travel",
-    "business": "Business",
-    "other": "Other",
-    "salary": "Salary",
-    "freelance": "Freelance",
-    "investments": "Investments"
   },
   "AI that does the tracking for you": "AI that does the tracking for you",
   "Your spending,": "Your spending,",
@@ -3964,5 +3711,27 @@
   "Trend": "Trend",
   "Upgrade to Premium": "Upgrade to Premium",
   "View All Transactions": "View All Transactions",
-  "Could not find matching category ID": "Could not find matching category ID"
+  "Could not find matching category ID": "Could not find matching category ID",
+  "Back to Home": "Back to Home",
+  "Back": "Back",
+  "Help Center & Documentation": "Help Center & Documentation",
+  "How can we help you?": "How can we help you?",
+  "Search questions or topics...": "Search questions or topics...",
+  "Quick Start": "Quick Start",
+  "Guides": "Guides",
+  "Plans & Pricing": "Plans & Pricing",
+  "AI Assistant": "AI Assistant",
+  "Online • Ask anything": "Online • Ask anything",
+  "Type your question here...": "Type your question here...",
+  "Hello! I am your Kaptia AI assistant. How can I help you today?": "Hello! I am your Kaptia AI assistant. How can I help you today?",
+  "All Features": "All Features",
+  "Calculators & Tools": "Calculators & Tools",
+  "Open Calculator": "Open Calculator",
+  "Try this feature free": "Try this feature free",
+  "Looking for instant answers?": "Looking for instant answers?",
+  "Visit Help Center": "Visit Help Center",
+  "No questions matched your search.": "No questions matched your search.",
+  "Clear search": "Clear search",
+  "Ready to transform your financial management?": "Ready to transform your financial management?",
+  "Start free with no credit card required.": "Start free with no credit card required."
 }

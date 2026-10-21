@@ -55,14 +55,7 @@
   "Transaction description": "Descripción de la transacción",
   "Type": "Tipo",
   "Category": "Categoría",
-  "transaction": {
-    "amount": "Monto",
-    "description": "Descripción",
-    "category": "Categoría",
-    "type": "Tipo",
-    "date": "Fecha",
-    "description_placeholder": "Descripción de la transacción"
-  },
+  "transaction": "transacción",
   "Select category": "Selecciona categoría",
   "Select a category": "Selecciona una categoría",
   "No categories available for": "No hay categorías disponibles para",
@@ -87,20 +80,16 @@
   "Consider reviewing your {{category}} expenses": "Considera revisar tus gastos de {{category}}",
   "Great job! You're maintaining healthy finances": "¡Excelente trabajo! Mantienes finanzas saludables",
   "Smart Bill Assistant": "Asistente Inteligente de Facturas",
-  "Payment URL (Optional)": "URL de Pago (Opcional)",
   "Link to where you can pay this bill": "Enlace donde puedes pagar esta factura",
   "Reference Note (Optional)": "Nota de Referencia (Opcional)",
   "Note": "Nota",
   "Account #123456, Reference: ABC789": "Cuenta #123456, Referencia: ABC789",
   "Account number or other reference information": "Número de cuenta u otra información de referencia",
-  "Make this a recurring transaction": "Hacer esta una transacción recurrente",
-  "Frequency": "Frecuencia",
   "Select frequency": "Seleccionar frecuencia",
   "Daily": "Diario",
   "Weekly": "Semanal",
   "Monthly": "Mensual",
   "Yearly": "Anual",
-  "End Date (Optional)": "Fecha de Fin (Opcional)",
   "Cancel": "Cancelar",
   "Add": "Agregar",
   "AI Financial Tips": "Consejos Financieros IA",
@@ -111,7 +100,7 @@
   "Welcome to your new plan! All features are now available.": "¡Bienvenido a tu nuevo plan! Todas las funciones están ahora disponibles.",
   "Help": "Ayuda",
   "Contact": "Contacto",
-  "AI Features": "Funciones IA",
+  "AI Features": "Funciones de IA",
   "Sign In": "Iniciar Sesión",
   "Take Control of Your": "Toma Control de Tu",
   "Financial Future": "Futuro Financiero",
@@ -130,8 +119,6 @@
   "Choose Your Perfect": "Elige tu Plan",
   "Financial Plan": "Financiero Perfecto",
   "From basic expense tracking to AI-powered financial insights, we have the right plan for every financial journey.": "Desde seguimiento básico de gastos hasta información financiera con IA, tenemos el plan correcto para cada camino financiero.",
-  "Monthly": "Mensual",
-  "Yearly": "Anual",
   "Free": "Gratis",
   "month": "mes",
   "Perfect for getting started with expense tracking": "Perfecto para comenzar con el seguimiento de gastos",
@@ -141,7 +128,6 @@
   "Simple financial overview": "Resumen financiero simple",
   "Personalized financial tips": "Consejos financieros personalizados",
   "Most Popular": "Más Popular",
-  "Standard": "Estándar",
   "For users serious about financial management": "Para usuarios serios sobre la gestión financiera",
   "Everything in Free plan": "Todo del plan Gratis",
   "Goals and budget management": "Gestión de metas y presupuesto",
@@ -150,7 +136,6 @@
   "Calendar view and reminders": "Vista de calendario y recordatorios",
   "Unlimited transaction history": "Historial de transacciones ilimitado",
   "Subscribe Now": "Suscribirse Ahora",
-  "Premium": "Premium",
   "Complete AI-powered financial automation": "Automatización financiera completa con IA",
   "Everything in Standard plan": "Todo del plan Estándar",
   "AI financial tips and insights": "Consejos e información financiera con IA",
@@ -167,10 +152,10 @@
   "$8.33/month • Save 2 months": "$8.33/mes • Ahorra 2 meses",
   "Compare All Features": "Comparar Todas las Funciones",
   "See exactly what's included in each plan": "Ve exactamente qué está incluido en cada plan",
-  "Features": "Funciones",
+  "Features": "Características",
   "Overview": "Resumen",
-  "Plans": "Planes", 
-  "User Guide": "Guía de Usuario",
+  "Plans": "Planes",
+  "User Guide": "Guías",
   "FAQ": "Preguntas Frecuentes",
   "Welcome to Kaptia": "Bienvenido a Kaptia",
   "Your comprehensive personal finance management solution": "Tu solución integral de gestión de finanzas personales",
@@ -196,7 +181,7 @@
   "Transaction editing and deletion": "Edición y eliminación de transacciones",
   "Bulk operations and imports": "Operaciones masivas e importaciones",
   "Custom category creation": "Creación de categorías personalizadas",
-  "Budgets & Goals": "Presupuestos y Metas",
+  "Budgets & Goals": "Presupuestos y objetivos",
   "Set monthly spending limits by category": "Establecer límites de gasto mensual por categoría",
   "Track progress with visual indicators": "Seguir el progreso con indicadores visuales",
   "Create savings goals with deadlines": "Crear metas de ahorro con fechas límite",
@@ -226,7 +211,6 @@
   "Daily AI-powered financial tips": "Consejos financieros diarios impulsados por IA",
   "Transaction reminders and alerts": "Recordatorios y alertas de transacciones",
   "Multi-device receipt scanning": "Escaneo de recibos multi-dispositivo",
-  "Data Management": "Gestión de Datos",
   "Cloud storage and backup (Premium)": "Almacenamiento y respaldo en la nube (Premium)",
   "Import from CSV, Excel, JSON formats": "Importar desde formatos CSV, Excel, JSON",
   "Export to multiple file formats": "Exportar a múltiples formatos de archivo",
@@ -244,7 +228,6 @@
   "Secure API endpoints": "Endpoints de API seguros",
   "Regular security audits": "Auditorías de seguridad regulares",
   "Data ownership transparency": "Transparencia de propiedad de datos",
-  "Most Popular": "Más Popular",
   "Getting Started": "Comenzando",
   "Quick Start Guide": "Guía de Inicio Rápido",
   "Create Your Account": "Crear Tu Cuenta",
@@ -262,7 +245,6 @@
   "Financial Summary Cards": "Tarjetas de Resumen Financiero",
   "Location": "Ubicación",
   "Function": "Función",
-  "Features": "Características",
   "Top of dashboard": "Parte superior del panel",
   "Display total income, expenses, and balance for selected month": "Mostrar ingresos totales, gastos y balance para el mes seleccionado",
   "Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values": "Se actualiza automáticamente con nuevas transacciones, clickeable para desglose detallado, valores positivos/negativos codificados por color",
@@ -273,16 +255,16 @@
   "Recent Transactions Widget": "Widget de Transacciones Recientes",
   "Left column of dashboard": "Columna izquierda del panel",
   "Shows last 5 transactions with edit/delete options": "Muestra las últimas 5 transacciones con opciones de editar/eliminar",
-  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Edición de un clic, iconos de categoría, formato de cantidad, miniaturas de recibos, indicadores de transacciones recurrentes",
-  "Budget Overview Widget (Standard+)": "Widget de Resumen de Presupuesto (Estándar+)",
+  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Edición con un clic, iconos de categoría, formato de montos, miniaturas de recibos, indicadores de transacciones recurrentes",
+  "Budget Overview Widget (Standard+)": "Widget de Vista General del Presupuesto (Standard+)",
   "Right column of dashboard": "Columna derecha del panel",
-  "Monitor budget progress across all categories": "Monitorear el progreso del presupuesto en todas las categorías",
-  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Barras de progreso, porcentaje de finalización, estado codificado por color (verde/amarillo/rojo), alertas de sobregasto",
+  "Monitor budget progress across all categories": "Monitorea el progreso del presupuesto en todas las categorías",
+  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Barras de progreso, porcentaje de finalización, estado codificado por colores (verde/amarillo/rojo), alertas de sobregasto",
   "Financial Health Score": "Puntuación de Salud Financiera",
-  "Calculate and display financial wellness score": "Calcular y mostrar puntuación de bienestar financiero",
+  "Calculate and display financial wellness score": "Calcula y muestra la puntuación de bienestar financiero",
   "Free Users": "Usuarios Gratuitos",
-  "Simple calculation based on income/expense ratio": "Cálculo simple basado en la relación ingresos/gastos",
-  "Standard+ Users": "Usuarios Estándar+",
+  "Simple calculation based on income/expense ratio": "Cálculo simple basado en la proporción ingresos/gastos",
+  "Standard+ Users": "Usuarios Standard+",
   "AI-powered analysis with detailed recommendations and improvement suggestions": "Análisis impulsado por IA con recomendaciones detalladas y sugerencias de mejora",
   "AI Financial Tips (Premium)": "Consejos Financieros IA (Premium)",
   "Personalized financial advice based on spending patterns": "Consejos financieros personalizados basados en patrones de gasto",
@@ -458,8 +440,6 @@
   "We may update this Cookie Policy from time to time. Any changes will be posted on this page with an updated revision date.": "Podemos actualizar esta Política de Cookies de vez en cuando. Cualquier cambio será publicado en esta página con una fecha de revisión actualizada.",
   "8. Contact Us": "8. Contáctanos",
   "If you have any questions about our use of cookies, please contact us at:": "Si tienes alguna pregunta sobre nuestro uso de cookies, por favor contáctanos en:",
-
-  "Kaptia": "Kaptia",
   "Take control of your finances with intelligent expense tracking, budgeting, and AI-powered insights.": "Toma control de tus finanzas con seguimiento inteligente de gastos, presupuestos e información con IA.",
   "NutriNova LLC": "NutriNova LLC",
   "2105 Vista Oeste NW": "2105 Vista Oeste NW",
@@ -469,12 +449,6 @@
   "Support": "Soporte",
   "Contact Us": "Contáctanos",
   "Help Center": "Centro de Ayuda",
-  "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. Todos los derechos reservados.",
-  "Privacy Policy": "Política de Privacidad",
-  "Terms of Service": "Términos de Servicio",
-  "Cookie Policy": "Política de Cookies",
-  "Contact": "Contacto",
-
   "Jan": "Ene",
   "Feb": "Feb",
   "Mar": "Mar",
@@ -511,8 +485,7 @@
   "Last Month": "Último Mes",
   "This Month": "Este Mes",
   "All Types": "Todos los Tipos",
-  "Income": "Ingresos",
-  "Expense": "Gastos",
+  "Expense": "Gasto",
   "All Categories": "Todas las Categorías",
   "All Transactions": "Todas las Transacciones",
   "voiceConversation": {
@@ -545,12 +518,9 @@
   "Recurring Only": "Solo Recurrentes",
   "One-time Only": "Solo Una Vez",
   "Date Range": "Rango de Fechas",
-  "Type": "Tipo",
-  "Category": "Categoría",
   "Recurring": "Recurrente",
   "Filters": "Filtros",
   "Active": "Activo",
-
   "Food": "Comida",
   "Entertainment": "Entretenimiento",
   "Housing": "Vivienda",
@@ -567,12 +537,10 @@
   "Debt Payoff": "Pago de Deudas",
   "Retirement": "Jubilación",
   "Other": "Otro",
-
   "Category Management": "Gestión de Categorías",
   "Organize your income and expense sources": "Organiza tus fuentes de ingresos y gastos",
-  "Expense Categories": "Categorías de Gastos", 
+  "Expense Categories": "Categorías de Gastos",
   "Income Categories": "Categorías de Ingresos",
-  "Expenses": "Gastos",
   "Manage categories for your expenses and spending": "Gestiona categorías para tus gastos y compras",
   "Manage categories for your income sources": "Gestiona categorías para tus fuentes de ingresos",
   "New Category": "Nueva Categoría",
@@ -583,10 +551,8 @@
   "Category Name": "Nombre de Categoría",
   "Enter category name": "Ingresa el nombre de la categoría",
   "Category Type": "Tipo de Categoría",
-  "Expense": "Gasto",
   "Icon": "Ícono",
   "Color": "Color",
-  "Cancel": "Cancelar",
   "Update": "Actualizar",
   "Create": "Crear",
   "No Expense Categories": "Sin Categorías de Gastos",
@@ -597,7 +563,6 @@
   "Add Income Category": "Agregar Categororía de Ingresos",
   "In use": "En uso",
   "Recent Transactions": "Transacciones Recientes",
-  "Search transactions...": "Buscar transacciones...",
   "Filter by type": "Filtrar por tipo",
   "All transactions": "Todas las transacciones",
   "Expenses only": "Solo gastos",
@@ -611,7 +576,6 @@
   "Total Expenses": "Gastos Totales",
   "Net Balance": "Balance Neto",
   "Budget Status": "Estado del Presupuesto",
-  "transaction": "transacción",
   "transactionPlural": "transacciones",
   "Auto": "Auto",
   "Manual": "Manual",
@@ -623,7 +587,6 @@
   "No Budget Set": "Sin Presupuesto Establecido",
   "Financial Trends": "Tendencias Financieras",
   "Evolution of your income, expenses and net balance over the last months": "Evolución de tus ingresos, gastos y balance neto durante los últimos meses",
-  "Premium": "Premium",
   "Expense Breakdown": "Desglose de Gastos",
   "Your spending by category": "Tus gastos por categoría",
   "Your spending by category this month": "Tus gastos por categoría este mes",
@@ -673,7 +636,36 @@
   "financialHealthMascot": "Mascota de Salud Financiera",
   "healthScore": "Puntuación de Salud",
   "achievements": "Logros",
-  "insights": "Perspectivas",
+  "insights": {
+    "title": "Perspectivas",
+    "description": "Perspectivas matemáticas basadas en sus datos financieros y tendencias de gastos",
+    "loading": "Cargando perspectivas...",
+    "no_insights": "No hay perspectivas disponibles",
+    "add_transactions": "Agregue transacciones para generar perspectivas financieras",
+    "upgrade_for_insights": "Actualice al plan Standard o Premium para acceder a las perspectivas",
+    "impact_high": "Alto",
+    "impact_medium": "Medio",
+    "impact_low": "Bajo",
+    "recommendation": "Recomendación",
+    "take_action": "Tomar Acción",
+    "high_spending_alert": "Alerta de Gasto Alto",
+    "high_spending_description": "Has gastado {{percentage}}% de tus ingresos este mes",
+    "review_expense_categories": "Considera revisar tus categorías de gastos más grandes",
+    "category_focus_opportunity": "Oportunidad de Enfoque en Categoría",
+    "category_spending_percentage": "{{category}} representa {{percentage}}% de tus gastos",
+    "consider_budget_limit": "Considera establecer un límite de presupuesto para {{category}}",
+    "positive_cash_flow": "Flujo de Efectivo Positivo",
+    "savings_rate": "Estás ahorrando {{rate}}% de tus ingresos este mes",
+    "increase_savings_rate": "Considera aumentar tu tasa de ahorro al 20%",
+    "excellent_savings": "¡Excelente tasa de ahorro!",
+    "spending_increased": "Gastos Aumentaron",
+    "spending_decreased": "Gastos Disminuyeron",
+    "spending_change_description": "Tus gastos han {{direction}} en {{percentage}}% comparado con el mes pasado",
+    "increased": "aumentado",
+    "decreased": "disminuido",
+    "review_recent_purchases": "Revisa compras recientes para identificar el aumento de gastos",
+    "great_expense_reduction": "¡Excelente trabajo reduciendo gastos!"
+  },
   "alerts": "Alertas",
   "hideDetails": "Ocultar Detalles",
   "showDetails": "Mostrar Detalles",
@@ -752,7 +744,6 @@
   },
   "aiAnalysisSection": "Sección de Análisis IA",
   "analysisInProgress": "Análisis en progreso...",
-
   "AI Expense Prediction": "Predicción de Gastos IA",
   "Machine learning predictions based on your spending patterns": "Predicciones de aprendizaje automático basadas en tus patrones de gasto",
   "By Category": "Por Categoría",
@@ -773,7 +764,6 @@
   "current": "actual",
   "Prediction factors": "Factores de predicción",
   "No Category Data Available": "No Hay Datos de Categoría Disponibles",
-
   "financial_health": {
     "title": "Puntuación de Salud Financiera",
     "spending_control": "Control de Gastos",
@@ -805,120 +795,68 @@
       "score_ranges_detail": "80-100: Excelente | 65-79: Bueno | 50-64: Regular | Menos de 50: Necesita Mejora"
     }
   },
-
-  "Frequently Asked Questions": "Preguntas Frecuentes",
   "AI Assistant": "Asistente IA",
   "Ask me anything about Kaptia": "Pregúntame cualquier cosa sobre Kaptia",
-
   "How do I get started with Kaptia?": "¿Cómo empiezo con Kaptia?",
   "Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions.": "Simplemente crea una cuenta y comienza agregando tu primera transacción. Puedes ingresar gastos e ingresos manualmente, o usar nuestra función de categorización IA (planes Standard+) para clasificar automáticamente tus transacciones.",
-
   "What are the differences between subscription plans?": "¿Cuáles son las diferencias entre los planes de suscripción?",
   "Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export.": "El plan gratuito permite 100 transacciones, el plan Standard ($4.99/mes) incluye hasta 100 transacciones con funciones IA, presupuestos y metas. El plan Premium ($9.99/mes) ofrece transacciones ilimitadas, análisis avanzados, respaldo en la nube e importación/exportación de datos.",
-
   "Is my financial data secure?": "¿Están seguros mis datos financieros?",
   "Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.": "Sí, utilizamos encriptación y medidas de seguridad estándar de la industria. Tus datos se almacenan de forma segura con PostgreSQL, y ofrecemos respaldo en la nube para usuarios Premium. Nunca compartimos tu información financiera personal.",
-
   "How does AI categorization work?": "¿Cómo funciona la categorización IA?",
   "Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.": "Nuestra IA analiza las descripciones y montos de tus transacciones para sugerir automáticamente la categoría más apropiada. Aprende de tus patrones y se vuelve más precisa con el tiempo. Disponible para planes Standard y Premium.",
-
   "How does receipt scanning work?": "¿Cómo funciona el escaneo de recibos?",
   "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.": "Sube fotos de recibos usando el botón 'Subir Imagen' en cualquier página de transacciones. Nuestra tecnología OCR extrae automáticamente el nombre del comerciante, monto y fecha. Los usuarios Standard+ obtienen sugerencias de categorías impulsadas por IA. Funciona con cámara móvil o fotos de galería.",
-
   "How does mobile QR code upload work?": "¿Cómo funciona la subida de códigos QR móvil?",
   "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.": "Haz clic en 'Subir Imagen' en tu computadora y selecciona 'Escanear con Teléfono'. Aparece un código QR en tu pantalla. Escanéalo con la cámara de tu teléfono para abrir la página de subida móvil. Toma una foto de tu recibo en tu teléfono, y los datos extraídos aparecen automáticamente en el formulario de transacción de tu computadora. Perfecto para escaneo de recibos sin interrupciones entre dispositivos.",
-
   "What if OCR doesn't read my receipt correctly?": "¿Qué pasa si el OCR no lee mi recibo correctamente?",
   "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results.": "Puedes editar cualquier información extraída antes de guardar. El sistema muestra los datos extraídos en campos editables, permitiéndote corregir nombres de comerciantes, montos o fechas. Las fotos claras y bien iluminadas producen los mejores resultados.",
-
   "What types of receipts are supported?": "¿Qué tipos de recibos son compatibles?",
   "All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions.": "Todos los recibos estándar incluyendo facturas de restaurantes, supermercados, gasolineras, compras al por menor y recibos de servicios. El sistema funciona mejor con recibos impresos que tienen texto claro y son fotografiados en buenas condiciones de iluminación.",
-
   "How do I set up budgets and goals?": "¿Cómo configuro presupuestos y metas?",
   "Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.": "Navega a la sección de Presupuestos o Metas desde la barra lateral. Establece límites de gasto mensual por categoría para presupuestos, o crea objetivos de ahorro con fechas límite para metas. La aplicación rastreará tu progreso automáticamente.",
-
   "Can I export my data?": "¿Puedo exportar mis datos?",
   "Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.": "Sí, los usuarios Premium pueden exportar datos en formatos CSV, Excel o JSON. También puedes configurar respaldos automáticos en la nube e importar datos de otras aplicaciones financieras como Mint, QuickBooks y YNAB.",
-
   "Is Kaptia available on mobile?": "¿Está Kaptia disponible en móvil?",
   "Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "Kaptia es una aplicación web receptiva que funciona perfectamente en navegadores móviles. Simplemente marca el sitio en tu teléfono para acceso fácil desde cualquier lugar.",
-
   "What widgets are available on the dashboard?": "¿Qué widgets están disponibles en el tablero?",
   "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.": "El tablero incluye Tarjetas de Resumen Financiero (ingresos/gastos/balance), widget de Transacciones Recientes, Vista General del Presupuesto (Standard+), Puntuación de Salud Financiera, Consejos Financieros IA (Premium), Mascota Financiera (Premium) y Recordatorios de Transacciones (Standard+). Todos los widgets se actualizan automáticamente.",
-
   "How do I edit or delete transactions?": "¿Cómo edito o elimino transacciones?",
   "Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads.": "Haz clic en cualquier transacción en listas o widgets del tablero para editar. Modifica monto, descripción, fecha, categoría o notas. Usa el botón de eliminar para quitar transacciones. Los cambios se actualizan inmediatamente sin recargar la página.",
-
   "How do recurring transactions work?": "¿Cómo funcionan las transacciones recurrentes?",
   "Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills.": "Los usuarios Standard+ pueden marcar transacciones como recurrentes (semanal, mensual, anual). El sistema muestra recordatorios próximos en el widget del tablero y detecta patrones automáticamente. Establece fechas de finalización o déjalas abiertas para facturas continuas.",
-
   "Can I create custom categories?": "¿Puedo crear categorías personalizadas?",
   "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus.": "Sí, crea categorías personalizadas ilimitadas con nombres, colores e iconos personalizados. Elige entre tipos de ingresos, gastos o metas. Las categorías personalizadas aparecen junto a más de 15 categorías predefinidas en todos los menús desplegables.",
-
   "How is the Financial Health Score calculated?": "¿Cómo se calcula la Puntuación de Salud Financiera?",
   "Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations.": "Los usuarios gratuitos ven un cálculo simple basado en la proporción ingresos/gastos. Los usuarios Standard+ obtienen análisis impulsado por IA que evalúa hábitos de gasto, cumplimiento del presupuesto, tasa de ahorro y progreso de metas con recomendaciones detalladas de mejora.",
-
   "How does budget tracking work?": "¿Cómo funciona el seguimiento del presupuesto?",
   "Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically.": "Los usuarios Standard+ crean presupuestos para categorías con límites semanales/mensuales/anuales. Las barras de progreso muestran el gasto con estado codificado por colores: verde (dentro del presupuesto), amarillo (acercándose al límite), rojo (sobre el presupuesto). Recibe alertas de sobregasto automáticamente.",
-
   "Can I share goals with family members?": "¿Puedo compartir metas con miembros de la familia?",
   "Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts.": "Sí, los usuarios Standard+ pueden crear metas colaborativas e invitar a miembros de la familia o parejas. Rastrea contribuciones compartidas, ve el progreso juntos y celebra logros como equipo para esfuerzos de ahorro conjunto.",
-
   "What is the calendar view feature?": "¿Qué es la función de vista de calendario?",
   "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.": "Los usuarios Standard+ pueden ver transacciones en una cuadrícula de calendario mensual que muestra totales de gasto diario y vistas previas de transacciones. Navega entre meses para ver patrones de gasto a lo largo del tiempo con diseño responsivo móvil.",
-
   "What are AI trend predictions?": "¿Qué son las predicciones de tendencias IA?",
   "Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends.": "Los usuarios Premium obtienen pronósticos financieros impulsados por IA que muestran predicciones de gasto, proyecciones de ingresos, recomendaciones de presupuesto y estimaciones de cronograma de metas. Usa aprendizaje automático para analizar patrones y predecir tendencias financieras futuras.",
-
   "What is the Financial Mascot feature?": "¿Qué es la función de Mascota Financiera?",
   "Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored.": "Los usuarios Premium obtienen un compañero IA personalizado que refleja la salud financiera a través de cambios de humor e indicadores visuales. La mascota se puede arrastrar por la pantalla, tiene rasgos únicos basados en tu perfil y puede ocultarse/restaurarse.",
-
   "How does cloud backup work?": "¿Cómo funciona el respaldo en la nube?",
   "Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data.": "Los usuarios Premium obtienen respaldos automáticos diarios a las 2:00 AM almacenando todas las transacciones, presupuestos, metas, categorías e imágenes de recibos de forma segura. Opciones de respaldo manual disponibles con funcionalidad de restauración completa para recuperar todos los datos.",
-
   "Can I import data from other financial apps?": "¿Puedo importar datos de otras aplicaciones financieras?",
   "Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling.": "Los usuarios Premium pueden importar desde Mint, QuickBooks, YNAB, Personal Capital y exportaciones bancarias. Las características incluyen mapeo de columnas, validación de datos, vista previa antes de importar y procesamiento por lotes con manejo de errores.",
-
   "Can I use my phone's camera for receipts?": "¿Puedo usar la cámara de mi teléfono para recibos?",
   "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.": "Sí, los navegadores móviles soportan acceso directo a la cámara. Elige 'Tomar Foto' para usar tu cámara o 'Elegir de Galería' para seleccionar fotos existentes. El escaneo de códigos QR permite subida entre dispositivos desde teléfono a computadora.",
-
   "How do I filter and view reports?": "¿Cómo filtro y veo reportes?",
   "Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports.": "Usa menús desplegables de mes y filtros de período (semana/mes/trimestre/año) en la página de Reportes. Ve resúmenes financieros, desgloses por categoría y análisis. Los usuarios Premium obtienen análisis de tendencias avanzado y reportes comparativos.",
-
   "How do plan upgrades and downgrades work?": "¿Cómo funcionan las actualizaciones y reducciones de plan?",
   "Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration.": "Las actualizaciones se aplican inmediatamente con facturación prorrateada. Las reducciones se programan para el final de tu período de facturación actual. Accede a la gestión de suscripción a través de la página de Perfil con transparencia total de facturación e integración del portal de clientes de Stripe.",
-
   "Is the app fully mobile-friendly?": "¿Es la aplicación completamente compatible con móviles?",
   "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.": "Sí, diseño completamente responsivo con interfaces táctiles, navegación móvil, filtros colapsables, formularios optimizados e integración de cámara. Toda la funcionalidad de escritorio es accesible en navegadores móviles sin requerir descargas de aplicaciones.",
-
   "How can I get help or support?": "¿Cómo puedo obtener ayuda o soporte?",
   "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.": "Usa este asistente de chat IA para ayuda inmediata, revisa nuestra documentación completa a continuación, o contacta a nuestro equipo de soporte a través de la página de contacto para asistencia personalizada.",
-
-  "Recent Transactions Widget": "Widget de Transacciones Recientes",
-  "Shows last 5 transactions with edit/delete options": "Muestra las últimas 5 transacciones con opciones de editar/eliminar",
-  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Edición con un clic, iconos de categoría, formato de montos, miniaturas de recibos, indicadores de transacciones recurrentes",
-
-  "Budget Overview Widget (Standard+)": "Widget de Vista General del Presupuesto (Standard+)",
-  "Monitor budget progress across all categories": "Monitorea el progreso del presupuesto en todas las categorías",
-  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Barras de progreso, porcentaje de finalización, estado codificado por colores (verde/amarillo/rojo), alertas de sobregasto",
-
-  "Financial Health Score": "Puntuación de Salud Financiera",
-  "Calculate and display financial wellness score": "Calcula y muestra la puntuación de bienestar financiero",
-  "Free Users": "Usuarios Gratuitos",
-  "Simple calculation based on income/expense ratio": "Cálculo simple basado en la proporción ingresos/gastos",
-  "Standard+ Users": "Usuarios Standard+",
-  "AI-powered analysis with detailed recommendations and improvement suggestions": "Análisis impulsado por IA con recomendaciones detalladas y sugerencias de mejora",
-
-  "AI Financial Tips (Premium)": "Consejos Financieros IA (Premium)",
-  "Personalized financial advice based on spending patterns": "Consejos financieros personalizados basados en patrones de gasto",
-  "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "Consejos generados por IA, análisis de tendencias, recomendaciones accionables, persistentes entre sesiones",
-
   "Financial Mascot (Premium)": "Mascota Financiera (Premium)",
   "Floating on dashboard": "Flotante en el tablero",
   "Personalized AI companion reflecting financial health": "Compañero IA personalizado que refleja la salud financiera",
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Posicionamiento arrastrable, cambios de humor basados en el gasto, rasgos únicos por usuario, opciones de ocultar/restaurar",
-
-  "Transaction Management": "Gestión de Transacciones",
   "Transaction Entry Forms": "Formularios de Entrada de Transacciones",
   "Expenses, Income, and Transactions pages": "Páginas de Gastos, Ingresos y Transacciones",
   "Add new financial transactions with complete details": "Agregar nuevas transacciones financieras con detalles completos",
@@ -941,8 +879,6 @@
   "Upload Image buttons on transaction pages": "Botones de Cargar Imagen en páginas de transacciones",
   "Extract transaction data from receipt photos": "Extraer datos de transacciones de fotos de recibos",
   "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "OCR de Google Cloud Vision, categorización IA, soporte de cámara móvil, carga QR entre dispositivos",
-
-  "Category Management": "Gestión de Categorías",
   "Category Creation and Editing": "Creación y Edición de Categorías",
   "Categories page": "Página de Categorías",
   "Create custom expense and income categories": "Crear categorías personalizadas de gastos e ingresos",
@@ -956,7 +892,6 @@
   "AI Auto-Categorization (Standard+)": "Auto-Categorización IA (Standard+)",
   "Automatically suggest categories based on transaction descriptions": "Sugerir automáticamente categorías basadas en descripciones de transacciones",
   "Machine learning analysis, merchant recognition, user preference learning, manual override options": "Análisis de aprendizaje automático, reconocimiento de comerciantes, aprendizaje de preferencias del usuario, opciones de anulación manual",
-
   "Budget and Goals (Standard+)": "Presupuestos y Metas (Standard+)",
   "Budget Creation and Management": "Creación y Gestión de Presupuestos",
   "Budgets page": "Página de Presupuestos",
@@ -970,10 +905,8 @@
   "Types": "Tipos",
   "Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement": "Fondo de Emergencia, Vacaciones, Enganche de Casa, Compra de Auto, Pago de Deudas, Jubilación",
   "Progress tracking, milestone celebrations, contribution history, deadline reminders": "Seguimiento de progreso, celebraciones de hitos, historial de contribuciones, recordatorios de fechas límite",
-  "Collaborative Goals": "Metas Colaborativas",
   "Share goals with family members or partners": "Compartir metas con miembros de la familia o parejas",
   "Friend invitations, shared contributions, progress visibility, achievement tracking": "Invitaciones de amigos, contribuciones compartidas, visibilidad de progreso, seguimiento de logros",
-
   "Reports and Analytics": "Reportes y Análisis",
   "Financial Overview Reports": "Reportes de Vista General Financiera",
   "Reports page - Overview tab": "Página de Reportes - Pestaña Vista General",
@@ -991,7 +924,6 @@
   "Calendar page": "Página de Calendario",
   "Monthly grid view of all transactions": "Vista de cuadrícula mensual de todas las transacciones",
   "Daily spending totals, transaction previews, monthly navigation, mobile responsive grid": "Totales de gasto diarios, vistas previas de transacciones, navegación mensual, cuadrícula responsiva móvil",
-
   "Data Management (Premium)": "Gestión de Datos (Premium)",
   "Cloud Backup System": "Sistema de Respaldo en la Nube",
   "Data Management page - Backup tab": "Página de Gestión de Datos - Pestaña Respaldo",
@@ -1009,7 +941,6 @@
   "Supported": "Compatible",
   "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, exportaciones bancarias",
   "Column mapping, data validation, preview before import, batch processing": "Mapeo de columnas, validación de datos, vista previa antes de importar, procesamiento por lotes",
-
   "Profile and Settings": "Perfil y Configuración",
   "Account Management": "Gestión de Cuenta",
   "Profile page - Account tab": "Página de Perfil - Pestaña Cuenta",
@@ -1031,7 +962,6 @@
   "Direct camera access for receipt scanning": "Acceso directo a cámara para escaneo de recibos",
   "Camera capture, gallery selection, image preview, auto-focus optimization": "Captura de cámara, selección de galería, vista previa de imagen, optimización de auto-enfoque",
   "QR Code Cross-Device Upload": "Subida QR de Dispositivo Cruzado",
-
   "voice": {
     "title": "Entrada de Transacción por Voz",
     "instructions": "Presiona el botón Comenzar a Hablar y habla breve, simple. Di estos datos: comerciante, producto, monto, fecha.",
@@ -1088,10 +1018,8 @@
   },
   "Scan receipts on mobile, process on desktop": "Escanear recibos en móvil, procesar en escritorio",
   "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso móvil anónimo, sondeo en tiempo real, población automática de formularios",
-
   "Fields": "Campos",
   "Validation": "Validación",
-
   "Receipt OCR Scanning (Standard+)": "Escaneo OCR de Recibos (Standard+)",
   "Available for Standard and Premium subscribers": "Disponible para suscriptores Standard y Premium",
   "How to Scan Receipts": "Cómo Escanear Recibos",
@@ -1123,15 +1051,12 @@
   "Check extracted data before saving the transaction": "Verificar los datos extraídos antes de guardar la transacción",
   "Editing Extracted Data": "Editando Datos Extraídos",
   "All extracted information appears in editable form fields. You can modify any details before saving the transaction. The original receipt image is stored and can be viewed later by clicking on receipt thumbnails in transaction lists.": "Toda la información extraída aparece en campos de formulario editables. Puedes modificar cualquier detalle antes de guardar la transacción. La imagen original del recibo se almacena y puede verse después haciendo clic en las miniaturas de recibos en las listas de transacciones.",
-
   "Troubleshooting": "Solución de Problemas",
   "If OCR fails, manually enter transaction details": "Si el OCR falla, ingresar manualmente los detalles de la transacción",
   "Poor image quality may affect extraction accuracy": "La calidad pobre de imagen puede afectar la precisión de extracción",
   "Handwritten receipts work better when text is clear": "Los recibos escritos a mano funcionan mejor cuando el texto es claro",
   "Multiple items on one receipt create one transaction for the total": "Múltiples artículos en un recibo crean una transacción por el total",
-
   "Ask about Kaptia features...": "Pregunta sobre las características de Kaptia...",
-
   "require_plan": {
     "compact": {
       "feature_title": "Función {{plan}}",
@@ -1221,12 +1146,11 @@
       }
     }
   },
-
   "reports": {
     "title": "Informes y Análisis Avanzados",
     "subtitle": "Perspectivas potenciadas por IA, gráficos interactivos y análisis financiero integral",
     "this_week": "Esta Semana",
-    "this_month": "Este Mes", 
+    "this_month": "Este Mes",
     "this_quarter": "Este Trimestre",
     "this_year": "Este Año",
     "custom_range": "Rango Personalizado",
@@ -1284,7 +1208,6 @@
     "get_ai_insights": "Obtén perspectivas IA, gráficos interactivos, herramientas de exportación y categorización automática",
     "upgrade_now": "Actualizar Ahora"
   },
-
   "ai_insights": {
     "title": "Perspectivas Potenciadas por IA",
     "description": "Recomendaciones personalizadas basadas en tus patrones de gastos",
@@ -1296,7 +1219,6 @@
     "impact_medium": "impacto medio",
     "impact_low": "bajo impacto"
   },
-
   "calendar": {
     "title": "Vista de Calendario",
     "description": "Ve tus transacciones financieras en formato de calendario",
@@ -1318,7 +1240,6 @@
       "saturday": "Sáb"
     }
   },
-
   "charts": {
     "date": "Fecha",
     "income": "Ingreso",
@@ -1338,7 +1259,6 @@
     "30d": "30D",
     "90d": "90D"
   },
-
   "budget": {
     "total_budget_for": "Presupuesto total para",
     "new_budget": "Nuevo Presupuesto",
@@ -1378,7 +1298,6 @@
     "failed_to_update_budget": "Error al actualizar presupuesto",
     "failed_to_delete_budget": "Error al eliminar presupuesto"
   },
-
   "common": {
     "success": "Éxito",
     "auto": "Auto",
@@ -1406,15 +1325,12 @@
     "of": "de",
     "transactions": "transacciones"
   },
-  "transaction": "transacción",
   "transactions_count": "transacciones",
-
   "frequencies": {
     "weekly": "Semanal",
-    "monthly": "Mensual", 
+    "monthly": "Mensual",
     "yearly": "Anual"
   },
-
   "income": {
     "title": "Ingresos",
     "subtitle": "Rastrea y gestiona tus fuentes de ingresos",
@@ -1444,7 +1360,6 @@
     "confirm_delete": "¿Estás seguro de que quieres eliminar este ingreso?",
     "adding": "Agregando..."
   },
-
   "expenses": {
     "title": "Gestión de Gastos",
     "subtitle": "Rastrea y gestiona todos tus gastos y egresos",
@@ -1492,9 +1407,7 @@
     "filtered_transactions": "Transacciones de gastos filtradas",
     "all_transactions": "Todas tus transacciones de gastos",
     "loading": "Cargando gastos...",
-    "no_expenses_found": "No se Encontraron Gastos",
     "adjust_filters": "Intenta ajustar tus filtros o términos de búsqueda",
-    "add_first_expense": "Agrega tu primera transacción de gasto para comenzar",
     "note": "Nota",
     "charts": {
       "trend_title": "Tendencia Mensual de Gastos",
@@ -1529,7 +1442,6 @@
       "update": "Actualizar"
     }
   },
-
   "expense_reminders": {
     "reminder_created": "Recordatorio Creado",
     "created_successfully": "El recordatorio de gasto se ha configurado exitosamente",
@@ -1545,7 +1457,6 @@
     "create_reminder_button": "Crear Recordatorio",
     "copied_to_clipboard": "Nota de referencia copiada al portapapeles"
   },
-
   "reminders": {
     "notifications_not_supported": "Notificaciones no soportadas",
     "browser_not_support": "Tu navegador no soporta notificaciones",
@@ -1556,18 +1467,27 @@
     "notifications_denied": "Notificaciones denegadas",
     "wont_receive_notifications": "No recibirás notificaciones del navegador"
   },
-
   "transaction_reminders": {
     "failed_to_create": "Error al crear recordatorio",
     "failed_to_complete": "Error al completar recordatorio",
     "failed_to_delete": "Error al eliminar recordatorio"
   },
-
   "categories": {
-    "category_created": "Categoría Creada",
-    "category_added_successfully": "Nueva categoría agregada exitosamente"
+    "food": "Comida",
+    "transportation": "Transporte",
+    "housing": "Vivienda",
+    "entertainment": "Entretenimiento",
+    "healthcare": "Salud",
+    "shopping": "Compras",
+    "utilities": "Servicios públicos",
+    "education": "Educación",
+    "travel": "Viajes",
+    "business": "Negocio",
+    "other": "Otro",
+    "salary": "Salario",
+    "freelance": "Trabajo independiente",
+    "investments": "Inversiones"
   },
-
   "colors": {
     "blue": "Azul",
     "green": "Verde",
@@ -1578,32 +1498,11 @@
     "indigo": "Índigo",
     "teal": "Verde Azulado"
   },
-
-  "categories": {
-    "voľná_práca": "Freelance",
-    "plat": "Salario",
-    "investície": "Inversiones",
-    "doprava": "Transporte",
-    "jedlo_&_reštaurácie": "Comida y Restaurantes",
-    "nakupovanie": "Compras",
-    "nákupy": "Compras",
-    "účty_&_služby": "Facturas y Servicios",
-    "zdravotníctvo": "Salud",
-    "zábava": "Entretenimiento",
-    "bývanie": "Vivienda",
-    "jedlo": "Comida",
-    "freelancing": "Freelance",
-    "salary": "Salario",
-    "freelance": "Freelance",
-    "investments": "Inversiones"
-  },
-
   "admin": {
     "failed_to_clear_function_cache": "Error al limpiar caché de función",
     "failed_to_clear_user_cache": "Error al limpiar caché de usuario",
     "failed_to_cleanup_expired_cache": "Error al limpiar caché expirado"
   },
-
   "profile": {
     "Loading...": "Cargando...",
     "No Stripe Subscription": "Sin Suscripción de Stripe",
@@ -1627,7 +1526,6 @@
     "Notification Settings": "Configuración de Notificaciones",
     "Manage your notification preferences": "Gestiona tus preferencias de notificación",
     "Notification settings will be managed here.": "Las configuraciones de notificación se gestionarán aquí.",
-    "Preferences": "Preferencias",
     "Customize your app preferences": "Personaliza las preferencias de tu app",
     "App preferences will be managed here.": "Las preferencias de la app se gestionarán aquí.",
     "Note": "Nota",
@@ -1661,8 +1559,6 @@
     "• Data management (CSV, PDF)": "• Gestión de datos (CSV, PDF)",
     "• Priority email support": "• Soporte prioritario por email",
     "Opening...": "Abriendo...",
-    "Manage Subscription": "Gestionar Suscripción",
-    "Note": "Nota",
     "If you received premium access through admin upgrade or special promotion, you may not have a Stripe subscription to manage. Contact support if you need billing assistance.": "Si recibiste acceso premium a través de una actualización de administrador o promoción especial, es posible que no tengas una suscripción de Stripe para gestionar. Contacta soporte si necesitas asistencia de facturación.",
     "This will open Stripe's secure customer portal where you can:": "Esto abrirá el portal seguro del cliente de Stripe donde puedes:",
     "• Update payment methods": "• Actualizar métodos de pago",
@@ -1674,13 +1570,11 @@
     "View Pricing Plans": "Ver Planes de Precios",
     "Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Actualiza a Estándar ($4.99/mes) o Premium ($9.99/mes) para características avanzadas"
   },
-
   "types": {
     "expense": "gasto",
     "income": "ingreso",
     "goal": "meta"
   },
-
   "goals": {
     "title": "Metas",
     "subtitle": "Establece y rastrea tus metas financieras",
@@ -1747,7 +1641,6 @@
       "failed_delete": "Error al eliminar la meta"
     }
   },
-
   "dashboard": {
     "total_income": "Ingresos Totales",
     "total_expenses": "Gastos Totales",
@@ -1761,12 +1654,10 @@
     "utilized": "utilizado",
     "remaining": "Restante"
   },
-
   "plans": {
     "standard": "Estándar",
     "premium": "Premium"
   },
-
   "currency": {
     "welcome_title": "¡Bienvenido a Kaptia! 🌎",
     "welcome_description": "Por favor elige tu moneda preferida para comenzar. Puedes cambiarla más tarde hasta que agregues tu primera transacción.",
@@ -1776,11 +1667,10 @@
     "error_title": "Error",
     "error_description": "Error al configurar la moneda. Por favor inténtalo de nuevo."
   },
-
   "upgrade": {
     "standard_name": "Estándar",
     "standard_price": "$4.99/mes",
-    "premium_name": "Premium", 
+    "premium_name": "Premium",
     "premium_price": "$9.99/mes",
     "complete_upgrade": "Completa tu Actualización {{plan}}",
     "ready_to_activate": "Listo para activar",
@@ -1794,7 +1684,7 @@
     "standard_features": {
       "goals": "Gestión de metas y presupuestos",
       "charts": "Gráficos interactivos e informes",
-      "ai_categorization": "Categorización de gastos con IA", 
+      "ai_categorization": "Categorización de gastos con IA",
       "calendar": "Vista de calendario y recordatorios",
       "unlimited_history": "Historial de transacciones ilimitado"
     },
@@ -1802,33 +1692,37 @@
       "everything": "Todo en el plan Estándar",
       "ai_tips": "Consejos financieros e insights con IA",
       "trends": "Análisis avanzado de tendencias",
-      "prediction": "Predicción de gastos", 
+      "prediction": "Predicción de gastos",
       "recommendations": "Recomendaciones personalizadas diarias",
       "backup": "Respaldo de datos en la nube",
       "data_management": "Gestión de datos (CSV, PDF)"
     }
   },
-
   "upload": {
-    "invalid_file_type": "Tipo de archivo inválido",
-    "please_select_image": "Por favor selecciona una imagen",
-    "upload_failed": "Error al subir",
-    "please_try_again": "Por favor inténtalo de nuevo",
-    "missing_information": "Información faltante",
-    "please_fill_required": "Por favor completa todos los campos requeridos",
-    "transaction_saved": "Transacción guardada",
-    "receipt_saved_description": "Los datos del recibo han sido guardados como una transacción",
-    "save_failed": "Error al guardar",
-    "save_failed_description": "Error al guardar la transacción. Por favor inténtalo de nuevo.",
-    "transaction_description_placeholder": "Descripción de la transacción",
-    "select_category_placeholder": "Seleccionar categoría",
-    "qr_code_error": "Error de Código QR",
-    "failed_to_generate_qr": "Error al generar código QR",
-    "upload_error": "Error de Carga",
-    "failed_to_process_mobile": "Error al procesar carga móvil",
-    "timeout": "Tiempo Agotado"
+    "drag_drop": "Arrastra y suelta una imagen aquí, o haz clic para navegar",
+    "processing": "Procesando tu recibo...",
+    "analysing": "Analizando imagen con IA...",
+    "try_again": "Intentar de Nuevo",
+    "upload_receipt": "Subir Recibo",
+    "or": "o",
+    "select_file": "Seleccionar archivo",
+    "scan_phone": "Escanear con Teléfono",
+    "scan_qr": "Escanea Código QR con tu Teléfono",
+    "qr_step_1": "1. Escanea este código QR con la cámara de tu teléfono",
+    "qr_step_2": "2. Toma una foto de tu recibo",
+    "qr_step_3": "3. Los datos aparecerán aquí automáticamente",
+    "waiting_upload": "Esperando subida desde móvil...",
+    "cancel_qr": "Cancelar Escaneo QR",
+    "edit_details": "Editar Detalles de Transacción",
+    "amount_required": "Cantidad *",
+    "save_transaction": "Guardar Transacción",
+    "recognized_text": "Texto Reconocido:",
+    "upload_another": "Subir otro recibo",
+    "close": "Cerrar",
+    "modal_title": "Subir Recibo",
+    "modal_subtitle": "Sube una foto del recibo para extraer automáticamente los datos de la transacción",
+    "button_text": "Subir Imagen"
   },
-
   "trends": {
     "title": "Análisis Avanzado de Tendencias",
     "subtitle": "Perspectivas profundas sobre tus patrones financieros y pronósticos",
@@ -1837,21 +1731,18 @@
     "export_error": "Error al generar reporte PDF",
     "uncategorized": "Sin categoría",
     "other": "Otro",
-    
     "periods": {
       "last_30_days": "Últimos 30 Días",
-      "last_12_weeks": "Últimas 12 Semanas", 
+      "last_12_weeks": "Últimas 12 Semanas",
       "last_6_months": "Últimos 6 Meses",
       "last_2_years": "Últimos 2 Años"
     },
-
     "tabs": {
       "overview": "Resumen",
       "by_category": "Por Categoría",
       "patterns": "Patrones",
       "forecasts": "Pronósticos"
     },
-
     "overview": {
       "trend_direction": "Dirección de Tendencia",
       "positive": "Positiva",
@@ -1865,24 +1756,21 @@
       "financial_trends_title": "Resumen de Tendencias Financieras",
       "financial_trends_description": "Ingresos, gastos y saldo neto durante {{period}}"
     },
-
     "chart": {
       "income": "Ingresos",
-      "expenses": "Gastos", 
+      "expenses": "Gastos",
       "net_balance": "Saldo Neto",
       "amount": "Cantidad"
     },
-
     "days": {
       "sunday": "Domingo",
       "monday": "Lunes",
       "tuesday": "Martes",
-      "wednesday": "Miércoles", 
+      "wednesday": "Miércoles",
       "thursday": "Jueves",
       "friday": "Viernes",
       "saturday": "Sábado"
     },
-
     "insights": {
       "no_data": "No hay datos de gastos disponibles.",
       "weekend_higher": "Gastas más los fines de semana ({{weekendAmount}}) que entre semana. {{maxDay}} es tu día de mayor gasto.",
@@ -1891,7 +1779,6 @@
       "month_end_higher": "Tiendes a gastar más al final del mes ({{lastWeekAvg}} promedio) que al comienzo ({{firstWeekAvg}} promedio).",
       "consistent_spending": "Tu gasto es relativamente consistente durante todo el mes."
     },
-
     "patterns": {
       "day_of_week_title": "Patrones por Día de la Semana",
       "day_of_week_description": "Tu comportamiento de gasto en diferentes días",
@@ -1903,7 +1790,6 @@
       "total": "Total",
       "average": "Promedio"
     },
-
     "forecasts": {
       "ai_forecasts_title": "Pronósticos Financieros IA",
       "ai_forecasts_description": "Predicciones impulsadas por IA basadas en tus patrones de datos históricos",
@@ -1926,39 +1812,37 @@
       "no_predictions_title": "No Hay Predicciones Disponibles",
       "no_predictions_description": "Agrega más transacciones para generar pronósticos financieros impulsados por IA"
     },
-
     "categories": {
       "total_spent": "Total Gastado:",
       "monthly_average": "Promedio Mensual:"
     },
-
     "trend": {
       "increasing": "creciente",
-      "decreasing": "decreciente", 
+      "decreasing": "decreciente",
       "stable": "estable"
     }
   },
-
   "export": {
     "page_title": "Gestión de Datos",
     "page_description": "Exporta e importa tus datos financieros con opciones avanzadas",
-    
     "tab_export": "Exportar",
-    "tab_import": "Importar", 
+    "tab_import": "Importar",
     "tab_backup": "Respaldo",
     "export_tab": "Exportar",
     "import_tab": "Importar",
-    
     "export_title": "Exportar Datos Financieros",
     "export_description": "Descarga tus transacciones, presupuestos, metas y más en varios formatos",
-    
-    "format": "Formato",
+    "format": {
+      "pdf": "PDF",
+      "csv": "CSV",
+      "excel": "Excel",
+      "json": "JSON"
+    },
     "format_description": "Elige tu formato de exportación preferido",
     "pdf": "PDF",
     "csv": "CSV",
     "excel": "Excel",
     "json": "JSON",
-    
     "date_range": "Rango de Fechas",
     "date_range_description": "Selecciona el período de tiempo para tu exportación",
     "all": "Todo el Tiempo",
@@ -1968,7 +1852,6 @@
     "custom": "Rango Personalizado",
     "start_date": "Fecha de Inicio",
     "end_date": "Fecha de Fin",
-    
     "data_selection": "Selección de Datos",
     "data_selection_description": "Elige qué incluir en tu exportación",
     "include_transactions": "Transacciones",
@@ -1977,79 +1860,57 @@
     "include_summary": "Resumen Financiero",
     "include_charts": "Gráficos y Visualizaciones",
     "include_label": "Incluir",
-    
     "format_label": "Formato",
     "date_range_label": "Rango de Fechas",
-    
     "range": {
       "all": "Todo el Tiempo",
-      "month": "Este Mes", 
+      "month": "Este Mes",
       "quarter": "Este Trimestre",
       "year": "Este Año",
       "custom": "Rango Personalizado"
     },
-    
-    "format": {
-      "pdf": "PDF",
-      "csv": "CSV", 
-      "excel": "Excel",
-      "json": "JSON"
-    },
-    
     "format_pdf": "PDF",
-    "format_csv": "CSV", 
+    "format_csv": "CSV",
     "format_excel": "Excel",
     "format_json": "JSON",
-    
     "range_all": "Todo el Tiempo",
-    "range_month": "Este Mes", 
+    "range_month": "Este Mes",
     "range_quarter": "Este Trimestre",
     "range_year": "Este Año",
     "range_custom": "Rango Personalizado",
-    
     "coming_soon": "Funcionalidad de exportación próximamente",
     "coming_soon_desc": "Soporte para PDF, CSV, Excel, JSON y más",
-    
     "import_title": "Importar Datos Financieros",
     "import_description": "Importa transacciones, presupuestos, metas y categorías desde archivos CSV o JSON",
-    
     "step1_title": "Descargar Archivo de Ejemplo",
     "step1_description": "Descarga nuestro archivo CSV de ejemplo para ver el formato correcto para tus datos",
     "download_example_csv": "Descargar CSV de Ejemplo",
-    
-    "step2_title": "Elegir Formato de Archivo", 
+    "step2_title": "Elegir Formato de Archivo",
     "csv_file": "Archivo CSV",
     "csv_description": "Formato de valores separados por comas (recomendado)",
-    "json_file": "Archivo JSON", 
+    "json_file": "Archivo JSON",
     "json_description": "Formato de Notación de Objetos JavaScript",
-    
     "step3_title": "Subir Tu Archivo",
     "drop_file_text": "Arrastra y suelta tu archivo aquí, o haz clic para navegar",
     "supports_files": "Soporta archivos",
-    
     "toast_import_failed": "Importación falló. Revisa el formato de tu archivo e inténtalo de nuevo.",
     "toast_backup_failed": "Error al crear respaldo. Inténtalo de nuevo.",
-    
     "backup_created": "Respaldo Creado Exitosamente",
     "backup_created_desc": "Tus datos han sido respaldados de forma segura en almacenamiento en la nube",
-    "backup_failed": "Error en Creación de Respaldo", 
+    "backup_failed": "Error en Creación de Respaldo",
     "backup_failed_desc": "Error al crear respaldo. Inténtalo de nuevo.",
-    
     "export_successful": "Exportación Completada Exitosamente",
     "export_successful_desc": "Tus datos han sido exportados en formato {{format}}",
     "export_failed": "Exportación Falló",
     "export_failed_desc": "Error al exportar datos. Inténtalo de nuevo.",
-    
-    "restore_successful": "Restauración Completada Exitosamente", 
+    "restore_successful": "Restauración Completada Exitosamente",
     "restore_successful_desc": "Se restauraron exitosamente {{transactions}} transacciones y {{budgets}} presupuestos de {{filename}}",
     "restore_failed": "Restauración Falló",
     "restore_failed_desc": "Error al restaurar respaldo. Revisa tu archivo de respaldo.",
-    
     "no_backups_available": "No Hay Respaldos Disponibles",
     "no_backups_found": "No se encontraron archivos de respaldo. Crea un respaldo primero.",
     "toast_export_failed": "Exportación falló. Inténtalo más tarde.",
     "toast_restore_failed": "Restauración falló. Revisa tu archivo de respaldo.",
-    
     "imported_count": "{{count}} importado",
     "collaborative": "Colaborativo",
     "warnings_count": "Advertencias ({{count}})",
@@ -2057,7 +1918,6 @@
     "recent_imports": "Importaciones Recientes",
     "records_count": "{{count}} registros",
     "no_import_history": "No hay historial de importación aún",
-    
     "pdf_security": {
       "modal_title": "Seguridad de Grado Bancario para Procesamiento de PDF",
       "modal_description": "Antes de procesar tu estado de cuenta bancario, revisa nuestras medidas de seguridad integrales.",
@@ -2097,7 +1957,6 @@
       "cancel": "Cancelar",
       "consent_button": "Consiento al Procesamiento Seguro"
     },
-    
     "duplicate_warning": {
       "title": "Posibles Transacciones Duplicadas Detectadas",
       "description": "Encontramos transacciones que podrían ya existir en tu cuenta. Revisa las coincidencias a continuación y elige qué transacciones importar.",
@@ -2118,7 +1977,6 @@
       "proceeding_title": "Procediendo con Importación",
       "proceeding_description": "Importando {{count}} transacciones seleccionadas"
     },
-    
     "backup_tab": "Respaldo",
     "cloud_backup_status": "Estado de Respaldo en la Nube",
     "automatic_backup_enabled": "Respaldo Automático Activado",
@@ -2143,33 +2001,6 @@
     "restoring": "Restaurando...",
     "restore": "Restaurar"
   },
-
-  "upload": {
-    "drag_drop": "Arrastra y suelta una imagen aquí, o haz clic para navegar",
-    "processing": "Procesando tu recibo...",
-    "analysing": "Analizando imagen con IA...",
-    "try_again": "Intentar de Nuevo",
-    "upload_receipt": "Subir Recibo",
-    "or": "o",
-    "select_file": "Seleccionar archivo",
-    "scan_phone": "Escanear con Teléfono",
-    "scan_qr": "Escanea Código QR con tu Teléfono",
-    "qr_step_1": "1. Escanea este código QR con la cámara de tu teléfono",
-    "qr_step_2": "2. Toma una foto de tu recibo",
-    "qr_step_3": "3. Los datos aparecerán aquí automáticamente",
-    "waiting_upload": "Esperando subida desde móvil...",
-    "cancel_qr": "Cancelar Escaneo QR",
-    "edit_details": "Editar Detalles de Transacción",
-    "amount_required": "Cantidad *",
-    "save_transaction": "Guardar Transacción",
-    "recognized_text": "Texto Reconocido:",
-    "upload_another": "Subir otro recibo",
-    "close": "Cerrar",
-    "modal_title": "Subir Recibo",
-    "modal_subtitle": "Sube una foto del recibo para extraer automáticamente los datos de la transacción",
-    "button_text": "Subir Imagen"
-  },
-
   "upcomingReminders": {
     "title": "Recordatorios Próximos",
     "description": "Recordatorios automáticos de transacciones y recordatorios de pago manual",
@@ -2224,7 +2055,6 @@
     "failedToComplete": "Error al completar recordatorio",
     "failedToDelete": "Error al eliminar recordatorio"
   },
-
   "Add transactions to generate category-specific expense predictions": "Agrega transacciones para generar predicciones de gastos específicas por categoría",
   "Timeline Forecast": "Pronóstico de Cronología",
   "1 Month": "1 Mes",
@@ -2235,7 +2065,6 @@
   "No Timeline Data Available": "No Hay Datos de Cronología Disponibles",
   "Add transactions to generate timeline expense predictions": "Agrega transacciones para generar predicciones de gastos de cronología",
   "AI-powered expense predictions help you plan your budget with machine learning insights": "Las predicciones de gastos con IA te ayudan a planificar tu presupuesto con información de aprendizaje automático",
-
   "Auto-Categorization": "Auto-Categorización",
   "AI-powered transaction categorization with machine learning": "Categorización de transacciones con IA y aprendizaje automático",
   "Smart Transaction Analysis": "Análisis Inteligente de Transacciones",
@@ -2307,36 +2136,6 @@
       "low": "baja"
     }
   },
-  "insights": {
-    "title": "Perspectivas",
-    "description": "Perspectivas matemáticas basadas en sus datos financieros y tendencias de gastos",
-    "loading": "Cargando perspectivas...",
-    "no_insights": "No hay perspectivas disponibles",
-    "add_transactions": "Agregue transacciones para generar perspectivas financieras",
-    "upgrade_for_insights": "Actualice al plan Standard o Premium para acceder a las perspectivas",
-    "impact_high": "Alto",
-    "impact_medium": "Medio", 
-    "impact_low": "Bajo",
-    "recommendation": "Recomendación",
-    "take_action": "Tomar Acción",
-    "high_spending_alert": "Alerta de Gasto Alto",
-    "high_spending_description": "Has gastado {{percentage}}% de tus ingresos este mes",
-    "review_expense_categories": "Considera revisar tus categorías de gastos más grandes",
-    "category_focus_opportunity": "Oportunidad de Enfoque en Categoría",
-    "category_spending_percentage": "{{category}} representa {{percentage}}% de tus gastos",
-    "consider_budget_limit": "Considera establecer un límite de presupuesto para {{category}}",
-    "positive_cash_flow": "Flujo de Efectivo Positivo",
-    "savings_rate": "Estás ahorrando {{rate}}% de tus ingresos este mes",
-    "increase_savings_rate": "Considera aumentar tu tasa de ahorro al 20%",
-    "excellent_savings": "¡Excelente tasa de ahorro!",
-    "spending_increased": "Gastos Aumentaron",
-    "spending_decreased": "Gastos Disminuyeron",
-    "spending_change_description": "Tus gastos han {{direction}} en {{percentage}}% comparado con el mes pasado",
-    "increased": "aumentado",
-    "decreased": "disminuido",
-    "review_recent_purchases": "Revisa compras recientes para identificar el aumento de gastos",
-    "great_expense_reduction": "¡Excelente trabajo reduciendo gastos!"
-  },
   "aiPoweredInsights": "Perspectivas Impulsadas por IA",
   "premium": "Premium",
   "spendingManagement": "Gestión de Gastos",
@@ -2364,7 +2163,6 @@
   "AI Processing:": "Procesamiento de IA:",
   "OpenAI for anonymized financial insights (as detailed in section 3 above)": "OpenAI para perspectivas financieras anonimizadas (como se detalla en la sección 3 anterior)",
   "5. Data Security": "5. Seguridad de Datos",
-  "6. Data Retention": "6. Retención de Datos",
   "7. Your Rights": "7. Tus Derechos",
   "8. Cookies and Tracking": "8. Cookies y Seguimiento",
   "9. Changes to This Policy": "9. Cambios a esta Política",
@@ -2373,13 +2171,11 @@
   "I agree to the": "Acepto los",
   "and": "y",
   "Please accept Terms & Privacy Policy to continue": "Por favor acepta los Términos y Política de Privacidad para continuar",
-
   "nav": {
     "features": "Funciones",
     "help": "Ayuda",
     "contact": "Contacto"
   },
-
   "contact": {
     "page_title": "Contáctanos",
     "seo_title": "Contáctanos - Soporte Kaptia | Obtén Ayuda y Envía Mensajes",
@@ -2418,7 +2214,6 @@
     "faq_q3": "¿Puedo exportar mis datos?",
     "faq_a3": "Los usuarios Estándar y Premium pueden exportar sus datos en varios formatos a través de la página de Gestión de Datos."
   },
-
   "auth": {
     "signUp": "Registrarse",
     "signIn": "Iniciar Sesión",
@@ -2434,17 +2229,15 @@
     "securePrivate": "Seguro y Privado",
     "securePrivateDesc": "Seguridad de estándar industrial mantiene tus datos protegidos"
   },
-
   "seo": {
     "authTitle": "Iniciar Sesión | Registrarse - Kaptia",
     "authDescription": "Crea tu cuenta de Kaptia o inicia sesión para acceder a tu panel de gastos. Comienza a rastrear gastos, gestionar presupuestos y alcanzar tus metas de ahorro hoy.",
     "authKeywords": "kaptia login, registrarse app finanzas, cuenta finanzas personales, registro rastreador gastos, login app presupuesto"
   },
-
   "factors": {
     "budgetManagement": "Gestión de Presupuesto",
     "adaptiveSpendingControl": "Control de Gasto Adaptativo",
-    "expenseVolatility": "Volatilidad de Gastos", 
+    "expenseVolatility": "Volatilidad de Gastos",
     "financialResilience": "Resistencia Financiera",
     "savingsRate": "Tasa de Ahorro",
     "debtManagement": "Gestión de Deudas",
@@ -2481,7 +2274,7 @@
   },
   "recurring": {
     "weekly": "Semanal",
-    "monthly": "Mensual", 
+    "monthly": "Mensual",
     "yearly": "Anual"
   },
   "collaborative_goals": {
@@ -2579,7 +2372,6 @@
       "enter_email": "Por favor ingresa una dirección de correo"
     }
   },
-
   "collaborative_goal_detail": {
     "messages": {
       "contribution_added": "Contribución Agregada",
@@ -2639,7 +2431,7 @@
     },
     "goal_categories": {
       "vacation": "Vacaciones",
-      "wedding": "Boda", 
+      "wedding": "Boda",
       "home": "Casa",
       "education": "Educación",
       "emergency": "Emergencia",
@@ -2686,7 +2478,7 @@
     },
     "actions": {
       "share_goal": "Compartir Meta",
-      "invite_friends": "Invitar Amigos", 
+      "invite_friends": "Invitar Amigos",
       "invite_description": "Envía una invitación a amigos para unirse a esta meta colaborativa.",
       "email_placeholder": "Ingresa el email de tu amigo",
       "send_invitation": "Enviar Invitación",
@@ -2736,7 +2528,6 @@
       "no_date": "Sin fecha"
     }
   },
-
   "redeem": {
     "seo": {
       "title": "Canjear Código AppSumo - Kaptia",
@@ -2792,7 +2583,6 @@
       "status": "Cargando estado de canje..."
     }
   },
-
   "help": {
     "seo": {
       "title": "Ayuda y Documentación - Guía del Usuario de Kaptia | Funciones y Soporte",
@@ -2805,7 +2595,7 @@
     },
     "tabs": {
       "overview": "Resumen",
-      "features": "Funciones", 
+      "features": "Funciones",
       "plans": "Planes",
       "guide": "Guía de Usuario",
       "faq": "Preguntas Frecuentes"
@@ -2869,7 +2659,7 @@
       "title": "Planes de Suscripción",
       "description": "Elige el plan que mejor se adapte a tus necesidades de gestión financiera",
       "free": "Gratuito",
-      "standard": "Estándar", 
+      "standard": "Estándar",
       "premium": "Premium",
       "price_free": "$0",
       "price_standard": "$4.99",
@@ -2878,14 +2668,14 @@
       "features": {
         "free": [
           "Hasta 100 transacciones",
-          "Seguimiento básico de transacciones", 
+          "Seguimiento básico de transacciones",
           "Panel simple",
           "Diseño responsivo móvil"
         ],
         "standard": [
           "Hasta 100 transacciones",
           "Escaneo OCR de recibos",
-          "Categorización de gastos con IA", 
+          "Categorización de gastos con IA",
           "Gestión de presupuestos",
           "Objetivos financieros",
           "Recordatorios de transacciones",
@@ -2897,7 +2687,7 @@
           "Perspectivas avanzadas con IA",
           "Predicciones de tendencias",
           "Respaldo y sincronización en la nube",
-          "Importación/exportación de datos", 
+          "Importación/exportación de datos",
           "Análisis avanzados",
           "Soporte prioritario",
           "Múltiples formatos de datos"
@@ -2905,7 +2695,6 @@
       }
     }
   },
-
   "cookies": {
     "seo": {
       "title": "Política de Cookies - Kaptia",
@@ -3010,7 +2799,6 @@
       "back": "Atrás"
     }
   },
-
   "gdpr": {
     "title": "Derechos de Privacidad Europeos (RGPD)",
     "legal_basis": {
@@ -3099,7 +2887,6 @@
       "response_desc": "Responderemos a su solicitud dentro de 30 días (extensible por 60 días para solicitudes complejas)"
     }
   },
-
   "ccpa": {
     "title": "Derechos de Privacidad del Consumidor de California (CCPA)",
     "consumer_rights": {
@@ -3173,7 +2960,6 @@
       "procedure": "Podemos solicitar información adicional para verificar su identidad, como detalles de cuenta o información de transacciones recientes."
     }
   },
-
   "financial_compliance": {
     "title": "Cumplimiento de Servicios Financieros",
     "bsa": {
@@ -3233,7 +3019,6 @@
       "cfpb_desc": "Cumplimiento de la Oficina de Protección Financiera del Consumidor para servicios financieros al consumidor"
     }
   },
-
   "ai_act_compliance": {
     "title": "Cumplimiento de la Ley de IA de la UE (2024)",
     "classification": {
@@ -3258,7 +3043,6 @@
       "measures": "Pruebas regulares de sesgo, datos de entrenamiento diversos y evaluaciones de equidad algorítmica aseguran rendimiento equitativo de IA en todas las demografías de usuarios."
     }
   },
-
   "data_transfers": {
     "title": "Transferencias Internacionales de Datos",
     "scc": {
@@ -3283,7 +3067,6 @@
       "monitoring": "Monitoreo continuo: Evaluaciones regulares de cumplimiento y procedimientos de auditoría"
     }
   },
-
   "compliance": {
     "detecting_location": "Detectando ubicación...",
     "gdpr": {
@@ -3295,7 +3078,6 @@
       "notice": "Los residentes de California tienen derechos específicos de privacidad bajo la CCPA. Puede solicitar información sobre recopilación de datos y optar por no participar en la venta de datos."
     }
   },
-
   "privacy": {
     "title": "Política de Privacidad",
     "last_updated": "Última actualización: 14 de junio de 2025",
@@ -3473,7 +3255,6 @@
       }
     }
   },
-
   "pdf": {
     "anonymization_preview": {
       "title": "Vista Previa de Anonimización de Datos",
@@ -3529,7 +3310,6 @@
       "transactions_processed": "Procesado {{processed}} de {{total}} transacciones"
     }
   },
-
   "features": {
     "hero": {
       "title": "Inteligencia de Gastos Potenciada por IA",
@@ -3567,40 +3347,36 @@
       }
     },
     "calculators": {
-      "categorization": {
-        "title": "Calculadora de Precisión de Categorización",
-        "transactions_label": "Transacciones por mes:",
-        "time_saved": "Tiempo ahorrado por mes:",
-        "hours": "horas"
-      },
-      "savings": {
-        "title": "Calculadora de Ahorros Potenciales",
-        "expenses_label": "Gastos mensuales:",
-        "potential_savings": "Ahorros mensuales potenciales (5-15%):"
-      },
-      "health": {
-        "title": "Simulador de Puntuación de Salud",
-        "savings_rate": "Tasa de ahorro:",
-        "budget_adherence": "Adherencia al presupuesto:",
-        "estimated_score": "Puntuación Estimada de Salud Financiera:"
-      },
-      "predictions": {
-        "title": "Calculadora de Rango de Predicción",
-        "historical_months": "Meses de datos históricos:",
-        "months": "meses",
-        "prediction_range": "Rango de predicción disponible:",
-        "months_ahead": "meses por delante",
-        "prediction_accuracy": "Precisión de predicción:"
-      },
-      "statements": {
-        "title": "Calculadora de Procesamiento de Estados",
-        "pages": "Páginas en el estado:",
-        "pages_unit": "páginas",
-        "estimated_transactions": "Transacciones extraídas estimadas:",
-        "transactions": "transacciones",
-        "processing_time": "Tiempo de procesamiento ahorrado:",
-        "minutes": "minutos"
-      }
+      "business_impact": "Calculadora de Impacto Empresarial",
+      "scoring": "Simulador de Puntuación",
+      "prediction_range": "Calculadora de Rango de Predicción",
+      "statement_processing": "Calculadora de Procesamiento de Estados",
+      "trend_strength": "Calculadora de Fuerza de Tendencias",
+      "recommendation_effectiveness": "Calculadora de Efectividad de Recomendaciones",
+      "contextual_relevance": "Calculadora de Relevancia Contextual",
+      "monthly_transactions": "Transacciones mensuales",
+      "monthly_expenses": "Gastos mensuales",
+      "business_size": "Tamaño del negocio (empleados)",
+      "savings_rate": "Tasa de ahorro",
+      "budget_adherence": "Adherencia al presupuesto",
+      "historical_months": "Meses de datos históricos",
+      "pages_statement": "Páginas en estado",
+      "trend_strength_level": "Fuerza de tendencia",
+      "recommendations_followed": "Recomendaciones seguidas",
+      "contextual_factors": "Factores contextuales considerados",
+      "estimated_time_saved": "Tiempo estimado ahorrado",
+      "predicted_accuracy": "Precisión predicha",
+      "estimated_health_score": "Puntuación de Salud Financiera Estimada",
+      "prediction_range_available": "Rango de predicción disponible",
+      "estimated_transactions": "Transacciones estimadas extraídas",
+      "processing_time_saved": "Tiempo de procesamiento ahorrado",
+      "trend_confidence": "Nivel de confianza de tendencia",
+      "weekly_value": "Valor semanal generado",
+      "relevance_score": "Puntuación de relevancia",
+      "months_ahead": "meses por adelantado",
+      "transactions": "transacciones",
+      "minutes": "minutos",
+      "per_week": "por semana"
     },
     "cta": {
       "title": "¿Listo para Transformar tu Forma de Registrar Gastos?",
@@ -3638,7 +3414,7 @@
         "description": "Observa cómo nuestra IA categoriza inteligentemente tus transacciones basándose en patrones de comerciantes y comportamiento de gastos."
       },
       "tips": {
-        "title": "Información Financiera", 
+        "title": "Información Financiera",
         "description": "Descubre cómo la IA analiza tus patrones de gastos para proporcionar recomendaciones financieras personalizadas."
       },
       "health": {
@@ -3830,41 +3606,8 @@
           "desc": "Considera tus restricciones y objetivos presupuestarios"
         }
       }
-    },
-    "calculators": {
-      "business_impact": "Calculadora de Impacto Empresarial",
-      "scoring": "Simulador de Puntuación",
-      "prediction_range": "Calculadora de Rango de Predicción",
-      "statement_processing": "Calculadora de Procesamiento de Estados",
-      "trend_strength": "Calculadora de Fuerza de Tendencias",
-      "recommendation_effectiveness": "Calculadora de Efectividad de Recomendaciones",
-      "contextual_relevance": "Calculadora de Relevancia Contextual",
-      "monthly_transactions": "Transacciones mensuales",
-      "monthly_expenses": "Gastos mensuales",
-      "business_size": "Tamaño del negocio (empleados)",
-      "savings_rate": "Tasa de ahorro",
-      "budget_adherence": "Adherencia al presupuesto",
-      "historical_months": "Meses de datos históricos",
-      "pages_statement": "Páginas en estado",
-      "trend_strength_level": "Fuerza de tendencia",
-      "recommendations_followed": "Recomendaciones seguidas",
-      "contextual_factors": "Factores contextuales considerados",
-      "estimated_time_saved": "Tiempo estimado ahorrado",
-      "predicted_accuracy": "Precisión predicha",
-      "estimated_health_score": "Puntuación de Salud Financiera Estimada",
-      "prediction_range_available": "Rango de predicción disponible",
-      "estimated_transactions": "Transacciones estimadas extraídas",
-      "processing_time_saved": "Tiempo de procesamiento ahorrado",
-      "trend_confidence": "Nivel de confianza de tendencia",
-      "weekly_value": "Valor semanal generado",
-      "relevance_score": "Puntuación de relevancia",
-      "months_ahead": "meses por adelantado",
-      "transactions": "transacciones",
-      "minutes": "minutos",
-      "per_week": "por semana"
     }
   },
-
   "voiceInput": {
     "listening": "Escuchando... Habla ahora",
     "notSupported": "La entrada de voz no es compatible con tu navegador",
@@ -3895,7 +3638,6 @@
       "extractedData": "Información Extraída"
     }
   },
-
   "voiceTransaction": {
     "title": "Revisar Transacción por Voz",
     "description": "Revisa y confirma los detalles de la transacción extraídos de tu entrada de voz",
@@ -3911,23 +3653,6 @@
     "descriptionPlaceholder": "Ingresa descripción",
     "selectCategory": "Selecciona una categoría",
     "followUp": "Información adicional necesaria"
-  },
-
-  "categories": {
-    "food": "Comida",
-    "transportation": "Transporte",
-    "housing": "Vivienda",
-    "entertainment": "Entretenimiento",
-    "healthcare": "Salud",
-    "shopping": "Compras",
-    "utilities": "Servicios públicos",
-    "education": "Educación",
-    "travel": "Viajes",
-    "business": "Negocio",
-    "other": "Otro",
-    "salary": "Salario",
-    "freelance": "Trabajo independiente",
-    "investments": "Inversiones"
   },
   "AI that does the tracking for you": "IA que hace el seguimiento por ti",
   "Your spending,": "Tus gastos,",
@@ -4024,5 +3749,26 @@
   "Premium Feature": "Función Premium",
   "Trend": "Tendencia",
   "Upgrade to Premium": "Mejorar a Premium",
-  "Could not find matching category ID": "No se encontró una categoría coincidente"
+  "Could not find matching category ID": "No se encontró una categoría coincidente",
+  "Back to Home": "Volver al inicio",
+  "Back": "Atrás",
+  "Help Center & Documentation": "Centro de Ayuda y Documentación",
+  "How can we help you?": "¿Cómo podemos ayudarte?",
+  "Search questions or topics...": "Buscar preguntas o temas...",
+  "Quick Start": "Comenzar",
+  "Guides": "Guías",
+  "Plans & Pricing": "Planes y Precios",
+  "Online • Ask anything": "En línea • Pregunta lo que sea",
+  "Type your question here...": "Escribe tu pregunta aquí...",
+  "Hello! I am your Kaptia AI assistant. How can I help you today?": "¡Hola! Soy tu asistente de IA de Kaptia. ¿Cómo puedo ayudarte hoy?",
+  "All Features": "Todas las funciones",
+  "Calculators & Tools": "Calculadoras y herramientas",
+  "Open Calculator": "Abrir calculadora",
+  "Try this feature free": "Probar esta función gratis",
+  "Looking for instant answers?": "¿Buscas respuestas inmediatas?",
+  "Visit Help Center": "Ir al Centro de Ayuda",
+  "No questions matched your search.": "No se encontraron preguntas para tu búsqueda.",
+  "Clear search": "Borrar búsqueda",
+  "Ready to transform your financial management?": "¿Listo para transformar la gestión de tus finanzas?",
+  "Start free with no credit card required.": "Comienza gratis sin tarjeta de crédito."
 }

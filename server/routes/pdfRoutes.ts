@@ -25,7 +25,7 @@ export function registerPDFRoutes(app: any) {
         });
       }
 
-      const { period, currency = '$' } = req.body;
+      const { period, currency: requestedCurrency } = req.body;
       const language = getUserLanguage(req);
 
       console.log('Generating PDF for premium user:', userId, 'Period:', period, 'Language:', language);
@@ -154,7 +154,8 @@ export function registerPDFRoutes(app: any) {
         );
       }
 
-      console.log('[PDF] Generating report. Currency:', currency, '| period:', period);
+      const reportCurrency = requestedCurrency || user.currency || '$';
+      console.log('[PDF] Generating report. Currency:', reportCurrency, '| period:', period);
 
       // Hand the report to the independent PDF processor. The payload matches
       // the processor's contract (see server/pdfProcessorClient.ts).
@@ -163,6 +164,7 @@ export function registerPDFRoutes(app: any) {
         email: userData.email,
         language,
         period,
+        currency: reportCurrency,
         monthly: trendsData,
         categories: categoryBreakdown,
         transactions: periodTransactions.map((t: any) => ({

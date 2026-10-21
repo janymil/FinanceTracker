@@ -2,15 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Crown, TrendingUp, Star } from "lucide-react";
+import { Check, X, Crown, TrendingUp, Star, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useUser } from "@clerk/clerk-react";
+import { AppLayout } from "@/components/AppLayout";
 
 export default function Pricing() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useUser();
+
+  const langMatch = location.match(/^\/([a-z]{2})(?:\/|$)/);
+  const currentLang = langMatch ? langMatch[1] : (localStorage.getItem('preferredLanguage') || 'en');
 
   // Get user's current plan - default to free for public page
   const userPlan = 'free';
@@ -40,16 +44,27 @@ export default function Pricing() {
   const isCurrentPlan = (plan: string) => userPlan === plan;
 
   return (
-    <>
+    <AppLayout isPublicPage={true}>
       <SEO 
         title="Pricing Plans - Choose Your Kaptia Plan"
         description="Compare Kaptia pricing plans. Start free with basic expense tracking or upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features like AI insights and cloud backup."
         keywords="kaptia pricing, subscription plans, expense tracker cost, personal finance app pricing, budget app plans"
         canonical="https://kaptia.app/pricing"
       />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          <div className="mb-6">
+            <button 
+              onClick={() => setLocation(`/${currentLang}`)}
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              <span>Back to home</span>
+            </button>
+          </div>
+        </div>
       {/* Hero Section */}
-      <section className="pt-32 pb-16">
+      <section className="pt-6 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
@@ -459,6 +474,6 @@ export default function Pricing() {
         </div>
       </section>
     </div>
-    </>
+    </AppLayout>
   );
 }

@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { 
   TrendingUp, 
-  CreditCard, 
   Target, 
   Calendar, 
   PieChart, 
@@ -21,22 +20,17 @@ import {
   HelpCircle,
   Star,
   Download,
-  Clock,
-  DollarSign,
   BarChart3,
   Cloud,
   Zap,
-  Users,
+  Camera,
+  Search,
+  Sparkles,
+  CheckCircle2,
   Lock,
-  ChevronDown,
-  ChevronRight,
-  Camera
+  DollarSign
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { useUser } from "@clerk/clerk-react";
-import { AnonymousHeader } from "@/components/anonymous-header";
 import { useTranslation } from "react-i18next";
 
 interface ChatMessage {
@@ -47,22 +41,23 @@ interface ChatMessage {
 
 export default function Help() {
   const { t } = useTranslation();
-  const { user } = useUser();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Language from route
+  const langMatch = location.match(/^\/([a-z]{2})(?:\/|$)/);
+  const currentLang = langMatch ? langMatch[1] : (localStorage.getItem('preferredLanguage') || 'en');
+
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: t('help.chat.initial_message'),
+      content: t("Hello! I am your Kaptia AI assistant. How can I help you today?"),
       timestamp: new Date()
     }
   ]);
   const [chatInput, setChatInput] = useState("");
-  const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleLogin = () => {
-    setLocation('/auth#sign-in');
-  };
 
   const sendChatMessage = async (message: string) => {
     setIsLoading(true);
@@ -82,14 +77,14 @@ export default function Help() {
       const data = await response.json();
       setChatMessages(prev => [...prev, {
         role: "assistant",
-        content: data.response || t('help.chat.error_response'),
+        content: data.response || t('help.chat.error_response', 'Sorry, could not get a response. Please try again.'),
         timestamp: new Date()
       }]);
     } catch (error) {
       console.error('Help chat error:', error);
       setChatMessages(prev => [...prev, {
         role: "assistant",
-        content: t('help.chat.error_response'),
+        content: t('help.chat.error_response', 'Sorry, could not get a response. Please try again.'),
         timestamp: new Date()
       }]);
     } finally {
@@ -111,6 +106,17 @@ export default function Help() {
     setChatInput("");
   };
 
+  const handleQuickPrompt = (promptText: string) => {
+    const userMessage: ChatMessage = {
+      role: "user",
+      content: promptText,
+      timestamp: new Date()
+    };
+    setChatMessages(prev => [...prev, userMessage]);
+    sendChatMessage(promptText);
+  };
+
+  // Canonical FAQ items using established translation keys
   const faqItems = [
     {
       id: "getting-started",
@@ -123,9 +129,9 @@ export default function Help() {
       answer: t("Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export.")
     },
     {
-      id: "data-security",
-      question: t("Is my financial data secure?"),
-      answer: t("Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.")
+      id: "receipt-ocr",
+      question: t("How does receipt scanning work?"),
+      answer: t("Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.")
     },
     {
       id: "ai-categorization",
@@ -133,1116 +139,448 @@ export default function Help() {
       answer: t("Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.")
     },
     {
-      id: "receipt-ocr",
-      question: t("How does receipt scanning work?"),
-      answer: t("Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.")
-    },
-    {
-      id: "mobile-qr-upload",
-      question: t("How does mobile QR code upload work?"),
-      answer: t("Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.")
-    },
-    {
-      id: "ocr-accuracy",
-      question: t("What if OCR doesn't read my receipt correctly?"),
-      answer: t("You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results.")
-    },
-    {
-      id: "supported-receipts",
-      question: t("What types of receipts are supported?"),
-      answer: t("All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions.")
-    },
-    {
-      id: "budgets-goals",
-      question: t("How do I set up budgets and goals?"),
-      answer: t("Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.")
-    },
-    {
-      id: "data-export",
-      question: t("Can I export my data?"),
-      answer: t("Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.")
-    },
-    {
-      id: "mobile-access",
-      question: t("Is Kaptia available on mobile?"),
-      answer: t("Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.")
-    },
-    {
-      id: "dashboard-widgets",
-      question: t("What widgets are available on the dashboard?"),
-      answer: t("Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.")
-    },
-    {
-      id: "transaction-editing",
-      question: t("How do I edit or delete transactions?"),
-      answer: t("Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads.")
-    },
-    {
-      id: "recurring-transactions",
-      question: t("How do recurring transactions work?"),
-      answer: t("Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills.")
-    },
-    {
-      id: "categories-custom",
-      question: t("Can I create custom categories?"),
-      answer: t("Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus.")
-    },
-    {
-      id: "financial-health-score",
-      question: t("How is the Financial Health Score calculated?"),
-      answer: t("Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations.")
+      id: "data-security",
+      question: t("Is my financial data secure?"),
+      answer: t("Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.")
     },
     {
       id: "budget-tracking",
       question: t("How does budget tracking work?"),
-      answer: t("Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically.")
-    },
-    {
-      id: "goals-collaboration",
-      question: t("Can I share goals with family members?"),
-      answer: t("Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts.")
-    },
-    {
-      id: "calendar-view",
-      question: t("What is the calendar view feature?"),
-      answer: t("Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.")
-    },
-    {
-      id: "trends-predictions",
-      question: t("What are AI trend predictions?"),
-      answer: t("Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends.")
-    },
-    {
-      id: "financial-mascot",
-      question: t("What is the Financial Mascot feature?"),
-      answer: t("Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored.")
-    },
-    {
-      id: "cloud-backup-restore",
-      question: t("How does cloud backup work?"),
-      answer: t("Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data.")
-    },
-    {
-      id: "data-import",
-      question: t("Can I import data from other financial apps?"),
-      answer: t("Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling.")
-    },
-    {
-      id: "mobile-camera",
-      question: t("Can I use my phone's camera for receipts?"),
-      answer: t("Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.")
-    },
-    {
-      id: "reports-filtering",
-      question: t("How do I filter and view reports?"),
-      answer: t("Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports.")
-    },
-    {
-      id: "subscription-changes",
-      question: t("How do plan upgrades and downgrades work?"),
-      answer: t("Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration.")
+      answer: t("Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.")
     },
     {
       id: "mobile-responsive",
-      question: t("Is the app fully mobile-friendly?"),
-      answer: t("Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.")
-    },
-    {
-      id: "customer-support",
-      question: t("How can I get help or support?"),
-      answer: t("Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.")
+      question: t("Is Kaptia available on mobile?"),
+      answer: t("Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.")
     }
   ];
 
-  const planFeatures = {
-    free: [
-      "Up to 100 transactions",
-      "Basic transaction tracking",
-      "Simple dashboard",
-      "Mobile responsive design"
-    ],
-    standard: [
-      "Up to 100 transactions",
-      "Receipt OCR scanning",
-      "AI expense categorization",
-      "Budget management",
-      "Financial goals",
-      "Transaction reminders",
-      "Calendar view",
-      "Basic reporting"
-    ],
-    premium: [
-      "Unlimited transactions",
-      "Advanced AI insights",
-      "Trend predictions",
-      "Cloud backup & sync",
-      "Data import/export",
-      "Advanced analytics",
-      "Priority support",
-      "Multiple data formats"
-    ]
-  };
-
-  const planPricing = {
-    free: "$0",
-    standard: "$4.99",
-    premium: "$9.99"
-  };
+  // Filter FAQs based on search input
+  const filteredFaqs = useMemo(() => {
+    if (!searchQuery.trim()) return faqItems;
+    const query = searchQuery.toLowerCase();
+    return faqItems.filter(item => 
+      item.question.toLowerCase().includes(query) || 
+      item.answer.toLowerCase().includes(query)
+    );
+  }, [searchQuery, faqItems]);
 
   return (
     <AppLayout isPublicPage={true}>
       <SEO 
-        title="Help & Documentation - Kaptia User Guide | Features & Support"
-        description="Complete Kaptia documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and getting the most out of Kaptia."
-        keywords="kaptia help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, spending tracker support"
+        title={`${t("Help & Documentation")} | Kaptia`}
+        description={t("Complete guide to mastering your spending with Kaptia's powerful features")}
+        keywords="kaptia help, documentation, expense tracker guide, receipt ocr, budgets"
         canonical="https://kaptia.app/help"
       />
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Documentation */}
-        <div className="lg:col-span-2">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              {t('Kaptia Documentation')}
+
+      <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">
+        {/* Glow accent matching frontpage */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          {/* Header Section */}
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 dark:border-white/10 bg-indigo-50/70 dark:bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">
+              <HelpCircle className="h-3.5 w-3.5" />
+              {t("Help & Documentation")}
+            </span>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mt-4">
+              {t("Kaptia Documentation")}
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mt-3 max-w-2xl mx-auto">
               {t("Complete guide to mastering your spending with Kaptia's powerful features")}
             </p>
+
+            {/* Instant Search Bar */}
+            <div className="max-w-xl mx-auto mt-6 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder={t("Search questions or topics...")}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (activeTab !== "faq" && e.target.value.trim().length > 0) {
+                    setActiveTab("faq");
+                  }
+                }}
+                className="pl-12 pr-4 h-11 rounded-xl bg-white/90 dark:bg-[#0f111a]/90 border-gray-200 dark:border-white/10 shadow-sm focus:ring-2 focus:ring-indigo-500 text-sm"
+              />
+            </div>
           </div>
 
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">{t('Overview')}</TabsTrigger>
-              <TabsTrigger value="features">{t('Features')}</TabsTrigger>
-              <TabsTrigger value="plans">{t('Plans')}</TabsTrigger>
-              <TabsTrigger value="guide">{t('User Guide')}</TabsTrigger>
-              <TabsTrigger value="faq">{t('FAQ')}</TabsTrigger>
+          {/* Interactive Categorized Tabs: avoids long scrolling */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 h-auto p-1.5 rounded-2xl bg-white/70 dark:bg-white/[0.04] backdrop-blur-xl border border-gray-200/80 dark:border-white/10 shadow-sm gap-1 mb-8">
+              <TabsTrigger 
+                value="overview" 
+                className="py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>{t("Overview")}</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="features" 
+                className="py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>{t("User Guide")}</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="plans" 
+                className="py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
+              >
+                <Star className="h-4 w-4" />
+                <span>{t("Plans")}</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="faq" 
+                className="py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
+              >
+                <HelpCircle className="h-4 w-4" />
+                <span>{t("FAQ")}</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ai-chat" 
+                className="col-span-2 md:col-span-1 py-2.5 rounded-xl text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all flex items-center gap-1.5 justify-center"
+              >
+                <Bot className="h-4 w-4" />
+                <span>{t("AI Assistant")}</span>
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-6 w-6 text-primary" />
-                    {t('Welcome to Kaptia')}
-                  </CardTitle>
-                  <CardDescription>
-                    {t('Everything you need to get the most out of Kaptia')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p>
-                    {t("Kaptia is a modern, intelligent spending tracker designed to help you understand where your money goes. With AI-powered insights, comprehensive tracking, and flexible plans, staying on top of your spending has never been easier.")}
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                    <div className="flex items-start gap-3 p-4 border rounded-lg">
-                      <BarChart3 className="h-8 w-8 text-blue-500 mt-1" />
-                      <div>
-                        <h3 className="font-semibold">{t('Smart Analytics')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('AI-powered insights and trend predictions for better financial decisions')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-4 border rounded-lg">
-                      <Shield className="h-8 w-8 text-green-500 mt-1" />
-                      <div>
-                        <h3 className="font-semibold">{t('Secure Data Protection')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Your financial data is protected with industry-standard encryption')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-4 border rounded-lg">
-                      <Cloud className="h-8 w-8 text-purple-500 mt-1" />
-                      <div>
-                        <h3 className="font-semibold">{t('Cloud Backup')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Never lose your data with automatic cloud synchronization')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-4 border rounded-lg">
-                      <Zap className="h-8 w-8 text-yellow-500 mt-1" />
-                      <div>
-                        <h3 className="font-semibold">{t('AI Categorization')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Automatically categorize transactions with machine learning')}
-                        </p>
-                      </div>
-                    </div>
+            {/* TAB 1: OVERVIEW */}
+            <TabsContent value="overview" className="space-y-6 focus-visible:outline-none">
+              <div className="glass-card rounded-2xl p-6 sm:p-8 border border-gray-200/80 dark:border-white/10 mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <TrendingUp className="h-6 w-6" />
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="features" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="h-5 w-5" />
-                      {t('Transaction Management')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2 text-sm">
-                      <li>• {t('Add income and expense transactions')}</li>
-                      <li>• {t('Receipt OCR scanning (Standard+)')}</li>
-                      <li>• {t('Mobile QR code upload')}</li>
-                      <li>• {t('AI-powered automatic categorization')}</li>
-                      <li>• {t('Smart search and filtering')}</li>
-                      <li>• {t('Monthly view with dynamic navigation')}</li>
-                      <li>• {t('Recurring transaction detection')}</li>
-                      <li>• {t('Transaction editing and deletion')}</li>
-                      <li>• {t('Bulk operations and imports')}</li>
-                      <li>• {t('Custom category creation')}</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      {t('Budgets & Goals')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2 text-sm">
-                      <li>• {t('Set monthly spending limits by category')}</li>
-                      <li>• {t('Track progress with visual indicators')}</li>
-                      <li>• {t('Create savings goals with deadlines')}</li>
-                      <li>• {t('Automatic budget vs. actual comparisons')}</li>
-                      <li>• {t('Smart notifications and reminders')}</li>
-                      <li>• {t('Collaborative savings goals with friends')}</li>
-                      <li>• {t('Goal achievement tracking')}</li>
-                      <li>• {t('Budget overflow warnings')}</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <PieChart className="h-5 w-5" />
-                      {t('Analytics & Reports')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2 text-sm">
-                      <li>• {t('Comprehensive spending dashboard')}</li>
-                      <li>• {t('Category-wise spending breakdown')}</li>
-                      <li>• {t('Trend analysis and predictions')}</li>
-                      <li>• {t('Income vs. expense comparisons')}</li>
-                      <li>• {t('Export data in multiple formats')}</li>
-                      <li>• {t('Period filtering (week/month/quarter/year)')}</li>
-                      <li>• {t('Visual charts and graphs')}</li>
-                      <li>• {t('Custom date range analysis')}</li>
-                      <li>• {t('Financial health scoring')}</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      {t('Smart Features')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2 text-sm">
-                      <li>• {t('AI financial health scoring')}</li>
-                      <li>• {t('Personalized recommendations')}</li>
-                      <li>• {t('Calendar view of transactions')}</li>
-                      <li>• {t('Automatic backup scheduling')}</li>
-                      <li>• {t('Data import from other apps')}</li>
-                      <li>• {t('Financial mascot companion')}</li>
-                      <li>• {t('Expense prediction and forecasting')}</li>
-                      <li>• {t('Daily AI-powered financial tips')}</li>
-                      <li>• {t('Transaction reminders and alerts')}</li>
-                      <li>• {t('Multi-device receipt scanning')}</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Download className="h-5 w-5" />
-                      {t('Data Management')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2 text-sm">
-                      <li>• {t('Cloud storage and backup (Premium)')}</li>
-                      <li>• {t('Import from CSV, Excel, JSON formats')}</li>
-                      <li>• {t('Export to multiple file formats')}</li>
-                      <li>• {t('Automatic daily backup scheduling')}</li>
-                      <li>• {t('Data restore and recovery')}</li>
-                      <li>• {t('Receipt image storage')}</li>
-                      <li>• {t('Secure data encryption')}</li>
-                      <li>• {t('Cross-platform synchronization')}</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      {t('Security & Privacy')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2 text-sm">
-                      <li>• {t('Industry-standard data encryption')}</li>
-                      <li>• {t('Secure authentication with Clerk')}</li>
-                      <li>• {t('Private data isolation')}</li>
-                      <li>• {t('GDPR compliance and privacy controls')}</li>
-                      <li>• {t('Cookie consent management')}</li>
-                      <li>• {t('Secure API endpoints')}</li>
-                      <li>• {t('Regular security audits')}</li>
-                      <li>• {t('Data ownership transparency')}</li>
-                    </ul>
-                  </CardContent>
-                </Card>
+                  <div>
+                    <h2 className="font-display text-xl sm:text-2xl font-bold">{t("Welcome to Kaptia")}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t("Everything you need to get the most out of Kaptia")}</p>
+                  </div>
+                </div>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {t("Kaptia is a modern, intelligent spending tracker designed to help you understand where your money goes. With AI-powered insights, comprehensive tracking, and flexible plans, staying on top of your spending has never been easier.")}
+                </p>
               </div>
-            </TabsContent>
 
-            <TabsContent value="plans" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="relative">
-                  <CardHeader>
-                    <CardTitle className="text-center">{t('help.plans.free')}</CardTitle>
-                    <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">{t('help.plans.price_free')}</span>
-                      <span className="text-sm">{t('help.plans.per_month')}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {(t('help.plans.features.free', { returnObjects: true }) as string[]).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <div className="h-2 w-2 bg-green-500 rounded-full" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card className="relative border-primary">
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-primary">{t('Most Popular')}</Badge>
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 w-fit mb-3">
+                    <BarChart3 className="h-6 w-6" />
                   </div>
-                  <CardHeader>
-                    <CardTitle className="text-center">{t('help.plans.standard')}</CardTitle>
-                    <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">{t('help.plans.price_standard')}</span>
-                      <span className="text-sm">{t('help.plans.per_month')}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {(t('help.plans.features.standard', { returnObjects: true }) as string[]).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <div className="h-2 w-2 bg-green-500 rounded-full" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                  <h3 className="font-display font-bold text-lg mb-2">{t("Smart Analytics")}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t("AI-powered insights and trend predictions for better financial decisions")}
+                  </p>
+                </div>
 
-                <Card className="relative">
-                  <CardHeader>
-                    <CardTitle className="text-center">{t('help.plans.premium')}</CardTitle>
-                    <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">{t('help.plans.price_premium')}</span>
-                      <span className="text-sm">{t('help.plans.per_month')}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {(t('help.plans.features.premium', { returnObjects: true }) as string[]).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <div className="h-2 w-2 bg-green-500 rounded-full" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 w-fit mb-3">
+                    <Shield className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg mb-2">{t("Secure Data Protection")}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t("Your financial data is protected with industry-standard encryption")}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 w-fit mb-3">
+                    <Cloud className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg mb-2">{t("Cloud Backup & Restore", "Cloud Backup")}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {t("Automatic backups keeping your financial history safe and accessible across devices")}
+                  </p>
+                </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="guide" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-6 w-6" />
-                    {t('Quick Start Guide')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
-                        1
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{t('Create Your Account')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Sign up for a free account to get started. You can upgrade to Standard or Premium anytime.')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
-                        2
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{t('Add Your First Transaction')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Navigate to the dashboard and click "Add Transaction" to record your first income or expense.')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
-                        3
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{t('Set Up Categories')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Choose from predefined categories or let AI automatically categorize your transactions.')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
-                        4
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{t('Create Budgets (Standard+)')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Set monthly spending limits by category to stay on track with your financial goals.')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
-                        5
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{t('Monitor Your Progress')}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('Use the dashboard and reports to track your spending patterns and achieve your financial goals.')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h3 className="font-semibold mb-4">{t('Comprehensive Feature Documentation')}</h3>
-                    <div className="space-y-8">
-                      
-                      {/* Dashboard Functions */}
-                      <div className="border-l-4 border-blue-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <BarChart3 className="h-5 w-5" />
-                          {t('Dashboard Functions')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Financial Summary Cards')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Top of dashboard')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Display total income, expenses, and balance for selected month')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values')}
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Quick Transaction Entry')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Header "+" button or dashboard "Add Transaction" button')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Add new income or expense transactions')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Form validation, category selection, date picker, recurring transaction option (Standard+), receipt upload (Standard+)')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Recent Transactions Widget')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Left column of dashboard')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Shows last 5 transactions with edit/delete options')}<br/>
-                              <strong>{t('Features')}:</strong> {t('One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Budget Overview Widget (Standard+)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Right column of dashboard')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Monitor budget progress across all categories')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Financial Health Score')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Right column of dashboard')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Calculate and display financial wellness score')}<br/>
-                              <strong>{t('Free Users')}:</strong> {t('Simple calculation based on income/expense ratio')}<br/>
-                              <strong>{t('Standard+ Users')}:</strong> {t('AI-powered analysis with detailed recommendations and improvement suggestions')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('AI Financial Tips (Premium)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Left column of dashboard')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Personalized financial advice based on spending patterns')}<br/>
-                              <strong>{t('Features')}:</strong> {t('AI-generated tips, trend analysis, actionable recommendations, persistent across sessions')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Financial Mascot (Premium)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Floating on dashboard')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Personalized AI companion reflecting financial health')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Transaction Management */}
-                      <div className="border-l-4 border-green-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <DollarSign className="h-5 w-5" />
-                          {t('Transaction Management')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Transaction Entry Forms')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Expenses, Income, and Transactions pages')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Add new financial transactions with complete details')}<br/>
-                              <strong>{t('Fields')}:</strong> {t('Amount, description, date, category, notes, recurring options')}<br/>
-                              <strong>{t('Validation')}:</strong> {t('Required fields, positive amounts, valid dates, category selection')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Transaction Lists and Filtering')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('All transaction pages')}<br/>
-                              <strong>{t('Function')}:</strong> {t('View, search, and filter transaction history')}<br/>
-                              <strong>{t('Filters')}:</strong> {t('Month selection, category filtering, transaction type, date ranges')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Responsive design, mobile-friendly collapsible filters, real-time search')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Transaction Editing and Deletion')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Transaction list items and dashboard widgets')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Modify or remove existing transactions')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Inline editing, confirmation dialogs, immediate UI updates, undo options')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Recurring Transactions (Standard+)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Transaction forms and reminders widget')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Set up automatic transaction detection and reminders')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Frequency selection (weekly, monthly, yearly), end date options, reminder notifications')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Receipt OCR Processing (Standard+)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Upload Image buttons on transaction pages')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Extract transaction data from receipt photos')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Category Management */}
-                      <div className="border-l-4 border-purple-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <Target className="h-5 w-5" />
-                          {t('Category Management')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Category Creation and Editing')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Categories page')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Create custom expense and income categories')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Custom names, color selection, icon choices, type assignment (income/expense/goal)')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Predefined Categories')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Available')}:</strong> {t('20+ built-in categories for common expenses and income')}<br/>
-                              <strong>{t('Examples')}:</strong> {t('Food & Dining, Transportation, Shopping, Bills & Utilities, Healthcare, Entertainment, Salary, Freelancing')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Professional icons, optimized colors, cannot be deleted')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('AI Auto-Categorization (Standard+)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Function')}:</strong> {t('Automatically suggest categories based on transaction descriptions')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Machine learning analysis, merchant recognition, user preference learning, manual override options')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Budget and Goals */}
-                      <div className="border-l-4 border-orange-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <Target className="h-5 w-5" />
-                          {t('Budget and Goals (Standard+)')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Budget Creation and Management')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Budgets page')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Set spending limits for categories with time periods')}<br/>
-                              <strong>{t('Options')}:</strong> {t('Weekly, monthly, quarterly, yearly timeframes')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Progress tracking, overspending alerts, visual indicators, budget history')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Financial Goals')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Goals page')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Set savings targets with deadlines')}<br/>
-                              <strong>{t('Types')}:</strong> {t('Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Progress tracking, milestone celebrations, contribution history, deadline reminders')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Collaborative Goals')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Function')}:</strong> {t('Share goals with family members or partners')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Friend invitations, shared contributions, progress visibility, achievement tracking')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Reports and Analytics */}
-                      <div className="border-l-4 border-red-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <BarChart3 className="h-5 w-5" />
-                          {t('Reports and Analytics')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Financial Overview Reports')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Reports page - Overview tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Comprehensive spending summary with charts and metrics')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Income vs. expenses, category breakdowns, time period filtering, trend indicators')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Advanced Analytics (Premium)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Reports page - Analytics tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Detailed financial pattern analysis')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Spending trends, seasonal patterns, category comparisons, growth metrics')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('AI Trend Predictions (Premium)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Trends page - Forecasts tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('AI-powered financial forecasting')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Spending predictions, income projections, budget recommendations, goal timeline estimates')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Calendar View (Standard+)')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Calendar page')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Monthly grid view of all transactions')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Daily spending totals, transaction previews, monthly navigation, mobile responsive grid')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Data Management */}
-                      <div className="border-l-4 border-indigo-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <Cloud className="h-5 w-5" />
-                          {t('Data Management (Premium)')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Cloud Backup System')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Data Management page - Backup tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Secure cloud storage of all financial data')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Automatic daily backups at 2:00 AM, manual backup options, backup history, restore functionality')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Data Export')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Data Management page - Export tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Download financial data in multiple formats')}<br/>
-                              <strong>{t('Formats')}:</strong> {t('PDF reports, Excel spreadsheets, CSV files, JSON data')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Custom date ranges, selective data export, formatted reports')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Data Import')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Data Management page - Import tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Import transactions from other financial apps')}<br/>
-                              <strong>{t('Supported')}:</strong> {t('Mint, QuickBooks, YNAB, Personal Capital, bank exports')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Column mapping, data validation, preview before import, batch processing')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Profile and Settings */}
-                      <div className="border-l-4 border-teal-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <Users className="h-5 w-5" />
-                          {t('Profile and Settings')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Account Management')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Profile page - Account tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Manage personal information and security settings')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Clerk authentication, email updates, password changes, profile photos')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Subscription Management')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Profile page - Subscription tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('View and modify subscription plans')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Notification Preferences')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Location')}:</strong> {t('Profile page - Notifications tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Control alert and reminder settings')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Budget alerts, goal reminders, transaction notifications, email preferences')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Mobile Features */}
-                      <div className="border-l-4 border-pink-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <Camera className="h-5 w-5" />
-                          {t('Mobile Features')}
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Responsive Design')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Function')}:</strong> {t('Full mobile optimization for all features')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('Mobile Camera Integration')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Function')}:</strong> {t('Direct camera access for receipt scanning')}<br/>
-                              <strong>{t('Features')}:</strong> {t('Camera capture, gallery selection, image preview, auto-focus optimization')}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">{t('QR Code Cross-Device Upload')}</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>{t('Function')}:</strong> {t('Scan receipts on mobile, process on desktop')}<br/>
-                              <strong>{t('Features')}:</strong> {t('QR code generation, anonymous mobile access, real-time polling, automatic form population')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+            {/* TAB 2: USER GUIDE */}
+            <TabsContent value="features" className="space-y-6 focus-visible:outline-none">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
                       <Camera className="h-5 w-5" />
-                      {t('Receipt OCR Scanning (Standard+)')}
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                          {t('Available for Standard and Premium subscribers')}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">{t('How to Scan Receipts')}</h4>
-                        
-                        <div className="mb-4">
-                          <h5 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">{t('Desktop/Web Upload')}:</h5>
-                          <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">1.</span>
-                              {t('Navigate to Expenses, Income, or Transactions page')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">2.</span>
-                              {t('Click the "Upload Image" button next to "Add Transaction"')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">3.</span>
-                              {t('Choose "Take Photo" (mobile camera) or "Choose from Gallery"')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">4.</span>
-                              {t('Select or capture a clear image of your receipt')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">5.</span>
-                              {t('Wait for OCR processing - extracted data will appear automatically')}
-                            </li>
-                          </ol>
-                        </div>
-
-                        <div>
-                          <h5 className="font-medium text-sm mb-2 text-green-600 dark:text-green-400">{t('Mobile QR Code Upload')}:</h5>
-                          <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">1.</span>
-                              {t('From your computer, click "Upload Image" and select "Scan with Phone"')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">2.</span>
-                              {t('A QR code will appear on your screen')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">3.</span>
-                              {t('Use your phone\'s camera to scan the QR code')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">4.</span>
-                              {t('Take a photo of your receipt using your phone')}
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">5.</span>
-                              {t('Data automatically appears in your computer\'s transaction form')}
-                            </li>
-                          </ol>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">{t('What Gets Extracted')}</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <div className="p-3 border rounded-lg">
-                            <h5 className="font-medium text-sm">{t('Merchant Name')}</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">{t('Store or restaurant name')}</p>
-                          </div>
-                          <div className="p-3 border rounded-lg">
-                            <h5 className="font-medium text-sm">{t('Total Amount')}</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">{t('Final transaction amount')}</p>
-                          </div>
-                          <div className="p-3 border rounded-lg">
-                            <h5 className="font-medium text-sm">{t('Date')}</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">{t('Transaction date')}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">{t('AI Category Suggestions')}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('For Standard+ users, our AI analyzes the merchant name and suggests the most appropriate expense category. You can accept the suggestion or choose a different category.')}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">{t('Best Practices for Scanning')}</h4>
-                        <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-                          <li>• {t('Ensure good lighting when taking photos')}</li>
-                          <li>• {t('Keep the receipt flat and avoid shadows')}</li>
-                          <li>• {t('Capture the entire receipt including headers and totals')}</li>
-                          <li>• {t('Use clear, uncrumpled receipts for best results')}</li>
-                          <li>• {t('Check extracted data before saving the transaction')}</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">{t('Editing Extracted Data')}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {t('All extracted information appears in editable form fields. You can modify any details before saving the transaction. The original receipt image is stored and can be viewed later by clicking on receipt thumbnails in transaction lists.')}
-                        </p>
-                      </div>
-
-                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                        <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">{t('Troubleshooting')}</h4>
-                        <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-                          <li>• {t('If OCR fails, manually enter transaction details')}</li>
-                          <li>• {t('Poor image quality may affect extraction accuracy')}</li>
-                          <li>• {t('Handwritten receipts work better when text is clear')}</li>
-                          <li>• {t('Multiple items on one receipt create one transaction for the total')}</li>
-                        </ul>
-                      </div>
                     </div>
+                    <h3 className="font-display font-bold text-lg">{t("How does receipt scanning work?")}</h3>
                   </div>
-                </CardContent>
-              </Card>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {t("Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.")}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-display font-bold text-lg">{t("How does AI categorization work?")}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {t("Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.")}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <Target className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-display font-bold text-lg">{t("How does budget tracking work?")}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {t("Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.")}
+                  </p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                      <Shield className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-display font-bold text-lg">{t("Is my financial data secure?")}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {t("Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.")}
+                  </p>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="faq" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <HelpCircle className="h-6 w-6" />
-                    {t('Frequently Asked Questions')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {faqItems.map((item) => (
-                      <div key={item.id} className="border rounded-lg">
-                        <button
-                          className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
-                          onClick={() => setExpandedFaq(expandedFaq === item.id ? null : item.id)}
-                        >
-                          <span className="font-medium">{item.question}</span>
-                          {expandedFaq === item.id ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </button>
-                        {expandedFaq === item.id && (
-                          <div className="p-4 pt-0 text-sm text-gray-600 dark:text-gray-300">
-                            {item.answer}
+            {/* TAB 3: PLANS */}
+            <TabsContent value="plans" className="space-y-6 focus-visible:outline-none">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Free */}
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-xl font-bold">{t("Free", "Free")}</h3>
+                    <div className="text-3xl font-extrabold mt-2 text-gray-900 dark:text-white">$0</div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t("Forever free", "Forever free")}</p>
+                    <ul className="space-y-2.5 mt-6 text-sm text-gray-600 dark:text-gray-300">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("Up to 100 transactions view", "Up to 100 transactions view")}</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("Manual categorization", "Manual categorization")}</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("Simple overview dashboard", "Simple spending overview")}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setLocation(`/${currentLang}/auth#sign-up`)} 
+                    className="w-full mt-6 rounded-xl"
+                  >
+                    {t("Get Started Free")}
+                  </Button>
+                </div>
+
+                {/* Standard */}
+                <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-xl font-bold">{t("Standard")}</h3>
+                    <div className="text-3xl font-extrabold mt-2 text-gray-900 dark:text-white">$4.99</div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">/ {t("month", "month")}</p>
+                    <ul className="space-y-2.5 mt-6 text-sm text-gray-600 dark:text-gray-300">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("AI expense categorization", "AI expense categorization")}</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("Budgets and goal management", "Budgets and goal management")}</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("Interactive charts and reports", "Interactive charts and reports")}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation(`/${currentLang}/auth#sign-up`)} 
+                    className="w-full mt-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white"
+                  >
+                    {t("Subscribe Now", "Subscribe Now")}
+                  </Button>
+                </div>
+
+                {/* Premium */}
+                <div className="glass-card rounded-2xl p-6 border-2 border-indigo-500 dark:border-indigo-400 relative flex flex-col justify-between bg-white dark:bg-[#0f111a]">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 px-3 py-0.5 text-xs font-semibold">
+                    {t("Most Popular")}
+                  </Badge>
+                  <div>
+                    <h3 className="font-display text-xl font-bold">{t("Premium")}</h3>
+                    <div className="text-3xl font-extrabold mt-2 text-indigo-600 dark:text-indigo-400">$9.99</div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">/ {t("month", "month")}</p>
+                    <ul className="space-y-2.5 mt-6 text-sm text-gray-600 dark:text-gray-300">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("Unlimited transaction history", "Unlimited transaction history")}</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("AI expense prediction", "AI expense prediction")}</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{t("Cloud data backup", "Cloud data backup")}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation(`/${currentLang}/auth#sign-up`)} 
+                    className="w-full mt-6 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-indigo-500/25"
+                  >
+                    {t("Subscribe Now", "Subscribe Now")}
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* TAB 4: FAQ */}
+            <TabsContent value="faq" className="space-y-4 focus-visible:outline-none">
+              <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10">
+                {filteredFaqs.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <HelpCircle className="h-8 w-8 mx-auto mb-2 opacity-60" />
+                    <p>{t("No questions matched your search.")}</p>
+                    <Button 
+                      variant="link" 
+                      onClick={() => setSearchQuery("")} 
+                      className="mt-2 text-indigo-600"
+                    >
+                      {t("Clear search")}
+                    </Button>
+                  </div>
+                ) : (
+                  <Accordion type="single" collapsible className="w-full space-y-2">
+                    {filteredFaqs.map((faq) => (
+                      <AccordionItem 
+                        key={faq.id} 
+                        value={faq.id}
+                        className="border border-gray-200/60 dark:border-white/5 rounded-xl px-4 py-1 data-[state=open]:bg-indigo-50/30 dark:data-[state=open]:bg-white/[0.02]"
+                      >
+                        <AccordionTrigger className="text-left font-medium text-sm sm:text-base hover:no-underline hover:text-indigo-600 dark:hover:text-indigo-400">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed pt-1 pb-3">
+                          {faq.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* TAB 5: AI CHAT */}
+            <TabsContent value="ai-chat" className="space-y-4 focus-visible:outline-none">
+              <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10 flex flex-col h-[520px]">
+                {/* Chat header */}
+                <div className="flex items-center justify-between pb-4 border-b border-gray-200/60 dark:border-white/10 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md">
+                      <Bot className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-sm sm:text-base">{t("Ask me anything about Kaptia")}</h3>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                        {t("Online • Ask anything")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick prompt suggestions */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <button
+                    onClick={() => handleQuickPrompt(t("How does receipt scanning work?"))}
+                    className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-white/10 transition-colors"
+                  >
+                    📸 {t("How does receipt scanning work?")}
+                  </button>
+                  <button
+                    onClick={() => handleQuickPrompt(t("How does AI categorization work?"))}
+                    className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-white/10 transition-colors"
+                  >
+                    ✨ {t("How does AI categorization work?")}
+                  </button>
+                </div>
+
+                {/* Chat messages */}
+                <ScrollArea className="flex-1 pr-3">
+                  <div className="space-y-3.5">
+                    {chatMessages.map((msg, index) => (
+                      <div
+                        key={index}
+                        className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        {msg.role === 'assistant' && (
+                          <div className="h-8 w-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 text-xs">
+                            <Bot className="h-4 w-4" />
                           </div>
                         )}
+                        <div
+                          className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
+                            msg.role === 'user'
+                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-none'
+                              : 'bg-gray-100 dark:bg-white/10 text-gray-800 dark:text-gray-200 rounded-bl-none'
+                          }`}
+                        >
+                          <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        </div>
                       </div>
                     ))}
+                    {isLoading && (
+                      <div className="flex gap-3 justify-start">
+                        <div className="h-8 w-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 text-xs">
+                          <Bot className="h-4 w-4" />
+                        </div>
+                        <div className="bg-gray-100 dark:bg-white/10 rounded-2xl px-4 py-2.5 text-sm text-gray-500 rounded-bl-none flex items-center gap-1.5">
+                          <span className="h-1.5 w-1.5 bg-gray-400 rounded-full animate-bounce" />
+                          <span className="h-1.5 w-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                          <span className="h-1.5 w-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+                </ScrollArea>
+
+                {/* Input box */}
+                <div className="pt-3 border-t border-gray-200/60 dark:border-white/10 flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder={t("Ask about Kaptia features...")}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()}
+                    disabled={isLoading}
+                    className="rounded-xl bg-white/90 dark:bg-[#0f111a]/90 text-sm"
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !chatInput.trim()}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-4 shrink-0"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
-        </div>
-
-        {/* AI Chat Assistant */}
-        <div className="lg:col-span-1">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader className="flex-shrink-0">
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                {t('AI Assistant')}
-              </CardTitle>
-              <CardDescription>
-                {t('Ask me anything about Kaptia')}
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="flex-1 flex flex-col">
-              <ScrollArea className="flex-1 mb-4">
-                <div className="space-y-4 pr-4">
-                  {chatMessages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[80%] p-3 rounded-lg ${
-                          message.role === "user"
-                            ? "bg-primary text-white"
-                            : "bg-gray-100 dark:bg-gray-800"
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                        <p className="text-sm">Thinking...</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-
-              <div className="flex gap-2">
-                <Input
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder={t('Ask about Kaptia features...')}
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  disabled={isLoading}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!chatInput.trim() || isLoading}
-                  size="icon"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
         </div>
       </div>
     </AppLayout>

@@ -1,133 +1,143 @@
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import puppeteer from 'puppeteer';
-import { generateChart } from './chartGenerator';
-import { generateHTMLTemplate } from './htmlTemplate';
+import { timingSafeEqual } from 'node:crypto';
+import React from 'react';
+import { renderToBuffer } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
+import { FinancialReportDocument } from './reportDocument.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '3000', 10);
+const PORT = parseInt(process.env.PORT || '8082', 10);
+const HOST = process.env.HOST || '0.0.0.0';
+const APP_URL = process.env.APP_URL || 'https://kaptia.app';
 
+/**
+ * Allowed API keys (`PDF_API_KEY`, comma-separated to allow several consumers).
+ * When the variable is empty the endpoint stays open, which is only meant for
+ * local development.
+ */
+const API_KEYS = (process.env.PDF_API_KEY || '')
+  .split(',')
+  .map((key) => key.trim())
+  .filter(Boolean);
+
+app.disable('x-powered-by');
+app.set('trust proxy', true);
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-app.post('/generate-pdf', async (req, res) => {
+function keysMatch(candidate: string, expected: string): boolean {
+  const a = Buffer.from(candidate);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+function requireApiKey(req: Request, res: Response, next: NextFunction) {
+  if (API_KEYS.length === 0) return next();
+
+  const headerKey = (req.headers['x-api-key'] as string | undefined) || (req.headers['x-api-token'] as string | undefined);
+  const bearer = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.slice('Bearer '.length).trim()
+    : undefined;
+  const provided = headerKey || bearer;
+
+  if (!provided || !API_KEYS.some((key) => keysMatch(provided, key))) {
+    return res.status(401).json({
+      error: 'Unauthorized: invalid or missing API key. Provide it via the x-api-key header or Authorization: Bearer <key>.',
+    });
+  }
+
+  return next();
+}
+
+app.get('/', (_req, res) => {
+  res.json({
+    service: 'kaptia-pdf-processor',
+    version: '1.0.0',
+    engine: '@react-pdf/renderer',
+    authRequired: API_KEYS.length > 0,
+    endpoints: ['GET /health', 'POST /generate-pdf'],
+  });
+});
+
+app.post('/generate-pdf', requireApiKey, async (req, res) => {
+  const startedAt = Date.now();
   try {
     const {
+      userData,
+      transactions = [],
+      categories = [],
+      budgets = [],
+      goals = [],
+      insights = [],
+      language = 'en-us',
+      period = 'Monthly',
+      currency = '$',
+    } = req.body;
+
+    // Generate QR code as Base64 Data URL (pure JS, zero native dependencies)
+    let qrCodeDataUrl: string | undefined;
+    try {
+      qrCodeDataUrl = await QRCode.toDataURL(APP_URL, {
+        margin: 1,
+        width: 120,
+        color: {
+          dark: '#1E293B',
+          light: '#FFFFFF',
+        },
+      });
+    } catch (qrErr) {
+      console.warn('Failed to generate QR code, continuing without it:', qrErr);
+    }
+
+    // Render PDF buffer using @react-pdf/renderer (pure vector rendering in memory)
+    const documentElement = React.createElement(FinancialReportDocument, {
       userData,
       transactions,
       categories,
       budgets,
       goals,
       insights,
-      language = 'en-us',
-      period = '6-months'
-    } = req.body;
-
-    // Generate charts
-    const trendChart = await generateChart({
-      type: 'line',
-      data: {
-        labels: transactions.map((t: any) => t.month),
-        datasets: [{
-          label: 'Balance Trend',
-          data: transactions.map((t: any) => t.balance),
-          borderColor: '#8B5CF6',
-          backgroundColor: 'rgba(139, 92, 246, 0.1)',
-          fill: true
-        }]
-      },
-      title: 'Financial Trends'
-    });
-
-    const categoryChart = await generateChart({
-      type: 'doughnut',
-      data: {
-        labels: categories.map((c: any) => c.name),
-        datasets: [{
-          data: categories.map((c: any) => c.amount),
-          backgroundColor: [
-            '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#EF4444'
-          ]
-        }]
-      },
-      title: 'Spending by Category'
-    });
-
-    // Generate QR code
-    const appUrl = process.env.APP_URL || 'https://kaptia.app';
-    const qrCodeDataUrl = await QRCode.toDataURL(appUrl);
-
-    // Generate HTML
-    const htmlContent = generateHTMLTemplate({
-      userData,
-      trendChart,
-      categoryChart,
       qrCodeDataUrl,
-      insights,
-      transactions,
-      budgets,
-      goals,
       language,
-      period
+      period,
+      currency,
     });
 
-    // Generate PDF with Alpine chromium configuration
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-features=VizDisplayCompositor'
-      ]
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
-    });
-
-    await browser.close();
+    const pdfBuffer = await renderToBuffer(documentElement);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename=financial-report.pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
     res.send(pdfBuffer);
 
+    console.log(
+      `[pdf] report generated in ${Date.now() - startedAt}ms ` +
+        `(${pdfBuffer.length} bytes, ${transactions.length} transactions, ${categories.length} categories)`
+    );
   } catch (error) {
     console.error('PDF generation error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'PDF generation failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'healthy',
+    service: 'kaptia-pdf-processor',
+    engine: '@react-pdf/renderer',
+    authRequired: API_KEYS.length > 0,
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Graceful error handling for uncaught exceptions
+// Graceful error handling
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
   process.exit(1);
@@ -138,11 +148,14 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Start server with error handling
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`PDF processor running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
-  console.log(`Chrome path: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`PDF processor (@react-pdf/renderer) listening on http://${HOST}:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(
+    API_KEYS.length > 0
+      ? `API key auth: enabled (${API_KEYS.length} key${API_KEYS.length === 1 ? '' : 's'})`
+      : 'API key auth: DISABLED (set PDF_API_KEY to protect /generate-pdf)'
+  );
 });
 
 server.on('error', (error) => {
@@ -150,17 +163,12 @@ server.on('error', (error) => {
   process.exit(1);
 });
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-  });
+  server.close(() => process.exit(0));
 });
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-  });
+  server.close(() => process.exit(0));
 });

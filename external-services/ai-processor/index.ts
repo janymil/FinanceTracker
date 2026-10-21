@@ -44,6 +44,7 @@ function normalizeLanguageCode(lang: string): string {
 
 const app = express();
 const port = parseInt(process.env.PORT || '8080', 10);
+const host = process.env.HOST || '0.0.0.0';
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -2443,6 +2444,6 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
   }
 }
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`AI Processor server running on port ${port}`);
+app.listen(port, host, () => {
+  console.log(`AI Processor server running on http://${host}:${port}`);
 });

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Sparkles, Mic, ScanLine, FileText, Target, ShieldCheck, Check, X, Crown, Sun, Moon,
-  ArrowRight, ReceiptText, Play, BarChart3, BrainCircuit, Menu
+  ArrowRight, ReceiptText, Play, BarChart3, BrainCircuit, Menu, TrendingUp
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
@@ -252,9 +252,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <button onClick={() => setLocation(`/${currentLang}`)} className="flex items-center gap-2.5 group">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 transition-shadow">
-                <span className="font-display font-bold text-white text-lg leading-none">K</span>
-              </div>
+              <TrendingUp className="h-8 w-8 text-primary transition-transform group-hover:scale-105" />
               <span className="font-display text-xl font-bold tracking-tight text-gray-900 dark:text-white">Kaptia</span>
             </button>
             <div className="flex items-center gap-1 sm:gap-2">

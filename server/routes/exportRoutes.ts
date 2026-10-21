@@ -197,6 +197,7 @@ export function registerExportRoutes(app: Express) {
         email: user.email || undefined,
         language: getUserLanguage(req),
         period: reportPeriod,
+        currency: user.currency || undefined,
         totals: { income, expenses },
         transactions: monthlyTransactions.map((transaction) => ({
           date: transaction.date,
@@ -396,6 +397,7 @@ export function registerExportRoutes(app: Express) {
             email: user.email || undefined,
             language: getUserLanguage(req),
             period: periodLabel,
+            currency: user.currency || undefined,
             totals,
             transactions: rows.map((t: any) => ({
               date: t.date,

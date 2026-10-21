@@ -2,7 +2,7 @@
   "features.hero.title": "Finančná inteligencia poháňaná AI",
   "features.hero.subtitle": "Pokročilá umelá inteligencia sa stretáva so správou osobných financií",
   "features.hero.stats.ai_functions": "AI funkcie",
-  "features.hero.stats.languages": "Jazyky", 
+  "features.hero.stats.languages": "Jazyky",
   "features.hero.stats.accuracy_rate": "Miera presnosti",
   "features.hero.stats.ai_availability": "Dostupnosť AI",
   "features.tools.title": "Bezplatné finančné nástroje",
@@ -211,5 +211,386 @@
   "features.cta.watch_demo": "Pozrieť demo",
   "features.cta.guarantee": "30-dňová garancia vrátenia peňazí",
   "features.cta.no_card": "Nevyžaduje sa kreditná karta",
-  "features.cta.cancel_anytime": "Zrušiť kedykoľvek"
+  "features.cta.cancel_anytime": "Zrušiť kedykoľvek",
+  "features": {
+    "hero": {
+      "title": "Finančná inteligencia poháňaná AI",
+      "subtitle": "Pokročilá umelá inteligencia sa stretáva so správou osobných financií",
+      "stats": {
+        "ai_functions": "AI funkcie",
+        "languages": "Jazyky",
+        "accuracy_rate": "Miera presnosti",
+        "ai_availability": "Dostupnosť AI"
+      }
+    },
+    "tools": {
+      "title": "Bezplatné finančné nástroje",
+      "subtitle": "Základné nástroje na efektívnu správu vašich financií"
+    },
+    "section": {
+      "title": "Finančné funkcie poháňané AI",
+      "subtitle": "Zažite budúcnosť osobných financií s našou inteligentnou automatizačnou súpravou"
+    },
+    "categorization": {
+      "title": "Inteligentná kategorizácia výdavkov",
+      "description": "Automatická kategorizácia všetkých vašich transakcií poháňaná AI s neustálym učením a zlepšovaním",
+      "badge": "Štandard+",
+      "benefits": {
+        "instant": {
+          "title": "Okamžité rozpoznanie",
+          "desc": "Okamžite kategorizuje transakcie keď sa pridajú"
+        },
+        "learning": {
+          "title": "Nepretržité učenie",
+          "desc": "Stáva sa inteligentnejším s každou transakciou ktorú spracujete"
+        },
+        "custom": {
+          "title": "Vlastné kategórie",
+          "desc": "Prispôsobuje sa vašim jedinečným vzorom výdavkov a kategóriám"
+        }
+      }
+    },
+    "contextual": {
+      "title": "Kontextové finančné tipy",
+      "description": "Dostávajte personalizované finančné poradenstvo založené na vašich špecifických vzoroch transakcií a správaní výdavkov",
+      "badge": "Štandard+",
+      "benefits": {
+        "realtime": {
+          "title": "Analýza v reálnom čase",
+          "desc": "Okamžité poznatky založené na vašej aktuálnej finančnej aktivite"
+        },
+        "budget": {
+          "title": "Vedomie o rozpočte",
+          "desc": "Tipy ktoré zohľadňujú vaše rozpočtové limity a ciele"
+        },
+        "goal": {
+          "title": "Orientované na ciele",
+          "desc": "Poradenstvo prispôsobené na pomoc pri dosahovaní vašich finančných cieľov"
+        }
+      }
+    },
+    "tips": {
+      "title": "AI finančné tipy",
+      "description": "Denné personalizované odporúčania na optimalizáciu vášho finančného zdravia a rýchlejšie dosiahnutie peňažných cieľov",
+      "badge": "Premium",
+      "benefits": {
+        "patterns": {
+          "title": "Vzory výdavkov",
+          "desc": "Hĺbková analýza vašich výdavkových správaní a trendov"
+        },
+        "strategies": {
+          "title": "Stratégie šetrenia",
+          "desc": "Personalizované odporúčania na optimalizáciu vášho peňažného toku"
+        },
+        "optimization": {
+          "title": "Optimalizácia rozpočtu",
+          "desc": "Inteligentné úpravy na maximalizáciu efektivity vášho rozpočtu"
+        },
+        "analysis": {
+          "title": "Pokročilá analýza",
+          "desc": "Finančné poznatky a prognózy profesionálnej úrovne"
+        }
+      }
+    },
+    "insights": {
+      "title": "Inteligentné poznatky o výdavkoch",
+      "description": "Pokročilá analýza vašich výdavkových transakcií na identifikáciu vzorov, anomálií a príležitostí na optimalizáciu",
+      "badge": "Štandard+",
+      "benefits": {
+        "anomaly": {
+          "title": "Detekcia anomálií",
+          "desc": "Automaticky identifikuje neobvyklé vzory výdavkov"
+        },
+        "trend": {
+          "title": "Analýza trendov",
+          "desc": "Zisťuje vznikajúce trendy vo vašich obchodných výdavkoch"
+        },
+        "optimization": {
+          "title": "Optimalizačné tipy",
+          "desc": "Realizovateľné odporúčania na zníženie nákladov"
+        }
+      }
+    },
+    "health": {
+      "title": "Skóre finančného zdravia",
+      "description": "Komplexná analýza finančného zdravia poháňaná AI s personalizovaným hodnotením a odporúčaniami na zlepšenie",
+      "badge": "Premium",
+      "benefits": {
+        "scoring": {
+          "title": "Hodnotenie v reálnom čase",
+          "desc": "Živé skóre finančného zdravia od 0-100"
+        },
+        "analysis": {
+          "title": "Analýza faktorov",
+          "desc": "Podrobné rozdelenie toho, co ovplyvňuje vaše skóre"
+        },
+        "plan": {
+          "title": "Plán zlepšenia",
+          "desc": "Personalizovaný akčný plán na zlepšenie vášho finančného zdravia"
+        }
+      }
+    },
+    "trends": {
+      "title": "Predpovede trendov",
+      "description": "Prognózovanie vašich finančných trendov poháňané AI s prediktívnou analytikou a budúcimi vzormi výdavkov",
+      "badge": "Premium",
+      "benefits": {
+        "growth": {
+          "title": "Prognózovanie rastu",
+          "desc": "Predpovedá budúce trendy príjmov a výdavkov"
+        },
+        "category": {
+          "title": "Analýza podľa kategórií",
+          "desc": "Podrobné predpovede podľa kategórie výdavkov"
+        },
+        "adaptation": {
+          "title": "Adaptívne učenie",
+          "desc": "Zlepšuje presnosť s vašimi vzormi výdavkov"
+        }
+      }
+    },
+    "predictions": {
+      "title": "Predpovede výdavkov",
+      "description": "Pokročilé AI algoritmy predpovedajú vaše budúce výdavky na pomoc pri lepšom plánovaní a rozpočtovaní",
+      "badge": "Premium",
+      "benefits": {
+        "forecasting": {
+          "title": "Inteligentné prognózovanie",
+          "desc": "Predpovedá výdavky až 12 mesiacov dopredu"
+        },
+        "seasonal": {
+          "title": "Sezónne vzory",
+          "desc": "Rozpoznáva sezónne variácie výdavkov"
+        },
+        "planning": {
+          "title": "Podpora plánovania",
+          "desc": "Lepšie rozpočtové plánovanie s budúcimi poznatkami"
+        }
+      }
+    },
+    "recommendations": {
+      "title": "Denné odporúčania",
+      "description": "Personalizované denné finančné odporúčania poháňané AI na optimalizáciu vášho míňania a šetrenia",
+      "badge": "Premium",
+      "benefits": {
+        "daily": {
+          "title": "Denné aktualizácie",
+          "desc": "Čerstvé odporúčania doručované každý deň"
+        },
+        "action": {
+          "title": "Realizovateľné rady",
+          "desc": "Praktické kroky ktoré môžete urobiť okamžite"
+        },
+        "priority": {
+          "title": "Založené na prioritách",
+          "desc": "Zameranie na to, čo je pre vaše financie najdôležitejšie"
+        }
+      }
+    },
+    "statements": {
+      "title": "Spracovanie bankových výpisov",
+      "description": "Nahrajte PDF bankové výpisy a nechajte AI extrahovať a kategorizovať všetky transakcie automaticky",
+      "badge": "Štandard+",
+      "benefits": {
+        "ocr": {
+          "title": "OCR technológia",
+          "desc": "Pokročilé rozpoznávanie textu z PDF výpisov"
+        },
+        "processing": {
+          "title": "Hromadné spracovanie",
+          "desc": "Spracuje stovky transakcií naraz"
+        },
+        "categorization": {
+          "title": "Auto-kategorizácia",
+          "desc": "AI kategorizuje všetky extrahované transakcie"
+        }
+      }
+    },
+    "demo": {
+      "title": "Vyskúšajte AI kategorizáciu",
+      "subtitle": "Otestujte našu inteligentnú kategorizáciu transakcií s reálnymi príkladmi",
+      "merchant_label": "Obchodník",
+      "merchant_placeholder": "Zadajte názov obchodníka (napr., Starbucks, Amazon, Shell)",
+      "amount_placeholder": "Zadajte sumu",
+      "demo_button": "Kategorizovať s AI",
+      "demo_loading": "AI analyzuje...",
+      "fill_fields": "Prosím vyplňte obe polia obchodníka a sumy",
+      "languages": {
+        "en": "Angličtina",
+        "es": "Španielčina",
+        "sk": "Slovenčina"
+      }
+    },
+    "demo_result": {
+      "title": "Výsledok AI analýzy",
+      "placeholder": "Zadajte detaily transakcie pre zobrazenie AI kategorizácie v akcii..."
+    },
+    "calculators": {
+      "expense": {
+        "title": "Kalkulačka odhadu výdavkov",
+        "description": "Rýchla analýza \"Môžem si to dovoliť?\" - bez potreby účtu!",
+        "modal_title": "Kalkulačka odhadu výdavkov",
+        "modal_description": "Rýchla analýza \"Môžem si to dovoliť?\" - bez potreby účtu!",
+        "features": "Vlastnosti:",
+        "feature1": "Analýza dostupnosti",
+        "feature2": "Výpočet časového harmonogramu šetrenia",
+        "feature3": "Odporúčania mesačného rozpočtu",
+        "open_button": "Otvoriť kalkulačku"
+      },
+      "debt": {
+        "title": "Vizualizér splácania dlhov",
+        "description": "Porovnajte stratégie snehová guľa vs lavína na rýchlejšie zrušenie dlhov!",
+        "modal_title": "Vizualizér splácania dlhov",
+        "modal_description": "Porovnajte stratégie snehová guľa vs lavína na rýchlejšie zrušenie dlhov!",
+        "features": "Vlastnosti:",
+        "feature1": "Porovnanie Snehová guľa vs Lavína",
+        "feature2": "Výpočet úspory úrokov",
+        "feature3": "Vizualizácia harmonogramu splácania",
+        "open_button": "Otvoriť kalkulačku"
+      },
+      "categorization": {
+        "title": "Kalkulačka presnosti kategorizácie",
+        "transactions_label": "Transakcie za mesiac:",
+        "time_saved": "Ušetrený čas za mesiac:",
+        "hours": "hodiny"
+      },
+      "savings": {
+        "title": "Kalkulačka potenciálnych úspor",
+        "expenses_label": "Mesačné výdavky:",
+        "potential_savings": "Potenciálne mesačné úspory (5-15%):"
+      },
+      "health": {
+        "title": "Simulátor skóre zdravia",
+        "savings_rate": "Miera šetrenia:",
+        "budget_adherence": "Dodržiavanie rozpočtu:",
+        "estimated_score": "Odhadované skóre finančného zdravia:"
+      },
+      "predictions": {
+        "title": "Kalkulačka rozsahu predpovedí",
+        "historical_months": "Mesiace historických údajov:",
+        "months": "mesiace",
+        "prediction_range": "Dostupný rozsah predpovedí:",
+        "months_ahead": "mesiacov dopredu",
+        "prediction_accuracy": "Presnosť predpovedí:"
+      },
+      "statements": {
+        "title": "Kalkulačka spracovania výpisov",
+        "pages": "Stránky vo výpise:",
+        "pages_unit": "stránky",
+        "estimated_transactions": "Odhadované extrahované transakcie:",
+        "transactions": "transakcie",
+        "processing_time": "Ušetrený čas spracovania:",
+        "minutes": "minúty"
+      }
+    },
+    "multilingual": {
+      "title": "Globálna finančná inteligencia",
+      "subtitle": "Naša AI hovorí vaším jazykom a rozumie vášmu kultúrnemu finančnému kontextu",
+      "english": {
+        "title": "English",
+        "description": "Kompletná AI analýza v angličtine s americkým obchodným kontextom a finančnou terminológiou"
+      },
+      "spanish": {
+        "title": "Español",
+        "description": "Kompletná AI analýza v španielčine s latinsko-americkým obchodným kontextom"
+      },
+      "slovak": {
+        "title": "Slovenčina",
+        "description": "Kompletná AI analýza v slovenčine s kontextom európskeho podnikania"
+      }
+    },
+    "core_features": {
+      "title": "Základné finančné funkcie",
+      "subtitle": "Základné nástroje pre kompletnú správu financií okrem AI automatizácie",
+      "budgets": {
+        "title": "Inteligentná správa rozpočtov",
+        "description": "Vytvárajte, sledujte a spravujte svoje rozpočty s inteligentnými poznatkami a automatickou kategorizáciou",
+        "features": {
+          "categories": "Neobmedzené kategórie rozpočtu",
+          "tracking": "Sledovanie výdavkov v reálnom čase",
+          "comparison": "Porovnanie rozpočtu vs skutočnosti",
+          "alerts": "Upozornenia a notifikácie o prekročení"
+        }
+      },
+      "goals": {
+        "title": "Sledovanie finančných cieľov",
+        "description": "Stanovte a dosiahnite svoje finančné ciele s kolaboratívnymi funkciami a inteligentným sledovaním pokroku",
+        "features": {
+          "types": "Viacero typov cieľov (úspory, splácanie dlhov, investície)",
+          "sharing": "Zdieľanie kolaboratívnych cieľov s partnermi",
+          "visualization": "Vizualizácia pokroku a míľnikov",
+          "predictions": "Predpovede dosiahnutia cieľov"
+        }
+      },
+      "receipts": {
+        "title": "Spracovanie pokladničných dokladov",
+        "description": "Nahrajte a spracujte pokladničné doklady s pokročilou OCR technológiou pre automatické sledovanie výdavkov",
+        "features": {
+          "extraction": "OCR extrakcia textu z pokladničných dokladov",
+          "categorization": "Automatická kategorizácia výdavkov",
+          "storage": "Ukladanie a organizácia pokladničných dokladov",
+          "reports": "Daňové správy výdavkov"
+        }
+      },
+      "recurring": {
+        "title": "Opakujúce sa transakcie",
+        "description": "Automatizujte svoje pravidelné príjmy a výdavky s inteligentnou správou opakujúcich sa transakcií",
+        "features": {
+          "frequency": "Týždenné, mesačné a ročné opakovanie",
+          "automation": "Automatické vytváranie transakcií",
+          "flexibility": "Flexibilné koncové dátumy a úpravy",
+          "reminders": "Notifikácie pripomienok faktúr"
+        }
+      },
+      "currency": {
+        "title": "Možnosti zobrazenia meny",
+        "description": "Vyberte si preferovanú menu pre zobrazenie finančných údajov a správ",
+        "features": {
+          "support": "Podpora pre 15 hlavných globálnych mien",
+          "interface": "Jednoduché rozhranie pre výber meny",
+          "consistency": "Konzistentné zobrazenie meny v celej aplikácii",
+          "preference": "Preferencia meny uložená pre používateľa"
+        }
+      },
+      "export": {
+        "title": "Export a import údajov",
+        "description": "Importujte z bankových výpisov a exportujte svoje finančné údaje vo viacerých formátoch",
+        "features": {
+          "formats": "CSV, Excel a PDF exportné formáty",
+          "import": "Import PDF bankových výpisov",
+          "ranges": "Vlastné exporty dátumových rozsahov",
+          "tax_reports": "Daňové finančné správy"
+        }
+      },
+      "collaboration": {
+        "title": "Kolaboratívne financie",
+        "description": "Zdieľajte finančné ciele a rozpočty s partnermi pre lepšiu správu rodinných financií",
+        "features": {
+          "shared_goals": "Zdieľané finančné ciele s partnermi",
+          "planning": "Kolaboratívne plánovanie rozpočtu",
+          "updates": "Aktualizácie pokroku v reálnom čase",
+          "notifications": "Systém notifikácií pre partnerov"
+        }
+      },
+      "security": {
+        "title": "Bezpečnosť bankového štandardu",
+        "description": "Vaše finančné údaje sú chránené bezpečnostnými a súkromnými opatreniami podnikovej úrovne",
+        "features": {
+          "encryption": "AES-256 šifrovanie pre citlivé údaje",
+          "privacy": "Lokálne OCR spracovanie pre súkromie",
+          "authentication": "Bezpečná autentifikácia používateľov",
+          "audits": "Pravidelné bezpečnostné audity"
+        }
+      }
+    },
+    "cta": {
+      "title": "Pripravení transformovať vašu správu financií?",
+      "subtitle": "Pripojte sa k tisícom podnikateľov, ktorí revolučne zmenili svoje obchodné financie s poznatkami poháňanými AI",
+      "start_free": "Začať s bezplatným účtom",
+      "watch_demo": "Pozrieť demo",
+      "guarantee": "30-dňová garancia vrátenia peňazí",
+      "no_card": "Nevyžaduje sa kreditná karta",
+      "cancel_anytime": "Zrušiť kedykoľvek"
+    }
+  }
 }

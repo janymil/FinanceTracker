@@ -59,6 +59,7 @@ Target: `162.35.25.125` → `ai-processor.formatika.dev` (not live yet).
 | `AI_REASONING_EFFORT` | no | `none` (default) / `minimal` / `low` / `medium` |
 | `AI_REQUEST_TIMEOUT_MS` | no | default 90000 |
 | `PORT` | no | default 8080 behind the proxy |
+| `HOST` | no | default `0.0.0.0`; set `127.0.0.1` on the VPS so only Caddy can reach it |
 
 Model ids and prices live in `providers.ts`. Add a provider there and it is available to
 every route — `chat.completions.create` is normalised (`max_tokens` → `max_completion_tokens`,
