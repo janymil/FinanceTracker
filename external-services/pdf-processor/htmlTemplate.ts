@@ -251,7 +251,7 @@ export function generateHTMLTemplate(data: TemplateData): string {
     <body>
       <div class="container">
         <div class="header">
-          <h1>FinanzerPro</h1>
+          <h1>Kaptia</h1>
           <p>Financial Report for ${userData.firstName} ${userData.lastName}</p>
           <p>Report Period: ${period}</p>
         </div>
@@ -354,13 +354,13 @@ export function generateHTMLTemplate(data: TemplateData): string {
           
           <div class="qr-section">
             <h3>Access Your Dashboard</h3>
-            <p>Scan this QR code to quickly access your FinanzerPro dashboard</p>
+            <p>Scan this QR code to quickly access your Kaptia dashboard</p>
             <img src="${qrCodeDataUrl}" alt="Dashboard QR Code" />
           </div>
         </div>
         
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} FinanzerPro - Smart Financial Management</p>
+          <p>&copy; ${new Date().getFullYear()} Kaptia - Smart Financial Management</p>
           <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
         </div>
       </div>

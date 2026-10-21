@@ -17,7 +17,6 @@ import { getMonthDateRange } from "@/lib/dateRangeUtils";
 // Core components for immediate display
 import FinancialCards from "@/components/financial-cards";
 import TransactionList from "@/components/transaction-list";
-import SimpleTransactionList from "@/components/simple-transaction-list";
 import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
@@ -694,90 +693,70 @@ export default function Dashboard() {
 
 
 
-        {/* Loading State */}
-        {!databaseUser && (
-          <div className="bg-gray-100 border border-gray-400 text-gray-700 px-4 py-3 rounded mb-4">
-
+        {/* Panels are rendered for every signed-in user.
+            Functions that require a higher plan are locked by <RequirePlan>. */}
+        <div className="space-y-8">
+          {/* Health score + quick snapshot + mascot */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <LazyFinancialHealthScore
+              summary={financialSummary}
+              budgets={budgets as any}
+            />
+            <LazyQuickFinancialSnapshot
+              summary={financialSummary}
+              transactions={transactions as any}
+            />
+            <RequirePlan
+              plan="standard"
+              compact
+              feature={t("Financial Mascot")}
+              description={t("Your companion that reacts to your financial health and motivates you.")}
+            >
+              <FinancialHealthMascot />
+            </RequirePlan>
           </div>
-        )}
 
-        {/* Free User Content - Only show if plan is explicitly 'free' */}
-
-        {databaseUser?.plan === 'free' && (
-          <div className="space-y-8">
-
-
-            {/* Simple Financial Health Score for Free Users */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <LazyFinancialHealthScore 
-                summary={financialSummary}
-                budgets={budgets as any}
-              />
-              <LazyQuickFinancialSnapshot 
-                summary={financialSummary}
-                transactions={transactions as any}
-              />
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("AI Financial Tips")}</h3>
-                  <div className="bg-standard-light text-standard px-2 py-1 rounded text-xs font-medium">
-                    {t("Standard Feature")}
-                  </div>
-                </div>
-
-                <div className="text-center py-8">
-                  <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">🤖</div>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">
-                    {t("AI-powered financial tips available with Standard plan")}
-                  </p>
-                  <Button className="bg-standard hover:bg-standard/90 text-white">
-                  <Link href="/pricing">{t("Upgrade to Standard")}</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <SimpleTransactionList
-                transactions={transactions as any}
-                isLoading={transactionsLoading}
-              />
-
-              <BudgetOverview isLimited={true} />
-            </div>
+          {/* Recent transactions + budget overview */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <TransactionList
+              transactions={transactions as any}
+              isLoading={transactionsLoading}
+              isPremium={databaseUser?.plan === 'premium'}
+            />
+            <BudgetOverview isLimited={(databaseUser?.plan ?? 'free') === 'free'} />
           </div>
-        )}
 
-        {/* Standard and Premium User Content */}
-        {(databaseUser?.plan === 'standard' || databaseUser?.plan === 'premium') && (
-          <div className="space-y-8">
-            {/* Advanced Analytics Row - AI-driven for Standard/Premium */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="grid grid-cols-1 gap-6">
-                <LazyQuickFinancialSnapshot 
-                  summary={financialSummary}
-                  transactions={transactions as any}
-                />
-                <FinancialHealthMascot />
-              </div>
+          {/* Interactive trends chart (Standard+) */}
+          <RequirePlan
+            plan="standard"
+            compact
+            feature={t("Trends")}
+            description={t("See your spending trends over time with interactive charts.")}
+          >
+            <LazyTrendsChart />
+          </RequirePlan>
+
+          {/* Contextual tips + expense breakdown (Standard+) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <RequirePlan
+              plan="standard"
+              compact
+              feature={t("Contextual Tips")}
+              description={t("Tips tailored to the data you are viewing, generated by AI.")}
+            >
               <LazyContextualFinancialTips
                 summary={financialSummary}
                 transactions={transactions as any}
                 budgets={budgets as any}
                 selectedMonth={selectedMonth}
               />
-            </div>
-
-            {/* Interactive Charts */}
-            <LazyTrendsChart />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <TransactionList
-                transactions={transactions as any}
-                isLoading={transactionsLoading}
-                isPremium={databaseUser?.plan === 'premium'}
-              />
-
+            </RequirePlan>
+            <RequirePlan
+              plan="standard"
+              compact
+              feature={t("Expense Breakdown")}
+              description={t("See which categories take the largest share of your spending.")}
+            >
               <LazyExpenseChart summary={{
                 totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
                 expensesByCategory: financialSummary?.transactionsByCategory
@@ -787,39 +766,68 @@ export default function Dashboard() {
                     amount: Math.abs(cat.amount)
                   })) || []
               }} />
-            </div>
-
-            {/* Budget Categories */}
-            <RequirePlan plan="standard">
-              <BudgetOverview />
             </RequirePlan>
+          </div>
 
-            {/* Advanced Features */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Reminders + daily recommendations (Standard+) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <RequirePlan
+              plan="standard"
+              compact
+              feature={t("Reminders")}
+              description={t("Bill reminders and saving streaks to keep you on track.")}
+            >
               <LazyTransactionRemindersWidget />
-
-              <LazyDailyRecommendations 
+            </RequirePlan>
+            <RequirePlan
+              plan="standard"
+              compact
+              feature={t("Daily Recommendations")}
+              description={t("Personalized suggestions to improve your spending every day.")}
+            >
+              <LazyDailyRecommendations
                 summary={financialSummary}
                 transactions={transactions as any}
                 budgets={budgets as any}
               />
-            </div>
+            </RequirePlan>
+          </div>
 
-            {/* Premium Features - Components handle internal upgrade prompts for Standard users */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <LazyExpensePrediction 
+          {/* Expense prediction (Premium) + auto-categorization (Standard+) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <RequirePlan
+              plan="premium"
+              compact
+              feature={t("Expense Prediction")}
+              description={t("AI forecast of your upcoming expenses and cash flow.")}
+            >
+              <LazyExpensePrediction
                 transactions={transactions as any}
                 summary={financialSummary}
               />
-              
+            </RequirePlan>
+            <RequirePlan
+              plan="standard"
+              compact
+              feature={t("Auto-Categorization")}
+              description={t("Let AI categorize your transactions automatically as they arrive.")}
+            >
               <LazyAutoCategorization transactions={transactions as any} />
-            </div>
+            </RequirePlan>
+          </div>
 
-            <LazyAIFinancialTips 
+          {/* AI financial tips (Premium) */}
+          <RequirePlan
+            plan="premium"
+            compact
+            feature={t("AI Financial Tips")}
+            description={t("In-depth AI analysis of your spending with actionable advice.")}
+          >
+            <LazyAIFinancialTips
               summary={!summaryLoading ? financialSummary : undefined}
             />
-          </div>
-        )}
+          </RequirePlan>
+        </div>
 
 
         

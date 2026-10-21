@@ -7,7 +7,7 @@ config({ path: '.env.local' });
 
 // Test encryption functionality
 function testEncryption() {
-  console.log('🔐 Testing FinanzerPro Encryption System');
+  console.log('🔐 Testing Kaptia Encryption System');
   console.log('=====================================\n');
 
   // Get encryption key from environment

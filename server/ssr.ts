@@ -5,169 +5,169 @@ import { renderToString } from 'react-dom/server';
 const multilingualContent: Record<string, Record<string, any>> = {
   'en': {
     '/': {
-      title: 'FinanzerPro - Smart Personal Finance Management',
-      description: 'Take control of your finances with FinanzerPro. Track expenses, set budgets, achieve goals, and get AI-powered insights for better financial decisions.',
-      keywords: 'personal finance, expense tracking, budgeting, financial goals, money management',
+      title: 'Kaptia - Smart Spending Tracker with AI Insights',
+      description: 'Kaptia turns receipts, voice notes and statements into a clear picture of your spending. Track expenses, set budgets, reach goals, and let AI organize the rest.',
+      keywords: 'spending tracker, expense tracking, budget planner, savings goals, receipt scanner',
       lang: 'en'
     },
     '/pricing': {
-      title: 'FinanzerPro Pricing Plans - Free, Standard & Premium',
-      description: 'Choose the perfect FinanzerPro plan for your needs. Free plan with basic tracking, Standard with budgets and AI, Premium with unlimited features.',
-      keywords: 'pricing, subscription, plans, free, standard, premium, financial software',
+      title: 'Kaptia Pricing Plans - Free, Standard & Premium',
+      description: 'Choose the Kaptia plan that fits you. Free plan with basic tracking, Standard with budgets and AI, Premium with unlimited smart features.',
+      keywords: 'pricing, subscription, plans, free, standard, premium, tracker app',
       lang: 'en'
     },
     '/help': {
-      title: 'FinanzerPro Help & Documentation',
-      description: 'Complete guide to using FinanzerPro. Learn about expense tracking, budgeting, goals, AI features, and mobile receipt scanning.',
+      title: 'Kaptia Help & Documentation',
+      description: 'Complete guide to using Kaptia. Learn about expense tracking, budgeting, goals, AI features, and mobile receipt scanning.',
       keywords: 'help, documentation, guide, tutorial, support, features',
       lang: 'en'
     },
     '/contact': {
-      title: 'Contact FinanzerPro Support Team',
-      description: 'Get help with FinanzerPro. Contact our support team for questions about features, billing, or technical assistance.',
+      title: 'Contact Kaptia Support Team',
+      description: 'Get help with Kaptia. Contact our support team for questions about features, billing, or technical assistance.',
       keywords: 'contact, support, help, customer service, technical assistance',
       lang: 'en'
     },
     '/auth': {
-      title: 'Sign In to FinanzerPro - Personal Finance Management',
-      description: 'Sign in to your FinanzerPro account to access expense tracking, budgeting tools, and AI-powered financial insights.',
-      keywords: 'sign in, login, account, authentication, finance app',
+      title: 'Sign In to Kaptia - Smart Spending Tracker',
+      description: 'Sign in to your Kaptia account to access expense tracking, budgets, and AI-powered insights.',
+      keywords: 'sign in, login, account, authentication, tracker app',
       lang: 'en'
     },
     '/privacy-policy': {
-      title: 'Privacy Policy - FinanzerPro',
-      description: 'Learn how FinanzerPro protects your personal and financial data with industry-standard security measures.',
+      title: 'Privacy Policy - Kaptia',
+      description: 'Learn how Kaptia protects your personal data with industry-standard security measures.',
       keywords: 'privacy policy, data protection, security, personal information',
       lang: 'en'
     },
     '/terms-of-service': {
-      title: 'Terms of Service - FinanzerPro',
-      description: 'Read FinanzerPro terms of service, user agreements, and service conditions for our financial management platform.',
+      title: 'Terms of Service - Kaptia',
+      description: 'Read Kaptia terms of service, user agreements, and service conditions for our smart tracking platform.',
       keywords: 'terms of service, user agreement, legal, conditions',
       lang: 'en'
     },
     '/cookie-policy': {
-      title: 'Cookie Policy - FinanzerPro',
-      description: 'Learn about how FinanzerPro uses cookies to enhance your experience and protect your privacy.',
+      title: 'Cookie Policy - Kaptia',
+      description: 'Learn about how Kaptia uses cookies to enhance your experience and protect your privacy.',
       keywords: 'cookie policy, cookies, privacy, website functionality',
       lang: 'en'
     },
     '/features': {
-      title: 'AI-Powered Financial Features - FinanzerPro',
-      description: 'Discover 9 intelligent AI features that transform your business finances: smart categorization, predictive analytics, financial health scoring, and personalized recommendations.',
-      keywords: 'AI features, financial intelligence, smart categorization, predictive analytics, financial health, business finance, automated insights',
+      title: 'AI-Powered Smart Features - Kaptia',
+      description: 'Discover 9 intelligent AI features that transform how you track spending: smart categorization, spending predictions, health scoring, and personalized recommendations.',
+      keywords: 'AI features, smart categorization, predictive analytics, spending insights, automated recommendations',
       lang: 'en'
     }
   },
   'es': {
     '/': {
-      title: 'FinanzerPro - Gestión Inteligente de Finanzas Personales',
-      description: 'Toma el control de tus finanzas con FinanzerPro. Rastrea gastos, establece presupuestos, alcanza metas y obtén insights impulsados por IA para mejores decisiones financieras.',
-      keywords: 'finanzas personales, seguimiento de gastos, presupuesto, metas financieras, gestión de dinero',
+      title: 'Kaptia - Rastreador Inteligente de Gastos con IA',
+      description: 'Kaptia convierte recibos, notas de voz y estados de cuenta en una imagen clara de tus gastos. Rastrea gastos, crea presupuestos, alcanza metas y deja que la IA organice el resto.',
+      keywords: 'rastreador de gastos, seguimiento de gastos, presupuesto, metas de ahorro, escáner de recibos',
       lang: 'es'
     },
     '/pricing': {
-      title: 'Planes de Precios FinanzerPro - Gratis, Estándar y Premium',
-      description: 'Elige el plan perfecto de FinanzerPro para tus necesidades. Plan gratuito con seguimiento básico, Estándar con presupuestos e IA, Premium con funciones ilimitadas.',
-      keywords: 'precios, suscripción, planes, gratis, estándar, premium, software financiero',
+      title: 'Planes de Precios Kaptia - Gratis, Estándar y Premium',
+      description: 'Elige el plan de Kaptia que se adapta a ti. Plan gratuito con seguimiento básico, Estándar con presupuestos e IA, Premium con funciones inteligentes ilimitadas.',
+      keywords: 'precios, suscripción, planes, gratis, estándar, premium, app de seguimiento',
       lang: 'es'
     },
     '/help': {
-      title: 'Ayuda y Documentación de FinanzerPro',
-      description: 'Guía completa para usar FinanzerPro efectivamente. Aprende sobre seguimiento de gastos, presupuestos, metas, funciones de IA y escaneo móvil de recibos.',
+      title: 'Ayuda y Documentación de Kaptia',
+      description: 'Guía completa para usar Kaptia efectivamente. Aprende sobre seguimiento de gastos, presupuestos, metas, funciones de IA y escaneo móvil de recibos.',
       keywords: 'ayuda, documentación, guía, tutorial, soporte, funciones',
       lang: 'es'
     },
     '/contact': {
-      title: 'Contactar Equipo de Soporte FinanzerPro',
-      description: 'Obtén ayuda con FinanzerPro. Contacta nuestro equipo de soporte para preguntas sobre funciones, facturación o asistencia técnica.',
+      title: 'Contactar Equipo de Soporte Kaptia',
+      description: 'Obtén ayuda con Kaptia. Contacta nuestro equipo de soporte para preguntas sobre funciones, facturación o asistencia técnica.',
       keywords: 'contacto, soporte, ayuda, servicio al cliente, asistencia técnica',
       lang: 'es'
     },
     '/auth': {
-      title: 'Iniciar Sesión en FinanzerPro - Gestión de Finanzas Personales',
-      description: 'Inicia sesión en tu cuenta de FinanzerPro para acceder al seguimiento de gastos, herramientas de presupuesto e insights financieros impulsados por IA.',
-      keywords: 'iniciar sesión, login, cuenta, autenticación, app de finanzas',
+      title: 'Iniciar Sesión en Kaptia - Rastreador de Gastos',
+      description: 'Inicia sesión en tu cuenta de Kaptia para acceder al seguimiento de gastos, presupuestos e insights impulsados por IA.',
+      keywords: 'iniciar sesión, login, cuenta, autenticación, app de seguimiento',
       lang: 'es'
     },
     '/privacy-policy': {
-      title: 'Política de Privacidad - FinanzerPro',
-      description: 'Aprende cómo FinanzerPro protege tus datos personales y financieros con medidas de seguridad estándar de la industria.',
+      title: 'Política de Privacidad - Kaptia',
+      description: 'Aprende cómo Kaptia protege tus datos personales con medidas de seguridad estándar de la industria.',
       keywords: 'política de privacidad, protección de datos, seguridad, información personal',
       lang: 'es'
     },
     '/terms-of-service': {
-      title: 'Términos de Servicio - FinanzerPro',
-      description: 'Lee los términos de servicio de FinanzerPro, acuerdos de usuario y condiciones de servicio para nuestra plataforma de gestión financiera.',
+      title: 'Términos de Servicio - Kaptia',
+      description: 'Lee los términos de servicio de Kaptia, acuerdos de usuario y condiciones para nuestra plataforma de seguimiento inteligente.',
       keywords: 'términos de servicio, acuerdo de usuario, legal, condiciones',
       lang: 'es'
     },
     '/cookie-policy': {
-      title: 'Política de Cookies - FinanzerPro',
-      description: 'Aprende sobre cómo FinanzerPro utiliza cookies para mejorar tu experiencia y proteger tu privacidad.',
+      title: 'Política de Cookies - Kaptia',
+      description: 'Aprende sobre cómo Kaptia utiliza cookies para mejorar tu experiencia y proteger tu privacidad.',
       keywords: 'política de cookies, cookies, privacidad, funcionalidad del sitio web',
       lang: 'es'
     },
     '/features': {
-      title: 'Funciones Financieras Impulsadas por IA - FinanzerPro',
-      description: 'Descubre 9 funciones inteligentes de IA que transforman las finanzas de tu negocio: categorización inteligente, análisis predictivo, puntuación de salud financiera y recomendaciones personalizadas.',
-      keywords: 'funciones IA, inteligencia financiera, categorización inteligente, análisis predictivo, salud financiera, finanzas empresariales, insights automatizados',
+      title: 'Funciones Inteligentes con IA - Kaptia',
+      description: 'Descubre 9 funciones inteligentes de IA que transforman tu forma de registrar gastos: categorización automática, predicciones de gasto, puntuación de salud y recomendaciones personalizadas.',
+      keywords: 'funciones IA, categorización inteligente, análisis predictivo, insights de gasto, recomendaciones automatizadas',
       lang: 'es'
     }
   },
   'sk': {
     '/': {
-      title: 'FinanzerPro - Inteligentné Riadenie Osobných Financií',
-      description: 'Prevezmi kontrolu nad svojimi financiami s FinanzerPro. Sleduj výdavky, nastav rozpočty, dosiahni ciele a získaj AI-poháňané poznatky pre lepšie finančné rozhodnutia.',
-      keywords: 'osobné financie, sledovanie výdavkov, rozpočet, finančné ciele, riadenie peňazí',
+      title: 'Kaptia - Inteligentný Sledovač Výdavkov s AI',
+      description: 'Kaptia mení účtenky, hlasové poznámky a výpisy na jasný obraz o vašich výdavkoch. Sledujte výdavky, tvorte rozpočty, dosahujte ciele a zvyšok nechajte na AI.',
+      keywords: 'sledovač výdavkov, sledovanie výdavkov, rozpočet, sporiteľské ciele, skener účteniek',
       lang: 'sk'
     },
     '/pricing': {
-      title: 'Cenové Plány FinanzerPro - Bezplatný, Štandardný a Prémiový',
-      description: 'Vyber si perfektný plán FinanzerPro pre tvoje potreby. Bezplatný plán so základným sledovaním, Štandardný s rozpočtami a AI, Prémiový s neobmedzenými funkciami.',
-      keywords: 'ceny, predplatné, plány, bezplatný, štandardný, prémiový, finančný softvér',
+      title: 'Cenové Plány Kaptia - Bezplatný, Štandardný a Prémiový',
+      description: 'Vyberte si plán Kaptia, ktorý vám vyhovuje. Bezplatný plán so základným sledovaním, Štandardný s rozpočtami a AI, Prémiový s neobmedzenými inteligentnými funkciami.',
+      keywords: 'ceny, predplatné, plány, bezplatný, štandardný, prémiový, sledovacia aplikácia',
       lang: 'sk'
     },
     '/help': {
-      title: 'Pomoc a Dokumentácia FinanzerPro',
-      description: 'Kompletný sprievodca používaním FinanzerPro. Nauč sa o sledovaní výdavkov, rozpočtoch, cieľoch, AI funkciách a mobilnom skenovaní účteniek.',
+      title: 'Pomoc a Dokumentácia Kaptia',
+      description: 'Kompletný sprievodca používaním Kaptia. Nauč sa o sledovaní výdavkov, rozpočtoch, cieľoch, AI funkciách a mobilnom skenovaní účteniek.',
       keywords: 'pomoc, dokumentácia, sprievodca, návod, podpora, funkcie',
       lang: 'sk'
     },
     '/contact': {
-      title: 'Kontaktovať Podporný Tím FinanzerPro',
-      description: 'Získaj pomoc s FinanzerPro. Kontaktuj náš podporný tím pre otázky o funkciách, fakturácii alebo technickú asistenciu.',
+      title: 'Kontaktovať Podporný Tím Kaptia',
+      description: 'Získaj pomoc s Kaptia. Kontaktuj náš podporný tím pre otázky o funkciách, fakturácii alebo technickú asistenciu.',
       keywords: 'kontakt, podpora, pomoc, zákaznícky servis, technická asistencia',
       lang: 'sk'
     },
     '/auth': {
-      title: 'Prihlásiť sa do FinanzerPro - Riadenie Osobných Financií',
-      description: 'Prihlás sa do svojho účtu FinanzerPro pre prístup k sledovaniu výdavkov, nástrojom rozpočtu a AI-poháňaným finančným poznatkom.',
-      keywords: 'prihlásiť sa, login, účet, autentifikácia, finančná aplikácia',
+      title: 'Prihlásiť sa do Kaptia - Sledovač Výdavkov',
+      description: 'Prihlás sa do svojho účtu Kaptia pre prístup k sledovaniu výdavkov, rozpočtom a AI-poháňaným prehľadom.',
+      keywords: 'prihlásiť sa, login, účet, autentifikácia, sledovacia aplikácia',
       lang: 'sk'
     },
     '/privacy-policy': {
-      title: 'Zásady Ochrany Súkromia - FinanzerPro',
-      description: 'Dozviete sa, ako FinanzerPro chráni vaše osobné a finančné údaje pomocou štandardných bezpečnostných opatrení.',
+      title: 'Zásady Ochrany Súkromia - Kaptia',
+      description: 'Dozviete sa, ako Kaptia chráni vaše osobné údaje pomocou štandardných bezpečnostných opatrení.',
       keywords: 'zásady ochrany súkromia, ochrana údajov, bezpečnosť, osobné informácie',
       lang: 'sk'
     },
     '/terms-of-service': {
-      title: 'Podmienky Služby - FinanzerPro',
-      description: 'Prečítajte si podmienky služby FinanzerPro, používateľské dohody a podmienky služby pre našu platformu finančného riadenia.',
+      title: 'Podmienky Služby - Kaptia',
+      description: 'Prečítajte si podmienky služby Kaptia, používateľské dohody a podmienky pre našu inteligentnú sledovaciu platformu.',
       keywords: 'podmienky služby, používateľská dohoda, právne, podmienky',
       lang: 'sk'
     },
     '/cookie-policy': {
-      title: 'Pravidlá Používania Cookies - FinanzerPro',
-      description: 'Dozviete sa o tom, ako FinanzerPro používa cookies na zlepšenie vašej skúsenosti a ochranu vášho súkromia.',
+      title: 'Pravidlá Používania Cookies - Kaptia',
+      description: 'Dozviete sa o tom, ako Kaptia používa cookies na zlepšenie vašej skúsenosti a ochranu vášho súkromia.',
       keywords: 'pravidlá cookies, cookies, súkromie, funkcionalita webovej stránky',
       lang: 'sk'
     },
     '/features': {
-      title: 'Finančné Funkcie Poháňané AI - FinanzerPro',
-      description: 'Objavte 9 inteligentných AI funkcií, ktoré transformujú financie vášho podnikania: inteligentná kategorizácia, prediktívna analytika, hodnotenie finančného zdravia a personalizované odporúčania.',
-      keywords: 'AI funkcie, finančná inteligencia, inteligentná kategorizácia, prediktívna analytika, finančné zdravie, podnikové financie, automatizované poznatky',
+      title: 'Inteligentné Funkcie s AI - Kaptia',
+      description: 'Objavte 9 inteligentných AI funkcií, ktoré menia spôsob sledovania výdavkov: automatická kategorizácia, predikcie výdavkov, skóre zdravia a personalizované odporúčania.',
+      keywords: 'AI funkcie, inteligentná kategorizácia, prediktívna analytika, prehľady výdavkov, automatizované odporúčania',
       lang: 'sk'
     }
   }
@@ -189,9 +189,9 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
     
     // Ultimate fallback
     return {
-      title: 'FinanzerPro - Smart Personal Finance Management',
-      description: 'Professional financial management application for tracking expenses, budgets, and goals.',
-      keywords: 'finance, budgeting, expense tracking',
+      title: 'Kaptia - Smart Spending Tracker',
+      description: 'Smart tracking application for expenses, budgets, and goals with AI-powered insights.',
+      keywords: 'expense tracking, budgeting, goals',
       lang: 'en'
     };
   };
@@ -210,27 +210,27 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://finanzerpro.com${language === 'en' ? '' : '/' + language}${route}">
+    <meta property="og:url" content="https://kaptia.app${language === 'en' ? '' : '/' + language}${route}">
     <meta property="og:title" content="${pageData.title}">
     <meta property="og:description" content="${pageData.description}">
-    <meta property="og:image" content="https://finanzerpro.com/og-image.png">
+    <meta property="og:image" content="https://kaptia.app/og-image.png">
     <meta property="og:locale" content="${pageData.lang === 'en' ? 'en_US' : pageData.lang === 'es' ? 'es_ES' : 'sk_SK'}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://finanzerpro.com${language === 'en' ? '' : '/' + language}${route}">
+    <meta property="twitter:url" content="https://kaptia.app${language === 'en' ? '' : '/' + language}${route}">
     <meta property="twitter:title" content="${pageData.title}">
     <meta property="twitter:description" content="${pageData.description}">
-    <meta property="twitter:image" content="https://finanzerpro.com/og-image.png">
+    <meta property="twitter:image" content="https://kaptia.app/og-image.png">
 
     <!-- Canonical URL with language -->
-    <link rel="canonical" href="https://finanzerpro.com${language === 'en' ? '' : '/' + language}${route}">
+    <link rel="canonical" href="https://kaptia.app${language === 'en' ? '' : '/' + language}${route}">
     
     <!-- Language alternates for SEO -->
-    <link rel="alternate" hreflang="en" href="https://finanzerpro.com${route}">
-    <link rel="alternate" hreflang="es" href="https://finanzerpro.com/es${route}">
-    <link rel="alternate" hreflang="sk" href="https://finanzerpro.com/sk${route}">
-    <link rel="alternate" hreflang="x-default" href="https://finanzerpro.com${route}">
+    <link rel="alternate" hreflang="en" href="https://kaptia.app${route}">
+    <link rel="alternate" hreflang="es" href="https://kaptia.app/es${route}">
+    <link rel="alternate" hreflang="sk" href="https://kaptia.app/sk${route}">
+    <link rel="alternate" hreflang="x-default" href="https://kaptia.app${route}">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -242,10 +242,10 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "FinanzerPro",
+      "name": "Kaptia",
       "description": "${pageData.description}",
-      "url": "https://finanzerpro.com",
-      "applicationCategory": "FinanceApplication",
+      "url": "https://kaptia.app",
+      "applicationCategory": "LifestyleApplication",
       "operatingSystem": "Web",
       "inLanguage": "${pageData.lang}",
       "offers": {
@@ -259,7 +259,7 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
 <body>
     <div id="root">
         <header>
-            <h1>FinanzerPro</h1>
+            <h1>Kaptia</h1>
             <nav>
                 ${getNavContent(pageData.lang)}
             </nav>
@@ -297,9 +297,9 @@ function getNavContent(lang: string): string {
 
 function getCopyrightText(lang: string): string {
   const texts = {
-    'en': '© 2025 FinanzerPro. All rights reserved.',
-    'es': '© 2025 FinanzerPro. Todos los derechos reservados.',
-    'sk': '© 2025 FinanzerPro. Všetky práva vyhradené.'
+    'en': '© 2025 Kaptia. All rights reserved.',
+    'es': '© 2025 Kaptia. Todos los derechos reservados.',
+    'sk': '© 2025 Kaptia. Všetky práva vyhradené.'
   };
   
   return texts[lang as keyof typeof texts] || texts['en'];
@@ -310,19 +310,19 @@ function getPageContent(route: string, lang: string = 'en'): string {
     'en': {
       '/': `
         <section>
-            <h1>Smart Personal Finance Management</h1>
-            <p>Take control of your finances with FinanzerPro's comprehensive expense tracking, budgeting tools, and AI-powered insights.</p>
+            <h1>Smart Spending Tracker with AI Insights</h1>
+            <p>Kaptia turns receipts, voice notes and statements into a clear picture of your spending, with budgets and AI-powered insights.</p>
             
             <h2>Key Features</h2>
             <ul>
                 <li>Expense and Income Tracking</li>
                 <li>Budget Management</li>
-                <li>Financial Goals</li>
+                <li>Savings Goals</li>
                 <li>AI-Powered Categorization</li>
                 <li>Receipt OCR Scanning</li>
                 <li>Mobile QR Code Upload</li>
                 <li>Cloud Backup & Export</li>
-                <li>Financial Health Analysis</li>
+                <li>Spending Health Analysis</li>
             </ul>
             
             <h2>Subscription Plans</h2>
@@ -341,7 +341,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/pricing': `
         <section>
             <h1>Pricing Plans</h1>
-            <p>Choose the perfect plan for your financial management needs</p>
+            <p>Choose the plan that fits your tracking needs</p>
             
             <div>
                 <h2>Free Plan - $0/month</h2>
@@ -356,7 +356,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Unlimited transactions</li>
                     <li>Budget management</li>
-                    <li>Financial goals</li>
+                    <li>Savings goals</li>
                     <li>AI expense categorization</li>
                     <li>Receipt OCR scanning</li>
                     <li>Mobile QR code upload</li>
@@ -367,7 +367,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Everything in Standard</li>
                     <li>Advanced AI insights</li>
-                    <li>Financial health analysis</li>
+                    <li>Spending health analysis</li>
                     <li>Predictive forecasting</li>
                     <li>Cloud backup & export</li>
                     <li>Collaborative goals</li>
@@ -379,7 +379,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/help': `
         <section>
             <h1>Help & Documentation</h1>
-            <p>Complete guide to using FinanzerPro effectively</p>
+            <p>Complete guide to using Kaptia effectively</p>
             
             <h2>Getting Started</h2>
             <ul>
@@ -403,11 +403,11 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/contact': `
         <section>
             <h1>Contact Support</h1>
-            <p>Get help with FinanzerPro</p>
+            <p>Get help with Kaptia</p>
             
             <h2>Support Channels</h2>
             <ul>
-                <li>Email: support@finanzerpro.com</li>
+                <li>Email: support@kaptia.app</li>
                 <li>Live chat (available 9 AM - 5 PM EST)</li>
                 <li>Help documentation</li>
                 <li>Community forum</li>
@@ -424,8 +424,8 @@ function getPageContent(route: string, lang: string = 'en'): string {
       `,
       '/auth': `
         <section>
-            <h1>Sign In to FinanzerPro</h1>
-            <p>Sign in to your account to access advanced financial tools</p>
+            <h1>Sign In to Kaptia</h1>
+            <p>Sign in to your account to access your smart tracking tools</p>
             
             <h2>Create New Account</h2>
             <ul>
@@ -436,18 +436,18 @@ function getPageContent(route: string, lang: string = 'en'): string {
             </ul>
             
             <h2>Already Have an Account?</h2>
-            <p>Simply sign in and continue managing your finances</p>
+            <p>Simply sign in and continue tracking your spending</p>
         </section>
       `,
       '/privacy-policy': `
         <section>
             <h1>Privacy Policy</h1>
-            <p>FinanzerPro is committed to protecting your personal and financial data</p>
+            <p>Kaptia is committed to protecting your personal data</p>
             
             <h2>Data Collection</h2>
             <ul>
                 <li>Account information</li>
-                <li>Financial transactions</li>
+                <li>Tracked transactions</li>
                 <li>Application usage</li>
                 <li>Device technical data</li>
             </ul>
@@ -464,7 +464,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/terms-of-service': `
         <section>
             <h1>Terms of Service</h1>
-            <p>Read the terms of use for FinanzerPro service</p>
+            <p>Read the terms of use for Kaptia service</p>
             
             <h2>Service Usage</h2>
             <ul>
@@ -476,9 +476,9 @@ function getPageContent(route: string, lang: string = 'en'): string {
             
             <h2>Liability Limitations</h2>
             <ul>
-                <li>Financial data accuracy</li>
+                <li>Tracked data accuracy</li>
                 <li>Service availability</li>
-                <li>Use of financial advice</li>
+                <li>Use of AI-generated suggestions</li>
                 <li>Data backup</li>
             </ul>
         </section>
@@ -486,7 +486,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/cookie-policy': `
         <section>
             <h1>Cookie Policy</h1>
-            <p>Information about how FinanzerPro uses cookies</p>
+            <p>Information about how Kaptia uses cookies</p>
             
             <h2>Types of Cookies</h2>
             <ul>
@@ -507,29 +507,29 @@ function getPageContent(route: string, lang: string = 'en'): string {
       `,
       '/features': `
         <section>
-            <h1>AI-Powered Financial Intelligence</h1>
-            <p>Transform your business finances with 8 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.</p>
+            <h1>AI-Powered Spending Intelligence</h1>
+            <p>Nine intelligent AI features that learn, adapt, and organize your spending in real-time.</p>
             
             <h2>Core AI Features</h2>
             <ul>
                 <li><strong>Smart Expense Categorization</strong> - Automatically categorizes transactions with machine learning</li>
-                <li><strong>Predictive Financial Analytics</strong> - Forecasts spending patterns and cash flow trends</li>
-                <li><strong>Financial Health Scoring</strong> - Real-time assessment of your financial wellness</li>
+                <li><strong>Predictive Spending Analytics</strong> - Forecasts spending patterns and upcoming trends</li>
+                <li><strong>Spending Health Scoring</strong> - Real-time assessment of your tracking habits</li>
                 <li><strong>Intelligent Budget Recommendations</strong> - AI-driven budget optimization suggestions</li>
                 <li><strong>Expense Prediction Engine</strong> - Anticipates future expenses based on historical data</li>
                 <li><strong>Trend Analysis & Insights</strong> - Identifies spending patterns and optimization opportunities</li>
-                <li><strong>Daily Financial Recommendations</strong> - Automated daily tips based on your spending patterns</li>
-                <li><strong>Interactive Financial Advisor</strong> - On-demand AI guidance for specific financial decisions</li>
-                <li><strong>Advanced Spending Analytics</strong> - Deep insights into your financial behavior</li>
+                <li><strong>Daily Smart Recommendations</strong> - Automated daily tips based on your spending patterns</li>
+                <li><strong>Interactive AI Assistant</strong> - On-demand AI guidance for questions about your spending</li>
+                <li><strong>Advanced Spending Analytics</strong> - Deep insights into your everyday habits</li>
             </ul>
             
             <h2>Key Benefits</h2>
             <ul>
-                <li>Automate financial decision making</li>
+                <li>Automate everyday money decisions</li>
                 <li>Reduce manual categorization by 95%</li>
-                <li>Improve financial health scores</li>
+                <li>Improve your spending health score</li>
                 <li>Predict and prevent overspending</li>
-                <li>Get personalized financial guidance</li>
+                <li>Get personalized spending guidance</li>
                 <li>Available in 3 languages</li>
                 <li>Real-time processing and insights</li>
             </ul>
@@ -539,7 +539,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>AES-256 encryption for sensitive data</li>
                 <li>Local OCR processing - no external data transmission</li>
                 <li>Privacy-first AI analysis</li>
-                <li>GDPR and financial compliance standards</li>
+                <li>GDPR and industry compliance standards</li>
             </ul>
         </section>
       `
@@ -547,19 +547,19 @@ function getPageContent(route: string, lang: string = 'en'): string {
     'es': {
       '/': `
         <section>
-            <h1>Gestión Inteligente de Finanzas Personales</h1>
-            <p>Toma el control de tus finanzas con el seguimiento integral de gastos, herramientas de presupuesto e insights impulsados por IA de FinanzerPro.</p>
+            <h1>Rastreador Inteligente de Gastos con IA</h1>
+            <p>Kaptia convierte recibos, notas de voz y estados de cuenta en una imagen clara de tus gastos, con presupuestos e insights impulsados por IA.</p>
             
             <h2>Características Principales</h2>
             <ul>
                 <li>Seguimiento de Gastos e Ingresos</li>
                 <li>Gestión de Presupuestos</li>
-                <li>Metas Financieras</li>
+                <li>Metas de Ahorro</li>
                 <li>Categorización Impulsada por IA</li>
                 <li>Escaneo OCR de Recibos</li>
                 <li>Carga de Códigos QR Móviles</li>
                 <li>Respaldo en la Nube y Exportación</li>
-                <li>Análisis de Salud Financiera</li>
+                <li>Análisis de Hábitos de Gasto</li>
             </ul>
             
             <h2>Planes de Suscripción</h2>
@@ -578,7 +578,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/pricing': `
         <section>
             <h1>Planes de Precios</h1>
-            <p>Elige el plan perfecto para tus necesidades de gestión financiera</p>
+            <p>Elige el plan perfecto para tus necesidades de seguimiento</p>
             
             <div>
                 <h2>Plan Gratuito - $0/mes</h2>
@@ -593,7 +593,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Transacciones ilimitadas</li>
                     <li>Gestión de presupuestos</li>
-                    <li>Metas financieras</li>
+                    <li>Metas de ahorro</li>
                     <li>Categorización de gastos con IA</li>
                     <li>Escaneo OCR de recibos</li>
                     <li>Carga de códigos QR móviles</li>
@@ -604,7 +604,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Todo en Estándar</li>
                     <li>Insights avanzados de IA</li>
-                    <li>Análisis de salud financiera</li>
+                    <li>Análisis de hábitos de gasto</li>
                     <li>Pronósticos predictivos</li>
                     <li>Respaldo en la nube y exportación</li>
                     <li>Metas colaborativas</li>
@@ -616,7 +616,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/help': `
         <section>
             <h1>Ayuda y Documentación</h1>
-            <p>Guía completa para usar FinanzerPro efectivamente</p>
+            <p>Guía completa para usar Kaptia efectivamente</p>
             
             <h2>Primeros Pasos</h2>
             <ul>
@@ -640,11 +640,11 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/contact': `
         <section>
             <h1>Contactar Soporte</h1>
-            <p>Obtén ayuda con FinanzerPro</p>
+            <p>Obtén ayuda con Kaptia</p>
             
             <h2>Canales de Soporte</h2>
             <ul>
-                <li>Email: support@finanzerpro.com</li>
+                <li>Email: support@kaptia.app</li>
                 <li>Chat en vivo (disponible 9 AM - 5 PM EST)</li>
                 <li>Documentación de ayuda</li>
                 <li>Foro de la comunidad</li>
@@ -661,8 +661,8 @@ function getPageContent(route: string, lang: string = 'en'): string {
       `,
       '/auth': `
         <section>
-            <h1>Iniciar Sesión en FinanzerPro</h1>
-            <p>Inicia sesión en tu cuenta para acceder a herramientas financieras avanzadas</p>
+            <h1>Iniciar Sesión en Kaptia</h1>
+            <p>Inicia sesión en tu cuenta para acceder a tus herramientas inteligentes de seguimiento</p>
             
             <h2>Crear Nueva Cuenta</h2>
             <ul>
@@ -673,18 +673,18 @@ function getPageContent(route: string, lang: string = 'en'): string {
             </ul>
             
             <h2>¿Ya Tienes una Cuenta?</h2>
-            <p>Simplemente inicia sesión y continúa gestionando tus finanzas</p>
+            <p>Simplemente inicia sesión y continúa registrando tus gastos</p>
         </section>
       `,
       '/privacy-policy': `
         <section>
             <h1>Política de Privacidad</h1>
-            <p>FinanzerPro se compromete a proteger tus datos personales y financieros</p>
+            <p>Kaptia se compromete a proteger tus datos personales</p>
             
             <h2>Recopilación de Datos</h2>
             <ul>
                 <li>Información de cuenta</li>
-                <li>Transacciones financieras</li>
+                <li>Transacciones registradas</li>
                 <li>Uso de la aplicación</li>
                 <li>Datos técnicos del dispositivo</li>
             </ul>
@@ -701,7 +701,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/terms-of-service': `
         <section>
             <h1>Términos de Servicio</h1>
-            <p>Lee los términos de uso del servicio FinanzerPro</p>
+            <p>Lee los términos de uso del servicio Kaptia</p>
             
             <h2>Uso del Servicio</h2>
             <ul>
@@ -713,9 +713,9 @@ function getPageContent(route: string, lang: string = 'en'): string {
             
             <h2>Limitaciones de Responsabilidad</h2>
             <ul>
-                <li>Precisión de datos financieros</li>
+                <li>Precisión de los datos registrados</li>
                 <li>Disponibilidad del servicio</li>
-                <li>Uso de consejos financieros</li>
+                <li>Uso de sugerencias generadas por IA</li>
                 <li>Respaldo de datos</li>
             </ul>
         </section>
@@ -723,7 +723,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/cookie-policy': `
         <section>
             <h1>Política de Cookies</h1>
-            <p>Información sobre cómo FinanzerPro utiliza cookies</p>
+            <p>Información sobre cómo Kaptia utiliza cookies</p>
             
             <h2>Tipos de Cookies</h2>
             <ul>
@@ -744,29 +744,29 @@ function getPageContent(route: string, lang: string = 'en'): string {
       `,
       '/features': `
         <section>
-            <h1>Inteligencia Financiera Impulsada por IA</h1>
-            <p>Transforma las finanzas de tu negocio con 9 funciones inteligentes de IA que aprenden, se adaptan y optimizan tus decisiones financieras en tiempo real.</p>
+            <h1>Inteligencia de Gastos Impulsada por IA</h1>
+            <p>9 funciones inteligentes de IA que aprenden, se adaptan y organizan tus gastos en tiempo real.</p>
             
             <h2>Funciones Core de IA</h2>
             <ul>
                 <li><strong>Categorización Inteligente de Gastos</strong> - Categoriza automáticamente transacciones con aprendizaje automático</li>
-                <li><strong>Análisis Financiero Predictivo</strong> - Pronostica patrones de gasto y tendencias de flujo de efectivo</li>
-                <li><strong>Puntuación de Salud Financiera</strong> - Evaluación en tiempo real de tu bienestar financiero</li>
+                <li><strong>Análisis Predictivo de Gastos</strong> - Pronostica patrones de gasto y próximas tendencias</li>
+                <li><strong>Puntuación de Hábitos de Gasto</strong> - Evaluación en tiempo real de tus hábitos</li>
                 <li><strong>Recomendaciones Inteligentes de Presupuesto</strong> - Sugerencias de optimización de presupuesto impulsadas por IA</li>
                 <li><strong>Motor de Predicción de Gastos</strong> - Anticipa gastos futuros basado en datos históricos</li>
                 <li><strong>Análisis de Tendencias e Insights</strong> - Identifica patrones de gasto y oportunidades de optimización</li>
-                <li><strong>Recomendaciones Financieras Diarias</strong> - Consejos automáticos diarios basados en tus patrones de gasto</li>
-                <li><strong>Asesor Financiero Interactivo</strong> - Orientación de IA bajo demanda para decisiones financieras específicas</li>
-                <li><strong>Análisis Avanzado de Gastos</strong> - Insights profundos sobre tu comportamiento financiero</li>
+                <li><strong>Recomendaciones Inteligentes Diarias</strong> - Consejos automáticos diarios basados en tus patrones de gasto</li>
+                <li><strong>Asistente de IA Interactivo</strong> - Orientación de IA bajo demanda para preguntas sobre tus gastos</li>
+                <li><strong>Análisis Avanzado de Gastos</strong> - Insights profundos sobre tus hábitos diarios</li>
             </ul>
             
             <h2>Beneficios Clave</h2>
             <ul>
-                <li>Automatiza la toma de decisiones financieras</li>
+                <li>Automatiza las decisiones de gasto diarias</li>
                 <li>Reduce la categorización manual en un 95%</li>
-                <li>Mejora las puntuaciones de salud financiera</li>
+                <li>Mejora tu puntuación de hábitos de gasto</li>
                 <li>Predice y previene el gasto excesivo</li>
-                <li>Obtén orientación financiera personalizada</li>
+                <li>Obtén orientación personalizada sobre tus gastos</li>
                 <li>Disponible en 3 idiomas</li>
                 <li>Procesamiento e insights en tiempo real</li>
             </ul>
@@ -776,7 +776,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Cifrado AES-256 para datos sensibles</li>
                 <li>Procesamiento OCR local - sin transmisión externa de datos</li>
                 <li>Análisis de IA que prioriza la privacidad</li>
-                <li>Estándares de cumplimiento GDPR y financiero</li>
+                <li>Estándares de cumplimiento GDPR e industria</li>
             </ul>
         </section>
       `
@@ -784,19 +784,19 @@ function getPageContent(route: string, lang: string = 'en'): string {
     'sk': {
       '/': `
         <section>
-            <h1>Inteligentné Riadenie Osobných Financií</h1>
-            <p>Prevezmi kontrolu nad svojimi financiami s komplexným sledovaním výdavkov, nástrojmi rozpočtu a AI-poháňanými poznatkami od FinanzerPro.</p>
+            <h1>Inteligentný Sledovač Výdavkov s AI</h1>
+            <p>Kaptia mení účtenky, hlasové poznámky a výpisy na jasný obraz o vašich výdavkoch - s rozpočtami a AI-poháňanými prehľadmi.</p>
             
             <h2>Hlavné Funkcie</h2>
             <ul>
                 <li>Sledovanie Výdavkov a Príjmov</li>
                 <li>Správa Rozpočtu</li>
-                <li>Finančné Ciele</li>
+                <li>Sporiteľské Ciele</li>
                 <li>AI-Poháňaná Kategorizácia</li>
                 <li>OCR Skenovanie Účteniek</li>
                 <li>Mobilné QR Kód Nahrávanie</li>
                 <li>Cloudové Zálohovanie a Export</li>
-                <li>Analýza Finančného Zdravia</li>
+                <li>Analýza Návykov Míňania</li>
             </ul>
             
             <h2>Predplatné Plány</h2>
@@ -815,7 +815,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/pricing': `
         <section>
             <h1>Cenové Plány</h1>
-            <p>Vyber si perfektný plán pre svoje potreby finančného riadenia</p>
+            <p>Vyber si perfektný plán pre svoje potreby sledovania</p>
             
             <div>
                 <h2>Bezplatný Plán - $0/mesiac</h2>
@@ -830,7 +830,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Neobmedzené transakcie</li>
                     <li>Správa rozpočtu</li>
-                    <li>Finančné ciele</li>
+                    <li>Sporiteľské ciele</li>
                     <li>AI kategorizácia výdavkov</li>
                     <li>OCR skenovanie účteniek</li>
                     <li>Mobilné QR kód nahrávanie</li>
@@ -841,7 +841,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Všetko v Štandardnom</li>
                     <li>Pokročilé AI poznatky</li>
-                    <li>Analýza finančného zdravia</li>
+                    <li>Analýza návykov míňania</li>
                     <li>Prediktívne prognózy</li>
                     <li>Cloudové zálohovanie a export</li>
                     <li>Spolupracujúce ciele</li>
@@ -853,7 +853,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/help': `
         <section>
             <h1>Pomoc a Dokumentácia</h1>
-            <p>Kompletný sprievodca efektívnym používaním FinanzerPro</p>
+            <p>Kompletný sprievodca efektívnym používaním Kaptia</p>
             
             <h2>Začíname</h2>
             <ul>
@@ -877,11 +877,11 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/contact': `
         <section>
             <h1>Kontaktovať Podporu</h1>
-            <p>Získaj pomoc s FinanzerPro</p>
+            <p>Získaj pomoc s Kaptia</p>
             
             <h2>Kanály Podpory</h2>
             <ul>
-                <li>Email: support@finanzerpro.com</li>
+                <li>Email: support@kaptia.app</li>
                 <li>Živý chat (dostupný 9:00 - 17:00 EST)</li>
                 <li>Dokumentácia pomoci</li>
                 <li>Komunitné fórum</li>
@@ -898,8 +898,8 @@ function getPageContent(route: string, lang: string = 'en'): string {
       `,
       '/auth': `
         <section>
-            <h1>Prihlásiť sa do FinanzerPro</h1>
-            <p>Prihlás sa do svojho účtu pre prístup k pokročilým finančným nástrojom</p>
+            <h1>Prihlásiť sa do Kaptia</h1>
+            <p>Prihlás sa do svojho účtu pre prístup k inteligentným sledovacím nástrojom</p>
             
             <h2>Vytvoriť Nový Účet</h2>
             <ul>
@@ -910,18 +910,18 @@ function getPageContent(route: string, lang: string = 'en'): string {
             </ul>
             
             <h2>Už Máš Účet?</h2>
-            <p>Jednoducho sa prihlás a pokračuj v správe svojich financií</p>
+            <p>Jednoducho sa prihlás a pokračuj v sledovaní svojich výdavkov</p>
         </section>
       `,
       '/privacy-policy': `
         <section>
             <h1>Zásady Ochrany Súkromia</h1>
-            <p>FinanzerPro sa zaväzuje chrániť vaše osobné a finančné údaje</p>
+            <p>Kaptia sa zaväzuje chrániť vaše osobné údaje</p>
             
             <h2>Zhromažďovanie Údajov</h2>
             <ul>
                 <li>Informácie o účte</li>
-                <li>Finančné transakcie</li>
+                <li>Sledované transakcie</li>
                 <li>Používanie aplikácie</li>
                 <li>Technické údaje zariadenia</li>
             </ul>
@@ -938,7 +938,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/terms-of-service': `
         <section>
             <h1>Podmienky Služby</h1>
-            <p>Prečítajte si podmienky používania služby FinanzerPro</p>
+            <p>Prečítajte si podmienky používania služby Kaptia</p>
             
             <h2>Používanie Služby</h2>
             <ul>
@@ -950,9 +950,9 @@ function getPageContent(route: string, lang: string = 'en'): string {
             
             <h2>Obmedzeniya Zodpovednosti</h2>
             <ul>
-                <li>Presnosť finančných údajov</li>
+                <li>Presnosť sledovaných údajov</li>
                 <li>Dostupnosť služby</li>
-                <li>Použitie finančných rád</li>
+                <li>Použitie návrhov generovaných AI</li>
                 <li>Zálohovanie údajov</li>
             </ul>
         </section>
@@ -960,7 +960,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/cookie-policy': `
         <section>
             <h1>Pravidlá Používania Cookies</h1>
-            <p>Informácie o tom, ako FinanzerPro používa cookies</p>
+            <p>Informácie o tom, ako Kaptia používa cookies</p>
             
             <h2>Typy Cookies</h2>
             <ul>
@@ -981,29 +981,29 @@ function getPageContent(route: string, lang: string = 'en'): string {
       `,
       '/features': `
         <section>
-            <h1>Finančná Inteligencia Poháňaná AI</h1>
-            <p>Transformujte financie vášho podnikania s 9 inteligentnými AI funkciami, ktoré sa učia, prispôsobujú a optimalizujú vaše finančné rozhodnutia v reálnom čase.</p>
+            <h1>Inteligencia Míňania Poháňaná AI</h1>
+            <p>9 inteligentných AI funkcií, ktoré sa učia, prispôsobujú a organizujú vaše míňanie v reálnom čase.</p>
             
             <h2>Základné AI Funkcie</h2>
             <ul>
                 <li><strong>Inteligentná Kategorizácia Výdavkov</strong> - Automaticky kategorizuje transakcie pomocou strojového učenia</li>
-                <li><strong>Prediktívna Finančná Analytika</strong> - Predpovedá vzorce míňania a trendy peňažných tokov</li>
-                <li><strong>Hodnotenie Finančného Zdravia</strong> - Hodnotenie vášho finančného blahobytu v reálnom čase</li>
+                <li><strong>Prediktívna Analytika Míňania</strong> - Predpovedá vzorce míňania a nadchádzajúce trendy</li>
+                <li><strong>Hodnotenie Návykov Míňania</strong> - Hodnotenie vašich návykov v reálnom čase</li>
                 <li><strong>Inteligentné Rozpočtové Odporúčania</strong> - Návrhy optimalizácie rozpočtu poháňané AI</li>
                 <li><strong>Engine Predikcie Výdavkov</strong> - Predpovedá budúce výdavky na základe historických údajov</li>
                 <li><strong>Analýza Trendov a Poznatky</strong> - Identifikuje vzorce míňania a príležitosti na optimalizáciu</li>
-                <li><strong>Denné Finančné Odporúčania</strong> - Personalizované denné tipy na zlepšenie financií</li>
-                <li><strong>Kontextové Finančné Tipy</strong> - Inteligentné poradenstvo na základe vašej aktuálnej finančnej situácie</li>
-                <li><strong>Pokročilá Analytika Míňania</strong> - Hlboké poznatky o vašom finančnom správaní</li>
+                <li><strong>Denné Inteligentné Odporúčania</strong> - Personalizované denné tipy založené na vašich vzorcoch míňania</li>
+                <li><strong>Kontextové Tipy Míňania</strong> - Inteligentné tipy na základe vašej aktuálnej situácie míňania</li>
+                <li><strong>Pokročilá Analytika Míňania</strong> - Hlboké poznatky o vašich každodenných návykoch</li>
             </ul>
             
             <h2>Kľúčové Výhody</h2>
             <ul>
-                <li>Automatizácia finančného rozhodovania</li>
+                <li>Automatizácia každodenných rozhodnutí o míňaní</li>
                 <li>Zníženie manuálnej kategorizácie o 95%</li>
-                <li>Zlepšenie skóre finančného zdravia</li>
+                <li>Zlepšenie skóre návykov míňania</li>
                 <li>Predpovedanie a prevencia nadmerného míňania</li>
-                <li>Získanie personalizovaného finančného vedenia</li>
+                <li>Získanie personalizovaného vedenia míňania</li>
                 <li>Dostupné v 3 jazykoch</li>
                 <li>Spracovanie a poznatky v reálnom čase</li>
             </ul>
@@ -1013,7 +1013,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>AES-256 šifrovanie pre citlivé údaje</li>
                 <li>Lokálne OCR spracovanie - žiadny externý prenos údajov</li>
                 <li>AI analýza s prioritou súkromia</li>
-                <li>GDPR a finančné štandardy compliance</li>
+                <li>GDPR a priemyselné štandardy compliance</li>
             </ul>
         </section>
       `

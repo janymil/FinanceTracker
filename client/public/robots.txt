@@ -29,7 +29,7 @@ Disallow: /mobile-upload/
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://finanzerpro.com/sitemap.xml
+Sitemap: https://kaptia.app/sitemap.xml
 
 # Crawl delay
 Crawl-delay: 1

@@ -27,15 +27,15 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">{t("FinanzerPro")}</h3>
+            <h3 className="text-lg font-semibold">{t("Kaptia")}</h3>
             <p className="text-sm text-muted-foreground">
-              {t("Take control of your finances with intelligent expense tracking, budgeting, and AI-powered insights.")}
+              {t("Snap receipts, speak expenses, and let AI turn your everyday spending into clear, useful insights.")}
             </p>
             <div className="text-sm text-muted-foreground">
               <p>{t("NutriNova LLC")}</p>
               <p>{t("2105 Vista Oeste NW")}</p>
               <p>{t("Albuquerque, NM 87120")}</p>
-              <p>{t("info@finanzerpro.com")}</p>
+              <p>{t("info@kaptia.app")}</p>
             </div>
           </div>
 
@@ -73,7 +73,7 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
         
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-muted-foreground">
-            {t("© 2025 FinanzerPro. All rights reserved.")}
+            {t("© 2025 Kaptia. All rights reserved.")}
           </div>
           <div className="flex items-center space-x-6 text-sm">
             <Link href="/privacy-policy" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">

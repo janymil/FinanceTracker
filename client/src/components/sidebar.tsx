@@ -37,7 +37,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
-  const { user } = useAuth();
+  const { user, clerkUser } = useAuth();
   const { t } = useTranslation();
   const location = useLocation();
   const [currentPath] = location;
@@ -58,7 +58,9 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
 
   const currentPlan = databaseUser?.plan || user?.plan || 'free';
 
-  if (!user) {
+  // Only hide the navigation when there is no authenticated user at all.
+  // A missing database row (temporary sync issue) must not remove the sidebar.
+  if (!user && !clerkUser) {
     return null;
   }
 
@@ -193,7 +195,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
             <div className="flex items-center">
               <TrendingUp className="h-8 w-8 text-primary mr-3" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
-                FinanzerPro
+                Kaptia
               </span>
             </div>
           )}

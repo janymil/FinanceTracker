@@ -3,6 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import LanguageGuard from "@/components/LanguageGuard";
+import { ErrorBoundary } from "react-error-boundary";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import { useState, useEffect } from "react";
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -58,10 +60,46 @@ const AppLoader = () => (
   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-gray-600 dark:text-gray-300">Loading FinanzerPro...</p>
+      <p className="text-gray-600 dark:text-gray-300">Loading Kaptia...</p>
     </div>
   </div>
 );
+
+// Last-resort fallback so a single broken component never blanks the whole app
+function AppErrorFallback({ error, resetErrorBoundary }: { error: any; resetErrorBoundary: () => void }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-6">
+      <div className="max-w-md w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 text-center shadow-xl">
+        <div className="mx-auto h-12 w-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+          <span className="text-2xl" role="img" aria-label="Warning">!</span>
+        </div>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Something went wrong</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+          The page hit an unexpected error. Your data is safe - try again or reload the page.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={resetErrorBoundary}
+            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+          >
+            Try again
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            Reload
+          </button>
+        </div>
+        {import.meta.env.DEV && error ? (
+          <pre className="mt-4 max-h-32 overflow-auto text-left text-xs bg-gray-100 dark:bg-gray-900 text-red-600 dark:text-red-400 rounded p-3 whitespace-pre-wrap">
+            {String(error?.message || error)}
+          </pre>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function Router() {
   // Track page views when routes change
@@ -159,7 +197,13 @@ function AppContent() {
 
   return (
     <>
-      <Router />
+      <ScrollToTop />
+      <ErrorBoundary
+        FallbackComponent={AppErrorFallback}
+        onError={(error, info) => console.error('Unhandled app error:', error, info)}
+      >
+        <Router />
+      </ErrorBoundary>
       <SignedOut>
         <CookieBanner />
       </SignedOut>
@@ -168,13 +212,21 @@ function AppContent() {
 }
 
 export function AuthenticatedApp() {
-  const { user: clerkUser, isLoaded } = useUser();
+  const { user: clerkUser, isLoaded, isSignedIn } = useUser();
+  const [currentPath, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  
 
-  
-  // Use Clerk user directly for faster loading in production
+  // Keep the language prefix when bouncing an anonymous visitor to sign-in
+  const currentLang = currentPath.match(/^\/([a-z]{2})(\/|$)/)?.[1] || 'en';
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      setLocation(`/${currentLang}/auth#sign-in`);
+    }
+  }, [isLoaded, isSignedIn, currentLang, setLocation]);
+
+  // Wait for Clerk to resolve the session before rendering the app shell
   if (!isLoaded || !clerkUser) {
     return <AppLoader />;
   }

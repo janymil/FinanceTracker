@@ -27,7 +27,7 @@ export async function handleContactForm(req: Request, res: Response) {
     });
 
     const mailOptions = {
-      from: `"FinanzerPro Contact Form" <info@finanzerpro.com>`,
+      from: `"Kaptia Contact Form" <info@kaptia.app>`,
       to: process.env.EMAIL_TO,
       subject: `[Contact Form] ${subject}`,
       text: `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`

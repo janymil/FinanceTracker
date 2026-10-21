@@ -95,6 +95,58 @@
 }
 
 @layer utilities {
+  /* Brand gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400;
+  }
+
+  /* Glassmorphism surfaces */
+  .glass-card {
+    @apply bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-gray-200/80 dark:border-white/10;
+  }
+
+  /* Subtle blueprint grid */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(99, 102, 241, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(99, 102, 241, 0.07) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .dark .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(129, 140, 248, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(129, 140, 248, 0.08) 1px, transparent 1px);
+  }
+
+  /* Marquee ticker */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 36s linear infinite;
+  }
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  /* Floating elements */
+  .animate-float {
+    animation: float 7s ease-in-out infinite;
+  }
+  .animate-float-slow {
+    animation: float 10s ease-in-out infinite;
+  }
+
+  /* Scanner beam for receipt demo */
+  .scan-beam {
+    animation: scan-beam 3.2s ease-in-out infinite;
+  }
+
+  /* Voice waveform bars */
+  .wave-bar {
+    transform-origin: bottom;
+    animation: wave-bar 1.1s ease-in-out infinite;
+  }
+
   .text-success {
     color: hsl(var(--success));
   }
@@ -137,6 +189,61 @@
   
   .border-premium {
     border-color: hsl(var(--premium));
+  }
+}
+
+/* Landing page keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes scan-beam {
+  0%, 100% { top: 8%; opacity: 0; }
+  15% { opacity: 1; }
+  50% { top: 78%; opacity: 1; }
+  65% { opacity: 0; }
+}
+
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+@keyframes aurora-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, -4%) scale(1.12); }
+  100% { transform: translate(-4%, 5%) scale(0.96); }
+}
+
+@keyframes chip-pop {
+  0%, 100% { opacity: 0.45; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-4px); }
+}
+
+.animate-chip {
+  animation: chip-pop 3.6s ease-in-out infinite;
+}
+
+.aurora-blob {
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .animate-float,
+  .animate-float-slow,
+  .scan-beam,
+  .wave-bar,
+  .aurora-blob,
+  .animate-chip {
+    animation: none !important;
   }
 }
 

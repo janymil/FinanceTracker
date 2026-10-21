@@ -40,7 +40,7 @@ export default function Navigation() {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <TrendingUp className="h-8 w-8 text-primary mr-3" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">Kaptia</span>
             </div>
             <div className="hidden md:block ml-10">
               <div className="flex items-baseline space-x-4">

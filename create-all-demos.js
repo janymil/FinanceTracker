@@ -10,19 +10,19 @@ const __dirname = path.dirname(__filename);
 // Professional demo scripts for each feature and language
 const demoScripts = {
   'en-us': {
-    categorization: "Experience FinanzerPro's intelligent AI categorization system. Simply upload your receipt, and watch our advanced AI instantly analyze and categorize your expense with 95% accuracy. No more manual entry - just smart, automatic organization of your financial data.",
-    tips: "Discover FinanzerPro's personalized AI financial insights. Our advanced algorithms analyze your spending patterns, identify opportunities for savings, and provide actionable recommendations tailored specifically to your financial goals and lifestyle.",
-    health: "Unlock your complete financial picture with FinanzerPro's AI health analysis. Our comprehensive system examines your income, expenses, debts, and savings to calculate a detailed health score and provide specific improvement strategies."
+    categorization: "Experience Kaptia's intelligent AI categorization system. Simply upload your receipt, and watch our advanced AI instantly analyze and categorize your expense with 95% accuracy. No more manual entry - just smart, automatic organization of your financial data.",
+    tips: "Discover Kaptia's personalized AI financial insights. Our advanced algorithms analyze your spending patterns, identify opportunities for savings, and provide actionable recommendations tailored specifically to your financial goals and lifestyle.",
+    health: "Unlock your complete financial picture with Kaptia's AI health analysis. Our comprehensive system examines your income, expenses, debts, and savings to calculate a detailed health score and provide specific improvement strategies."
   },
   'es-pe': {
-    categorization: "Experimenta el sistema inteligente de categorización AI de FinanzerPro. Simplemente sube tu recibo y observa cómo nuestra IA avanzada analiza y categoriza instantáneamente tu gasto con 95% de precisión. No más entrada manual - solo organización inteligente y automática de tus datos financieros.",
-    tips: "Descubre los insights financieros personalizados de FinanzerPro. Nuestros algoritmos avanzados analizan tus patrones de gasto, identifican oportunidades de ahorro y proporcionan recomendaciones accionables adaptadas específicamente a tus metas financieras y estilo de vida.",
-    health: "Desbloquea tu panorama financiero completo con el análisis de salud AI de FinanzerPro. Nuestro sistema integral examina tus ingresos, gastos, deudas y ahorros para calcular un puntaje detallado de salud y proporcionar estrategias específicas de mejora."
+    categorization: "Experimenta el sistema inteligente de categorización AI de Kaptia. Simplemente sube tu recibo y observa cómo nuestra IA avanzada analiza y categoriza instantáneamente tu gasto con 95% de precisión. No más entrada manual - solo organización inteligente y automática de tus datos financieros.",
+    tips: "Descubre los insights financieros personalizados de Kaptia. Nuestros algoritmos avanzados analizan tus patrones de gasto, identifican oportunidades de ahorro y proporcionan recomendaciones accionables adaptadas específicamente a tus metas financieras y estilo de vida.",
+    health: "Desbloquea tu panorama financiero completo con el análisis de salud AI de Kaptia. Nuestro sistema integral examina tus ingresos, gastos, deudas y ahorros para calcular un puntaje detallado de salud y proporcionar estrategias específicas de mejora."
   },
   'sk-sk': {
-    categorization: "Zažite inteligentný AI kategorizačný systém FinanzerPro. Jednoducho nahrajte svoj účet a sledujte, ako naša pokročilá AI okamžite analyzuje a kategorizuje váš výdavok s 95% presnosťou. Žiadne manuálne zadávanie - len inteligentná, automatická organizácia vašich finančných údajov.",
-    tips: "Objavte personalizované AI finančné poznatky FinanzerPro. Naše pokročilé algoritmy analyzují vaše vzory útrat, identifikujú príležitosti na úspory a poskytujú realizovateľné odporúčania prispôsobené špecificky vašim finančným cieľom a životnému štýlu.",
-    health: "Odomknite váš kompletný finančný obraz s AI analýzou zdravia FinanzerPro. Náš komplexný systém skúma vaše príjmy, výdavky, dlhy a úspory na výpočet detailného skóre zdravia a poskytnutie špecifických stratégií zlepšenia."
+    categorization: "Zažite inteligentný AI kategorizačný systém Kaptia. Jednoducho nahrajte svoj účet a sledujte, ako naša pokročilá AI okamžite analyzuje a kategorizuje váš výdavok s 95% presnosťou. Žiadne manuálne zadávanie - len inteligentná, automatická organizácia vašich finančných údajov.",
+    tips: "Objavte personalizované AI finančné poznatky Kaptia. Naše pokročilé algoritmy analyzují vaše vzory útrat, identifikujú príležitosti na úspory a poskytujú realizovateľné odporúčania prispôsobené špecificky vašim finančným cieľom a životnému štýlu.",
+    health: "Odomknite váš kompletný finančný obraz s AI analýzou zdravia Kaptia. Náš komplexný systém skúma vaše príjmy, výdavky, dlhy a úspory na výpočet detailného skóre zdravia a poskytnutie špecifických stratégií zlepšenia."
   }
 };
 
@@ -34,7 +34,7 @@ const voiceSettings = {
 };
 
 async function createAllDemoVideos() {
-  console.log('🎬 Creating all FinanzerPro demo videos with ElevenLabs narration...');
+  console.log('🎬 Creating all Kaptia demo videos with ElevenLabs narration...');
   
   const outputDir = path.join(__dirname, 'public', 'demo-videos');
   await fs.mkdir(outputDir, { recursive: true });
@@ -140,14 +140,14 @@ async function createProfessionalVideo(audioPath, outputPath, feature, language,
         `fade=in:0:30,fade=out:${Math.max(0, (duration*30)-30)}:30`,
         // Semi-transparent overlay
         'drawbox=x=0:y=0:w=1280:h=720:color=black@0.4:t=fill',
-        // FinanzerPro branding
-        'drawtext=text=FinanzerPro:fontsize=48:fontcolor=white:x=50:y=50:fontfile=/System/Library/Fonts/Arial.ttf',
+        // Kaptia branding
+        'drawtext=text=Kaptia:fontsize=48:fontcolor=white:x=50:y=50:fontfile=/System/Library/Fonts/Arial.ttf',
         // Feature title
         `drawtext=text='${title}':fontsize=36:fontcolor=white:x=50:y=120:fontfile=/System/Library/Fonts/Arial.ttf`,
         // AI-powered badge
         'drawtext=text="AI-Powered":fontsize=24:fontcolor=#FFD700:x=50:y=180:fontfile=/System/Library/Fonts/Arial.ttf',
         // Call to action
-        'drawtext=text="Try FinanzerPro Today":fontsize=28:fontcolor=white:x=(w-text_w)/2:y=600:fontfile=/System/Library/Fonts/Arial.ttf'
+        'drawtext=text="Try Kaptia Today":fontsize=28:fontcolor=white:x=(w-text_w)/2:y=600:fontfile=/System/Library/Fonts/Arial.ttf'
       ].join(','),
       '-c:v', 'libx264',
       '-c:a', 'aac',

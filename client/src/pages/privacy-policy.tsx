@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
   const { requiresGDPR, requiresCCPA, loading: locationLoading } = useGeolocation();
   
   useEffect(() => {
-    document.title = "Privacy Policy - FinanzerPro";
+    document.title = "Privacy Policy - Kaptia";
   }, []);
 
   const handleLogin = () => {
@@ -199,7 +199,7 @@ export default function PrivacyPolicy() {
                 <h3 className="text-lg font-semibold mb-3">{t("gdpr.dpo.title")}</h3>
                 <p className="mb-4">{t("gdpr.dpo.description")}</p>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                  <p className="text-sm"><strong>{t("gdpr.dpo.contact")}</strong> dpo@finanzerpro.com</p>
+                  <p className="text-sm"><strong>{t("gdpr.dpo.contact")}</strong> dpo@kaptia.app</p>
                   <p className="text-sm"><strong>{t("gdpr.dpo.responsibilities")}</strong> {t("gdpr.dpo.responsibilities_desc")}</p>
                 </div>
               </div>
@@ -218,8 +218,8 @@ export default function PrivacyPolicy() {
                 <h3 className="text-lg font-semibold mb-3">{t("gdpr.exercise_rights.title")}</h3>
                 <p className="mb-4">{t("gdpr.exercise_rights.description")}</p>
                 <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
-                  <p className="text-sm"><strong>{t("gdpr.exercise_rights.email")}</strong> privacy@finanzerpro.com</p>
-                  <p className="text-sm"><strong>{t("gdpr.exercise_rights.dpo_email")}</strong> dpo@finanzerpro.com</p>
+                  <p className="text-sm"><strong>{t("gdpr.exercise_rights.email")}</strong> privacy@kaptia.app</p>
+                  <p className="text-sm"><strong>{t("gdpr.exercise_rights.dpo_email")}</strong> dpo@kaptia.app</p>
                   <p className="text-sm"><strong>{t("gdpr.exercise_rights.response_time")}</strong> {t("gdpr.exercise_rights.response_desc")}</p>
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function PrivacyPolicy() {
                 <h3 className="text-lg font-semibold mb-3">{t("ccpa.exercise_rights.title")}</h3>
                 <p className="mb-4">{t("ccpa.exercise_rights.description")}</p>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.email")}</strong> privacy@finanzerpro.com</p>
+                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.email")}</strong> privacy@kaptia.app</p>
                   <p className="text-sm"><strong>{t("ccpa.exercise_rights.phone")}</strong> +1 (505) 555-0123</p>
                   <p className="text-sm"><strong>{t("ccpa.exercise_rights.response_time")}</strong> {t("ccpa.exercise_rights.response_desc")}</p>
                 </div>

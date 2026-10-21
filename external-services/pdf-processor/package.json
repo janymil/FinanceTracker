@@ -2,7 +2,7 @@
 {
   "name": "pdf-processor",
   "version": "1.0.0",
-  "description": "PDF generation service for FinanzerPro",
+  "description": "PDF generation service for Kaptia",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

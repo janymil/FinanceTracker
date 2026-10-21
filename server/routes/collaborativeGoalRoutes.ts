@@ -342,7 +342,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
           
           // Send notification email to existing user
           const { sendGoalInvitationEmail } = await import('../emailService');
-          const goalUrl = `${req.get('origin') || 'https://finanzerpro.com'}/collaborative-goals/${goalId}`;
+          const goalUrl = `${req.get('origin') || 'https://kaptia.app'}/collaborative-goals/${goalId}`;
           
           const emailSent = await sendGoalInvitationEmail({
             recipientEmail: email,
@@ -368,7 +368,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       } else {
         // User doesn't exist - send invitation email
         const { sendGoalInvitationEmail } = await import('../emailService');
-        const goalUrl = `${req.get('origin') || 'https://finanzerpro.com'}/collaborative-goals/${goalId}`;
+        const goalUrl = `${req.get('origin') || 'https://kaptia.app'}/collaborative-goals/${goalId}`;
         
         const emailSent = await sendGoalInvitationEmail({
           recipientEmail: email,

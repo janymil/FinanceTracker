@@ -42,12 +42,12 @@ async function generateExpenseReportPdf(data: MonthlySummary) {
   let yPosition = height - 50;
   
   // Title
-  page.drawText(`FinanzerPro - Expense Report for ${data.month} ${data.year}`, {
+  page.drawText(`Kaptia - Expense Report for ${data.month} ${data.year}`, {
     x: 50,
     y: yPosition,
     size: 20,
     font: helveticaBoldFont,
-    color: rgb(0.31, 0.27, 0.9), // FinanzerPro brand color
+    color: rgb(0.31, 0.27, 0.9), // Kaptia brand color
   });
   
   yPosition -= 40;
@@ -158,7 +158,7 @@ async function generateExpenseReportPdf(data: MonthlySummary) {
   
   yPosition -= 25;
   
-  page.drawText('This report was generated automatically by FinanzerPro.', {
+  page.drawText('This report was generated automatically by Kaptia.', {
     x: 50,
     y: yPosition,
     size: 10,
@@ -177,7 +177,7 @@ async function generateExpenseReportPdf(data: MonthlySummary) {
   });
   
   // Footer
-  page.drawText(`FinanzerPro Financial Report - ${data.month} ${data.year}`, {
+  page.drawText(`Kaptia Financial Report - ${data.month} ${data.year}`, {
     x: 50,
     y: 30,
     size: 8,
@@ -311,7 +311,7 @@ export function ExportTools() {
       // Save PDF
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      saveAs(blob, `finanzerpro-expense-report-${currentMonth}-${currentYear}.pdf`);
+      saveAs(blob, `kaptia-expense-report-${currentMonth}-${currentYear}.pdf`);
       
     } catch (error) {
       console.error('Error generating PDF:', error);

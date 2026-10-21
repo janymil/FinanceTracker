@@ -90,7 +90,7 @@ function generateHTMLTemplate(data: any): string {
     </head>
     <body>
       <div class="header">
-        <div class="logo">FinanzerPro</div>
+        <div class="logo">Kaptia</div>
         <h1>Financial Report</h1>
         <p>${userData.firstName} ${userData.lastName} • ${currentDate}</p>
       </div>

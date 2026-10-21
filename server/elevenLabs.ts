@@ -126,9 +126,9 @@ class ElevenLabsService {
   private getDemoScripts() {
     return {
       categorization_intro: {
-        'en-us': 'Welcome to FinanzerPro\'s AI Transaction Categorization. Watch how our intelligent system automatically categorizes your expenses with 95% accuracy.',
-        'es-pe': 'Bienvenido a la Categorización IA de Transacciones de FinanzerPro. Observa cómo nuestro sistema inteligente categoriza automáticamente tus gastos con 95% de precisión.',
-        'sk-sk': 'Vitajte v AI Kategorizácii Transakcií FinanzerPro. Sledujte ako náš inteligentný systém automaticky kategorizuje vaše výdavky s 95% presnosťou.'
+        'en-us': 'Welcome to Kaptia\'s AI Transaction Categorization. Watch how our intelligent system automatically categorizes your expenses with 95% accuracy.',
+        'es-pe': 'Bienvenido a la Categorización IA de Transacciones de Kaptia. Observa cómo nuestro sistema inteligente categoriza automáticamente tus gastos con 95% de precisión.',
+        'sk-sk': 'Vitajte v AI Kategorizácii Transakcií Kaptia. Sledujte ako náš inteligentný systém automaticky kategorizuje vaše výdavky s 95% presnosťou.'
       },
       categorization_upload: {
         'en-us': 'First, upload any receipt or enter transaction details manually. Our OCR technology instantly reads the receipt.',

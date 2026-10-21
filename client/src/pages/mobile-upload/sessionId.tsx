@@ -142,7 +142,7 @@ export default function MobileUpload() {
             Upload Receipt
           </CardTitle>
           <CardDescription>
-            Scan your receipt to add it to FinanzerPro
+            Scan your receipt to add it to Kaptia
           </CardDescription>
         </CardHeader>
         

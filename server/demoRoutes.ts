@@ -188,19 +188,19 @@ function getDemoScripts() {
   return {
     categorization: {
       'en-us': {
-        intro: 'Watch how FinanzerPro\'s AI automatically categorizes your expenses with 95% accuracy. No manual sorting required.',
+        intro: 'Watch how Kaptia\'s AI automatically categorizes your expenses with 95% accuracy. No manual sorting required.',
         upload: 'Simply upload any receipt or enter transaction details. Our OCR technology instantly reads the receipt.',
         analysis: 'AI analyzes the merchant name, amount, and your spending patterns to suggest the perfect category.',
         result: 'The transaction is categorized with confidence scoring and saved to your financial records automatically.'
       },
       'es-pe': {
-        intro: 'Observa cómo la IA de FinanzerPro categoriza automáticamente tus gastos con 95% de precisión. No se requiere ordenamiento manual.',
+        intro: 'Observa cómo la IA de Kaptia categoriza automáticamente tus gastos con 95% de precisión. No se requiere ordenamiento manual.',
         upload: 'Simplemente sube cualquier recibo o ingresa detalles de transacción. Nuestra tecnología OCR lee instantáneamente el recibo.',
         analysis: 'La IA analiza el nombre del comerciante, cantidad y tus patrones de gasto para sugerir la categoría perfecta.',
         result: 'La transacción se categoriza con puntuación de confianza y se guarda automáticamente en tus registros financieros.'
       },
       'sk-sk': {
-        intro: 'Sledujte ako AI FinanzerPro automaticky kategorizuje vaše výdavky s 95% presnosťou. Nie je potrebné manuálne triedenie.',
+        intro: 'Sledujte ako AI Kaptia automaticky kategorizuje vaše výdavky s 95% presnosťou. Nie je potrebné manuálne triedenie.',
         upload: 'Jednoducho nahrajte akýkoľvek účet alebo zadajte detaily transakcie. Naša OCR technológia okamžite prečíta účet.',
         analysis: 'AI analyzuje názov obchodníka, sumu a vaše vzorce výdavkov na navrhnutie perfektnej kategórie.',
         result: 'Transakcia sa kategorizuje s hodnotením spoľahlivosti a automaticky sa uloží do vašich finančných záznamov.'

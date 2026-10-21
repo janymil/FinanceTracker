@@ -9,7 +9,7 @@ declare global {
 // Initialize Google Analytics and Google Ads - Production Only
 export const initGA = () => {
   // Only initialize in production
-  if (window.location.hostname !== 'finanzerpro.com') {
+  if (window.location.hostname !== 'kaptia.app') {
     return;
   }
 
@@ -37,7 +37,7 @@ export const initGA = () => {
 // Track page views - useful for single-page applications
 export const trackPageView = (url: string) => {
   // Only track in production
-  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
+  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'kaptia.app') return;
   
   const measurementId = 'G-PRRBGDT20Q';
   
@@ -50,7 +50,7 @@ export const trackPageView = (url: string) => {
 // Track Google Ads conversions
 export const trackConversion = (conversionLabel?: string, value?: number, currency?: string) => {
   // Only track in production
-  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
+  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'kaptia.app') return;
   
   const googleAdsId = 'AW-17290659470';
   
@@ -78,7 +78,7 @@ export const trackEvent = (
   value?: number
 ) => {
   // Only track in production
-  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
+  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'kaptia.app') return;
   
   window.gtag('event', action, {
     event_category: category,

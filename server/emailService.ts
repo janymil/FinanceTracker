@@ -51,7 +51,7 @@ export async function sendPaymentFailureNotification(
   const text = `
 Hi ${userName},
 
-We were unable to process your payment for your FinanzerPro subscription.
+We were unable to process your payment for your Kaptia subscription.
 
 Failure reason: ${failureReason}
 
@@ -65,7 +65,7 @@ To update your payment method:
 If you need help, please contact our support team.
 
 Best regards,
-The FinanzerPro Team
+The Kaptia Team
   `.trim();
 
   const html = `
@@ -74,7 +74,7 @@ The FinanzerPro Team
   
   <p>Hi ${userName},</p>
   
-  <p>We were unable to process your payment for your FinanzerPro subscription.</p>
+  <p>We were unable to process your payment for your Kaptia subscription.</p>
   
   <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
     <strong>Failure reason:</strong> ${failureReason}
@@ -93,13 +93,13 @@ The FinanzerPro Team
   
   <p>If you need help, please contact our support team.</p>
   
-  <p>Best regards,<br>The FinanzerPro Team</p>
+  <p>Best regards,<br>The Kaptia Team</p>
 </div>
   `;
 
   return sendEmail({
     to: userEmail,
-    from: 'noreply@finanzerpro.com',
+    from: 'noreply@kaptia.app',
     subject,
     text,
     html
@@ -116,7 +116,7 @@ export async function sendGraceExpiryWarning(
   const text = `
 Hi ${userName},
 
-Your FinanzerPro account access will expire in ${hoursRemaining} hours due to a failed payment.
+Your Kaptia account access will expire in ${hoursRemaining} hours due to a failed payment.
 
 Please update your payment method immediately to avoid service interruption.
 
@@ -128,7 +128,7 @@ To update your payment method:
 If you need help, please contact our support team.
 
 Best regards,
-The FinanzerPro Team
+The Kaptia Team
   `.trim();
 
   const html = `
@@ -138,7 +138,7 @@ The FinanzerPro Team
   <p>Hi ${userName},</p>
   
   <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 20px 0;">
-    <strong>Your FinanzerPro account access will expire in ${hoursRemaining} hours due to a failed payment.</strong>
+    <strong>Your Kaptia account access will expire in ${hoursRemaining} hours due to a failed payment.</strong>
   </div>
   
   <p>Please update your payment method immediately to avoid service interruption.</p>
@@ -154,13 +154,13 @@ The FinanzerPro Team
   
   <p>If you need help, please contact our support team.</p>
   
-  <p>Best regards,<br>The FinanzerPro Team</p>
+  <p>Best regards,<br>The Kaptia Team</p>
 </div>
   `;
 
   return sendEmail({
     to: userEmail,
-    from: 'noreply@finanzerpro.com',
+    from: 'noreply@kaptia.app',
     subject,
     text,
     html
@@ -176,7 +176,7 @@ export async function sendAccountDowngradedNotification(
   const text = `
 Hi ${userName},
 
-Your FinanzerPro account has been downgraded to the Free plan due to payment issues.
+Your Kaptia account has been downgraded to the Free plan due to payment issues.
 
 You can still access basic features, but premium features are now restricted.
 
@@ -189,7 +189,7 @@ To restore your premium access:
 If you need help, please contact our support team.
 
 Best regards,
-The FinanzerPro Team
+The Kaptia Team
   `.trim();
 
   const html = `
@@ -198,7 +198,7 @@ The FinanzerPro Team
   
   <p>Hi ${userName},</p>
   
-  <p>Your FinanzerPro account has been downgraded to the Free plan due to payment issues.</p>
+  <p>Your Kaptia account has been downgraded to the Free plan due to payment issues.</p>
   
   <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
     <strong>You can still access basic features, but premium features are now restricted.</strong>
@@ -216,13 +216,13 @@ The FinanzerPro Team
   
   <p>If you need help, please contact our support team.</p>
   
-  <p>Best regards,<br>The FinanzerPro Team</p>
+  <p>Best regards,<br>The Kaptia Team</p>
 </div>
   `;
 
   return sendEmail({
     to: userEmail,
-    from: 'noreply@finanzerpro.com',
+    from: 'noreply@kaptia.app',
     subject,
     text,
     html
@@ -280,7 +280,7 @@ ${goalUrl}
 Start contributing today and be part of this exciting savings journey!
 
 Best regards,
-The FinanzerPro Team
+The Kaptia Team
     `.trim();
 
     const html = `
@@ -323,33 +323,33 @@ The FinanzerPro Team
   </div>
   
   <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-    <p>Best regards,<br>The FinanzerPro Team</p>
+    <p>Best regards,<br>The Kaptia Team</p>
   </div>
 </div>
     `;
 
     return sendEmail({
       to: recipientEmail,
-      from: 'noreply@finanzerpro.com',
+      from: 'noreply@kaptia.app',
       subject,
       text,
       html
     });
   } else {
     // Email for new users
-    const subject = `${inviterName} invited you to join FinanzerPro and save together!`;
+    const subject = `${inviterName} invited you to join Kaptia and save together!`;
     
     const text = `
 Hi there,
 
-${inviterName} has invited you to join FinanzerPro and participate in their collaborative savings goal "${goalName}"!
+${inviterName} has invited you to join Kaptia and participate in their collaborative savings goal "${goalName}"!
 
 Goal Details:
 • Target Amount: ${formattedAmount}
 • Target Date: ${formattedDate}
 • Description: ${goalDescription}
 
-FinanzerPro is a smart personal finance app that helps you:
+Kaptia is a smart personal finance app that helps you:
 ✓ Track expenses with AI-powered categorization
 ✓ Set and achieve savings goals
 ✓ Collaborate with friends and family on financial goals
@@ -367,13 +367,13 @@ Why collaborative goals work:
 Start your financial journey today!
 
 Best regards,
-The FinanzerPro Team
+The Kaptia Team
     `.trim();
 
     const html = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
   <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-    <h1 style="color: white; margin: 0; font-size: 24px;">🎉 Welcome to FinanzerPro!</h1>
+    <h1 style="color: white; margin: 0; font-size: 24px;">🎉 Welcome to Kaptia!</h1>
     <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">You've been invited to save together</p>
   </div>
   
@@ -381,7 +381,7 @@ The FinanzerPro Team
     <p style="font-size: 16px; color: #333;">Hi there,</p>
     
     <p style="font-size: 16px; color: #333;">
-      <strong>${inviterName}</strong> has invited you to join <strong style="color: #667eea;">FinanzerPro</strong> 
+      <strong>${inviterName}</strong> has invited you to join <strong style="color: #667eea;">Kaptia</strong> 
       and participate in their collaborative savings goal <strong>"${goalName}"</strong>!
     </p>
     
@@ -395,8 +395,8 @@ The FinanzerPro Team
     </div>
     
     <div style="background-color: #e8f4fd; border-radius: 8px; padding: 20px; margin: 25px 0;">
-      <h3 style="margin: 0 0 15px 0; color: #1976D2;">📱 What is FinanzerPro?</h3>
-      <p style="margin: 0; color: #333;">FinanzerPro is a smart personal finance app that helps you:</p>
+      <h3 style="margin: 0 0 15px 0; color: #1976D2;">📱 What is Kaptia?</h3>
+      <p style="margin: 0; color: #333;">Kaptia is a smart personal finance app that helps you:</p>
       <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #555;">
         <li>✓ Track expenses with AI-powered categorization</li>
         <li>✓ Set and achieve savings goals</li>
@@ -424,14 +424,14 @@ The FinanzerPro Team
   
   <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
     <p>Start your financial journey today!</p>
-    <p>Best regards,<br>The FinanzerPro Team</p>
+    <p>Best regards,<br>The Kaptia Team</p>
   </div>
 </div>
     `;
 
     return sendEmail({
       to: recipientEmail,
-      from: 'noreply@finanzerpro.com',
+      from: 'noreply@kaptia.app',
       subject,
       text,
       html

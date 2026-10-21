@@ -20,7 +20,7 @@ async function createSimpleDemo() {
         'xi-api-key': process.env.ELEVENLABS_API_KEY
       },
       body: JSON.stringify({
-        text: "Transform your financial life with FinanzerPro. Upload receipts and watch AI instantly categorize expenses with 95% accuracy. Get personalized financial insights and take control of your money today.",
+        text: "Transform your financial life with Kaptia. Upload receipts and watch AI instantly categorize expenses with 95% accuracy. Get personalized financial insights and take control of your money today.",
         model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: 0.5,

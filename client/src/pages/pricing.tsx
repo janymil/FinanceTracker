@@ -42,10 +42,10 @@ export default function Pricing() {
   return (
     <>
       <SEO 
-        title="Pricing Plans - Choose Your Financial Plan | FinanzerPro"
-        description="Compare FinanzerPro pricing plans. Start free with basic expense tracking or upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features like AI insights and cloud backup."
-        keywords="finanzerpro pricing, subscription plans, expense tracker cost, personal finance app pricing, budget app plans"
-        canonical="https://finanzerpro.com/pricing"
+        title="Pricing Plans - Choose Your Kaptia Plan"
+        description="Compare Kaptia pricing plans. Start free with basic expense tracking or upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features like AI insights and cloud backup."
+        keywords="kaptia pricing, subscription plans, expense tracker cost, personal finance app pricing, budget app plans"
+        canonical="https://kaptia.app/pricing"
       />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Hero Section */}
@@ -53,11 +53,11 @@ export default function Pricing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              Choose Your Perfect
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> Financial Plan</span>
+              Simple pricing,
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> serious value.</span>
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              From basic expense tracking to AI-powered financial insights, we have the right plan for every financial journey.
+              Start free and upgrade when you want more AI horsepower. Cancel anytime.
             </p>
           </div>
         </div>
@@ -112,11 +112,11 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Simple financial overview</span>
+                    <span>Simple spending overview</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized financial tips</span>
+                    <span>Personalized smart tips</span>
                   </div>
                 </div>
                 <Button 
@@ -153,7 +153,7 @@ export default function Pricing() {
                 <div className="text-4xl font-bold text-blue-600">
                   $4.99<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
-                <CardDescription>For users serious about financial management</CardDescription>
+                <CardDescription>For people ready to understand their spending</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
@@ -217,7 +217,7 @@ export default function Pricing() {
                 <div className="text-4xl font-bold text-purple-600">
                   $9.99<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
-                <CardDescription>The ultimate financial management experience</CardDescription>
+                <CardDescription>The full intelligent tracking experience</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
@@ -227,7 +227,7 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI financial tips and insights</span>
+                    <span>AI tips and insights</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
@@ -308,11 +308,11 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Simple financial overview</span>
+                    <span>Simple spending overview</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized financial tips</span>
+                    <span>Personalized smart tips</span>
                   </div>
                 </div>
                 <Button 
@@ -350,7 +350,7 @@ export default function Pricing() {
                   $49.90<span className="text-lg font-normal text-gray-500">/year</span>
                 </div>
                 <div className="text-sm text-green-600 font-medium mt-1">Save $9.98 annually</div>
-                <CardDescription>For users serious about financial management</CardDescription>
+                <CardDescription>For people ready to understand their spending</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
@@ -407,7 +407,7 @@ export default function Pricing() {
                   $99.90<span className="text-lg font-normal text-gray-500">/year</span>
                 </div>
                 <div className="text-sm text-green-600 font-medium mt-1">Save $19.98 annually</div>
-                <CardDescription>The ultimate financial management experience</CardDescription>
+                <CardDescription>The full intelligent tracking experience</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
@@ -417,7 +417,7 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI financial tips and insights</span>
+                    <span>AI tips and insights</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />

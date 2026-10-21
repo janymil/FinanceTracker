@@ -3,7 +3,7 @@ export const PDF_TEMPLATE = `
 <html>
 <head>
     <meta charset="utf-8">
-    <title>FinanzerPro Financial Report - {{MONTH}} {{YEAR}}</title>
+    <title>Kaptia Financial Report - {{MONTH}} {{YEAR}}</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -340,7 +340,7 @@ export const PDF_TEMPLATE = `
     <div class="report-container">
         <!-- Header Section -->
         <div class="header">
-            <h1>FinanzerPro Financial Report</h1>
+            <h1>Kaptia Financial Report</h1>
             <div class="subtitle">Comprehensive Financial Analysis & Insights</div>
             <div class="meta">
                 <div>Period: {{MONTH}} {{YEAR}}</div>
@@ -458,12 +458,12 @@ export const PDF_TEMPLATE = `
 
         <!-- Footer -->
         <div class="footer">
-            <div class="logo">FinanzerPro</div>
+            <div class="logo">Kaptia</div>
             <p>Your Personal Finance Management Solution</p>
-            <p>Visit us at finanzerpro.com</p>
+            <p>Visit us at kaptia.app</p>
             <div class="disclaimer">
                 This report contains confidential financial information. Handle with care and store securely.
-                <br>Generated automatically by FinanzerPro on {{GENERATED_DATE}}.
+                <br>Generated automatically by Kaptia on {{GENERATED_DATE}}.
             </div>
         </div>
     </div>

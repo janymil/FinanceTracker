@@ -2,9 +2,31 @@ import { clerkMiddleware, requireAuth } from '@clerk/express';
 import type { Request, Response, NextFunction } from 'express';
 
 export const setupClerkAuth = (app: any) => {
+  const publishableKey = process.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const secretKey = process.env.CLERK_SECRET_KEY;
+
+  // Loud, actionable validation: a publishable key in CLERK_SECRET_KEY makes every
+  // protected API request return 401, which users experience as "empty/broken dashboard".
+  if (!secretKey) {
+    console.error(
+      '[AUTH] CLERK_SECRET_KEY is missing. Every authenticated API request will return 401.\n' +
+      '       Fix: add CLERK_SECRET_KEY=sk_test_... (or sk_live_...) from Clerk Dashboard -> Configure -> API Keys.'
+    );
+  } else if (!secretKey.startsWith('sk_') || secretKey.includes('REPLACE_WITH')) {
+    console.error(
+      '[AUTH] CLERK_SECRET_KEY is INVALID - it must be a real secret key starting with "sk_test_" or "sk_live_" (current value: "' +
+      secretKey.slice(0, 12) + '...").\n' +
+      '       Fix: Clerk Dashboard -> Configure -> API Keys -> copy the Secret key into .env as CLERK_SECRET_KEY=sk_... .\n' +
+      '       Until this is fixed every authenticated request is rejected with 401 and dashboards render without data.'
+    );
+  }
+  if (publishableKey && !publishableKey.startsWith('pk_')) {
+    console.error('[AUTH] CLERK_PUBLISHABLE_KEY looks invalid - it must start with "pk_test_" or "pk_live_".');
+  }
+
   console.log('Setting up Clerk middleware with keys:', {
-    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
-    secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
+    publishable: publishableKey?.substring(0, 20) + '...',
+    secret: secretKey?.substring(0, 20) + '...'
   });
   
   // Create single Clerk middleware instance

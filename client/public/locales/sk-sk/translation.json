@@ -172,11 +172,11 @@
   "Plans": "Plány", 
   "User Guide": "Používateľská Príručka",
   "FAQ": "Často Kladené Otázky",
-  "Welcome to FinanzerPro": "Vitajte v FinanzerPro",
+  "Welcome to Kaptia": "Vitajte v Kaptia",
   "Your comprehensive personal finance management solution": "Vaše komplexné riešenie správy osobných financií",
-  "FinanzerPro Documentation": "Dokumentácia FinanzerPro",
-  "Complete guide to managing your finances with FinanzerPro's powerful features": "Kompletná príručka na správu vašich financií s mocnými funkciami FinanzerPro",
-  "FinanzerPro is a modern, intelligent personal finance application designed to help you take control of your financial future. With AI-powered insights, comprehensive tracking, and flexible subscription plans, managing your money has never been easier.": "FinanzerPro je moderná, inteligentná aplikácia na správu osobných financií navrhnutá na to, aby vám pomohla prevziať kontrolu nad vaším finančným budúcnosťou. S poznatkami poháňanými AI, komplexným sledovaním a flexibilnými predplatnými plánmi, správa vašich peňazí nikdy nebola jednoduchšia.",
+  "Kaptia Documentation": "Dokumentácia Kaptia",
+  "Complete guide to managing your finances with Kaptia's powerful features": "Kompletná príručka na správu vašich financií s mocnými funkciami Kaptia",
+  "Kaptia is a modern, intelligent personal finance application designed to help you take control of your financial future. With AI-powered insights, comprehensive tracking, and flexible subscription plans, managing your money has never been easier.": "Kaptia je moderná, inteligentná aplikácia na správu osobných financií navrhnutá na to, aby vám pomohla prevziať kontrolu nad vaším finančným budúcnosťou. S poznatkami poháňanými AI, komplexným sledovaním a flexibilnými predplatnými plánmi, správa vašich peňazí nikdy nebola jednoduchšia.",
   "Smart Analytics": "Inteligentné Analýzy",
   "AI-powered insights and trend predictions for better financial decisions": "Poznatky poháňané AI a predpovede trendov pre lepšie finančné rozhodnutia",
   "Secure Data Protection": "Bezpečná Ochrana Údajov",
@@ -298,15 +298,15 @@
   "No, there is no free trial for paid plans. However, you can start with our free plan to explore basic features before upgrading to Standard or Premium.": "Nie, pre platené plány nie je dostupná bezplatná skúška. Môžete však začať s naším bezplatným plánom a preskúmať základné funkcie pred aktualizáciou na štandardný alebo premium.",
   "How secure is my financial data?": "Ako bezpečné sú moje finančné údaje?",
   "We use industry-standard encryption to protect your data. Your information is encrypted both in transit and at rest.": "Používame šifrovanie podľa priemyselných štandardov na ochranu vašich údajov. Vaše informácie sú šifrované počas prenosu aj pri ukladaní.",
-  "FinanzerPro": "FinanzerPro",
+  "Kaptia": "Kaptia",
   "Take control of your financial future with intelligent expense tracking and budgeting.": "Prevezmite kontrolu nad finančnou budúcnosťou s inteligentným sledovaním výdavkov a rozpočtovaním.",
-  "© 2025 FinanzerPro. All rights reserved.": "© 2025 FinanzerPro. Všetky práva vyhradené.",
+  "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. Všetky práva vyhradené.",
   "Terms of Service": "Podmienky služby",
   "Last updated: June 14, 2025": "Posledná aktualizácia: 14. jún 2025",
   "1. Acceptance of Terms": "1. Prijatie podmienok",
-  "By accessing and using FinanzerPro, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.": "Prístupom a používaním FinanzerPro prijímate a súhlasíte s podmienkami tejto zmluvy. Ak nesúhlasíte s týmito podmienkami, nepoužívajte našu službu.",
+  "By accessing and using Kaptia, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.": "Prístupom a používaním Kaptia prijímate a súhlasíte s podmienkami tejto zmluvy. Ak nesúhlasíte s týmito podmienkami, nepoužívajte našu službu.",
   "2. Description of Service": "2. Popis služby",
-  "FinanzerPro is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "FinanzerPro je aplikácia na správu osobných financií, ktorá pomáha používateľom sledovať výdavky, spravovať rozpočty, stanoviť finančné ciele a získať prehľad o vzorcoch utrácania.",
+  "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "Kaptia je aplikácia na správu osobných financií, ktorá pomáha používateľom sledovať výdavky, spravovať rozpočty, stanoviť finančné ciele a získať prehľad o vzorcoch utrácania.",
   "2.1 Service Plans": "2.1 Servisné plány",
   "Free Plan:": "Bezplatný plán:",
   "Basic transaction tracking (limited to 100 transactions)": "Základné sledovanie transakcií (obmedzené na 100 transakcií)",
@@ -321,7 +321,7 @@
   "You are responsible for all activities under your account": "Ste zodpovední za všetky aktivity pod vaším účtom",
   "Notify us immediately of any unauthorized use": "Okamžite nás upozornite na akékoľvek neoprávnené použitie",
   "4. Acceptable Use": "4. Prijateľné používanie",
-  "You agree not to use FinanzerPro to:": "Súhlasíte, že nebudete používať FinanzerPro na:",
+  "You agree not to use Kaptia to:": "Súhlasíte, že nebudete používať Kaptia na:",
   "Violate any applicable laws or regulations": "Porušovanie platných zákonov alebo predpisov",
   "Transmit any harmful, threatening, or offensive content": "Prenášanie škodlivého, hrozivého alebo urážlivého obsahu",
   "Attempt to gain unauthorized access to our systems": "Pokus o získanie neoprávneného prístupu k našim systémom",
@@ -344,16 +344,16 @@
   "7. Service Availability": "7. Dostupnosť služby",
   "While we strive for 99.9% uptime, we do not guarantee uninterrupted service. We may temporarily suspend service for maintenance or updates.": "Hoci sa snažíme o 99,9% dostupnosť, nezaručujeme neprerušenú službu. Môžeme dočasne pozastaviť službu kvôli údržbe alebo aktualizáciám.",
   "8. Limitation of Liability": "8. Obmedzenie zodpovednosti",
-  "FinanzerPro is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service.": "FinanzerPro je poskytovaný \"tak ako je\" bez akýchkoľvek záruk. Nie sme zodpovední za žiadne nepriame, náhodné alebo následné škody vyplývajúce z používania služby.",
+  "Kaptia is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service.": "Kaptia je poskytovaný \"tak ako je\" bez akýchkoľvek záruk. Nie sme zodpovední za žiadne nepriame, náhodné alebo následné škody vyplývajúce z používania služby.",
   "9. Intellectual Property": "9. Duševné vlastníctvo",
-  "The FinanzerPro service, including its design, functionality, and content, is protected by intellectual property laws. You may not copy, modify, or distribute our service.": "Služba FinanzerPro vrátane jej dizajnu, funkčnosti a obsahu je chránená zákonmi o duševnom vlastníctve. Nesmieme kopírovať, upravovať alebo distribuovať našu službu.",
+  "The Kaptia service, including its design, functionality, and content, is protected by intellectual property laws. You may not copy, modify, or distribute our service.": "Služba Kaptia vrátane jej dizajnu, funkčnosti a obsahu je chránená zákonmi o duševnom vlastníctve. Nesmieme kopírovať, upravovať alebo distribuovať našu službu.",
   "10. Termination": "10. Ukončenie",
   "We may terminate or suspend your account immediately if you violate these terms. You may terminate your account at any time through your account settings.": "Môžeme okamžite ukončiť alebo pozastaviť váš účet ak porušíte tieto podmienky. Môžete ukončiť svoj účet kedykoľvek prostredníctvom nastavení účtu.",
   "11. Changes to Terms": "11. Zmeny podmienok",
   "We may modify these terms at any time. We will notify users of significant changes via email or through the service. Continued use constitutes acceptance of modified terms.": "Môžeme upraviť tieto podmienky kedykoľvek. Budeme informovať používateľov o významných zmenách e-mailom alebo prostredníctvom služby. Pokračovanie v používaní znamená prijatie upravených podmienok.",
   "12. Contact Information": "12. Kontaktné informácie",
   "For questions about these Terms of Service, please contact us at:": "Pre otázky o týchto podmienkach služby nás kontaktujte na:",
-  "Email: info@finanzerpro.com": "E-mail: info@finanzerpro.com",
+  "Email: info@kaptia.app": "E-mail: info@kaptia.app",
   "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120",
   "Privacy Policy": "Zásady ochrany súkromia",
   "1. Information We Collect": "1. Informácie ktoré zbierame",
@@ -459,17 +459,17 @@
   "8. Contact Us": "8. Kontaktujte nás",
   "If you have any questions about our use of cookies, please contact us at:": "Ak máte akékoľvek otázky o našom používaní cookies, kontaktujte nás na:",
 
-  "FinanzerPro": "FinanzerPro",
+  "Kaptia": "Kaptia",
   "Take control of your finances with intelligent expense tracking, budgeting, and AI-powered insights.": "Prevezmite kontrolu nad financiami s inteligentným sledovaním výdavkov, rozpočtovaním a AI poznatkami.",
   "NutriNova LLC": "NutriNova LLC",
   "2105 Vista Oeste NW": "2105 Vista Oeste NW",
   "Albuquerque, NM 87120": "Albuquerque, NM 87120",
-  "info@finanzerpro.com": "info@finanzerpro.com",
+  "info@kaptia.app": "info@kaptia.app",
   "Product": "Produkt",
   "Support": "Podpora",
   "Contact Us": "Kontaktujte nás",
   "Help Center": "Centrum pomoci",
-  "© 2025 FinanzerPro. All rights reserved.": "© 2025 FinanzerPro. Všetky práva vyhradené.",
+  "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. Všetky práva vyhradené.",
   "Privacy Policy": "Zásady ochrany súkromia",
   "Terms of Service": "Podmienky služby",
   "Cookie Policy": "Zásady cookies",
@@ -817,9 +817,9 @@
 
   "Frequently Asked Questions": "Často Kladené Otázky",
   "AI Assistant": "AI Asistent",
-  "Ask me anything about FinanzerPro": "Opýtajte sa ma čokoľvek o FinanzerPro",
+  "Ask me anything about Kaptia": "Opýtajte sa ma čokoľvek o Kaptia",
 
-  "How do I get started with FinanzerPro?": "Ako začnem s FinanzerPro?",
+  "How do I get started with Kaptia?": "Ako začnem s Kaptia?",
   "Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions.": "Jednoducho si vytvorte účet a začnite pridaním svojej prvej transakcie. Môžete manuálne zadať výdavky a príjmy, alebo použiť našu funkciu AI kategorizácie (Standard+ plány) na automatickú klasifikáciu vašich transakcií.",
 
   "What are the differences between subscription plans?": "Aké sú rozdiely medzi predplatnými plánmi?",
@@ -849,8 +849,8 @@
   "Can I export my data?": "Môžem exportovať svoje údaje?",
   "Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.": "Áno, Premium používatelia môžu exportovať údaje vo formátoch CSV, Excel alebo JSON. Môžete tiež nastaviť automatické cloudové zálohovanie a importovať údaje z iných finančných aplikácií ako Mint, QuickBooks a YNAB.",
 
-  "Is FinanzerPro available on mobile?": "Je FinanzerPro dostupné na mobile?",
-  "FinanzerPro is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "FinanzerPro je responzívna webová aplikácia, ktorá funguje perfektne v mobilných prehliadačoch. Jednoducho si označte stránku v telefóne pre ľahký prístup kdekoľvek.",
+  "Is Kaptia available on mobile?": "Je Kaptia dostupné na mobile?",
+  "Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "Kaptia je responzívna webová aplikácia, ktorá funguje perfektne v mobilných prehliadačoch. Jednoducho si označte stránku v telefóne pre ľahký prístup kdekoľvek.",
 
   "What widgets are available on the dashboard?": "Aké widgety sú dostupné na nástenke?",
   "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.": "Nástenka zahŕňa Karty Finančného Súhrnu (príjmy/výdavky/bilancia), widget Nedávnych Transakcií, Prehľad Rozpočtu (Standard+), Skóre Finančného Zdravia, AI Finančné Tipy (Premium), Finančnú Maskota (Premium) a Pripomienky Transakcií (Standard+). Všetky widgety sa aktualizujú automaticky.",
@@ -1139,7 +1139,7 @@
   "Handwritten receipts work better when text is clear": "Ručne písané účtenky fungujú lepšie keď je text jasný",
   "Multiple items on one receipt create one transaction for the total": "Viacero položiek na jednej účtenke vytvorí jednu transakciu za celkový súčet",
 
-  "Ask about FinanzerPro features...": "Opýtajte sa na funkcie FinanzerPro...",
+  "Ask about Kaptia features...": "Opýtajte sa na funkcie Kaptia...",
 
   "require_plan": {
     "compact": {
@@ -1436,6 +1436,7 @@
     "insight": "Pozornosť"
   },
   "common": {
+    "success": "Úspech",
     "auto": "Auto",
     "manual": "Manuálne",
     "cancel": "Zrušiť",
@@ -1744,7 +1745,7 @@
   },
 
   "currency": {
-    "welcome_title": "Vitajte v FinanzerPro! 🌎",
+    "welcome_title": "Vitajte v Kaptia! 🌎",
     "welcome_description": "Prosím vyberte svoju preferovanú menu na začiatok. Môžete ju zmeniť neskôr, kým nepridáte vašu prvú transakciu.",
     "choose_description": "🌎 Vyberte si z 15 mien vrátane latinskoamerických opcií:",
     "success_title": "Mena Úspešne Nastavená",
@@ -2291,7 +2292,7 @@
   "financialHealth": "Finančné zdravie",
   "riskAssessment": "Hodnotenie rizika",
   "3. AI-Powered Features and Data Processing": "3. Funkcie poháňané AI a spracovanie dát",
-  "FinanzerPro uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:": "FinanzerPro používa umelú inteligenciu na poskytovanie personalizovaných finančných poznatkov a odporúčaní. Tu je ako spracovávame vaše údaje pre AI spracovanie:",
+  "Kaptia uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:": "Kaptia používa umelú inteligenciu na poskytovanie personalizovaných finančných poznatkov a odporúčaní. Tu je ako spracovávame vaše údaje pre AI spracovanie:",
   "AI Service Provider:": "Poskytovateľ AI služieb:",
   "We use OpenAI's GPT models to analyze spending patterns and generate insights": "Používame modely GPT od OpenAI na analýzu vzorcov výdavkov a generovanie poznatkov",
   "Data Anonymization:": "Anonymizácia údajov:",
@@ -2328,10 +2329,10 @@
 
   "contact": {
     "page_title": "Kontaktujte nás",
-    "seo_title": "Kontaktujte nás - Podpora FinanzerPro | Získajte pomoc a pošlite správy",
-    "seo_description": "Kontaktujte tím podpory FinanzerPro pre pomoc s osobným finančným manažmentom, sledovaním výdavkov, rozpočtami a technickou podporou. Získajte odpovede na vaše otázky rýchlo.",
-    "seo_keywords": "finanzerpro kontakt, zákaznícka podpora, help desk, podpora finančnej aplikácie, pomoc tracker výdavkov, asistencia rozpočtovej aplikácie",
-    "page_description": "Máte otázky o FinanzerPro? Sme tu, aby sme pomohli. Spojte sa s naším tímom podpory a odpovieme čo najrýchlejšie.",
+    "seo_title": "Kontaktujte nás - Podpora Kaptia | Získajte pomoc a pošlite správy",
+    "seo_description": "Kontaktujte tím podpory Kaptia pre pomoc so sledovaním výdavkov, rozpočtami a technickou podporou. Získajte odpovede na vaše otázky rýchlo.",
+    "seo_keywords": "kaptia kontakt, zákaznícka podpora, help desk, podpora finančnej aplikácie, pomoc tracker výdavkov, asistencia rozpočtovej aplikácie",
+    "page_description": "Máte otázky o Kaptia? Sme tu, aby sme pomohli. Spojte sa s naším tímom podpory a odpovieme čo najrýchlejšie.",
     "form_title": "Pošlite nám správu",
     "form_description": "Vyplňte formulár nižšie a odpovieme vám do 24 hodín.",
     "form_name": "Meno",
@@ -2382,9 +2383,9 @@
   },
 
   "seo": {
-    "authTitle": "Prihlásenie | Registrácia - FinanzerPro",
-    "authDescription": "Vytvor si svoj FinanzerPro účet alebo sa prihlás pre prístup k tvojmu osobnému finančnému panelu. Začni sledovať výdavky, spravovať rozpočty a dosiahnuť svoje finančné ciele už dnes.",
-    "authKeywords": "finanzerpro prihlásenie, registrácia finančná aplikácia, osobný finančný účet, registrácia sledovač výdavkov, prihlásenie rozpočtová aplikácia"
+    "authTitle": "Prihlásenie | Registrácia - Kaptia",
+    "authDescription": "Vytvor si svoj Kaptia účet alebo sa prihlás pre prístup k svojmu panelu výdavkov. Začni sledovať výdavky, spravovať rozpočty a dosahovať svoje sporiteľské ciele ešte dnes.",
+    "authKeywords": "kaptia prihlásenie, registrácia finančná aplikácia, osobný finančný účet, registrácia sledovač výdavkov, prihlásenie rozpočtová aplikácia"
   },
 
   "factors": {
@@ -2402,6 +2403,7 @@
     "financialPlanning": "Finančné Plánovanie"
   },
   "transactions": {
+    "deleted_success": "Transakcia bola úspešne vymazaná",
     "allTransactions": "Všetky Transakcie",
     "manageTransactionsDesc": "Spravujte všetky svoje transakcie príjmov a výdavkov",
     "uploadImage": "Nahrať Obrázok",
@@ -2723,8 +2725,8 @@
 
   "redeem": {
     "seo": {
-      "title": "Uplatniť AppSumo Kód - FinanzerPro",
-      "description": "Uplatnite svoje AppSumo kódy na odomknutie Štandardných alebo Prémiových funkcií vo FinanzerPro."
+      "title": "Uplatniť AppSumo Kód - Kaptia",
+      "description": "Uplatnite svoje AppSumo kódy na odomknutie Štandardných alebo Prémiových funkcií vo Kaptia."
     },
     "title": "Uplatniť AppSumo Kód",
     "description": "Zadajte svoje AppSumo kódy na uplatnenie na odomknutie prémiových funkcií",
@@ -2779,13 +2781,13 @@
 
   "help": {
     "seo": {
-      "title": "Pomoc a Dokumentácia - Používateľská Príručka FinanzerPro | Funkcie a Podpora",
-      "description": "Kompletná dokumentácia FinanzerPro pokrývajúca sledovanie výdavkov, OCR skenovanie účteniek, AI kategorizáciu, rozpočty, ciele a všetky funkcie. Získajte pomoc s nastavením, riešením problémov a maximalizáciou vašej finančnej správy.",
-      "keywords": "pomoc finanzerpro, sprievodca sledovanie výdavkov, návod skenovanie účteniek, pomoc AI kategorizácia, dokumentácia rozpočet app, podpora osobné financie, návod finančná správa"
+      "title": "Pomoc a Dokumentácia - Používateľská Príručka Kaptia | Funkcie a Podpora",
+      "description": "Kompletná dokumentácia Kaptia pokrývajúca sledovanie výdavkov, OCR skenovanie účteniek, AI kategorizáciu, rozpočty, ciele a všetky funkcie. Získajte pomoc s nastavením, riešením problémov a maximalizáciou vašej finančnej správy.",
+      "keywords": "pomoc kaptia, sprievodca sledovanie výdavkov, návod skenovanie účteniek, pomoc AI kategorizácia, dokumentácia rozpočet app, podpora osobné financie, návod finančná správa"
     },
     "page": {
-      "title": "Dokumentácia FinanzerPro",
-      "subtitle": "Kompletná príručka na správu vašich financií s mocnými funkciami FinanzerPro"
+      "title": "Dokumentácia Kaptia",
+      "subtitle": "Kompletná príručka na správu vašich financií s mocnými funkciami Kaptia"
     },
     "tabs": {
       "overview": "Prehľad",
@@ -2797,7 +2799,7 @@
     "overview": {
       "getting_started": {
         "title": "Začíname",
-        "description": "Vitajte v FinanzerPro! Táto komplexná príručka vám pomôže zvládnuť správu osobných financií s našou inteligentnou platformou.",
+        "description": "Vitajte v Kaptia! Táto komplexná príručka vám pomôže zvládnuť správu osobných financií s našou inteligentnou platformou.",
         "create_account": "Vytvorte si bezplatný účet pre začiatok",
         "add_transactions": "Pridajte svoju prvú transakciu manuálne alebo pomocou skenovania účteniek",
         "set_budgets": "Nastavte rozpočty a finančné ciele (plány Standard+)",
@@ -2838,14 +2840,14 @@
         "title": "Získanie Pomoci",
         "chat_ai": "Použite tento AI chat pre okamžitú pomoc s funkciami aplikácie",
         "faq_check": "Skontrolujte sekciu Často Kladených Otázok nižšie pre bežné otázky",
-        "email_support": "Kontaktujte podporu na info@finanzerpro.com pre technické problémy",
+        "email_support": "Kontaktujte podporu na info@kaptia.app pre technické problémy",
         "help_center": "Navštívte Centrum Pomoci pre podrobné príručky a návody"
       }
     },
     "chat": {
-      "placeholder": "Spýtajte sa ma čokoľvek o FinanzerPro...",
+      "placeholder": "Spýtajte sa ma čokoľvek o Kaptia...",
       "send": "Odoslať",
-      "initial_message": "Ahoj! Som váš asistent FinanzerPro. Môžem vám pomôcť s otázkami o používaní aplikácie, predplatných plánoch, funkciách a ďalšom. Čo by ste sa chceli dozvedieť?",
+      "initial_message": "Ahoj! Som váš asistent Kaptia. Môžem vám pomôcť s otázkami o používaní aplikácie, predplatných plánoch, funkciách a ďalšom. Čo by ste sa chceli dozvedieť?",
       "error_response": "Prepáčte, mám teraz problémy. Prosím skúste to znovu neskôr.",
       "thinking": "Premýšľam..."
     },
@@ -2892,8 +2894,8 @@
 
   "cookies": {
     "seo": {
-      "title": "Pravidlá používania cookies - FinanzerPro",
-      "description": "Dozviete sa o tom, ako FinanzerPro používa cookies na zlepšenie vašej skúsenosti a ochranu vášho súkromia."
+      "title": "Pravidlá používania cookies - Kaptia",
+      "description": "Dozviete sa o tom, ako Kaptia používa cookies na zlepšenie vašej skúsenosti a ochranu vášho súkromia."
     },
     "policy": {
       "title": "Pravidlá používania cookies",
@@ -2963,12 +2965,12 @@
       "changes_desc": "Túto politiku cookies môžeme čas od času aktualizovať. Akékoľvek zmeny budú zverejnené na tejto stránke s aktualizovaným dátumom revízie.",
       "contact_us": "8. Kontaktujte nás",
       "contact_desc": "Ak máte akékoľvek otázky o našom používaní cookies, kontaktujte nás na:",
-      "email": "Email: info@finanzerpro.com",
+      "email": "Email: info@kaptia.app",
       "address": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
     },
     "banner": {
       "title": "Vážime si vaše súkromie",
-      "description": "Používame cookies na zlepšenie vašej skúsenosti s FinanzerPro. Niektoré cookies sú nevyhnutné pre fungovanie webovej stránky, zatiaľ čo iné nám pomáhajú zlepšovať našu službu a porozumieť tomu, ako používate našu stránku.",
+      "description": "Používame cookies na zlepšenie vašej skúsenosti s Kaptia. Niektoré cookies sú nevyhnutné pre fungovanie webovej stránky, zatiaľ čo iné nám pomáhajú zlepšovať našu službu a porozumieť tomu, ako používate našu stránku.",
       "accept_all": "Prijať všetky",
       "reject_non_essential": "Odmietnuť nepodstatné",
       "customize": "Prispôsobiť",
@@ -3072,7 +3074,7 @@
     "eu_representative": {
       "title": "Zástupca v EÚ",
       "description": "Pre obyvateľov EÚ náš určený zástupca v EÚ rieši záležitosti GDPR:",
-      "notice": "Upozornenie: Určenie zástupcu v EÚ prebieha. Pre GDPR otázky kontaktujte nášho Povereníka pre ochranu údajov na dpo@finanzerpro.com alebo použite náš všeobecný kontakt pre súkromie: privacy@finanzerpro.com"
+      "notice": "Upozornenie: Určenie zástupcu v EÚ prebieha. Pre GDPR otázky kontaktujte nášho Povereníka pre ochranu údajov na dpo@kaptia.app alebo použite náš všeobecný kontakt pre súkromie: privacy@kaptia.app"
     },
     "exercise_rights": {
       "title": "Ako uplatniť vaše práva",
@@ -3127,7 +3129,7 @@
     "sale_sharing": {
       "title": "Predaj a zdieľanie osobných informácií",
       "no_sale": "NEPREDÁVAME VAŠE OSOBNÉ INFORMÁCIE",
-      "description": "FinanzerPro nepredáva, neprenajíma ani nezdieľa vaše osobné informácie s tretími stranami na ich marketingové účely."
+      "description": "Kaptia nepredáva, neprenajíma ani nezdieľa vaše osobné informácie s tretími stranami na ich marketingové účely."
     },
     "service_providers": {
       "title": "Poskytovatelia služieb a obchodní partneri",
@@ -3162,7 +3164,7 @@
     "title": "Súlad s finančnými službami",
     "bsa": {
       "title": "Súlad s Bank Secrecy Act (BSA)",
-      "description": "FinanzerPro dodržiava Bank Secrecy Act a nariadenia o boji proti praniu špinavých peňazí (AML):",
+      "description": "Kaptia dodržiava Bank Secrecy Act a nariadenia o boji proti praniu špinavých peňazí (AML):",
       "aml_procedures": "Implementácia komplexných AML postupov a náležitej starostlivosti voči zákazníkom",
       "transaction_monitoring": "Automatizované monitorovanie transakcií pre vzory podozrivej aktivity",
       "suspicious_activity": "Povinné hlásenie podozrivej aktivity pre FinCEN keď je to potrebné",
@@ -3202,13 +3204,13 @@
     },
     "regulatory_disclosures": {
       "title": "Regulačné zverejnenia",
-      "not_advisor": "NIE JE FINANČNÝ PORADCA: FinanzerPro nie je registrovaný investičný poradca alebo finančný plánovač.",
+      "not_advisor": "NIE JE FINANČNÝ PORADCA: Kaptia nie je registrovaný investičný poradca alebo finančný plánovač.",
       "educational_purposes": "Naše AI-poháňané poznatky a odporúčania sú len pre vzdelávacie a informačné účely.",
       "consult_professional": "Vždy sa poraďte s kvalifikovanými finančnými profesionálmi pred prijatím investičných alebo finančných rozhodnutí."
     },
     "regulatory_oversight": {
       "title": "Regulačný dozor",
-      "description": "FinanzerPro pôsobí pod dozorom viacerých finančných regulačných orgánov:",
+      "description": "Kaptia pôsobí pod dozorom viacerých finančných regulačných orgánov:",
       "finra": "FINRA:",
       "finra_desc": "Dodržiavanie smerníc Financial Industry Regulatory Authority pre poskytovateľov technológií",
       "sec": "SEC:",
@@ -3323,7 +3325,7 @@
     },
     "section3": {
       "title": "3. AI-poháňané funkcie a spracovanie údajov",
-      "description": "FinanzerPro používa umelú inteligenciu na poskytovanie personalizovaných finančných poznatkov a odporúčaní. Takto spracovávame vaše údaje pre AI spracovanie:",
+      "description": "Kaptia používa umelú inteligenciu na poskytovanie personalizovaných finančných poznatkov a odporúčaní. Takto spracovávame vaše údaje pre AI spracovanie:",
       "ai_provider": {
         "title": "Poskytovateľ AI služieb:",
         "description": "Používame GPT modely OpenAI na analýzu vzorcov utrácania a generovanie poznatkov"
@@ -3401,7 +3403,7 @@
     "section10": {
       "title": "10. Kontaktujte nás",
       "description": "Ak máte akékoľvek otázky týkajúce sa týchto Zásad ochrany súkromia, kontaktujte nás na:",
-      "email": "Email: info@finanzerpro.com",
+      "email": "Email: info@kaptia.app",
       "address": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
     }
   },
@@ -3647,8 +3649,8 @@
 
   "features": {
     "hero": {
-      "title": "AI-poháňaná finančná inteligencia",
-      "subtitle": "Transformujte podnikové financie s 9 inteligentnými AI funkciami, ktoré sa učia, adaptujú a optimalizujú vaše finančné rozhodnutia v reálnom čase.",
+      "title": "AI-poháňaná inteligencia míňania",
+      "subtitle": "9 inteligentných AI funkcií, ktoré sa učia, prispôsobujú a organizujú vaše míňanie v reálnom čase.",
       "stats": {
         "ai_functions": "AI funkcie",
         "languages": "Jazyky",
@@ -3657,8 +3659,8 @@
       }
     },
     "tools": {
-      "title": "Bezplatné Finančné Nástroje",
-      "subtitle": "Získajte okamžité finančné poznatky bez registrácie. Vyskúšajte našu kalkulačku dostupnosti pre inteligentnejšie rozhodnutia o výdavkoch."
+      "title": "Bezplatné Inteligentné Nástroje",
+      "subtitle": "Získajte okamžité prehľady bez registrácie. Vyskúšajte našu kalkulačku pre inteligentnejšie rozhodnutia o výdavkoch."
     },
     "demo_result": {
       "title": "Výsledok AI Analýzy",
@@ -3666,11 +3668,11 @@
       "label_language": "Jazyk"
     },
     "multilingual": {
-      "title": "Globálna Finančná Inteligencia",
-      "subtitle": "Naša AI hovorí vašim jazykom a rozumie vášmu kultúrnemu finančnému kontextu",
+      "title": "Globálna Inteligencia Míňania",
+      "subtitle": "Naša AI hovorí vašim jazykom a rozumie vášmu každodennému kontextu",
       "english": {
         "title": "English",
-        "description": "Kompletná AI analýza v angličtine s americkým obchodným kontextom a finančnou terminológiou"
+        "description": "Kompletná AI analýza v angličtine s americkým regionálnym kontextom a každodennou terminológiou"
       },
       "spanish": {
         "title": "Español",
@@ -3718,8 +3720,8 @@
       }
     },
     "cta": {
-      "title": "Pripravení Transformovať Vašu Finančnú Správu?",
-      "subtitle": "Pridajte sa k tisícom podnikateľov, ktorí revolucionalizovali financie svojich podnikov s poznatkami poháňanými AI",
+      "title": "Pripravení Transformovať Svoje Sledovanie Výdavkov?",
+      "subtitle": "Pridajte sa k tisícom ľudí, ktorí zmenili spôsob sledovania výdavkov s AI prehľadmi",
       "start_free": "Začať s Bezplatným Účtom",
       "watch_demo": "Pozrieť Demo",
       "guarantee": "30-dňová záruka vrátenia peňazí",
@@ -3758,7 +3760,7 @@
       },
       "health": {
         "title": "Analýza zdravia",
-        "description": "Pozrite sa ako AI hodnotí vaše finančné zdravie a poskytuje akčné stratégie na zlepšenie."
+        "description": "Pozrite sa ako AI hodnotí vaše návyky míňania a poskytuje akčné stratégie na zlepšenie."
       },
       "generate": "Generovať AI demo",
       "generating": "Generuje sa AI rozprávanie...",
@@ -3769,7 +3771,7 @@
     },
     "section": {
       "title": "Kompletná AI funkčná sada",
-      "subtitle": "Preskúmajte každú z našich 9 inteligentných AI funkcií navrhnutých na revolúciu vo vašom finančnom riadení"
+      "subtitle": "Preskúmajte každú z našich 9 inteligentných AI funkcií navrhnutých na revolúciu vo vašom sledovaní výdavkov"
     },
     "categorization": {
       "title": "Inteligentná kategorizácia transakcií",
@@ -4035,5 +4037,100 @@
   "What was this transaction for?": "Na čo bola táto transakcia?",
   "Select type": "Vyberte typ",
   "Upgrade": "Vylepšiť",
-  "Upgrade to Premium": "Vylepšiť na Prémiový"
+  "Upgrade to Premium": "Vylepšiť na Prémiový",
+  "AI that does the tracking for you": "AI, ktorá sleduje za vás",
+  "Your spending,": "Vaše výdavky,",
+  "finally decoded.": "konečne dekódované.",
+  "Kaptia is the intelligent tracker that captures receipts with a photo, understands expenses you say out loud, imports your statements, and turns it all into clear insights and budgets that actually stick.": "Kaptia je inteligentný sledovač, ktorý zachytí účtenky fotkou, rozumie výdavkom, ktoré poviete nahlas, importuje vaše výpisy a všetko mení na jasné prehľady a rozpočty, ktoré naozaj fungujú.",
+  "Start Free - No Card Required": "Začnite Zadarmo - Bez Karty",
+  "See How It Works": "Pozrite, Ako To Funguje",
+  "Free forever plan": "Plán zadarmo navždy",
+  "Total tracked this month": "Celkom zaznamenané tento mesiac",
+  "Groceries": "Potraviny",
+  "Dining out": "Stravovanie vonku",
+  "Transport": "Doprava",
+  "Receipt scanned": "Účtenka naskenovaná",
+  "Coffee": "Káva",
+  "Added by voice": "Pridané hlasom",
+  "AI insight": "AI prehľad",
+  "Dining out is up 18% this month": "Stravovanie vonku je tento mesiac hore o 18 %",
+  "Compare plans": "Porovnajte plány",
+  "Pricing": "Cenník",
+  "Simple pricing,": "Jednoduché ceny,",
+  "serious value.": "vážna hodnota.",
+  "Start free and upgrade when you want more AI horsepower. Cancel anytime.": "Začnite zadarmo a prejdite na vyšší plán, keď budete chcieť viac AI výkonu. Zrušenie kedykoľvek.",
+  "How Kaptia works": "Ako funguje Kaptia",
+  "From chaos to clarity": "Z chaosu do prehľadu",
+  "in three steps": "v troch krokoch",
+  "No spreadsheets, no manual entry marathons. Kaptia meets your spending where it happens.": "Žiadne tabuľky, žiadne maratóny manuálneho zadávania. Kaptia sa stretne s vašimi výdavkami tam, kde sa dejú.",
+  "Everything inside": "Všetko vo vnútri",
+  "One tracker.": "Jeden sledovač.",
+  "Every superpower.": "Všetky superschopnosti.",
+  "Six intelligent systems working together so you never have to type an expense again.": "Šesť inteligentných systémov spolupracuje, aby ste už nikdy nemuseli výdavok písať ručne.",
+  "Ready to see your spending clearly?": "Pripravení vidieť svoje výdavky jasne?",
+  "Join Kaptia today and let intelligent tracking do the heavy lifting. Free forever plan, no card required.": "Pridajte sa ku Kaptia ešte dnes a nechajte ťažkú prácu na inteligentné sledovanie. Plán zadarmo navždy, bez karty.",
+  "Voice input": "Hlasový vstup",
+  "Receipt scanning": "Skenovanie účteniek",
+  "Statement import": "Import výpisov",
+  "Shared goals": "Zdieľané ciele",
+  "Smart reminders": "Inteligentné pripomienky",
+  "Spending predictions": "Predikcie výdavkov",
+  "AES-256 encryption": "Šifrovanie AES-256",
+  "Capture anything": "Zachytte čokoľvek",
+  "Snap a receipt, say it out loud, or drop in a statement PDF. Kaptia accepts spending in any form.": "Odfotografujte účtenku, povedzte ju nahlas alebo vložte výpis vo formáte PDF. Kaptia prijíma výdavky v akejkoľvek forme.",
+  "AI organizes it": "AI to zorganizuje",
+  "Every entry is categorized, matched and double-checked automatically - getting sharper every week you use it.": "Každý záznam sa automaticky kategorizuje, spáruje a skontroluje - a každým týždňom používania je presnejší.",
+  "See it clearly": "Vidieť to jasne",
+  "Dashboards, trends and predictions show exactly where your money goes - and what to adjust next.": "Prehľady, trendy a predikcie ukazujú presne, kam vaše peniaze odchádzajú - a čo upraviť ďalej.",
+  "AI that understands your spending": "AI, ktorá rozumie vašim výdavkom",
+  "Transactions are categorized the moment they arrive, learning your habits to get sharper every week.": "Transakcie sa kategorizujú hneď, ako prídu, a učia sa vaše návyky, aby boli každým týždňom presnejšie.",
+  "Subscriptions": "Predplatné",
+  "Say it, track it": "Povedzte to, sledujte to",
+  "Speak an expense in seconds - Kaptia turns your words into structured, categorized entries.": "Povedzte výdavok za pár sekúnd - Kaptia mení vaše slová na štruktúrované, kategorizované záznamy.",
+  "Snap. Scanned. Sorted.": "Fotka. Naskenované. Zaradené.",
+  "Point your camera at any receipt. OCR reads every line and files it instantly.": "Namierťe kameru na akúkoľvek účtenku. OCR prečíta každý riadok a okamžite ho založí.",
+  "Statements, imported in seconds": "Výpisy importované za sekundy",
+  "Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.": "Vložte výpis v PDF a sledujte, ako sa stránky histórie menia na čisté, vyhľadateľné transakcie - spracované súkromne priamo vo vašom zariadení.",
+  "Goals that keep you honest": "Ciele, ktoré vás držia v kondícii",
+  "Budgets and shared goals with gentle nudges before you overspend - not after.": "Rozpočty a zdieľané ciele s jemnými upozorneniami skôr, než miniete viac - nie až potom.",
+  "Private by design": "Súkromie od základu",
+  "Your data is encrypted with AES-256 in transit and at rest. You own it - always.": "Vaše údaje sú šifrované AES-256 pri prenose aj v pokoji. Vlastníte ich - vždy.",
+  "Simple spending overview": "Jednoduchý prehľad výdavkov",
+  "Personalized smart tips": "Personalizované inteligentné tipy",
+  "For people ready to understand their spending": "Pre ľudí, ktorí chcú rozumieť svojim výdavkom",
+  "The full intelligent tracking experience": "Úplný zážitok z inteligentného sledovania",
+  "AI tips and insights": "AI tipy a prehľady",
+  "What can Kaptia actually capture?": "Čo vlastne Kaptia dokáže zachytiť?",
+  "Receipts via your camera, expenses spoken out loud, PDF statements, and classic manual entries - all organized automatically by AI.": "Účtenky cez kameru, výdavky povedané nahlas, výpisy v PDF a klasické ručné záznamy - všetko automaticky organizuje AI.",
+  "How secure is my data?": "Ako bezpečné sú moje údaje?",
+  "Your information is protected with industry-standard AES-256 encryption, both in transit and at rest. We never sell your data.": "Vaše informácie sú chránené štandardným šifrovaním AES-256, pri prenose aj v pokoji. Vaše údaje nikdy nepredávame.",
+  "Snap receipts, speak expenses, and let AI turn your everyday spending into clear, useful insights.": "Fotografujte účtenky, hovorte výdavky a nechajte AI meniť vaše každodenné výdavky na jasné, užitočné prehľady.",
+  "Complete guide to mastering your spending with Kaptia's powerful features": "Kompletný sprievodca zvládnutím vašich výdavkov s výkonnými funkciami Kaptia",
+  "Everything you need to get the most out of Kaptia": "Všetko, čo potrebujete na maximálne využitie Kaptia",
+  "Kaptia is a modern, intelligent spending tracker designed to help you understand where your money goes. With AI-powered insights, comprehensive tracking, and flexible plans, staying on top of your spending has never been easier.": "Kaptia je moderný, inteligentný sledovač výdavkov navrhnutý tak, aby vám pomohol pochopiť, kam vaše peniaze odchádzajú. S AI-poháňanými prehľadmi, komplexným sledovaním a flexibilnými plánmi nebolo mať výdavky pod kontrolou nikdy jednoduchšie.",
+  "Comprehensive spending dashboard": "Komplexný panel výdavkov",
+  "Comprehensive spending summary with charts and metrics": "Komplexný súhrn výdavkov s grafmi a metrikami",
+  "How it works": "Ako to funguje",
+  "Menu": "Menu",
+  "Close menu": "Zavrieť menu",
+  "Explore all features": "Preskúmať všetky funkcie",
+  "Expense Prediction": "Predpoveď Výdavkov",
+  "Financial Mascot": "Finančný Maskot",
+  "Contextual Tips": "Kontextové Tipy",
+  "Reminders": "Pripomienky",
+  "Your companion that reacts to your financial health and motivates you.": "Váš spoločník, ktorý reaguje na vaše finančné zdravie a motivuje vás.",
+  "See your spending trends over time with interactive charts.": "Sledujte vývoj svojich výdavkov pomocou interaktívnych grafov.",
+  "Tips tailored to the data you are viewing, generated by AI.": "Tipy prispôsobené údajom, ktoré práve vidíte, generované AI.",
+  "See which categories take the largest share of your spending.": "Zistite, ktoré kategórie tvoria najväčšiu časť vašich výdavkov.",
+  "Bill reminders and saving streaks to keep you on track.": "Pripomienky platieb a série šetrenia, ktoré vás udržia v tempe.",
+  "Personalized suggestions to improve your spending every day.": "Personalizované návrhy na zlepšenie výdavkov každý deň.",
+  "AI forecast of your upcoming expenses and cash flow.": "AI predpoveď vašich nadchádzajúcich výdavkov a cash flow.",
+  "Let AI categorize your transactions automatically as they arrive.": "Nechajte AI automaticky kategorizovať vaše transakcie hneď, ako prídu.",
+  "In-depth AI analysis of your spending with actionable advice.": "Hĺbková AI analýza vašich výdavkov s praktickými radami.",
+  "Daily Recommendations": "Denné Odporúčania",
+  "Budgets & goals": "Rozpočty a ciele",
+  "Confidence": "Istota",
+  "Premium Feature": "Prémiová funkcia",
+  "Trend": "Trend",
+  "Could not find matching category ID": "Nepodarilo sa nájsť zodpovedajúcu kategóriu"
 }

@@ -58,7 +58,7 @@ app.post('/generate-pdf', async (req, res) => {
     });
 
     // Generate QR code
-    const appUrl = process.env.APP_URL || 'https://finanzerpro.com';
+    const appUrl = process.env.APP_URL || 'https://kaptia.app';
     const qrCodeDataUrl = await QRCode.toDataURL(appUrl);
 
     // Generate HTML

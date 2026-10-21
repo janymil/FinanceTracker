@@ -26,7 +26,7 @@ export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps
             className="flex items-center hover:opacity-80 transition-opacity"
           >
             <TrendingUp className="h-8 w-8 text-primary mr-3" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">Kaptia</span>
           </button>
           <div className="flex items-center space-x-4">
             <button 

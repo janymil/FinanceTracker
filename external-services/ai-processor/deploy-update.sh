@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Force deployment of updated AI processor to Fly.io
-echo "Deploying updated FinanzerPro AI Processor..."
+echo "Deploying updated Kaptia AI Processor..."
 
 # Create a temporary deployment directory with just the files we need
 mkdir -p /tmp/fly-deploy

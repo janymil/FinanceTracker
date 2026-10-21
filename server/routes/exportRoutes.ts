@@ -207,7 +207,7 @@ export function registerExportRoutes(app: Express) {
       
       // Send PDF response
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="finanzerpro-report-${month}-${targetYear}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="kaptia-report-${month}-${targetYear}.pdf"`);
       return res.send(pdfBuffer);
 
     } catch (error) {
@@ -277,7 +277,7 @@ export function registerExportRoutes(app: Express) {
 
       if (format === 'json') {
         res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Disposition', 'attachment; filename="finanzerpro-export.json"');
+        res.setHeader('Content-Disposition', 'attachment; filename="kaptia-export.json"');
         return res.json(exportData);
       } else if (format === 'csv') {
         // For CSV, we'll export transactions only as CSV format is tabular
@@ -289,7 +289,7 @@ export function registerExportRoutes(app: Express) {
           }).join('\n');
           
           res.setHeader('Content-Type', 'text/csv');
-          res.setHeader('Content-Disposition', 'attachment; filename="finanzerpro-transactions.csv"');
+          res.setHeader('Content-Disposition', 'attachment; filename="kaptia-transactions.csv"');
           return res.send(csvHeader + csvRows);
         } else {
           return res.status(400).json({ message: "CSV export requires transactions to be included" });

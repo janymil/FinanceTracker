@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://finanzerpro.com/sitemap.xml
+Sitemap: https://kaptia.app/sitemap.xml
 
 # Allow search engines to crawl all public pages
 Allow: /auth

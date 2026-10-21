@@ -11,15 +11,15 @@ interface SEOProps {
 }
 
 export function SEO({
-  title = "FinanzerPro - Smart Personal Finance Management",
-  description = "Transform your financial life with FinanzerPro. AI-powered expense tracking, receipt OCR scanning, budgeting tools, and collaborative savings goals. Start free today!",
-  keywords = "personal finance, expense tracker, budget app, financial management, receipt scanner, AI categorization, savings goals, financial health, money management, expense tracking",
-  canonical = "https://finanzerpro.com",
-  ogImage = "https://finanzerpro.com/og-image.png",
+  title = "Kaptia - Smart Spending Tracker with AI Insights",
+  description = "Kaptia turns receipts, voice notes and statements into a clear picture of your spending. Snap a photo, speak a note, or import a file - AI organizes the rest. Start free today!",
+  keywords = "spending tracker, expense tracker, budget planner, receipt scanner, voice expense input, AI categorization, savings goals, smart budgeting, expense tracking",
+  canonical = "https://kaptia.app",
+  ogImage = "https://kaptia.app/og-image.png",
   ogType = "website",
   twitterCard = "summary_large_image"
 }: SEOProps) {
-  const fullTitle = title.includes("FinanzerPro") ? title : `${title} | FinanzerPro`;
+  const fullTitle = title.includes("Kaptia") ? title : `${title} | Kaptia`;
 
   return (
     <Helmet>
@@ -38,7 +38,7 @@ export function SEO({
       <meta property="og:image" content={ogImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:site_name" content="FinanzerPro" />
+      <meta property="og:site_name" content="Kaptia" />
 
       {/* Twitter */}
       <meta property="twitter:card" content={twitterCard} />
@@ -46,7 +46,7 @@ export function SEO({
       <meta property="twitter:title" content={fullTitle} />
       <meta property="twitter:description" content={description} />
       <meta property="twitter:image" content={ogImage} />
-      <meta property="twitter:creator" content="@finanzerpro" />
+      <meta property="twitter:creator" content="@kaptia" />
     </Helmet>
   );
 }

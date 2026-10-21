@@ -69,7 +69,7 @@ export function getCurrentAppConfig(): AppConfiguration {
     pricing: {
       free: {
         price: "Free forever",
-        features: "Perfect for trying out FinanzerPro with basic expense tracking"
+        features: "Perfect for trying out Kaptia with basic expense tracking"
       },
       standard: {
         monthly: "$4.99/month",
@@ -101,7 +101,7 @@ export function getCurrentAppConfig(): AppConfiguration {
     },
     processInfo: {
       gettingStarted: [
-        "1. Create your free FinanzerPro account",
+        "1. Create your free Kaptia account",
         "2. Add your first transaction (income or expense)",
         "3. Let AI categorize it automatically (Standard+ plans)",
         "4. Set up budgets for your spending categories (Standard+ plans)",
@@ -125,7 +125,7 @@ export function getCurrentAppConfig(): AppConfiguration {
       support: [
         "Use this AI chat for immediate help with app features",
         "Check the FAQ section below for common questions", 
-        "Contact support at info@finanzerpro.com for technical issues",
+        "Contact support at info@kaptia.app for technical issues",
         "Visit the Help Center for detailed guides and tutorials"
       ]
     }

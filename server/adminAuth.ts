@@ -33,7 +33,7 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
 export const adminLogin = async (req: AdminRequest, res: Response) => {
   const { password } = req.body;
   
-  console.log('Admin login attempt for FinanzerPro admin portal');
+  console.log('Admin login attempt for Kaptia admin portal');
   
   if (!password) {
     return res.status(400).json({ message: 'Password required' });

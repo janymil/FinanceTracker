@@ -12,7 +12,7 @@ export default function TermsOfService() {
   const { t } = useTranslation();
   
   useEffect(() => {
-    document.title = "Terms of Service - FinanzerPro";
+    document.title = "Terms of Service - Kaptia";
   }, []);
 
   const handleLogin = () => {
@@ -29,14 +29,14 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("1. Acceptance of Terms")}</h2>
             <p className="mb-4">
-              {t("By accessing and using FinanzerPro, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.")}
+              {t("By accessing and using Kaptia, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.")}
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("2. Description of Service")}</h2>
             <p className="mb-4">
-              {t("FinanzerPro is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.")}
+              {t("Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.")}
             </p>
             <h3 className="text-lg font-semibold mb-2">{t("2.1 Service Plans")}</h3>
             <ul className="list-disc list-inside mb-4 space-y-2">
@@ -61,7 +61,7 @@ export default function TermsOfService() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("4. Acceptable Use")}</h2>
-            <p className="mb-4">{t("You agree not to use FinanzerPro to:")}</p>
+            <p className="mb-4">{t("You agree not to use Kaptia to:")}</p>
             <ul className="list-disc list-inside mb-4 space-y-2">
               <li>{t("Violate any applicable laws or regulations")}</li>
               <li>{t("Transmit any harmful, threatening, or offensive content")}</li>
@@ -113,14 +113,14 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("8. Limitation of Liability")}</h2>
             <p className="mb-4">
-              {t("FinanzerPro is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service.")}
+              {t("Kaptia is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service.")}
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("9. Intellectual Property")}</h2>
             <p className="mb-4">
-              {t("The FinanzerPro service, including its design, functionality, and content, is protected by intellectual property laws. You may not copy, modify, or distribute our service.")}
+              {t("The Kaptia service, including its design, functionality, and content, is protected by intellectual property laws. You may not copy, modify, or distribute our service.")}
             </p>
           </section>
 
@@ -143,7 +143,7 @@ export default function TermsOfService() {
             <p className="mb-4">
               {t("For questions about these Terms of Service, please contact us at:")}
             </p>
-            <p className="mb-2">{t("Email: info@finanzerpro.com")}</p>
+            <p className="mb-2">{t("Email: info@kaptia.app")}</p>
             <p>{t("Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120")}</p>
           </section>
         </div>

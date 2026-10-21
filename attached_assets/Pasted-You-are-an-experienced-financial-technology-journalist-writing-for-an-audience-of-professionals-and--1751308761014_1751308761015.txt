@@ -1,18 +1,18 @@
 You are an experienced financial technology journalist writing for an audience of professionals and tech-savvy users.
 
-Write a professional, comprehensive article announcing and explaining FinanzerPro’s new feature: PDF bank statement import for premium users, which allows users to upload their PDF bank statements and have transactions automatically added to their account.
+Write a professional, comprehensive article announcing and explaining Kaptia’s new feature: PDF bank statement import for premium users, which allows users to upload their PDF bank statements and have transactions automatically added to their account.
 
 The article should be structured clearly with headings and cover these topics in detail:
 
 1️⃣ Introduction & Overview
 
-Present the new PDF import function as a significant upgrade for FinanzerPro premium users.
+Present the new PDF import function as a significant upgrade for Kaptia premium users.
 
 Highlight how this feature simplifies financial tracking by eliminating manual transaction entry.
 
 2️⃣ How the PDF Import Works
 
-Describe the user experience: uploading a PDF statement via the FinanzerPro interface.
+Describe the user experience: uploading a PDF statement via the Kaptia interface.
 
 Explain the processing workflow: document upload, parsing, OCR if needed, data extraction, and transaction matching or categorization.
 
@@ -24,7 +24,7 @@ Mention any technologies used for parsing (e.g., PDF parsers, NLP for transactio
 
 4️⃣ Data Security & Encryption
 
-Explain what measures FinanzerPro implements to keep uploaded bank statements secure.
+Explain what measures Kaptia implements to keep uploaded bank statements secure.
 
 Describe file storage, encryption in transit (HTTPS/TLS) and at rest (AES-256 or similar), token-based access, etc.
 
@@ -38,7 +38,7 @@ Mention any user consent mechanisms or policies that ensure data privacy.
 
 Emphasize the time saved, reduced errors, and enhanced accuracy.
 
-Mention how this feature positions FinanzerPro as a top choice for advanced personal finance management.
+Mention how this feature positions Kaptia as a top choice for advanced personal finance management.
 
 7️⃣ Conclusion & Call to Action
 

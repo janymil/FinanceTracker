@@ -23,7 +23,7 @@ export default function Contact() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = `${t('contact.page_title')} - FinanzerPro`;
+    document.title = `${t('contact.page_title')} - Kaptia`;
   }, [t]);
 
   const handleLogin = () => {
@@ -85,7 +85,7 @@ export default function Contact() {
         title={t('contact.seo_title')}
         description={t('contact.seo_description')}
         keywords={t('contact.seo_keywords')}
-        canonical="https://finanzerpro.com/contact"
+        canonical="https://kaptia.app/contact"
       />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">
@@ -188,7 +188,7 @@ export default function Contact() {
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium">{t('contact.info_email')}</p>
-                    <p className="text-sm text-muted-foreground">info@finanzerpro.com</p>
+                    <p className="text-sm text-muted-foreground">info@kaptia.app</p>
                   </div>
                 </div>
 

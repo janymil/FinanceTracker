@@ -114,7 +114,7 @@ export default function Help() {
   const faqItems = [
     {
       id: "getting-started",
-      question: t("How do I get started with FinanzerPro?"),
+      question: t("How do I get started with Kaptia?"),
       answer: t("Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions.")
     },
     {
@@ -164,8 +164,8 @@ export default function Help() {
     },
     {
       id: "mobile-access",
-      question: t("Is FinanzerPro available on mobile?"),
-      answer: t("FinanzerPro is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.")
+      question: t("Is Kaptia available on mobile?"),
+      answer: t("Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.")
     },
     {
       id: "dashboard-widgets",
@@ -292,10 +292,10 @@ export default function Help() {
   return (
     <AppLayout isPublicPage={true}>
       <SEO 
-        title="Help & Documentation - FinanzerPro User Guide | Features & Support"
-        description="Complete FinanzerPro documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and maximizing your financial management."
-        keywords="finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
-        canonical="https://finanzerpro.com/help"
+        title="Help & Documentation - Kaptia User Guide | Features & Support"
+        description="Complete Kaptia documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and getting the most out of Kaptia."
+        keywords="kaptia help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, spending tracker support"
+        canonical="https://kaptia.app/help"
       />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -303,10 +303,10 @@ export default function Help() {
         <div className="lg:col-span-2">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              {t('FinanzerPro Documentation')}
+              {t('Kaptia Documentation')}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              {t("Complete guide to managing your finances with FinanzerPro's powerful features")}
+              {t("Complete guide to mastering your spending with Kaptia's powerful features")}
             </p>
           </div>
 
@@ -324,15 +324,15 @@ export default function Help() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-6 w-6 text-primary" />
-                    {t('Welcome to FinanzerPro')}
+                    {t('Welcome to Kaptia')}
                   </CardTitle>
                   <CardDescription>
-                    {t('Your comprehensive personal finance management solution')}
+                    {t('Everything you need to get the most out of Kaptia')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p>
-                    {t("FinanzerPro is a modern, intelligent personal finance application designed to help you take control of your financial future. With AI-powered insights, comprehensive tracking, and flexible subscription plans, managing your money has never been easier.")}
+                    {t("Kaptia is a modern, intelligent spending tracker designed to help you understand where your money goes. With AI-powered insights, comprehensive tracking, and flexible plans, staying on top of your spending has never been easier.")}
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -435,7 +435,7 @@ export default function Help() {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      <li>• {t('Comprehensive financial dashboard')}</li>
+                      <li>• {t('Comprehensive spending dashboard')}</li>
                       <li>• {t('Category-wise spending breakdown')}</li>
                       <li>• {t('Trend analysis and predictions')}</li>
                       <li>• {t('Income vs. expense comparisons')}</li>
@@ -871,7 +871,7 @@ export default function Help() {
                             <h5 className="font-medium text-sm mb-2">{t('Financial Overview Reports')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
                               <strong>{t('Location')}:</strong> {t('Reports page - Overview tab')}<br/>
-                              <strong>{t('Function')}:</strong> {t('Comprehensive financial summary with charts and metrics')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Comprehensive spending summary with charts and metrics')}<br/>
                               <strong>{t('Features')}:</strong> {t('Income vs. expenses, category breakdowns, time period filtering, trend indicators')}
                             </p>
                           </div>
@@ -1188,7 +1188,7 @@ export default function Help() {
                 {t('AI Assistant')}
               </CardTitle>
               <CardDescription>
-                {t('Ask me anything about FinanzerPro')}
+                {t('Ask me anything about Kaptia')}
               </CardDescription>
             </CardHeader>
 
@@ -1228,7 +1228,7 @@ export default function Help() {
                 <Input
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  placeholder={t('Ask about FinanzerPro features...')}
+                  placeholder={t('Ask about Kaptia features...')}
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   disabled={isLoading}
                 />

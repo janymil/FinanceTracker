@@ -8,10 +8,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Professional promotional script
-const promoScript = "Transform your financial life with FinanzerPro. Upload receipts and watch AI instantly categorize expenses with 95% accuracy. Get personalized financial insights, track spending patterns, and receive actionable recommendations. Set budgets, achieve savings goals, and gain complete control over your money. Join thousands who've revolutionized their finances with our intelligent platform. Start your free account today and experience the future of personal finance management.";
+const promoScript = "Transform your financial life with Kaptia. Upload receipts and watch AI instantly categorize expenses with 95% accuracy. Get personalized financial insights, track spending patterns, and receive actionable recommendations. Set budgets, achieve savings goals, and gain complete control over your money. Join thousands who've revolutionized their finances with our intelligent platform. Start your free account today and experience the future of personal finance management.";
 
 async function createPromoVideo() {
-  console.log('🎬 Creating FinanzerPro promotional video...');
+  console.log('🎬 Creating Kaptia promotional video...');
   
   const outputDir = path.join(__dirname, 'public', 'demo-videos');
   await fs.mkdir(outputDir, { recursive: true });
@@ -35,7 +35,7 @@ async function createPromoVideo() {
     
     // Step 3: Create final video
     console.log('🎬 Creating promotional video...');
-    const outputPath = path.join(outputDir, 'finanzerpro-promo.mp4');
+    const outputPath = path.join(outputDir, 'kaptia-promo.mp4');
     
     const audioDuration = await getAudioDuration(audioPath);
     await createProfessionalVideo(audioPath, videoPath, outputPath, audioDuration);
@@ -137,7 +137,7 @@ async function createProfessionalVideo(audioPath, videoPath, outputPath, duratio
       '-i', audioPath,
       '-filter_complex', `
         [0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setpts=PTS*${duration/60}[v];
-        [v]drawtext=text='FinanzerPro':fontsize=72:fontcolor=white:x=(w-text_w)/2:y=50:fontfile=/System/Library/Fonts/Arial.ttf:enable='between(t,1,3)'[v1];
+        [v]drawtext=text='Kaptia':fontsize=72:fontcolor=white:x=(w-text_w)/2:y=50:fontfile=/System/Library/Fonts/Arial.ttf:enable='between(t,1,3)'[v1];
         [v1]drawtext=text='Smart Personal Finance Management':fontsize=36:fontcolor=white:x=(w-text_w)/2:y=150:fontfile=/System/Library/Fonts/Arial.ttf:enable='between(t,1,3)'[v2];
         [v2]drawtext=text='AI-Powered • Receipt Scanning • Budget Tracking':fontsize=28:fontcolor=white:x=(w-text_w)/2:y=h-100:fontfile=/System/Library/Fonts/Arial.ttf:enable='between(t,${duration-3},${duration})'[vout]
       `,

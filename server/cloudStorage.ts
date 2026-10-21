@@ -288,7 +288,7 @@ export class BunnyStorage implements CloudStorageService {
       storageZone: process.env.BUNNY_STORAGE_ZONE || '',
       accessKey: process.env.BUNNY_ACCESS_KEY || '',
       storagePassword: process.env.BUNNY_STORAGE_PASSWORD || '',
-      pullzoneUrl: process.env.BUNNY_PULLZONE_URL || 'https://finanzerpro.b-cdn.net',
+      pullzoneUrl: process.env.BUNNY_PULLZONE_URL || 'https://kaptia.b-cdn.net',
     };
     this.baseUrl = `https://la.storage.bunnycdn.com/${this.config.storageZone}`;
   }

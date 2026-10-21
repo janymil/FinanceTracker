@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting production deployment for FinanzerPro..."
+echo "🚀 Starting production deployment for Kaptia..."
 echo "=============================================="
 
 # Step 1: Push schema changes to Neon production (preserves existing data)
