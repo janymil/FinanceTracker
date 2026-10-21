@@ -389,9 +389,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
           emailSent
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error inviting user:", error);
-      return res.status(500).json({ message: getLocalizedMessage(userLanguage, 'failedToSendEmail') });
+      const lang = getUserLanguage(req);
+      return res.status(500).json({ message: getLocalizedMessage(lang, 'failedToSendEmail') });
     }
   });
 
@@ -414,9 +415,9 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       
       const contribution = await storage.addGoalContribution(contributionData);
       return res.json(contribution);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding contribution:", error);
-      return res.status(400).json({ message: error.message || "Failed to add contribution" });
+      return res.status(400).json({ message: error?.message || "Failed to add contribution" });
     }
   });
 

@@ -194,7 +194,7 @@ function TransactionPreviewCard({
           <div className="flex items-center space-x-3">
             <Checkbox
               checked={isSelected}
-              onChange={onToggleSelect}
+              onCheckedChange={onToggleSelect}
               className="mt-1"
             />
             <div className="flex-1">

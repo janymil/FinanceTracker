@@ -194,7 +194,7 @@ export function ExportTools() {
   
   // Get transactions for chart generation
   const { data: transactions = [] } = useQuery<Transaction[]>({
-    queryKey: ['transactions', user?.id],
+    queryKey: ['/api/transactions'],
     enabled: isReady,
   });
   

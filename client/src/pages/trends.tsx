@@ -545,7 +545,7 @@ export default function Trends() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-1 text-xs md:text-sm">
-              <LineChart className="h-3 w-3 md:h-4 md:w-4" />
+              <LineChartIcon className="h-3 w-3 md:h-4 md:w-4" />
               <span>{t('trends.tabs.overview')}</span>
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">

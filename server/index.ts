@@ -2,29 +2,18 @@ import { config } from "dotenv";
 import path from "path";
 import fs from "fs";
 
-// Only load .env.local in development (NODE_ENV=development)
-// In production, use system environment variables only
+// Always load base .env file first
+config({ path: path.resolve(process.cwd(), '.env') });
+
+// In development, allow .env.local to override if present
 if (process.env.NODE_ENV === 'development') {
   const envLocalPath = path.resolve(process.cwd(), '.env.local');
   if (fs.existsSync(envLocalPath)) {
-    // Clear system vars first, then load dev keys
     delete process.env.VITE_CLERK_PUBLISHABLE_KEY;
     delete process.env.CLERK_SECRET_KEY;
     config({ path: envLocalPath, override: true });
-    console.log('Development environment: Using .env.local for Clerk keys');
-    console.log('Loaded dev keys:', {
-      publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
-      secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
-    });
+    console.log('Development environment: Using .env.local overrides');
   }
-} else {
-  // Production: use system environment variables only, ignore .env.local
-  config(); // Load .env as fallback
-  console.log('Production environment: Using system environment variables');
-  console.log('Production keys:', {
-    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
-    secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
-  });
 }
 
 import express, { type Request, Response, NextFunction } from "express";
@@ -450,14 +439,13 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Defaults to 5000 (the port Replit exposes); override with PORT locally
+  const port = Number(process.env.PORT) || 5000;
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
+    // reusePort is not supported on Windows (fails with ENOTSUP)
+    ...(process.platform === "win32" ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
   });

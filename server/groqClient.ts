@@ -1,11 +1,11 @@
 import Groq from 'groq-sdk';
 
 if (!process.env.GROQ_API_KEY) {
-  throw new Error('GROQ_API_KEY must be set in environment variables');
+  console.warn('GROQ_API_KEY not set in environment variables - Groq voice features will be unavailable until configured.');
 }
 
 export const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY || 'missing-groq-api-key',
 });
 
 // Groq STT using Distil-Whisper

@@ -23,7 +23,7 @@ export default function Pricing() {
         setLocation(`/subscribe?plan=${plan}`);
       }
     } else {
-      setLocation('/sign-in-clerk');
+      setLocation('/auth');
     }
   };
 

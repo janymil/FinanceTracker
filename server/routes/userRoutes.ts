@@ -4,7 +4,7 @@ import { storage } from "../storage";
 import { getUserLanguage, translateCategories } from "../categoryTranslations";
 
 export function registerUserRoutes(app: Express) {
-  // Update user plan
+  // Update user plan (only allows switching to 'free' directly; paid plans require Stripe checkout or promo code)
   app.post('/api/update-plan', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
@@ -15,6 +15,14 @@ export function registerUserRoutes(app: Express) {
 
       if (!plan || !['free', 'standard', 'premium'].includes(plan)) {
         return res.status(400).json({ message: "Invalid plan. Must be 'free', 'standard', or 'premium'" });
+      }
+
+      if (plan !== 'free') {
+        const user = await storage.getUser(userId);
+        const isAdmin = user?.email === 'jan.milata@gmail.com';
+        if (!isAdmin) {
+          return res.status(403).json({ message: "Paid plan upgrades require active payment checkout or promo code" });
+        }
       }
 
       await storage.updateUserPlan(userId, plan);

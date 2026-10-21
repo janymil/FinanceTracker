@@ -4,7 +4,7 @@ import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
 import { MistralClient } from "./mistralClient.js";
 
 // Using gpt-4o-mini for cost optimization while maintaining quality for financial analysis
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'missing-openai-api-key' });
 
 export interface ExpenseCategorizationResult {
   category: string;
@@ -1644,16 +1644,17 @@ export async function generateContextualFinancialTips(
     // Check for budget overruns with detailed analysis ONLY if budgets exist
     if (budgets && Array.isArray(budgets) && budgets.length > 0) {
       budgets.forEach(budget => {
+        const budgetCatName = budget.categoryName || budget.category || 'Uncategorized';
         if (budget.remaining < 0) {
           const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-          const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budget.categoryName);
+          const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budgetCatName);
           const avgTransactionInCategory = categoryTransactions.length > 0 ? 
             categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
           
-          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budgetCatName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
         } else if (budget.remaining < budget.budgetAmount * 0.1) {
           // Budget almost exhausted
-          scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+          scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budgetCatName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
         }
       });
     }
@@ -1730,7 +1731,7 @@ TOP SPENDING CATEGORIES:
 ${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
 
 BUDGET STATUS:
-${budgets.length > 0 ? budgets.map(b => `- ${b.categoryName}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
+${budgets.length > 0 ? budgets.map((b: any) => `- ${b.categoryName || b.category || 'Uncategorized'}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
 
 FINANCIAL GOALS:
 ${goals.length > 0 ? goals.map(g => `- ${g.name}: $${g.currentAmount.toLocaleString()}/$${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
@@ -2057,6 +2058,7 @@ export async function voiceExtraction(
     // Try Mistral first for voice extraction
     try {
       console.log('🤖 [Local Voice] Trying Mistral Small 3.2...');
+      const mistralClient = new MistralClient();
       const mistralResponse = await mistralClient.createChatCompletion({
         messages: [
           {
@@ -2075,8 +2077,8 @@ CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)
       });
       console.log('✅ [Local Voice] Mistral successful');
       return mistralResponse.choices[0]?.message?.content || '';
-    } catch (mistralError) {
-      console.warn('⚠️ [Local Voice] Mistral failed, using OpenAI fallback:', mistralError.message);
+    } catch (mistralError: any) {
+      console.warn('⚠️ [Local Voice] Mistral failed, using OpenAI fallback:', mistralError?.message);
     }
 
     // Fallback to OpenAI

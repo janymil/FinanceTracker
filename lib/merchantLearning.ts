@@ -97,7 +97,7 @@ async function updateMerchantPattern(data: MerchantLearningData): Promise<void> 
     if (existingPattern[0]) {
       // Update existing pattern - increase user count and confidence
       const newUserCount = existingPattern[0].userCount + 1;
-      const newConfidence = Math.min(0.95, existingPattern[0].confidence + 0.05);
+      const newConfidence = Math.min(0.95, parseFloat(existingPattern[0].confidence) + 0.05);
 
       await db
         .update(merchantPatterns)
@@ -176,11 +176,11 @@ export async function getLearnedMerchantPattern(
       return {
         merchantName: patterns[0].merchantName,
         businessType: patterns[0].businessType,
-        categoryId: patterns[0].categoryId,
+        categoryId: patterns[0].categoryId || 0,
         categoryName: patterns[0].categoryName,
         confidence: parseFloat(patterns[0].confidence),
         userCount: patterns[0].userCount,
-        source: patterns[0].source
+        source: patterns[0].source || 'user_feedback'
       };
     }
 
@@ -214,10 +214,10 @@ export async function getUserMerchantHistory(
       .orderBy(desc(merchantLearning.learnedAt))
       .limit(1);
 
-    if (history[0]) {
+    if (history[0] && history[0].categoryId !== null) {
       return {
         categoryId: history[0].categoryId,
-        confidence: parseFloat(history[0].confidence)
+        confidence: parseFloat(history[0].confidence || '0.5')
       };
     }
 
@@ -254,11 +254,11 @@ export async function getTopLearnedMerchants(
     return patterns.map(p => ({
       merchantName: p.merchantName,
       businessType: p.businessType,
-      categoryId: p.categoryId,
+      categoryId: p.categoryId || 0,
       categoryName: p.categoryName,
       confidence: parseFloat(p.confidence),
       userCount: p.userCount,
-      source: p.source
+      source: p.source || 'user_feedback'
     }));
   } catch (error) {
     console.error('[MerchantLearning] Error getting top merchants:', error);

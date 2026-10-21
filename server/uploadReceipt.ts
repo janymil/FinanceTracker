@@ -26,30 +26,30 @@ const upload = multer({
 });
 
 // Validate Google Cloud environment variables
-if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GOOGLE_CLOUD_PRIVATE_KEY || !process.env.GOOGLE_CLOUD_CLIENT_EMAIL) {
-  console.error('Missing required Google Cloud environment variables');
-  throw new Error('Google Cloud Vision configuration is incomplete');
+const hasGoogleCloudConfig = Boolean(
+  process.env.GOOGLE_CLOUD_PROJECT_ID &&
+  process.env.GOOGLE_CLOUD_PRIVATE_KEY &&
+  process.env.GOOGLE_CLOUD_CLIENT_EMAIL
+);
+
+if (!hasGoogleCloudConfig) {
+  console.warn('Missing Google Cloud environment variables - Receipt OCR will be unavailable until configured.');
 }
 
-// Initialize Google Cloud Vision client with environment variables
-const visionClient = new ImageAnnotatorClient({
-  credentials: {
-    type: 'service_account',
-    project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
-    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-  },
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-});
+// Initialize Google Cloud Vision client with environment variables if available
+const visionClient = hasGoogleCloudConfig
+  ? new ImageAnnotatorClient({
+      credentials: {
+        type: 'service_account',
+        project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
+        private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+      },
+      projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+    })
+  : null;
 
-// Bunny.net configuration
-const bunnyConfig = {
-  apiKey: process.env.BUNNY_ACCESS_KEY,
-  storagePassword: process.env.BUNNY_STORAGE_PASSWORD,
-  storageZone: process.env.BUNNY_STORAGE_ZONE,
-  storageHost: 'la.storage.bunnycdn.com',
-  pullzoneUrl: 'https://finanzerpro.b-cdn.net',
-};
+import { cloudStorage } from './cloudStorage';
 
 interface UserPlan {
   plan: 'free' | 'standard' | 'premium';
@@ -69,33 +69,20 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
   }
 }
 
-// Upload file to Bunny.net
-export async function uploadToBunny(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
-  if (!bunnyConfig.storagePassword || !bunnyConfig.storageZone || !bunnyConfig.storageHost) {
-    throw new Error('Bunny.net configuration is incomplete');
-  }
-
-  const url = `https://${bunnyConfig.storageHost}/${bunnyConfig.storageZone}/receipts/${fileName}`;
-  
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'AccessKey': bunnyConfig.storagePassword,
-      'Content-Type': mimeType,
-    },
-    body: fileBuffer,
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to upload to Bunny.net: ${response.status} - ${errorText}`);
-  }
-
-  return `${bunnyConfig.pullzoneUrl}/receipts/${fileName}`;
+// Upload receipt file to Cloud Storage (Cloudflare R2 or fallback)
+export async function uploadReceiptFile(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
+  const filePath = `receipts/${fileName}`;
+  return await cloudStorage.uploadFile(filePath, fileBuffer, mimeType);
 }
+
+// Legacy alias
+export const uploadToBunny = uploadReceiptFile;
 
 // Perform OCR using Google Cloud Vision
 export async function performOCR(imageBuffer: Buffer): Promise<string> {
+  if (!visionClient) {
+    throw new Error('Google Cloud Vision configuration is incomplete');
+  }
   try {
     const [result] = await visionClient.textDetection({
       image: { content: imageBuffer },
@@ -231,15 +218,16 @@ export const uploadReceiptHandler = [
 
       let imageUrl: string | undefined;
 
-      // Upload to Bunny.net if user has appropriate plan
+      // Upload to Cloud Storage if user has appropriate plan
       if (canStore) {
         const timestamp = Date.now();
-        const fileName = `receipt-${userId}-${timestamp}.${req.file.mimetype.split('/')[1]}`;
+        const extension = req.file.mimetype.split('/')[1] || 'jpg';
+        const fileName = `receipt-${userId}-${timestamp}.${extension}`;
         
         try {
-          imageUrl = await uploadToBunny(fileName, req.file.buffer, req.file.mimetype);
+          imageUrl = await uploadReceiptFile(fileName, req.file.buffer, req.file.mimetype);
         } catch (uploadError) {
-          console.error('Upload to Bunny.net failed:', uploadError);
+          console.error('Upload to Cloud Storage failed:', uploadError);
           // Continue without storing the image, but still return OCR results
         }
       }

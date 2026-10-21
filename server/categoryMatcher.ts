@@ -202,17 +202,6 @@ function guessTransactionType(suggestion: string, language: string): 'income' | 
   );
   
   return isIncome ? 'income' : 'expense';
-
-
-  // **STEP 4: Create new category if no matches**
-  console.log(`✨ No match found, suggesting new category: "${aiSuggestedCategory}"`);
-  
-  return {
-    matchedCategory: null,
-    createNew: true,
-    newCategoryName: aiSuggestedCategory,
-    confidence: 0.7
-  };
 }
 
 /**

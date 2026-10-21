@@ -62,8 +62,22 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
     // Extract first IP if multiple (proxy chain)
     const clientIP = ip.split(',')[0].trim();
 
+    // Skip for development or internal requests
+    if (process.env.NODE_ENV === 'development') {
+      return next();
+    }
+
     // Skip for localhost/development
-    if (clientIP === '127.0.0.1' || clientIP === '::1' || clientIP.startsWith('192.168.')) {
+    if (
+      !clientIP ||
+      clientIP === '127.0.0.1' ||
+      clientIP === '::1' ||
+      clientIP === 'localhost' ||
+      clientIP.startsWith('::ffff:127.0.0.1') ||
+      clientIP.startsWith('192.168.') ||
+      clientIP.startsWith('10.') ||
+      clientIP.startsWith('172.16.')
+    ) {
       return next();
     }
 

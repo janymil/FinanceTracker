@@ -20,7 +20,7 @@ interface MerchantLookupResult {
   typical_categories?: string[];
   confidence: number;
   matched_merchant?: string;
-  source: 'country_specific' | 'global' | 'ai_analysis' | 'context_analysis' | 'english_context_analysis';
+  source: 'country_specific' | 'global' | 'ai_analysis' | 'context_analysis' | 'english_context_analysis' | 'user_history' | 'learned_pattern';
 }
 
 // Cache for loaded merchant data
@@ -228,7 +228,7 @@ export async function lookupMerchant(
     console.log(`[MerchantLookup] Looking up merchant: "${merchantName}" for country: ${countryCode}`);
     
     // Step 1: Check user's personal history (highest priority)
-    if (userId) {
+    if (userId && merchantName) {
       const userHistory = await getUserMerchantHistory(userId, merchantName);
       if (userHistory) {
         console.log(`[MerchantLookup] User history match found:`, userHistory);
@@ -236,23 +236,25 @@ export async function lookupMerchant(
           business_type: 'learned_from_user',
           category_keywords: [],
           confidence: userHistory.confidence,
-          matched_merchant: merchantName,
+          matched_merchant: merchantName || undefined,
           source: 'user_history'
         };
       }
     }
     
     // Step 2: Check learned global patterns
-    const learnedPattern = await getLearnedMerchantPattern(merchantName, countryCode);
-    if (learnedPattern && learnedPattern.confidence > 0.6) {
-      console.log(`[MerchantLookup] Learned pattern match found:`, learnedPattern);
-      return {
-        business_type: learnedPattern.businessType,
-        category_keywords: [],
-        confidence: learnedPattern.confidence,
-        matched_merchant: merchantName,
-        source: 'learned_pattern'
-      };
+    if (merchantName) {
+      const learnedPattern = await getLearnedMerchantPattern(merchantName, countryCode);
+      if (learnedPattern && learnedPattern.confidence > 0.6) {
+        console.log(`[MerchantLookup] Learned pattern match found:`, learnedPattern);
+        return {
+          business_type: learnedPattern.businessType,
+          category_keywords: [],
+          confidence: learnedPattern.confidence,
+          matched_merchant: merchantName || undefined,
+          source: 'learned_pattern'
+        };
+      }
     }
     
     // Step 3: Load merchant data for country (file-based)
@@ -260,7 +262,7 @@ export async function lookupMerchant(
     console.log(`[MerchantLookup] Loaded merchant data for ${countryCode}:`, Object.keys(merchantData || {}));
     
     // Step 4: Try direct merchant match
-    const directMatch = await findMerchantMatch(merchantName, merchantData);
+    const directMatch = merchantName ? await findMerchantMatch(merchantName, merchantData) : null;
     if (directMatch) {
       console.log(`[MerchantLookup] Direct match found:`, directMatch);
       return directMatch;
@@ -271,14 +273,14 @@ export async function lookupMerchant(
     try {
       const globalPath = path.resolve(process.cwd(), 'lib', 'merchants', 'global.json');
       const globalData = JSON.parse(await fs.readFile(globalPath, 'utf-8'));
-      const globalMatch = await findMerchantMatch(merchantName, globalData);
+      const globalMatch = merchantName ? await findMerchantMatch(merchantName, globalData) : null;
       if (globalMatch) {
         globalMatch.source = 'global';
         console.log(`[MerchantLookup] Global match found:`, globalMatch);
         return globalMatch;
       }
-    } catch (globalError) {
-      console.log(`[MerchantLookup] Could not load global merchants:`, globalError.message);
+    } catch (globalError: any) {
+      console.log(`[MerchantLookup] Could not load global merchants:`, globalError?.message);
     }
     
     // Step 6: Simple context analysis using country-specific merchant data

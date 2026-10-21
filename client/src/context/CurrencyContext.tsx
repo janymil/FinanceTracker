@@ -26,9 +26,15 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
   const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-  // Load user currency and check transaction status
+  // Load user currency and check transaction status ONLY for logged-in users
   useEffect(() => {
-    if (!isReady || !user?.id || isInitialized) return;
+    // If user is not logged in, don't show setup modal
+    if (!isReady || !user?.id) {
+      setShowSetupModal(false);
+      return;
+    }
+
+    if (isInitialized) return;
 
     const initializeCurrency = async () => {
       try {
@@ -37,9 +43,8 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         
         if (!userResponse.ok) {
           if (userResponse.status === 401) {
-            // User account doesn't exist, force cleanup and redirect
-            const { forceSignOutAndRedirect } = await import('../utils/sessionCleanup');
-            await forceSignOutAndRedirect();
+            // User not authenticated or account deleted
+            setShowSetupModal(false);
             return;
           }
           throw new Error('Failed to fetch user data');
@@ -61,16 +66,15 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
           setShowSetupModal(false);
           setIsInitialized(true);
         } else {
-          // User has no currency set - show setup modal until they choose
-          setCurrencyState(''); // No currency symbol until user selects
+          // User has no currency set - show setup modal only for new authenticated users
+          setCurrencyState('$');
           setShowSetupModal(true);
           setIsInitialized(true);
         }
       } catch (error) {
         console.error('Failed to initialize currency:', error);
-        // For auth errors, don't set any currency - let user choose
-        setCurrencyState('');
-        setShowSetupModal(true);
+        // Never show setup modal on error or unauthenticated state
+        setShowSetupModal(false);
         setIsInitialized(true);
       }
     };

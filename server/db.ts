@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Pool as NeonPool, neonConfig } from '@neondatabase/serverless';
 import { drizzle as neonDrizzle } from 'drizzle-orm/neon-serverless';
 import { Pool as PgPool } from 'pg';
@@ -35,13 +36,14 @@ if (isProduction) {
   
   console.log('✅ Connected to Neon production database');
 } else {
-  // Development: Use standard PostgreSQL connection for Replit
+  // Development: Use standard PostgreSQL connection with SSL support for Neon
   pool = new PgPool({ 
-    connectionString: databaseUrl
+    connectionString: databaseUrl,
+    ssl: databaseUrl.includes('neon.tech') ? { rejectUnauthorized: false } : undefined
   });
   db = pgDrizzle(pool, { schema });
   
-  console.log('✅ Connected to Replit development database');
+  console.log('✅ Connected to Neon development database');
 }
 
 export { pool, db };

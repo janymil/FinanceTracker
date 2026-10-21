@@ -28,7 +28,7 @@ export class DataEncryption {
 
     try {
       const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipher('aes-256-cbc', ENCRYPTION_KEY);
+      const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
       
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
@@ -58,13 +58,25 @@ export class DataEncryption {
       }
 
       const iv = Buffer.from(ivHex, 'hex');
-      const decipher = crypto.createDecipher('aes-256-cbc', ENCRYPTION_KEY);
+      const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
       
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
       
       return decrypted;
     } catch (error) {
+      // Backward compatibility for legacy createCipher format
+      try {
+        const [, encrypted] = encryptedData.split(':');
+        if (encrypted) {
+          const legacyDecipher = crypto.createDecipher('aes-256-cbc', ENCRYPTION_KEY);
+          let decrypted = legacyDecipher.update(encrypted, 'hex', 'utf8');
+          decrypted += legacyDecipher.final('utf8');
+          return decrypted;
+        }
+      } catch {
+        // Ignore legacy fallback failure
+      }
       console.error('Decryption error:', error);
       return encryptedData; // Return original data if decryption fails
     }
@@ -88,7 +100,7 @@ export class DataEncryption {
 
   // Utility method to check if data appears to be encrypted
   static isEncrypted(data: string): boolean {
-    return data && data.includes(':') && data.split(':').length === 2;
+    return Boolean(data && data.includes(':') && data.split(':').length === 2);
   }
 
   // Method to get encryption status

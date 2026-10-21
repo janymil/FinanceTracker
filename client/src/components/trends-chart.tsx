@@ -29,7 +29,7 @@ export default function TrendsChart() {
 
   // Fetch user's actual financial data for trend calculation
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["transactions", user?.id],
+    queryKey: ["/api/transactions"],
     enabled: isReady && !!user?.id,
     staleTime: 0,
     gcTime: 0,

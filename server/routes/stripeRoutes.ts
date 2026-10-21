@@ -465,7 +465,7 @@ export function registerStripeRoutes(app: Express) {
     }
 
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
@@ -547,6 +547,15 @@ export function registerStripeRoutes(app: Express) {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (user?.stripeSubscriptionId && stripe) {
+        try {
+          await stripe.subscriptions.cancel(user.stripeSubscriptionId);
+        } catch (stripeError) {
+          console.error('Error cancelling subscription in Stripe:', stripeError);
+        }
       }
 
       // Reset user to free plan

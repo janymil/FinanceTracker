@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 if (!ADMIN_PASSWORD) {
-  throw new Error('ADMIN_PASSWORD environment variable must be set for admin access');
+  console.warn('ADMIN_PASSWORD environment variable is not set - legacy admin login will be disabled until configured.');
 }
 
 interface AdminRequest extends Request {
@@ -45,7 +45,7 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   }
   
   // Simple password check - in production, use hashed passwords
-  if (password === ADMIN_PASSWORD) {
+  if (ADMIN_PASSWORD && password === ADMIN_PASSWORD) {
     req.session.isAdminAuthenticated = true;
     console.log('Admin login successful, session updated');
     console.log('Session after login:', {

@@ -17,10 +17,10 @@ router.post('/generate-narration', async (req, res) => {
       const scripts = getDemoScripts();
       const featureScript = scripts[demoType as keyof typeof scripts];
       
-      if (featureScript && featureScript[language]) {
+      if (featureScript && featureScript[language as keyof typeof featureScript]) {
         // Combine all script steps into one narration
-        const steps = featureScript[language];
-        narrationText = `${steps.intro} ${steps.upload} ${steps.analysis} ${steps.result}`;
+        const steps = featureScript[language as keyof typeof featureScript] as Record<string, string>;
+        narrationText = Object.values(steps).join(' ');
       }
     }
     

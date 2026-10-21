@@ -9,6 +9,7 @@ import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit, ImageIc
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
+import { queryClient } from "@/lib/queryClient";
 import QRCode from "qrcode";
 
 interface UploadReceiptModalProps {
@@ -491,11 +492,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
       });
 
       // Invalidate cache to refresh transaction lists
-      if (typeof window !== 'undefined' && (window as any).queryClient) {
-        const queryClient = (window as any).queryClient;
-        queryClient.invalidateQueries({ queryKey: ["transactions"] });
-        queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      }
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
 
       // Reset and close modal
       handleReset();

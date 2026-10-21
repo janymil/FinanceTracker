@@ -5,8 +5,11 @@ server/public
 vite.config.ts.*
 *.tar.gz
 
-# Security - Never commit service account files
+# Security - Never commit service account files or environment secrets
+.env
+.env.*
+!.env.example
 service-account.json
 *-service-account.json
 google-cloud-credentials.json
-gcp-*.json
+gcp-*.json

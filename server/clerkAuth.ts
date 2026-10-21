@@ -7,23 +7,30 @@ export const setupClerkAuth = (app: any) => {
     secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
   });
   
+  // Create single Clerk middleware instance
+  const clerkHandler = clerkMiddleware({
+    publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
+  });
+
   // Add Clerk middleware only for routes that need authentication
   app.use((req: any, res: any, next: any) => {
-    // Skip Clerk middleware for static assets, webhooks, and public SEO routes
-    if (req.path.startsWith('/uploads/') ||
-        req.path.startsWith('/api/clerk-webhooks') ||
-        req.path.startsWith('/api/stripe-webhook') ||
-        req.path.includes('.') || // Static files (css, js, images, etc.)
-        req.path === '/robots.txt' ||
-        req.path === '/sitemap.xml') {
+    // Skip Clerk middleware for Vite internal requests, static assets, webhooks, and public SEO routes
+    if (
+      req.path.startsWith('/@') ||
+      req.path.startsWith('/src/') ||
+      req.path.startsWith('/node_modules/') ||
+      req.path.startsWith('/uploads/') ||
+      req.path.startsWith('/api/clerk-webhooks') ||
+      req.path.startsWith('/api/stripe-webhook') ||
+      req.path.includes('.') || // Static files (css, js, images, etc.)
+      req.path === '/robots.txt' ||
+      req.path === '/sitemap.xml'
+    ) {
       return next();
     }
-    
-    // Apply Clerk middleware for protected routes and API endpoints that need auth
-    clerkMiddleware({
-      publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
-      secretKey: process.env.CLERK_SECRET_KEY,
-    })(req, res, next);
+
+    return clerkHandler(req, res, next);
   });
 };
 

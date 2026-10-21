@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { generatePdfReport } from "../generatePdf";
-import { BunnyStorage } from "../bunnyStorage";
+import { cloudStorage } from "../cloudStorage";
 
 export function registerExportRoutes(app: Express) {
 
@@ -284,7 +284,8 @@ export function registerExportRoutes(app: Express) {
         if (exportData.transactions) {
           const csvHeader = 'Date,Description,Amount,Type,Category\n';
           const csvRows = exportData.transactions.map((t: any) => {
-            return `${t.date.split('T')[0]},"${t.description}",${t.amount},${t.type},${t.categoryName || 'Uncategorized'}`;
+            const dateStr = t.date instanceof Date ? t.date.toISOString().split('T')[0] : String(t.date || '').split('T')[0];
+            return `${dateStr},"${(t.description || '').replace(/"/g, '""')}",${t.amount},${t.type},${t.categoryName || 'Uncategorized'}`;
           }).join('\n');
           
           res.setHeader('Content-Type', 'text/csv');
@@ -303,13 +304,8 @@ export function registerExportRoutes(app: Express) {
     }
   });
 
-  // Cloud backup endpoints using existing BunnyStorage infrastructure
-  let bunnyStorage: BunnyStorage | null = null;
-  try {
-    bunnyStorage = new BunnyStorage();
-  } catch (error) {
-    console.log('Bunny.net storage not configured:', error);
-  }
+  // Cloud backup endpoints using Cloud Storage (Cloudflare R2 or Bunny fallback)
+  const backupStorage = cloudStorage;
 
   // Create backup endpoint
   app.post('/api/backup', isAuthenticated, async (req: any, res) => {
@@ -324,7 +320,7 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
       }
 
-      if (!bunnyStorage) {
+      if (!backupStorage) {
         return res.status(503).json({ message: "Cloud backup service unavailable" });
       }
 
@@ -360,7 +356,7 @@ export function registerExportRoutes(app: Express) {
       console.log('BACKUP DEBUG: Starting backup creation for user:', userId);
       console.log('BACKUP DEBUG: Backup data size:', JSON.stringify(backupData).length, 'characters');
       
-      const filename = await bunnyStorage.createBackup(userId, backupData);
+      const filename = await backupStorage.createBackup(userId, backupData);
       
       console.log('BACKUP DEBUG: Backup created successfully with filename:', filename);
 
@@ -370,7 +366,7 @@ export function registerExportRoutes(app: Express) {
         filename 
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("BACKUP ERROR: Error creating backup:", error);
       console.error("BACKUP ERROR: Error details:", error.message);
       return res.status(500).json({ message: "Failed to create backup", error: error.message });
@@ -390,12 +386,12 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Cloud backup requires Premium subscription", userPlan: user?.plan });
       }
 
-      if (!bunnyStorage) {
+      if (!backupStorage) {
         return res.status(503).json({ message: "Cloud backup service unavailable" });
       }
 
       // Use the existing getUserBackups method
-      const backups = await bunnyStorage.getUserBackups(userId);
+      const backups = await backupStorage.getUserBackups(userId);
       const lastBackup = backups.length > 0 ? backups[0] : null;
 
       res.json({
@@ -458,12 +454,12 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
       }
 
-      if (!bunnyStorage) {
+      if (!backupStorage) {
         return res.status(503).json({ message: "Cloud backup service unavailable" });
       }
 
       // Get user backups using the existing method
-      const backups = await bunnyStorage.getUserBackups(userId);
+      const backups = await backupStorage.getUserBackups(userId);
       
       // Format backup data for frontend
       const formattedBackups = backups.map(backup => ({
@@ -518,7 +514,7 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
       }
 
-      if (!bunnyStorage) {
+      if (!backupStorage) {
         return res.status(503).json({ message: "Cloud backup service unavailable" });
       }
 
@@ -531,7 +527,7 @@ export function registerExportRoutes(app: Express) {
 
       // Use the existing downloadFile method with proper path
       const filePath = `backups/user-${userId}/${filename}`;
-      const backupContent = await bunnyStorage.downloadFile(filePath);
+      const backupContent = await backupStorage.downloadFile(filePath);
       const parsedData = JSON.parse(backupContent);
 
       if (parsedData.userId !== userId) {
@@ -625,7 +621,7 @@ export function registerExportRoutes(app: Express) {
         backupDate: parsedData.timestamp
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("RESTORE ERROR: Error restoring backup:", error);
       console.error("RESTORE ERROR: Error details:", error.message);
       console.error("RESTORE ERROR: Error stack:", error.stack);

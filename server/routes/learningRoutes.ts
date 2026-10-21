@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { requireAuth } from "@clerk/express";
+import { getUserId } from "../clerkAuth";
 import { z } from "zod";
 import { 
   recordMerchantLearning, 
@@ -28,7 +29,7 @@ export function registerLearningRoutes(app: Router) {
   router.post('/record', requireAuth(), async (req: Request, res: Response) => {
     try {
       const data = learningSchema.parse(req.body);
-      const userId = req.auth?.userId;
+      const userId = getUserId(req);
       
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });

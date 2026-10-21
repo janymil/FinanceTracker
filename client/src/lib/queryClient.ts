@@ -23,19 +23,22 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  // Get Clerk session token for authentication
+export async function getAuthToken(): Promise<string | null> {
   try {
     if (typeof window !== 'undefined' && window.Clerk?.session) {
-      const token = await window.Clerk.session.getToken();
-      console.log('Clerk token available:', !!token);
-      if (token) {
-        return { Authorization: `Bearer ${token}` };
-      }
+      return await window.Clerk.session.getToken();
     }
-    console.log('No Clerk session available');
   } catch (error) {
     console.warn('Failed to get Clerk token:', error);
+  }
+  return null;
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  // Get Clerk session token for authentication
+  const token = await getAuthToken();
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
   }
   return {};
 }

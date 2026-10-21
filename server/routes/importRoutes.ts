@@ -233,7 +233,7 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
 }
 
 // Store active SSE connections for progress updates
-const progressConnections = new Map<string, Express.Response>();
+const progressConnections = new Map<string, any>();
 
 export function registerImportRoutes(app: Express) {
   
@@ -696,10 +696,12 @@ export function registerImportRoutes(app: Express) {
                 categoryNameToIdMap[originalName] = existingCategory.id;
                 console.log(`Using existing category: ${userEditedName} (ID: ${existingCategory.id})`);
               } else {
-                const newCategory = await storage.createCategory(userId, {
+                const newCategory = await storage.createCategory({
+                  userId,
                   name: userEditedName,
                   type: 'expense',
-                  description: `Created from bank statement import`
+                  icon: 'Tag',
+                  color: '#6366f1'
                 });
                 categoryNameToIdMap[originalName] = newCategory.id;
                 console.log(`Created new category: ${userEditedName} (ID: ${newCategory.id})`);
@@ -729,17 +731,18 @@ export function registerImportRoutes(app: Express) {
           }
 
           const transactionData = {
-            amount: Math.abs(parseFloat(transaction.amount)),
+            userId,
+            amount: String(Math.abs(parseFloat(transaction.amount))),
             description: transaction.description,
-            date: transaction.date,
-            type: transaction.type || 'expense',
+            date: new Date(transaction.date),
+            type: (transaction.type || 'expense') as 'income' | 'expense',
             categoryId: categoryId,
-            reference: transaction.reference || null,
-            recurring: false,
-            receiptUrl: null
+            referenceNote: transaction.reference || null,
+            isRecurring: false,
+            imageUrl: null
           };
 
-          const savedTransaction = await storage.createTransaction(userId, transactionData);
+          const savedTransaction = await storage.createTransaction(transactionData);
           savedTransactions.push(savedTransaction);
         } catch (error) {
           console.error(`Failed to save transaction: ${transaction.description}`, error);

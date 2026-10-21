@@ -45,7 +45,7 @@ export class BunnyStorage {
     };
 
     if (!this.config.storageZone || !this.config.accessKey || !this.config.storagePassword) {
-      throw new Error('Bunny.net credentials not properly configured');
+      console.warn('Bunny.net credentials not configured - cloud storage features will be unavailable until configured.');
     }
 
     this.baseUrl = `https://la.storage.bunnycdn.com/${this.config.storageZone}`;
@@ -57,6 +57,9 @@ export class BunnyStorage {
     data?: string | Buffer,
     contentType?: string
   ): Promise<any> {
+    if (!this.config.storageZone || !this.config.accessKey || !this.config.storagePassword) {
+      throw new Error('Bunny.net credentials not properly configured');
+    }
     const url = `${this.baseUrl}${path}`;
     
     const headers: Record<string, string> = {

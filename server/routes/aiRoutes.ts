@@ -173,8 +173,8 @@ export function registerAIRoutes(app: Express) {
         // Get the most recent cached tip directly from database
         const recentEntry = await storage.getRecentAICacheEntry(userId, 'financial-tips');
         
-        if (recentEntry && recentEntry.output) {
-          return res.json({ tip: recentEntry.output });
+        if (recentEntry && recentEntry.outputJson) {
+          return res.json({ tip: recentEntry.outputJson });
         } else {
           return res.json({ tip: null });
         }
@@ -938,6 +938,8 @@ export function registerAIRoutes(app: Express) {
               }
             } else if (existingMascot.imageUrl.startsWith('/uploads/mascots/')) {
               // Delete local file (fallback for old mascots)
+              const fs = await import('fs/promises');
+              const path = await import('path');
               const oldFilePath = path.join(process.cwd(), existingMascot.imageUrl);
               await fs.unlink(oldFilePath);
               console.log('Deleted previous local mascot file');
@@ -1318,7 +1320,10 @@ Answer questions about features, subscription plans, how to use the app, trouble
       
       // Return fallback tips instead of 500 error
       try {
-        const fallbackTips = generateFallbackTips(safeSummary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 }, safeTransactions || [], safeBudgets || []);
+        const fallbackSummary = req.body?.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 };
+        const fallbackTransactions = req.body?.transactions || [];
+        const fallbackBudgets = req.body?.budgets || [];
+        const fallbackTips = generateFallbackTips(fallbackSummary, fallbackTransactions, fallbackBudgets);
         console.log('🔄 Contextual tips - Returning fallback tips due to error');
         return res.json({ tips: fallbackTips });
       } catch (fallbackError) {

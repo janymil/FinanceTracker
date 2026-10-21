@@ -9,6 +9,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Trash2, Filter, TrendingDown, TrendingUp, ChevronDown, ChevronUp, Receipt, Repeat } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import ReceiptModal from "@/components/receipt-modal";
 import { useTranslation } from "react-i18next";
 import { useDateFormat } from "@/hooks/useDateFormat";
@@ -46,6 +49,28 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const { t } = useTranslation();
   const { formatDate } = useDateFormat();
+  const { toast } = useToast();
+
+  const deleteTransactionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/transactions/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      toast({
+        title: t("common.success"),
+        description: t("transactions.deleted_success"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   // Filter and search transactions
   const filteredTransactions = useMemo(() => {
@@ -285,7 +310,13 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                       )}
 
                       {isPremium && (
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-destructive">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-destructive"
+                          onClick={() => deleteTransactionMutation.mutate(transaction.id)}
+                          disabled={deleteTransactionMutation.isPending}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}

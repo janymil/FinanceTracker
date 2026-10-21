@@ -29,6 +29,7 @@ interface CategorySuggestion {
   id: string;
   transactionDescription: string;
   suggestedCategory: string;
+  suggestedCategoryId?: number;
   confidence: number;
   merchant?: string;
   amount: number;
@@ -84,7 +85,12 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
   };
 
   const { data: uncategorizedTransactions } = useQuery({
-    queryKey: ["transactions", user?.id, "uncategorized"],
+    queryKey: ["/api/transactions"],
+    enabled: !!user,
+  });
+
+  const { data: categories = [] } = useQuery<any[]>({
+    queryKey: ["/api/categories"],
     enabled: !!user,
   });
 
@@ -106,9 +112,24 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
     }
   };
 
-  const applySuggestion = async ({ transactionId, categoryId }: { transactionId: string; categoryId: string }) => {
+  const applySuggestion = async ({ transactionId, categoryId }: { transactionId: string; categoryId: number | string }) => {
     try {
-      const data = await apiRequest("PATCH", `/api/transactions/${transactionId}`, { categoryId });
+      const txList = Array.isArray(transactions) && transactions.length > 0
+        ? transactions
+        : (Array.isArray(uncategorizedTransactions) ? uncategorizedTransactions : []);
+      const existingTx = txList.find((tx: any) => String(tx.id) === String(transactionId));
+
+      await apiRequest("PUT", `/api/transactions/${transactionId}`, {
+        ...(existingTx ? {
+          amount: existingTx.amount,
+          description: existingTx.description,
+          type: existingTx.type,
+          date: existingTx.date,
+          note: existingTx.note,
+        } : {}),
+        categoryId: Number(categoryId),
+      });
+      await queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       toast({
         title: t("Category Applied"),
@@ -140,9 +161,27 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
   };
 
   const handleApplySuggestion = (suggestion: CategorySuggestion) => {
+    let resolvedCategoryId: number | string | undefined = suggestion.suggestedCategoryId;
+    if (!resolvedCategoryId && Array.isArray(categories)) {
+      const matched = categories.find(
+        (c: any) => c.name?.toLowerCase() === suggestion.suggestedCategory?.toLowerCase()
+      );
+      if (matched) {
+        resolvedCategoryId = matched.id;
+      }
+    }
+    if (!resolvedCategoryId) {
+      toast({
+        title: t("Error"),
+        description: t("Could not find matching category ID"),
+        variant: "destructive",
+      });
+      return;
+    }
+
     applySuggestion({
       transactionId: suggestion.id,
-      categoryId: suggestion.suggestedCategory
+      categoryId: resolvedCategoryId
     });
     
     setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));

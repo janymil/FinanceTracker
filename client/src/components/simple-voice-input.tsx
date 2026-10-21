@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Mic, MicOff, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, getAuthToken } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 interface SimpleVoiceInputProps {
@@ -69,13 +69,13 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   const [newCategoryName, setNewCategoryName] = useState('');
 
   // Get user data
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<any>({
     queryKey: ['/api/auth/user'],
     staleTime: 5 * 60 * 1000
   });
 
   // Get categories for matching
-  const { data: allCategories, isLoading: categoriesLoading } = useQuery({
+  const { data: allCategories, isLoading: categoriesLoading } = useQuery<any[]>({
     queryKey: ['/api/categories'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/categories');
@@ -92,12 +92,12 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       return [];
     }
     
-    const filtered = allCategories.filter(cat => cat.type === accumulatedData.type);
+    const filtered = allCategories.filter((cat: any) => cat.type === accumulatedData.type);
     console.log('🔍 [VOICE-INPUT] Category filtering:', {
       totalCategories: allCategories.length,
       transactionType: accumulatedData.type,
       filteredCategories: filtered.length,
-      sampleFiltered: filtered.slice(0, 3).map(c => c.name)
+      sampleFiltered: filtered.slice(0, 3).map((c: any) => c.name)
     });
     
     return filtered;
@@ -152,14 +152,13 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       // Step 3: Create new category if no match found
       if (result.createNew) {
         console.log('🆕 Creating new category:', result.newCategoryName);
-        const newCategoryResponse = await apiRequest('/api/categories', {
-          method: 'POST',
-          body: {
-            name: result.newCategoryName,
-            type: 'expense', // Default to expense
-            color: '#6366f1' // Default color
-          }
+        const newCategoryRes = await apiRequest('POST', '/api/categories', {
+          name: result.newCategoryName,
+          type: 'expense', // Default to expense
+          icon: 'Tag',
+          color: '#6366f1' // Default color
         });
+        const newCategoryResponse = await newCategoryRes.json();
 
         if (newCategoryResponse.id) {
           console.log('✅ New category created:', newCategoryResponse.name);
@@ -361,13 +360,15 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       formData.append('audio', audioBlob, 'recording.webm');
       
       console.log('🎯 Trying Groq as fallback...');
+      const groqToken = await getAuthToken();
       
       const response = await fetch('/api/voice-groq/transcribe-and-parse', {
         method: 'POST',
         body: formData,
         headers: {
           'x-user-language': getCurrentLanguageForAPI(),
-          'x-user-currency': userCurrency
+          'x-user-currency': userCurrency,
+          ...(groqToken ? { 'Authorization': `Bearer ${groqToken}` } : {})
         }
       });
       
@@ -455,13 +456,15 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       formData.append('audio', audioBlob, 'recording.webm');
       
       console.log('🎤 Sending audio to Mistral for processing...');
+      const mistralToken = await getAuthToken();
       
       const response = await fetch('/api/voice-mistral/transcribe-and-parse', {
         method: 'POST',
         body: formData,
         headers: {
           'x-user-language': getCurrentLanguageForAPI(),
-          'x-user-currency': userCurrency
+          'x-user-currency': userCurrency,
+          ...(mistralToken ? { 'Authorization': `Bearer ${mistralToken}` } : {})
         }
       });
       
@@ -982,14 +985,13 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                       onClick={async () => {
                         if (newCategoryName.trim()) {
                           try {
-                            const newCategory = await apiRequest('/api/categories', {
-                              method: 'POST',
-                              body: JSON.stringify({
-                                name: newCategoryName.trim(),
-                                type: accumulatedData.type,
-                                color: '#6366f1'
-                              })
+                            const newCategoryRes = await apiRequest('POST', '/api/categories', {
+                              name: newCategoryName.trim(),
+                              type: accumulatedData.type,
+                              icon: 'Tag',
+                              color: '#6366f1'
                             });
+                            const newCategory = await newCategoryRes.json();
                             
                             setAccumulatedData(prev => ({
                               ...prev,

@@ -101,14 +101,15 @@ export interface IStorage {
 
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
-  getUserTransactions(userId: string, limit?: number): Promise<Transaction[]>;
+  getUserTransactions(userId: string, limit?: number): Promise<(Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null })[]>;
+  getTransactionsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Array<Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null }>>;
   updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction>;
   deleteTransaction(id: number, userId: string): Promise<void>;
   clearUserTransactions(userId: string): Promise<void>;
 
   // Budget operations
   createBudget(budget: InsertBudget): Promise<Budget>;
-  getUserBudgets(userId: string): Promise<Budget[]>;
+  getUserBudgets(userId: string): Promise<(Budget & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null; spent?: number; remaining?: number; percentage?: number })[]>;
   getBudget(id: number): Promise<Budget | undefined>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
   deleteBudget(id: number, userId: string): Promise<void>;
@@ -123,6 +124,7 @@ export interface IStorage {
 
   // Category operations
   getCategories(userId?: string): Promise<Category[]>;
+  getCategory(categoryId: number): Promise<Category | undefined>;
   createCategory(category: { userId: string; name: string; icon: string; color: string; type: string }): Promise<Category>;
   updateCategory(categoryId: number, userId: string, updateData: { name: string; icon: string; color: string; type: 'income' | 'expense' }): Promise<Category>;
   deleteCategory(categoryId: number, userId: string): Promise<Category>;
@@ -391,8 +393,8 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
-    let query = db
+  async getUserTransactions(userId: string, limit?: number): Promise<(Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null })[]> {
+    const baseQuery = db
       .select({
         id: transactions.id,
         userId: transactions.userId,
@@ -408,6 +410,11 @@ export class DatabaseStorage implements IStorage {
         parentTransactionId: transactions.parentTransactionId,
         paymentUrl: transactions.paymentUrl,
         referenceNote: transactions.referenceNote,
+        imageUrl: transactions.imageUrl,
+        ocrText: transactions.ocrText,
+        ocrVendor: transactions.ocrVendor,
+        ocrDetectedAmount: transactions.ocrDetectedAmount,
+        ocrDetectedDate: transactions.ocrDetectedDate,
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColor: categories.color,
@@ -417,16 +424,56 @@ export class DatabaseStorage implements IStorage {
       .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.date));
 
-    if (limit) {
-      query = query.limit(limit);
-    }
-
-    const userTransactions = await query;
+    const userTransactions = limit ? await baseQuery.limit(limit) : await baseQuery;
 
     // Decrypt sensitive fields (amount is not encrypted)
     return userTransactions.map(transaction => ({
       ...transaction,
       // amount stays as-is since it's not encrypted
+      description: DataEncryption.decryptDescription(transaction.description),
+      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
+    }));
+  }
+
+  async getTransactionsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Array<Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null }>> {
+    const userTransactions = await db
+      .select({
+        id: transactions.id,
+        userId: transactions.userId,
+        categoryId: transactions.categoryId,
+        amount: transactions.amount,
+        description: transactions.description,
+        date: transactions.date,
+        type: transactions.type,
+        createdAt: transactions.createdAt,
+        isRecurring: transactions.isRecurring,
+        recurringFrequency: transactions.recurringFrequency,
+        recurringEndDate: transactions.recurringEndDate,
+        parentTransactionId: transactions.parentTransactionId,
+        paymentUrl: transactions.paymentUrl,
+        referenceNote: transactions.referenceNote,
+        imageUrl: transactions.imageUrl,
+        ocrText: transactions.ocrText,
+        ocrVendor: transactions.ocrVendor,
+        ocrDetectedAmount: transactions.ocrDetectedAmount,
+        ocrDetectedDate: transactions.ocrDetectedDate,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryColor: categories.color,
+      })
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          gte(transactions.date, startDate),
+          lte(transactions.date, endDate)
+        )
+      )
+      .orderBy(desc(transactions.date));
+
+    return userTransactions.map(transaction => ({
+      ...transaction,
       description: DataEncryption.decryptDescription(transaction.description),
       referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
     }));
@@ -504,7 +551,7 @@ export class DatabaseStorage implements IStorage {
     return newBudget;
   }
 
-  async getUserBudgets(userId: string): Promise<Budget[]> {
+  async getUserBudgets(userId: string): Promise<(Budget & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null; spent?: number; remaining?: number; percentage?: number })[]> {
     const budgetData = await db
       .select({
         id: budgets.id,
@@ -528,7 +575,7 @@ export class DatabaseStorage implements IStorage {
     const budgetsWithSpending = await Promise.all(
       budgetData.map(async (budget) => {
         // Calculate total spending for this category within the budget period
-        const spendingResult = await db
+        const spendingResult = budget.categoryId ? await db
           .select({
             totalSpent: sql`COALESCE(SUM(ABS(CAST(${transactions.amount} AS DECIMAL))), 0)`
           })
@@ -541,7 +588,7 @@ export class DatabaseStorage implements IStorage {
               gte(transactions.date, budget.startDate),
               lte(transactions.date, budget.endDate)
             )
-          );
+          ) : [{ totalSpent: 0 }];
 
         const totalSpent = Number(spendingResult[0]?.totalSpent || 0);
         const budgetAmount = parseFloat(budget.amount);
@@ -686,6 +733,12 @@ export class DatabaseStorage implements IStorage {
       );
     }
     return await db.select().from(categories);
+  }
+
+  async getCategory(categoryId: number): Promise<Category | undefined> {
+    if (!categoryId) return undefined;
+    const [category] = await db.select().from(categories).where(eq(categories.id, categoryId)).limit(1);
+    return category;
   }
 
   async createCategory(category: { userId: string; name: string; icon: string; color: string; type: string }): Promise<Category> {
@@ -1014,7 +1067,7 @@ export class DatabaseStorage implements IStorage {
         const reminder = {
           id: `recurring_${recurring.id}`,
           title: DataEncryption.decryptDescription(recurring.description), // Decrypt the description
-          description: recurring.recurringFrequency, // Just send the frequency, let client translate
+          description: recurring.recurringFrequency || 'monthly', // Just send the frequency, let client translate
           amount: recurring.amount, // Amount is not encrypted, so use as-is
           dueDate: nextOccurrence,
           type: recurring.type as 'income' | 'expense',
@@ -1682,7 +1735,7 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: GoalContribution[], activities: ChallengeActivity[] }) | undefined> {
+  async getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: Array<GoalContribution & { user: User }>, activities: ChallengeActivity[] }) | undefined> {
     // Check if user is participant
     const [participant] = await db
       .select()
@@ -2645,14 +2698,14 @@ export class DatabaseStorage implements IStorage {
       const lastDateOnly = lastLearningDate ? new Date(lastLearningDate.getFullYear(), lastLearningDate.getMonth(), lastLearningDate.getDate()) : null;
       
       // Calculate streak
-      let newStreak = stats.currentStreak;
+      let newStreak = stats.currentStreak || 0;
       if (lastDateOnly) {
         const daysDiff = Math.floor((todayDateOnly.getTime() - lastDateOnly.getTime()) / (1000 * 60 * 60 * 24));
         if (daysDiff === 0) {
           // Same day, keep current streak
         } else if (daysDiff === 1) {
           // Consecutive day, increment streak
-          newStreak = stats.currentStreak + 1;
+          newStreak = (stats.currentStreak || 0) + 1;
         } else {
           // Streak broken, reset to 1
           newStreak = 1;
@@ -3191,12 +3244,13 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Check daily limit
-      if (limits.dailyRequestLimit > 0) {
+      const dailyLimit = limits.dailyRequestLimit || 0;
+      if (dailyLimit > 0) {
         const dailyUsage = await this.getDailyAIUsage(userId, functionName);
-        if (dailyUsage.requests >= limits.dailyRequestLimit) {
+        if (dailyUsage.requests >= dailyLimit) {
           return {
             allowed: false,
-            reason: `Daily limit exceeded (${dailyUsage.requests}/${limits.dailyRequestLimit})`
+            reason: `Daily limit exceeded (${dailyUsage.requests}/${dailyLimit})`
           };
         }
       }

@@ -97,7 +97,8 @@ export default function Courses() {
   // Submit exercise completion
   const submitExerciseMutation = useMutation({
     mutationFn: async (exerciseData: any) => {
-      return apiRequest('/api/courses/submit-exercise', 'POST', exerciseData);
+      const res = await apiRequest('POST', '/api/courses/submit-exercise', exerciseData);
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/courses/progress'] });
