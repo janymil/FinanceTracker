@@ -1,6 +1,43 @@
 import type { Express } from "express";
 import { setupClerkAuth, isAuthenticated, getUserId } from "../clerkAuth";
-import { storage } from "../storage";
+import { storage, type ClerkProfile } from "../storage";
+
+let clerkClientPromise: Promise<any> | null = null;
+
+async function getClerkClient() {
+  if (!clerkClientPromise) {
+    clerkClientPromise = import('@clerk/backend').then(({ createClerkClient }) =>
+      createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
+    );
+  }
+  return clerkClientPromise;
+}
+
+/**
+ * Reads the authoritative identity from Clerk. Only a *verified* primary email is
+ * returned, because it is used to match a Clerk login against an existing database
+ * user (account re-linking) and must not be spoofable.
+ */
+export async function getVerifiedClerkProfile(userId: string): Promise<Partial<ClerkProfile> | null> {
+  try {
+    const client = await getClerkClient();
+    const clerkUser = await client.users.getUser(userId);
+    const primary = clerkUser?.emailAddresses?.find(
+      (address: any) => address.id === clerkUser.primaryEmailAddressId
+    );
+    const isVerified = primary?.verification?.status === 'verified';
+
+    return {
+      email: isVerified ? primary?.emailAddress ?? null : null,
+      firstName: clerkUser?.firstName ?? null,
+      lastName: clerkUser?.lastName ?? null,
+      profileImageUrl: clerkUser?.imageUrl ?? null,
+    };
+  } catch (error) {
+    console.warn(`[AUTH] Could not load Clerk profile for ${userId}:`, (error as Error).message);
+    return null;
+  }
+}
 
 export function registerAuthRoutes(app: Express) {
   // Auth middleware
@@ -26,43 +63,68 @@ export function registerAuthRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
-      if (!userId) {
-        return res.status(401).json({ message: "No user ID found" });
-      }
 
       let user = await storage.getUser(userId);
-      
-      // If user doesn't exist in database, create them
-      if (!user) {
-        try {
-          // Create user with basic data from authentication
-          const userData = {
-            id: userId,
-            email: null, // Will be populated from Clerk webhooks
-            firstName: null,
-            lastName: null,
-            profileImageUrl: null,
-            plan: 'free',
-            stripeCustomerId: null,
-            stripeSubscriptionId: null,
-            settings: null,
-            currency: null // Explicitly set to null to trigger currency setup modal
-          };
-          user = await storage.upsertUser(userData);
-          console.log(`Created new user in database: ${userId}`);
-        } catch (error) {
-          console.error('Error creating user in database:', error);
-          return res.status(500).json({ 
-            message: 'Failed to create user account'
-          });
+
+      // Rows created before the Clerk webhook was reachable carry a placeholder email
+      // (`<clerk_id>@clerk.user`, see storage.upsertUser). Refresh those from Clerk so the
+      // real identity is stored - and re-home existing data when Clerk reissued the user
+      // id for the same verified email (deleted user, or database seeded from another
+      // Clerk instance). Without this, such a login resolves to an empty account.
+      const needsIdentitySync = !user || !user.email || user.email.endsWith('@clerk.user');
+
+      if (needsIdentitySync) {
+        const profile = await getVerifiedClerkProfile(userId);
+
+        if (profile?.email) {
+          const emailOwner = await storage.getUserByEmail(profile.email);
+          if (emailOwner && emailOwner.id !== userId) {
+            try {
+              user = await storage.adoptUserAccount(emailOwner.id, userId, profile);
+              console.log(`[AUTH] Re-linked data from ${emailOwner.id} to ${userId} (${profile.email})`);
+            } catch (adoptionError) {
+              console.error('[AUTH] Could not re-link existing account:', adoptionError);
+            }
+          }
+        }
+
+        // If user doesn't exist in database, create them
+        if (!user) {
+          try {
+            // Create user with basic data from authentication
+            const userData = {
+              id: userId,
+              email: profile?.email ?? null, // Populated from Clerk when available
+              firstName: profile?.firstName ?? null,
+              lastName: profile?.lastName ?? null,
+              profileImageUrl: profile?.profileImageUrl ?? null,
+              plan: 'free',
+              stripeCustomerId: null,
+              stripeSubscriptionId: null,
+              settings: null,
+              currency: null // Explicitly set to null to trigger currency setup modal
+            };
+            user = await storage.upsertUser(userData);
+            console.log(`Created new user in database: ${userId}`);
+          } catch (error) {
+            console.error('Error creating user in database:', error);
+            return res.status(500).json({ 
+              message: 'Failed to create user account'
+            });
+          }
+        } else if (profile?.email && user.email !== profile.email) {
+          try {
+            user = await storage.updateUser(userId, { email: profile.email });
+          } catch (updateError) {
+            console.warn(`[AUTH] Could not backfill email for ${userId}:`, (updateError as Error).message);
+          }
         }
       }
 
       return res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
-      console.error("Stack trace:", error.stack);
+      console.error("Stack trace:", (error as Error).stack);
       return res.status(500).json({ message: "Failed to fetch user" });
     }
   });
@@ -92,7 +154,7 @@ export function registerAuthRoutes(app: Express) {
       return res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user:", error);
-      console.error("Stack trace:", error.stack);
+      console.error("Stack trace:", (error as Error).stack);
       return res.status(500).json({ message: "Failed to update user" });
     }
   });

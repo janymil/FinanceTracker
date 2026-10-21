@@ -5,8 +5,10 @@ import fs from "fs";
 // Always load base .env file first
 config({ path: path.resolve(process.cwd(), '.env') });
 
-// In development, allow .env.local to override if present
-if (process.env.NODE_ENV === 'development') {
+// In development, allow .env.local to override if present.
+// NOTE: `npm run dev` does not set NODE_ENV, so treat anything except explicit
+// "production" as development - otherwise local Clerk dev keys are ignored.
+if (process.env.NODE_ENV !== 'production') {
   const envLocalPath = path.resolve(process.cwd(), '.env.local');
   if (fs.existsSync(envLocalPath)) {
     delete process.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -26,6 +28,8 @@ import { setupVite, serveStatic, log } from "./vite.js";
 import { cookieConsentMiddleware } from "./cookieMiddleware.js";
 import { renderPageForCrawler } from './ssr.js';
 import { countryBlockingMiddleware } from "./middleware/countryBlocking.js";
+import { checkEncryptionKey } from "./encryptionDiagnostics.js";
+
 import "./batch-processor.js"; // Initialize batch processing system
 
 const app = express();
@@ -303,7 +307,7 @@ app.use((req, res, next) => {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
-        res.setHeader('X-Admin-Portal', 'FinanzerPro-Official');
+        res.setHeader('X-Admin-Portal', 'Kaptia-Official');
       }
     } catch (error) {
       console.error('Error setting admin headers:', error);
@@ -439,6 +443,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Report a field-encryption key mismatch at boot instead of silently rendering
+  // ciphertext in the UI (see server/encryptionDiagnostics.ts).
+  await checkEncryptionKey();
+
   // Defaults to 5000 (the port Replit exposes); override with PORT locally
   const port = Number(process.env.PORT) || 5000;
   server.listen({
@@ -450,3 +458,12 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
   });
 })();
+
+process.on('uncaughtException', (err) => {
+  console.error('CRITICAL: Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
+});
+

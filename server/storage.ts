@@ -81,12 +81,21 @@ import { db } from "./db";
 import { DataEncryption } from "./encryption";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt } from "drizzle-orm";
 
+// Verified identity fields fetched from Clerk (see server/routes/authRoutes.ts)
+export interface ClerkProfile {
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl: string | null;
+}
+
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
   upsertUser(user: any): Promise<User>;
+  adoptUserAccount(sourceUserId: string, targetUserId: string, profile?: Partial<ClerkProfile>): Promise<User>;
   createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User>;
   updateUserPlan(userId: string, plan: 'free' | 'standard' | 'premium', billingInterval?: 'monthly' | 'yearly'): Promise<User>;
@@ -249,6 +258,126 @@ export class DatabaseStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
+  }
+
+  /**
+   * Re-home every row owned by `sourceUserId` onto `targetUserId`, then delete the stale
+   * user row. This is required when Clerk re-creates a user with a new id for the same
+   * verified email (deleted user, imported database, or a DB seeded from another Clerk
+   * instance). Without it, the login resolves to a brand new empty account and the user
+   * sees a dashboard with no data.
+   */
+  async adoptUserAccount(
+    sourceUserId: string,
+    targetUserId: string,
+    profile?: Partial<ClerkProfile>,
+  ): Promise<User> {
+    if (sourceUserId === targetUserId) {
+      throw new Error('Cannot adopt a user onto itself');
+    }
+
+    const [source] = await db.select().from(users).where(eq(users.id, sourceUserId));
+    const [target] = await db.select().from(users).where(eq(users.id, targetUserId));
+    if (!source) throw new Error(`Source user ${sourceUserId} not found`);
+    if (!target) throw new Error(`Target user ${targetUserId} not found`);
+
+    const adopted = await db.transaction(async (tx) => {
+      // Safety: never merge into an account that already accumulated its own financial data
+      const existingData: any = await tx.execute(sql`
+        select count(*)::int as owned_transactions
+          from transactions
+         where user_id = ${targetUserId}
+      `);
+      const ownedTransactions = Number((existingData?.rows ?? existingData)?.[0]?.owned_transactions ?? 0);
+      if (ownedTransactions > 0) {
+        throw new Error(`Target user ${targetUserId} already owns transactions - refusing to merge`);
+      }
+
+      // 1. Move every child row. Discover the columns rather than the FK constraints:
+      //    this database has drifted from the Drizzle schema and some tables (transactions,
+      //    budgets, recurring_transactions) have no FK declared on user_id.
+      const columnsResult: any = await tx.execute(sql`
+        select table_name, column_name
+          from information_schema.columns
+         where table_schema = 'public'
+           and table_name <> 'sessions'
+           and column_name in ('user_id', 'owner_id')
+        union
+        select tc.table_name, kcu.column_name
+          from information_schema.table_constraints tc
+          join information_schema.key_column_usage kcu
+            on kcu.constraint_name = tc.constraint_name
+           and kcu.constraint_schema = tc.constraint_schema
+          join information_schema.constraint_column_usage ccu
+            on ccu.constraint_name = tc.constraint_name
+           and ccu.constraint_schema = tc.constraint_schema
+         where tc.constraint_type = 'FOREIGN KEY'
+           and ccu.table_name = 'users'
+           and ccu.column_name = 'id'
+      `);
+      const targets: Array<{ table_name: string; column_name: string }> = (columnsResult?.rows ?? columnsResult) || [];
+
+      for (const ref of targets) {
+        await tx.execute(sql`
+          update ${sql.identifier(ref.table_name)}
+             set ${sql.identifier(ref.column_name)} = ${targetUserId}
+           where ${sql.identifier(ref.column_name)} = ${sourceUserId}
+        `);
+      }
+
+      // 1b. Never delete the old row while anything still points at it
+      for (const ref of targets) {
+        const residualResult: any = await tx.execute(sql`
+          select count(*)::int as remaining
+            from ${sql.identifier(ref.table_name)}
+           where ${sql.identifier(ref.column_name)} = ${sourceUserId}
+        `);
+        const remaining = Number((residualResult?.rows ?? residualResult)?.[0]?.remaining ?? 0);
+        if (remaining > 0) {
+          throw new Error(
+            `Refusing to delete ${sourceUserId}: ${remaining} row(s) still reference it in ${ref.table_name}.${ref.column_name}`
+          );
+        }
+      }
+
+      // 2. Carry over the account state (plan, subscription, currency, settings)
+      await tx
+        .update(users)
+        .set({
+          plan: source.plan,
+          billingInterval: target.billingInterval ?? source.billingInterval,
+          currency: target.currency ?? source.currency,
+          stripeCustomerId: target.stripeCustomerId ?? source.stripeCustomerId,
+          stripeSubscriptionId: target.stripeSubscriptionId ?? source.stripeSubscriptionId,
+          activatedAt: target.activatedAt ?? source.activatedAt,
+          settings: target.settings ?? source.settings,
+          createdAt:
+            source.createdAt && target.createdAt
+              ? new Date(Math.min(source.createdAt.getTime(), target.createdAt.getTime()))
+              : target.createdAt,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, targetUserId));
+
+      // 3. Drop the stale row before writing the email (users.email is unique)
+      await tx.delete(users).where(eq(users.id, sourceUserId));
+
+      const [survivor] = await tx
+        .update(users)
+        .set({
+          email: profile?.email ?? source.email ?? target.email,
+          firstName: target.firstName ?? source.firstName ?? profile?.firstName ?? null,
+          lastName: target.lastName ?? source.lastName ?? profile?.lastName ?? null,
+          profileImageUrl: target.profileImageUrl ?? source.profileImageUrl ?? profile?.profileImageUrl ?? null,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, targetUserId))
+        .returning();
+
+      return survivor;
+    });
+
+    return adopted;
   }
 
   async getUserByStripeCustomerId(customerId: string): Promise<User | undefined> {
@@ -487,10 +616,10 @@ export class DatabaseStorage implements IStorage {
         if (transaction.amount !== undefined) {
             updateFields.amount = transaction.amount; // Keep amount unencrypted for database compatibility
         }
-        if (transaction.description !== undefined) {
+        if (transaction.description !== undefined && transaction.description !== DataEncryption.UNREADABLE) {
             updateFields.description = DataEncryption.encryptDescription(transaction.description);
         }
-        if (transaction.referenceNote !== undefined) {
+        if (transaction.referenceNote !== undefined && transaction.referenceNote !== DataEncryption.UNREADABLE) {
             updateFields.referenceNote = transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null;
         }
         if (transaction.categoryId !== undefined) {
@@ -513,6 +642,26 @@ export class DatabaseStorage implements IStorage {
         }
         if (transaction.paymentUrl !== undefined) {
             updateFields.paymentUrl = transaction.paymentUrl;
+        }
+
+        // Nothing writable left (e.g. the client only echoed the undecryptable marker):
+        // return the stored row instead of issuing an empty UPDATE.
+        if (Object.keys(updateFields).length === 0) {
+            const [existing] = await db
+                .select()
+                .from(transactions)
+                .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId!)));
+
+            if (!existing) {
+                throw new Error('Transaction not found');
+            }
+
+            return {
+                ...existing,
+                amount: existing.amount,
+                description: DataEncryption.decryptDescription(existing.description),
+                referenceNote: existing.referenceNote ? DataEncryption.decrypt(existing.referenceNote) : null
+            };
         }
 
         const [updatedTransaction] = await db
