@@ -16,4 +16,8 @@ gcp-*.json
 
 # Local data backups (may contain personal data)
 backups/
-
+
+# Media & temporary scratch footage
+temp-*
+*.mov
+videos-raw/

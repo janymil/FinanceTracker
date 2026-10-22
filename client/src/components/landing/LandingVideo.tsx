@@ -9,6 +9,8 @@ interface LandingVideoProps {
   autoPlay?: boolean;
 }
 
+const MEDIA_BASE = (import.meta.env.VITE_MEDIA_BASE_URL || "https://media.kaptia.app/videos").replace(/\/$/, "");
+
 export function LandingVideo({
   name,
   className = "",
@@ -83,14 +85,14 @@ export function LandingVideo({
         loop
         playsInline
         preload="metadata"
-        poster={`/videos/${name}_poster.webp`}
+        poster={`${MEDIA_BASE}/${name}_poster.webp`}
         onLoadedData={() => setIsLoaded(true)}
         className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02] ${aspectClass}`}
         aria-label={title}
       >
-        <source src={`/videos/${name}.webm`} type="video/webm" />
-        <source src={`/videos/${name}_web.mp4`} type="video/mp4" />
-        <source src={`/videos/${name}.mp4`} type="video/mp4" />
+        <source src={`${MEDIA_BASE}/${name}.webm`} type="video/webm" />
+        <source src={`${MEDIA_BASE}/${name}_web.mp4`} type="video/mp4" />
+        <source src={`${MEDIA_BASE}/${name}.mp4`} type="video/mp4" />
       </video>
 
       {/* Subtle overlay controls */}
