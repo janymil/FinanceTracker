@@ -175,13 +175,13 @@
       }
     },
     "statements": {
-      "title": "Procesamiento de Estados Bancarios",
-      "description": "Sube estados bancarios PDF y deja que la IA extraiga y categorice todas las transacciones automáticamente",
+      "title": "Procesamiento Inteligente de Documentos",
+      "description": "Sube documentos financieros en PDF y deja que la IA extraiga y categorice todas las transacciones automáticamente",
       "badge": "Estándar+",
       "benefits": {
         "ocr": {
           "title": "Tecnología OCR",
-          "desc": "Reconocimiento avanzado de texto de estados PDF"
+          "desc": "Reconocimiento avanzado de texto de documentos PDF"
         },
         "processing": {
           "title": "Procesamiento Masivo",
@@ -357,10 +357,10 @@
       },
       "export": {
         "title": "Exportación e Importación de Datos",
-        "description": "Importa desde estados bancarios y exporta tus datos financieros en múltiples formatos",
+        "description": "Importa registros financieros y exporta tus datos en múltiples formatos",
         "features": {
           "formats": "Formatos de exportación CSV, Excel y PDF",
-          "import": "Importación de PDF de estados bancarios",
+          "import": "Importación de documentos financieros en PDF",
           "ranges": "Exportaciones de rangos de fechas personalizados",
           "tax_reports": "Reportes financieros listos para impuestos"
         }

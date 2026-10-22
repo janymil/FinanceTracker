@@ -130,11 +130,11 @@ export default function FeaturesPage() {
     {
       id: 'statements',
       icon: FileText,
-      title: t('features.statements.title', 'Bank Statement Processing'),
+      title: t('features.statements.title', 'Smart Document Processing'),
       badge: t('features.statements.badge', 'Standard+'),
-      description: t('features.statements.description', 'Upload PDF bank statements and let AI extract and categorize all transactions automatically'),
+      description: t('features.statements.description', 'Upload PDF financial documents and let AI extract and categorize all transactions automatically'),
       benefits: [
-        { title: t('features.statements.benefits.ocr.title', 'OCR Technology'), desc: t('features.statements.benefits.ocr.desc', 'Advanced text recognition from PDF statements') },
+        { title: t('features.statements.benefits.ocr.title', 'OCR Technology'), desc: t('features.statements.benefits.ocr.desc', 'Advanced text recognition from PDF financial documents') },
         { title: t('features.statements.benefits.processing.title', 'Bulk Processing'), desc: t('features.statements.benefits.processing.desc', 'Process hundreds of transactions at once') },
         { title: t('features.statements.benefits.categorization.title', 'Auto-categorization'), desc: t('features.statements.benefits.categorization.desc', 'AI categorizes all extracted transactions') }
       ]

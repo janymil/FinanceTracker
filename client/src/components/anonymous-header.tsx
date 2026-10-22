@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Sun, Moon, Menu, X, ArrowLeft } from "lucide-react";
+import { Sun, Moon, Menu, X, ArrowLeft } from "lucide-react";
+import { KaptiaLogo } from "@/components/KaptiaLogo";
 import { useLocation } from "wouter";
 import { useTheme } from "@/context/ThemeContext";
 import { useTranslation } from "react-i18next";
@@ -49,7 +50,7 @@ export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps
               className="flex items-center gap-2 group focus:outline-none"
               aria-label="Kaptia Home"
             >
-              <TrendingUp className="h-8 w-8 text-primary transition-transform group-hover:scale-105" />
+              <KaptiaLogo className="h-8 w-8 transition-transform group-hover:scale-105" />
               <span className="font-display text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Kaptia
               </span>

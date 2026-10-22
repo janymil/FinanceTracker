@@ -12,6 +12,9 @@ import { SEO } from "@/components/SEO";
 import { useTheme } from "@/context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { Footer } from "@/components/footer";
+import { KaptiaLogo } from "@/components/KaptiaLogo";
+import { LandingVideo } from "@/components/landing/LandingVideo";
+import { FuturisticHeroBackground } from "@/components/landing/FuturisticHeroBackground";
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
 
 const fadeUp = {
@@ -241,9 +244,9 @@ export default function Landing() {
   return (
     <>
       <SEO
-        title="Kaptia - Smart Spending Tracker with AI Insights | Receipts, Voice & Budgets"
-        description="Kaptia turns receipts, voice notes and statements into a clear picture of your spending. Snap a photo, speak a note, or import a file - AI organizes the rest. Start free today!"
-        keywords="spending tracker, expense tracker, budget planner, receipt scanner, voice expense input, AI categorization, savings goals, smart budgeting, expense tracking"
+        title="Kaptia - Smart Spending Tracker with AI Insights | Photos, Voice & Budgets"
+        description="Kaptia turns your everyday expenses into a clear picture of your spending. Capture spending by photo, voice, or file import - AI organizes the rest. Start free today!"
+        keywords="spending tracker, expense tracker, budget planner, expense scanner, voice expense input, AI categorization, savings goals, smart budgeting, expense tracking"
         canonical="https://kaptia.app"
       />
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white overflow-hidden">
@@ -252,7 +255,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <button onClick={() => setLocation(`/${currentLang}`)} className="flex items-center gap-2.5 group">
-              <TrendingUp className="h-8 w-8 text-primary transition-transform group-hover:scale-105" />
+              <KaptiaLogo className="h-8 w-8 transition-transform group-hover:scale-105" />
               <span className="font-display text-xl font-bold tracking-tight text-gray-900 dark:text-white">Kaptia</span>
             </button>
             <div className="flex items-center gap-1 sm:gap-2">
@@ -339,53 +342,68 @@ export default function Landing() {
       </nav>
 
       {/* ============ HERO ============ */}
-      <section className="relative pt-32 pb-20 md:pt-40 md:pb-24" ref={heroRef} onMouseMove={handleHeroMouse}>
-        {/* Aurora background */}
-        <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-          <div className="absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_75%_65%_at_50%_35%,black,transparent)]" />
-          <div className="aurora-blob absolute -top-32 left-1/2 -translate-x-1/2 h-[480px] w-[820px] rounded-full bg-gradient-to-r from-blue-500/25 via-indigo-500/25 to-purple-500/25 blur-3xl dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-purple-500/20" />
-          <div className="aurora-blob absolute top-40 -left-40 h-96 w-96 rounded-full bg-blue-400/20 dark:bg-blue-600/10 blur-3xl [animation-delay:-8s]" />
-          <div className="aurora-blob absolute top-24 -right-40 h-96 w-96 rounded-full bg-purple-400/20 dark:bg-purple-600/10 blur-3xl [animation-delay:-14s]" />
-        </div>
+      <section className="relative isolate pt-32 pb-24 md:pt-40 md:pb-28" ref={heroRef} onMouseMove={handleHeroMouse}>
+        <FuturisticHeroBackground />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 dark:border-white/10 bg-white/70 dark:bg-white/5 backdrop-blur px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0} className="relative inline-flex">
+            <span className="hero-badge-glow pointer-events-none absolute -inset-px rounded-full opacity-60 blur-[7px]" aria-hidden />
+            <span className="relative inline-flex items-center gap-2.5 rounded-full border border-white/70 bg-white/80 px-4 py-1.5 text-sm font-medium text-gray-700 shadow-[0_10px_30px_-14px_rgba(79,70,229,0.6)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-200">
+              <span className="relative flex h-2 w-2" aria-hidden>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
               <Sparkles className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
               {t("AI that does the tracking for you")}
             </span>
           </motion.div>
 
-          <motion.h1 variants={fadeUp} initial="hidden" animate="show" custom={1} className="font-display text-5xl md:text-7xl lg:text-[5.25rem] font-bold tracking-tight leading-[1.05] text-gray-900 dark:text-white mt-8">
-            {t("Your spending,")}
-            <span className="text-gradient block pb-2">{t("finally decoded.")}</span>
+          <motion.h1 variants={fadeUp} initial="hidden" animate="show" custom={1} className="relative mt-8 text-balance font-display text-[2.85rem] font-bold leading-[0.98] tracking-tight text-gray-900 dark:text-white sm:text-6xl md:text-7xl lg:text-[5.4rem]">
+            <span className="block">{t("Your spending,")}</span>
+            <span className="text-gradient-animated block pb-3">{t("finally decoded.")}</span>
           </motion.h1>
 
-          <motion.p variants={fadeUp} initial="hidden" animate="show" custom={2} className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mt-6 max-w-3xl mx-auto leading-relaxed">
-            {t("Kaptia is the intelligent tracker that captures receipts with a photo, understands expenses you say out loud, imports your statements, and turns it all into clear insights and budgets that actually stick.")}
+          <motion.p variants={fadeUp} initial="hidden" animate="show" custom={2} className="mx-auto mt-7 max-w-3xl text-pretty text-lg leading-relaxed text-gray-600 dark:text-gray-300 md:text-xl">
+            {t("Kaptia is the intelligent tracker that captures expenses with a photo, understands voice entries, organizes your financial history, and turns it all into clear insights and budgets that actually stick.")}
           </motion.p>
-          <motion.div variants={fadeUp} initial="hidden" animate="show" custom={3} className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-            <Button onClick={handleLogin} size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 text-base px-8 h-12 rounded-xl shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-shadow w-full sm:w-auto">
+          <motion.div variants={fadeUp} initial="hidden" animate="show" custom={3} className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button
+              onClick={handleLogin}
+              size="lg"
+              className="hero-cta-shine group relative h-12 w-full overflow-hidden rounded-xl border-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-[length:160%_100%] bg-left px-8 text-base text-white shadow-xl shadow-indigo-500/30 transition-[background-position,box-shadow] duration-500 hover:bg-right hover:shadow-indigo-500/45 sm:w-auto"
+            >
               {t("Start Free - No Card Required")}
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Button>
-            <Button onClick={() => scrollToSection('how-it-works')} size="lg" variant="outline" className="text-base px-8 h-12 rounded-xl border-gray-300 dark:border-white/15 bg-white/60 dark:bg-white/5 backdrop-blur w-full sm:w-auto">
-              <Play className="h-4 w-4 mr-2" />
+            <Button
+              onClick={() => scrollToSection('how-it-works')}
+              size="lg"
+              variant="outline"
+              className="group h-12 w-full rounded-xl border-indigo-200/80 bg-white/70 px-8 text-base text-gray-800 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white/90 dark:border-white/15 dark:bg-white/[0.05] dark:text-gray-100 dark:hover:bg-white/[0.09] sm:w-auto"
+            >
+              <Play className="mr-2 h-4 w-4 text-indigo-500 transition-transform duration-300 group-hover:scale-110 dark:text-indigo-300" />
               {t("See How It Works")}
             </Button>
           </motion.div>
 
-          <motion.dl variants={fadeUp} initial="hidden" animate="show" custom={4} className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto mt-14">
+          <motion.dl
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            custom={4}
+            className="relative mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-y-8 overflow-hidden rounded-2xl border border-white/70 bg-white/55 px-6 py-7 shadow-[0_24px_70px_-38px_rgba(79,70,229,0.6)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04] md:grid-cols-4 md:gap-y-0 md:divide-x md:divide-gray-200/70 dark:divide-white/10"
+          >
+            <span className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/70 to-transparent" aria-hidden />
             {[
               ["9", "AI features"],
               ["3", "Languages"],
               ["AES-256", "Encryption"],
               ["$0", "Free forever plan"],
             ].map(([value, label]) => (
-              <div key={label} className="text-center">
+              <div key={label} className="flex flex-col items-center justify-center px-2 text-center">
                 <dt className="sr-only">{t(label)}</dt>
-                <dd className="font-display text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{value}</dd>
-                <dd className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t(label)}</dd>
+                <dd className="text-gradient font-display text-2xl font-bold md:text-3xl">{value}</dd>
+                <dd className="mt-1 text-xs text-gray-500 dark:text-gray-400 md:text-sm">{t(label)}</dd>
               </div>
             ))}
           </motion.dl>
@@ -394,57 +412,38 @@ export default function Landing() {
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative max-w-4xl mx-auto mt-16 [perspective:1400px]"
+            className="relative max-w-4xl mx-auto mt-16"
           >
-            <motion.div style={reduceMotion ? undefined : { rotateX, rotateY }} className="relative rounded-2xl glass-card shadow-2xl shadow-indigo-500/10 dark:shadow-black/40 overflow-hidden">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-4 -top-10 bottom-6 rounded-[2.5rem] bg-gradient-to-b from-indigo-500/25 via-purple-500/10 to-transparent blur-3xl dark:from-indigo-500/30 dark:via-purple-500/15"
+            />
+            <div className="relative rounded-2xl glass-card shadow-2xl shadow-indigo-500/15 dark:shadow-black/50 overflow-hidden border border-gray-200/80 dark:border-white/10">
+              <span aria-hidden className="pointer-events-none absolute inset-x-16 top-0 z-10 h-px bg-gradient-to-r from-transparent via-white to-transparent dark:via-white/50" />
               {/* window chrome */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200/70 dark:border-white/10 bg-gray-50/70 dark:bg-white/[0.03]">
-                <span className="h-3 w-3 rounded-full bg-red-400" />
-                <span className="h-3 w-3 rounded-full bg-amber-400" />
-                <span className="h-3 w-3 rounded-full bg-emerald-400" />
-                <span className="ml-3 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md px-3 py-1">kaptia.app/dashboard</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5 text-left">
-                {/* Balance + chart */}
-                <div className="md:col-span-2 rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
-                  <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t("Total tracked this month")}</p>
-                  <p className="font-display text-3xl font-bold mt-1">$1,284.50</p>
-                  <svg viewBox="0 0 300 80" className="w-full h-20 mt-3" aria-hidden>
-                    <defs>
-                      <linearGradient id="heroChartFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
-                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-                      </linearGradient>
-                      <linearGradient id="heroChartLine" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#2563eb" />
-                        <stop offset="100%" stopColor="#9333ea" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M0,62 C30,58 45,40 70,44 C95,48 110,28 140,30 C170,32 185,50 215,38 C245,26 270,18 300,22 L300,80 L0,80 Z" fill="url(#heroChartFill)" />
-                    <path d="M0,62 C30,58 45,40 70,44 C95,48 110,28 140,30 C170,32 185,50 215,38 C245,26 270,18 300,22" fill="none" stroke="url(#heroChartLine)" strokeWidth="2.5" strokeLinecap="round" />
-                  </svg>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200/70 dark:border-white/10 bg-gray-50/80 dark:bg-white/[0.03]">
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-red-400" />
+                  <span className="h-3 w-3 rounded-full bg-amber-400" />
+                  <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                  <span className="ml-3 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md px-3 py-1 flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    kaptia.app · {t("Your spending, finally decoded.")}
+                  </span>
                 </div>
-                {/* Budget bars */}
-                <div className="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5 space-y-4">
-                  <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t("Budgets & goals")}</p>
-                  {[
-                    ["Groceries", "w-[68%]", "68%"],
-                    ["Dining out", "w-[45%]", "45%"],
-                    ["Transport", "w-[30%]", "30%"],
-                  ].map(([label, width, pct]) => (
-                    <div key={label}>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <span className="text-gray-600 dark:text-gray-300">{t(label)}</span>
-                        <span className="text-gray-400">{pct}</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-gray-200/80 dark:bg-white/10 overflow-hidden">
-                        <div className={`h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 ${width}`} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <span className="hidden sm:inline-flex text-[11px] font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-1 rounded-full border border-indigo-200/60 dark:border-indigo-800/40">
+                  HD Live Demo
+                </span>
               </div>
-            </motion.div>
+
+              {/* Front Video Player */}
+              <LandingVideo
+                name="kaptia-front"
+                title="Kaptia - Decode your spending"
+                aspectRatio="video"
+                className="rounded-none border-0 shadow-none"
+              />
+            </div>
             {/* Floating: receipt scanned */}
             <div className="animate-float hidden md:flex absolute -left-16 top-10 items-center gap-3 rounded-2xl glass-card shadow-xl shadow-indigo-500/10 px-4 py-3">
               <div className="h-10 w-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
@@ -511,8 +510,9 @@ export default function Landing() {
                 step: "01",
                 icon: ScanLine,
                 title: "Capture anything",
-                desc: "Snap a receipt, say it out loud, or drop in a statement PDF. Kaptia accepts spending in any form.",
+                desc: "Snap an expense, use quick voice entry, or import financial records. Kaptia accepts spending in any form.",
                 tint: "text-blue-500 bg-blue-500/10",
+                video: "1",
               },
               {
                 step: "02",
@@ -520,6 +520,7 @@ export default function Landing() {
                 title: "AI organizes it",
                 desc: "Every entry is categorized, matched and double-checked automatically - getting sharper every week you use it.",
                 tint: "text-indigo-500 bg-indigo-500/10",
+                video: "3",
               },
               {
                 step: "03",
@@ -527,6 +528,7 @@ export default function Landing() {
                 title: "See it clearly",
                 desc: "Dashboards, trends and predictions show exactly where your money goes - and what to adjust next.",
                 tint: "text-purple-500 bg-purple-500/10",
+                video: "4",
               },
             ].map((item, i) => (
               <motion.div
@@ -536,16 +538,21 @@ export default function Landing() {
                 whileInView="show"
                 viewport={{ once: true, margin: "-60px" }}
                 custom={i}
-                className="relative rounded-2xl glass-card p-8 text-center hover:-translate-y-1.5 transition-transform duration-300"
+                className="relative rounded-2xl glass-card p-6 sm:p-7 text-center hover:-translate-y-1.5 transition-transform duration-300 flex flex-col justify-between"
               >
-                <div className={`relative mx-auto h-16 w-16 rounded-2xl ${item.tint} flex items-center justify-center mb-6`}>
-                  <item.icon className="h-8 w-8" />
-                  <span className="absolute -top-2 -right-2 h-6 min-w-6 px-1 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[11px] font-bold flex items-center justify-center font-display">
-                    {item.step}
-                  </span>
+                <div>
+                  <div className={`relative mx-auto h-14 w-14 rounded-2xl ${item.tint} flex items-center justify-center mb-5`}>
+                    <item.icon className="h-7 w-7" />
+                    <span className="absolute -top-2 -right-2 h-6 min-w-6 px-1 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[11px] font-bold flex items-center justify-center font-display">
+                      {item.step}
+                    </span>
+                  </div>
+                  <h3 className="font-display text-xl font-bold mb-2">{t(item.title)}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{t(item.desc)}</p>
                 </div>
-                <h3 className="font-display text-xl font-bold mb-3">{t(item.title)}</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{t(item.desc)}</p>
+                <div className="mt-6">
+                  <LandingVideo name={item.video} title={t(item.title)} aspectRatio="video" className="rounded-xl" />
+                </div>
               </motion.div>
             ))}
           </div>
@@ -593,19 +600,16 @@ export default function Landing() {
             </motion.div>
 
             {/* Receipt scanning */}
-            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={2} className="rounded-3xl glass-card p-8">
-              <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-5">
-                <ScanLine className="h-6 w-6 text-emerald-500" />
-              </div>
-              <h3 className="font-display text-xl font-bold mb-2">{t("Snap. Scanned. Sorted.")}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{t("Point your camera at any receipt. OCR reads every line and files it instantly.")}</p>
-              <div className="relative mt-6 h-24 rounded-xl border border-dashed border-emerald-400/40 bg-emerald-50/50 dark:bg-emerald-500/5 overflow-hidden" aria-hidden>
-                <div className="scan-beam absolute left-3 right-3 h-0.5 rounded-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
-                <div className="absolute inset-x-4 top-4 space-y-2">
-                  <div className="h-1.5 rounded bg-emerald-300/50 dark:bg-emerald-400/20 w-2/3" />
-                  <div className="h-1.5 rounded bg-emerald-300/50 dark:bg-emerald-400/20 w-1/2" />
-                  <div className="h-1.5 rounded bg-emerald-300/50 dark:bg-emerald-400/20 w-3/4" />
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={2} className="rounded-3xl glass-card p-8 flex flex-col justify-between">
+              <div>
+                <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-5">
+                  <ScanLine className="h-6 w-6 text-emerald-500" />
                 </div>
+                <h3 className="font-display text-xl font-bold mb-2">{t("Snap. Scanned. Sorted.")}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{t("Point your camera at any receipt. OCR reads every line and files it instantly.")}</p>
+              </div>
+              <div className="mt-6">
+                <LandingVideo name="2" title={t("Snap. Scanned. Sorted.")} aspectRatio="video" className="rounded-xl" />
               </div>
             </motion.div>
             {/* Statement import - wide */}
@@ -616,7 +620,7 @@ export default function Landing() {
                     <FileText className="h-6 w-6 text-purple-500" />
                   </div>
                   <h3 className="font-display text-2xl font-bold mb-2">{t("Statements, imported in seconds")}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{t("Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.")}</p>
+                  <p className="text-gray-600 dark:text-gray-300">{t("Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.")}</p>
                 </div>
                 <div className="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4 space-y-2.5" aria-hidden>
                   {[
@@ -634,39 +638,30 @@ export default function Landing() {
             </motion.div>
 
             {/* Goals */}
-            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={1} className="rounded-3xl glass-card p-8">
-              <div className="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-5">
-                <Target className="h-6 w-6 text-amber-500" />
-              </div>
-              <h3 className="font-display text-xl font-bold mb-2">{t("Goals that keep you honest")}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{t("Budgets and shared goals with gentle nudges before you overspend - not after.")}</p>
-              <div className="mt-6 flex items-center justify-center" aria-hidden>
-                <div className="relative h-20 w-20">
-                  <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
-                    <circle cx="40" cy="40" r="34" fill="none" strokeWidth="8" className="stroke-gray-200 dark:stroke-white/10" />
-                    <circle cx="40" cy="40" r="34" fill="none" strokeWidth="8" strokeLinecap="round" stroke="url(#goalRing)" strokeDasharray="213.6" strokeDashoffset="70" />
-                    <defs>
-                      <linearGradient id="goalRing" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#f59e0b" />
-                        <stop offset="100%" stopColor="#8b5cf6" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center font-display text-sm font-bold">67%</span>
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={1} className="rounded-3xl glass-card p-8 flex flex-col justify-between">
+              <div>
+                <div className="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-5">
+                  <Target className="h-6 w-6 text-amber-500" />
                 </div>
+                <h3 className="font-display text-xl font-bold mb-2">{t("Goals that keep you honest")}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{t("Budgets and shared goals with gentle nudges before you overspend - not after.")}</p>
+              </div>
+              <div className="mt-6">
+                <LandingVideo name="5" title={t("Goals that keep you honest")} aspectRatio="video" className="rounded-xl" />
               </div>
             </motion.div>
 
             {/* Privacy */}
-            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={2} className="rounded-3xl glass-card p-8 md:col-span-1">
-              <div className="h-12 w-12 rounded-2xl bg-sky-500/10 flex items-center justify-center mb-5">
-                <ShieldCheck className="h-6 w-6 text-sky-500" />
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={2} className="rounded-3xl glass-card p-8 md:col-span-1 flex flex-col justify-between">
+              <div>
+                <div className="h-12 w-12 rounded-2xl bg-sky-500/10 flex items-center justify-center mb-5">
+                  <ShieldCheck className="h-6 w-6 text-sky-500" />
+                </div>
+                <h3 className="font-display text-xl font-bold mb-2">{t("Private by design")}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{t("Your data is encrypted with AES-256 in transit and at rest. You own it - always.")}</p>
               </div>
-              <h3 className="font-display text-xl font-bold mb-2">{t("Private by design")}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{t("Your data is encrypted with AES-256 in transit and at rest. You own it - always.")}</p>
-              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-sky-300/40 dark:border-sky-400/20 bg-sky-50 dark:bg-sky-500/10 px-3.5 py-1.5 text-xs font-semibold text-sky-600 dark:text-sky-300">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                AES-256
+              <div className="mt-6">
+                <LandingVideo name="6" title={t("Private by design")} aspectRatio="video" className="rounded-xl" />
               </div>
             </motion.div>
           </div>
@@ -774,7 +769,7 @@ export default function Landing() {
               {[
                 {
                   q: "What can Kaptia actually capture?",
-                  a: "Receipts via your camera, expenses spoken out loud, PDF statements, and classic manual entries - all organized automatically by AI.",
+                  a: "Smart expense photos, fast voice entries, document imports, and classic manual entries - all organized automatically by AI.",
                 },
                 {
                   q: "Can I cancel my subscription anytime?",
@@ -814,11 +809,14 @@ export default function Landing() {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" aria-hidden />
           <div className="absolute inset-0 bg-grid opacity-40" aria-hidden />
-          <div className="relative px-8 py-16 md:py-20 text-center text-white">
-            <h2 className="font-display text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <div className="relative px-8 py-12 md:py-16 text-center text-white">
+            <div className="max-w-md mx-auto mb-8 overflow-hidden rounded-2xl shadow-2xl border border-white/20">
+              <LandingVideo name="7" title="Kaptia - Start free today" aspectRatio="video" className="border-0 shadow-none" />
+            </div>
+            <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight mb-4">
               {t("Ready to see your spending clearly?")}
             </h2>
-            <p className="text-lg text-white/85 max-w-2xl mx-auto mb-10">
+            <p className="text-base md:text-lg text-white/85 max-w-2xl mx-auto mb-8">
               {t("Join Kaptia today and let intelligent tracking do the heavy lifting. Free forever plan, no card required.")}
             </p>
             <Button

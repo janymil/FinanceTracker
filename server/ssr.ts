@@ -6,8 +6,8 @@ const multilingualContent: Record<string, Record<string, any>> = {
   'en': {
     '/': {
       title: 'Kaptia - Smart Spending Tracker with AI Insights',
-      description: 'Kaptia turns receipts, voice notes and statements into a clear picture of your spending. Track expenses, set budgets, reach goals, and let AI organize the rest.',
-      keywords: 'spending tracker, expense tracking, budget planner, savings goals, receipt scanner',
+      description: 'Kaptia turns your everyday expenses into a clear picture of your spending. Track expenses, set budgets, reach goals, and let AI organize the rest.',
+      keywords: 'spending tracker, expense tracking, budget planner, savings goals, expense scanner',
       lang: 'en'
     },
     '/pricing': {
@@ -62,8 +62,8 @@ const multilingualContent: Record<string, Record<string, any>> = {
   'es': {
     '/': {
       title: 'Kaptia - Rastreador Inteligente de Gastos con IA',
-      description: 'Kaptia convierte recibos, notas de voz y estados de cuenta en una imagen clara de tus gastos. Rastrea gastos, crea presupuestos, alcanza metas y deja que la IA organice el resto.',
-      keywords: 'rastreador de gastos, seguimiento de gastos, presupuesto, metas de ahorro, escáner de recibos',
+      description: 'Kaptia convierte tus gastos diarios en una imagen clara de tus finanzas. Rastrea gastos, crea presupuestos, alcanza metas y deja que la IA organice el resto.',
+      keywords: 'rastreador de gastos, seguimiento de gastos, presupuesto, metas de ahorro, control de finanzas',
       lang: 'es'
     },
     '/pricing': {
@@ -118,8 +118,8 @@ const multilingualContent: Record<string, Record<string, any>> = {
   'sk': {
     '/': {
       title: 'Kaptia - Inteligentný Sledovač Výdavkov s AI',
-      description: 'Kaptia mení účtenky, hlasové poznámky a výpisy na jasný obraz o vašich výdavkoch. Sledujte výdavky, tvorte rozpočty, dosahujte ciele a zvyšok nechajte na AI.',
-      keywords: 'sledovač výdavkov, sledovanie výdavkov, rozpočet, sporiteľské ciele, skener účteniek',
+      description: 'Kaptia mení vaše každodenné výdavky na jasný obraz o vašich financiách. Sledujte výdavky, tvorte rozpočty, dosahujte ciele a zvyšok nechajte na AI.',
+      keywords: 'sledovač výdavkov, sledovanie výdavkov, rozpočet, sporiteľské ciele, správa výdavkov',
       lang: 'sk'
     },
     '/pricing': {
@@ -311,7 +311,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/': `
         <section>
             <h1>Smart Spending Tracker with AI Insights</h1>
-            <p>Kaptia turns receipts, voice notes and statements into a clear picture of your spending, with budgets and AI-powered insights.</p>
+            <p>Kaptia turns your everyday expenses into a clear picture of your spending, with budgets and AI-powered insights.</p>
             
             <h2>Key Features</h2>
             <ul>
@@ -548,7 +548,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/': `
         <section>
             <h1>Rastreador Inteligente de Gastos con IA</h1>
-            <p>Kaptia convierte recibos, notas de voz y estados de cuenta en una imagen clara de tus gastos, con presupuestos e insights impulsados por IA.</p>
+            <p>Kaptia convierte tus gastos diarios en una imagen clara de tus finanzas, con presupuestos e insights impulsados por IA.</p>
             
             <h2>Características Principales</h2>
             <ul>
@@ -785,7 +785,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/': `
         <section>
             <h1>Inteligentný Sledovač Výdavkov s AI</h1>
-            <p>Kaptia mení účtenky, hlasové poznámky a výpisy na jasný obraz o vašich výdavkoch - s rozpočtami a AI-poháňanými prehľadmi.</p>
+            <p>Kaptia mení vaše každodenné výdavky na jasný obraz o vašich financiách - s rozpočtami a AI-poháňanými prehľadmi.</p>
             
             <h2>Hlavné Funkcie</h2>
             <ul>

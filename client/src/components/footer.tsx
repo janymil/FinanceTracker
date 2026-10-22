@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useTranslation } from 'react-i18next';
-import { TrendingUp } from "lucide-react";
+import { KaptiaLogo } from "@/components/KaptiaLogo";
 
 interface FooterProps {
   sidebarCollapsed?: boolean;
@@ -32,7 +32,7 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
           {/* Company Info */}
           <div className="space-y-4 md:col-span-2">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-primary" />
+              <KaptiaLogo className="h-6 w-6" />
               <span className="font-display text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Kaptia
               </span>

@@ -235,6 +235,122 @@
   will-change: transform;
 }
 
+/* ===== Futuristic hero background ===== */
+@keyframes hero-orbit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gradient-slide {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes hero-scan-sweep {
+  0% { transform: translateY(-60%); opacity: 0; }
+  10% { opacity: 0.8; }
+  55% { opacity: 0.35; }
+  100% { transform: translateY(340%); opacity: 0; }
+}
+
+.hero-atmosphere {
+  background-image:
+    radial-gradient(ellipse 62% 52% at 50% 0%, rgba(99, 102, 241, 0.17), transparent 72%),
+    radial-gradient(ellipse 46% 46% at 10% 34%, rgba(56, 189, 248, 0.12), transparent 70%),
+    radial-gradient(ellipse 46% 46% at 90% 24%, rgba(168, 85, 247, 0.14), transparent 70%);
+}
+
+.dark .hero-atmosphere {
+  background-image:
+    radial-gradient(ellipse 62% 52% at 50% 0%, rgba(99, 102, 241, 0.32), transparent 72%),
+    radial-gradient(ellipse 46% 46% at 10% 34%, rgba(34, 211, 238, 0.15), transparent 70%),
+    radial-gradient(ellipse 46% 46% at 90% 24%, rgba(168, 85, 247, 0.24), transparent 70%);
+}
+
+.hero-halo {
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.16), rgba(168, 85, 247, 0.08) 45%, transparent 72%);
+}
+
+.dark .hero-halo {
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.26), rgba(168, 85, 247, 0.14) 45%, transparent 72%);
+}
+
+.hero-floor {
+  mask-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0.85) 42%, rgba(0, 0, 0, 0.35) 78%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0.85) 42%, rgba(0, 0, 0, 0.35) 78%, transparent 100%);
+}
+
+.hero-horizon-glow {
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.14) 45%, transparent 72%);
+}
+
+.dark .hero-horizon-glow {
+  background: radial-gradient(ellipse at center, rgba(129, 140, 248, 0.38), rgba(168, 85, 247, 0.2) 45%, transparent 72%);
+}
+
+.hero-orbit {
+  animation: hero-orbit-spin 90s linear infinite;
+  transform-origin: center;
+}
+
+.hero-orbit-reverse {
+  animation: hero-orbit-spin 130s linear infinite reverse;
+  transform-origin: center;
+}
+
+.hero-scan-beam {
+  animation: hero-scan-sweep 12s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-delay: 2.5s;
+}
+
+.hero-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+.dark .hero-grain {
+  opacity: 0.06;
+  mix-blend-mode: screen;
+}
+
+/* Animated brand gradient text */
+.text-gradient-animated {
+  background-image: linear-gradient(100deg, #2563eb 0%, #6366f1 20%, #8b5cf6 40%, #38bdf8 58%, #6366f1 78%, #7c3aed 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-slide 14s ease-in-out infinite;
+}
+
+.dark .text-gradient-animated {
+  background-image: linear-gradient(100deg, #60a5fa 0%, #818cf8 20%, #a78bfa 40%, #22d3ee 58%, #818cf8 78%, #c084fc 100%);
+}
+
+/* Soft gradient ring that keeps the hero badge feeling "alive" */
+.hero-badge-glow {
+  background: linear-gradient(120deg, rgba(99, 102, 241, 0.9), rgba(56, 189, 248, 0.75), rgba(168, 85, 247, 0.9));
+  background-size: 220% 220%;
+  animation: gradient-slide 9s ease-in-out infinite;
+}
+
+/* Hover sheen for the primary hero CTA */
+.hero-cta-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.38) 48%, transparent 64%);
+  transform: translateX(-130%);
+  transition: transform 0.9s ease;
+  pointer-events: none;
+}
+
+.hero-cta-shine:hover::after {
+  transform: translateX(130%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marquee-track,
   .animate-float,
@@ -242,7 +358,12 @@
   .scan-beam,
   .wave-bar,
   .aurora-blob,
-  .animate-chip {
+  .animate-chip,
+  .hero-orbit,
+  .hero-orbit-reverse,
+  .hero-scan-beam,
+  .text-gradient-animated,
+  .hero-badge-glow {
     animation: none !important;
   }
 }

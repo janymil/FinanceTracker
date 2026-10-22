@@ -175,13 +175,13 @@
       }
     },
     "statements": {
-      "title": "Bank Statement Processing",
-      "description": "Upload PDF bank statements and let AI extract and categorize all transactions automatically",
+      "title": "Smart Document Processing",
+      "description": "Upload PDF financial documents and let AI extract and categorize all transactions automatically",
       "badge": "Standard+",
       "benefits": {
         "ocr": {
           "title": "OCR Technology",
-          "desc": "Advanced text recognition from PDF statements"
+          "desc": "Advanced text recognition from PDF financial documents"
         },
         "processing": {
           "title": "Bulk Processing",
@@ -357,10 +357,10 @@
       },
       "export": {
         "title": "Data Export & Import",
-        "description": "Import from bank statements and export your financial data in multiple formats",
+        "description": "Import financial records and export your data in multiple formats",
         "features": {
           "formats": "CSV, Excel, and PDF export formats",
-          "import": "Bank statement PDF import",
+          "import": "Financial document PDF import",
           "ranges": "Custom date range exports",
           "tax_reports": "Tax-ready financial reports"
         }

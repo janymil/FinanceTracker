@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TrendingUp, Crown, ChevronDown, User, Settings, LogOut } from "lucide-react";
+import { KaptiaLogo } from "@/components/KaptiaLogo";
 import { Link, useLocation } from "wouter";
 import { useClerk } from "@clerk/clerk-react";
 import { clearUserSession } from "@/lib/queryClient";
@@ -39,7 +40,7 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <TrendingUp className="h-8 w-8 text-primary mr-3" />
+              <KaptiaLogo className="h-8 w-8 mr-3" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">Kaptia</span>
             </div>
             <div className="hidden md:block ml-10">

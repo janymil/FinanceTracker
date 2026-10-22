@@ -83,11 +83,11 @@
   "features.recommendations.benefits.action.desc": "Praktické kroky ktoré môžete urobiť okamžite",
   "features.recommendations.benefits.priority.title": "Založené na prioritách",
   "features.recommendations.benefits.priority.desc": "Zameranie na to, čo je pre vaše financie najdôležitejšie",
-  "features.statements.title": "Spracovanie bankových výpisov",
-  "features.statements.description": "Nahrajte PDF bankové výpisy a nechajte AI extrahovať a kategorizovať všetky transakcie automaticky",
+  "features.statements.title": "Inteligentné spracovanie dokumentov",
+  "features.statements.description": "Nahrajte PDF finančné dokumenty a nechajte AI extrahovať a kategorizovať všetky transakcie automaticky",
   "features.statements.badge": "Štandard+",
   "features.statements.benefits.ocr.title": "OCR technológia",
-  "features.statements.benefits.ocr.desc": "Pokročilé rozpoznávanie textu z PDF výpisov",
+  "features.statements.benefits.ocr.desc": "Pokročilé rozpoznávanie textu z PDF dokumentov",
   "features.statements.benefits.processing.title": "Hromadné spracovanie",
   "features.statements.benefits.processing.desc": "Spracuje stovky transakcií naraz",
   "features.statements.benefits.categorization.title": "Auto-kategorizácia",
@@ -140,8 +140,8 @@
   "features.calculators.predictions.prediction_range": "Dostupný rozsah predpovedí:",
   "features.calculators.predictions.months_ahead": "mesiacov dopredu",
   "features.calculators.predictions.prediction_accuracy": "Presnosť predpovedí:",
-  "features.calculators.statements.title": "Kalkulačka spracovania výpisov",
-  "features.calculators.statements.pages": "Stránky vo výpise:",
+  "features.calculators.statements.title": "Kalkulačka spracovania dokumentov",
+  "features.calculators.statements.pages": "Stránky v dokumente:",
   "features.calculators.statements.pages_unit": "stránky",
   "features.calculators.statements.estimated_transactions": "Odhadované extrahované transakcie:",
   "features.calculators.statements.transactions": "transakcie",
@@ -188,9 +188,9 @@
   "features.core_features.currency.features.consistency": "Konzistentné zobrazenie meny v celej aplikácii",
   "features.core_features.currency.features.preference": "Preferencia meny uložená pre používateľa",
   "features.core_features.export.title": "Export a import údajov",
-  "features.core_features.export.description": "Importujte z bankových výpisov a exportujte svoje finančné údaje vo viacerých formátoch",
+  "features.core_features.export.description": "Importujte finančné záznamy a exportujte svoje údaje vo viacerých formátoch",
   "features.core_features.export.features.formats": "CSV, Excel a PDF exportné formáty",
-  "features.core_features.export.features.import": "Import PDF bankových výpisov",
+  "features.core_features.export.features.import": "Import PDF finančných dokumentov",
   "features.core_features.export.features.ranges": "Vlastné exporty dátumových rozsahov",
   "features.core_features.export.features.tax_reports": "Daňové finančné správy",
   "features.core_features.collaboration.title": "Kolaboratívne financie",
@@ -388,13 +388,13 @@
       }
     },
     "statements": {
-      "title": "Spracovanie bankových výpisov",
-      "description": "Nahrajte PDF bankové výpisy a nechajte AI extrahovať a kategorizovať všetky transakcie automaticky",
+      "title": "Inteligentné spracovanie dokumentov",
+      "description": "Nahrajte PDF finančné dokumenty a nechajte AI extrahovať a kategorizovať všetky transakcie automaticky",
       "badge": "Štandard+",
       "benefits": {
         "ocr": {
           "title": "OCR technológia",
-          "desc": "Pokročilé rozpoznávanie textu z PDF výpisov"
+          "desc": "Pokročilé rozpoznávanie textu z PDF dokumentov"
         },
         "processing": {
           "title": "Hromadné spracovanie",
@@ -474,8 +474,8 @@
         "prediction_accuracy": "Presnosť predpovedí:"
       },
       "statements": {
-        "title": "Kalkulačka spracovania výpisov",
-        "pages": "Stránky vo výpise:",
+        "title": "Kalkulačka spracovania dokumentov",
+        "pages": "Stránky v dokumente:",
         "pages_unit": "stránky",
         "estimated_transactions": "Odhadované extrahované transakcie:",
         "transactions": "transakcie",
@@ -554,10 +554,10 @@
       },
       "export": {
         "title": "Export a import údajov",
-        "description": "Importujte z bankových výpisov a exportujte svoje finančné údaje vo viacerých formátoch",
+        "description": "Importujte finančné záznamy a exportujte svoje údaje vo viacerých formátoch",
         "features": {
           "formats": "CSV, Excel a PDF exportné formáty",
-          "import": "Import PDF bankových výpisov",
+          "import": "Import PDF finančných dokumentov",
           "ranges": "Vlastné exporty dátumových rozsahov",
           "tax_reports": "Daňové finančné správy"
         }

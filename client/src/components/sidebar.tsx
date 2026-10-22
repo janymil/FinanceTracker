@@ -25,6 +25,7 @@ import {
   Crosshair,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { KaptiaLogo } from "@/components/KaptiaLogo";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -191,12 +192,16 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          {!isCollapsed && (
+          {!isCollapsed ? (
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-primary mr-3" />
+              <KaptiaLogo className="h-8 w-8 mr-3" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 Kaptia
               </span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center w-full">
+              <KaptiaLogo className="h-8 w-8" />
             </div>
           )}
 
