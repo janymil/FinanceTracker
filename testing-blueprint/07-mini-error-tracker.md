@@ -445,11 +445,54 @@ a confident wrong answer.
 - Log the exact prompt hash per analysis (audit: "what did we send?").
 - AI output is never executed, never auto-committed, never used to auto-resolve a group.
 
+### 9.6 Where the triage call actually goes (decided)
+
+The main app has **three** AI layers, and the right one here is the middle one:
+
+| Layer | What it is | Use for triage? |
+|---|---|---|
+| `lib/aiProvider.ts` | low-level router (openai → deepseek → groq → mistral, usage collection) | no — too low, no task abstraction, no fallback chain |
+| `lib/aiProcessor.ts` `runAI(task, userId, payload)` | task-based entry point: external `ai-processor` first, **local fallback** second, 5-min cooldown when the service is down | **yes** |
+| `external-services/ai-processor` | standalone Express service owning provider keys, `/execute-gpt-task` with a `switch (task)` | add one task here |
+
+So: `runAI('error-triage', 'system', { …scrubbedAnalysisPayload })`.
+
+Four consequences that must be handled, or this becomes a new failure path:
+
+1. **Quota bypass.** `runAI` calls `storage.canUseAIFunction(userId, functionName, plan)` and
+   `storage.recordAIUsage(...)`. Triage has no user — pass the sentinel `userId: 'system'`,
+   `functionName: 'error-triage'`, and skip the per-user quota check for `system` so a
+   free-plan user cannot block system diagnostics. Keep the **cost** recording: it should show
+   up in the existing AI usage dashboard, under `system`.
+2. **New task in the processor.** Add `case 'error-triage'` to
+   `external-services/ai-processor/index.ts` **and** a matching branch in the local fallback
+   switch in `lib/aiProcessor.ts`. Without both, the processor path throws
+   `Unknown task` and the local path throws `No local fallback available`.
+3. **Scrub before the HTTP hop.** The prompt leaves the VPS for the processor host, so scrubbing
+   must happen in the main app *before* `runAI` is called — never inside the processor. The
+   processor must not log request bodies (it currently logs `Processing ${task} for user ${userId}`,
+   which is fine, but a prompt-logging line would be a leak).
+4. **Validate in the caller.** The processor returns raw JSON in `response.choices[0]`; zod-validate
+   in the main app and treat a mismatch like a failed analysis (§9.4), never trust the shape.
+
+Budget stays in the main app: `TELEMETRY_DAILY_AI_BUDGET` is checked **before** calling
+`runAI`, so a broken loop cannot spend money in the processor.
+
 ---
 
 ## 10. The one screen
 
-Route `/sk/admin/watch` (admin only, reuses the existing admin auth).
+**Decided: it lives in the existing admin panel**, not a separate app. Concretely:
+
+- API: `server/routes/adminRoutes.ts` (or a sibling `adminWatchRoutes.ts`) mounted under
+  `/api/admin/watch/*`, every handler behind the existing `adminAuth` session middleware.
+- UI: a new `client/src/pages/admin-watch.tsx` linked from `admin-analytics.tsx`
+  (or a tab inside it, if the page stays under ~600 lines).
+- Destructive actions (`resolve`, `ignore forever`) are `POST` only and idempotent — the admin
+  auth is a shared password in a session cookie with no CSRF token, so keep mutations
+  non-trivial to trigger accidentally.
+
+Route `/sk/admin/watch` (admin only).
 
 **Panel 1 — Right now** (last 60 min)
 Big header: `Serving normally` / `3 new errors in 12 minutes`. Money-path issues are pinned on
@@ -546,6 +589,24 @@ Total: **~1 week of focused work**, ~2 weeks including review and the unpleasant
 
 ---
 
+### M5 — Coverage beyond exceptions (≈2–3 days, independent track)
+
+Can and should start **before** M1 if the tracker is deferred — it catches the failures that
+matter most (wrong money) without any new infrastructure.
+
+- `shared/invariants.ts` + tests for every row in §18.
+- Invariant calls wired into `getUserFinancialSummary`, import, receipt/voice draft, budget,
+  PDF export.
+- Swallow rule (§17.1) applied to the call sites listed there — `reportSwallowed` routes to
+  Sentry today and to the tracker later, so nothing is lost by doing it first.
+- Job-run records (§17.3) + "missing run" alert.
+- 3 synthetic journeys (§19) on a 15-minute cron.
+
+Acceptance: a deliberately broken calculation and a deliberately swallowed error both show up
+in under a minute, and a synthetic-journey failure sends an e-mail.
+
+---
+
 ## 13. Test plan (fits the existing harness)
 
 | Layer | File | What it proves |
@@ -585,15 +646,20 @@ Everything else may be scheduled.
 
 ---
 
-## 15. Open decisions (answer before M1)
+## 15. Decisions
 
-1. **Where does the screen live** — `/sk/admin/watch` inside Kaptia, or a separate tiny app?
-   Inside is cheaper (auth, layout, i18n exist); separate is safer (an app crash doesn't take the
-   console with it). Recommendation: inside + external monitor for the blind spot.
-2. **Any customer-facing surface change** ("something went wrong, we're on it")? If yes, add a
+**Decided**
+
+1. **The screen lives in the existing admin panel** (§10): `/api/admin/watch/*` behind
+   `adminAuth`, new `admin-watch.tsx` linked from `admin-analytics.tsx`.
+2. **AI triage goes through `runAI('error-triage', 'system', …)`** (§9.6), i.e. the external
+   `ai-processor` first with a local fallback — not through `lib/aiProvider.ts` directly.
+   The processor gets one new task; the main app keeps the budget and the validation.
+
+**Still open**
+
+3. **Customer-facing surface** — any "something went wrong, we're on it" message? If yes, add a
    support code: show the user a short id, put it in the email.
-3. **Which model** for triage — the existing router (`lib/aiProvider.ts`) or a dedicated one?
-   Recommendation: reuse the router, pin the model per task, store provider + model per analysis.
 4. **Dual-send to Sentry for the browser** from day one, or only if M4 stalls?
    Recommendation: keep Sentry wired with an empty DSN; enable only if on-demand symbolication
    is abandoned.
@@ -611,7 +677,110 @@ If any of these becomes necessary, that is the signal to pay a vendor — not to
 
 ---
 
-## 17. Risk register (carried over from the brainstorm)
+## 17. Coverage model — what an error tracker cannot see
+
+Direct answer to "does this catch every error a user can experience": **no.** An error tracker
+covers *thrown* errors. Roughly half of what a user experiences as "broken" never throws.
+
+| # | Failure class | Example in Kaptia | Tracker sees it? | Needs |
+|---|---|---|---|---|
+| 1 | Uncaught exception (server/client) | `TypeError` in `trends-chart.tsx` | ✅ | tracker |
+| 2 | Unhandled promise rejection | `await fetch(...)` without catch | ✅ (if wired) | tracker |
+| 3 | **Swallowed error** | `runAI` returns `{ error: 'AI service temporarily unavailable' }`; `getUserPlan` catch → `'free'`; `pdfProcessorClient` maps everything to 502 | ❌ | report at the swallow point (§17.1) |
+| 4 | **HTTP failure the UI handles** | PDF export returns 502, toast says "failed" | ❌ | fetch wrapper reports 5xx (§17.2) |
+| 5 | **Wrong numbers, no exception** | import yields 0 rows and shows an empty table; totals off by a cent after a rounding change | ❌ | money invariants (§18) |
+| 6 | **Silent degradation** | voice parse returns an amount but no category → "Uncategorized"; duplicate detection misses a row → double-counted expense | ❌ | invariants (§18) |
+| 7 | Background job failure | backup upload fails, reminder e-mail not sent, webhook dropped | 🟡 only if the job reports | job-run records (§17.3) |
+| 8 | Third-party outage | Clerk 401 storm, Stripe signature mismatch, Mistral/OpenAI 429, PDF service down | 🟡 statuses only | provider counters + synthetic (§19) |
+| 9 | Infrastructure | DNS, TLS expiry, Neon throttling, country-block false positive | ❌ | external monitor |
+| 10 | **Client blind spots** | ad-blocker blocking `/api/telemetry`; chunk-load failure after deploy; offline; localStorage quota; a tab running an old bundle; JS disabled | ❌ / 🟡 | heartbeat + external monitor |
+| 11 | UI broken but "fine" | infinite spinner, raw i18n key `expenses.form.amount`, overflow on Pixel 5, invisible dark-mode text | ❌ | synthetic journeys (§19) |
+| 12 | The tracker itself | ingest blocked, DB down, circuit breaker open | ❌ | honesty footer (§10) + external monitor |
+
+**Realistic claim:** error capture + invariants + synthetic journeys ≈ 90 % of user-visible
+failures. Any claim of 100 % is marketing.
+
+### 17.1 The swallow rule (highest-value single rule)
+
+Every `catch` that hides a failure must report it. One convention, greppable:
+
+```
+catch (error) {
+  reportSwallowed(error, { where: 'runAI', fallback: 'local' });
+  return fallback;
+}
+```
+
+Swallows that must be covered in this codebase today: `lib/aiProcessor.ts` (`{ error: … }`
+result, processor cooldown), `server/uploadReceipt.ts` (`getUserPlan` → `'free'`,
+`extractStructuredData` → `{ error }`), route catch blocks returning a partial payload,
+`lib/pdfProcessor.ts` (parse → OCR → AI chain), client mutations with `onError` → toast only.
+
+Reported as `severity: error`, `source: 'swallowed'`, with a stable `where` code so they
+fingerprint per call site instead of per message.
+
+### 17.2 HTTP outcome capture
+
+The fetch wrapper reports `5xx` always, `4xx` only where 4xx is *unexpected* (so a 403 for a
+free plan does not become noise). Fields: method, route pattern, status, duration, request id.
+No bodies, no query strings.
+
+### 17.3 Job-run records
+
+`job_runs(job_name, started_at, finished_at, status, error_code)` written by the backup
+scheduler, batch processor, grace-period processor, e-mail batch and the healthcheck cron.
+A **missing** row when one is due is itself an alert — it is how you catch "the cron is gone",
+which nothing else can see.
+
+---
+
+## 18. Money invariants (`invariant.violated`)
+
+The class of failure that matters most here throws nothing. Cheap to add, and in a FinTech the
+return on effort is higher than the tracker itself.
+
+| Invariant | Check |
+|---|---|
+| Balance consistency | `totalIncomeInCents − totalExpensesInCents === netBalanceInCents` |
+| Category consistency | `sum(categories.amountInCents) === totalExpensesInCents` |
+| Rate sanity | `savingsRate === null` or within `[−100, 100]` |
+| Import non-empty | if extracted text > 200 chars then `rows > 0` |
+| Import row shape | every row has a parseable date and `|amountInCents| > 0` |
+| Duplicate accounting | `imported + duplicates === parsed` |
+| Receipt draft | `amountInCents > 0` or explicitly `null`; date not in the future |
+| Voice draft | `needsReview === false` implies `amountInCents !== null` |
+| Budget | `spent >= 0` and `remaining === amount − spent` (±1 cent) |
+| PDF | body starts with `%PDF-` and is > 1 000 bytes; currency symbol ≤ 5 chars |
+| Currency | symbol ∈ allowed set for the user's language |
+
+Implementation rules:
+
+- Run **next to the calculation**, not in a separate job: the invariant is a pure function of the
+  data just produced — `shared/invariants.ts`, unit-tested like `money.ts`.
+- Dev/staging: 100 % of requests. Production: sampled 1 in 20, plus 100 % on money paths.
+- Report `code`, expected/actual **in cents**, route and release — never the underlying strings.
+- An invariant violation is always `severity: critical` with the money-path badge (§9.3).
+
+---
+
+## 19. Production synthetic journeys
+
+Three read-only journeys, every 15 minutes, Playwright against production, reusing the harness
+already in `tests/e2e`, with a dedicated synthetic account:
+
+1. load `/sk/dashboard` → no console errors, no 5xx, a rendered balance element;
+2. load `/sk/expenses` → the list renders (or the explicit empty state);
+3. `GET /api/financial-summary` for a fixed range → `200` and a valid summary shape.
+
+They catch what the tracker cannot: white screens, raw i18n keys, a route returning 500 for
+nobody-in-particular, a deploy that ships a missing chunk. Read-only by contract — the synthetic
+user never writes to the production database.
+
+A failing journey uses the same e-mail channel as §11 and attaches the Playwright trace.
+
+---
+
+## 20. Risk register (carried over from the brainstorm)
 
 | Risk | Mitigation | Where |
 |---|---|---|
@@ -621,6 +790,7 @@ If any of these becomes necessary, that is the signal to pay a vendor — not to
 | Silent data loss | `dropped_count` + `telemetry_failures` in the footer and the daily digest | §10, §14 |
 | Self-monitoring blind spot | external uptime monitor + heartbeat cron | §11 |
 | Fingerprint explosion (one bug → 300 groups) | normalisation rules + no column in the frame + explicit version bumps | §4 |
+| Coverage illusion — "we have a tracker, so we see everything" | §17 matrix + invariants (§18) + synthetic journeys (§19); an error tracker alone covers ~half | §17–19 |
 | The tool nobody opens | one screen, three panels, email-first interface; if it isn't opened in 2 weeks, delete it | §0, §10 |
 
 **Kill criterion:** if after four weeks the tracker has not been opened voluntarily and has not
