@@ -1,6 +1,7 @@
 // Centralized AI Processor with Fly.io Primary + Local Fallback
 import crypto from 'crypto';
 import { storage } from '../server/storage.js';
+import { reportSwallowed } from '../server/errorGuard/report.js';
 import { collectAIUsage, type AIUsageRecord } from './aiProvider';
 import { 
   generateContextualFinancialTips,
@@ -82,6 +83,7 @@ async function trackAIUsage(
         userAgent: null
       });
     } catch (logError) {
+      reportSwallowed(logError, { where: 'runAI.recordUsage', fallback: 'usage not recorded' });
       console.error('Failed to log AI usage:', logError);
     }
   }
@@ -218,6 +220,13 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
     } catch (error: any) {
       processorDownUntil = Date.now() + PROCESSOR_COOLDOWN_MS;
+      // The user still gets an answer from the local fallback, so nothing throws — which is
+      // exactly why this must be reported explicitly (blueprint 07 §17.1).
+      reportSwallowed(error, {
+        where: 'runAI.processor',
+        fallback: 'local',
+        route: `/ai/${task}`,
+      });
       console.error(`[AI ${task}] AI processor unavailable:`, error.message || error);
       
       try {
@@ -282,6 +291,13 @@ export async function runAI(task: string, userId: string, payload: Record<string
         console.log(`[AI ${task}] SUCCESS: Local fallback completed`);
         return fallbackResult;
       } catch (fallbackError: any) {
+        // Both the service and the local path failed: the feature silently degrades to a
+        // canned error payload. Highest-value swallow in the app.
+        reportSwallowed(fallbackError, {
+          where: 'runAI.localFallback',
+          fallback: 'errorPayload',
+          route: `/ai/${task}`,
+        });
         console.error(`[AI ${task}] Local fallback also failed:`, fallbackError.message);
         return { 
           error: 'AI service temporarily unavailable', 

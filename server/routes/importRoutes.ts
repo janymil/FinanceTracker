@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { checkImport } from "@shared/invariants";
+import { reportInvariant } from "../errorGuard/report.js";
 import { z } from "zod";
 import { 
   ensureCategoryExists, 
@@ -650,6 +652,31 @@ export function registerImportRoutes(app: Express) {
       };
 
       console.log(`PDF processing completed: ${validationResult.valid.length} valid transactions extracted`);
+
+      // Import invariants (blueprint 07 §18): zero-amount rows, unparseable dates and rows
+      // lost between "parsed" and "imported + duplicate + invalid" are silent data bugs.
+      // The parser does not expose the raw text length, so the emptiness check is skipped.
+      for (const violation of checkImport({
+        textLength: 0,
+        parsedCount:
+          validationResult.valid.length +
+          (processingResult.duplicates?.length ?? 0) +
+          validationResult.invalid.length,
+        importedCount: validationResult.valid.length,
+        duplicateCount: processingResult.duplicates?.length ?? 0,
+        invalidCount: validationResult.invalid.length,
+        rows: validationResult.valid.map((transaction: { date?: string; amount?: number | string }) => ({
+          date: transaction.date ?? null,
+          amountCents:
+            transaction.amount == null ? null : Math.round(Number(transaction.amount) * 100),
+        })),
+      })) {
+        reportInvariant(violation.code, {
+          expected: violation.expected,
+          actual: violation.actual,
+          where: 'importRoutes.processBankStatementPDF',
+        });
+      }
 
       return res.json(response);
 

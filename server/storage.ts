@@ -80,6 +80,8 @@ import {
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
 import { centsToNumber, parseAmountToCents } from "@shared/money";
+import { checkSummary } from "@shared/invariants";
+import { reportInvariant } from "./errorGuard/report.js";
 import { UNCATEGORIZED } from "@shared/calculations";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, inArray } from "drizzle-orm";
 
@@ -1042,6 +1044,23 @@ export class DatabaseStorage implements IStorage {
         type: result.type,
       };
     });
+
+    // Money invariant (blueprint 07 §18). This is the authoritative place where every
+    // money summary is built, so a silent wrong-number bug is caught exactly once, here.
+    // It reports and continues: a failed invariant must not turn a readable summary into
+    // an error page for the user.
+    for (const violation of checkSummary({
+      totalIncomeInCents,
+      totalExpensesInCents,
+      netBalanceInCents,
+      categories: transactionsByCategory,
+    })) {
+      reportInvariant(violation.code, {
+        expected: violation.expected,
+        actual: violation.actual,
+        where: 'storage.getUserFinancialSummary',
+      });
+    }
 
     return {
       totalIncomeInCents,

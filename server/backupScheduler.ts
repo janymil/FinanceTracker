@@ -1,5 +1,6 @@
 import { storage } from './storage';
 import { bunnyStorage } from './bunnyStorage';
+import { withJobRun } from './errorGuard/jobs.js';
 
 interface ScheduledBackup {
   userId: string;
@@ -24,9 +25,10 @@ class BackupScheduler {
     // Schedule existing users
     await this.scheduleAllActiveUsers();
     
-    // Run every hour to check for missed backups
+    // Run every hour to check for missed backups.
+    // Wrapped so the run is recorded: a missing row is how a dead scheduler is noticed.
     setInterval(() => {
-      this.checkMissedBackups();
+      void withJobRun('backup-scheduler', () => this.checkMissedBackups());
     }, 60 * 60 * 1000); // 1 hour
   }
 

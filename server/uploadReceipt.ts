@@ -12,6 +12,8 @@ import { categorizeExpense } from './openai';
 import { extractStructuredData } from './receiptExtraction';
 export { extractStructuredData };
 export type { LegacyExtractedReceipt } from '../shared/receiptExtraction';
+import { checkReceiptDraft } from '@shared/invariants';
+import { reportInvariant, reportSwallowed } from './errorGuard/report.js';
 
 // Configure multer for file upload
 const upload = multer({
@@ -47,6 +49,9 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
     }
     return { plan: 'free' };
   } catch (error) {
+    // Swallowed on purpose (the upload must still work for a free plan), but no longer
+    // silently: blueprint 07 §17.1.
+    reportSwallowed(error, { where: 'uploadReceipt.getUserPlan', fallback: 'free' });
     console.error('Error fetching user plan:', error);
     return { plan: 'free' };
   }
@@ -91,6 +96,21 @@ export const uploadReceiptHandler = [
       // Extract structured data using OpenAI
       const extractedData = await extractStructuredData(recognizedText);
 
+      // Money invariant (blueprint 07 §18): a draft with a non-positive amount, a future
+      // date or a paragraph-length vendor is a parsing bug, and it would silently reach the
+      // user's expense form. Report it and continue — the OCR text is still useful.
+      for (const violation of checkReceiptDraft({
+        amount: extractedData.amount ?? null,
+        date: extractedData.date ?? null,
+        vendor: extractedData.vendor ?? null,
+      })) {
+        reportInvariant(violation.code, {
+          expected: violation.expected,
+          actual: violation.actual,
+          where: 'uploadReceipt.extractStructuredData',
+        });
+      }
+
       // AI Categorization for standard+ users
       let predictedCategory: string | undefined;
       if (userPlan.plan === 'standard' || userPlan.plan === 'premium') {
@@ -102,6 +122,12 @@ export const uploadReceiptHandler = [
           const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
           predictedCategory = categorization.category;
         } catch (categoryError) {
+          reportSwallowed(categoryError, {
+            where: 'uploadReceipt.categorizeExpense',
+            fallback: 'uncategorized',
+            route: '/api/upload-receipt',
+            moneyPath: true,
+          });
           console.error('AI categorization failed:', categoryError);
           // Continue without categorization
         }
@@ -118,6 +144,11 @@ export const uploadReceiptHandler = [
         try {
           imageUrl = await uploadReceiptFile(fileName, req.file.buffer, req.file.mimetype);
         } catch (uploadError) {
+          reportSwallowed(uploadError, {
+            where: 'uploadReceipt.storeImage',
+            fallback: 'no imageUrl',
+            route: '/api/upload-receipt',
+          });
           console.error('Upload to Cloud Storage failed:', uploadError);
           // Continue without storing the image, but still return OCR results
         }

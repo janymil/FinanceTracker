@@ -1,5 +1,6 @@
 import { storage } from './storage';
 import { sendGraceExpiryWarning, sendAccountDowngradedNotification } from './emailService';
+import { withJobRun } from './errorGuard/jobs.js';
 
 class GraceProcessor {
   private isRunning = false;
@@ -98,12 +99,11 @@ class GraceProcessor {
   start(): void {
     console.log('Grace period processor initialized - running every 12 hours');
     
-    // Run immediately
-    this.processGracePeriods();
-    
-    // Then run every 12 hours
+    // Run immediately, then every 12 hours. Both are recorded as job runs.
+    void withJobRun('grace-period', () => this.processGracePeriods());
+
     setInterval(() => {
-      this.processGracePeriods();
+      void withJobRun('grace-period', () => this.processGracePeriods());
     }, 12 * 60 * 60 * 1000); // 12 hours
   }
 }

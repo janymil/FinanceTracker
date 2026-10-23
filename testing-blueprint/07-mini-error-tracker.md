@@ -445,37 +445,42 @@ a confident wrong answer.
 - Log the exact prompt hash per analysis (audit: "what did we send?").
 - AI output is never executed, never auto-committed, never used to auto-resolve a group.
 
-### 9.6 Where the triage call actually goes (decided, implemented)
+### 9.6 Where the triage call goes (final, implemented)
 
-The main app has three AI layers. Triage uses the **lowest** one, on purpose:
+The triage call goes to the **AI processor service**, because that service owns the provider
+keys, the model router, the cost log and the prompts. The web app must not become a second AI
+owner.
 
-| Layer | What it is | Used here? |
+| Piece | File | What it owns |
 |---|---|---|
-| `lib/aiProvider.ts` — `createRoutedClient()` | provider router: gpt-6-luna → deepseek-flash → groq, usage + cost recording, fence stripping | **yes** |
-| `lib/aiProcessor.ts` — `runAI(task, …)` | task dispatcher: external `ai-processor` first, local fallback, per-user quota | no |
-| `external-services/ai-processor` | standalone service, `switch (task)` with 10 financial tasks | **not touched** |
+| Prompt + model call + JSON parsing | `external-services/ai-processor/errorGuardTriage.ts` (new file) | `SYSTEM_PROMPT`, `buildUserPrompt`, `POST /error-triage` |
+| Mount | `external-services/ai-processor/index.ts` | one line: `registerErrorGuardTriage(app)` |
+| HTTP client, budget, cooldown | `server/errorGuard/triage.ts` | payload build, timeout, daily budget, circuit breaker |
+| Response contract | `shared/errorGuard/triage.ts` | zod schema, `parseTriageResponse`, `buildTriagePayload` |
 
-Why not `runAI`: it would require a new `case` in the running processor **and** a branch in
-its local fallback, i.e. a redeploy of a service that serves ten financial tasks, plus a
-per-user quota check that does not apply to a system task. The whole feature is worth less
-than that risk.
+What was **not** touched in the processor: `/execute-gpt-task`, its task switch, any existing
+prompt or specialist, `providers.ts`, and the API-key middleware. The only change to the
+running service is one import plus one registration call, and the new route is protected by
+the service-wide `x-api-key` check that already existed.
 
-So: `server/errorGuard/triage.ts` calls `createRoutedClient()` directly — the same router
-`server/openai.ts` already uses — with `task: 'error-triage'` for usage attribution and
-`AI_MODELS.classification` as the alias. Consequences handled explicitly:
+Flow: `flush` → new-group hook → `analyzeGroup` → `POST {AI_PROCESSOR_URL}/error-triage`
+(`x-api-key`) → prompt + `gpt-6-luna` (with the processor's own DeepSeek/Groq fallbacks) →
+`{ analysis, model }` → zod validation in the web app → `error_groups.ai_analysis`.
 
-1. **Budget is ours.** `ERROR_GUARD_AI_BUDGET` (default 25/day) is checked *before* the call;
-   no `ai_usage` row is written, so financial AI dashboards stay untouched.
-2. **No quota coupling.** No `canUseAIFunction`, no `userId`; triage is a system job.
-3. **Scrub before the call.** `shared/piiScrubber.ts` runs in the main app; the prompt carries
-   a scrubbed message, the top five frames and context *keys* only — never values.
-4. **Validate in the caller.** `parseTriageResponse` (zod) rejects anything that does not match
-   the contract; a mismatch is stored as `failed`, never shown as fact.
-5. **Total isolation.** Removing the feature is deleting `server/errorGuard/triage.ts` and one
-   route. Nothing in the financial AI path imports it, and it imports nothing from that path.
+Failure handling, all deliberate:
 
-Prompts live in `shared/errorGuard/triage.ts` — a new file, not in the processor's prompt
-set, so no "AI specialist" in the running service changes behaviour.
+- **timeout** `ERROR_GUARD_AI_TIMEOUT_MS` (20 s) — a hanging processor cannot hold a slot;
+- **cooldown** `ERROR_GUARD_AI_COOLDOWN_MS` (5 min) after a network error or 5xx, so a dead
+  host does not add 20 s to every new problem;
+- **budget** `ERROR_GUARD_AI_BUDGET` (25/day) checked before the call;
+- **validation** — a response that does not match the schema is stored as `failed`, never
+  shown as fact;
+- **no fallback to the web app's own provider** on purpose: one AI owner, one bill, one place
+  to change a prompt.
+
+Privacy: the payload is metadata only (scrubbed message, top 5 frames, context *keys*,
+breadcrumb labels). The processor never logs the payload; `providers.ts` logs model, tokens
+and cost only.
 
 ---
 
@@ -651,10 +656,10 @@ Everything else may be scheduled.
 
 1. **The screen lives in the existing admin panel** (§10): `/api/admin/watch/*` behind
    `adminAuth`, new `admin-watch.tsx` linked from `admin-analytics.tsx`.
-2. **AI triage is fully independent** (§9.6): `createRoutedClient()` from `lib/aiProvider.ts`,
-   called from `server/errorGuard/triage.ts`, with its own prompt, budget and validation.
-   `external-services/ai-processor`, `lib/aiProcessor.ts` and every existing prompt were left
-   untouched — no redeploy of the running AI service.
+2. **AI triage runs in the AI processor** (§9.6): a new self-contained file
+   `external-services/ai-processor/errorGuardTriage.ts` mounted by one registration call,
+   exposing `POST /error-triage`. Its existing task switch, prompts and specialists are
+   untouched; the web app only builds a metadata payload and validates the answer.
 
 **Still open**
 
@@ -811,29 +816,62 @@ cheaper than maintaining a second product.
 | Tables (groups, events, rollups, job runs) | `shared/schema.ts` | done, `--create` DDL in the smoke script |
 | Aggregator (buffer → one write per group per flush) | `server/errorGuard/aggregator.ts` | done, storm test green |
 | Storage | `server/errorGuard/store.ts` | done, verified against the real DB |
-| AI triage (independent module) | `server/errorGuard/triage.ts` | done, one real call verified |
+| AI triage — prompt + `POST /error-triage` | `external-services/ai-processor/errorGuardTriage.ts` | done, verified end to end |
+| AI triage — HTTP client, budget, cooldown | `server/errorGuard/triage.ts` | done |
 | HTTP: ingest + `/api/admin/watch/*` | `server/errorGuard/routes.ts` | done |
 | Browser capture + breadcrumbs + `reportSwallowed` | `client/src/lib/errorGuard.ts` | done |
+| Server reporting (`reportSwallowed`, `reportInvariant`) | `server/errorGuard/report.ts` | done, wired |
+| Money invariants (pure checks) | `shared/invariants.ts` | done, 22 tests |
+| Job-run records + wrapper | `server/errorGuard/jobs.ts` | done, wired |
+| E-mail alerts (throttled) | `server/errorGuard/alerts.ts` | done, wired |
 | Admin screen | `client/src/pages/admin-watch.tsx` | done |
-| Smoke script | `scripts/error-guard-smoke.ts` | 15/15 checks incl. AI |
+| Smoke script | `scripts/error-guard-smoke.ts` | 15/15 checks incl. a real processor call |
 
-Still to do (deliberately not in this slice):
+### Where the reporting is actually wired now
 
-1. **Wire `reportSwallowed` into the existing swallow points** (§17.1) — the guard is ready,
-   the call sites are not. This is the highest-value follow-up.
-2. **Money invariants** (§18, milestone M5) — nothing built yet.
-3. **E-mail alerts** (§11) — the screen is the interface for now.
-4. **Job-run reporting** from the backup/email/cron jobs — the table and endpoint exist, the
-   senders do not.
-5. **Production DDL**: the deploy script's `drizzle-kit push` creates the tables, or run
+`reportSwallowed` (blueprint §17.1):
+
+| Call site | `where` code | Fallback it was hiding |
+|---|---|---|
+| `lib/aiProcessor.ts` (processor failure) | `runAI.processor` | local AI call |
+| `lib/aiProcessor.ts` (both failed) | `runAI.localFallback` | canned error payload |
+| `lib/aiProcessor.ts` (usage write) | `runAI.recordUsage` | no usage row |
+| `server/uploadReceipt.ts` (plan lookup) | `uploadReceipt.getUserPlan` | plan `free` |
+| `server/uploadReceipt.ts` (categorisation) | `uploadReceipt.categorizeExpense` | uncategorised |
+| `server/uploadReceipt.ts` (image upload) | `uploadReceipt.storeImage` | no image URL |
+| `server/errorGuard/jobs.ts` (any wrapped job) | `job.<name>` | the job did nothing |
+
+`reportInvariant` (blueprint §18):
+
+| Call site | Invariants |
+|---|---|
+| `server/storage.ts` `getUserFinancialSummary` | `summary.balance_mismatch`, `summary.categories_mismatch`, `summary.savings_rate_out_of_range` |
+| `server/uploadReceipt.ts` `extractStructuredData` | `receipt.amount_not_positive`, `receipt.date_unparseable`, `receipt.date_in_future`, `receipt.vendor_too_long` |
+| `server/routes/importRoutes.ts` bank statement preview | `import.row_amount_zero`, `import.row_date_unparseable`, `import.duplicate_accounting` |
+| `server/routes/pdfRoutes.ts` export | `pdf.bad_header`, `pdf.too_small`, `pdf.currency_symbol_invalid` |
+
+Job-run records: `backup-scheduler`, `grace-period`, `batch-processor`.
+
+E-mail alerts: sent after a successful flush for `critical`, `invariant` and `job` problems,
+at most one per 10 minutes / 8 per day / once per problem per 6 hours.
+
+Still to do:
+
+1. **Wire the last two invariants** — `checkBudget` and `checkVoiceDraft` exist and are tested,
+   but the budget route and the voice route are not wired yet. Pure functions, a few lines each.
+2. **Client-side swallow points** — `onError: () => toast(...)` handlers across pages still
+   hide failures; `reportSwallowed` from `client/src/lib/errorGuard.ts` fits there.
+3. **Redeploy the AI processor** so `/error-triage` exists in production (the web app degrades
+   gracefully until then: `aiStatus = failed`, the problem list still works).
+4. **Production DDL**: `drizzle-kit push` in the deploy script, or
    `npm run error-guard:smoke -- --create` once against the target database.
-6. **Retention cron** for `pruneOldEvents` (30 days), if evidence volume ever matters.
+5. **Retention cron** for `pruneOldEvents` (30 days).
 
 Two real bugs the smoke test caught while building this:
 
-- `lib/aiProvider.ts` forwarded its own `task` field to the provider, so the first triage call
-  died with `400 Unknown parameter: 'task'`. Fixed in `buildBody`, regression test in
-  `tests/unit/aiProviderBody.test.ts`.
+- The web app's AI router forwarded its own `task` field to the provider, so the first triage
+  call died with `400 Unknown parameter: 'task'`. Fixed in `lib/aiProvider.ts` `buildBody`,
+  regression test in `tests/unit/aiProviderBody.test.ts`.
 - `drizzle-kit generate` hangs on an interactive prompt because the committed schema and the
   development database have drifted. That is why the guard ships an idempotent `--create`
   path instead of relying on `push` for local setup.

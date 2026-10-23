@@ -1,68 +1,110 @@
 /**
- * The AI prompt and its response contract (blueprint 07 §9.4).
+ * The triage contract: what leaves the web app, and what it will accept back.
  *
- * Two things matter here: the prompt must never contain a context *value*, and a model
- * answer that does not match the schema must never reach a human as if it were fact.
+ * The prompt itself lives in the AI processor (`errorGuardTriage.ts`), so there is nothing
+ * to test here about wording — only that the payload carries metadata and never data, and
+ * that a malformed model answer cannot reach a human.
  */
 import { describe, expect, it } from 'vitest';
 import {
-  buildTriagePrompt,
+  TRIAGE_PATH,
+  buildTriagePayload,
   parseTriageResponse,
   toGuardAnalysis,
-  type TriageInput,
+  type TriageSample,
 } from '@shared/errorGuard/triage';
+import type { GuardGroup } from '@shared/errorGuard/types';
 
-const input: TriageInput = {
-  title: 'TypeError: Cannot read properties of undefined',
+const group: GuardGroup = {
+  id: 'abc123',
   kind: 'exception',
+  source: 'client',
+  title: 'TypeError: Cannot read properties of undefined',
+  message: 'Cannot read properties of undefined (reading "amountInCents")',
   route: '/api/expenses/:id',
-  release: 'abc1234',
-  platform: 'client',
+  release: 'release-42',
   severity: 'critical',
+  status: 'open',
   moneyPath: true,
   eventCount: 12,
-  message: 'Cannot read properties of undefined (reading "amountInCents")',
-  stackFrames: [
-    'at renderExpense (src/pages/expenses.tsx:120:18)',
-    'at Array.map (<anonymous>)',
-  ],
-  contextKeys: ['where', 'fallback'],
-  breadcrumbLabels: ['button[data-testid="save-expense"]'],
+  sessionCount: 3,
+  firstSeen: '2026-03-12T09:00:00.000Z',
+  lastSeen: '2026-03-12T10:00:00.000Z',
+  aiStatus: 'pending',
+  aiAnalysis: null,
+  aiModel: null,
+  aiUpdatedAt: null,
 };
 
-describe('buildTriagePrompt', () => {
-  const prompt = buildTriagePrompt(input);
+const sample: TriageSample = {
+  stack: [
+    'Error: boom',
+    '    at renderExpense (src/pages/expenses.tsx:120:18)',
+    '    at map (src/pages/expenses.tsx:140:10)',
+    '    at each (src/lib/each.ts:10:1)',
+    '    at run (src/lib/run.ts:20:1)',
+    '    at go (src/lib/go.ts:30:1)',
+    '    at sixth (src/lib/sixth.ts:40:1)',
+  ].join('\n'),
+  context: {
+    where: 'renderExpense',
+    amountInCents: 1234,
+    email: 'should-never-leave@example.com',
+  },
+  breadcrumbs: Array.from({ length: 12 }, (_, index) => ({ label: `click-${index}` })),
+};
 
-  it('includes the metadata the model needs', () => {
-    expect(prompt.user).toContain('/api/expenses/:id');
-    expect(prompt.user).toContain('Touches money: yes');
-    expect(prompt.user).toContain('Times seen: 12');
-    expect(prompt.user).toContain('renderExpense');
-    expect(prompt.user).toContain('where, fallback');
+describe('buildTriagePayload', () => {
+  const payload = buildTriagePayload(group, [sample]);
+
+  it('carries the metadata the processor needs', () => {
+    expect(payload.title).toBe(group.title);
+    expect(payload.route).toBe('/api/expenses/:id');
+    expect(payload.release).toBe('release-42');
+    expect(payload.moneyPath).toBe(true);
+    expect(payload.eventCount).toBe(12);
+    expect(payload.severity).toBe('critical');
   });
 
-  it('demands a single JSON object and forbids markdown', () => {
-    expect(prompt.system).toContain('single JSON object');
-    expect(prompt.system).toContain('No markdown');
-    expect(prompt.user).toContain('"moneyRisk"');
+  it('sends context KEY NAMES, never their values', () => {
+    expect(payload.contextKeys).toEqual(['where', 'amountInCents', 'email']);
+    const serialized = JSON.stringify(payload);
+    expect(serialized).not.toContain('should-never-leave@example.com');
+    expect(serialized).not.toContain('1234');
   });
 
-  it('is pure: same input, same prompt', () => {
-    expect(buildTriagePrompt(input)).toEqual(buildTriagePrompt(input));
+  it('limits stack frames and breadcrumbs', () => {
+    expect(payload.stackFrames).toHaveLength(5);
+    expect(payload.stackFrames?.[0]).toContain('renderExpense');
+    expect(payload.breadcrumbLabels).toHaveLength(8);
+    expect(payload.breadcrumbLabels?.[7]).toBe('click-11');
   });
 
-  it('omits optional sections instead of printing "undefined"', () => {
-    const minimal = buildTriagePrompt({
-      title: 't',
-      kind: 'swallowed',
-      severity: 'error',
-      moneyPath: false,
-      eventCount: 1,
-      message: 'm',
-    });
-    expect(minimal.user).not.toContain('undefined');
-    expect(minimal.user).not.toContain('Top frames');
-    expect(minimal.user).toContain('Route: unknown');
+  it('omits empty optional sections instead of sending empty arrays', () => {
+    const bare = buildTriagePayload({ ...group, route: null, release: null }, []);
+    expect(bare.stackFrames).toBeUndefined();
+    expect(bare.contextKeys).toBeUndefined();
+    expect(bare.breadcrumbLabels).toBeUndefined();
+    expect(bare.route).toBeNull();
+  });
+
+  it('truncates a long message', () => {
+    const long = buildTriagePayload({ ...group, message: 'x'.repeat(2_000) }, []);
+    expect(long.message).toHaveLength(500);
+  });
+
+  it('never throws on a malformed sample', () => {
+    expect(() =>
+      buildTriagePayload(group, [
+        { stack: null, context: null, breadcrumbs: 'not-an-array' } as unknown as TriageSample,
+      ]),
+    ).not.toThrow();
+  });
+});
+
+describe('the processor endpoint', () => {
+  it('is the path mounted by registerErrorGuardTriage', () => {
+    expect(TRIAGE_PATH).toBe('/error-triage');
   });
 });
 
@@ -88,13 +130,10 @@ describe('parseTriageResponse', () => {
     expect(parseTriageResponse({ ...valid, confidence: 1.5 })).toBeNull();
   });
 
-  it('rejects non-objects instead of throwing', () => {
+  it('rejects non-objects and short answers instead of throwing', () => {
     expect(parseTriageResponse(null)).toBeNull();
     expect(parseTriageResponse('{"plainSummary":"x"}')).toBeNull();
     expect(parseTriageResponse(undefined)).toBeNull();
-  });
-
-  it('rejects a too-short answer that is technically a string', () => {
     expect(parseTriageResponse({ ...valid, plainSummary: 'oops' })).toBeNull();
   });
 });

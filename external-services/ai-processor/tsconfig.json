@@ -17,6 +17,7 @@
   },
   "include": [
     "index.ts",
+    "errorGuardTriage.ts",
     "openai-functions.ts"
   ],
   "exclude": [

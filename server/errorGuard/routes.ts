@@ -16,11 +16,13 @@ import {
   flush,
   getAggregatorStats,
   isIntakeAllowed,
+  setAlertHandler,
   setNewGroupHandler,
   startErrorGuard,
   type AggregatorStats,
 } from './aggregator';
 import { analyzeGroup, getTriageStats, scheduleTriage } from './triage';
+import { notifyCriticalProblems } from './alerts';
 import {
   databaseSummary,
   getGroup,
@@ -203,6 +205,7 @@ export function registerErrorGuardRoutes(app: Express): void {
           'in-flight': 'An explanation is already being written',
           missing: 'This problem no longer exists',
           invalid: 'The AI answer was unusable — nothing was saved',
+          unavailable: 'The AI service is not answering right now — the problem list still works',
           failed: 'The AI could not be reached',
         };
         res.status(202).json({ ok: false, message: messages[outcome.reason] ?? 'No explanation available' });
@@ -251,7 +254,8 @@ export function registerErrorGuardRoutes(app: Express): void {
     }),
   );
 
-  // Wire the aggregator to triage and start the flush timer once.
+  // Wire the aggregator to triage and to e-mail alerts, then start the flush timer once.
   setNewGroupHandler(scheduleTriage);
+  setAlertHandler(notifyCriticalProblems);
   startErrorGuard();
 }

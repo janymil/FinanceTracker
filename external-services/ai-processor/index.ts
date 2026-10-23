@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { createRoutedClient, getProviderStatus } from './providers';
+import { registerErrorGuardTriage } from './errorGuardTriage';
 import axios from "axios";
 import dotenv from "dotenv";
 
@@ -2443,6 +2444,10 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
     throw new Error('Failed to parse bank statement transactions');
   }
 }
+
+// Error Guard: adds POST /error-triage only. Existing tasks, prompts and specialists are
+// untouched — the module owns its own prompt and response shape.
+registerErrorGuardTriage(app);
 
 app.listen(port, host, () => {
   console.log(`AI Processor server running on http://${host}:${port}`);

@@ -1,48 +1,45 @@
 /**
- * AI triage for Error Guard — an **independent** module.
+ * AI triage client — talks to the **AI processor service**, not to a provider directly.
  *
- * Deliberate architectural choice: nothing here touches the running `ai-processor`
- * service, `lib/aiProcessor.ts`, or any existing prompt/specialist. The call goes through
- * `lib/aiProvider.createRoutedClient()` — the same router `server/openai.ts` already uses —
- * with its own task name (`error-triage`), its own model alias (`classification`), its own
- * budget and its own prompt (in `shared/errorGuard/triage.ts`).
+ * The processor (`external-services/ai-processor`, deployed at `AI_PROCESSOR_URL`) owns the
+ * provider keys, the model router, the prompt and the cost log. It exposes one new route,
+ * `POST /error-triage`, mounted by `registerErrorGuardTriage(app)`. Nothing else in that
+ * service changed.
  *
- * That means: zero redeploy of ai-processor, zero risk to the ten financial AI tasks, and
- * removing this feature is deleting this file.
+ * This module's job is narrow:
+ *  - decide whether to call at all (off switch, daily budget, one call at a time),
+ *  - build a metadata-only payload (`buildTriagePayload`),
+ *  - survive a dead/hanging service (timeout + cooldown),
+ *  - validate the answer and store it.
  *
- * Invariants:
- *  - never throws into the caller (the caller is the flush path);
- *  - never blocks a request (fire-and-forget after the row exists);
- *  - never sends user data — the prompt is built from scrubbed metadata only;
- *  - never spends more than `ERROR_GUARD_AI_BUDGET` calls per UTC day.
+ * It never throws into the caller: the caller is the flush path of the error tracker.
  */
-import { AI_MODELS, createRoutedClient, getAIProviderStatus } from '../../lib/aiProvider';
 import {
-  buildTriagePrompt,
+  TRIAGE_PATH,
+  buildTriagePayload,
   parseTriageResponse,
   toGuardAnalysis,
-  TRIAGE_TASK,
-  type TriageInput,
+  type TriagePayload,
 } from '@shared/errorGuard/triage';
-import type { GuardGroup } from '@shared/errorGuard/types';
-import { getGroup, getSamples, saveAnalysis, setAIStatus, type GuardSample } from './store';
+import { getGroup, getSamples, saveAnalysis, setAIStatus } from './store';
 
+const PROCESSOR_TIMEOUT_MS = Number(process.env.ERROR_GUARD_AI_TIMEOUT_MS) || 20_000;
+const PROCESSOR_COOLDOWN_MS = Number(process.env.ERROR_GUARD_AI_COOLDOWN_MS) || 300_000;
 const DAILY_BUDGET = Number(process.env.ERROR_GUARD_AI_BUDGET) || 25;
-const CALL_TIMEOUT_MS = Number(process.env.ERROR_GUARD_AI_TIMEOUT_MS) || 25_000;
 const MAX_CONCURRENT = 1;
 
 let callsToday = 0;
 let budgetDay = new Date().toISOString().slice(0, 10);
+let processorDownUntil = 0;
 const inFlight = new Set<string>();
 
-/** Off switch is explicit: `ERROR_GUARD_AI=off`, or simply no provider key configured. */
+function processorUrl(): string {
+  return (process.env.AI_PROCESSOR_URL || 'https://ai-processor.formatika.dev').replace(/\/+$/, '');
+}
+
+/** `ERROR_GUARD_AI=off` is the only switch. The keys live in the processor, not here. */
 export function isTriageEnabled(): boolean {
-  if (process.env.ERROR_GUARD_AI === 'off') return false;
-  try {
-    return getAIProviderStatus().providers.some((provider) => provider.configured);
-  } catch {
-    return false;
-  }
+  return process.env.ERROR_GUARD_AI !== 'off';
 }
 
 export interface TriageStats {
@@ -50,10 +47,19 @@ export interface TriageStats {
   callsToday: number;
   budget: number;
   inFlight: number;
+  processorReachable: boolean;
+  processorUrl: string;
 }
 
 export function getTriageStats(): TriageStats {
-  return { enabled: isTriageEnabled(), callsToday, budget: DAILY_BUDGET, inFlight: inFlight.size };
+  return {
+    enabled: isTriageEnabled(),
+    callsToday,
+    budget: DAILY_BUDGET,
+    inFlight: inFlight.size,
+    processorReachable: Date.now() >= processorDownUntil,
+    processorUrl: processorUrl(),
+  };
 }
 
 function consumeBudget(): boolean {
@@ -67,59 +73,53 @@ function consumeBudget(): boolean {
   return true;
 }
 
-function safeJson(raw: unknown): unknown {
-  if (typeof raw !== 'string') return raw;
-  const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+export type TriageOutcome =
+  | { ok: true; model: string }
+  | {
+      ok: false;
+      reason: 'disabled' | 'budget' | 'in-flight' | 'missing' | 'invalid' | 'unavailable' | 'failed';
+    };
+
+interface ProcessorResponse {
+  analysis?: unknown;
+  model?: string;
+}
+
+async function callProcessor(payload: TriagePayload): Promise<ProcessorResponse> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PROCESSOR_TIMEOUT_MS);
+
   try {
-    return JSON.parse(cleaned);
-  } catch {
-    return null;
+    const response = await fetch(`${processorUrl()}${TRIAGE_PATH}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(process.env.AI_PROCESSOR_API_KEY ? { 'x-api-key': process.env.AI_PROCESSOR_API_KEY } : {}),
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const detail = (await response.text()).slice(0, 120);
+      const error: Error & { status?: number } = new Error(
+        `processor HTTP ${response.status}: ${detail}`,
+      );
+      error.status = response.status;
+      throw error;
+    }
+
+    return (await response.json()) as ProcessorResponse;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
-/** Only metadata goes into the prompt: the message, the top frames, the key names. */
-export function buildTriageInput(group: GuardGroup, samples: GuardSample[]): TriageInput {
-  const sample = samples[0];
-  const stackFrames = (sample?.stack ?? '')
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith('at '))
-    .slice(0, 5);
-
-  const contextKeys = sample?.context && typeof sample.context === 'object'
-    ? Object.keys(sample.context).slice(0, 15)
-    : undefined;
-
-  const breadcrumbLabels = Array.isArray(sample?.breadcrumbs)
-    ? (sample.breadcrumbs as Array<{ label?: unknown }>)
-        .map((crumb) => (typeof crumb?.label === 'string' ? crumb.label : null))
-        .filter((label): label is string => Boolean(label))
-        .slice(-8)
-    : undefined;
-
-  return {
-    title: group.title,
-    kind: group.kind,
-    route: group.route,
-    release: group.release,
-    platform: null,
-    severity: group.severity,
-    moneyPath: group.moneyPath,
-    eventCount: group.eventCount,
-    message: group.message,
-    stackFrames: stackFrames.length > 0 ? stackFrames : undefined,
-    contextKeys,
-    breadcrumbLabels,
-  };
-}
-
-export type TriageOutcome =
-  | { ok: true; model: string }
-  | { ok: false; reason: 'disabled' | 'budget' | 'in-flight' | 'missing' | 'invalid' | 'failed' };
-
 /**
- * Analyse one group. Fire-and-forget from the flush path; returns an outcome so the admin
- * "Explain this" button can tell the user what happened instead of hanging.
+ * Analyse one group through the AI processor.
+ *
+ * Fire-and-forget from the flush path; returns an outcome so the admin "Explain this"
+ * button can say what happened instead of hanging.
  */
 export async function analyzeGroup(groupId: string): Promise<TriageOutcome> {
   if (!isTriageEnabled()) {
@@ -129,64 +129,50 @@ export async function analyzeGroup(groupId: string): Promise<TriageOutcome> {
   if (inFlight.has(groupId) || inFlight.size >= MAX_CONCURRENT) {
     return { ok: false, reason: 'in-flight' };
   }
+  if (Date.now() < processorDownUntil) {
+    await setAIStatus(groupId, 'skipped').catch(() => undefined);
+    return { ok: false, reason: 'unavailable' };
+  }
   if (!consumeBudget()) {
     await setAIStatus(groupId, 'skipped').catch(() => undefined);
     return { ok: false, reason: 'budget' };
   }
 
   inFlight.add(groupId);
-  let timeout: ReturnType<typeof setTimeout> | null = null;
 
   try {
     const group = await getGroup(groupId);
     if (!group) return { ok: false, reason: 'missing' };
 
     const samples = await getSamples(groupId, 3);
-    const prompt = buildTriagePrompt(buildTriageInput(group, samples));
+    const payload = buildTriagePayload(group, samples);
+    const response = await callProcessor(payload);
 
-    const client = createRoutedClient();
-    const request = client.chat.completions.create({
-      model: AI_MODELS.classification,
-      messages: [
-        { role: 'system', content: prompt.system },
-        { role: 'user', content: prompt.user },
-      ],
-      response_format: { type: 'json_object' },
-      max_completion_tokens: 600,
-      // Custom field consumed by the router in lib/aiProvider.ts (usage attribution).
-      task: TRIAGE_TASK,
-    } as never) as unknown as Promise<{
-      model?: string;
-      choices?: Array<{ message?: { content?: string } }>;
-    }>;
-
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      timeout = setTimeout(() => reject(new Error('triage timeout')), CALL_TIMEOUT_MS);
-      if (typeof timeout.unref === 'function') timeout.unref();
-    });
-
-    const completion = await Promise.race([request, timeoutPromise]);
-    const parsed = parseTriageResponse(safeJson(completion?.choices?.[0]?.message?.content));
-
+    const parsed = parseTriageResponse(response.analysis);
     if (!parsed) {
       await setAIStatus(groupId, 'failed').catch(() => undefined);
-      // Log the group id, never the prompt: the prompt is derived from user-facing text.
-      console.warn(`[errorGuard] triage returned an unusable shape for group ${groupId}`);
+      // Log the group id, never the payload: it is derived from user-facing text.
+      console.warn(`[errorGuard] processor returned an unusable shape for group ${groupId}`);
       return { ok: false, reason: 'invalid' };
     }
 
-    const model = completion?.model ?? AI_MODELS.classification;
+    const model = response.model ?? 'ai-processor';
     await saveAnalysis(groupId, toGuardAnalysis(parsed), model);
+    processorDownUntil = 0;
     return { ok: true, model };
   } catch (error: unknown) {
+    const status = (error as { status?: number }).status;
+    // A network failure or 5xx means the service is down: stop asking for five minutes so a
+    // dead host cannot add latency to every new problem. A 4xx is our bug, not an outage.
+    if (!status || status >= 500) processorDownUntil = Date.now() + PROCESSOR_COOLDOWN_MS;
+
     await setAIStatus(groupId, 'failed').catch(() => undefined);
     console.warn(
       `[errorGuard] triage failed for group ${groupId}:`,
       error instanceof Error ? error.message.slice(0, 160) : 'unknown',
     );
-    return { ok: false, reason: 'failed' };
+    return { ok: false, reason: !status || status >= 500 ? 'unavailable' : 'failed' };
   } finally {
-    if (timeout) clearTimeout(timeout);
     inFlight.delete(groupId);
   }
 }
@@ -198,3 +184,4 @@ export function scheduleTriage(groupId: string): void {
     void analyzeGroup(groupId).catch(() => undefined);
   });
 }
+

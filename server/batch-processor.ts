@@ -1,6 +1,7 @@
 
 import { storage } from "./storage";
 import { runAI } from "../lib/aiProcessor";
+import { withJobRun } from "./errorGuard/jobs.js";
 // Cache system removed
 
 // Track users who need batch processing
@@ -114,8 +115,11 @@ async function shouldProcessInsights(userId: string, transactions: any[]): Promi
   return significantAmount > 100; // Process if $100+ in new transactions
 }
 
-// Start batch processing interval (every 5 minutes)
-setInterval(processBatchedOperations, 5 * 60 * 1000);
+// Start batch processing interval (every 5 minutes), recorded as a job run so a stalled
+// processor shows up on the Watch screen instead of silently doing nothing.
+setInterval(() => {
+  void withJobRun('batch-processor', processBatchedOperations);
+}, 5 * 60 * 1000);
 
 // Initial cleanup on startup
 setTimeout(processBatchedOperations, 30000); // Run after 30 seconds of startup

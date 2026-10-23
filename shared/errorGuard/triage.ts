@@ -1,20 +1,30 @@
 /**
- * The AI triage prompt and response contract (blueprint 07 §9).
+ * Error Guard triage — the contract between the web app and the AI processor.
  *
- * This lives here — in a *new, independent* file — on purpose. The running
- * `ai-processor` service is not touched: the prompt is built and validated in the main
- * app, and the model call goes through `lib/aiProvider.createRoutedClient()` (the same
- * router `server/openai.ts` already uses). No new task, no redeploy of the processor.
+ * The **prompt does not live here**. It lives in `external-services/ai-processor/errorGuardTriage.ts`,
+ * because that service owns the provider keys and the AI logic. The web app's job is:
  *
- * Pure: no SDK import, no network, so it is unit-testable without keys.
+ *   1. build a metadata-only payload (`buildTriagePayload`),
+ *   2. POST it to `${AI_PROCESSOR_URL}/error-triage`,
+ *   3. validate the answer with `parseTriageResponse` before anything is stored.
+ *
+ * Pure and isomorphic, so it is unit-testable with no keys, no network and no database.
  */
 import { z } from 'zod';
-import type { GuardAnalysis, GuardSeverity } from './types';
+import type { GuardAnalysis, GuardGroup, GuardSeverity } from './types';
 
-export const TRIAGE_TASK = 'error-triage';
+/** Path on the AI processor. The service-wide `x-api-key` middleware protects it. */
+export const TRIAGE_PATH = '/error-triage';
 
-/** What the caller sends. Everything here is already scrubbed. */
-export interface TriageInput {
+export const TRIAGE_MAX_FRAMES = 5;
+export const TRIAGE_MAX_CONTEXT_KEYS = 15;
+export const TRIAGE_MAX_BREADCRUMBS = 8;
+
+/**
+ * What the web app sends. Every field is metadata: no context *values*, no user identity,
+ * no request body, no query string.
+ */
+export interface TriagePayload {
   title: string;
   kind: string;
   route?: string | null;
@@ -24,18 +34,64 @@ export interface TriageInput {
   moneyPath: boolean;
   eventCount: number;
   message: string;
-  /** Top application frames only — never a full stack. */
   stackFrames?: string[];
-  /** Keys of the scrubbed context, not the values. */
   contextKeys?: string[];
   breadcrumbLabels?: string[];
+}
+
+/** Just enough of a stored sample to build the payload (keeps this module DB-free). */
+export interface TriageSample {
+  stack?: string | null;
+  context?: Record<string, unknown> | null;
+  breadcrumbs?: unknown;
+}
+
+/**
+ * Build the payload for one group. Deterministic and defensive: it never throws, never
+ * includes a context value, and truncates everything that could grow.
+ */
+export function buildTriagePayload(group: GuardGroup, samples: TriageSample[]): TriagePayload {
+  const sample = samples[0];
+
+  const stackFrames = String(sample?.stack ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('at '))
+    .slice(0, TRIAGE_MAX_FRAMES);
+
+  const contextKeys =
+    sample?.context && typeof sample.context === 'object'
+      ? Object.keys(sample.context).slice(0, TRIAGE_MAX_CONTEXT_KEYS)
+      : [];
+
+  const breadcrumbLabels = Array.isArray(sample?.breadcrumbs)
+    ? (sample.breadcrumbs as Array<{ label?: unknown }>)
+        .map((crumb) => (typeof crumb?.label === 'string' ? crumb.label : null))
+        .filter((label): label is string => Boolean(label))
+        .slice(-TRIAGE_MAX_BREADCRUMBS)
+    : [];
+
+  return {
+    title: group.title.slice(0, 200),
+    kind: group.kind,
+    route: group.route,
+    release: group.release,
+    platform: null,
+    severity: group.severity,
+    moneyPath: group.moneyPath,
+    eventCount: group.eventCount,
+    message: group.message.slice(0, 500),
+    ...(stackFrames.length > 0 ? { stackFrames } : {}),
+    ...(contextKeys.length > 0 ? { contextKeys } : {}),
+    ...(breadcrumbLabels.length > 0 ? { breadcrumbLabels } : {}),
+  };
 }
 
 const severityEnum = z.enum(['critical', 'error', 'warning', 'info']);
 
 /**
- * Strict on purpose: an analysis that does not fit this shape is thrown away rather
- * than shown to a human as if it were fact.
+ * Strict on purpose: an analysis that does not fit this shape is thrown away rather than
+ * shown to a human as if it were fact.
  */
 export const triageResponseSchema = z.object({
   plainSummary: z.string().min(10).max(400),
@@ -67,42 +123,4 @@ export function toGuardAnalysis(response: TriageResponse): GuardAnalysis {
     confidence: response.confidence,
     suggestedFix: response.suggestedFix,
   };
-}
-
-const SYSTEM_PROMPT = `You are a senior engineer helping the owner of a small personal-finance app understand a failure report.
-
-Rules:
-- The report is metadata only. You will not see user data, and you must not ask for it.
-- Write for a non-developer first, then give one technical pointer.
-- Never invent file names. If the stack does not show a file, say "not in the report".
-- Be concrete and short. No markdown, no code blocks, no bullet characters.
-- Money matters: if an amount, balance, budget or export could be wrong, set moneyRisk to "possible" or "likely" and explain the consequence for the user.
-- Answer with a single JSON object and nothing else.`;
-
-/** Build the prompt. Pure: identical input, identical output, no clock, no randomness. */
-export function buildTriagePrompt(input: TriageInput): { system: string; user: string } {
-  const frames = (input.stackFrames ?? []).slice(0, 5);
-  const lines = [
-    `Problem: ${input.title}`,
-    `Type: ${input.kind}`,
-    `Severity: ${input.severity}`,
-    `Touches money: ${input.moneyPath ? 'yes' : 'no'}`,
-    `Times seen: ${input.eventCount}`,
-    `Route: ${input.route ?? 'unknown'}`,
-    `Release: ${input.release ?? 'unknown'}`,
-    `Platform: ${input.platform ?? 'unknown'}`,
-    `Message: ${input.message}`,
-  ];
-  if (frames.length) lines.push('Top frames:', ...frames.map((frame) => `- ${frame}`));
-  if (input.contextKeys?.length) lines.push(`Context keys present: ${input.contextKeys.join(', ')}`);
-  if (input.breadcrumbLabels?.length) {
-    lines.push('Last actions before it happened:', ...input.breadcrumbLabels.slice(-8).map((l) => `- ${l}`));
-  }
-  lines.push(
-    '',
-    'Reply with JSON: {"plainSummary":string,"likelyCause":string,"whereToLook":string,',
-    '"userImpact":string,"moneyRisk":"none"|"possible"|"likely",',
-    '"severity":"critical"|"error"|"warning"|"info","confidence":0..1,"suggestedFix":string}',
-  );
-  return { system: SYSTEM_PROMPT, user: lines.join('\n') };
 }

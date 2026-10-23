@@ -172,21 +172,26 @@ async function main(): Promise<void> {
   check(summary.eventsLast24h >= 3, `events in the last 24h counted from rollups (${summary.eventsLast24h})`);
 
   if (process.argv.includes('--ai')) {
-    console.log('\n4b. AI explanation (one real call, costs ~$0.0002)');
-    const { analyzeGroup, isTriageEnabled } = await import('../server/errorGuard/triage.js');
+    console.log('\n4b. AI explanation through the AI processor (one real call, ~$0.0002)');
+    const { analyzeGroup, isTriageEnabled, getTriageStats } = await import('../server/errorGuard/triage.js');
     if (!isTriageEnabled()) {
-      console.log('  SKIP  no AI provider key configured, or ERROR_GUARD_AI=off');
+      console.log('  SKIP  ERROR_GUARD_AI=off');
     } else {
+      console.log(`  Using processor: ${getTriageStats().processorUrl}`);
       const outcome = await analyzeGroup(group.id);
-      check(outcome.ok, `analysis returned (${outcome.ok ? outcome.model : outcome.reason})`);
-      const { getGroup } = await import('../server/errorGuard/store.js');
-      const refreshed = await getGroup(group.id);
-      const analysis = refreshed?.aiAnalysis ?? null;
-      check(Boolean(analysis), 'analysis stored on the group');
-      if (analysis) {
-        check(analysis.confidence >= 0 && analysis.confidence <= 1, 'confidence is within 0..1');
-        check(analysis.moneyRisk !== undefined, `money risk classified as "${analysis.moneyRisk}"`);
-        console.log(`  Summary it wrote: ${analysis.plainSummary}`);
+      if (!outcome.ok && outcome.reason === 'unavailable') {
+        console.log('  SKIP  the AI processor is not reachable — the problem list still works');
+      } else {
+        check(outcome.ok, `analysis returned (${outcome.ok ? outcome.model : outcome.reason})`);
+        const { getGroup } = await import('../server/errorGuard/store.js');
+        const refreshed = await getGroup(group.id);
+        const analysis = refreshed?.aiAnalysis ?? null;
+        check(Boolean(analysis), 'analysis stored on the group');
+        if (analysis) {
+          check(analysis.confidence >= 0 && analysis.confidence <= 1, 'confidence is within 0..1');
+          check(analysis.moneyRisk !== undefined, `money risk classified as "${analysis.moneyRisk}"`);
+          console.log(`  Summary it wrote: ${analysis.plainSummary}`);
+        }
       }
     }
   }

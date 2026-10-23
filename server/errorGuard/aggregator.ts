@@ -55,12 +55,20 @@ let lastError: string | null = null;
 let timer: ReturnType<typeof setInterval> | null = null;
 let flushing = false;
 let newGroupHandler: ((groupId: string) => void) | null = null;
+let alertHandler: ((groups: GroupSnapshot[]) => Promise<void> | void) | null = null;
 /** Groups already offered to triage, so a recurring problem does not spend budget twice. */
 const triageSeen = new Set<string>();
 
 /** Wired by the routes module to the triage job (a hook, to avoid an import cycle). */
 export function setNewGroupHandler(handler: ((groupId: string) => void) | null): void {
   newGroupHandler = handler;
+}
+
+/** Wired by the routes module to the e-mail alerter (blueprint 07 §11). */
+export function setAlertHandler(
+  handler: ((groups: GroupSnapshot[]) => Promise<void> | void) | null,
+): void {
+  alertHandler = handler;
 }
 
 /** Per-IP intake limiter. A browser that loops on an error cannot flood the endpoint. */
@@ -193,6 +201,14 @@ export async function flush(now: number = Date.now()): Promise<void> {
         }
       }
     }
+
+    if (alertHandler) {
+      try {
+        void Promise.resolve(alertHandler(snapshots)).catch(() => undefined);
+      } catch {
+        /* alerting must never break the flush */
+      }
+    }
   } catch (error: unknown) {
     flushFailures += 1;
     consecutiveFailures += 1;
@@ -260,4 +276,5 @@ export function resetAggregatorForTests(): void {
   lastFlushAt = null;
   lastError = null;
   newGroupHandler = null;
+  alertHandler = null;
 }

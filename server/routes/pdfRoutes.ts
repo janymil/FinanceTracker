@@ -5,6 +5,8 @@ import { transactions, categories, users } from '../../shared/schema';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { translateCategoryName, getUserLanguage } from '../categoryTranslations';
 import { buildTrendsPayload, requestPdf, PdfProcessorError } from '../pdfProcessorClient';
+import { checkPdf } from '@shared/invariants';
+import { reportInvariant } from '../errorGuard/report.js';
 
 export function registerPDFRoutes(app: any) {
   // Generate PDF report for trends data - Premium plan required
@@ -189,6 +191,16 @@ export function registerPDFRoutes(app: any) {
       const pdfBuffer = await requestPdf(payload);
 
       console.log('PDF generated successfully:', pdfBuffer.length, 'bytes');
+
+      // Export invariant (blueprint 07 §18): a PDF that is not a PDF, or is suspiciously
+      // small, means the user downloads a broken file and nobody notices.
+      for (const violation of checkPdf(pdfBuffer)) {
+        reportInvariant(violation.code, {
+          expected: violation.expected,
+          actual: violation.actual,
+          where: 'pdfRoutes.export',
+        });
+      }
 
       // Set response headers
       res.setHeader('Content-Type', 'application/pdf');
