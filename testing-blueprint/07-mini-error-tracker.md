@@ -665,9 +665,10 @@ Everything else may be scheduled.
 
 3. **Customer-facing surface** — any "something went wrong, we're on it" message? If yes, add a
    support code: show the user a short id, put it in the email.
-4. **Dual-send to Sentry for the browser** from day one, or only if M4 stalls?
-   Recommendation: keep Sentry wired with an empty DSN; enable only if on-demand symbolication
-   is abandoned.
+4. ~~Dual-send to Sentry~~ — **closed: there is no Sentry in this project.** It was removed at
+   the owner's decision (`@sentry/*` deps, client/server initialisation, Vite source-map plugin
+   and the test button are all gone). Error Guard is the only reporter, so there is exactly one
+   place where failures are captured and one place to look for them.
 
 ---
 
@@ -826,6 +827,10 @@ cheaper than maintaining a second product.
 | E-mail alerts (throttled) | `server/errorGuard/alerts.ts` | done, wired |
 | Admin screen | `client/src/pages/admin-watch.tsx` | done |
 | Smoke script | `scripts/error-guard-smoke.ts` | 15/15 checks incl. a real processor call |
+| Retention script | `scripts/error-guard-prune.ts` | done, cron installed |
+| External uptime check | `scripts/uptime-check.ts` | done, cron every 5 min |
+| Server 5xx capture | middleware in `server/routes/index.ts` | done |
+| Sentry | removed (deps, client/server init, Vite plugin, test button) | gone — one reporter only |
 
 ### Where the reporting is actually wired now
 

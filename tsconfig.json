@@ -9,7 +9,9 @@
     "scripts/sentry-smoke.ts",
     "scripts/capture-ai-fixture.ts",
     "scripts/benchmark-ocr.ts",
-    "scripts/error-guard-smoke.ts"
+    "scripts/error-guard-smoke.ts",
+    "scripts/error-guard-prune.ts",
+    "scripts/uptime-check.ts"
   ],
   "exclude": ["node_modules", "build", "dist"],
   "compilerOptions": {

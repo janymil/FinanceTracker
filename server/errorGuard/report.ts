@@ -89,6 +89,38 @@ export function reportInvariant(code: string, details: Record<string, unknown> =
   }
 }
 
+/**
+ * A 5xx response that no `catch` reported (blueprint 07 §17.2).
+ *
+ * Client-side capture only sees requests it made. This covers API-only callers: mobile
+ * uploads, Clerk/Stripe webhooks, cron scripts. Reported as `http` + status so it groups
+ * per route instead of per message.
+ */
+export function reportHttpServerError(input: {
+  method: string;
+  route: string;
+  status: number;
+  durationMs: number;
+}): void {
+  if (disabled()) return;
+  try {
+    enqueue([
+      {
+        kind: 'http',
+        message: `${input.method} ${input.route} returned ${input.status}`,
+        source: 'server',
+        route: input.route,
+        method: input.method,
+        status: input.status,
+        durationMs: input.durationMs,
+        severity: 'error',
+      },
+    ]);
+  } catch {
+    /* never throw from the reporter */
+  }
+}
+
 /** A server-side exception that was already handled (a 500 response, a failed job step). */
 export function reportServerError(
   error: unknown,

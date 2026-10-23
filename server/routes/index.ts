@@ -12,7 +12,9 @@ import { registerExportRoutes } from "./exportRoutes";
 import { uploadReceiptHandler } from '../uploadReceipt';
 import { registerAIRoutes } from "./aiRoutes";
 import { registerAdminRoutes } from "./adminRoutes";
+import { reportHttpServerError } from "../errorGuard/report.js";
 import { registerErrorGuardRoutes } from "../errorGuard/routes.js";
+import { normalizeRoute } from "@shared/errorGuard/fingerprint";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
@@ -36,6 +38,25 @@ import mistralTestRoutes from "./mistralTestRoutes.js";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Server-side HTTP outcome capture (blueprint 07 §17.2): a 5xx that no `catch` reported
+  // still reaches this listener, so API-only callers are not invisible. Registered before
+  // any route, because `finish` only fires for responses that went through here.
+  app.use((req, res, next) => {
+    const startedAt = Date.now();
+    res.on('finish', () => {
+      if (res.statusCode < 500) return;
+      const route = normalizeRoute(String(req.originalUrl || '').split('?')[0]);
+      if (!route || route.startsWith('/api/telemetry')) return;
+      reportHttpServerError({
+        method: req.method,
+        route,
+        status: res.statusCode,
+        durationMs: Date.now() - startedAt,
+      });
+    });
+    next();
+  });
+
   // Cookie consent middleware
   app.post('/api/cookie-consent', setCookieConsent);
 

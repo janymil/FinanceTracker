@@ -66,7 +66,7 @@ function addBreadcrumb(type: GuardBreadcrumb['type'], label: string): void {
 }
 
 function release(): string | undefined {
-  return env.VITE_SENTRY_RELEASE?.trim() || undefined;
+  return env.VITE_APP_RELEASE?.trim() || env.VITE_SENTRY_RELEASE?.trim() || undefined;
 }
 
 /** Aggregate locally first: the same failure 30 times is one event with `count: 30`. */

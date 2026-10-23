@@ -9,17 +9,14 @@ import { I18nextProvider } from 'react-i18next';
 import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
-import { initClientObservability } from './lib/observability';
 import { installErrorGuard } from './lib/errorGuard';
 import i18n from './i18n/i18n';
 // Clear any stale authentication data on app startup
 clearStaleSession();
 
-// Error reporting (Sentry) — initialise before the first render so early errors count.
-initClientObservability();
-
 // Error Guard (blueprint 07): aggregates failures into "problems" for the admin panel.
-// Independent of Sentry — both can be on, both can be off, neither depends on the other.
+// Installed before the first render, so errors thrown during mount are captured.
+// This is the app's only error reporter — there is no Sentry in this project.
 installErrorGuard();
 
 // Simple browser language detection function
