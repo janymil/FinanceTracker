@@ -1,9 +1,124 @@
 import type { Express } from "express";
+import Stripe from "stripe";
+import { clerkClient } from "@clerk/express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage, translateCategories } from "../categoryTranslations";
+import { rateLimit } from "../middleware/rateLimit";
+import { reportServerError } from "../errorGuard/report";
+
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export function registerUserRoutes(app: Express) {
+  /**
+   * GDPR: the person must be able to take their data with them.
+   * Everything is collected with Promise.allSettled so one missing table cannot
+   * turn a legal obligation into a 500. Secrets (Stripe ids) are stripped.
+   */
+  app.get(
+    '/api/account/export',
+    isAuthenticated,
+    rateLimit({ windowMs: 60 * 60 * 1000, max: 5, keyPrefix: 'account-export', perUser: true }),
+    async (req: any, res) => {
+      try {
+        const userId = getUserId(req);
+        if (!userId) return res.status(401).json({ message: 'Authentication required' });
+
+        const user = await storage.getUser(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const settled = await Promise.allSettled([
+          storage.getUserTransactions(userId),
+          storage.getUserBudgets(userId),
+          storage.getUserGoals(userId),
+          storage.getCategories(userId),
+          storage.getUserExpenseReminders(userId),
+          storage.getUserAchievements(userId),
+        ]);
+        const value = (index: number) => {
+          const result = settled[index];
+          return result.status === 'fulfilled' ? result.value : null;
+        };
+
+        const { stripeCustomerId, stripeSubscriptionId, ...account } = user as any;
+
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          app: 'Kaptia',
+          account,
+          transactions: value(0),
+          budgets: value(1),
+          goals: value(2),
+          categories: value(3),
+          reminders: value(4),
+          achievements: value(5),
+        };
+
+        const stamp = new Date().toISOString().slice(0, 10);
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="kaptia-export-${stamp}.json"`);
+        return res.send(JSON.stringify(payload, null, 2));
+      } catch (error) {
+        reportServerError(error, { where: 'account.export', route: '/api/account/export' });
+        return res.status(500).json({ message: 'Could not prepare the export' });
+      }
+    }
+  );
+
+  /**
+   * GDPR: right to erasure. Order matters —
+   *   1. stop billing (never delete data while a subscription keeps charging),
+   *   2. delete the app data,
+   *   3. delete the login (Clerk). If step 3 fails, the account cannot sign in to
+   *      anything meaningful and the failure is visible in the error tracker.
+   */
+  app.post(
+    '/api/account/delete',
+    isAuthenticated,
+    rateLimit({ windowMs: 60 * 60 * 1000, max: 5, keyPrefix: 'account-delete', perUser: true }),
+    async (req: any, res) => {
+      const userId = getUserId(req);
+      if (!userId) return res.status(401).json({ message: 'Authentication required' });
+
+      if (String(req.body?.confirmation || '').toUpperCase() !== 'DELETE') {
+        return res.status(400).json({ message: 'Type DELETE to confirm' });
+      }
+
+      try {
+        const user = await storage.getUser(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if ((user as any).stripeSubscriptionId && stripe) {
+          try {
+            await stripe.subscriptions.cancel((user as any).stripeSubscriptionId);
+          } catch (billingError) {
+            reportServerError(billingError, {
+              where: 'account.delete.billing',
+              route: '/api/account/delete',
+              moneyPath: true,
+            });
+            return res.status(409).json({
+              message: 'We could not stop the subscription. Nothing was deleted. Please contact support.',
+            });
+          }
+        }
+
+        await storage.deleteUserCompletely(userId);
+
+        try {
+          await clerkClient.users.deleteUser(userId);
+        } catch (loginError) {
+          reportServerError(loginError, { where: 'account.delete.login', route: '/api/account/delete' });
+        }
+
+        return res.json({ ok: true });
+      } catch (error) {
+        reportServerError(error, { where: 'account.delete', route: '/api/account/delete' });
+        return res.status(500).json({ message: 'Could not delete the account' });
+      }
+    }
+  );
+
   // Update user plan (only allows switching to 'free' directly; paid plans require Stripe checkout or promo code)
   app.post('/api/update-plan', isAuthenticated, async (req: any, res) => {
     try {

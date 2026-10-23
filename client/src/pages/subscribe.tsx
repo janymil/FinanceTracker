@@ -7,12 +7,30 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Crown, Check, ArrowLeft, CreditCard } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import {
+  amountFor,
+  currencyForLanguage,
+  formatMoney,
+  yearlySaving,
+  type BillingCurrency,
+  type BillingInterval,
+  type PlanId,
+} from "@shared/pricing";
 
 export default function Subscribe() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const langMatch = location.match(/^\/([a-z]{2})(?:\/|$)/);
+  const currentLang = langMatch
+    ? langMatch[1]
+    : (localStorage.getItem('preferredLanguage') || i18n.language || 'en').slice(0, 2);
+  // Same rule as the pricing page: Spanish visitors pay in soles, everyone else in dollars.
+  const currency: BillingCurrency = currencyForLanguage(currentLang);
+  const priceLabel = (plan: PlanId, interval: BillingInterval) =>
+    formatMoney(amountFor(plan, interval, currency), currency);
 
   // Get user's current plan and billing interval
   const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
@@ -51,8 +69,10 @@ export default function Subscribe() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'x-user-language': currentLang,
         },
-        body: JSON.stringify({ plan: planName }),
+        // `currency` makes the server pick the price list that matches what this page showed.
+        body: JSON.stringify({ plan: planName, currency }),
       });
 
       if (response.ok) {
@@ -91,8 +111,9 @@ export default function Subscribe() {
   const plans = {
     standard: {
       name: t('plans.standard'),
-      monthly: 4.99,
-      yearly: 49.90,
+      monthlyLabel: priceLabel('standard', 'monthly'),
+      yearlyLabel: priceLabel('standard', 'yearly'),
+      yearlySavingLabel: formatMoney(yearlySaving('standard', currency), currency),
       features: [
         t('subscribe.plans.standard.features.0'),
         t('subscribe.plans.standard.features.1'),
@@ -104,8 +125,9 @@ export default function Subscribe() {
     },
     premium: {
       name: t('plans.premium'),
-      monthly: 9.99,
-      yearly: 99.90,
+      monthlyLabel: priceLabel('premium', 'monthly'),
+      yearlyLabel: priceLabel('premium', 'yearly'),
+      yearlySavingLabel: formatMoney(yearlySaving('premium', currency), currency),
       features: [
         t('subscribe.plans.premium.features.0'),
         t('subscribe.plans.premium.features.1'),
@@ -127,7 +149,7 @@ export default function Subscribe() {
           <div className="text-center mb-8">
             <Button 
               variant="outline" 
-              onClick={() => setLocation('/')}
+              onClick={() => setLocation(`/${currentLang}`)}
               className="mb-4"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -158,7 +180,7 @@ export default function Subscribe() {
                   {isCurrentPlan('standard', 'monthly') && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-green-500 text-white px-4 py-1">
-                        Current Plan
+                        {t('subscribe.current_plan')}
                       </Badge>
                     </div>
                   )}
@@ -166,12 +188,12 @@ export default function Subscribe() {
                     <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-blue-100 dark:bg-blue-900">
                       <TrendingUp className="h-8 w-8 text-blue-600" />
                     </div>
-                    <CardTitle className="text-3xl">{plans.standard.name} Plan</CardTitle>
+                    <CardTitle className="text-3xl">{t('subscribe.plan_title', { plan: plans.standard.name })}</CardTitle>
                     <div className="text-5xl font-bold mb-2 text-blue-600">
-                      ${plans.standard.monthly}
-                      <span className="text-lg font-normal text-gray-500">/month</span>
+                      {plans.standard.monthlyLabel}
+                      <span className="text-lg font-normal text-gray-500">{t('subscribe.per_month')}</span>
                     </div>
-                    <CardDescription>Billed monthly, cancel anytime</CardDescription>
+                    <CardDescription>{t('subscribe.billing_description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="p-8">
                     <div className="space-y-4 mb-8">
@@ -199,7 +221,7 @@ export default function Subscribe() {
                       ) : (
                         <>
                           <CreditCard className="h-5 w-5 mr-2" />
-                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_month', { price: plans.standard.monthly })}
+                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_month', { price: plans.standard.monthlyLabel })}
                         </>
                       )}
                     </Button>
@@ -234,7 +256,7 @@ export default function Subscribe() {
                     </div>
                     <CardTitle className="text-3xl">{t('subscribe.plan_title', { plan: plans.premium.name })}</CardTitle>
                     <div className="text-5xl font-bold mb-2 text-purple-600">
-                      ${plans.premium.monthly}
+                      {plans.premium.monthlyLabel}
                       <span className="text-lg font-normal text-gray-500">{t('subscribe.per_month')}</span>
                     </div>
                     <CardDescription>{t('subscribe.billing_description')}</CardDescription>
@@ -265,7 +287,7 @@ export default function Subscribe() {
                       ) : (
                         <>
                           <CreditCard className="h-5 w-5 mr-2" />
-                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_month', { price: plans.premium.monthly })}
+                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_month', { price: plans.premium.monthlyLabel })}
                         </>
                       )}
                     </Button>
@@ -291,11 +313,11 @@ export default function Subscribe() {
                     </div>
                     <CardTitle className="text-3xl">{t('subscribe.plan_title', { plan: plans.standard.name })}</CardTitle>
                     <div className="text-5xl font-bold mb-2 text-blue-600">
-                      ${plans.standard.yearly}
+                      {plans.standard.yearlyLabel}
                       <span className="text-lg font-normal text-gray-500">{t('subscribe.per_year')}</span>
                     </div>
                     <CardDescription>
-                      {t('subscribe.save_per_year', { amount: ((plans.standard.monthly * 12) - plans.standard.yearly).toFixed(2) })}
+                      {t('subscribe.save_per_year', { amount: plans.standard.yearlySavingLabel })}
                     </CardDescription>
                     <Badge className="mt-2 bg-green-100 text-green-800">
                       {t('subscribe.discount_percentage')}
@@ -327,7 +349,7 @@ export default function Subscribe() {
                       ) : (
                         <>
                           <CreditCard className="h-5 w-5 mr-2" />
-                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_year', { price: plans.standard.yearly })}
+                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_year', { price: plans.standard.yearlyLabel })}
                         </>
                       )}
                     </Button>
@@ -362,11 +384,11 @@ export default function Subscribe() {
                     </div>
                     <CardTitle className="text-3xl">{t('subscribe.plan_title', { plan: plans.premium.name })}</CardTitle>
                     <div className="text-5xl font-bold mb-2 text-purple-600">
-                      ${plans.premium.yearly}
+                      {plans.premium.yearlyLabel}
                       <span className="text-lg font-normal text-gray-500">{t('subscribe.per_year')}</span>
                     </div>
                     <CardDescription>
-                      {t('subscribe.save_per_year', { amount: ((plans.premium.monthly * 12) - plans.premium.yearly).toFixed(2) })}
+                      {t('subscribe.save_per_year', { amount: plans.premium.yearlySavingLabel })}
                     </CardDescription>
                     <Badge className="mt-2 bg-green-100 text-green-800">
                       {t('subscribe.best_value_discount')}
@@ -398,7 +420,7 @@ export default function Subscribe() {
                       ) : (
                         <>
                           <CreditCard className="h-5 w-5 mr-2" />
-                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_year', { price: plans.premium.yearly })}
+                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_year', { price: plans.premium.yearlyLabel })}
                         </>
                       )}
                     </Button>

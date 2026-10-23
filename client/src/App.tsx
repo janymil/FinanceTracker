@@ -303,14 +303,10 @@ export function AuthenticatedApp() {
 }
 
 export default function App() {
-  // Initialize Google Analytics and check for incognito mode when app loads
+  // Analytics + incognito check. initGA() is a no-op until the visitor accepts
+  // analytics in the cookie banner, so this is safe to run on every load.
   useEffect(() => {
-    // Verify required environment variable is present
-    if (!import.meta.env.VITE_GA_MEASUREMENT_ID) {
-      console.warn('Missing required Google Analytics key: VITE_GA_MEASUREMENT_ID');
-    } else {
-      initGA();
-    }
+    initGA();
 
     // Check for incognito mode and show warning if detected
     detectIncognito().then(isIncognito => {

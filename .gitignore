@@ -17,6 +17,13 @@ gcp-*.json
 # Local data backups (may contain personal data)
 backups/
 
+# Scratch files that must never be committed (one of them held a real admin session cookie)
+cookies*.txt
+admin_cookies.txt
+headers.txt
+response*.txt
+response*.pdf
+
 # Media & temporary scratch footage
 temp-*
 *.mov

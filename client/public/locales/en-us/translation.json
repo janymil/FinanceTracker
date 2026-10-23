@@ -3108,10 +3108,10 @@
     "per_month": "/month",
     "per_year": "/year",
     "billing_description": "Billed monthly, cancel anytime",
-    "save_per_year": "Save ${{amount}} per year",
+    "save_per_year": "Save {{amount}} per year",
     "discount_percentage": "17% Off",
-    "subscribe_for_month": "Subscribe for ${{price}}/month",
-    "subscribe_for_year": "Subscribe for ${{price}}/year",
+    "subscribe_for_month": "Subscribe for {{price}} per month",
+    "subscribe_for_year": "Subscribe for {{price}} per year",
     "already_have_account": "Already have an account?",
     "sign_in_here": "Sign in here",
     "secure_payment": "Secure payment processing by Stripe",
@@ -3213,7 +3213,24 @@
     "Failed to create customer portal session": "Failed to create customer portal session",
     "Unknown error occurred": "Unknown error occurred",
     "Error": "Error",
-    "Failed to open subscription management: {{errorMessage}}": "Failed to open subscription management: {{errorMessage}}"
+    "Failed to open subscription management: {{errorMessage}}": "Failed to open subscription management: {{errorMessage}}",
+    "Data & privacy": "Data & privacy",
+    "Your data belongs to you": "Your data belongs to you",
+    "Download my data": "Download my data",
+    "Download a copy of your account and records as a JSON file": "Download a copy of your account and records as a JSON file",
+    "Download": "Download",
+    "Preparing...": "Preparing...",
+    "Delete my account": "Delete my account",
+    "This stops your subscription, erases your records and removes your login. It cannot be undone.": "This stops your subscription, erases your records and removes your login. It cannot be undone.",
+    "Type DELETE below to confirm": "Type DELETE below to confirm",
+    "Delete forever": "Delete forever",
+    "Deleting...": "Deleting...",
+    "Cancel": "Cancel",
+    "Your data was downloaded": "Your data was downloaded",
+    "Your account was deleted": "Your account was deleted",
+    "Could not prepare your data": "Could not prepare your data",
+    "Could not delete your account": "Could not delete your account",
+    "See the pricing page for current prices": "See the pricing page for current prices"
   },
   "pdf": {
     "anonymization_preview": {
@@ -3739,5 +3756,66 @@
   "No questions matched your search.": "No questions matched your search.",
   "Clear search": "Clear search",
   "Ready to transform your financial management?": "Ready to transform your financial management?",
-  "Start free with no credit card required.": "Start free with no credit card required."
+  "Start free with no credit card required.": "Start free with no credit card required.",
+  "pricing": {
+    "seo_title": "Kaptia Pricing - Simple plans for tracking your spending",
+    "seo_description": "Start free and upgrade when you want more. Standard and Premium plans in US dollars.",
+    "seo_keywords": "kaptia pricing, spending tracker plans, expense app pricing",
+    "hero_title": "Simple pricing,",
+    "hero_highlight": "serious value.",
+    "hero_subtitle": "Start free and upgrade when you want more AI help. Cancel anytime.",
+    "currency_note_usd": "Prices are in US dollars (USD).",
+    "currency_note_pen": "Prices are in Peruvian soles (PEN).",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "per_month": "/month",
+    "per_year": "/year",
+    "save_per_year": "Save {{amount}} per year",
+    "monthly_equivalent": "≈ {{amount}} / month",
+    "current_plan": "This is your plan",
+    "get_started_free": "Get Started Free",
+    "subscribe_now": "Subscribe Now",
+    "back_home": "Back to home",
+    "most_popular": "Most Popular",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "tagline": "Perfect for getting started with expense tracking",
+        "features": [
+          "Basic expense and income tracking",
+          "Manual categorization",
+          "Up to 100 transaction entries",
+          "Simple spending overview",
+          "Personalized smart tips"
+        ]
+      },
+      "standard": {
+        "name": "Standard",
+        "tagline": "For people ready to understand their spending",
+        "features": [
+          "Everything in Free plan",
+          "Goals and budget management",
+          "Interactive charts and reports",
+          "AI expense categorization",
+          "Calendar view and reminders",
+          "Unlimited transaction history"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "tagline": "The full intelligent tracking experience",
+        "features": [
+          "Everything in Standard plan",
+          "AI tips and insights",
+          "Advanced trends analysis",
+          "Expense prediction",
+          "Daily personalized recommendations",
+          "Cloud receipt storage",
+          "Cloud data backup",
+          "Data management (CSV, PDF)",
+          "Priority email support"
+        ]
+      }
+    }
+  }
 }

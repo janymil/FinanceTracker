@@ -6,25 +6,46 @@ import { storage } from "../storage";
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 type PlanKey = 'standard' | 'standard-yearly' | 'premium' | 'premium-yearly';
+type BillingCurrency = 'usd' | 'pen';
+
+function resolveCurrency(value: unknown): BillingCurrency {
+  return String(value ?? '').toLowerCase() === 'pen' ? 'pen' : 'usd';
+}
+
+/** Body value wins; otherwise the page language header decides (es -> soles). */
+function currencyForRequest(req: Request): BillingCurrency {
+  const explicit = (req.body as { currency?: unknown } | undefined)?.currency;
+  if (explicit !== undefined) return resolveCurrency(explicit);
+  const language = req.header('x-user-language') || '';
+  return language.toLowerCase().startsWith('es') ? 'pen' : 'usd';
+}
 
 /**
- * The deployment `.env` stores Stripe **product** ids (`prod_…`) under the
- * `STRIPE_*_PEN_PRICE_ID` names. Stripe does not accept a product id in
- * `line_items[].price` — it needs a `price_…` id — so product references are
- * resolved through the API to the product's `default_price` (or its only active
- * price) and cached in memory.
+ * Two price lists: US dollars and Peruvian soles. The page language picks the currency
+ * (es -> pen, everything else -> usd); the client also sends it explicitly at checkout.
  *
- * `price_…` values are used directly, so either form works.
+ * Both entries may be a `price_…` id or a `prod_…` id. Products are resolved to their
+ * default price through the API (see `resolvePriceId`), so a product reference keeps
+ * working, but an explicit price id is preferred: it is the only way to be certain the
+ * interval (month vs year) is the one the page promised.
  */
-const PRICE_ENV_KEYS: Record<PlanKey, string[]> = {
-  'standard': ['STRIPE_STANDARD_MONTHLY_PRICE_ID', 'STRIPE_STANDARD_MONTHLY_PEN_PRICE_ID'],
-  'standard-yearly': ['STRIPE_STANDARD_YEARLY_PRICE_ID', 'STRIPE_STANDARD_YEARLY_PEN_PRICE_ID'],
-  'premium': ['STRIPE_PREMIUM_MONTHLY_PRICE_ID', 'STRIPE_PREMIUM_MONTHLY_PEN_PRICE_ID'],
-  'premium-yearly': ['STRIPE_PREMIUM_YEARLY_PRICE_ID', 'STRIPE_PREMIUM_YEARLY_PEN_PRICE_ID'],
+const PRICE_ENV_KEYS: Record<BillingCurrency, Record<PlanKey, string[]>> = {
+  usd: {
+    'standard': ['STRIPE_STANDARD_MONTHLY_USD_PRICE_ID', 'STRIPE_STANDARD_MONTHLY_PRICE_ID'],
+    'standard-yearly': ['STRIPE_STANDARD_YEARLY_USD_PRICE_ID', 'STRIPE_STANDARD_YEARLY_PRICE_ID'],
+    'premium': ['STRIPE_PREMIUM_MONTHLY_USD_PRICE_ID', 'STRIPE_PREMIUM_MONTHLY_PRICE_ID'],
+    'premium-yearly': ['STRIPE_PREMIUM_YEARLY_USD_PRICE_ID', 'STRIPE_PREMIUM_YEARLY_PRICE_ID'],
+  },
+  pen: {
+    'standard': ['STRIPE_STANDARD_MONTHLY_PEN_PRICE_ID'],
+    'standard-yearly': ['STRIPE_STANDARD_YEARLY_PEN_PRICE_ID'],
+    'premium': ['STRIPE_PREMIUM_MONTHLY_PEN_PRICE_ID'],
+    'premium-yearly': ['STRIPE_PREMIUM_YEARLY_PEN_PRICE_ID'],
+  },
 };
 
-function readConfiguredReference(plan: PlanKey): string | undefined {
-  for (const key of PRICE_ENV_KEYS[plan]) {
+function readConfiguredReference(plan: PlanKey, currency: BillingCurrency): string | undefined {
+  for (const key of PRICE_ENV_KEYS[currency][plan]) {
     const raw = process.env[key];
     if (!raw) continue;
     const value = raw.trim().replace(/^["']|["']$/g, '');
@@ -86,7 +107,7 @@ const intervalChecked = new Set<string>();
  * currently has both "Anual" products priced with `interval: month`, which
  * would bill the yearly amount every month. Never blocks checkout.
  */
-async function warnIfIntervalMismatch(plan: PlanKey, priceId: string): Promise<void> {
+async function warnIfIntervalMismatch(plan: PlanKey, priceId: string, currency: BillingCurrency): Promise<void> {
   if (!stripe || intervalChecked.has(priceId)) return;
   intervalChecked.add(priceId);
 
@@ -97,7 +118,7 @@ async function warnIfIntervalMismatch(plan: PlanKey, priceId: string): Promise<v
     if (actual && actual !== expected) {
       console.warn(
         `[Billing] ${plan} uses price ${priceId} with interval "${actual}" but "${expected}" is expected. ` +
-        `Fix the price interval in Stripe or point ${PRICE_ENV_KEYS[plan][0]} at a price_… id with the right interval.`
+        `Fix the price interval in Stripe or point ${PRICE_ENV_KEYS[currency][plan][0]} at a price_… id with the right interval.`
       );
     }
   } catch {
@@ -105,16 +126,16 @@ async function warnIfIntervalMismatch(plan: PlanKey, priceId: string): Promise<v
   }
 }
 
-async function getPlanPriceId(plan: string): Promise<string | undefined> {
-  if (!(plan in PRICE_ENV_KEYS)) return undefined;
+async function getPlanPriceId(plan: string, currency: BillingCurrency): Promise<string | undefined> {
+  if (!(plan in PRICE_ENV_KEYS[currency])) return undefined;
   const key = plan as PlanKey;
-  const priceId = await resolvePriceId(readConfiguredReference(key));
-  if (priceId) await warnIfIntervalMismatch(key, priceId);
+  const priceId = await resolvePriceId(readConfiguredReference(key, currency));
+  if (priceId) await warnIfIntervalMismatch(key, priceId, currency);
   return priceId;
 }
 
 // Handle subscription changes (upgrade/downgrade) with proper proration
-async function handleSubscriptionChange(user: any, newPlan: string, res: Response) {
+async function handleSubscriptionChange(user: any, newPlan: string, currency: BillingCurrency, res: Response) {
   if (!stripe) {
     return res.status(503).json({ message: "Payment processing unavailable" });
   }
@@ -124,7 +145,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
     const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
     
     // Resolve the target plan to a Stripe price id (env may hold prod_ or price_)
-    const newPriceId = await getPlanPriceId(newPlan);
+    const newPriceId = await getPlanPriceId(newPlan, currency);
     if (!newPriceId) {
       return res.status(400).json({ error: "Invalid plan selected" });
     }
@@ -185,7 +206,10 @@ export function registerStripeRoutes(app: Express) {
       const { plan } = req.body;
       const userId = getUserId(req);
       
-      console.log('Checkout session request - Plan:', plan, 'User ID:', userId);
+      // Currency follows the page language unless the client sends it explicitly.
+      const currency = currencyForRequest(req);
+
+      console.log('Checkout session request - Plan:', plan, 'Currency:', currency, 'User ID:', userId);
       
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -236,10 +260,11 @@ export function registerStripeRoutes(app: Express) {
 
       // Plan references come from the environment and are resolved to price ids.
       console.log('Plan price references:', {
-        standard: readConfiguredReference('standard'),
-        'standard-yearly': readConfiguredReference('standard-yearly'),
-        premium: readConfiguredReference('premium'),
-        'premium-yearly': readConfiguredReference('premium-yearly'),
+        currency,
+        standard: readConfiguredReference('standard', currency),
+        'standard-yearly': readConfiguredReference('standard-yearly', currency),
+        premium: readConfiguredReference('premium', currency),
+        'premium-yearly': readConfiguredReference('premium-yearly', currency),
       });
 
       let sessionConfig: any;
@@ -262,11 +287,11 @@ export function registerStripeRoutes(app: Express) {
         };
       } else {
         // For paid plans, create the subscription with the resolved price id.
-        const priceId = await getPlanPriceId(plan);
-        console.log('Requested plan:', plan, '-> price:', priceId);
+        const priceId = await getPlanPriceId(plan, currency);
+        console.log('Requested plan:', plan, 'Currency:', currency, '-> price:', priceId);
 
         if (!priceId) {
-          console.error('Invalid plan requested:', plan, 'Configured plans:', Object.keys(PRICE_ENV_KEYS));
+          console.error('Invalid plan requested:', plan, 'Currency:', currency, 'Configured plans:', Object.keys(PRICE_ENV_KEYS[currency]));
           return res.status(400).json({ error: "Invalid plan selected" });
         }
         
@@ -282,6 +307,7 @@ export function registerStripeRoutes(app: Express) {
           metadata: {
             plan: plan,
             userId: userId,
+            currency: currency,
             isUpgrade: user.stripeSubscriptionId ? 'true' : 'false'
           }
         };
@@ -363,18 +389,6 @@ export function registerStripeRoutes(app: Express) {
       }
 
 
-
-      // Handle existing subscription if this is an upgrade
-      if (session.metadata?.existingSubscriptionId) {
-        try {
-          // Cancel the existing subscription
-          await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
-          console.log(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
-        } catch (cancelError) {
-          console.error('Error cancelling existing subscription:', cancelError);
-          // Continue with the process even if cancellation fails
-        }
-      }
 
       // Handle existing subscription if this is an upgrade
       if (session.metadata?.existingSubscriptionId) {
@@ -487,11 +501,18 @@ export function registerStripeRoutes(app: Express) {
       }
 
       // Plan hierarchy weights, keyed by the price ids actually in use.
+      // Both currencies are resolved: a customer may switch language between visits, and
+      // an upgrade must still be recognised whichever price list is attached to them.
       const planKeyOrder: PlanKey[] = ['standard', 'standard-yearly', 'premium', 'premium-yearly'];
-      const resolvedPlanPrices = await Promise.all(planKeyOrder.map((key) => getPlanPriceId(key)));
+      const currencies: BillingCurrency[] = ['usd', 'pen'];
+      const resolved = await Promise.all(
+        currencies.flatMap((currency) =>
+          planKeyOrder.map(async (key) => ({ key, priceId: await getPlanPriceId(key, currency) }))
+        )
+      );
       const priceWeights: Record<string, number> = {};
-      resolvedPlanPrices.forEach((priceId, index) => {
-        if (priceId) priceWeights[priceId] = index + 1;
+      resolved.forEach(({ key, priceId }) => {
+        if (priceId) priceWeights[priceId] = planKeyOrder.indexOf(key) + 1;
       });
 
       // Validate price IDs
@@ -625,7 +646,7 @@ export function registerStripeRoutes(app: Express) {
         return res.status(404).json({ error: "No active subscription found" });
       }
 
-      return await handleSubscriptionChange(user, plan, res);
+      return await handleSubscriptionChange(user, plan, currencyForRequest(req), res);
 
     } catch (error) {
       console.error('Error changing subscription:', error);

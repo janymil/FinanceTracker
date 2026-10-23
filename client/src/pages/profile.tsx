@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useUser, UserProfile, UserButton } from "@clerk/clerk-react";
+import { useUser, UserProfile, UserButton, useClerk } from "@clerk/clerk-react";
 import { useClerkUserReady } from "../hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -19,6 +19,11 @@ export default function ProfilePage() {
   const { getAuthHeaders } = useClerkUserReady();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const clerk = useClerk();
 
   if (!user || !authUser) {
     return <div>{t('profile.Loading...')}</div>;
@@ -61,6 +66,66 @@ export default function ProfilePage() {
       setIsLoading(false);
     }
   };
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/account/export', { headers, credentials: 'include' });
+      if (!response.ok) throw new Error('export failed');
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `kaptia-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      toast({ title: t('profile.Your data was downloaded') });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: t('profile.Error'),
+        description: t('profile.Could not prepare your data'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ confirmation: deleteConfirmText.trim().toUpperCase() }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || t('profile.Could not delete your account'));
+      }
+
+      toast({ title: t('profile.Your account was deleted') });
+      await clerk.signOut().catch(() => undefined);
+      window.location.href = '/';
+    } catch (error: any) {
+      toast({
+        title: t('profile.Error'),
+        description: error?.message || t('profile.Could not delete your account'),
+        variant: 'destructive',
+      });
+      setIsDeleting(false);
+    }
+  };
+
+
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
@@ -287,7 +352,7 @@ export default function ProfilePage() {
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                     <p className="text-xs text-muted-foreground">
-                      {t('profile.Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features')}
+                      {t('profile.See the pricing page for current prices')}
                     </p>
                   </div>
                 </div>
@@ -296,6 +361,71 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Data & privacy — required by GDPR, and the only place a user can leave. */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>{t('profile.Data & privacy')}</CardTitle>
+          <CardDescription>{t('profile.Your data belongs to you')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg">
+            <div>
+              <h3 className="font-semibold">{t('profile.Download my data')}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t('profile.Download a copy of your account and records as a JSON file')}
+              </p>
+            </div>
+            <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+              {isExporting ? t('profile.Preparing...') : t('profile.Download')}
+            </Button>
+          </div>
+
+          <div className="p-4 border border-destructive/40 rounded-lg space-y-3">
+            <div>
+              <h3 className="font-semibold text-destructive">{t('profile.Delete my account')}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t('profile.This stops your subscription, erases your records and removes your login. It cannot be undone.')}
+              </p>
+            </div>
+            {!confirmingDelete ? (
+              <Button variant="destructive" onClick={() => setConfirmingDelete(true)}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t('profile.Delete my account')}
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm">
+                  {t('profile.Type DELETE below to confirm')}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    value={deleteConfirmText}
+                    onChange={(event) => setDeleteConfirmText(event.target.value)}
+                    placeholder="DELETE"
+                    className="flex-1 px-3 py-2 border rounded-md bg-background"
+                    aria-label={t('profile.Type DELETE below to confirm')}
+                  />
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting || deleteConfirmText.toUpperCase() !== 'DELETE'}
+                  >
+                    {isDeleting ? t('profile.Deleting...') : t('profile.Delete forever')}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => { setConfirmingDelete(false); setDeleteConfirmText(''); }}
+                    disabled={isDeleting}
+                  >
+                    {t('profile.Cancel')}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

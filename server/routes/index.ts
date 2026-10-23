@@ -26,6 +26,9 @@ import { registerPDFRoutes } from "./pdfRoutes.js";
 import demoRoutes from "../demoRoutes.js";
 import courseRoutes from "../courseRoutes.js";
 import { DataEncryption } from "../encryption.js";
+import { getEmailTransportStatus } from "../emailService.js";
+import { isAuthenticated } from "../clerkAuth.js";
+import { rateLimit } from "../middleware/rateLimit.js";
 import { db } from "../db.js";
 import { sql } from "drizzle-orm";
 
@@ -60,8 +63,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
   app.post('/api/cookie-consent', setCookieConsent);
 
-  // Contact form endpoint
-  app.post('/api/contact', handleContactForm);
+  // Contact form endpoint — public by design, so it gets a tight per-IP limit.
+  app.post(
+    '/api/contact',
+    rateLimit({ windowMs: 10 * 60 * 1000, max: 5, keyPrefix: 'contact' }),
+    handleContactForm
+  );
 
   // System status endpoints
   app.get('/api/health', (req, res) => {
@@ -74,10 +81,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const startedAt = Date.now();
     try {
       await db.execute(sql`select 1`);
+      // Email state is exposed as a status only: no host, no account, no error text.
+      const email = getEmailTransportStatus();
       res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        checks: { database: { status: 'ok', latencyMs: Date.now() - startedAt } },
+        checks: {
+          database: { status: 'ok', latencyMs: Date.now() - startedAt },
+          email: { status: email.status === 'failed' ? 'error' : email.status === 'unconfigured' ? 'disabled' : 'ok' },
+        },
       });
     } catch (error) {
       console.error('[health] deep check failed:', error);
@@ -110,8 +122,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerStripeRoutes(app);
   registerRedeemRoutes(app);
 
-  // Receipt upload endpoint
-  app.post('/api/upload-receipt', uploadReceiptHandler);
+  // Receipt upload endpoint — OCR and AI run per file, so it needs both a login and a cap.
+  app.post(
+    '/api/upload-receipt',
+    isAuthenticated,
+    rateLimit({ windowMs: 60 * 60 * 1000, max: 60, keyPrefix: 'receipt', perUser: true }),
+    uploadReceiptHandler
+  );
   registerAIRoutes(app);
   registerAdminRoutes(app);
   // Error Guard: public ingest + /api/admin/watch/* (blueprint 07).
@@ -122,11 +139,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerLearningRoutes(app);
   registerVoiceRoutes(app);
   
-  // Groq voice processing routes
-  app.use('/api/voice-groq', groqVoiceRoutes);
+  // Groq voice processing routes — paid per request and previously open to anyone.
+  app.use(
+    '/api/voice-groq',
+    isAuthenticated,
+    rateLimit({ windowMs: 10 * 60 * 1000, max: 30, keyPrefix: 'voice-groq', perUser: true }),
+    groqVoiceRoutes
+  );
   
-  // Mistral voice processing routes (better accuracy)
-  app.use('/api/voice-mistral', mistralVoiceRoutes);
+  // Mistral voice processing routes (better accuracy) — same protection.
+  app.use(
+    '/api/voice-mistral',
+    isAuthenticated,
+    rateLimit({ windowMs: 10 * 60 * 1000, max: 30, keyPrefix: 'voice-mistral', perUser: true }),
+    mistralVoiceRoutes
+  );
   
   // Mistral test routes (no auth required) - development only, they call a paid API
   if (process.env.NODE_ENV !== 'production') {

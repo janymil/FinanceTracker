@@ -9,7 +9,7 @@
  * Deliberate: it does not log in, does not write anything, and does not need a session.
  */
 import 'dotenv/config';
-import { databaseSummary } from '../server/errorGuard/store.js';
+import { databaseSummary, recordJobRun } from '../server/errorGuard/store.js';
 import { isEmailConfigured, sendEmail } from '../server/emailService.js';
 
 const TIMEOUT_MS = Number(process.env.UPTIME_TIMEOUT_MS) || 10_000;
@@ -90,6 +90,7 @@ async function telemetryAgeWarning(): Promise<string | null> {
 }
 
 async function main(): Promise<void> {
+  const startedAt = new Date();
   const base = baseUrl();
   if (!base) {
     console.error(
@@ -109,6 +110,22 @@ async function main(): Promise<void> {
   if (warning) console.log(`  NOTE  tracker: ${warning}`);
 
   const failures = checks.filter((check) => !check.ok);
+
+  // Always leave a trace in the database. E-mail can be broken (it was, for days), and a
+  // monitor whose only channel is that same broken mailer is not a monitor. This row is
+  // what the admin "Watch" screen shows under Jobs.
+  try {
+    await recordJobRun({
+      jobName: 'uptime-check',
+      status: failures.length === 0 ? 'ok' : 'failed',
+      errorCode: failures.length === 0 ? null : failures.map((failure) => failure.name).join(', ').slice(0, 120),
+      startedAt,
+      durationMs: Date.now() - startedAt.getTime(),
+    });
+  } catch (error) {
+    console.error('[uptime] could not record the run:', error instanceof Error ? error.message : error);
+  }
+
   if (failures.length === 0) {
     console.log('[uptime] all checks passed');
     // MUST exit explicitly: this script imports server/db.ts, whose connection pool keeps

@@ -1,57 +1,16 @@
 import { Router } from 'express';
-import { elevenLabsService } from './elevenLabs.js';
 import { normalizeLanguageCode } from '../lib/languageUtils.js';
 
 const router = Router();
 
-// Generate narration for demo steps
-router.post('/generate-narration', async (req, res) => {
-  try {
-    const { text, demoType, language: rawLanguage } = req.body;
-    
-    let narrationText = text;
-    
-    // If no text provided but demoType is given, get script from demo data
-    if (!narrationText && demoType) {
-      const language = normalizeLanguageCode(rawLanguage || 'en-us');
-      const scripts = getDemoScripts();
-      const featureScript = scripts[demoType as keyof typeof scripts];
-      
-      if (featureScript && featureScript[language as keyof typeof featureScript]) {
-        // Combine all script steps into one narration
-        const steps = featureScript[language as keyof typeof featureScript] as Record<string, string>;
-        narrationText = Object.values(steps).join(' ');
-      }
-    }
-    
-    if (!narrationText) {
-      return res.status(400).json({ error: 'Text or demoType is required' });
-    }
-
-    const language = normalizeLanguageCode(rawLanguage || 'en-us') as 'en-us' | 'es-pe' | 'sk-sk';
-    
-    const audioBuffer = await elevenLabsService.generateAudio({
-      text: narrationText,
-      language,
-      voice_options: {
-        stability: 0.6,
-        similarity_boost: 0.8,
-        style: 0.3, // Slightly more expressive for marketing
-        use_speaker_boost: true
-      }
-    });
-
-    res.set({
-      'Content-Type': 'audio/mpeg',
-      'Content-Length': audioBuffer.length.toString(),
-      'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
-    });
-
-    res.send(audioBuffer);
-  } catch (error) {
-    console.error('Narration generation error:', error);
-    res.status(500).json({ error: 'Failed to generate narration' });
-  }
+// Narration was generated with ElevenLabs (paid per character). It is retired:
+// the marketing videos ship with recorded audio, so there is no reason to expose a
+// public endpoint that spends money. Kept as an explicit 410 instead of deleting the
+// path silently, so an old page/script fails loudly and visibly.
+router.post('/generate-narration', (_req, res) => {
+  res.status(410).json({
+    error: 'Narration is disabled. Demo audio ships as static files.',
+  });
 });
 
 // Get demo script for a specific feature and language

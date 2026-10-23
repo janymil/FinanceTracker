@@ -26,12 +26,19 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   const handleUpgrade = async (plan: string) => {
     setLoading(true);
     try {
+      // Match the currency to the page language, exactly like /pricing showed it.
+      const lang = (window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/)?.[1]
+        || localStorage.getItem('preferredLanguage')
+        || 'en').slice(0, 2);
+      const currency = lang === 'es' ? 'pen' : 'usd';
+
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-language': lang,
         },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, currency }),
       });
 
       if (response.ok) {

@@ -30,6 +30,7 @@ import { renderPageForCrawler } from './ssr.js';
 import { countryBlockingMiddleware } from "./middleware/countryBlocking.js";
 import { checkEncryptionKey } from "./encryptionDiagnostics.js";
 import { reportServerError } from './errorGuard/report.js';
+import { verifyEmailTransport } from './emailService.js';
 
 import "./batch-processor.js"; // Initialize batch processing system
 
@@ -226,14 +227,51 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Session middleware setup - original working configuration
+// Behind Caddy + Cloudflare: without this, req.ip is the proxy's address (so rate
+// limits would hit everybody at once) and `secure` cookies are dropped.
+app.set('trust proxy', 1);
+
+const isProduction = process.env.NODE_ENV === 'production';
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  console.error(
+    '[SESSION] SESSION_SECRET is missing — falling back to an insecure default. ' +
+    'Set SESSION_SECRET in .env and restart.'
+  );
+}
+
+// Production keeps sessions in Postgres (table: sessions). The default MemoryStore
+// both leaks memory and forgets every admin login on each restart.
+// `any` on purpose: connect-pg-simple and express-session disagree on the Store
+// generic, and the only thing that matters here is that it has `.get/.set/.destroy`.
+let sessionStore: any;
+if (isProduction) {
+  const PgSession = ConnectPgSimple(session);
+  const sessionConnectionString = process.env.DATABASE_URL_PROD || process.env.DATABASE_URL;
+  if (sessionConnectionString) {
+    sessionStore = new PgSession({
+      conObject: {
+        connectionString: sessionConnectionString,
+        ssl: sessionConnectionString.includes('neon.tech') ? { rejectUnauthorized: false } : undefined,
+      },
+      tableName: 'sessions',
+      createTableIfMissing: true,
+    });
+    console.log('[SESSION] Using the PostgreSQL session store.');
+  } else {
+    console.error('[SESSION] No database URL available — sessions fall back to memory.');
+  }
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'admin-session-secret-fallback',
+  store: sessionStore,
+  secret: sessionSecret || 'admin-session-secret-fallback',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,
+    secure: isProduction,
     httpOnly: true,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
   name: 'admin.session.id'
@@ -455,6 +493,31 @@ app.use((req, res, next) => {
   // Report a field-encryption key mismatch at boot instead of silently rendering
   // ciphertext in the UI (see server/encryptionDiagnostics.ts).
   await checkEncryptionKey();
+
+  // Prove the mail credentials at boot. A wrong SMTP password is otherwise invisible:
+  // every sendEmail() failure is caught and logged only to pm2 (see emailService.ts).
+  setTimeout(() => {
+    void (async () => {
+      try {
+        const result = await verifyEmailTransport();
+        if (result.status === 'failed') {
+          console.error(
+            `[EMAIL] Transport verification FAILED: ${result.detail}. ` +
+            'Contact form, reminders, payment notices and alerts will not be delivered.'
+          );
+          reportServerError(new Error(`Email transport failed: ${result.detail}`), {
+            where: 'email.verify',
+          });
+        } else if (result.status === 'ok') {
+          log(`[EMAIL] Transport verified: ${result.detail}`);
+        } else {
+          console.warn('[EMAIL] No transport configured — outgoing mail is disabled.');
+        }
+      } catch (error) {
+        console.error('[EMAIL] Transport verification crashed:', error);
+      }
+    })();
+  }, 5000);
 
   // Defaults to 5000 (the port Replit exposes); override with PORT locally
   const port = Number(process.env.PORT) || 5000;

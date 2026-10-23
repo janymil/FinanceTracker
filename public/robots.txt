@@ -4,32 +4,43 @@ Allow: /
 # Sitemap location
 Sitemap: https://kaptia.app/sitemap.xml
 
-# Allow search engines to crawl all public pages
-Allow: /auth
-Allow: /pricing
-Allow: /subscribe
-Allow: /help
-Allow: /contact
-Allow: /privacy
-Allow: /terms
-Allow: /cookies
-
-# Disallow private/authenticated areas
-Disallow: /dashboard
-Disallow: /expenses
-Disallow: /income
-Disallow: /transactions
-Disallow: /budgets
-Disallow: /goals
-Disallow: /reports
-Disallow: /trends
-Disallow: /calendar
-Disallow: /export
-Disallow: /profile
-Disallow: /categories
-Disallow: /admin-analytics
+# Public pages are listed in the sitemap. Signed-in screens are repeated for each
+# language prefix, so both "/dashboard" and "/sk/dashboard" must be excluded.
 Disallow: /api/
 Disallow: /mobile-upload/
+Disallow: /dashboard
+Disallow: /*/dashboard
+Disallow: /expenses
+Disallow: /*/expenses
+Disallow: /income
+Disallow: /*/income
+Disallow: /transactions
+Disallow: /*/transactions
+Disallow: /budget
+Disallow: /*/budget
+Disallow: /goals
+Disallow: /*/goals
+Disallow: /collaborative-goals
+Disallow: /*/collaborative-goals
+Disallow: /reports
+Disallow: /*/reports
+Disallow: /trends
+Disallow: /*/trends
+Disallow: /calendar
+Disallow: /*/calendar
+Disallow: /export
+Disallow: /*/export
+Disallow: /profile
+Disallow: /*/profile
+Disallow: /categories
+Disallow: /*/categories
+Disallow: /admin-analytics
+Disallow: /*/admin-analytics
+Disallow: /admin-watch
+Disallow: /*/admin-watch
+Disallow: /redeem
+Disallow: /*/redeem
+Disallow: /subscribe
+Disallow: /*/subscribe
 
-# Crawl-delay (optional - 1 second between requests)
 Crawl-delay: 1

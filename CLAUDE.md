@@ -12,9 +12,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run db:push` - Push database schema changes via Drizzle
 
 ### Testing and Quality
-- No automated testing framework is currently configured
-- Use `npm run check` for TypeScript validation before commits
-- Manual testing is performed through the development server
+- `npm run check` — TypeScript across app, tests and scripts
+- `npm test` — Vitest unit + replay suites (no database, no AI keys, no network)
+- `npm run test:integration` — needs `DATABASE_URL_TEST` (skips loudly without it)
+- `npm run test:e2e` — Playwright; needs a staging URL + Clerk test instance
+- `npm run healthcheck -- --deep --url https://kaptia.app` — synthetic check, exit code 0/1
+- `npm run uptime:check` — external probe; records a `job_runs` row and e-mails on failure
+- `./scripts/deploy.sh` — safe deploy: typecheck → tests → sitemap → build → pm2 reload → health gate → automatic rollback
+
+Production timers live in `/etc/cron.d/kaptia` (uptime every 5 min, latency check hourly,
+error-data retention daily). Schema changes are **not** part of the deploy script: run
+`npm run db:push` against `DATABASE_URL_PROD` deliberately.
+
+### Money and pricing rules
+- Amounts live in `shared/pricing.ts` and mirror the live Stripe prices (usd + pen).
+  Never hardcode a price in a component or a translation.
+- Currency follows the page language: `es` → PEN (soles), everything else → USD.
+  The client sends the currency to `/api/create-checkout-session` so the charged price
+  is the price that was shown.
+- Copy rule: no wording that suggests a licensed financial service (no “bank”, “loan”,
+  “credit”, “invest”, “advisor”). All three languages must be updated together.
+
+### Analytics and consent
+- `client/src/lib/consent.ts` is the only source of truth for the cookie decision.
+- `initGA()` in `client/src/lib/analytics.ts` does nothing until `analytics === true`.
+  Never load a third-party script before that click.
+
 
 ## Architecture Overview
 

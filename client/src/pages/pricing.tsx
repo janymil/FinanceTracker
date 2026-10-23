@@ -2,478 +2,223 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Crown, TrendingUp, Star, ArrowLeft } from "lucide-react";
+import { Check, Crown, TrendingUp, Star, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { SEO } from "@/components/SEO";
-import { useCurrency } from "@/context/CurrencyContext";
 import { useUser } from "@clerk/clerk-react";
 import { AppLayout } from "@/components/AppLayout";
+import {
+  amountFor,
+  currencyForLanguage,
+  formatMoney,
+  monthlyEquivalent,
+  yearlySaving,
+  type BillingCurrency,
+  type BillingInterval,
+  type PlanId,
+} from "@shared/pricing";
 
+/**
+ * Public price list.
+ *
+ * Rules this page follows:
+ *  - every amount comes from `shared/pricing.ts`, which mirrors the live Stripe prices,
+ *    so the number shown is the number charged;
+ *  - the currency follows the page language (Spanish -> soles, otherwise dollars);
+ *  - all copy lives in the translation files (sk / en / es).
+ */
 export default function Pricing() {
   const [location, setLocation] = useLocation();
   const { user } = useUser();
+  const { t, i18n } = useTranslation();
 
   const langMatch = location.match(/^\/([a-z]{2})(?:\/|$)/);
-  const currentLang = langMatch ? langMatch[1] : (localStorage.getItem('preferredLanguage') || 'en');
+  const currentLang = langMatch
+    ? langMatch[1]
+    : (localStorage.getItem('preferredLanguage') || i18n.language || 'en').slice(0, 2);
 
-  // Get user's current plan - default to free for public page
+  const currency: BillingCurrency = currencyForLanguage(currentLang);
+
+  // Public page: the visitor is not signed in, so nobody's plan is highlighted.
   const userPlan = 'free';
 
-  const handleGetStarted = (plan: string) => {
-    if (user) {
-      if (plan === 'free') {
-        setLocation('/dashboard');
-      } else {
-        setLocation(`/subscribe?plan=${plan}`);
-      }
-    } else {
-      setLocation('/auth');
-    }
-  };
+  const go = (path: string) => setLocation(`/${currentLang}${path}`);
 
-  const getButtonText = (plan: string) => {
-    if (userPlan === plan) {
-      return 'This is your plan';
+  const handleGetStarted = (plan: string) => {
+    if (!user) {
+      go('/auth');
+      return;
     }
     if (plan === 'free') {
-      return 'Get Started Free';
+      go('/dashboard');
+      return;
     }
-    return 'Subscribe Now';
+    go(`/subscribe?plan=${plan}`);
   };
 
-  const isCurrentPlan = (plan: string) => userPlan === plan;
+  const money = (plan: PlanId, interval: BillingInterval) =>
+    formatMoney(amountFor(plan, interval, currency), currency);
+
+  const featuresOf = (plan: 'free' | PlanId): string[] => {
+    const value = t(`pricing.plans.${plan}.features`, { returnObjects: true });
+    return Array.isArray(value) ? (value as string[]) : [];
+  };
+
+  const isCurrentPlan = (plan: string): boolean => userPlan === plan;
+
+  const buttonLabel = (plan: 'free' | PlanId) => {
+    if (isCurrentPlan(plan)) return t('pricing.current_plan');
+    return plan === 'free' ? t('pricing.get_started_free') : t('pricing.subscribe_now');
+  };
+
+  const planCard = (plan: 'free' | PlanId, interval: BillingInterval) => {
+    const isFree = plan === 'free';
+    const icon = isFree ? <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
+      : plan === 'standard' ? <TrendingUp className="h-8 w-8 text-blue-600" />
+      : <Crown className="h-8 w-8 text-purple-600" />;
+    const iconBg = isFree ? 'bg-gray-100 dark:bg-gray-700'
+      : plan === 'standard' ? 'bg-blue-100 dark:bg-blue-900'
+      : 'bg-purple-100 dark:bg-purple-900';
+    const accent = isFree ? 'text-gray-900 dark:text-white'
+      : plan === 'standard' ? 'text-blue-600'
+      : 'text-purple-600';
+    const border = isCurrentPlan(plan) ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+      : plan === 'standard' ? 'border-blue-500'
+      : plan === 'premium' ? 'border-purple-500'
+      : '';
+
+    const price = isFree ? formatMoney(0, currency) : money(plan, interval);
+    const periodLabel = interval === 'monthly' ? t('pricing.per_month') : t('pricing.per_year');
+    const checkoutPlan = interval === 'yearly' ? `${plan}-yearly` : plan;
+
+    return (
+      <Card className={`border-2 relative ${border}`}>
+        {isCurrentPlan(plan) && (
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+            <Badge className="bg-green-500 text-white px-4 py-1">{t('pricing.current_plan')}</Badge>
+          </div>
+        )}
+        {plan === 'standard' && (
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+            <Badge className="bg-blue-600 text-white px-4 py-1">{t('pricing.most_popular')}</Badge>
+          </div>
+        )}
+        <CardHeader className="text-center pb-8">
+          <div className={`${iconBg} p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center`}>
+            {icon}
+          </div>
+          <CardTitle className="text-2xl">{t(`pricing.plans.${plan}.name`)}</CardTitle>
+          <div className={`text-4xl font-bold ${accent}`}>
+            {price}
+            {!isFree && <span className="text-lg font-normal text-gray-500">{periodLabel}</span>}
+          </div>
+          {!isFree && interval === 'yearly' && (
+            <>
+              <div className="text-sm text-green-600 font-medium mt-1">
+                {t('pricing.save_per_year', {
+                  amount: formatMoney(yearlySaving(plan as PlanId, currency), currency),
+                })}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {t('pricing.monthly_equivalent', {
+                  amount: formatMoney(monthlyEquivalent(plan as PlanId, currency), currency),
+                })}
+              </div>
+            </>
+          )}
+          <CardDescription className="mt-3">{t(`pricing.plans.${plan}.tagline`)}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            {featuresOf(plan).map((feature, index) => (
+              <div key={index} className="flex items-center">
+                <Check className="h-5 w-5 text-success mr-3 flex-shrink-0" />
+                <span>{feature}</span>
+              </div>
+            ))}
+          </div>
+          <Button
+            onClick={() => handleGetStarted(isFree ? 'free' : checkoutPlan)}
+            className={`w-full mt-6 ${plan === 'standard' ? 'bg-blue-600 hover:bg-blue-700' : plan === 'premium' ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+            variant={isFree ? 'outline' : 'default'}
+            disabled={isCurrentPlan(plan)}
+          >
+            {buttonLabel(plan)}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <AppLayout isPublicPage={true}>
-      <SEO 
-        title="Pricing Plans - Choose Your Kaptia Plan"
-        description="Compare Kaptia pricing plans. Start free with basic expense tracking or upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features like AI insights and cloud backup."
-        keywords="kaptia pricing, subscription plans, expense tracker cost, personal finance app pricing, budget app plans"
-        canonical="https://kaptia.app/pricing"
+      <SEO
+        title={t('pricing.seo_title')}
+        description={t('pricing.seo_description')}
+        keywords={t('pricing.seo_keywords')}
+        canonical={`https://kaptia.app/${currentLang}/pricing`}
       />
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <div className="mb-6">
-            <button 
-              onClick={() => setLocation(`/${currentLang}`)}
+            <button
+              onClick={() => go('')}
               className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-              <span>Back to home</span>
+              <span>{t('pricing.back_home')}</span>
             </button>
           </div>
         </div>
-      {/* Hero Section */}
-      <section className="pt-6 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              Simple pricing,
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> serious value.</span>
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Start free and upgrade when you want more AI horsepower. Cancel anytime.
-            </p>
+
+        <section className="pt-6 pb-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                {t('pricing.hero_title')}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                  {' '}{t('pricing.hero_highlight')}
+                </span>
+              </h1>
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-4">{t('pricing.hero_subtitle')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {currency === 'pen' ? t('pricing.currency_note_pen') : t('pricing.currency_note_usd')}
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Pricing Cards */}
-      <section className="pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Tabs defaultValue="monthly" className="w-full">
-            <div className="flex justify-center mb-8">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                <TabsTrigger value="yearly">Yearly</TabsTrigger>
-              </TabsList>
-            </div>
+        <section className="pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Tabs defaultValue="monthly" className="w-full">
+              <div className="flex justify-center mb-8">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="monthly">{t('pricing.monthly')}</TabsTrigger>
+                  <TabsTrigger value="yearly">{t('pricing.yearly')}</TabsTrigger>
+                </TabsList>
+              </div>
 
-            <TabsContent value="monthly">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <TabsContent value="monthly">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {planCard('free', 'monthly')}
+                  {planCard('standard', 'monthly')}
+                  {planCard('premium', 'monthly')}
+                </div>
+              </TabsContent>
 
-            {/* Free Plan */}
-            <Card className={`border-2 relative ${isCurrentPlan('free') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
-              {isCurrentPlan('free') && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-4 py-1">
-                    Current Plan
-                  </Badge>
+              <TabsContent value="yearly">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {planCard('free', 'yearly')}
+                  {planCard('standard', 'yearly')}
+                  {planCard('premium', 'yearly')}
                 </div>
-              )}
-              <CardHeader className="text-center pb-8">
-                <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
-                </div>
-                <CardTitle className="text-2xl">Free</CardTitle>
-                <div className="text-4xl font-bold text-gray-900 dark:text-white">
-                  $0<span className="text-lg font-normal text-gray-500">/month</span>
-                </div>
-                <CardDescription>Perfect for getting started with expense tracking</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Basic expense and income tracking</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Manual categorization</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Up to 100 transaction entries</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Simple spending overview</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized smart tips</span>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => handleGetStarted('free')} 
-                  className="w-full mt-6" 
-                  variant={isCurrentPlan('free') ? "default" : "outline"}
-                  disabled={isCurrentPlan('free')}
-                >
-                  {getButtonText('free')}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Standard Plan */}
-            <Card className={`border-2 relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500'}`}>
-              {isCurrentPlan('standard') ? (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-4 py-1">
-                    Current Plan
-                  </Badge>
-                </div>
-              ) : (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-500 text-white px-4 py-1">
-                    Most Popular
-                  </Badge>
-                </div>
-              )}
-              <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
-                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <TrendingUp className="h-8 w-8 text-blue-600" />
-                </div>
-                <CardTitle className="text-2xl">Standard</CardTitle>
-                <div className="text-4xl font-bold text-blue-600">
-                  $4.99<span className="text-lg font-normal text-gray-500">/month</span>
-                </div>
-                <CardDescription>For people ready to understand their spending</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Free plan</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Goals and budget management</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Interactive charts and reports</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI expense categorization</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Receipt OCR scanning</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Mobile QR code upload</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Calendar view and reminders</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Unlimited transaction history</span>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => handleGetStarted('standard')} 
-                  className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
-                  disabled={isCurrentPlan('standard')}
-                >
-                  {getButtonText('standard')}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Premium Plan */}
-            <Card className={`border-2 relative ${isCurrentPlan('premium') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-purple-500'}`}>
-              {isCurrentPlan('premium') && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-4 py-1">
-                    Current Plan
-                  </Badge>
-                </div>
-              )}
-              <CardHeader className="text-center pb-8 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-transparent">
-                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Crown className="h-8 w-8 text-purple-600" />
-                </div>
-                <CardTitle className="text-2xl">Premium</CardTitle>
-                <div className="text-4xl font-bold text-purple-600">
-                  $9.99<span className="text-lg font-normal text-gray-500">/month</span>
-                </div>
-                <CardDescription>The full intelligent tracking experience</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Standard plan</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI tips and insights</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Advanced trends analysis</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Expense prediction</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Daily personalized recommendations</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Cloud receipt storage</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Cloud data backup</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Data management (CSV, PDF)</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Priority email support</span>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => handleGetStarted('premium')} 
-                  className="w-full mt-6 bg-purple-600 hover:bg-purple-700"
-                  disabled={isCurrentPlan('premium')}
-                >
-                  {getButtonText('premium')}
-                </Button>
-              </CardContent>
-            </Card>
-            </div>
-            </TabsContent>
-
-            <TabsContent value="yearly">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            {/* Free Plan - Yearly */}
-            <Card className={`border-2 relative ${isCurrentPlan('free') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
-              {isCurrentPlan('free') && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-4 py-1">
-                    Current Plan
-                  </Badge>
-                </div>
-              )}
-              <CardHeader className="text-center pb-8">
-                <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
-                </div>
-                <CardTitle className="text-2xl">Free</CardTitle>
-                <div className="text-4xl font-bold text-gray-900 dark:text-white">
-                  $0<span className="text-lg font-normal text-gray-500">/year</span>
-                </div>
-                <CardDescription>Perfect for getting started with expense tracking</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Basic expense and income tracking</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Manual categorization</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Up to 100 transaction entries</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Simple spending overview</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized smart tips</span>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => handleGetStarted('free')} 
-                  className="w-full mt-6" 
-                  variant={isCurrentPlan('free') ? "default" : "outline"}
-                  disabled={isCurrentPlan('free')}
-                >
-                  {getButtonText('free')}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Standard Plan - Yearly */}
-            <Card className={`border-2 relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500'}`}>
-              {isCurrentPlan('standard') ? (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-4 py-1">
-                    Current Plan
-                  </Badge>
-                </div>
-              ) : (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-500 text-white px-4 py-1">
-                    Most Popular
-                  </Badge>
-                </div>
-              )}
-              <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
-                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <TrendingUp className="h-8 w-8 text-blue-600" />
-                </div>
-                <CardTitle className="text-2xl">Standard</CardTitle>
-                <div className="text-4xl font-bold text-blue-600">
-                  $49.90<span className="text-lg font-normal text-gray-500">/year</span>
-                </div>
-                <div className="text-sm text-green-600 font-medium mt-1">Save $9.98 annually</div>
-                <CardDescription>For people ready to understand their spending</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Free plan</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Goals and budget management</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Interactive charts and reports</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI expense categorization</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Calendar view and reminders</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Unlimited transaction history</span>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => handleGetStarted('standard-yearly')} 
-                  className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
-                  disabled={isCurrentPlan('standard')}
-                >
-                  {getButtonText('standard')}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Premium Plan - Yearly */}
-            <Card className={`border-2 relative ${isCurrentPlan('premium') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-purple-500'}`}>
-              {isCurrentPlan('premium') && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-4 py-1">
-                    Current Plan
-                  </Badge>
-                </div>
-              )}
-              <CardHeader className="text-center pb-8 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-transparent">
-                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Crown className="h-8 w-8 text-purple-600" />
-                </div>
-                <CardTitle className="text-2xl">Premium</CardTitle>
-                <div className="text-4xl font-bold text-purple-600">
-                  $99.90<span className="text-lg font-normal text-gray-500">/year</span>
-                </div>
-                <div className="text-sm text-green-600 font-medium mt-1">Save $19.98 annually</div>
-                <CardDescription>The full intelligent tracking experience</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Standard plan</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI tips and insights</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Advanced trends analysis</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Expense prediction</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Daily personalized recommendations</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Cloud data backup</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Data management (CSV, PDF)</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Priority email support</span>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => handleGetStarted('premium-yearly')} 
-                  className="w-full mt-6 bg-purple-600 hover:bg-purple-700"
-                  disabled={isCurrentPlan('premium')}
-                >
-                  {getButtonText('premium')}
-                </Button>
-              </CardContent>
-            </Card>
-            </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </section>
-    </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </section>
+      </div>
     </AppLayout>
   );
 }
+

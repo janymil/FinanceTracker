@@ -5,12 +5,8 @@ import { X, Cookie, Settings } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from 'react-i18next';
 import { getLocalizedPath } from './LanguageGuard';
-
-interface CookiePreferences {
-  essential: boolean;
-  functional: boolean;
-  analytics: boolean;
-}
+import { readConsent, saveConsent, type CookiePreferences } from '@/lib/consent';
+import { enableAnalytics } from '@/lib/analytics';
 
 export function CookieBanner() {
   const { t } = useTranslation();
@@ -23,13 +19,8 @@ export function CookieBanner() {
   });
 
   useEffect(() => {
-    // Check if user has already made a choice
-    const cookieConsent = localStorage.getItem('cookie-consent');
-    if (!cookieConsent) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
+    // Only ask once; a stored decision (accept, select or reject) hides the banner.
+    setIsVisible(readConsent() === null);
   }, []);
 
   const sendConsentToServer = async (consent: CookiePreferences & { timestamp: string }) => {
@@ -47,39 +38,20 @@ export function CookieBanner() {
     }
   };
 
-  const acceptAll = async () => {
-    const consent = {
-      essential: true,
-      functional: true,
-      analytics: true,
-      timestamp: new Date().toISOString(),
-    };
-    localStorage.setItem('cookie-consent', JSON.stringify(consent));
-    await sendConsentToServer(consent);
+  const applyConsent = async (next: CookiePreferences) => {
+    const saved = saveConsent(next);
+    // Analytics starts only here — never before this click.
+    if (saved.analytics) enableAnalytics();
+    await sendConsentToServer(saved as CookiePreferences & { timestamp: string });
     setIsVisible(false);
   };
 
-  const acceptSelected = async () => {
-    const consent = {
-      ...preferences,
-      timestamp: new Date().toISOString(),
-    };
-    localStorage.setItem('cookie-consent', JSON.stringify(consent));
-    await sendConsentToServer(consent);
-    setIsVisible(false);
-  };
+  const acceptAll = () => applyConsent({ essential: true, functional: true, analytics: true });
 
-  const rejectAll = async () => {
-    const consent = {
-      essential: true, // Essential cookies cannot be rejected
-      functional: false,
-      analytics: false,
-      timestamp: new Date().toISOString(),
-    };
-    localStorage.setItem('cookie-consent', JSON.stringify(consent));
-    await sendConsentToServer(consent);
-    setIsVisible(false);
-  };
+  const acceptSelected = () => applyConsent(preferences);
+
+  const rejectAll = () => applyConsent({ essential: true, functional: false, analytics: false });
+
 
   if (!isVisible) return null;
 

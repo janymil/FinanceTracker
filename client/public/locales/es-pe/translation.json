@@ -1568,7 +1568,24 @@
     "• Cancel subscription": "• Cancelar suscripción",
     "Upgrade Your Plan": "Actualizar Tu Plan",
     "View Pricing Plans": "Ver Planes de Precios",
-    "Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Actualiza a Estándar ($4.99/mes) o Premium ($9.99/mes) para características avanzadas"
+    "Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Actualiza a Estándar ($4.99/mes) o Premium ($9.99/mes) para características avanzadas",
+    "Data & privacy": "Datos y privacidad",
+    "Your data belongs to you": "Tus datos son tuyos",
+    "Download my data": "Descargar mis datos",
+    "Download a copy of your account and records as a JSON file": "Descarga una copia de tu cuenta y registros en un archivo JSON",
+    "Download": "Descargar",
+    "Preparing...": "Preparando...",
+    "Delete my account": "Eliminar mi cuenta",
+    "This stops your subscription, erases your records and removes your login. It cannot be undone.": "Esto detiene tu suscripción, borra tus registros y elimina tu inicio de sesión. No se puede deshacer.",
+    "Type DELETE below to confirm": "Escribe DELETE para confirmar",
+    "Delete forever": "Eliminar para siempre",
+    "Deleting...": "Eliminando...",
+    "Cancel": "Cancelar",
+    "Your data was downloaded": "Tus datos se descargaron",
+    "Your account was deleted": "Tu cuenta fue eliminada",
+    "Could not prepare your data": "No se pudieron preparar tus datos",
+    "Could not delete your account": "No se pudo eliminar tu cuenta",
+    "See the pricing page for current prices": "Consulta los precios actuales en la página de precios"
   },
   "types": {
     "expense": "gasto",
@@ -3216,11 +3233,11 @@
     "plan_title": "Plan {{plan}}",
     "per_month": "/mes",
     "per_year": "/año",
-    "billing_description": "Facturado mensualmente, cancela en cualquier momento",
-    "save_per_year": "Ahorra ${{amount}} por año",
+    "billing_description": "Se cobra cada mes, cancela cuando quieras",
+    "save_per_year": "Ahorras {{amount}} al año",
     "discount_percentage": "17% de Descuento",
-    "subscribe_for_month": "Suscribirse por ${{price}}/mes",
-    "subscribe_for_year": "Suscribirse por ${{price}}/año",
+    "subscribe_for_month": "Suscribirse por {{price}} al mes",
+    "subscribe_for_year": "Suscribirse por {{price}} al año",
     "already_have_account": "¿Ya tienes una cuenta?",
     "sign_in_here": "Inicia sesión aquí",
     "secure_payment": "Procesamiento seguro de pagos por Stripe",
@@ -3776,5 +3793,66 @@
   "No questions matched your search.": "No se encontraron preguntas para tu búsqueda.",
   "Clear search": "Borrar búsqueda",
   "Ready to transform your financial management?": "¿Listo para transformar la gestión de tus finanzas?",
-  "Start free with no credit card required.": "Comienza gratis sin tarjeta de crédito."
+  "Start free with no credit card required.": "Comienza gratis sin tarjeta de crédito.",
+  "pricing": {
+    "seo_title": "Precios de Kaptia: planes simples para registrar tus gastos",
+    "seo_description": "Empieza gratis y mejora cuando quieras más. Planes Standard y Premium en soles peruanos.",
+    "seo_keywords": "precios kaptia, planes registro de gastos, precio app de gastos",
+    "hero_title": "Precios simples,",
+    "hero_highlight": "valor de verdad.",
+    "hero_subtitle": "Empieza gratis y mejora cuando quieras más ayuda de la IA. Cancela cuando quieras.",
+    "currency_note_usd": "Los precios están en dólares estadounidenses (USD).",
+    "currency_note_pen": "Los precios están en soles peruanos (PEN).",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "per_month": "/mes",
+    "per_year": "/año",
+    "save_per_year": "Ahorras {{amount}} al año",
+    "monthly_equivalent": "≈ {{amount}} / mes",
+    "current_plan": "Este es tu plan",
+    "get_started_free": "Empezar gratis",
+    "subscribe_now": "Suscribirme",
+    "back_home": "Volver al inicio",
+    "most_popular": "Más popular",
+    "plans": {
+      "free": {
+        "name": "Gratis",
+        "tagline": "Ideal para empezar a registrar tus gastos",
+        "features": [
+          "Registro básico de gastos e ingresos",
+          "Categorización manual",
+          "Hasta 100 registros",
+          "Vista simple de tus gastos",
+          "Consejos inteligentes personalizados"
+        ]
+      },
+      "standard": {
+        "name": "Standard",
+        "tagline": "Para quienes quieren entender sus gastos",
+        "features": [
+          "Todo lo del plan Gratis",
+          "Metas y control de presupuesto",
+          "Gráficos e informes interactivos",
+          "Categorización de gastos con IA",
+          "Calendario y recordatorios",
+          "Historial de transacciones ilimitado"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "tagline": "El seguimiento inteligente completo",
+        "features": [
+          "Todo lo del plan Standard",
+          "Consejos y análisis con IA",
+          "Análisis avanzado de tendencias",
+          "Predicción de gastos",
+          "Recomendaciones diarias personalizadas",
+          "Almacenamiento de recibos en la nube",
+          "Copia de seguridad en la nube",
+          "Gestión de datos (CSV, PDF)",
+          "Soporte prioritario por correo"
+        ]
+      }
+    }
+  }
 }

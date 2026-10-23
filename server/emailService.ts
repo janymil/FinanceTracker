@@ -39,6 +39,48 @@ export function isEmailConfigured(): boolean {
   return hasSendGrid || hasSmtp;
 }
 
+export type EmailTransportStatus = 'unconfigured' | 'unknown' | 'ok' | 'failed';
+
+let transportStatus: EmailTransportStatus = isEmailConfigured() ? 'unknown' : 'unconfigured';
+let transportStatusDetail = isEmailConfigured() ? '' : 'No SENDGRID_API_KEY or EMAIL_* settings';
+
+/** Last known transport state — cheap, so health checks and the admin screen can read it. */
+export function getEmailTransportStatus(): { status: EmailTransportStatus; detail: string } {
+  return { status: transportStatus, detail: transportStatusDetail };
+}
+
+/**
+ * Proves the credentials really work. `sendEmail` swallows failures by design (a failed
+ * receipt reminder must not crash a route), which is exactly how a wrong SMTP password
+ * stayed invisible for days. The bootstrap calls this once and reports loudly.
+ */
+export async function verifyEmailTransport(): Promise<{ status: EmailTransportStatus; detail: string }> {
+  if (hasSendGrid) {
+    transportStatus = 'ok';
+    transportStatusDetail = 'SendGrid API key configured';
+    return getEmailTransportStatus();
+  }
+
+  const transporter = getSmtpTransporter();
+  if (!transporter) {
+    transportStatus = 'unconfigured';
+    transportStatusDetail = 'No SENDGRID_API_KEY or EMAIL_* settings';
+    return getEmailTransportStatus();
+  }
+
+  try {
+    await transporter.verify();
+    transportStatus = 'ok';
+    transportStatusDetail = `SMTP ${process.env.EMAIL_HOST} accepted ${process.env.EMAIL_USER}`;
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    transportStatus = 'failed';
+    transportStatusDetail = detail;
+  }
+  return getEmailTransportStatus();
+}
+
+
 interface EmailParams {
   to: string;
   from: string;

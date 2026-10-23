@@ -2,6 +2,8 @@ import { Router, type Express } from "express";
 import { z } from "zod";
 import { lookupMerchant } from "../../lib/merchantLookup";
 import { parseVoiceInput } from "../../shared/voiceParser";
+import { isAuthenticated } from "../clerkAuth.js";
+import { rateLimit } from "../middleware/rateLimit.js";
 
 const router = Router();
 
@@ -89,5 +91,13 @@ router.post('/parse', async (req, res) => {
 });
 
 export function registerVoiceRoutes(app: Express) {
-  app.use('/api/voice', router);
+  // Parsing a spoken phrase is free (pure regex), but it reveals the merchant lookup and
+  // is only used by signed-in screens. Keeping it behind the same door as the other voice
+  // routes makes the rule "no login, no voice" uniform.
+  app.use(
+    '/api/voice',
+    isAuthenticated,
+    rateLimit({ windowMs: 10 * 60 * 1000, max: 60, keyPrefix: 'voice-parse', perUser: true }),
+    router
+  );
 }

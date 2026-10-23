@@ -1,6 +1,12 @@
 # 06 — Observability & production safety
 
 > Status: **IMPLEMENTED** (step 6).
+> **Update 2026-10-23:** Sentry was removed (commit `f113959f`). Error capture is now the
+> in-house tracker in `server/errorGuard/` + `client/src/lib/errorGuard.ts`, with the admin
+> screen at `/:lang/admin-watch`. The Sentry sections below (DSN, `sentry:smoke`, the
+> activation checklist in §9) are historical and must not be followed. The PII scrubber,
+> deep health check, synthetic monitor and deploy gate are still current — see
+> `testing-blueprint/07-mini-error-tracker.md` for the replacement design.
 > Sentry code paths, PII scrubbing, deep health check, synthetic monitor script and the
 > deployment gate are all written and unit-tested. Activating Sentry needs a DSN (yours).
 > Prerequisite: blueprints 01–05.

@@ -3161,11 +3161,11 @@
     "plan_title": "{{plan}} Plán",
     "per_month": "/mesiac",
     "per_year": "/rok",
-    "billing_description": "Fakturované mesačne, zrušte kedykoľvek",
-    "save_per_year": "Ušetrite ${{amount}} ročne",
+    "billing_description": "Účtované mesačne, zrušiť môžete kedykoľvek",
+    "save_per_year": "Ušetríte {{amount}} za rok",
     "discount_percentage": "17% Zľava",
-    "subscribe_for_month": "Predplatiť za ${{price}}/mesiac",
-    "subscribe_for_year": "Predplatiť za ${{price}}/rok",
+    "subscribe_for_month": "Predplatiť za {{price}} mesačne",
+    "subscribe_for_year": "Predplatiť za {{price}} ročne",
     "already_have_account": "Už máte účet?",
     "sign_in_here": "Prihláste sa tu",
     "secure_payment": "Bezpečné spracovanie platieb cez Stripe",
@@ -3326,7 +3326,24 @@
     "profile.• Cancel subscription": "• Zrušiť predplatné",
     "profile.Upgrade Your Plan": "Vylepšiť Váš Plán",
     "profile.View Pricing Plans": "Zobraziť Cenové Plány",
-    "profile.Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Vylepšite na Štandardný ($4.99/mesiac) alebo Prémiový ($9.99/mesiac) pre pokročilé funkcie"
+    "profile.Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Vylepšite na Štandardný ($4.99/mesiac) alebo Prémiový ($9.99/mesiac) pre pokročilé funkcie",
+    "Data & privacy": "Údaje a súkromie",
+    "Your data belongs to you": "Vaše údaje patria vám",
+    "Download my data": "Stiahnuť moje údaje",
+    "Download a copy of your account and records as a JSON file": "Stiahnite si kópiu svojho účtu a záznamov ako súbor JSON",
+    "Download": "Stiahnuť",
+    "Preparing...": "Pripravujem...",
+    "Delete my account": "Zmazať môj účet",
+    "This stops your subscription, erases your records and removes your login. It cannot be undone.": "Týmto sa zastaví predplatné, vymažú sa vaše záznamy a odstráni sa prihlásenie. Nedá sa to vrátiť.",
+    "Type DELETE below to confirm": "Na potvrdenie napíšte DELETE",
+    "Delete forever": "Zmazať navždy",
+    "Deleting...": "Mažem...",
+    "Cancel": "Zrušiť",
+    "Your data was downloaded": "Vaše údaje boli stiahnuté",
+    "Your account was deleted": "Váš účet bol zmazaný",
+    "Could not prepare your data": "Údaje sa nepodarilo pripraviť",
+    "Could not delete your account": "Účet sa nepodarilo zmazať",
+    "See the pricing page for current prices": "Aktuálne ceny nájdete na stránke s cenami"
   },
   "pdf": {
     "anonymization_preview": {
@@ -3856,5 +3873,66 @@
   "No questions matched your search.": "Na váš dotaz sme nenašli žiadne otázky.",
   "Clear search": "Zrušiť vyhľadávanie",
   "Ready to transform your financial management?": "Pripravení zjednodušiť si správu výdavkov?",
-  "Start free with no credit card required.": "Začnite zadarmo ešte dnes bez kreditnej karty."
+  "Start free with no credit card required.": "Začnite zadarmo ešte dnes bez kreditnej karty.",
+  "pricing": {
+    "seo_title": "Kaptia – cenník. Jednoduché plány na sledovanie výdavkov",
+    "seo_description": "Začnite zadarmo a rozšírte, keď budete chcieť viac. Plány Standard a Premium v amerických dolároch.",
+    "seo_keywords": "kaptia cenník, plány sledovania výdavkov, cena aplikácie na výdavky",
+    "hero_title": "Jednoduché ceny,",
+    "hero_highlight": "seriózna hodnota.",
+    "hero_subtitle": "Začnite zadarmo a rozšírte, keď budete chcieť viac AI pomoci. Zrušiť môžete kedykoľvek.",
+    "currency_note_usd": "Ceny sú v amerických dolároch (USD).",
+    "currency_note_pen": "Ceny sú v peruánskych soloch (PEN).",
+    "monthly": "Mesačne",
+    "yearly": "Ročne",
+    "per_month": "/mesiac",
+    "per_year": "/rok",
+    "save_per_year": "Ušetríte {{amount}} za rok",
+    "monthly_equivalent": "≈ {{amount}} / mesiac",
+    "current_plan": "Toto je váš plán",
+    "get_started_free": "Začať zadarmo",
+    "subscribe_now": "Predplatiť",
+    "back_home": "Späť na úvod",
+    "most_popular": "Najobľúbenejší",
+    "plans": {
+      "free": {
+        "name": "Zadarmo",
+        "tagline": "Ideálne na začiatok so sledovaním výdavkov",
+        "features": [
+          "Základné sledovanie výdavkov a príjmov",
+          "Ručné kategorizovanie",
+          "Do 100 záznamov transakcií",
+          "Jednoduchý prehľad výdavkov",
+          "Personalizované inteligentné tipy"
+        ]
+      },
+      "standard": {
+        "name": "Standard",
+        "tagline": "Pre ľudí, ktorí chcú rozumieť svojim výdavkom",
+        "features": [
+          "Všetko z plánu Zadarmo",
+          "Ciele a správa rozpočtu",
+          "Interaktívne grafy a prehľady",
+          "AI kategorizácia výdavkov",
+          "Kalendár a pripomienky",
+          "Neobmedzená história transakcií"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "tagline": "Kompletné inteligentné sledovanie",
+        "features": [
+          "Všetko z plánu Standard",
+          "AI tipy a postrehy",
+          "Pokročilá analýza trendov",
+          "Predpoveď výdavkov",
+          "Denné personalizované odporúčania",
+          "Cloudové úložisko bločkov",
+          "Cloudová záloha údajov",
+          "Správa údajov (CSV, PDF)",
+          "Prioritná e-mailová podpora"
+        ]
+      }
+    }
+  }
 }
