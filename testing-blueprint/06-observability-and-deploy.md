@@ -144,3 +144,78 @@ npm run healthcheck -- --url https://kaptia.app --deep --max-latency 3000 --json
 4. Sentry v11 removed `sendDefaultPii`; the code uses the `dataCollection` block instead
    (checked against the installed `.d.ts`, not against a blog post).
 
+---
+
+## 9. Sentry — activation checklist
+
+### 9.1 The agent plugin (why nothing was installed)
+
+`npx @sentry/agent-plugin install semantika-tech#7d85a7d29d` ran, was verified as the
+official package (`getsentry/sentry-for-ai`, maintainer `sentry-bot@sentry.io`), and reported:
+
+```
+✔ No AI coding tools found
+↓ Installing plugins [SKIPPED: No agents selected]
+```
+
+The plugin only knows **Antigravity, Claude Code, GitHub Copilot, Cursor, Codex and Grok** —
+each wired through that tool's own plugin marketplace. **Cline has no such marketplace**, so
+there is nothing for the installer to do here. The run code
+(`semantika-tech#7d85a7d29d`) is an *onboarding progress* code for Sentry's UI; it is **not**
+an API credential and cannot create a project or return a DSN by itself.
+
+What those agents receive is a `sentry-get-started` / `sentry-instrument` skill. Nothing in
+it is magic: install the SDK, initialise before anything else, wire the error handler, scrub
+PII. That is already done in this repo (§1), so only the account-level values are missing.
+
+### 9.2 What has to be created in the Sentry UI
+
+1. Sign up / log in at **sentry.io**, organisation `semantika-tech`.
+2. **Create two projects** (recommended — separate quotas and separate noise):
+   - `kaptia-api` — platform **Node.js** → server DSN
+   - `kaptia-web` — platform **React** → browser DSN
+3. **Create an auth token** for source maps: Settings → Auth Tokens →
+   scopes `project:releases` + `org:read`.
+
+### 9.3 Values to paste (never commit them)
+
+```bash
+# server runtime (.env)
+SENTRY_DSN=https://<key>@o….ingest.sentry.io/<kaptia-api id>
+SENTRY_RELEASE=$(git rev-parse --short HEAD)
+SENTRY_TRACES_SAMPLE_RATE=0
+
+# frontend (build-time — Vite inlines it, so rebuild after changing)
+VITE_SENTRY_DSN=https://<key>@o….ingest.sentry.io/<kaptia-web id>
+VITE_SENTRY_RELEASE=$(git rev-parse --short HEAD)
+VITE_SENTRY_TRACES_SAMPLE_RATE=0
+
+# source-map upload (build only)
+SENTRY_ORG=semantika-tech
+SENTRY_PROJECT=kaptia-web
+SENTRY_AUTH_TOKEN=<token with project:releases + org:read>
+```
+
+Without `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT` the Vite plugin is not even
+constructed: no upload and no `.map` files written (verified: `build_exit=0`, 0 maps).
+
+### 9.4 Verification
+
+```bash
+SENTRY_DSN=https://… npm run sentry:smoke
+```
+
+Expected in Sentry → Issues: `Kaptia Sentry smoke test` where `email`, `description` and
+`transcript` show `[redacted]`, while `amountInCents` is `12345`. That one check proves
+connectivity **and** the scrubber.
+
+Frontend: build with `VITE_SENTRY_DSN`, open the app, run in the console
+`setTimeout(() => { throw new Error('fe smoke') })` → the event must arrive scrubbed too.
+
+### 9.5 After it is live
+
+- Alerts → *When a new issue is created* → e-mail (otherwise nobody notices).
+- Ignore `AbortError`, `ResizeObserver loop limit exceeded`, 404 on `/api/*`.
+- Keep `tracesSampleRate: 0` until error volume is understood; tracing spends quota.
+- Sentry is a data processor → mention it in the privacy policy, keep retention short.
+
