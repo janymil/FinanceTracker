@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { sumTransactionAmountsByType } from "@shared/calculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -122,13 +123,9 @@ export default function CalendarPage() {
         isSameDay(parseISO(transaction.date), date)
       );
 
-      const totalIncome = dayTransactions
-        .filter(t => t.type === "income")
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const totalIncome = sumTransactionAmountsByType(dayTransactions, "income");
 
-      const totalExpenses = dayTransactions
-        .filter(t => t.type === "expense")
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const totalExpenses = sumTransactionAmountsByType(dayTransactions, "expense");
 
       return {
         date,

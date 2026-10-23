@@ -3,6 +3,7 @@ import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { sumTransactionAmountsByType } from "@shared/calculations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -388,13 +389,9 @@ export default function Transactions() {
     setIsDialogOpen(true);
   };
 
-  const totalIncome = filteredTransactions
-    .filter((t: Transaction) => t.type === "income")
-    .reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
+  const totalIncome = sumTransactionAmountsByType(filteredTransactions, "income");
 
-  const totalExpenses = filteredTransactions
-    .filter((t: Transaction) => t.type === "expense")
-    .reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
+  const totalExpenses = sumTransactionAmountsByType(filteredTransactions, "expense");
 
   if (!user) {
     return null;

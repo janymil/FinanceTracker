@@ -1,0 +1,98 @@
+name: tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: typecheck + unit tests + build
+    runs-on: ubuntu-latest
+    env:
+      # Puppeteer's Chromium download is only needed at runtime for PDF rendering.
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck (tests included)
+        run: npm run check
+
+      - name: Unit tests (no DB, no AI keys)
+        run: npm run test
+
+      - name: E2E specs parse (no browser, no server, no secrets)
+        run: npm run test:e2e:list
+
+      - name: Build
+        run: npm run build
+
+  # Added in step 4 of testing-blueprint/00-testing-strategy.md:
+  # - integration job against a Neon branch (DATABASE_URL_TEST)
+  # - e2e job with Playwright + Clerk test instance
+  # A live AI benchmark is NEVER part of this workflow.
+
+  integration:
+    name: integration (Neon branch)
+    runs-on: ubuntu-latest
+    # Runs only when the repository provides DATABASE_URL_TEST as a secret.
+    if: ${{ secrets.DATABASE_URL_TEST != '' }}
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Integration tests (skipped without DATABASE_URL_TEST)
+        run: npm run test:integration
+
+  e2e:
+    name: e2e (Playwright)
+    runs-on: ubuntu-latest
+    # Opt-in: set the repository variable E2E_ENABLED=true and provide a staging URL.
+    if: ${{ vars.E2E_ENABLED == 'true' }}
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      E2E_ENABLED: '1'
+      E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
+      E2E_LOCALE: ${{ vars.E2E_LOCALE || 'sk' }}
+      E2E_MANAGED_SERVER: '1'
+      DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
+      VITE_CLERK_PUBLISHABLE_KEY: ${{ vars.E2E_CLERK_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E
+        run: npm run test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: test-results/
+          retention-days: 7

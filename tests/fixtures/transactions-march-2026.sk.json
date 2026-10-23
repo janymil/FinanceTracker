@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "name": "golden-march-2026-sk",
+    "purpose": "Golden dataset for calculateFinancialSummary / groupTransactionsByMonth. Hand-computed, never AI-generated.",
+    "language": "sk",
+    "currencySymbol": "€",
+    "amountFormat": "strings exactly as Postgres decimal(12,2) returns them",
+    "dateFormat": "local wall-clock ISO strings WITHOUT timezone, so month bucketing is identical on every CI runner. Production rows arrive as UTC (Z) — that path is covered separately in calculations.test.ts.",
+    "signConvention": "amounts are non-negative; the sign lives in `type`. Refunds are `income` rows with parentTransactionId set.",
+    "knownBehaviour": "15 expenses + 3 incomes in March, 1 refund (Alza), plus 2 February rows that MUST be excluded by the March range filter."
+  },
+  "transactions": [
+    { "id": 1, "date": "2026-03-01T08:05:00", "amount": "2450.00", "type": "income", "categoryName": "Mzda", "description": "Mzda 03/2026" },
+    { "id": 2, "date": "2026-03-15T10:00:00", "amount": "650.00", "type": "income", "categoryName": "Freelance", "description": "Faktúra klient" },
+    { "id": 3, "date": "2026-03-28T12:00:00", "amount": "150.00", "type": "income", "categoryName": "Dividendy", "description": "Dividendy" },
+
+    { "id": 4, "date": "2026-03-01T00:10:00", "amount": "84.30", "type": "expense", "categoryName": "Potraviny", "description": "Lidl" },
+    { "id": 5, "date": "2026-03-03T17:45:00", "amount": "62.15", "type": "expense", "categoryName": "Potraviny", "description": "Kaufland" },
+    { "id": 6, "date": "2026-03-05T08:30:00", "amount": "249.99", "type": "expense", "categoryName": "Nákup", "description": "Alza - slúchadlá" },
+    { "id": 7, "date": "2026-03-06T19:10:00", "amount": "60.00", "type": "expense", "categoryName": "Doprava", "description": "Slovnaft" },
+    { "id": 8, "date": "2026-03-07T12:00:00", "amount": "12.40", "type": "expense", "categoryName": "Doprava", "description": "Bolt" },
+    { "id": 9, "date": "2026-03-09T20:15:00", "amount": "28.90", "type": "expense", "categoryName": "Stravovanie", "description": "Reštaurácia" },
+    { "id": 10, "date": "2026-03-11T09:00:00", "amount": "13.99", "type": "expense", "categoryName": "Predplatné", "description": "Netflix" },
+    { "id": 11, "date": "2026-03-12T16:40:00", "amount": "18.75", "type": "expense", "categoryName": "Zdravie", "description": "Lekáreň" },
+    { "id": 12, "date": "2026-03-14T11:25:00", "amount": "45.60", "type": "expense", "categoryName": "Potraviny", "description": "Tesco" },
+    { "id": 13, "date": "2026-03-17T07:55:00", "amount": "120.00", "type": "expense", "categoryName": "Bývanie", "description": "Elektrina" },
+    { "id": 14, "date": "2026-03-19T06:00:00", "amount": "450.00", "type": "expense", "categoryName": "Bývanie", "description": "Nájom" },
+    { "id": 15, "date": "2026-03-31T23:50:00", "amount": "4.50", "type": "expense", "categoryName": "Potraviny", "description": "Potraviny - večer (last minute of March)" },
+    { "id": 16, "date": "2026-03-21T21:30:00", "amount": "22.00", "type": "expense", "categoryName": "Zábava", "description": "Kino" },
+    { "id": 17, "date": "2026-03-24T13:15:00", "amount": "78.50", "type": "expense", "categoryName": "Bývanie", "description": "Plyn" },
+    { "id": 18, "date": "2026-03-29T15:00:00", "amount": "35.00", "type": "expense", "categoryName": "Dary", "description": "Darček" },
+
+    { "id": 21, "date": "2026-03-26T14:20:00", "amount": "249.99", "type": "income", "categoryName": "Refundácie", "description": "Refundácia Alza", "parentTransactionId": 6 },
+
+    { "id": 19, "date": "2026-02-10T09:00:00", "amount": "55.00", "type": "expense", "categoryName": "Potraviny", "description": "Februárový nákup" },
+    { "id": 20, "date": "2026-02-25T18:30:00", "amount": "500.00", "type": "income", "categoryName": "Predaj", "description": "Predaj bicykla" }
+  ],
+  "expected": {
+    "march": {
+      "range": { "start": "2026-03-01T00:00:00", "end": "2026-03-31T23:59:59.999" },
+      "totalIncomeInCents": 349999,
+      "totalExpensesInCents": 128608,
+      "netBalanceInCents": 221391,
+      "netIncomeInCents": 325000,
+      "refundsInCents": 24999,
+      "incomeTransactionCount": 4,
+      "expenseTransactionCount": 15,
+      "totalTransactionCount": 19,
+      "ignoredTransactionCount": 0,
+      "topExpenseCategory": { "categoryName": "Bývanie", "amountInCents": 64850, "transactionCount": 3 },
+      "savingsRateInBasisPoints": 6043,
+      "expensesByCategory": [
+        { "categoryName": "Bývanie", "amountInCents": 64850, "transactionCount": 3 },
+        { "categoryName": "Nákup", "amountInCents": 24999, "transactionCount": 1 },
+        { "categoryName": "Potraviny", "amountInCents": 19655, "transactionCount": 4 },
+        { "categoryName": "Doprava", "amountInCents": 7240, "transactionCount": 2 },
+        { "categoryName": "Dary", "amountInCents": 3500, "transactionCount": 1 },
+        { "categoryName": "Stravovanie", "amountInCents": 2890, "transactionCount": 1 },
+        { "categoryName": "Zábava", "amountInCents": 2200, "transactionCount": 1 },
+        { "categoryName": "Zdravie", "amountInCents": 1875, "transactionCount": 1 },
+        { "categoryName": "Predplatné", "amountInCents": 1399, "transactionCount": 1 }
+      ]
+    },
+    "fullDataset": {
+      "totalIncomeInCents": 399999,
+      "totalExpensesInCents": 134108,
+      "netBalanceInCents": 265891,
+      "incomeTransactionCount": 5,
+      "expenseTransactionCount": 16
+    },
+    "months": [
+      { "monthKey": "2026-02", "incomeInCents": 50000, "expensesInCents": 5500, "netInCents": 44500, "transactionCount": 2 },
+      { "monthKey": "2026-03", "incomeInCents": 349999, "expensesInCents": 128608, "netInCents": 221391, "transactionCount": 19 }
+    ],
+    "expenseChangeFebToMarPercent": 2238.33
+  }
+}

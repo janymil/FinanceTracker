@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "provider": "mistral",
+    "model": "mistral-ocr-latest",
+    "task": "receipt-extraction",
+    "promptVersion": "ocr@1",
+    "ocrSource": "mistral",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…",
+  "output": {
+    "pages": [
+      { "index": 0, "markdown": "LIDL SLOVENSKO\nDatum: 12.03.2026\nSPOLU 24,89 €" }
+    ]
+  },
+  "expected": { "text": "LIDL SLOVENSKO\nDatum: 12.03.2026\nSPOLU 24,89 €", "source": "mistral" }
+}

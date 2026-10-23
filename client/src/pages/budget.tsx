@@ -31,6 +31,7 @@ import RequirePlan from "@/components/require-plan";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import { formatDate } from "@/lib/dateUtils";
+import { sumAmountsToCents, centsToNumber } from "@shared/money";
 
 interface Budget {
   id: number;
@@ -294,7 +295,7 @@ export default function Budget() {
   console.log("Expense categories:", expenseCategories);
   console.log("Filtered budgets for", format(currentDate, "MMMM yyyy"), ":", filteredBudgets);
   
-  const totalBudget = filteredBudgets.reduce((sum: number, budget: Budget) => sum + parseFloat(budget.amount.toString() || '0'), 0);
+  const totalBudget = centsToNumber(sumAmountsToCents(filteredBudgets.map((budget: Budget) => budget.amount)));
   const totalSpent = filteredBudgets.reduce((sum: number, budget: Budget) => sum + (budget.spent || 0), 0);
   const totalRemaining = totalBudget - totalSpent;
 

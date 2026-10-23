@@ -8,6 +8,18 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:ai": "vitest run tests/ai",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list",
+    "test:e2e:install": "playwright install chromium",
+    "capture:ai": "tsx scripts/capture-ai-fixture.ts",
+    "benchmark:ocr": "tsx scripts/benchmark-ocr.ts",
+    "healthcheck": "tsx scripts/healthcheck.ts",
+    "sentry:smoke": "tsx scripts/sentry-smoke.ts",
     "audit:flows": "tsx scripts/audit-flows.ts",
     "auth:check": "node scripts/check-clerk-config.mjs",
     "auth:clean-users": "node scripts/clean-clerk-users.mjs",
@@ -56,6 +68,8 @@
     "@radix-ui/react-tooltip": "^1.2.0",
     "@react-pdf/renderer": "^4.3.0",
     "@sendgrid/mail": "^8.1.5",
+    "@sentry/node": "^11.8.0",
+    "@sentry/react": "^11.8.0",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.4.0",
     "@tanstack/react-query": "^5.60.5",
@@ -137,6 +151,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@replit/vite-plugin-cartographer": "^0.2.5",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
     "@tailwindcss/typography": "^0.5.15",
@@ -159,7 +174,8 @@
     "tailwindcss": "^3.4.17",
     "tsx": "^4.20.3",
     "typescript": "^5.6.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^3.2.7"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"

@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { sumAmountsByCategoryName, sumTransactionAmountsByType } from "@shared/calculations";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,13 +83,9 @@ export default function AIInsights({ data }: AIInsightsProps) {
       return tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
     });
 
-    const totalExpenses = thisMonthTransactions
-      .filter((t: any) => t.type === 'expense')
-      .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+    const totalExpenses = sumTransactionAmountsByType(thisMonthTransactions, 'expense');
 
-    const totalIncome = thisMonthTransactions
-      .filter((t: any) => t.type === 'income')
-      .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+    const totalIncome = sumTransactionAmountsByType(thisMonthTransactions, 'income');
 
     // High spending warning
     if (totalExpenses > totalIncome * 0.8) {
@@ -104,17 +101,11 @@ export default function AIInsights({ data }: AIInsightsProps) {
       });
     }
 
-    // Category analysis
-    const categorySpending = thisMonthTransactions
-      .filter((t: any) => t.type === 'expense')
-      .reduce((acc: any, t: any) => {
-        const category = t.categoryName || 'Other';
-        acc[category] = (acc[category] || 0) + parseFloat(t.amount);
-        return acc;
-      }, {});
-
-    const topCategory = Object.entries(categorySpending)
-      .sort(([,a]: any, [,b]: any) => b - a)[0];
+    // Category analysis (summed in integer cents, biggest category first)
+    const topCategoryEntry = sumAmountsByCategoryName(thisMonthTransactions, { type: 'expense' })[0];
+    const topCategory: [string, number] | undefined = topCategoryEntry
+      ? [topCategoryEntry.name, topCategoryEntry.amount]
+      : undefined;
 
     if (topCategory && (topCategory[1] as number) > totalExpenses * 0.3) {
       insights.push({
@@ -171,14 +162,14 @@ export default function AIInsights({ data }: AIInsightsProps) {
       const lastMonth = new Date();
       lastMonth.setMonth(lastMonth.getMonth() - 1);
       
-      const lastMonthExpenses = transactions
-        .filter((t: any) => {
+      const lastMonthExpenses = sumTransactionAmountsByType(
+        transactions.filter((t: any) => {
           const tDate = new Date(t.date);
-          return tDate.getMonth() === lastMonth.getMonth() && 
-                 tDate.getFullYear() === lastMonth.getFullYear() &&
-                 t.type === 'expense';
-        })
-        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+          return tDate.getMonth() === lastMonth.getMonth() &&
+                 tDate.getFullYear() === lastMonth.getFullYear();
+        }),
+        'expense',
+      );
 
       if (lastMonthExpenses > 0) {
         const spendingChange = ((totalExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;

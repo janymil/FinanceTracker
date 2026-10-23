@@ -1,5 +1,6 @@
 import { MistralClient } from './mistralClient.js';
 import { normalizeLanguageCode, getLanguageLabel } from '../lib/languageUtils';
+import { applyAmountCorrections, findAmountCorrection } from '../shared/voiceCorrections';
 
 interface ParsedTransaction {
   amount: string;
@@ -89,12 +90,8 @@ CRITICAL INTELLIGENCE RULES:
 - GASOLINA is NOT Shopping - it's transport
 - Use LOGIC, not just keyword matching`;
 
-  // Spanish number pattern fixes
-  const spanishPatterns = [
-    { pattern: /cinco\s+ochenta/i, expectedAmount: '5.80' },
-    { pattern: /dos\s+cincuenta/i, expectedAmount: '2.50' },
-    { pattern: /tres\s+veinte/i, expectedAmount: '3.20' }
-  ];
+  // Spanish spoken-number patterns live in shared/voiceCorrections.ts (pure, tested).
+  const amountHint = findAmountCorrection(transcript);
 
   let userPrompt = `Parse this transaction: "${transcript}"
 
@@ -112,11 +109,8 @@ CRITICAL EXAMPLES FOR PROPER CATEGORIZATION:
 ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user's list.`;
   
   // Add specific guidance for known Spanish patterns
-  for (const p of spanishPatterns) {
-    if (transcript.match(p.pattern)) {
-      userPrompt += `\n\nIMPORTANT: This contains Spanish number format. Expected amount: ${p.expectedAmount}`;
-      break;
-    }
+  if (amountHint) {
+    userPrompt += `\n\nIMPORTANT: This contains Spanish number format. Expected amount: ${amountHint.expectedAmount}`;
   }
 
   try {
@@ -136,13 +130,10 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
     const result = JSON.parse(rawResponse);
     
     // Post-process amount parsing for Spanish patterns
-    let correctedAmount = String(result.amount || '');
-    for (const p of spanishPatterns) {
-      if (transcript.match(p.pattern) && correctedAmount !== p.expectedAmount) {
-        correctedAmount = p.expectedAmount;
-        console.log(`🔧 Fixed Spanish amount: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
-        break;
-      }
+    const correction = applyAmountCorrections(transcript, result.amount);
+    const correctedAmount = correction.amount;
+    if (correction.corrected) {
+      console.log(`🔧 Fixed Spanish amount: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
     }
     
     // Validate and sanitize result

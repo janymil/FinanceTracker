@@ -3,6 +3,7 @@ import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { sumAmountsByCategoryName, sumAmountsByMonthKey, sumTransactionAmounts } from "@shared/calculations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -264,26 +265,13 @@ export default function Expenses() {
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
   const availableCategories = Array.from(new Set(expenseTransactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
 
-  const totalExpenses = filteredExpenses.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
+  const totalExpenses = sumTransactionAmounts(filteredExpenses);
   const averageExpense = filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0;
 
-  // Chart data preparation with localized month names
-  const monthlyExpenseData = expenseTransactions.reduce((acc: any, transaction: Transaction) => {
-    const date = new Date(transaction.date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    
-    if (!acc[monthKey]) {
-      acc[monthKey] = 0;
-    }
-    acc[monthKey] += parseFloat(transaction.amount);
-    
-    return acc;
-  }, {});
-
-  const chartData = Object.entries(monthlyExpenseData)
-    .sort(([a], [b]) => a.localeCompare(b))
+  // Chart data preparation with localized month names (summed in integer cents)
+  const chartData = sumAmountsByMonthKey(expenseTransactions)
     .slice(-6)
-    .map(([month, amount]) => {
+    .map(({ monthKey: month, amount }) => {
       const date = new Date(month + '-01');
       const currentLang = i18n.language;
       
@@ -300,19 +288,13 @@ export default function Expenses() {
       
       return {
         month: monthName,
-        amount: amount as number
+        amount
       };
     });
 
-  const categoryData = expenseTransactions.reduce((acc: any, transaction: Transaction) => {
-    const category = transaction.categoryName || "Other";
-    acc[category] = (acc[category] || 0) + parseFloat(transaction.amount);
-    return acc;
-  }, {});
-
-  const pieData = Object.entries(categoryData).map(([name, value], index) => ({
+  const pieData = sumAmountsByCategoryName(expenseTransactions).map(({ name, amount }, index) => ({
     name,
-    value: value as number,
+    value: amount,
     fill: `hsl(${index * 137.5 % 360}, 70%, 50%)`,
   }));
 
@@ -392,7 +374,8 @@ export default function Expenses() {
 
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
+                  <Button
+                    data-testid="add-expense"
                     className="bg-red-600 hover:bg-red-700"
                     onClick={() => {
                       setEditingTransaction(null);
@@ -572,7 +555,8 @@ export default function Expenses() {
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                       {t("common.cancel")}
                     </Button>
-                    <Button 
+                    <Button
+                      data-testid="save-expense"
                       onClick={handleSubmit}
                       disabled={!newExpense.amount || !newExpense.description}
                       className="bg-red-600 hover:bg-red-700"
@@ -596,7 +580,10 @@ export default function Expenses() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("expenses.total_expenses")}</p>
-                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  <p
+                    data-testid="expenses-total"
+                    className="text-2xl font-bold text-red-600 dark:text-red-400"
+                  >
                     {displayCurrency}{totalExpenses.toFixed(2)}
                   </p>
                 </div>
@@ -747,7 +734,8 @@ export default function Expenses() {
                     ? t("expenses.adjust_filters")
                     : t("expenses.add_first_expense")}
                 </p>
-                <Button 
+                <Button
+                  data-testid="add-expense"
                   onClick={() => setIsDialogOpen(true)}
                   className="bg-red-600 hover:bg-red-700"
                 >

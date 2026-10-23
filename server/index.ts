@@ -29,6 +29,7 @@ import { cookieConsentMiddleware } from "./cookieMiddleware.js";
 import { renderPageForCrawler } from './ssr.js';
 import { countryBlockingMiddleware } from "./middleware/countryBlocking.js";
 import { checkEncryptionKey } from "./encryptionDiagnostics.js";
+import { attachSentryErrorHandler, captureServerException, initServerObservability } from "./observability.js";
 
 import "./batch-processor.js"; // Initialize batch processing system
 
@@ -424,14 +425,24 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Error reporting first, so boot failures are reported too. No DSN => no-op.
+  await initServerObservability();
+
   const server = await registerRoutes(app);
+
+  // Sentry must see the error before the custom handler writes the response.
+  attachSentryErrorHandler(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Never crash the process for a single failed request; report and answer.
+    console.error("Unhandled route error:", err);
+    captureServerException(err, { status });
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
   });
 
   // importantly only setup vite in development and after
@@ -461,6 +472,7 @@ app.use((req, res, next) => {
 
 process.on('uncaughtException', (err) => {
   console.error('CRITICAL: Uncaught Exception:', err);
+  captureServerException(err, { scope: 'uncaughtException' });
 });
 
 process.on('unhandledRejection', (reason, promise) => {

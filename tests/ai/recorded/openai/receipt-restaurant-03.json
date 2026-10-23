@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "task": "receipt-extraction",
+    "promptVersion": "receipt-extract@1",
+    "ocrSource": "mistral",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "Bistro u Martina\n14.03.2026 13:42\nPolievka 3,50\nHlavne jedlo 9,00\nSUMA 12,50 EUR",
+  "output": { "amount": "12,50 EUR", "date": "2026-03-14", "vendor": "Bistro u Martina" },
+  "expected": { "amountInCents": 1250, "date": "2026-03-14", "vendor": "Bistro u Martina" }
+}

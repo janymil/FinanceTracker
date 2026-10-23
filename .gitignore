@@ -22,8 +22,15 @@ temp-*
 *.mov
 videos-raw/
 
+# graphify generated artifacts (knowledge graph output)
+graphify-out/
+
 # Landing videos/posters are served from Cloudflare R2 (media.kaptia.app)
 # Intentionally untracked - see client/src/components/landing/LandingVideo.tsx
 client/public/videos/*.mp4
 client/public/videos/*.webm
 client/public/videos/*.webp
+
+# Playwright
+test-results/
+playwright-report/

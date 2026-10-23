@@ -1,15 +1,17 @@
 
 import multer from 'multer';
 import { Request, Response } from 'express';
-import { ImageAnnotatorClient } from '@google-cloud/vision';
 import { getUserId } from './clerkAuth';
 import { db } from './db';
 import { users } from '../shared/schema.ts';
 import { eq } from 'drizzle-orm';
-import fetch from 'node-fetch';
-import { openai } from './openaiClient';
-import { AI_MODELS } from '../lib/aiProvider';
 import { categorizeExpense } from './openai';
+// Receipt extraction is split on purpose:
+//   shared/receiptExtraction.ts – pure normalization (unit tested, no SDK/keys)
+//   server/receiptExtraction.ts – the single AI call + legacy wrapper
+import { extractStructuredData } from './receiptExtraction';
+export { extractStructuredData };
+export type { LegacyExtractedReceipt } from '../shared/receiptExtraction';
 
 // Configure multer for file upload
 const upload = multer({
@@ -26,29 +28,9 @@ const upload = multer({
   },
 });
 
-// Validate Google Cloud environment variables
-const hasGoogleCloudConfig = Boolean(
-  process.env.GOOGLE_CLOUD_PROJECT_ID &&
-  process.env.GOOGLE_CLOUD_PRIVATE_KEY &&
-  process.env.GOOGLE_CLOUD_CLIENT_EMAIL
-);
-
-if (!hasGoogleCloudConfig) {
-  console.warn('Google Cloud Vision not configured - OCR will rely on Mistral OCR (no Vision fallback).');
-}
-
-// Initialize Google Cloud Vision client with environment variables if available
-const visionClient = hasGoogleCloudConfig
-  ? new ImageAnnotatorClient({
-      credentials: {
-        type: 'service_account',
-        project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
-        private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-      },
-      projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-    })
-  : null;
+// OCR lives in ./ocr: Mistral primary, Google Vision fallback, both injectable for tests.
+import { performOCR } from './ocr';
+export { performOCR };
 
 import { cloudStorage } from './cloudStorage';
 
@@ -78,137 +60,6 @@ export async function uploadReceiptFile(fileName: string, fileBuffer: Buffer, mi
 
 // Legacy alias
 export const uploadToBunny = uploadReceiptFile;
-
-// Perform OCR. Mistral OCR 4.x is the primary engine (better structure on receipts and
-// scanned documents); Google Cloud Vision remains the fallback.
-export async function performOCR(imageBuffer: Buffer): Promise<string> {
-  const mistralKey = process.env.MISTRAL_API_KEY;
-
-  if (mistralKey) {
-    try {
-      const response = await fetch('https://api.mistral.ai/v1/ocr', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${mistralKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: process.env.MISTRAL_OCR_MODEL || 'mistral-ocr-latest',
-          document: {
-            type: 'image_url',
-            image_url: `data:image/jpeg;base64,${imageBuffer.toString('base64')}`,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Mistral OCR HTTP ${response.status}`);
-      }
-
-      const payload: any = await response.json();
-      const text = (payload?.pages ?? [])
-        .map((page: any) => page?.markdown ?? '')
-        .join('\n\n')
-        .trim();
-
-      if (text) {
-        return text;
-      }
-      throw new Error('Mistral OCR returned no text');
-    } catch (error) {
-      console.warn('[OCR] Mistral OCR failed, falling back to Google Vision:', (error as Error).message);
-    }
-  }
-
-  if (!visionClient) {
-    throw new Error('No OCR provider configured (set MISTRAL_API_KEY or Google Cloud Vision credentials)');
-  }
-  try {
-    const [result] = await visionClient.textDetection({
-      image: { content: imageBuffer },
-    });
-
-    const detections = result.textAnnotations;
-    if (detections && detections.length > 0) {
-      return detections[0].description || '';
-    }
-
-    // Fallback to fullTextAnnotation if textAnnotations is empty
-    const fullTextAnnotation = result.fullTextAnnotation;
-    return fullTextAnnotation?.text || '';
-  } catch (error) {
-    console.error('OCR Error:', error);
-    throw new Error('Failed to process image with OCR');
-  }
-}
-
-// Extract structured data from OCR text using OpenAI
-export async function extractStructuredData(ocrText: string): Promise<{
-  amount?: number;
-  date?: string;
-  vendor?: string;
-  error?: string;
-}> {
-  try {
-    const response = await openai.chat.completions.create({
-      model: AI_MODELS.parsing,
-      messages: [
-        {
-          role: "system",
-          content: "You are a financial application. Based on this OCR text from a receipt, extract: - amount (as a number) - purchase date (in YYYY-MM-DD format) - store/vendor name. Return the response in JSON format with keys: amount, date, vendor."
-        },
-        {
-          role: "user",
-          content: ocrText
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.1
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    
-    // Normalize extracted data
-    const extractedData: any = {};
-    
-    // Normalize amount to number
-    if (result.amount !== undefined) {
-      const numAmount = Number(result.amount);
-      if (!isNaN(numAmount) && numAmount > 0) {
-        extractedData.amount = numAmount;
-      }
-    }
-    
-    // Normalize date to YYYY-MM-DD format
-    if (result.date) {
-      const dateStr = String(result.date).trim();
-      if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        extractedData.date = dateStr;
-      } else {
-        // Try to parse and reformat common date formats
-        const date = new Date(dateStr);
-        if (!isNaN(date.getTime())) {
-          extractedData.date = date.toISOString().split('T')[0];
-        }
-      }
-    }
-    
-    // Normalize vendor string
-    if (result.vendor) {
-      const vendor = String(result.vendor).trim();
-      if (vendor.length > 0 && vendor.length <= 100) {
-        extractedData.vendor = vendor;
-      }
-    }
-    
-    return extractedData;
-  } catch (error) {
-    console.error('OpenAI extraction error:', error);
-    return {
-      error: 'Failed to extract structured data'
-    };
-  }
-}
 
 // Main upload handler
 export const uploadReceiptHandler = [
@@ -303,54 +154,4 @@ export const uploadReceiptHandler = [
     }
   }
 ];
-
-// Helper functions to extract specific data from OCR text
-function extractAmount(text: string): string | null {
-  // Look for currency patterns (€, $, etc.) followed by numbers
-  const amountRegex = /[€$£¥]\s*(\d+(?:[.,]\d{2})?)|(\d+(?:[.,]\d{2})?)\s*[€$£¥]/g;
-  const matches = text.match(amountRegex);
-  
-  if (matches && matches.length > 0) {
-    // Return the last match (usually the total)
-    return matches[matches.length - 1].trim();
-  }
-  
-  // Look for "Total" or "Sum" followed by numbers
-  const totalRegex = /(?:total|sum|celkom|spolu)[\s:]*(\d+(?:[.,]\d{2})?)/i;
-  const totalMatch = text.match(totalRegex);
-  
-  if (totalMatch) {
-    return totalMatch[1];
-  }
-  
-  return null;
-}
-
-function extractMerchant(text: string): string | null {
-  // Extract first few lines that might contain merchant name
-  const lines = text.split('\n').filter(line => line.trim().length > 0);
-  
-  if (lines.length > 0) {
-    // Usually merchant name is in the first few lines
-    const firstLine = lines[0].trim();
-    if (firstLine.length > 2 && firstLine.length < 50) {
-      return firstLine;
-    }
-  }
-  
-  return null;
-}
-
-function extractDate(text: string): string | null {
-  // Look for date patterns
-  const dateRegex = /(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})|(\d{2,4}[./-]\d{1,2}[./-]\d{1,2})/g;
-  const matches = text.match(dateRegex);
-  
-  if (matches && matches.length > 0) {
-    return matches[0];
-  }
-  
-  return null;
-}
-
 

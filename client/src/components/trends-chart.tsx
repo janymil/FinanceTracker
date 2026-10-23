@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { sumTransactionAmountsByType } from "@shared/calculations";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import RequirePlan from "@/components/require-plan";
@@ -63,13 +64,9 @@ export default function TrendsChart() {
       });
       
       // Calculate totals for this month
-      const income = monthTransactions
-        .filter((t: any) => t.type === 'income')
-        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+      const income = sumTransactionAmountsByType(monthTransactions, 'income');
       
-      const expenses = monthTransactions
-        .filter((t: any) => t.type === 'expense')
-        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+      const expenses = sumTransactionAmountsByType(monthTransactions, 'expense');
       
       const netBalance = income - expenses;
       

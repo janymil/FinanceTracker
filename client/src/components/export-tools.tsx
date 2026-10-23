@@ -7,6 +7,7 @@ import { Download, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
 import { getCurrentMonthDateRange } from '@/lib/dateRangeUtils';
+import { centsToNumber, parseAmountToCents } from '@shared/money';
 
 interface MonthlySummary {
   totalIncome: number;
@@ -212,8 +213,8 @@ export function ExportTools() {
       const currentMonth = startDate.toLocaleDateString('en-US', { month: 'long' });
       const currentYear = startDate.getFullYear();
       
-      // Calculate category breakdown
-      const categoryBreakdown: { [key: string]: number } = {};
+      // Calculate category breakdown (accumulated in integer cents)
+      const categoryBreakdownCents: { [key: string]: number } = {};
       
       transactions
         .filter(t => {
@@ -224,9 +225,14 @@ export function ExportTools() {
         })
         .forEach(t => {
           const category = t.categoryId || 'Other';
-          categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
+          categoryBreakdownCents[category] = (categoryBreakdownCents[category] || 0) + parseAmountToCents(t.amount);
         });
       
+      const categoryBreakdown: { [key: string]: number } = {};
+      for (const [category, cents] of Object.entries(categoryBreakdownCents)) {
+        categoryBreakdown[category] = centsToNumber(cents);
+      }
+
       const typedSummary = summary as { totalIncome?: number; totalExpenses?: number; netAmount?: number; transactionCount?: number } | undefined;
       const monthlySummary: MonthlySummary = {
         totalIncome: typedSummary?.totalIncome || 0,

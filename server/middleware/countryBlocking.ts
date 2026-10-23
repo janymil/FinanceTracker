@@ -67,6 +67,12 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
       return next();
     }
 
+    // Explicit escape hatch for E2E / synthetic monitoring. Default off; must be set
+    // deliberately in a non-production environment (see tests/e2e/README.md).
+    if (process.env.DISABLE_COUNTRY_BLOCKING === '1' && process.env.NODE_ENV !== 'production') {
+      return next();
+    }
+
     // Skip for localhost/development
     if (
       !clientIP ||

@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "task": "receipt-extraction",
+    "promptVersion": "receipt-extract@1",
+    "ocrSource": "mistral",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "ALZA.SK\nFAKTURA c. 2026-0442\nDatum vystavenia: 2026-03-02\nSluchadla Sony 1 234,56 €\nCelkom k uhrade 1 234,56 €",
+  "output": { "amount": "1 234,56", "date": "2026-03-02", "vendor": "Alza.sk" },
+  "expected": { "amountInCents": 123456, "date": "2026-03-02", "vendor": "Alza.sk" }
+}

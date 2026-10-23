@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "task": "receipt-extraction",
+    "promptVersion": "receipt-extract@1",
+    "ocrSource": "vision",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "…nečitateľný text…",
+  "output": "Sorry, I can't read this receipt.",
+  "expected": { "amountInCents": null, "date": null, "vendor": null }
+}

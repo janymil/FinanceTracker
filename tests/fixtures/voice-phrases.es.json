@@ -1,0 +1,26 @@
+{
+  "language": "es-pe",
+  "now": "2026-03-15T10:00:00",
+  "phrases": [
+    { "text": "Pagué 12,50 por el almuerzo", "expected": { "amountInCents": 1250, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Taxi ayer 18.40", "expected": { "amountInCents": 1840, "type": "expense", "date": "yesterday", "needsReview": false } },
+    { "text": "Compré gasolina por 60 soles", "expected": { "amountInCents": 6000, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Recibí mi salario 2450", "expected": { "amountInCents": 245000, "type": "income", "date": "", "needsReview": false } },
+    { "text": "Café hoy 2,50", "expected": { "amountInCents": 250, "type": "expense", "date": "today", "needsReview": false } },
+    { "text": "Supermercado 84,30", "expected": { "amountInCents": 8430, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Cine 12:50", "expected": { "amountInCents": 1250, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Nada hoy", "expected": { "amountInCents": null, "type": "expense", "date": "today", "needsReview": true } },
+    { "text": "Desayuno 6,80", "expected": { "amountInCents": 680, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Cena 45,90", "expected": { "amountInCents": 4590, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Farmacia 12,40", "expected": { "amountInCents": 1240, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Libros 29,99", "expected": { "amountInCents": 2999, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Gimnasio 39,00", "expected": { "amountInCents": 3900, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Luz 120,50", "expected": { "amountInCents": 12050, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Agua 34,80", "expected": { "amountInCents": 3480, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Internet 49,99", "expected": { "amountInCents": 4999, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Vuelo 320,00", "expected": { "amountInCents": 32000, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Hotel 185,60", "expected": { "amountInCents": 18560, "type": "expense", "date": "", "needsReview": false } },
+    { "text": "Cine ayer 24,00", "expected": { "amountInCents": 2400, "type": "expense", "date": "yesterday", "needsReview": false } },
+    { "text": "Regalo 40,00", "expected": { "amountInCents": 4000, "type": "expense", "date": "", "needsReview": false } }
+  ]
+}

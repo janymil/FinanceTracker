@@ -3,6 +3,7 @@ import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { sumAmountsByCategoryName, sumAmountsByMonthKey, sumTransactionAmounts } from "@shared/calculations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -259,25 +260,12 @@ export default function Income() {
   const incomeCategories = categories.filter((cat: Category) => cat.type === "income");
   const availableCategories = Array.from(new Set(incomeTransactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
 
-  const totalIncome = filteredIncomes.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
+  const totalIncome = sumTransactionAmounts(filteredIncomes);
 
-  // Calculate monthly income data for chart
-  const monthlyIncomeData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {
-    const date = new Date(transaction.date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    
-    if (!acc[monthKey]) {
-      acc[monthKey] = 0;
-    }
-    acc[monthKey] += parseFloat(transaction.amount);
-    
-    return acc;
-  }, {});
-
-  const chartData = Object.entries(monthlyIncomeData)
-    .sort(([a], [b]) => a.localeCompare(b))
+  // Monthly income chart (summed in integer cents)
+  const chartData = sumAmountsByMonthKey(incomeTransactions)
     .slice(-6)
-    .map(([month, amount]) => {
+    .map(({ monthKey: month, amount }) => {
       const date = new Date(month + '-01');
       const currentLang = i18n.language;
       
@@ -298,19 +286,10 @@ export default function Income() {
       };
     });
 
-  // Calculate category distribution
-  const categoryData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {
-    const category = transaction.categoryName || 'Uncategorized';
-    if (!acc[category]) {
-      acc[category] = 0;
-    }
-    acc[category] += parseFloat(transaction.amount);
-    return acc;
-  }, {});
-
-  const pieData = Object.entries(categoryData).map(([name, value]) => ({
+  // Calculate category distribution (summed in integer cents)
+  const pieData = sumAmountsByCategoryName(incomeTransactions).map(({ name, amount }) => ({
     name,
-    value: value as number
+    value: amount
   }));
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];

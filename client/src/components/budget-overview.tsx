@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit3 } from "lucide-react";
 import { useMemo } from "react";
+import { sumTransactionAmounts } from "@shared/calculations";
 import { useLocation } from "wouter";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
@@ -116,16 +117,13 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
     return budgets
       .map((budget) => {
         // Calculate total spending for this category in the current budget period
-        const categorySpending = transactions
-          .filter((transaction) => 
-            transaction.categoryId === budget.categoryId && 
+        const categorySpending = sumTransactionAmounts(transactions
+          .filter((transaction) =>
+            transaction.categoryId === budget.categoryId &&
             transaction.type === 'expense' &&
             new Date(transaction.date) >= new Date(budget.startDate) &&
             new Date(transaction.date) <= new Date(budget.endDate)
-          )
-          .reduce((total, transaction) => 
-            total + Math.abs(parseFloat(transaction.amount)), 0
-          );
+          ));
 
         return {
           ...budget,

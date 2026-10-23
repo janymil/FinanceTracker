@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { centsToNumber, sumAmountsToCents } from "@shared/money";
 import { useTranslation } from "react-i18next";
 
 interface FinancialHealthProps {
@@ -57,7 +58,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
     }
 
     // Budget adherence (25% weight)
-    const totalBudget = budgets?.reduce((sum, budget) => sum + parseFloat(budget.amount), 0) || 0;
+    const totalBudget = budgets ? centsToNumber(sumAmountsToCents(budgets.map((budget) => budget.amount))) : 0;
     const budgetUsage = totalBudget > 0 ? Math.abs(summary.totalExpenses) / totalBudget : 0;
     if (budgetUsage <= 0.8) {
       score += 25;

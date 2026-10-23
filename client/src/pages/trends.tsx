@@ -1,4 +1,6 @@
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { sumTransactionAmountsByType } from "@shared/calculations";
+import { centsToNumber, parseAmountToCents } from "@shared/money";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -269,13 +271,8 @@ export default function Trends() {
         }
       });
 
-      const income = periodTransactions
-        .filter((t: any) => t.type === 'income')
-        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
-
-      const expenses = periodTransactions
-        .filter((t: any) => t.type === 'expense')
-        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+      const income = sumTransactionAmountsByType(periodTransactions, 'income');
+      const expenses = sumTransactionAmountsByType(periodTransactions, 'expense');
 
       return {
         period: period.label,
@@ -307,16 +304,19 @@ export default function Trends() {
       }
       
       const categoryData = categoryTrends.get(categoryName);
-      const currentAmount = categoryData.get(monthKey) || 0;
-      categoryData.set(monthKey, currentAmount + parseFloat(transaction.amount));
+      const currentAmountInCents = categoryData.get(monthKey) || 0;
+      categoryData.set(monthKey, currentAmountInCents + parseAmountToCents(transaction.amount));
     });
 
     return Array.from(categoryTrends.entries()).map(([categoryName, monthData]) => {
-      const amounts = Array.from(monthData.values()) as number[];
-      const totalAmount = amounts.reduce((sum: number, amount: number) => sum + amount, 0);
-      const avgAmount = totalAmount / amounts.length;
-      const trend = amounts.length > 1 ? 
-        (amounts[amounts.length - 1] > amounts[amounts.length - 2] ? 'increasing' : 'decreasing') : 'stable';
+      const amountsInCents = Array.from(monthData.values()) as number[];
+      const totalAmountInCents = amountsInCents.reduce((sum: number, amount: number) => sum + amount, 0);
+      const totalAmount = centsToNumber(totalAmountInCents);
+      const avgAmount = amountsInCents.length > 0
+        ? centsToNumber(Math.round(totalAmountInCents / amountsInCents.length))
+        : 0;
+      const trend = amountsInCents.length > 1 ?
+        (amountsInCents[amountsInCents.length - 1] > amountsInCents[amountsInCents.length - 2] ? 'increasing' : 'decreasing') : 'stable';
 
       return {
         category: categoryName,
@@ -327,7 +327,7 @@ export default function Trends() {
           const [month, amount] = entry;
           return {
             month,
-            amount
+            amount: centsToNumber(amount)
           };
         })
       };

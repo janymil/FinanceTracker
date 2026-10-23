@@ -79,6 +79,8 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
+import { centsToNumber, parseAmountToCents } from "@shared/money";
+import { UNCATEGORIZED } from "@shared/calculations";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, inArray } from "drizzle-orm";
 
 // Verified identity fields fetched from Clerk (see server/routes/authRoutes.ts)
@@ -151,7 +153,11 @@ export interface IStorage {
     totalIncome: number;
     totalExpenses: number;
     netBalance: number;
-    transactionsByCategory: Array<{ categoryName: string; amount: number; type: string }>;
+    /** Cent-exact values; the plain numbers below are derived from these. */
+    totalIncomeInCents: number;
+    totalExpensesInCents: number;
+    netBalanceInCents: number;
+    transactionsByCategory: Array<{ categoryName: string; amount: number; amountInCents: number; type: string }>;
   }>;
 
   // Backup settings operations
@@ -1019,22 +1025,31 @@ export class DatabaseStorage implements IStorage {
       )
       .groupBy(categories.name, transactions.type);
 
-    const totalIncome = Number(incomeResult[0]?.total || 0);
-    const totalExpenses = Number(expenseResult[0]?.total || 0);
+    // Postgres returns decimal(12,2) sums as strings ("1420.50"); converting via
+    // cents keeps every downstream total exact (no binary-float drift).
+    const totalIncomeInCents = parseAmountToCents(incomeResult[0]?.total);
+    const totalExpensesInCents = parseAmountToCents(expenseResult[0]?.total);
     const incomeTransactionCount = Number(incomeResult[0]?.count || 0);
     const expenseTransactionCount = Number(expenseResult[0]?.count || 0);
-    const netBalance = totalIncome - totalExpenses;
+    const netBalanceInCents = totalIncomeInCents - totalExpensesInCents;
 
-    const transactionsByCategory = categoryResults.map(result => ({
-      categoryName: result.categoryName || 'Uncategorized',
-      amount: Number(result.amount || 0),
-      type: result.type,
-    }));
+    const transactionsByCategory = categoryResults.map(result => {
+      const amountInCents = parseAmountToCents(result.amount);
+      return {
+        categoryName: result.categoryName || UNCATEGORIZED,
+        amount: centsToNumber(amountInCents),
+        amountInCents,
+        type: result.type,
+      };
+    });
 
     return {
-      totalIncome,
-      totalExpenses,
-      netBalance,
+      totalIncomeInCents,
+      totalExpensesInCents,
+      netBalanceInCents,
+      totalIncome: centsToNumber(totalIncomeInCents),
+      totalExpenses: centsToNumber(totalExpensesInCents),
+      netBalance: centsToNumber(netBalanceInCents),
       incomeTransactionCount,
       expenseTransactionCount,
       totalTransactionCount: incomeTransactionCount + expenseTransactionCount,

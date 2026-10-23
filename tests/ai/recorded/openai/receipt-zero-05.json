@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "task": "receipt-extraction",
+    "promptVersion": "receipt-extract@1",
+    "ocrSource": "mistral",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "Kaufland\n05.03.2026\nVratna flasa 0,00 €\nSPOLU 0,00 €",
+  "output": { "amount": "0,00", "date": "05.03.2026", "vendor": "Kaufland" },
+  "expected": { "amountInCents": null, "date": "2026-03-05", "vendor": "Kaufland" }
+}

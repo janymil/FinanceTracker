@@ -1,6 +1,16 @@
 {
-  "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
+  "include": [
+    "client/src/**/*",
+    "shared/**/*",
+    "server/**/*",
+    "tests/**/*",
+    "playwright.config.ts",
+    "scripts/healthcheck.ts",
+    "scripts/sentry-smoke.ts",
+    "scripts/capture-ai-fixture.ts",
+    "scripts/benchmark-ocr.ts"
+  ],
+  "exclude": ["node_modules", "build", "dist"],
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",

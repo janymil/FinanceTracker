@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "task": "receipt-extraction",
+    "promptVersion": "receipt-extract@1",
+    "ocrSource": "mistral",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "MULTILINE HEADER THAT IS FAR TOO LONG FOR A MERCHANT FIELD AND SHOULD BE REJECTED BY THE NORMALIZER BECAUSE IT EXCEEDS ONE HUNDRED CHARACTERS\n29.03.2026\nSPOLU 35,00 €",
+  "output": {
+    "amount": "35,00",
+    "date": "29.03.2026",
+    "vendor": "MULTILINE HEADER THAT IS FAR TOO LONG FOR A MERCHANT FIELD AND SHOULD BE REJECTED BY THE NORMALIZER BECAUSE IT EXCEEDS ONE HUNDRED CHARACTERS"
+  },
+  "expected": { "amountInCents": 3500, "date": "2026-03-29", "vendor": null }
+}

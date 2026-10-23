@@ -23,6 +23,8 @@ import { registerPDFRoutes } from "./pdfRoutes.js";
 import demoRoutes from "../demoRoutes.js";
 import courseRoutes from "../courseRoutes.js";
 import { DataEncryption } from "../encryption.js";
+import { db } from "../db.js";
+import { sql } from "drizzle-orm";
 
 import { registerTTSRoutes } from "./ttsRoutes.js";
 import { registerLearningRoutes } from "./learningRoutes.js";
@@ -42,6 +44,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // System status endpoints
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Deep health check for synthetic monitoring: also verifies the database round-trip.
+  // Deliberately returns no error details — the reason is logged, not published.
+  app.get('/api/health/deep', async (_req, res) => {
+    const startedAt = Date.now();
+    try {
+      await db.execute(sql`select 1`);
+      res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        checks: { database: { status: 'ok', latencyMs: Date.now() - startedAt } },
+      });
+    } catch (error) {
+      console.error('[health] deep check failed:', error);
+      res.status(503).json({
+        status: 'error',
+        timestamp: new Date().toISOString(),
+        checks: {
+          database: { status: 'error', latencyMs: Date.now() - startedAt },
+        },
+      });
+    }
   });
   
   app.get('/api/encryption-status', (req, res) => {

@@ -9,9 +9,13 @@ import { I18nextProvider } from 'react-i18next';
 import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
+import { initClientObservability } from './lib/observability';
 import i18n from './i18n/i18n';
 // Clear any stale authentication data on app startup
 clearStaleSession();
+
+// Error reporting (no DSN => no-op, the Sentry chunk is never fetched).
+void initClientObservability();
 
 // Simple browser language detection function
 function detectLanguageFromBrowser(): string {

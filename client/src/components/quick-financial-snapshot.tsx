@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, PiggyBank } f
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import { getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
+import { sumTransactionAmounts } from "@shared/calculations";
 
 interface QuickSnapshotProps {
   summary?: {
@@ -54,8 +55,8 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
 
     if (recentTransactions.length === 0 || olderTransactions.length === 0) return 'stable';
 
-    const recentAvg = recentTransactions.reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0) / recentTransactions.length;
-    const olderAvg = olderTransactions.reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0) / olderTransactions.length;
+    const recentAvg = sumTransactionAmounts(recentTransactions) / recentTransactions.length;
+    const olderAvg = sumTransactionAmounts(olderTransactions) / olderTransactions.length;
 
     if (recentAvg > olderAvg * 1.1) return 'increasing';
     if (recentAvg < olderAvg * 0.9) return 'decreasing';
@@ -87,12 +88,11 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
   if (hasTransactionData) {
     const lastMonthRange = getDateRangeForFilter('last-month');
     
-    const lastMonthExpenses = lastMonthRange ? transactions
+    const lastMonthExpenses = lastMonthRange ? sumTransactionAmounts(transactions
       .filter(t => {
         const tDate = new Date(t.date);
         return t.type === 'expense' && isDateInRange(tDate, lastMonthRange);
-      })
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0) : 0;
+      })) : 0;
 
     if (currentMonthExpenses > lastMonthExpenses * 1.1) {
       spendingTrend = 'increasing';

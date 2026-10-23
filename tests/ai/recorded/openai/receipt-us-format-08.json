@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "task": "receipt-extraction",
+    "promptVersion": "receipt-extract@1",
+    "ocrSource": "mistral",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "AMAZON EU SARL\nOrder date: 12/25/2026\nItems total 1,234.56 USD\nGrand total 1,234.56 USD",
+  "output": { "amount": "1,234.56 USD", "date": "12/25/2026", "vendor": "Amazon EU SARL" },
+  "expected": { "amountInCents": 123456, "date": "2026-12-25", "vendor": "Amazon EU SARL" }
+}

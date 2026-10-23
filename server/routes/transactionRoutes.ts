@@ -332,17 +332,18 @@ export function registerTransactionRoutes(app: Express) {
       const userLanguage = getUserLanguage(req);
 
       // Filter for expense categories only and format for chart
+      // Amounts are stored non-negative (sign lives in `type`), so no Math.abs().
       const expensesByCategory = summary.transactionsByCategory
         .filter((cat: any) => cat.type === 'expense')
         .map((cat: any, index: number) => ({
           category: translateCategoryName(cat.categoryName, userLanguage),
-          amount: Math.abs(cat.amount),
+          amount: cat.amount,
           color: COLORS[index % COLORS.length]
         }));
 
       res.json({
         expensesByCategory,
-        totalExpenses: Math.abs(summary.totalExpenses)
+        totalExpenses: summary.totalExpenses
       });
     } catch (error) {
       console.error("Error fetching expense breakdown:", error);

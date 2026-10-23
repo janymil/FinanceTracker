@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "task": "receipt-extraction",
+    "promptVersion": "receipt-extract@1",
+    "ocrSource": "mistral",
+    "capturedAt": "2026-10-22T09:00:00Z",
+    "source": "synthetic"
+  },
+  "input": "LIDL SLOVENSKO\nPotraviny\nDatum: 12.03.2026\nMlieko 1,20 €\nChlieb 2,49 €\nSPOLU 24,89 €",
+  "output": { "amount": "24,89", "date": "12.03.2026", "vendor": "Lidl" },
+  "expected": { "amountInCents": 2489, "date": "2026-03-12", "vendor": "Lidl" }
+}
