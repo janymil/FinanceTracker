@@ -136,8 +136,11 @@ function resolveSpec(requested: string): AIModelSpec {
   return { provider: 'openai', model: requested, inputPricePerM: 0.1, outputPricePerM: 0.5, reasoningEffort: 'none' };
 }
 
-function buildBody(spec: AIModelSpec, params: any): any {
-  const body: any = { ...params, model: spec.model };
+export function buildBody(spec: AIModelSpec, params: any): any {
+  // `task` is this router's own attribution field, not an OpenAI parameter. Forwarding it
+  // makes the provider answer `400 Unknown parameter: 'task'`, so it must never leave here.
+  const { task: _task, ...requestParams } = params ?? {};
+  const body: any = { ...requestParams, model: spec.model };
 
   // OpenAI reasoning models reject max_tokens; they expect max_completion_tokens.
   if (spec.provider === 'openai' && body.max_tokens != null) {

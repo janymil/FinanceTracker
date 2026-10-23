@@ -10,6 +10,7 @@ import {
   decimal,
   boolean,
   integer,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -710,3 +711,87 @@ export const insertBlockedCountrySchema = createInsertSchema(blockedCountries).o
 });
 
 // Removed: contextualFinancialTips schemas - using unified ai_cache system
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Error Guard (blueprint 07). Four tables, no foreign keys on purpose: the tracker
+// must be writable even when the rest of the schema is mid-migration, and deleting a
+// group must never cascade into anything that matters.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** One row per distinct problem. This is what the admin panel shows. */
+export const errorGroups = pgTable(
+  "error_groups",
+  {
+    id: varchar("id", { length: 32 }).primaryKey(),
+    kind: varchar("kind", { length: 24 }).notNull(),
+    source: varchar("source", { length: 12 }).notNull().default("client"),
+    title: varchar("title", { length: 240 }).notNull(),
+    message: text("message").notNull(),
+    route: varchar("route", { length: 200 }),
+    release: varchar("release", { length: 64 }),
+    platform: varchar("platform", { length: 32 }),
+    severity: varchar("severity", { length: 12 }).notNull().default("error"),
+    status: varchar("status", { length: 12 }).notNull().default("open"),
+    moneyPath: boolean("money_path").notNull().default(false),
+    eventCount: integer("event_count").notNull().default(0),
+    sessionCount: integer("session_count").notNull().default(0),
+    firstSeen: timestamp("first_seen").notNull().defaultNow(),
+    lastSeen: timestamp("last_seen").notNull().defaultNow(),
+    aiStatus: varchar("ai_status", { length: 16 }).notNull().default("pending"),
+    aiAnalysis: jsonb("ai_analysis"),
+    aiModel: varchar("ai_model", { length: 64 }),
+    aiUpdatedAt: timestamp("ai_updated_at"),
+  },
+  (table) => [
+    index("IDX_error_groups_status").on(table.status, table.lastSeen),
+    index("IDX_error_groups_severity").on(table.severity),
+  ],
+);
+
+/** Sampled evidence. Never the whole storm — two samples per flush is enough. */
+export const errorEvents = pgTable(
+  "error_events",
+  {
+    id: serial("id").primaryKey(),
+    groupId: varchar("group_id", { length: 32 }).notNull(),
+    occurredAt: timestamp("occurred_at").notNull(),
+    source: varchar("source", { length: 12 }).notNull().default("client"),
+    release: varchar("release", { length: 64 }),
+    route: varchar("route", { length: 200 }),
+    status: integer("status"),
+    durationMs: integer("duration_ms"),
+    requestId: varchar("request_id", { length: 80 }),
+    message: text("message").notNull(),
+    stack: text("stack"),
+    context: jsonb("context"),
+    breadcrumbs: jsonb("breadcrumbs"),
+  },
+  (table) => [index("IDX_error_events_group").on(table.groupId, table.occurredAt)],
+);
+
+/** Hourly counts. The only table that grows with traffic, and it grows slowly. */
+export const errorRollups = pgTable(
+  "error_rollups",
+  {
+    id: serial("id").primaryKey(),
+    groupId: varchar("group_id", { length: 32 }).notNull(),
+    bucket: timestamp("bucket").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (table) => [uniqueIndex("UQ_error_rollups_group_bucket").on(table.groupId, table.bucket)],
+);
+
+/** "Did the cron run?" — a missing row is itself the alarm (blueprint §17.3). */
+export const jobRuns = pgTable(
+  "job_runs",
+  {
+    id: serial("id").primaryKey(),
+    jobName: varchar("job_name", { length: 64 }).notNull(),
+    startedAt: timestamp("started_at").notNull().defaultNow(),
+    finishedAt: timestamp("finished_at"),
+    status: varchar("status", { length: 12 }).notNull().default("running"),
+    errorCode: varchar("error_code", { length: 120 }),
+    durationMs: integer("duration_ms"),
+  },
+  (table) => [index("IDX_job_runs_name_started").on(table.jobName, table.startedAt)],
+);

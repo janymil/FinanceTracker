@@ -19,6 +19,7 @@
     "capture:ai": "tsx scripts/capture-ai-fixture.ts",
     "benchmark:ocr": "tsx scripts/benchmark-ocr.ts",
     "healthcheck": "tsx scripts/healthcheck.ts",
+    "error-guard:smoke": "tsx scripts/error-guard-smoke.ts",
     "sentry:smoke": "tsx scripts/sentry-smoke.ts",
     "audit:flows": "tsx scripts/audit-flows.ts",
     "auth:check": "node scripts/check-clerk-config.mjs",

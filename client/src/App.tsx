@@ -53,6 +53,7 @@ import Help from "@/pages/help";
 import NotFoundPage from "./pages/not-found";
 import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
+import AdminWatch from "@/pages/admin-watch";
 import MobileUpload from "@/pages/mobile-upload/sessionId";
 import RedeemPage from "@/pages/redeem";
 import FeaturesPage from "@/pages/features";
@@ -130,6 +131,7 @@ function Router() {
         <Route path="/:lang/subscribe" component={AuthenticatedApp} />
         <Route path="/:lang/redeem" component={AuthenticatedApp} />
         <Route path="/:lang/admin-analytics" component={AuthenticatedApp} />
+        <Route path="/:lang/admin-watch" component={AuthenticatedApp} />
         
         {/* Public pages with language prefix */}
         <Route path="/:lang/features" component={FeaturesPage} />
@@ -275,6 +277,7 @@ export function AuthenticatedApp() {
               <Route path="/:lang/redeem" component={RedeemPage} />
               <Route path="/:lang/profile" component={ProfilePage} />
               <Route path="/:lang/admin-analytics" component={AdminAnalytics} />
+              <Route path="/:lang/admin-watch" component={AdminWatch} />
               
               {/* Public pages with language prefix for authenticated users */}
               <Route path="/:lang/features" component={FeaturesPage} />

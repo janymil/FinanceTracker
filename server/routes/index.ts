@@ -12,6 +12,7 @@ import { registerExportRoutes } from "./exportRoutes";
 import { uploadReceiptHandler } from '../uploadReceipt';
 import { registerAIRoutes } from "./aiRoutes";
 import { registerAdminRoutes } from "./adminRoutes";
+import { registerErrorGuardRoutes } from "../errorGuard/routes.js";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
@@ -92,6 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
+  // Error Guard: public ingest + /api/admin/watch/* (blueprint 07).
+  registerErrorGuardRoutes(app);
   registerPDFRoutes(app);
 
   registerTTSRoutes(app);

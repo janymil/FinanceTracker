@@ -818,6 +818,15 @@ export default function AdminAnalytics() {
               <p className="text-gray-600 text-sm md:text-base">Monitor application metrics and user management</p>
             </div>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              const lang = window.location.pathname.split('/')[1] || 'sk';
+              window.location.href = `/${lang}/admin-watch`;
+            }}
+          >
+            Open Watch
+          </Button>
         </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
