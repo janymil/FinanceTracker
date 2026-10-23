@@ -14,8 +14,8 @@ import i18n from './i18n/i18n';
 // Clear any stale authentication data on app startup
 clearStaleSession();
 
-// Error reporting (no DSN => no-op, the Sentry chunk is never fetched).
-void initClientObservability();
+// Error reporting (Sentry) — initialise before the first render so early errors count.
+initClientObservability();
 
 // Simple browser language detection function
 function detectLanguageFromBrowser(): string {

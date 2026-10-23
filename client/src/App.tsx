@@ -1,4 +1,5 @@
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
+import { SentryTestButton } from "@/components/sentry-test-button";
 
 import { Switch, Route, useLocation, useRouter } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
@@ -322,6 +323,8 @@ export default function App() {
       <CurrencyProvider>
         <AppContent />
         <Toaster />
+        {/* Dev-only: throws on purpose to verify Sentry end-to-end. Renders null in prod. */}
+        <SentryTestButton />
       </CurrencyProvider>
     </ThemeProvider>
   );

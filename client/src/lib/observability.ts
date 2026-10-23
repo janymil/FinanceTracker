@@ -1,26 +1,41 @@
 /**
- * Client-side error reporting with PII scrubbing.
+ * Client-side error reporting (Sentry) with PII scrubbing.
  *
- * No `VITE_SENTRY_DSN` => no-op (the SDK chunk is never loaded). `sendDefaultPii: false`
- * plus the shared scrubber, because breadcrumbs can contain transaction descriptions
- * typed by the user.
+ * Initialised synchronously and as early as possible: `main.tsx` calls this before
+ * `createRoot(...).render(...)`, so errors thrown during the first render are captured.
+ *
+ * PRIVACY — this app handles financial data:
+ * - `dataCollection` turns off automatic collectors (user info, cookies, headers, bodies,
+ *   query params).
+ * - `beforeSend` / `beforeBreadcrumb` redact e-mails, IBANs, card numbers, phones and
+ *   sensitive field names (see shared/piiScrubber.ts).
+ * - Session Replay runs with text/media/inputs masked. Do not disable masking here: a
+ *   replay is a video of the screen, and the screen shows transactions.
  */
+import * as Sentry from '@sentry/react';
 import { scrubBreadcrumb, scrubEvent } from '@shared/piiScrubber';
 
 const env = import.meta.env as unknown as Record<string, string | undefined>;
 
-export async function initClientObservability(): Promise<boolean> {
+function numberFromEnv(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+let initialised = false;
+
+export function initClientObservability(): boolean {
+  if (initialised) return true;
+
   const dsn = env.VITE_SENTRY_DSN?.trim();
   if (!dsn) return false;
 
   try {
-    const Sentry = await import('@sentry/react');
     Sentry.init({
       dsn,
       environment: env.MODE ?? 'development',
       release: env.VITE_SENTRY_RELEASE,
-      // Sentry v11: opt out of every automatic PII collector (cookies, headers, bodies,
-      // query params, user info). Breadcrumbs are scrubbed separately below.
+      // Never let the SDK collect PII on its own.
       dataCollection: {
         userInfo: false,
         cookies: false,
@@ -28,7 +43,18 @@ export async function initClientObservability(): Promise<boolean> {
         httpBodies: [],
         urlQueryParams: false,
       },
-      tracesSampleRate: Number(env.VITE_SENTRY_TRACES_SAMPLE_RATE ?? '0') || 0,
+      integrations: [
+        Sentry.replayIntegration({
+          // Mandatory for this app: no text, no media, no input values in replays.
+          maskAllText: true,
+          maskAllInputs: true,
+          blockAllMedia: true,
+        }),
+      ],
+      // A session replay is a screen recording — keep the sample rate low by default.
+      replaysSessionSampleRate: numberFromEnv(env.VITE_SENTRY_REPLAY_SESSION_SAMPLE_RATE, 0.1),
+      replaysOnErrorSampleRate: numberFromEnv(env.VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE, 1.0),
+      tracesSampleRate: numberFromEnv(env.VITE_SENTRY_TRACES_SAMPLE_RATE, 0),
       beforeSend(event) {
         return scrubEvent(event as any) as any;
       },
@@ -36,6 +62,8 @@ export async function initClientObservability(): Promise<boolean> {
         return scrubBreadcrumb(breadcrumb as any) as any;
       },
     });
+
+    initialised = true;
     return true;
   } catch (error) {
     // Telemetry must never break the UI.
@@ -43,3 +71,15 @@ export async function initClientObservability(): Promise<boolean> {
     return false;
   }
 }
+
+/** Correlates events with a user without sending an e-mail or name. */
+export function setObservabilityUser(userId: string | null | undefined): void {
+  if (!initialised) return;
+  Sentry.setUser(userId ? { id: userId } : null);
+}
+
+export function captureClientException(error: unknown, context?: Record<string, unknown>): void {
+  if (!initialised) return;
+  Sentry.captureException(error, context ? { extra: scrubEvent({ extra: context } as any).extra as any } : undefined);
+}
+
