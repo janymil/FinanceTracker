@@ -137,6 +137,8 @@ testing-blueprint/
   03-voice-expenses.md           # krok 4
   04-pdf-and-banking-imports.md  # krok 4
   05-e2e-critical-flows.md       # krok 5
+  06-observability-and-deploy.md # krok 6
+  07-mini-error-tracker.md       # BLUEPRINT ONLY — own error tracker, not implemented
   reports/                       # výstupy live benchmarkov (nie v CI)
 ```
 
