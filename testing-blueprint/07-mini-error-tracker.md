@@ -874,6 +874,20 @@ Still to do:
 
 Two real bugs the smoke test caught while building this:
 
+### Operational incident (2026-10-23): a cron script that never exits
+
+`npm run uptime:check` and `npm run error-guard:prune` both import `server/db.ts`, whose
+connection pool keeps the event loop alive. Without an explicit `process.exit()` the process
+stayed alive after its work was done. Under a 5-minute cron that piles up one idle process —
+and one database connection — per run, until the machine runs out of memory.
+
+Rules that follow, now enforced in the code and in this document:
+
+- every script that touches the database ends with `process.exit(0)`; both scripts do;
+- every cron line is wrapped in `timeout`, e.g.
+  `*/5 * * * * cd /var/www/kaptia && timeout 120 npx tsx scripts/uptime-check.ts >> /var/log/kaptia-uptime.log 2>&1`;
+- a cron entry is only installed after `ps aux | grep <script>` is verified empty a minute later.
+
 - The web app's AI router forwarded its own `task` field to the provider, so the first triage
   call died with `400 Unknown parameter: 'task'`. Fixed in `lib/aiProvider.ts` `buildBody`,
   regression test in `tests/unit/aiProviderBody.test.ts`.

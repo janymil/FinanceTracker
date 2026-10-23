@@ -111,6 +111,10 @@ async function main(): Promise<void> {
   const failures = checks.filter((check) => !check.ok);
   if (failures.length === 0) {
     console.log('[uptime] all checks passed');
+    // MUST exit explicitly: this script imports server/db.ts, whose connection pool keeps
+    // the event loop alive. Without this the process would hang forever under cron and pile
+    // up one idle process (and one database connection) every 5 minutes.
+    process.exit(0);
     return;
   }
 

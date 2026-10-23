@@ -20,6 +20,8 @@ async function main(): Promise<void> {
   }
   const deleted = await pruneOldEvents(days);
   console.log(`[error-guard] pruned ${deleted} evidence row(s) older than ${days} day(s)`);
+  // The database pool would keep the process alive; cron must see a clean exit.
+  process.exit(0);
 }
 
 void main().catch((error) => {
