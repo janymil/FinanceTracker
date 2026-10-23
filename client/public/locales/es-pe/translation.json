@@ -2710,7 +2710,8 @@
           "Múltiples formatos de datos"
         ]
       }
-    }
+    },
+    "pricing_answer": "El plan gratis cubre hasta 100 transacciones. Standard ({{standard}}/mes) añade categorización con IA, presupuestos y metas. Premium ({{premium}}/mes) añade historial ilimitado, análisis avanzado, copia en la nube e importación/exportación."
   },
   "cookies": {
     "seo": {
@@ -3854,5 +3855,17 @@
         ]
       }
     }
+  },
+  "upgradeBanner": {
+    "title": "Desbloquea el análisis avanzado",
+    "subtitle": "Obtén gráficos interactivos, análisis de tendencias y detalles para tener tus gastos bajo control.",
+    "charts": "Gráficos interactivos",
+    "charts_note": "Tendencias y análisis visuales",
+    "budgets": "Presupuestos avanzados",
+    "budgets_note": "Seguimiento por categoría",
+    "export": "Exportar datos",
+    "export_note": "Informes CSV y PDF",
+    "cta": "Mejorar ahora: {{price}}/mes",
+    "learn_more": "Saber más"
   }
 }

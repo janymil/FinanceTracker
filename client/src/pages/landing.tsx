@@ -16,6 +16,14 @@ import { KaptiaLogo } from "@/components/KaptiaLogo";
 import { LandingVideo } from "@/components/landing/LandingVideo";
 import { FuturisticHeroBackground } from "@/components/landing/FuturisticHeroBackground";
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import {
+  amountFor,
+  currencyForLanguage,
+  formatMoney,
+  monthlyEquivalent,
+  yearlySaving,
+  type PlanId,
+} from "@shared/pricing";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -45,10 +53,6 @@ const planData = [
   {
     id: "free",
     name: "Free",
-    monthly: "$0",
-    yearly: "$0",
-    yearlyNote: null as string | null,
-    yearlyBadge: null as string | null,
     desc: "Perfect for getting started with expense tracking",
     features: [
       "Basic expense and income tracking",
@@ -63,10 +67,6 @@ const planData = [
   {
     id: "standard",
     name: "Standard",
-    monthly: "$4.99",
-    yearly: "$49.90",
-    yearlyNote: "$4.16/month • Save 2 months",
-    yearlyBadge: "Save $9.98",
     desc: "For people ready to understand their spending",
     features: [
       "Everything in Free plan",
@@ -82,10 +82,6 @@ const planData = [
   {
     id: "premium",
     name: "Premium",
-    monthly: "$9.99",
-    yearly: "$99.90",
-    yearlyNote: "$8.33/month • Save 2 months",
-    yearlyBadge: "Save $19.98",
     desc: "The full intelligent tracking experience",
     features: [
       "Everything in Standard plan",
@@ -103,11 +99,22 @@ const planData = [
 ];
 
 function PricingCards({ billing, onSelect }: { billing: "monthly" | "yearly"; onSelect: (plan: string) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Same currency rule as /pricing: Spanish -> soles, everything else -> dollars.
+  const pathLang = typeof window !== "undefined"
+    ? window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/)?.[1]
+    : undefined;
+  const currency = currencyForLanguage(pathLang || i18n.language);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
       {planData.map((plan, i) => {
-        const price = billing === "monthly" ? plan.monthly : plan.yearly;
+        const planId = plan.id as "free" | PlanId;
+        const isFree = planId === "free";
+        const price = isFree
+          ? formatMoney(0, currency)
+          : formatMoney(amountFor(planId, billing, currency), currency);
+        const savingLabel = isFree ? null : formatMoney(yearlySaving(planId, currency), currency);
+        const monthlyLabel = isFree ? null : formatMoney(monthlyEquivalent(planId, currency), currency);
         const selectId = billing === "monthly" ? plan.id : `${plan.id}-yearly`;
         const card = (
           <motion.div
@@ -122,13 +129,13 @@ function PricingCards({ billing, onSelect }: { billing: "monthly" | "yearly"; on
                 : "glass-card"
             }`}
           >
-            {billing === "yearly" && plan.yearlyBadge && (
+            {billing === "yearly" && savingLabel && (
               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white border-0 px-4 py-1">
-                {t(plan.yearlyBadge)}
+                {t('pricing.save_per_year', { amount: savingLabel })}
               </Badge>
             )}
             {plan.popular && (
-              <Badge className={`absolute -top-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 px-4 py-1 ${billing === "yearly" && plan.yearlyBadge ? "right-4 left-auto translate-x-0" : "left-1/2 -translate-x-1/2"}`}>
+              <Badge className={`absolute -top-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 px-4 py-1 ${billing === "yearly" && savingLabel ? "right-4 left-auto translate-x-0" : "left-1/2 -translate-x-1/2"}`}>
                 <Crown className="h-3 w-3 mr-1" />
                 {t("Most Popular")}
               </Badge>
@@ -139,8 +146,10 @@ function PricingCards({ billing, onSelect }: { billing: "monthly" | "yearly"; on
                 {price}
                 <span className="text-base font-normal text-gray-500 dark:text-gray-400">/{billing === "monthly" ? t("month") : t("year")}</span>
               </div>
-              {billing === "yearly" && plan.yearlyNote && (
-                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">{t(plan.yearlyNote)}</p>
+              {billing === "yearly" && monthlyLabel && (
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
+                  {t('pricing.monthly_equivalent', { amount: monthlyLabel })}
+                </p>
               )}
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">{t(plan.desc)}</p>
             </div>

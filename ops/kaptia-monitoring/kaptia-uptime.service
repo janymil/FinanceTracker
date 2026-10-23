@@ -1,0 +1,13 @@
+[Unit]
+Description=Kaptia external uptime check (API, database, public page)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/kaptia
+Environment=NODE_ENV=production
+ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/uptime-check.ts
+StandardOutput=append:/var/log/kaptia-uptime.log
+StandardError=append:/var/log/kaptia-uptime.log
+NoNewPrivileges=true

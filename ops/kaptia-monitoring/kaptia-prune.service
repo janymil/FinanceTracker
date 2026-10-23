@@ -1,0 +1,13 @@
+[Unit]
+Description=Kaptia error-data retention (delete evidence older than 30 days)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/kaptia
+Environment=NODE_ENV=production
+ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/error-guard-prune.ts --days=30
+StandardOutput=append:/var/log/kaptia-prune.log
+StandardError=append:/var/log/kaptia-prune.log
+NoNewPrivileges=true

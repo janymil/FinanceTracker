@@ -72,6 +72,8 @@ fi
 rm -rf "$PREVIOUS"
 
 # Keep a few timestamped copies for archaeology, drop the rest.
-ls -dt dist.backup-* 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -rf
+# `|| true`: when there are no backups yet, `ls` exits non-zero and `set -e` would abort
+# the deploy after it has already succeeded.
+ls -dt dist.backup-* 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -rf || true
 
 echo "==> Deployed at $STAMP. Health: ok"

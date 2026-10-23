@@ -1,0 +1,13 @@
+[Unit]
+Description=Kaptia latency check on the deep health endpoint
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/kaptia
+Environment=NODE_ENV=production
+ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/healthcheck.ts --url https://kaptia.app --deep --max-latency 3000
+StandardOutput=append:/var/log/kaptia-health.log
+StandardError=append:/var/log/kaptia-health.log
+NoNewPrivileges=true

@@ -2584,7 +2584,8 @@
           "Multiple data formats"
         ]
       }
-    }
+    },
+    "pricing_answer": "The free plan covers up to 100 transactions. Standard ({{standard}}/month) adds AI categorization, budgets and goals. Premium ({{premium}}/month) adds unlimited history, advanced analysis, cloud backup and data import/export."
   },
   "cookies": {
     "seo": {
@@ -3817,5 +3818,17 @@
         ]
       }
     }
+  },
+  "upgradeBanner": {
+    "title": "Unlock Advanced Analytics",
+    "subtitle": "Get interactive charts, trend analysis and detailed insights to take complete control of your money.",
+    "charts": "Interactive Charts",
+    "charts_note": "Visual trends & analytics",
+    "budgets": "Advanced Budgets",
+    "budgets_note": "Category-wise tracking",
+    "export": "Export Data",
+    "export_note": "CSV & PDF reports",
+    "cta": "Upgrade Now – {{price}}/month",
+    "learn_more": "Learn More"
   }
 }

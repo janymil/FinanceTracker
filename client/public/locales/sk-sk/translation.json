@@ -2638,7 +2638,8 @@
           "Viacero formátov údajov"
         ]
       }
-    }
+    },
+    "pricing_answer": "Plán Zadarmo pokrýva do 100 transakcií. Standard ({{standard}}/mesiac) pridáva AI kategorizáciu, rozpočty a ciele. Premium ({{premium}}/mesiac) pridáva neobmedzenú históriu, pokročilú analýzu, cloudovú zálohu a import/export údajov."
   },
   "cookies": {
     "seo": {
@@ -3934,5 +3935,17 @@
         ]
       }
     }
+  },
+  "upgradeBanner": {
+    "title": "Odomknite pokročilú analýzu",
+    "subtitle": "Získajte interaktívne grafy, analýzu trendov a detailné prehľady, aby ste mali svoje výdavky plne pod kontrolou.",
+    "charts": "Interaktívne grafy",
+    "charts_note": "Vizuálne trendy a analýzy",
+    "budgets": "Pokročilé rozpočty",
+    "budgets_note": "Sledovanie podľa kategórií",
+    "export": "Export údajov",
+    "export_note": "CSV a PDF prehľady",
+    "cta": "Rozšíriť – {{price}}/mesiac",
+    "learn_more": "Zistiť viac"
   }
 }

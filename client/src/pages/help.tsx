@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
+import { amountFor, currencyForLanguage, formatMoney } from "@shared/pricing";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -48,6 +49,10 @@ export default function Help() {
   // Language from route
   const langMatch = location.match(/^\/([a-z]{2})(?:\/|$)/);
   const currentLang = langMatch ? langMatch[1] : (localStorage.getItem('preferredLanguage') || 'en');
+  // Prices shown in help must match /pricing: soles on Spanish pages, dollars elsewhere.
+  const priceCurrency = currencyForLanguage(currentLang);
+  const standardPrice = formatMoney(amountFor('standard', 'monthly', priceCurrency), priceCurrency);
+  const premiumPrice = formatMoney(amountFor('premium', 'monthly', priceCurrency), priceCurrency);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -126,7 +131,7 @@ export default function Help() {
     {
       id: "subscription-plans",
       question: t("What are the differences between subscription plans?"),
-      answer: t("Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export.")
+      answer: t("help.pricing_answer", { standard: standardPrice, premium: premiumPrice })
     },
     {
       id: "receipt-ocr",
@@ -390,7 +395,7 @@ export default function Help() {
                 <div className="glass-card rounded-2xl p-6 border border-gray-200/80 dark:border-white/10 flex flex-col justify-between">
                   <div>
                     <h3 className="font-display text-xl font-bold">{t("Standard")}</h3>
-                    <div className="text-3xl font-extrabold mt-2 text-gray-900 dark:text-white">$4.99</div>
+                    <div className="text-3xl font-extrabold mt-2 text-gray-900 dark:text-white">{standardPrice}</div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">/ {t("month", "month")}</p>
                     <ul className="space-y-2.5 mt-6 text-sm text-gray-600 dark:text-gray-300">
                       <li className="flex items-center gap-2">
@@ -422,7 +427,7 @@ export default function Help() {
                   </Badge>
                   <div>
                     <h3 className="font-display text-xl font-bold">{t("Premium")}</h3>
-                    <div className="text-3xl font-extrabold mt-2 text-indigo-600 dark:text-indigo-400">$9.99</div>
+                    <div className="text-3xl font-extrabold mt-2 text-indigo-600 dark:text-indigo-400">{premiumPrice}</div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">/ {t("month", "month")}</p>
                     <ul className="space-y-2.5 mt-6 text-sm text-gray-600 dark:text-gray-300">
                       <li className="flex items-center gap-2">

@@ -1,0 +1,10 @@
+# graphify: keep the knowledge graph focused on code + human-written docs.
+# Binary/scratch assets and giant generated PDFs are excluded to keep
+# semantic (LLM) extraction cheap and fast. gitignore syntax; can only exclude MORE.
+attached_assets/
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.pdf
