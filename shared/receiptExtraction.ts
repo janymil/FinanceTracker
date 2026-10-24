@@ -37,7 +37,7 @@ export interface LegacyExtractedReceipt {
 
 export const RECEIPT_VENDOR_MAX_LENGTH = 100;
 
-const CURRENCY_CODE = /\b(?:EUR|USD|GBP|CZK|PLN|HUF|CHF)\b/gi;
+const CURRENCY_CODE = /\b(?:EUR|USD|GBP|CZK|PLN|HUF|CHF|PEN)\b|S\//gi;
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const EU_DATE = /^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/;
 
@@ -186,15 +186,25 @@ export function toLegacyExtractedReceipt(draft: ReceiptExtractionDraft): LegacyE
 
 /** Last currency-marked number (or "total/spolu/celkom" value) — raw string. */
 export function extractAmountFromText(text: string): string | null {
-  const amountRegex = /[€$£¥]\s*(\d+(?:[.,]\d{2})?)|(\d+(?:[.,]\d{2})?)\s*[€$£¥]/g;
-  const matches = text.match(amountRegex);
-  if (matches && matches.length > 0) {
-    return matches[matches.length - 1].trim();
+  // Symbols and ISO codes both count, including Peru's "S/" — a soles receipt used to
+  // fall through to null because only € $ £ ¥ were recognised.
+  const currency = '(?:€|\\$|£|¥|\\b(?:EUR|USD|PEN|CZK|PLN|GBP|CHF)\\b|S\\/)';
+  const markedRegex = new RegExp(
+    `(?:${currency})\\s*(\\d+(?:[.,]\\d{2})?)|(\\d+(?:[.,]\\d{2})?)\\s*(?:${currency})`,
+    'gi',
+  );
+  const marked = Array.from(text.matchAll(markedRegex));
+  if (marked.length > 0) {
+    return marked[marked.length - 1][0].trim();
   }
 
-  const totalRegex = /(?:total|sum|celkom|spolu)[\s:]*(\d+(?:[.,]\d{2})?)/i;
-  const totalMatch = totalRegex.exec(text);
-  return totalMatch ? totalMatch[1] : null;
+  // Keyword and number may be separated by a currency token ("SPOLU EUR 21.80").
+  const totalRegex = new RegExp(
+    `(?:total|sum|suma|celkom|spolu|celkem|gesamt|importe|monto|amount due|to pay)[^\\d\\n]{0,14}(\\d+(?:[.,]\\d{2})?)`,
+    'gi',
+  );
+  const totals = Array.from(text.matchAll(totalRegex));
+  return totals.length > 0 ? totals[totals.length - 1][1] : null;
 }
 
 /** First non-empty line, 3..50 chars — usually the merchant header. */

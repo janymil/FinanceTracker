@@ -54,6 +54,16 @@ function clientKey(req: Request, options: RateLimitOptions): string {
       /* fall back to the IP */
     }
   }
+
+  // Behind Cloudflare the connection IP is an edge server, and the edge changes between
+  // requests — so `req.ip` would give every visitor a different bucket and the limit would
+  // not bind. CF-Connecting-IP carries the real visitor. The origin only accepts Cloudflare
+  // traffic (ops/cloudflare-origin-firewall), so the header can be trusted here.
+  const cfConnectingIp = req.headers?.['cf-connecting-ip'];
+  if (typeof cfConnectingIp === 'string' && cfConnectingIp.trim()) {
+    return `ip:${cfConnectingIp.trim()}`;
+  }
+
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
   return `ip:${ip}`;
 }

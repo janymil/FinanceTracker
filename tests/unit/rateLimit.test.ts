@@ -82,6 +82,28 @@ describe('rateLimit', () => {
     expect(userBFirst.statusCode).toBe(200);
   });
 
+  it('prefers the real visitor address behind Cloudflare', () => {
+    const limiter = rateLimit({ windowMs: 60_000, max: 1, keyPrefix: 'test-cf' });
+    const visitor = '203.0.113.7';
+
+    const first = response();
+    limiter(
+      { ...request('10.0.0.5'), headers: { 'cf-connecting-ip': visitor } } as any,
+      first,
+      () => undefined
+    );
+
+    const second = response();
+    limiter(
+      { ...request('10.0.0.6'), headers: { 'cf-connecting-ip': visitor } } as any,
+      second,
+      () => undefined
+    );
+
+    expect(first.statusCode).toBe(200);
+    expect(second.statusCode).toBe(429);
+  });
+
   it('starts counting again after the window', async () => {
     const limiter = rateLimit({ windowMs: 50, max: 1, keyPrefix: 'test-window' });
     const first = response();

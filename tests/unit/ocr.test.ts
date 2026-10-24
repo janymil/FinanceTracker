@@ -96,17 +96,40 @@ describe('Mistral OCR (primary provider)', () => {
 });
 
 describe('Vision fallback', () => {
-  it('falls back when Mistral returns a non-OK status', async () => {
+  it('falls back when Mistral keeps returning a non-OK status', async () => {
     const fetchImpl = vi.fn<OcrFetch>(async () => ({ ok: false, status: 500, json: async () => ({}) }));
 
     const outcome = await performOCRDetailed(Buffer.from('i'), {
       fetchImpl,
       mistralApiKey: 'k',
       visionClient: visionWith('VISION TEXT'),
+      retryDelayMs: 0,
     });
 
     expect(outcome).toEqual({ text: 'VISION TEXT', source: 'vision' });
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    // One attempt, one retry after the 5xx, then the fallback.
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries a rate-limited Mistral call once and keeps its answer', async () => {
+    const fetchImpl = vi
+      .fn<OcrFetch>()
+      .mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({}) })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ pages: [{ markdown: 'LIDL 23.50' }] }),
+      });
+
+    const outcome = await performOCRDetailed(Buffer.from('i'), {
+      fetchImpl,
+      mistralApiKey: 'k',
+      visionClient: visionWith('VISION TEXT'),
+      retryDelayMs: 0,
+    });
+
+    expect(outcome).toEqual({ text: 'LIDL 23.50', source: 'mistral' });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
   it('falls back when the Mistral request throws', async () => {
@@ -145,22 +168,45 @@ describe('Vision fallback', () => {
     expect(outcome).toEqual({ text: 'FULLTEXT', source: 'vision' });
   });
 
-  it('throws the documented error when no provider is configured', async () => {
+  it('throws a clear error when every provider is unavailable', async () => {
     await expect(
-      performOCRDetailed(Buffer.from('i'), { mistralApiKey: '', visionClient: null }),
-    ).rejects.toThrow('No OCR provider configured (set MISTRAL_API_KEY or Google Cloud Vision credentials)');
+      performOCRDetailed(Buffer.from('i'), {
+        mistralApiKey: '',
+        visionClient: null,
+        openaiVision: null,
+      }),
+    ).rejects.toThrow('OCR is unavailable right now');
   });
 
-  it('wraps vision failures in a stable error', async () => {
+  it('falls back to OpenAI vision when Mistral and Vision cannot help', async () => {
+    const fetchImpl = vi.fn<OcrFetch>(async () => ({ ok: false, status: 429, json: async () => ({}) }));
+
+    const outcome = await performOCRDetailed(Buffer.from('i'), {
+      fetchImpl,
+      mistralApiKey: 'k',
+      visionClient: null,
+      retryDelayMs: 0,
+      openaiVision: async () => 'LIDL\nMlieko 1,29\nSpolu 23,50',
+    });
+
+    expect(outcome.source).toBe('openai');
+    expect(outcome.text).toContain('Spolu 23,50');
+  });
+
+  it('uses OpenAI vision when Vision throws', async () => {
     const visionClient: VisionLike = {
       textDetection: async () => {
         throw new Error('quota exceeded');
       },
     };
 
-    await expect(
-      performOCRDetailed(Buffer.from('i'), { mistralApiKey: '', visionClient }),
-    ).rejects.toThrow('Failed to process image with OCR');
+    const outcome = await performOCRDetailed(Buffer.from('i'), {
+      mistralApiKey: '',
+      visionClient,
+      openaiVision: async () => 'OPENAI TEXT',
+    });
+
+    expect(outcome).toEqual({ text: 'OPENAI TEXT', source: 'openai' });
   });
 });
 

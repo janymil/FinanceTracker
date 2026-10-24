@@ -199,6 +199,13 @@ describe('regex fallbacks (unwired by default)', () => {
     expect(extractAmountFromText('ziadna suma')).toBeNull();
   });
 
+  it('reads a total that has a currency code between the keyword and the number', () => {
+    // Real receipt text produced by OCR on 2026-10-24; the old regex returned null here.
+    expect(extractAmountFromText('SUMA 21.80\nDPH 23% 4.08\nSPOLU EUR 21.80\nKARTA 21.80')).toBe('EUR 21.80');
+    expect(extractAmountFromText('Monto total: S/ 25.00')).toBe('S/ 25.00');
+    expect(extractAmountFromText('Suma total PEN 19,90')).toBe('PEN 19,90');
+  });
+
   it('reads the merchant header and the first date token', () => {
     expect(extractMerchantFromText(ocrText)).toBe('Lidl Slovakia');
     expect(extractDateFromText(ocrText)).toBe('12.03.2026');
