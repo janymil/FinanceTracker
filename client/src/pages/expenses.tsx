@@ -28,6 +28,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { useToast } from "@/hooks/use-toast";
+import { useSubmitLock } from "@/hooks/useSubmitLock";
 import { format } from "date-fns";
 import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -81,6 +82,7 @@ export default function Expenses() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { toast } = useToast();
+  const submitOnce = useSubmitLock();
   const { t, i18n } = useTranslation();
   const { formatDate } = useDateFormat();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -301,11 +303,14 @@ export default function Expenses() {
   const handleSubmit = async () => {
     if (!newExpense.amount || !newExpense.description) return;
 
-    if (editingTransaction) {
-      updateExpenseMutation.mutate({ id: editingTransaction.id, ...newExpense });
-    } else {
-      createExpenseMutation.mutate(newExpense);
-    }
+    // One submit at a time: a double click must not create two rows.
+    submitOnce((done) => {
+      if (editingTransaction) {
+        updateExpenseMutation.mutate({ id: editingTransaction.id, ...newExpense }, { onSettled: done });
+      } else {
+        createExpenseMutation.mutate(newExpense, { onSettled: done });
+      }
+    });
   };
 
   const handleEdit = (transaction: Transaction) => {

@@ -41,3 +41,6 @@ client/public/videos/*.webp
 # Playwright
 test-results/
 playwright-report/
+
+# Playwright auth state (contains a live session cookie, never commit)
+tests/e2e/.auth/

@@ -9,6 +9,7 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
+import { annotateEmptyReason } from "../../shared/dailyRecommendations";
 import { getAIProviderStatus } from "../../lib/aiProvider";
 import { UnifiedAICache } from "../../lib/unifiedAICache";
 import { 
@@ -525,7 +526,7 @@ export function registerAIRoutes(app: Express) {
       const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
         console.log('Daily recommendations: Using cached result for date:', todayKey, 'language:', language);
-        return res.json(cachedResult);
+        return res.json(annotateEmptyReason(cachedResult, { transactionCount: transactions.length, totalIncome: summary?.totalIncome, totalExpenses: summary?.totalExpenses }));
       }
 
       // Generate new AI response
@@ -553,7 +554,7 @@ export function registerAIRoutes(app: Express) {
       await cache.set(cacheKey, recommendations, false, 24);
       console.log('Daily recommendations: Cached new result for date:', todayKey, 'language:', language);
 
-      return res.json(recommendations);
+      return res.json(annotateEmptyReason(recommendations, { transactionCount: transactions.length, totalIncome: summary?.totalIncome, totalExpenses: summary?.totalExpenses }));
     } catch (error) {
       console.error("Error generating daily recommendations:", error);
       return res.status(500).json({ message: "Failed to generate daily recommendations" });

@@ -12,6 +12,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:5000';
 const MANAGED_SERVER = process.env.E2E_MANAGED_SERVER === '1';
+const E2E_ENABLED = process.env.E2E_ENABLED === '1';
+const STORAGE_STATE = 'tests/e2e/.auth/user.json';
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -38,16 +40,24 @@ export default defineConfig({
     trace: 'on-first-retry',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    // Tests must never touch a human's account or production Clerk.
-    extraHTTPHeaders: process.env.E2E_LOCALE ? { 'x-user-language': process.env.E2E_LOCALE } : {},
+    // NOTE: do not add a global `x-user-language` header here. Playwright applies
+    // extraHTTPHeaders to every request in the context, including Clerk's CDN, and the
+    // resulting CORS preflight makes Clerk's own script fail to load (`failed_to_load_clerk_js`).
   },
 
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
+    // When E2E is enabled, one setup run signs in and everything else reuses its cookies.
+    ...(E2E_ENABLED ? [{ name: 'setup', testMatch: /auth\.setup\.ts/ }] : []),
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], ...(E2E_ENABLED ? { storageState: STORAGE_STATE } : {}) },
+      ...(E2E_ENABLED ? { dependencies: ['setup'] } : {}),
+    },
     {
       name: 'mobile',
-      use: { ...devices['Pixel 5'] },
+      use: { ...devices['Pixel 5'], ...(E2E_ENABLED ? { storageState: STORAGE_STATE } : {}) },
       testMatch: /add-expense\.spec\.ts/,
+      ...(E2E_ENABLED ? { dependencies: ['setup'] } : {}),
     },
   ],
 

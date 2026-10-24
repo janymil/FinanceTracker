@@ -2,6 +2,11 @@ import { UnifiedAICache } from "../lib/unifiedAICache";
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
 import { MistralClient } from "./mistralClient.js";
 import { createRoutedClient, AI_MODELS } from "../lib/aiProvider";
+import {
+  financialTipsFallback,
+  isTextInLanguage,
+  progressTipFallback,
+} from "../shared/aiFallbacks";
 
 // All model calls go through lib/aiProvider: gpt-6-luna by default, with DeepSeek/Groq
 // fallbacks, JSON fence stripping and real token/cost accounting.
@@ -526,7 +531,20 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
       }
 
       const aiData = await aiResponse.json();
-      result = Array.isArray(aiData) ? aiData[0] : (aiData.tip || aiData);
+      // The processor answers with an array of sections: [{ title, content }, …].
+      // The app used to take `aiData[0]` and read `.description`, which does not exist —
+      // so every tips card was silently the static fallback. Normalise both shapes here.
+      result = Array.isArray(aiData)
+        ? {
+            title: aiData[0]?.title ?? '',
+            description: aiData
+              .map((section: any) => `${section?.title ? `${section.title}: ` : ''}${section?.content ?? ''}`)
+              .join('\n\n'),
+            category: aiData[0]?.category ?? 'budgeting',
+            priority: aiData[0]?.priority ?? 'high',
+            actionable: true,
+          }
+        : (aiData.tip || aiData);
     } catch (aiProcessorError) {
       console.warn(
         'AI processor service unavailable, falling back to direct OpenAI:',
@@ -587,8 +605,10 @@ Return comprehensive analysis in JSON:
       result = JSON.parse(response.choices[0].message.content || '{}');
     }
 
-    // Handle comprehensive analysis response
-    const processedTips: FinancialTip[] = result.title && result.description ? [{
+    // Handle comprehensive analysis response. A model that answers in the wrong language
+    // is not shown to the user: the localised fallback takes its place, and the drift is
+    // reported so it can be fixed in the prompt rather than silently shipped.
+    const rawTips: FinancialTip[] = result.title && result.description ? [{
       title: result.title,
       description: result.description,
       category: result.category || 'comprehensive',
@@ -596,13 +616,18 @@ Return comprehensive analysis in JSON:
       actionable: Boolean(result.actionable),
       estimatedSaving: result.estimatedSaving || undefined,
       educational: Boolean(result.educational)
-    }] : [{
-      title: 'Track Your Expenses',
-      description: 'Start by categorizing all your expenses to understand where your money goes each month.',
-      category: 'budgeting',
-      priority: 'high',
-      actionable: true
-    }];
+    }] : [financialTipsFallback(normalizedLanguage)];
+
+    const processedTips: FinancialTip[] = rawTips.map((tip) => {
+      const inLanguage = isTextInLanguage(`${tip.title} ${tip.description}`, normalizedLanguage);
+      if (!inLanguage) {
+        console.warn(
+          `[AI] Replacing tips written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
+        );
+        return financialTipsFallback(normalizedLanguage);
+      }
+      return tip;
+    });
 
     // Cache the result with 168 hours (7 days) TTL
     await cache.set(financialData, processedTips, false, 168);
@@ -610,15 +635,8 @@ Return comprehensive analysis in JSON:
     return processedTips;
   } catch (error) {
     console.error('Error generating financial tips:', error);
-    return [
-      {
-        title: 'Track Your Expenses',
-        description: 'Start by categorizing all your expenses to understand where your money goes each month.',
-        category: 'budgeting',
-        priority: 'high',
-        actionable: true
-      }
-    ];
+    // Deterministic fallback, in the caller's language — never English on a Slovak screen.
+    return [financialTipsFallback(normalizedLanguage)];
   }
 }
 
@@ -1488,7 +1506,10 @@ You are an expert financial advisor who provides personalized, actionable recomm
         }
       ],
       response_format: { type: "json_object" },
-      max_tokens: 1000,
+      // 1000 tokens truncated the JSON mid-string ("Unterminated string"), which the
+      // caller turned into an empty card. The prompt asks for tasks + insights + impact,
+      // so give it room and keep the shape small.
+      max_tokens: 2500,
       temperature: 0.3 // Moderate creativity for personalized recommendations
     });
 
@@ -1822,17 +1843,36 @@ You are an expert financial advisor who provides personalized, contextual recomm
 
     const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
     
-    // Ensure proper data structure
-    const tips = Array.isArray(aiResponse.tips) 
-      ? aiResponse.tips.map((tip: any, index: number) => ({
-          id: tip.id || `tip_${Date.now()}_${index}`,
-          title: tip.title || 'Financial Tip',
-          description: tip.description || 'No description available',
-          category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
-          priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
-          actionable: Boolean(tip.actionable)
-        }))
-      : [];
+    // Ensure proper data structure. Every tip must be in the requested language; a tip
+    // that is not (or a missing description, which used to default to English) is
+    // replaced by the localised fallback instead of being shown to the user.
+    const fallbackTip = progressTipFallback(normalizedLanguage);
+    const rawTips = Array.isArray(aiResponse.tips) ? aiResponse.tips : [];
+    const tips = rawTips
+      .map((tip: any, index: number) => ({
+        id: tip.id || `tip_${Date.now()}_${index}`,
+        title: String(tip.title || ''),
+        description: String(tip.description || ''),
+        category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
+        priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
+        actionable: Boolean(tip.actionable),
+      }))
+      .filter((tip: any) => {
+        const ok =
+          tip.title &&
+          tip.description &&
+          isTextInLanguage(`${tip.title} ${tip.description}`, normalizedLanguage);
+        if (!ok) {
+          console.warn(
+            `[AI] Dropping a contextual tip written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
+          );
+        }
+        return ok;
+      });
+
+    if (tips.length === 0) {
+      tips.push({ id: 'fallback_tip', ...fallbackTip });
+    }
 
 
     
@@ -1854,11 +1894,7 @@ You are an expert financial advisor who provides personalized, contextual recomm
     const fallbackResult: { tips: ContextualTip[] } = {
       tips: [{
         id: 'fallback_tip',
-        title: 'Track Your Progress',
-        description: 'Continue monitoring your financial transactions to identify spending patterns and optimization opportunities.',
-        category: 'budgeting',
-        priority: 'medium',
-        actionable: true
+        ...progressTipFallback(normalizedLanguage),
       }]
     };
     

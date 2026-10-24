@@ -14,23 +14,67 @@ A real run needs all of this — none of it may point at production:
 | Running app | `npm run dev` or `E2E_MANAGED_SERVER=1` to let Playwright start it |
 | Country blocking off | `DISABLE_COUNTRY_BLOCKING=1`, otherwise the runner can get a 403 |
 
-## Run
+## A real run (what the suite does)
+
+`auth.setup.ts` creates (once) a demo account in the Clerk **test** instance
+(`kaptia.e2e+clerk_test@example.com`), opens `/:lang/auth`, switches to "Sign in", types
+the credentials and saves the cookie jar to `tests/e2e/.auth/user.json`. Every other spec
+starts from that jar, so a failure is never "the login step was flaky".
+
+`human-flow.spec.ts` is the "walks like a user" test:
+
+1. land on the dashboard (already signed in)
+2. open Expenses → add **50.00** through the form
+3. the row appears and the total changes
+4. reload — the row is still there (came from the database)
+5. the same row is visible in Transactions
+6. Profile renders the "Data & privacy" card
+7. `/api/auth/user` returns the demo account
+
+### Run it against a disposable database (recommended)
 
 ```bash
-# 1. browsers (one-off)
-npx playwright install chromium
+# 1. throw-away Postgres
+docker run --rm -d --name kaptia-e2e-db \
+  -e POSTGRES_PASSWORD=e2e -e POSTGRES_USER=e2e -e POSTGRES_DB=kaptia \
+  -p 127.0.0.1:55432:5432 postgres:16-alpine
 
-# 2. app + env
-export E2E_ENABLED=1
-export E2E_BASE_URL=http://localhost:5000
-export E2E_LOCALE=sk
-npm run dev            # or: E2E_MANAGED_SERVER=1 npm run test:e2e
+DATABASE_URL='postgresql://e2e:e2e@127.0.0.1:55432/kaptia' npx drizzle-kit push
 
-# 3. suite
-npm run test:e2e
-npm run test:e2e -- --list        # parses specs, needs no server
-npx playwright show-report test-results/html
+# 2. the app, pointed at that database (port 4400 — Chrome blocks 5061)
+PORT=4400 DATABASE_URL='postgresql://e2e:e2e@127.0.0.1:55432/kaptia' \
+  DISABLE_COUNTRY_BLOCKING=1 \
+  PDF_SERVICE_URL='http://127.0.0.1:4010' PDF_API_KEY='e2e-stub-key' \
+  ./node_modules/.bin/tsx server/index.ts
+
+# 3. the suite (in another shell; .env supplies the Clerk test keys)
+set -a && . ./.env && set +a
+DATABASE_URL='postgresql://e2e:e2e@127.0.0.1:55432/kaptia' \
+E2E_ENABLED=1 E2E_BASE_URL=http://127.0.0.1:4400 E2E_LOCALE=sk \
+npx playwright test
+
+# 4. clean up
+docker rm -f kaptia-e2e-db
 ```
+
+`auth.setup.ts` refuses to run if `DATABASE_URL` contains `neon.tech` — the demo account is
+put on the Standard plan for the PDF test, and that must never happen in production.
+
+### Two traps this suite already paid for
+
+- **Clerk tokens are short-lived.** A saved cookie jar is useless until a page has loaded
+  and the Clerk client refreshed the session. `ensureSession()` does that in `beforeEach`;
+  without it the first API call answers 401 even though the user "is" signed in.
+- **The first-login currency modal is a full-screen overlay.** If it is left open, every
+  later click fails with "element intercepts pointer events" — a message that has nothing
+  to do with the feature under test. `dismissCurrencyModal()` closes it (with an API
+  fallback) before any assertion runs.
+
+### Known coverage gap
+
+Country blocking and Stripe checkout are not covered: the first needs a real geo setup, the
+second a test-mode Stripe account with webhooks. Both are listed in `05-e2e-critical-flows.md`.
+
 
 ## What is covered
 

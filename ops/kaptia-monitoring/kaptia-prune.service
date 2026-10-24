@@ -11,3 +11,8 @@ ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/error-guard-prune.ts --d
 StandardOutput=append:/var/log/kaptia-prune.log
 StandardError=append:/var/log/kaptia-prune.log
 NoNewPrivileges=true
+# A runaway job must never eat the server: hard caps, and a start timeout so a
+# hung script is killed instead of piling up.
+TimeoutStartSec=180
+MemoryMax=256M
+CPUQuota=50%

@@ -134,6 +134,9 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
   const recommendations = recommendationsData?.recommendations || [];
   const insights = recommendationsData?.insights || [];
+  // 'no_suggestions' = the AI had data but proposed nothing today;
+  // 'not_enough_data' = the account is still too thin for a useful answer.
+  const emptyReason = (recommendationsData as { reason?: 'not_enough_data' | 'no_suggestions' | null } | undefined)?.reason;
 
   const toggleTaskCompletion = (taskId: string) => {
     setCompletedTasks(prev => {
@@ -289,10 +292,14 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {t('dailyRecommendations.noRecommendationsTitle')}
+                    {emptyReason === 'no_suggestions'
+                      ? t('dailyRecommendations.noSuggestionsTitle')
+                      : t('dailyRecommendations.noRecommendationsTitle')}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    {t('dailyRecommendations.noRecommendationsMessage')}
+                    {emptyReason === 'no_suggestions'
+                      ? t('dailyRecommendations.noSuggestionsMessage')
+                      : t('dailyRecommendations.noRecommendationsMessage')}
                   </p>
                 </div>
               )}
@@ -334,13 +341,16 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {t('dailyRecommendations.noInsightsTitle')}
+                    {emptyReason === 'no_suggestions'
+                      ? t('dailyRecommendations.noSuggestionsTitle')
+                      : t('dailyRecommendations.noInsightsTitle')}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    {hasTransactionData 
-                      ? t('dailyRecommendations.noInsightsMessageAlt')
-                      : t('dailyRecommendations.noInsightsMessage')
-                    }
+                    {emptyReason === 'no_suggestions'
+                      ? t('dailyRecommendations.noSuggestionsMessage')
+                      : hasTransactionData
+                        ? t('dailyRecommendations.noInsightsMessageAlt')
+                        : t('dailyRecommendations.noInsightsMessage')}
                   </p>
                 </div>
               )}

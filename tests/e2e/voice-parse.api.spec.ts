@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { E2E_ENABLED, SKIP_REASON } from './support/env';
+import { E2E_ENABLED, SKIP_REASON, ensureSession } from './support/env';
 
 /**
  * E2E-2 — voice parsing through the REAL route (API level, not the microphone).
@@ -12,9 +12,13 @@ import { E2E_ENABLED, SKIP_REASON } from './support/env';
 
 test.skip(!E2E_ENABLED, SKIP_REASON);
 
+test.beforeEach(async ({ page }) => {
+  await ensureSession(page);
+});
+
 test.describe('E2E-2 voice parse', () => {
-  test('expense sentence yields cents, type and review flag', async ({ request }) => {
-    const response = await request.post('/api/voice/parse', {
+  test('expense sentence yields cents, type and review flag', async ({ page }) => {
+    const response = await page.request.post('/api/voice/parse', {
       data: { transcript: 'Obed včera 12,50', userLanguage: 'sk' },
     });
 
@@ -28,8 +32,8 @@ test.describe('E2E-2 voice parse', () => {
     expect(body.data.note).toBe('Obed včera 12,50');
   });
 
-  test('salary sentence is classified as income', async ({ request }) => {
-    const response = await request.post('/api/voice/parse', {
+  test('salary sentence is classified as income', async ({ page }) => {
+    const response = await page.request.post('/api/voice/parse', {
       data: { transcript: 'Dostal som výplatu 2450 eur', userLanguage: 'sk' },
     });
 
@@ -38,8 +42,8 @@ test.describe('E2E-2 voice parse', () => {
     expect(body.data.type).toBe('income');
   });
 
-  test('an utterance without an amount is flagged for review, never guessed', async ({ request }) => {
-    const response = await request.post('/api/voice/parse', {
+  test('an utterance without an amount is flagged for review, never guessed', async ({ page }) => {
+    const response = await page.request.post('/api/voice/parse', {
       data: { transcript: 'Nič som nekúpil', userLanguage: 'sk' },
     });
 
@@ -48,8 +52,8 @@ test.describe('E2E-2 voice parse', () => {
     expect(body.data.needsReview).toBe(true);
   });
 
-  test('rejects an empty transcript with 400', async ({ request }) => {
-    const response = await request.post('/api/voice/parse', {
+  test('rejects an empty transcript with 400', async ({ page }) => {
+    const response = await page.request.post('/api/voice/parse', {
       data: { transcript: '', userLanguage: 'sk' },
     });
 

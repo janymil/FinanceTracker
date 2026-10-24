@@ -2022,7 +2022,9 @@
       "high": "high",
       "medium": "medium",
       "low": "low"
-    }
+    },
+    "noSuggestionsTitle": "Nothing New Today",
+    "noSuggestionsMessage": "We checked your recent records and have no new suggestion for today. Your numbers usually change after a few more entries — this card updates tomorrow."
   },
   "aiPoweredInsights": "AI-Powered Insights",
   "premium": "Premium",

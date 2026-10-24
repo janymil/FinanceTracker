@@ -32,6 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 
 import { useToast } from "@/hooks/use-toast";
+import { useSubmitLock } from "@/hooks/useSubmitLock";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -74,6 +75,7 @@ interface Category {
 export default function Transactions() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
+  const submitOnce = useSubmitLock();
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { t } = useTranslation();
@@ -290,7 +292,9 @@ export default function Transactions() {
   const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) return;
 
-    if (editingTransaction) {
+    // One submit at a time: two clicks in the same tick must not create two rows.
+    submitOnce((done) => {
+      if (editingTransaction) {
       // Use React Query mutation for editing
       const updateData = {
         id: editingTransaction.id,
@@ -306,7 +310,7 @@ export default function Transactions() {
         referenceNote: newTransaction.referenceNote || ""
       };
 
-      editTransactionMutation.mutate(updateData);
+      editTransactionMutation.mutate(updateData, { onSettled: done });
       
       // Reset form
       setNewTransaction({
@@ -336,7 +340,7 @@ export default function Transactions() {
         referenceNote: newTransaction.referenceNote || ""
       };
 
-      createTransactionMutation.mutate(createData);
+      createTransactionMutation.mutate(createData, { onSettled: done });
       
       // Reset form
       setNewTransaction({
@@ -352,6 +356,7 @@ export default function Transactions() {
         referenceNote: "",
       });
     }
+    });
   };
 
   const handleEdit = (transaction: Transaction) => {

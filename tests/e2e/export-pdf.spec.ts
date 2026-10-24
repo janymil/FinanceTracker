@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { E2E_ENABLED, SKIP_REASON } from './support/env';
+import { E2E_ENABLED, SKIP_REASON, ensureSession } from './support/env';
 
 /**
  * E2E-3 — PDF export through the real server, with the external PDF service stubbed.
@@ -14,6 +14,10 @@ import { E2E_ENABLED, SKIP_REASON } from './support/env';
  */
 
 test.skip(!E2E_ENABLED, SKIP_REASON);
+
+test.beforeEach(async ({ page }) => {
+  await ensureSession(page);
+});
 
 test.describe('E2E-3 export PDF', () => {
   test('server returns a PDF produced by the (stubbed) service', async ({ page }) => {

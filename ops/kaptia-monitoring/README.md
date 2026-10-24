@@ -24,6 +24,14 @@ Logs: `/var/log/kaptia-uptime.log`, `/var/log/kaptia-health.log`, `/var/log/kapt
 
 ## Notes
 
+- **Why not cron?** This host has no cron daemon installed (`cron.service` does not exist),
+  and its `/etc/crontab` still contains a dormant `*/5` job for another project. Installing
+  cron would wake that job up as a side effect. systemd also gives us, for free: one instance
+  per job at a time (a one-shot service cannot overlap with itself), per-run logs in the
+  journal, `Persistent=true` catch-up after downtime, and the resource caps below.
+- **Caps on every run:** `TimeoutStartSec=180`, `MemoryMax=256M`, `CPUQuota=50%`. A hung or
+  runaway check is killed instead of accumulating processes — the failure mode that once
+  consumed the whole server.
 - All services run with `NODE_ENV=production`, so the scripts use `DATABASE_URL_PROD` — the
   same database the app uses. Without it they would quietly check the development database.
 - The scripts exit by themselves. A monitor that hangs would accumulate one process and one

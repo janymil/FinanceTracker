@@ -2151,7 +2151,9 @@
       "high": "alta",
       "medium": "media",
       "low": "baja"
-    }
+    },
+    "noSuggestionsTitle": "Hoy no hay nada nuevo",
+    "noSuggestionsMessage": "Revisamos tus registros recientes y hoy no tenemos una nueva sugerencia. Tus números suelen cambiar con más registros: esta tarjeta se actualiza mañana."
   },
   "aiPoweredInsights": "Perspectivas Impulsadas por IA",
   "premium": "Premium",

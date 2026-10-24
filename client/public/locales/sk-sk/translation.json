@@ -1337,7 +1337,9 @@
       "high": "vysoká",
       "medium": "stredná",
       "low": "nízka"
-    }
+    },
+    "noSuggestionsTitle": "Dnes nič nové",
+    "noSuggestionsMessage": "Pozreli sme sa na vaše posledné záznamy a na dnes nemáme nové odporúčanie. Čísla sa menia po ďalších záznamoch – karta sa obnoví zajtra."
   },
   "aiInsights": {
     "title": "Pozornosti poháňané AI",

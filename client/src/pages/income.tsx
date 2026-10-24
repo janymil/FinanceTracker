@@ -30,6 +30,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { useToast } from "@/hooks/use-toast";
+import { useSubmitLock } from "@/hooks/useSubmitLock";
 
 import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -88,6 +89,7 @@ export default function Income() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { toast } = useToast();
+  const submitOnce = useSubmitLock();
   const { t, i18n } = useTranslation();
   const { formatDate } = useDateFormat();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -315,7 +317,9 @@ export default function Income() {
       return;
     }
     
-    createIncomeMutation.mutate(newIncome);
+    submitOnce((done) => {
+      createIncomeMutation.mutate(newIncome, { onSettled: done });
+    });
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
