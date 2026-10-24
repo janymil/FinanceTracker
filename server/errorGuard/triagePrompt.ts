@@ -1,25 +1,17 @@
 /**
- * Error Guard triage — a self-contained module for the standalone AI processor.
+ * Error Guard triage prompt and model call.
  *
- * WHY THIS FILE EXISTS
- * The Kaptia web app should not own AI prompts. This service already owns the provider
- * keys, the model router and the cost logging, so error triage lives here too.
- *
- * ISOLATION (deliberate):
- *  - this file is additive: it does not touch `/execute-gpt-task`, the task switch, or any
- *    existing prompt or specialist;
- *  - it has its own prompt, its own response shape and its own model choice;
- *  - it is mounted by a single `registerErrorGuardTriage(app)` call in `index.ts`;
- *  - auth is the service-wide `x-api-key` middleware that already protects every route.
+ * The prompt lives here, in the app, like every other Kaptia prompt: the ai-processor gateway
+ * is generic and holds no Kaptia text. The call goes through lib/aiProvider, so it reaches the
+ * gateway first and falls back to calling a provider directly.
  *
  * PRIVACY:
- *  - the caller sends metadata only (a scrubbed message, top stack frames, breadcrumb
- *    labels, context *keys*). No user data, no request bodies;
- *  - the payload is never logged; `providers.ts` logs model, tokens and cost only;
- *  - the response is plain JSON that the caller validates with zod before storing anything.
+ *  - the caller sends metadata only (a scrubbed message, top stack frames, breadcrumb labels,
+ *    context *keys*). No user data, no request bodies;
+ *  - nothing here logs the payload or the model output;
+ *  - the answer is plain JSON that the caller validates with zod before storing anything.
  */
-import type { Express, Request, Response } from 'express';
-import { DEFAULT_MODEL, createRoutedClient } from './providers';
+import { AI_MODELS, createRoutedClient } from '../../lib/aiProvider';
 
 const openai = createRoutedClient();
 
@@ -28,7 +20,7 @@ const MAX_FRAMES = 5;
 const MAX_CONTEXT_KEYS = 15;
 const MAX_BREADCRUMBS = 8;
 
-const SYSTEM_PROMPT = `You are a senior engineer helping the owner of a small personal-finance app understand a failure report.
+export const TRIAGE_SYSTEM_PROMPT = `You are a senior engineer helping the owner of a small personal-finance app understand a failure report.
 
 Rules:
 - The report is metadata only. You will not see user data, and you must not ask for it.
@@ -43,7 +35,7 @@ Response shape:
  "moneyRisk":"none"|"possible"|"likely","severity":"critical"|"error"|"warning"|"info",
  "confidence":number-between-0-and-1,"suggestedFix":string}`;
 
-interface TriageRequest {
+export interface TriageRequest {
   title?: string;
   kind?: string;
   route?: string | null;
@@ -94,7 +86,7 @@ export function buildUserPrompt(input: TriageRequest): string {
   return lines.join('\n');
 }
 
-function parseJsonObject(text: unknown): Record<string, unknown> | null {
+export function parseJsonObject(text: unknown): Record<string, unknown> | null {
   if (typeof text !== 'string') return null;
   const cleaned = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   try {
@@ -107,55 +99,25 @@ function parseJsonObject(text: unknown): Record<string, unknown> | null {
   }
 }
 
-async function handleTriage(req: Request, res: Response): Promise<void> {
-  const input = (req.body ?? {}) as TriageRequest;
-
-  if (!input.message || typeof input.message !== 'string') {
-    res.status(400).json({ error: 'Missing required field: message' });
-    return;
-  }
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: buildUserPrompt(input) },
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 600,
-      temperature: 0.2,
-    });
-
-    const content = completion?.choices?.[0]?.message?.content;
-    const analysis = parseJsonObject(content);
-    if (!analysis) {
-      // Do not echo the model output: it is derived from user-facing text.
-      res.status(502).json({ error: 'invalid_json' });
-      return;
-    }
-
-    res.json({
-      analysis,
-      model: completion?.model ?? DEFAULT_MODEL,
-      usage: {
-        inputTokens: completion?.usage?.prompt_tokens ?? null,
-        outputTokens: completion?.usage?.completion_tokens ?? null,
-      },
-    });
-  } catch (error: any) {
-    console.error(
-      '[error-triage] failed:',
-      error?.status || 'network',
-      String(error?.message ?? '').slice(0, 160),
-    );
-    res.status(502).json({ error: 'triage_failed' });
-  }
+export interface TriageModelResult {
+  analysis: unknown;
+  model: string;
 }
 
-/** Mount `/error-triage`. One call in `index.ts`; nothing else in this service changes. */
-export function registerErrorGuardTriage(app: Express): void {
-  app.post('/error-triage', (req, res) => {
-    void handleTriage(req, res);
-  });
+/** Asks the model for one analysis. Throws on a provider failure (the caller handles cooldown). */
+export async function runTriageModel(input: TriageRequest): Promise<TriageModelResult> {
+  const completion = await openai.chat.completions.create({
+    model: AI_MODELS.default,
+    task: 'error-triage',
+    messages: [
+      { role: 'system', content: TRIAGE_SYSTEM_PROMPT },
+      { role: 'user', content: buildUserPrompt(input) },
+    ],
+    response_format: { type: 'json_object' },
+    max_tokens: 600,
+    temperature: 0.2,
+  } as any);
+
+  const analysis = parseJsonObject(completion?.choices?.[0]?.message?.content);
+  return { analysis, model: completion?.model ?? AI_MODELS.default };
 }

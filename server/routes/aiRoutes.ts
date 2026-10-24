@@ -2,6 +2,10 @@ import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { aiGuard } from "../aiAccess";
 import { storage } from "../storage";
+import { rateLimit } from "../middleware/rateLimit";
+import { adminAuth } from "../adminAuth";
+import { anonymizeText } from "../../shared/aiAnonymizer";
+import { PLAN_PRICES, formatMoney } from "../../shared/pricing";
 import { getUserLanguage } from "../categoryTranslations";
 import { 
   categorizeExpense,
@@ -11,6 +15,8 @@ import {
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
 import { annotateEmptyReason } from "../../shared/dailyRecommendations";
+import { isAIFailure } from "../../shared/aiResults";
+import { contextualFallbackTips } from "../../shared/aiFallbacks";
 import { getAIProviderStatus } from "../../lib/aiProvider";
 import { UnifiedAICache } from "../../lib/unifiedAICache";
 import { 
@@ -23,9 +29,14 @@ import {
 } from "../../shared/schema";
 import { eq, desc, lt, gte, sql, and } from "drizzle-orm";
 
+/** `runAI` answered with its failure payload: say so with a stable code and cache nothing. */
+function aiUnavailable(res: any) {
+  return res.status(503).json({ message: 'AI service temporarily unavailable', code: 'ai_unavailable' });
+}
+
 export function registerAIRoutes(app: Express) {
-  // Provider/routing diagnostics. Exposes configuration only (never keys).
-  app.get('/api/ai/health', (_req, res) => {
+  // Provider/routing diagnostics. Exposes configuration only (never keys), admin only.
+  app.get('/api/ai/health', adminAuth, (_req, res) => {
     res.json({
       ...getAIProviderStatus(),
       processor: {
@@ -92,7 +103,10 @@ export function registerAIRoutes(app: Express) {
               language
             );
           }
-          
+
+          // A failed answer is not a suggestion
+          if (result.failed) continue;
+
           suggestions.push({
             id: `suggestion-${transaction.id}`,
             transactionDescription: transaction.description,
@@ -155,7 +169,9 @@ export function registerAIRoutes(app: Express) {
         result = await categorizeExpenseWithUserCategories(description, amount || 0, categoryList, language);
       }
       
-      return res.json({ 
+      if (result.failed) return aiUnavailable(res);
+
+      return res.json({
         category: result.suggestedCategory || `Category ID: ${result.categoryId}`,
         categoryId: result.categoryId,
         confidence: result.confidence,
@@ -186,8 +202,12 @@ export function registerAIRoutes(app: Express) {
       if (mode === 'fetch_cached') {
         // Get the most recent cached tip directly from database
         const recentEntry = await storage.getRecentAICacheEntry(userId, 'financial-tips');
-        
-        if (recentEntry && recentEntry.outputJson) {
+
+        // A tip written in another language than the one on screen is not shown.
+        const storedLanguage = recentEntry?.inputJson?.language;
+        const sameLanguage = !storedLanguage || storedLanguage === getUserLanguage(req);
+
+        if (recentEntry && recentEntry.outputJson && sameLanguage) {
           return res.json({ tip: recentEntry.outputJson });
         } else {
           return res.json({ tip: null });
@@ -236,13 +256,7 @@ export function registerAIRoutes(app: Express) {
       // Generate new AI response
       const tipResults = await runAI('financial-tips', userId, aiPayload, user.plan || 'free');
 
-      // Handle AI processor response format
-      console.log('TIP ENDPOINT: AI processor response type:', typeof tipResults, 'isArray:', Array.isArray(tipResults));
-      
-      if (tipResults?.error) {
-        console.error('TIP ENDPOINT: AI processor returned error:', tipResults.error);
-        return res.status(500).json({ message: "AI service temporarily unavailable" });
-      }
+      if (isAIFailure(tipResults)) return aiUnavailable(res);
 
       let responseData;
       if (Array.isArray(tipResults) && tipResults.length > 0) {
@@ -262,7 +276,6 @@ export function registerAIRoutes(app: Express) {
           type: typeof tipResults,
           isArray: Array.isArray(tipResults),
           keys: tipResults ? Object.keys(tipResults) : 'null',
-          content: tipResults
         });
         return res.status(500).json({ message: "Failed to generate financial tip" });
       }
@@ -319,6 +332,7 @@ export function registerAIRoutes(app: Express) {
 
       // Generate new AI response
       const insights = await runAI('spending-insights', userId, aiPayload, user.plan || 'free');
+      if (isAIFailure(insights)) return aiUnavailable(res);
 
       // Cache the result for 72 hours
       await cache.set(aiPayload, insights, false, 72);
@@ -379,17 +393,10 @@ export function registerAIRoutes(app: Express) {
 
       // Generate new AI response
       const aiScore = await runAI('financial-health-score', userId, aiPayload, user.plan || 'free');
+      if (isAIFailure(aiScore)) return aiUnavailable(res);
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, aiScore, false, 24);
-      
-      console.log('Financial health: AI response structure:', {
-        hasScore: typeof aiScore?.score === 'number',
-        score: aiScore?.score,
-        hasStatus: !!aiScore?.status,
-        status: aiScore?.status,
-        fullResponse: aiScore
-      });
 
       return res.json(aiScore);
     } catch (error) {
@@ -448,6 +455,7 @@ export function registerAIRoutes(app: Express) {
 
       // Generate new AI response
       const predictions = await runAI('trend-predictions', userId, aiPayload, user.plan || 'free');
+      if (isAIFailure(predictions)) return aiUnavailable(res);
 
       // Cache the result for 48 hours
       await cache.set(aiPayload, predictions, false, 48);
@@ -473,13 +481,6 @@ export function registerAIRoutes(app: Express) {
       }
 
       const { transactions, summary, budgets } = req.body;
-
-      console.log('DEBUG: Raw daily recommendations request data:', {
-        transactionCount: transactions?.length || 0,
-        firstTransactionStructure: transactions?.[0] || 'none',
-        summaryReceived: summary || 'none',
-        budgetCount: budgets?.length || 0
-      });
 
       if (!transactions || !Array.isArray(transactions)) {
         return res.status(400).json({ message: "Transactions array is required" });
@@ -532,24 +533,7 @@ export function registerAIRoutes(app: Express) {
 
       // Generate new AI response
       let recommendations = await runAI('daily-recommendations', userId, aiPayload, user.plan || 'free');
-      
-      console.log('Daily recommendations: received response from the AI processor:', {
-        hasRecommendations: Array.isArray(recommendations?.recommendations),
-        recommendationCount: recommendations?.recommendations?.length || 0,
-        hasInsights: Array.isArray(recommendations?.insights),
-        insightCount: recommendations?.insights?.length || 0,
-        source: 'ai-processor',
-        actualRecommendations: recommendations?.recommendations,
-        actualInsights: recommendations?.insights
-      });
-
-      console.log('Daily recommendations: AI response structure:', {
-        hasRecommendations: !!recommendations?.recommendations,
-        recommendationCount: recommendations?.recommendations?.length || 0,
-        hasInsights: !!recommendations?.insights,
-        insightCount: recommendations?.insights?.length || 0,
-        fullResponse: recommendations
-      });
+      if (isAIFailure(recommendations)) return aiUnavailable(res);
 
       // Cache the result for 24 hours using date-based key with language
       await cache.set(cacheKey, recommendations, false, 24);
@@ -688,6 +672,7 @@ export function registerAIRoutes(app: Express) {
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload, user.plan || 'free');
+      if (isAIFailure(healthData)) return aiUnavailable(res);
 
       // Transform AI analysis into frontend-expected format
       const response = transformAIResponseForMascot(healthData);
@@ -1077,6 +1062,7 @@ export function registerAIRoutes(app: Express) {
         language: language
       };
       const predictions = await runAI('expense-predictions', userId, aiPayload, user.plan || 'free');
+      if (isAIFailure(predictions)) return aiUnavailable(res);
 
       // Cache the result for 48 hours using consistent input
       await cache.set(cacheInput, predictions, false, 48);
@@ -1089,12 +1075,20 @@ export function registerAIRoutes(app: Express) {
   });
 
   // Help Chat Assistant endpoint
-  app.post('/api/help-chat', async (req: any, res) => {
+  // Public (the help page works before sign-up), so it is rate limited per visitor and the
+  // message is capped. No user data is sent: the prompt below only describes the product.
+  app.post('/api/help-chat',
+    rateLimit({ windowMs: 60_000, max: 6, keyPrefix: 'help-chat-min', message: 'Too many questions. Please wait a minute.' }),
+    rateLimit({ windowMs: 60 * 60_000, max: 30, keyPrefix: 'help-chat-hour', message: 'Hourly question limit reached. Please try again later.' }),
+    async (req: any, res) => {
     try {
       const { message } = req.body;
 
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ message: "Message is required" });
+      }
+      if (message.length > 500) {
+        return res.status(400).json({ message: "Message is too long (500 characters max)" });
       }
 
       const { openai } = await import('../openaiClient');
@@ -1108,8 +1102,8 @@ export function registerAIRoutes(app: Express) {
 
 Kaptia offers three subscription tiers:
 - Free Plan: Basic transaction tracking (up to 100 transactions)
-- Standard Plan ($4.99/month or $49.90/year): Enhanced features including budgeting, goals, transaction reminders, AI categorization, receipt OCR processing
-- Premium Plan ($9.99/month or $99.90/year): Unlimited transactions, advanced analytics, AI insights, data export/import, cloud backup, predictions, recommendations
+- Standard Plan (${formatMoney(PLAN_PRICES.standard.usd.monthly, 'usd')}/month or ${formatMoney(PLAN_PRICES.standard.usd.yearly, 'usd')}/year; in Peru ${formatMoney(PLAN_PRICES.standard.pen.monthly, 'pen')}/month): Enhanced features including budgeting, goals, transaction reminders, AI categorization, receipt OCR processing
+- Premium Plan (${formatMoney(PLAN_PRICES.premium.usd.monthly, 'usd')}/month or ${formatMoney(PLAN_PRICES.premium.usd.yearly, 'usd')}/year; in Peru ${formatMoney(PLAN_PRICES.premium.pen.monthly, 'pen')}/month): Unlimited transactions, advanced analytics, AI insights, data export/import, cloud backup, predictions, recommendations
 
 Key features include:
 - Transaction tracking (manual entry and receipt OCR scanning)
@@ -1127,7 +1121,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
           },
           {
             role: "user",
-            content: message
+            // Anonymous visitors may paste anything: strip e-mails, phones, card numbers, IDs.
+            content: anonymizeText(message).text
           }
         ],
         temperature: 0.7,
@@ -1171,37 +1166,12 @@ Answer questions about features, subscription plans, how to use the app, trouble
         budgets: safeBudgets.length 
       });
       
-      console.log('🎯 [CONTEXTUAL-TIPS] Budget Analysis:', {
-        budgetCount: safeBudgets.length,
-        budgets: safeBudgets.map((b: any) => ({
-          category: b.categoryName,
-          amount: b.amount,
-          spent: b.spent,
-          remaining: b.remaining
-        })),
-        hasBudgets: safeBudgets.length > 0
-      });
       console.log('🎯 Contextual tips - User check:', {
         userId: userId?.substring(0, 8) + '...',
         userPlan: user?.plan || 'free',
         hasUser: !!user
       });
 
-      console.log('🔥 Contextual tips API request received:', {
-        userId: userId?.substring(0, 8) + '...',
-        selectedMonth,
-        transactionCount: transactions?.length || 0,
-        hasIncome: summary?.totalIncome > 0,
-        hasExpenses: summary?.totalExpenses > 0,
-        budgetCount: budgets?.length || 0,
-        goalsCount: goals?.length || 0,
-        firstTransaction: transactions?.[0] ? {
-          description: transactions[0].description,
-          categoryName: transactions[0].categoryName,
-          amount: transactions[0].amount,
-          type: transactions[0].type
-        } : 'none'
-      });
 
       if (!safeTransactions && !safeSummary) {
         return res.status(400).json({ message: "Financial data is required" });
@@ -1217,7 +1187,9 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       const formattedMonth = formatMonth(selectedMonth);
 
-      // Prepare payload for centralized AI processor
+      const language = getUserLanguage(req);
+
+      // Prepare payload for the AI call
       const aiPayload = {
         summary: {
           totalIncome: safeSummary.totalIncome || 0,
@@ -1246,7 +1218,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
           progress: goal.progress || ((goal.currentAmount / goal.targetAmount) * 100)
         })) || [],
         selectedMonth: formattedMonth,
-        language: getUserLanguage(req)
+        language
       };
 
       // Initialize UnifiedAICache with 72 hours TTL
@@ -1258,8 +1230,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
         // Return cached tips with proper formatting
         const tips = Array.isArray(cachedResult?.tips) ? cachedResult.tips.map((tip: any, index: number) => ({
           id: tip.id || `tip_${Date.now()}_${index}`,
-          title: tip.title || 'Financial Tip',
-          description: tip.description || 'No description available',
+          title: tip.title || '',
+          description: tip.description || '',
           category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
           priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
           actionable: Boolean(tip.actionable)
@@ -1287,44 +1259,36 @@ Answer questions about features, subscription plans, how to use the app, trouble
         result = await runAI('contextual-tips', userId, aiPayload, user?.plan || 'free');
         console.log('✅ [CONTEXTUAL-TIPS] runAI completed successfully');
       } catch (aiError: any) {
-        console.error('🚨 [CONTEXTUAL-TIPS] AI processor failed:', aiError.message);
-        console.error('🚨 [CONTEXTUAL-TIPS] Full error:', aiError);
-        // Return fallback tips based on available data
-        const fallbackTips = generateFallbackTips(safeSummary, safeTransactions, safeBudgets);
-        console.log('🔄 [CONTEXTUAL-TIPS] Returning fallback tips:', fallbackTips.length);
-        return res.json({ tips: fallbackTips });
+        console.error('🚨 [CONTEXTUAL-TIPS] AI failed:', aiError.message);
+        return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
       }
       
-      console.log('📥 Contextual tips - AI processor response:', {
-        hasResult: !!result,
-        resultType: typeof result,
-        hasError: !!result?.error,
-        hasTips: !!result?.tips,
-        tipsCount: result?.tips?.length || 0,
-        firstTip: result?.tips?.[0]?.title || 'none'
-      });
-      
-      // Handle AI processor errors
-      if (result?.error) {
-        console.error('🚨 AI processor returned error for contextual tips:', result.error);
-        const fallbackTips = generateFallbackTips(safeSummary, safeTransactions, safeBudgets);
-        return res.json({ tips: fallbackTips });
+      // The model could not be reached: rule-based tips in the person's language, never cached.
+      if (isAIFailure(result)) {
+        console.error('🚨 AI returned an error for contextual tips');
+        return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
       }
-      
-      // Handle centralized processor response
-      const tips = Array.isArray(result?.tips) ? result.tips.map((tip: any, index: number) => ({
-        id: tip.id || `tip_${Date.now()}_${index}`,
-        title: tip.title || 'Financial Tip',
-        description: tip.description || 'No description available',
-        category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
-        priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
-        actionable: Boolean(tip.actionable)
-      })) : generateFallbackTips(safeSummary, safeTransactions, safeBudgets);
 
-      // Cache the result for 72 hours
-      await cache.set(aiPayload, { tips }, false, 72);
+      const aiTips = (Array.isArray(result?.tips) ? result.tips : [])
+        .filter((tip: any) => tip && typeof tip.title === 'string' && tip.title.trim()
+          && typeof tip.description === 'string' && tip.description.trim())
+        .map((tip: any, index: number) => ({
+          id: tip.id || `tip_${Date.now()}_${index}`,
+          title: tip.title,
+          description: tip.description,
+          category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
+          priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
+          actionable: Boolean(tip.actionable)
+        }));
 
-      return res.json({ tips });
+      if (aiTips.length === 0) {
+        return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
+      }
+
+      // Cache only a real answer, for 72 hours
+      await cache.set(aiPayload, { tips: aiTips }, false, 72);
+
+      return res.json({ tips: aiTips });
     } catch (error: any) {
       console.error("Error generating contextual financial tips:", {
         error: error.message,
@@ -1337,7 +1301,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
         const fallbackSummary = req.body?.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 };
         const fallbackTransactions = req.body?.transactions || [];
         const fallbackBudgets = req.body?.budgets || [];
-        const fallbackTips = generateFallbackTips(fallbackSummary, fallbackTransactions, fallbackBudgets);
+        const fallbackTips = generateFallbackTips(fallbackSummary, fallbackTransactions, fallbackBudgets, getUserLanguage(req));
         console.log('🔄 Contextual tips - Returning fallback tips due to error');
         return res.json({ tips: fallbackTips });
       } catch (fallbackError) {
@@ -1349,67 +1313,12 @@ Answer questions about features, subscription plans, how to use the app, trouble
   });
 
   // Helper function to generate fallback tips when AI processor fails
-  function generateFallbackTips(summary: any, transactions: any[], budgets: any[]) {
-    const tips = [];
-    const netBalance = (summary?.totalIncome || 0) - (summary?.totalExpenses || 0);
-    
-    // Basic budgeting tip
-    if (summary?.totalExpenses > 0 && budgets?.length === 0) {
-      tips.push({
-        id: 'fallback_budget',
-        title: 'Create Your First Budget',
-        description: 'Set spending limits for your expense categories to better control your finances.',
-        category: 'budgeting',
-        priority: 'high',
-        actionable: true
-      });
-    }
-    
-    // Savings tip based on net balance
-    if (netBalance > 0) {
-      tips.push({
-        id: 'fallback_savings',
-        title: 'Great Job on Positive Cash Flow!',
-        description: 'You have a positive balance this month. Consider setting aside some money for savings or emergency fund.',
-        category: 'saving',
-        priority: 'medium',
-        actionable: true
-      });
-    } else if (netBalance < 0) {
-      tips.push({
-        id: 'fallback_spending',
-        title: 'Review Your Spending',
-        description: 'Your expenses exceed your income this month. Look for areas where you can reduce costs.',
-        category: 'spending',
-        priority: 'high',
-        actionable: true
-      });
-    }
-    
-    // Transaction tracking tip
-    if (!transactions || transactions.length === 0) {
-      tips.push({
-        id: 'fallback_tracking',
-        title: 'Start Tracking Your Expenses',
-        description: 'Begin by recording your daily expenses to get a clear picture of your spending habits.',
-        category: 'budgeting',
-        priority: 'high',
-        actionable: true
-      });
-    }
-    
-    // Default tip if no other conditions met
-    if (tips.length === 0) {
-      tips.push({
-        id: 'fallback_general',
-        title: 'Keep Track of Your Finances',
-        description: 'Regular monitoring of your income and expenses helps maintain financial health.',
-        category: 'budgeting',
-        priority: 'medium',
-        actionable: true
-      });
-    }
-    
-    return tips;
+  function generateFallbackTips(summary: any, transactions: any[], budgets: any[], language: string) {
+    return contextualFallbackTips(language, {
+      totalIncome: summary?.totalIncome,
+      totalExpenses: summary?.totalExpenses,
+      transactionCount: transactions?.length,
+      budgetCount: budgets?.length,
+    });
   }
 }

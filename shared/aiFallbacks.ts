@@ -119,3 +119,128 @@ export function financialTipsFallback(language: string): FallbackTip {
 export function progressTipFallback(language: string): FallbackTip {
   return { ...PROGRESS_FALLBACK[simpleLanguage(language)] };
 }
+
+/** Shown when there is no data yet (not when generation failed): trend forecast and first tip. */
+export interface EmptyStateCopy {
+  forecastInsight: string;
+  forecastTitle: string;
+  forecastDescription: string;
+  firstTipTitle: string;
+  firstTipDescription: string;
+}
+
+const EMPTY_STATE: Record<SimpleLanguage, EmptyStateCopy> = {
+  en: {
+    forecastInsight: 'Add transactions to generate AI-powered financial forecasts',
+    forecastTitle: 'Start tracking your expenses',
+    forecastDescription: 'Add transactions to receive personalized predictions',
+    firstTipTitle: 'Start Your Financial Journey',
+    firstTipDescription: 'Begin by tracking your income and expenses to get personalized financial insights.',
+  },
+  es: {
+    forecastInsight: 'Agrega movimientos para generar previsiones financieras con IA',
+    forecastTitle: 'Empieza a registrar tus gastos',
+    forecastDescription: 'Agrega movimientos para recibir predicciones personalizadas',
+    firstTipTitle: 'Empieza tu camino financiero',
+    firstTipDescription: 'Empieza registrando tus ingresos y gastos para recibir información financiera personalizada.',
+  },
+  sk: {
+    forecastInsight: 'Pridajte transakcie, aby sa mohli vytvoriť finančné predpovede s AI',
+    forecastTitle: 'Začnite sledovať svoje výdavky',
+    forecastDescription: 'Pridajte transakcie a získate personalizované predpovede',
+    firstTipTitle: 'Začnite svoju finančnú cestu',
+    firstTipDescription: 'Začnite sledovaním príjmov a výdavkov, aby ste dostali personalizované finančné poznatky.',
+  },
+};
+
+export function emptyStateCopy(language: string): EmptyStateCopy {
+  return { ...EMPTY_STATE[simpleLanguage(language)] };
+}
+
+/** Words for the computed health score when the model could not be reached. */
+export interface HealthFallbackCopy {
+  unavailable: string;
+  positiveBalance: string;
+  expensesExceedIncome: string;
+}
+
+const HEALTH_FALLBACK: Record<SimpleLanguage, HealthFallbackCopy> = {
+  en: {
+    unavailable: 'Detailed analysis is temporarily unavailable',
+    positiveBalance: 'Positive net balance',
+    expensesExceedIncome: 'Expenses exceed income',
+  },
+  es: {
+    unavailable: 'El análisis detallado no está disponible por ahora',
+    positiveBalance: 'Balance neto positivo',
+    expensesExceedIncome: 'Los gastos superan los ingresos',
+  },
+  sk: {
+    unavailable: 'Podrobná analýza momentálne nie je dostupná',
+    positiveBalance: 'Kladný čistý zostatok',
+    expensesExceedIncome: 'Výdavky prevyšujú príjmy',
+  },
+};
+
+export function healthFallbackCopy(language: string): HealthFallbackCopy {
+  return { ...HEALTH_FALLBACK[simpleLanguage(language)] };
+}
+
+/**
+ * Rule-based tips for when the model could not be reached. They only depend on three numbers,
+ * so they are written out in all three languages instead of being translated by a model.
+ */
+export interface ContextualFallbackTip {
+  id: string;
+  title: string;
+  description: string;
+  category: 'spending' | 'saving' | 'budgeting' | 'income';
+  priority: 'high' | 'medium' | 'low';
+  actionable: boolean;
+}
+
+type FallbackKey = 'budget' | 'savings' | 'spending' | 'tracking' | 'general';
+
+const CONTEXTUAL_FALLBACK: Record<SimpleLanguage, Record<FallbackKey, { title: string; description: string }>> = {
+  en: {
+    budget: { title: 'Create Your First Budget', description: 'Set spending limits for your expense categories to better control your finances.' },
+    savings: { title: 'Great Job on Positive Cash Flow!', description: 'You have a positive balance this month. Consider setting aside some money for savings or an emergency fund.' },
+    spending: { title: 'Review Your Spending', description: 'Your expenses exceed your income this month. Look for areas where you can reduce costs.' },
+    tracking: { title: 'Start Tracking Your Expenses', description: 'Begin by recording your daily expenses to get a clear picture of your spending habits.' },
+    general: { title: 'Keep Track of Your Finances', description: 'Regular monitoring of your income and expenses helps maintain financial health.' },
+  },
+  es: {
+    budget: { title: 'Crea tu primer presupuesto', description: 'Define límites de gasto para tus categorías y controla mejor tus finanzas.' },
+    savings: { title: '¡Buen trabajo con tu flujo de caja positivo!', description: 'Tienes un saldo positivo este mes. Considera apartar algo de dinero para ahorrar o para un fondo de emergencia.' },
+    spending: { title: 'Revisa tus gastos', description: 'Tus gastos superan tus ingresos este mes. Busca dónde puedes reducir costos.' },
+    tracking: { title: 'Empieza a registrar tus gastos', description: 'Comienza anotando tus gastos diarios para ver con claridad tus hábitos de gasto.' },
+    general: { title: 'Mantén el control de tus finanzas', description: 'Revisar con regularidad tus ingresos y gastos ayuda a mantener unas finanzas sanas.' },
+  },
+  sk: {
+    budget: { title: 'Vytvorte svoj prvý rozpočet', description: 'Nastavte limity výdavkov pre svoje kategórie a lepšie ovládajte svoje financie.' },
+    savings: { title: 'Skvelá práca s kladným cash flow!', description: 'Tento mesiac máte kladný zostatok. Zvážte odloženie časti peňazí na úspory alebo núdzovú rezervu.' },
+    spending: { title: 'Skontrolujte svoje výdavky', description: 'Vaše výdavky tento mesiac prevyšujú príjmy. Poobzerajte sa, kde môžete znížiť náklady.' },
+    tracking: { title: 'Začnite sledovať svoje výdavky', description: 'Začnite zapisovaním denných výdavkov, aby ste jasne videli svoje výdavkové návyky.' },
+    general: { title: 'Majte svoje financie pod kontrolou', description: 'Pravidelné sledovanie príjmov a výdavkov pomáha udržať zdravé financie.' },
+  },
+};
+
+export function contextualFallbackTips(
+  language: string,
+  facts: { totalIncome?: number; totalExpenses?: number; transactionCount?: number; budgetCount?: number },
+): ContextualFallbackTip[] {
+  const copy = CONTEXTUAL_FALLBACK[simpleLanguage(language)];
+  const income = Number(facts.totalIncome) || 0;
+  const expenses = Number(facts.totalExpenses) || 0;
+  const net = income - expenses;
+  const tips: ContextualFallbackTip[] = [];
+  const add = (key: FallbackKey, category: ContextualFallbackTip['category'], priority: ContextualFallbackTip['priority']) =>
+    tips.push({ id: `fallback_${key}`, ...copy[key], category, priority, actionable: true });
+
+  if (expenses > 0 && !facts.budgetCount) add('budget', 'budgeting', 'high');
+  if (net > 0) add('savings', 'saving', 'medium');
+  else if (net < 0) add('spending', 'spending', 'high');
+  if (!facts.transactionCount) add('tracking', 'budgeting', 'high');
+  if (tips.length === 0) add('general', 'budgeting', 'medium');
+  return tips;
+}

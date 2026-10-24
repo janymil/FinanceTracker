@@ -17,12 +17,13 @@ import { registerErrorGuardRoutes } from "../errorGuard/routes.js";
 import { normalizeRoute } from "@shared/errorGuard/fingerprint";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { registerMercadoPagoRoutes } from "./mercadoPagoRoutes";
+import { registerBillingRegionRoute } from "../billingRegion";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 import { registerImportRoutes } from "./importRoutes";
 import { handleContactForm } from "../contact";
+import { registerComplaintRoutes } from "../complaints";
 import { registerRedeemRoutes } from "./redeemRoutes";
-import { registerClerkWebhookRoutes } from "./clerkWebhooks.js";
 import { registerPDFRoutes } from "./pdfRoutes.js";
 import demoRoutes from "../demoRoutes.js";
 import courseRoutes from "../courseRoutes.js";
@@ -30,6 +31,7 @@ import { DataEncryption } from "../encryption.js";
 import { getEmailTransportStatus } from "../emailService.js";
 import { isAuthenticated } from "../clerkAuth.js";
 import { aiGuard } from "../aiAccess.js";
+import { checkAiGateway } from "../aiGatewayHealth";
 import { rateLimit } from "../middleware/rateLimit.js";
 import { db } from "../db.js";
 import { sql } from "drizzle-orm";
@@ -39,7 +41,6 @@ import { registerLearningRoutes } from "./learningRoutes.js";
 import { registerVoiceRoutes } from "./voiceRoutes.js";
 import groqVoiceRoutes from "./groqVoiceRoutes.js";
 import mistralVoiceRoutes from "./mistralVoiceRoutes.js";
-import mistralTestRoutes from "./mistralTestRoutes.js";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -65,6 +66,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
   app.post('/api/cookie-consent', setCookieConsent);
 
+  // Libro de Reclamaciones (Peru consumer law)
+  registerComplaintRoutes(app);
+
   // Contact form endpoint — public by design, so it gets a tight per-IP limit.
   app.post(
     '/api/contact',
@@ -85,12 +89,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.execute(sql`select 1`);
       // Email state is exposed as a status only: no host, no account, no error text.
       const email = getEmailTransportStatus();
+      // The AI gateway is allowed to be down (calls fall back to the providers), so it can
+      // only ever read "degraded"; it never turns the whole check red.
+      const ai = await checkAiGateway();
       res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         checks: {
           database: { status: 'ok', latencyMs: Date.now() - startedAt },
           email: { status: email.status === 'failed' ? 'error' : email.status === 'unconfigured' ? 'disabled' : 'ok' },
+          ai: { status: ai },
         },
       });
     } catch (error) {
@@ -105,11 +113,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get('/api/encryption-status', (req, res) => {
-    const status = DataEncryption.getEncryptionStatus();
-    res.json(status);
-  });
-
   // Register all route modules
   registerMobileUploadRoutes(app);
   registerAuthRoutes(app);
@@ -121,6 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerRealtimeRoutes(app);
   registerExportRoutes(app);
   registerImportRoutes(app);
+  registerBillingRegionRoute(app);
   registerStripeRoutes(app);
   // Peru pays in soles through MercadoPago; USD keeps going through Stripe.
   registerMercadoPagoRoutes(app);
@@ -161,21 +165,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     mistralVoiceRoutes
   );
   
-  // Mistral test routes (no auth required) - development only, they call a paid API
+  // Demo routes (video-production tooling) are not served in production.
   if (process.env.NODE_ENV !== 'production') {
-    app.use('/api/mistral-test', mistralTestRoutes);
+    app.use('/api/demo', demoRoutes);
   }
-  
-  // Demo routes for interactive video features
-  app.use('/api/demo', demoRoutes);
   
   // Course routes for financial literacy mini-courses
   app.use('/api/courses', courseRoutes);
   
   // Contextual financial tips routes moved to aiRoutes.ts
 
-  // Register Clerk webhooks after other routes to avoid middleware conflicts
-  registerClerkWebhookRoutes(app);
+  // The Clerk webhook lives in server/index.ts: it needs the raw body before any parser.
 
   // Production fix: Handle mobile upload client-side routing
   // This ensures mobile-upload/:sessionId routes serve the React app in production

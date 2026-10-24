@@ -47,3 +47,20 @@ tests/e2e/.auth/
 
 # Tesseract language data (downloaded on demand, never committed)
 eng.traineddata
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Database dumps, user uploads and local tool settings never belong in git
+prod_*.txt
+dev_*.txt
+uploads/
+attached_assets/
+.claude/settings.local.json
+server.log
+*.log
+Screenshot *.png
+kaptia-app-analysis.pdf
+
+# The AI gateway is its own repository (github.com/janymil/ai-processor)
+/ai-processor/

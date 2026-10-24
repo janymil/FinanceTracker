@@ -35,6 +35,8 @@ export const AI_MODELS = {
   parsing: 'gpt-6-luna',
   /** Short classification: expense/income categorisation, voice parsing. */
   classification: 'gpt-6-luna',
+  /** Voice transcript -> transaction: Mistral first, then the chain below. */
+  voice: 'mistral-small-latest',
   /** Anything not specified above. */
   default: 'gpt-6-luna',
 } as const;
@@ -55,15 +57,91 @@ const FALLBACKS: Record<string, string[]> = {
   'gpt-6-luna': ['deepseek-flash', 'openai/gpt-oss-20b'],
   'gpt-5-nano': ['openai/gpt-oss-20b', 'deepseek-flash'],
   'deepseek-flash': ['gpt-6-luna', 'openai/gpt-oss-20b'],
+  'mistral-small-latest': ['gpt-6-luna', 'deepseek-flash'],
+  'openai/gpt-oss-120b': ['gpt-6-luna', 'deepseek-flash'],
   default: ['deepseek-flash'],
 };
 
-const PROVIDER_KEYS: Record<AIProvider, string | undefined> = {
-  openai: process.env.OPENAI_API_KEY,
-  deepseek: process.env.DEEPSEEK_API_KEY,
-  groq: process.env.GROQ_API_KEY,
-  mistral: process.env.MISTRAL_API_KEY,
+const KEY_ENV: Record<AIProvider, string> = {
+  openai: 'OPENAI_API_KEY',
+  deepseek: 'DEEPSEEK_API_KEY',
+  groq: 'GROQ_API_KEY',
+  mistral: 'MISTRAL_API_KEY',
 };
+
+/** Read at call time, so a key rotated in the environment never needs a code change. */
+function keyFor(provider: AIProvider): string | undefined {
+  return process.env[KEY_ENV[provider]] || undefined;
+}
+
+/**
+ * Circuit breaker, one per provider. After `AI_BREAKER_THRESHOLD` failures in a row the
+ * provider is skipped for `AI_BREAKER_COOLDOWN_MS`, so an outage costs one slow request
+ * instead of a full timeout on every request. After the cooldown one request tries it again.
+ */
+interface BreakerState {
+  failures: number;
+  openUntil: number;
+  lastError?: string;
+  lastFailureAt?: number;
+}
+
+const breakers = new Map<string, BreakerState>();
+const GATEWAY = 'gateway';
+
+function breakerThreshold(): number {
+  return Number(process.env.AI_BREAKER_THRESHOLD) || 3;
+}
+function breakerCooldownMs(): number {
+  return Number(process.env.AI_BREAKER_COOLDOWN_MS) || 60_000;
+}
+/** Longest a single request may spend walking down the fallback chain. */
+function totalBudgetMs(): number {
+  return Number(process.env.AI_TOTAL_BUDGET_MS) || 120_000;
+}
+
+function breakerFor(provider: string): BreakerState {
+  let state = breakers.get(provider);
+  if (!state) {
+    state = { failures: 0, openUntil: 0 };
+    breakers.set(provider, state);
+  }
+  return state;
+}
+
+function isOpen(provider: string, now: number): boolean {
+  return breakerFor(provider).openUntil > now;
+}
+
+function recordSuccess(provider: string): void {
+  const state = breakerFor(provider);
+  state.failures = 0;
+  state.openUntil = 0;
+}
+
+/** Only failures that say something about the provider count; a malformed request does not. */
+function countsAgainstProvider(error: any): boolean {
+  const status = error?.status;
+  if (!status) return true;
+  return status >= 500 || [401, 403, 408, 409, 429].includes(status);
+}
+
+function recordFailure(provider: string, error: any, now: number): void {
+  const state = breakerFor(provider);
+  state.lastError = String(error?.message || error).slice(0, 160);
+  state.lastFailureAt = now;
+  if (!countsAgainstProvider(error)) return;
+  state.failures += 1;
+  if (state.failures >= breakerThreshold()) {
+    state.openUntil = now + breakerCooldownMs();
+  }
+}
+
+/** Test helper: forgets every provider's failure history and cached clients. */
+export function resetAIBreakers(): void {
+  breakers.clear();
+  clients.clear();
+}
 
 const PROVIDER_BASE_URLS: Partial<Record<AIProvider, string>> = {
   deepseek: 'https://api.deepseek.com',
@@ -74,6 +152,8 @@ const PROVIDER_BASE_URLS: Partial<Record<AIProvider, string>> = {
 export interface AIUsageRecord {
   model: string;
   provider: AIProvider | 'unknown';
+  /** 'gateway' when the ai-processor answered, 'direct' when the app called a provider itself. */
+  via?: 'gateway' | 'direct';
   inputTokens: number;
   outputTokens: number;
   costUsd: number;
@@ -100,7 +180,7 @@ function clientFor(provider: AIProvider): OpenAI {
   const cached = clients.get(provider);
   if (cached) return cached;
 
-  const apiKey = PROVIDER_KEYS[provider];
+  const apiKey = keyFor(provider);
   if (!apiKey) throw new Error(`No API key configured for provider "${provider}"`);
 
   const client = new OpenAI({
@@ -197,6 +277,7 @@ async function callModel(spec: AIModelSpec, params: any, fallback: boolean, task
   recordUsage({
     model: spec.model,
     provider: spec.provider,
+    via: 'direct',
     inputTokens,
     outputTokens,
     costUsd: (inputTokens * spec.inputPricePerM + outputTokens * spec.outputPricePerM) / 1_000_000,
@@ -207,7 +288,76 @@ async function callModel(spec: AIModelSpec, params: any, fallback: boolean, task
   return sanitizeResponse(response);
 }
 
-async function routeChat(params: any): Promise<any> {
+/**
+ * The ai-processor gateway is the first stop for every call. It holds the provider keys and
+ * adds its own fallback; this app only builds the prompt and keeps a direct path as the net
+ * underneath. It needs a URL *and* a key: a gateway without a key would be open to anyone,
+ * so a missing key means "not configured", never "call it anyway".
+ */
+function gatewayConfig(): { url: string; key: string } | null {
+  if (process.env.AI_PROCESSOR_ENABLED !== 'true') return null;
+  const url = String(process.env.AI_PROCESSOR_URL || '').replace(/\/+$/, '');
+  const key = process.env.AI_PROCESSOR_API_KEY;
+  if (!url || !key) return null;
+  return { url, key };
+}
+
+function gatewayTimeoutMs(task?: string): number {
+  const base = Number(process.env.AI_PROCESSOR_TIMEOUT_MS) || 45_000;
+  return task === 'parseBankStatement' ? Math.max(base, 120_000) : base;
+}
+
+async function callGateway(config: { url: string; key: string }, params: any, task?: string): Promise<any> {
+  const { task: _task, ...body } = params ?? {};
+
+  const response = await fetch(`${config.url}/v1/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': config.key,
+      'x-app': 'kaptia',
+      ...(task ? { 'x-task': task } : {}),
+    },
+    body: JSON.stringify(body),
+    // Aborting also tells the gateway to stop spending on this request.
+    signal: AbortSignal.timeout(gatewayTimeoutMs(task)),
+  });
+
+  if (!response.ok) {
+    let detail = '';
+    try {
+      const json: any = await response.json();
+      detail = String(json?.error?.message || json?.error || '').slice(0, 160);
+    } catch {
+      /* body was not JSON */
+    }
+    const error: any = new Error(`gateway HTTP ${response.status}${detail ? `: ${detail}` : ''}`);
+    error.status = response.status;
+    throw error;
+  }
+
+  const json: any = await response.json();
+  const content = json?.choices?.[0]?.message?.content;
+  if (typeof content !== 'string' || content.trim() === '') {
+    throw new Error('Empty response from the gateway');
+  }
+
+  const meta = json?.x_gateway ?? {};
+  recordUsage({
+    model: String(meta.model || json?.model || 'unknown'),
+    provider: (meta.provider as AIProvider) || 'unknown',
+    via: 'gateway',
+    inputTokens: json?.usage?.prompt_tokens ?? 0,
+    outputTokens: json?.usage?.completion_tokens ?? 0,
+    costUsd: Number(meta.costUsd) || 0,
+    fallback: Boolean(meta.fallback),
+    task,
+  });
+
+  return sanitizeResponse(json);
+}
+
+export async function routeChat(params: any): Promise<any> {
   // Single choke point: nothing reaches a provider with an e-mail, IBAN, card, phone,
   // address, account number or the user's own name inside the prompt.
   if (Array.isArray(params?.messages)) {
@@ -215,29 +365,61 @@ async function routeChat(params: any): Promise<any> {
   }
 
   const primaryName = String(params?.model || AI_MODELS.default);
-  const chain = [primaryName, ...(FALLBACKS[primaryName] ?? FALLBACKS.default)];
+  const chain = [primaryName, ...(FALLBACKS[primaryName] ?? FALLBACKS.default)]
+    .map((name) => resolveSpec(name))
+    .filter((spec) => Boolean(keyFor(spec.provider)));
+
+  const startedAt = Date.now();
   let lastError: any;
+  let gatewayFailed = false;
 
-  for (let i = 0; i < chain.length; i++) {
-    const spec = resolveSpec(chain[i]);
-
-    if (!PROVIDER_KEYS[spec.provider]) {
-      lastError = new Error(`Provider ${spec.provider} has no API key`);
-      continue;
-    }
-
+  // 1. The gateway. One outage costs one slow request: after three failures in a row it is
+  //    skipped for a minute, and a request the gateway calls invalid does not count.
+  const gateway = gatewayConfig();
+  if (gateway && !isOpen(GATEWAY, startedAt)) {
     try {
-      return await callModel(spec, params, i > 0, params?.task);
+      const response = await callGateway(gateway, params, params?.task);
+      recordSuccess(GATEWAY);
+      return response;
+    } catch (error: any) {
+      gatewayFailed = true;
+      lastError = error;
+      recordFailure(GATEWAY, error, Date.now());
+      console.warn(
+        `[AI] gateway failed (${error?.status || error?.name || 'network'}: ${String(error?.message || error).slice(0, 120)}); using direct providers`,
+      );
+    }
+  }
+
+  if (chain.length === 0) {
+    throw lastError ?? new Error('No AI provider is configured');
+  }
+
+  // 2. Direct providers. Skip any whose breaker is open; if every one is open, try them all
+  //    anyway: a guess is better than refusing every request for the whole cooldown.
+  const healthy = chain.filter((spec) => !isOpen(spec.provider, startedAt));
+  const candidates = healthy.length > 0 ? healthy : chain;
+
+  for (const spec of candidates) {
+    try {
+      const response = await callModel(spec, params, gatewayFailed || spec !== chain[0], params?.task);
+      recordSuccess(spec.provider);
+      return response;
     } catch (error: any) {
       lastError = error;
+      recordFailure(spec.provider, error, Date.now());
       // A 4xx that is not auth/rate-limit means the request itself is wrong: retrying on
       // another provider would fail the same way, so stop early.
-      if (error?.status && error.status >= 400 && error.status < 500 && ![401, 403, 408, 409, 429].includes(error.status)) {
+      if (!countsAgainstProvider(error)) {
         throw error;
       }
       console.warn(
         `[AI] ${spec.provider}:${spec.model} failed (${error?.status || 'network'}: ${String(error?.message || error).slice(0, 120)}); trying next provider`,
       );
+      if (Date.now() - startedAt > totalBudgetMs()) {
+        console.warn('[AI] time budget spent; not trying further providers');
+        break;
+      }
     }
   }
 
@@ -256,13 +438,30 @@ export function createRoutedClient(): OpenAI {
 
 /** Cheap diagnostics used by /api/ai/health. */
 export function getAIProviderStatus() {
+  const now = Date.now();
+  const gatewayState = breakerFor(GATEWAY);
   return {
+    gateway: {
+      enabled: process.env.AI_PROCESSOR_ENABLED === 'true',
+      configured: gatewayConfig() !== null,
+      circuit: gatewayState.openUntil > now ? 'open' : 'closed',
+      consecutiveFailures: gatewayState.failures,
+      lastError: gatewayState.lastError ?? null,
+      lastFailureAt: gatewayState.lastFailureAt ? new Date(gatewayState.lastFailureAt).toISOString() : null,
+    },
     defaultModel: AI_MODELS.default,
     reasoningEffort: process.env.AI_REASONING_EFFORT || 'none',
-    providers: (Object.keys(PROVIDER_KEYS) as AIProvider[]).map((provider) => ({
-      provider,
-      configured: Boolean(PROVIDER_KEYS[provider]),
-    })),
+    providers: (Object.keys(KEY_ENV) as AIProvider[]).map((provider) => {
+      const state = breakerFor(provider);
+      return {
+        provider,
+        configured: Boolean(keyFor(provider)),
+        circuit: state.openUntil > now ? 'open' : 'closed',
+        consecutiveFailures: state.failures,
+        lastError: state.lastError ?? null,
+        lastFailureAt: state.lastFailureAt ? new Date(state.lastFailureAt).toISOString() : null,
+      };
+    }),
     fallbacks: FALLBACKS[AI_MODELS.default] ?? [],
   };
 }

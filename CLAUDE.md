@@ -16,7 +16,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm test` — Vitest unit + replay suites (no database, no AI keys, no network)
 - `npm run test:integration` — needs `DATABASE_URL_TEST` (skips loudly without it)
 - `npm run test:e2e` — Playwright; needs a staging URL + Clerk test instance
-- `npm run healthcheck -- --deep --url https://kaptia.app` — synthetic check, exit code 0/1
+- `npm run healthcheck -- --deep --url https://kaptia.app` — synthetic check, exit code 0/1 (the AI gateway shows as `degraded`, never as an error: calls fall back)
+- `npm run ai:chain-check` — free end-to-end check of app → gateway → fake provider (needs the gateway checked out at `./ai-processor` or `GATEWAY_DIR`)
 - `npm run uptime:check` — external probe; records a `job_runs` row and e-mails on failure
 - `./scripts/deploy.sh` — safe deploy: typecheck → tests → sitemap → build → pm2 reload → health gate → automatic rollback
 
@@ -75,7 +76,7 @@ error-data retention daily). Schema changes are **not** part of the deploy scrip
 - **Key Tables**: users, transactions, budgets, goals, categories, ai_cache
 
 ### External Services Integration
-- **AI Processing**: `lib/aiProvider.ts` routes every chat call to OpenAI / DeepSeek / Groq / Mistral directly (with fallbacks). The optional `ai-processor` service runs on the same VPS (`AI_PROCESSOR_ENABLED`), it is not hosted on Fly.io.
+- **AI Processing**: every chat call goes through `lib/aiProvider.ts`: the **ai-processor gateway first** (`AI_PROCESSOR_ENABLED`, own repo `janymil/ai-processor`, shared by all your apps, holds the provider keys), then **OpenAI directly** from this app, then DeepSeek and Groq. Kaptia owns every prompt in `server/openai.ts`; the gateway is generic (`POST /v1/chat/completions`) and holds no Kaptia prompt, so there is one copy to test. Each hop has a circuit breaker; a call the app abandons is cancelled upstream. Not through the gateway (chat-only contract): speech-to-text, text-to-speech, image generation and OCR providers (images are masked first).
 - **File Storage**: Cloudflare R2 (`server/cloudStorage.ts`) for receipts and exports
 - **OCR**: AI OCR (Mistral → Google Vision → OpenAI vision) on images whose identifying lines were blacked out locally by `server/imageAnonymizer.ts`; Tesseract only locates the lines to mask
 - **Email**: Zoho SMTP (verified at boot; `email: ok` in `/api/health/deep`)
@@ -93,6 +94,9 @@ replace that with local Tesseract text extraction — Tesseract cannot read bank
 
 Access is gated by `server/aiAccess.ts`: free plans never reach an AI provider, and
 `users.ai_enabled = false` stops OCR, voice, tips, insights and predictions for that account.
+`aiGuard()` also counts each person's calls (`AI_RATE_PER_MIN` / `AI_RATE_PER_HOUR`). Every route or job that calls an AI
+function must sit behind `aiGuard()` or call `checkAiAccess()` — `tests/unit/aiRouteCoverage.test.ts` fails the build otherwise.
+There is no background AI job: AI runs only when a person opens a feature.
 
 ## Language and Internationalization
 
@@ -129,11 +133,11 @@ if (currentLang.startsWith('es')) {
 
 ### AI Processing Flow
 1. Check unified cache for existing results
-2. If not cached, anonymise the payload (`shared/aiAnonymizer.ts`) and call the provider chain
-   (`lib/aiProvider.ts`); the optional `ai-processor` service on this VPS is tried first when enabled
-3. Fall back to the next provider if one fails
-4. Store results in cache with appropriate TTL
-5. Return localized response to frontend
+2. If not cached, build the prompt (`server/openai.ts`), anonymise it (`shared/aiAnonymizer.ts`) and send it
+   through `lib/aiProvider.ts`: gateway first, then OpenAI directly, then DeepSeek / Groq
+3. Validate the reply (`shared/aiResults.ts`): empty, prose, wrong shape or an invented category id is a failure
+4. Cache only a real answer (the language is part of the key); a failure is never served from cache
+5. Return a localised response; a provider failure is a 503 `{ code: 'ai_unavailable' }`, never a fake result
 
 ## Security and Privacy
 

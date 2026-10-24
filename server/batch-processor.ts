@@ -1,131 +1,26 @@
+/**
+ * This module used to pre-generate insights and tips in the background after a person added
+ * transactions. It is gone on purpose:
+ *
+ *  - the results were thrown away, and the cache keys it used (no language, category ids
+ *    instead of names) could never match what the routes later ask for, so the work could not
+ *    speed anything up;
+ *  - it still cost real money on every burst of transactions and counted against each person's
+ *    AI usage allowance;
+ *  - it ignored the account's AI off-switch.
+ *
+ * AI now runs only when a person opens a feature, behind `aiGuard`, and is cached by that request.
+ * `batchProcessor.scheduleUser` stays as a harmless no-op so existing callers do not change.
+ */
+import { graceProcessor } from './graceProcessor';
 
-import { storage } from "./storage";
-import { runAI } from "../lib/aiProcessor";
-import { withJobRun } from "./errorGuard/jobs.js";
-// Cache system removed
-
-// Track users who need batch processing
-const batchQueue = new Set<string>();
-const processingInProgress = new Set<string>();
-
-// Schedule a user for batch processing
-export function scheduleBatchProcessing(userId: string) {
-  batchQueue.add(userId);
+export function scheduleBatchProcessing(_userId: string): void {
+  // intentionally empty: see the comment above
 }
 
-// Export batch processor interface
 export const batchProcessor = {
-  scheduleUser: scheduleBatchProcessing
+  scheduleUser: scheduleBatchProcessing,
 };
 
-// Process batched AI operations for users with new data
-async function processBatchedOperations() {
-  if (batchQueue.size === 0) return;
-  
-  console.log(`Processing batch operations for ${batchQueue.size} users`);
-  
-  // Process users one by one to avoid rate limits
-  for (const userId of Array.from(batchQueue)) {
-    if (processingInProgress.has(userId)) continue;
-    
-    try {
-      processingInProgress.add(userId);
-      batchQueue.delete(userId);
-      
-      const user = await storage.getUser(userId);
-      if (!user || user.plan === 'free') continue;
-      
-      // Get recent transactions to check if cache needs updating
-      const transactions = await storage.getUserTransactions(userId, 100);
-      if (transactions.length === 0) continue;
-      
-      // Check if we need to update insights (only if data changed significantly)
-      const shouldUpdateInsights = await shouldProcessInsights(userId, transactions);
-      
-      if (shouldUpdateInsights) {
-        console.log(`Updating insights for user ${userId}`);
-        
-        // Pre-generate and cache insights for faster dashboard loading
-        if (user.plan === 'premium') {
-          const insights = await runAI('spending-insights', userId, {
-            transactions: transactions.map(t => ({
-              description: t.description,
-              amount: parseFloat(t.amount),
-              date: t.date.toISOString(),
-              categoryName: t.categoryId?.toString() || 'Uncategorized',
-              type: t.type
-            }))
-          }, user.plan || 'free');
-          
-          // Cache insights with transaction hash
-          // Cache system removed
-        }
-        
-        // Generate financial tips if user has enough data
-        if (transactions.length > 5) {
-          const startDate = new Date();
-          startDate.setDate(1);
-          const endDate = new Date();
-          
-          const financialSummary = await storage.getUserFinancialSummary(userId, startDate, endDate);
-          
-          const financialData = {
-            totalIncome: financialSummary.totalIncome,
-            totalExpenses: financialSummary.totalExpenses,
-            transactionsByCategory: financialSummary.transactionsByCategory,
-            recentTransactions: transactions.slice(0, 20).map(t => ({
-              description: t.description,
-              amount: parseFloat(t.amount),
-              date: t.date.toISOString(),
-              categoryName: t.categoryId?.toString() || 'Uncategorized'
-            }))
-          };
-          
-          const tips = await runAI('financial-tips', userId, financialData, user.plan || 'free');
-          // Cache system removed
-        }
-        
-        console.log(`Batch processing completed for user ${userId}`);
-      }
-      
-    } catch (error) {
-      console.error(`Batch processing error for user ${userId}:`, error);
-    } finally {
-      processingInProgress.delete(userId);
-    }
-    
-    // Small delay to respect API rate limits
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-}
-
-// Check if insights need updating based on transaction changes
-async function shouldProcessInsights(userId: string, transactions: any[]): Promise<boolean> {
-  // Check if user has significant new transactions since last processing
-  const recentTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date);
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    return transactionDate > oneDayAgo;
-  });
-  
-  // Process if there are 3+ new transactions or significant amount changes
-  if (recentTransactions.length >= 3) return true;
-  
-  const significantAmount = recentTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-  return significantAmount > 100; // Process if $100+ in new transactions
-}
-
-// Start batch processing interval (every 5 minutes), recorded as a job run so a stalled
-// processor shows up on the Watch screen instead of silently doing nothing.
-setInterval(() => {
-  void withJobRun('batch-processor', processBatchedOperations);
-}, 5 * 60 * 1000);
-
-// Initial cleanup on startup
-setTimeout(processBatchedOperations, 30000); // Run after 30 seconds of startup
-
-console.log('Batch processor initialized - running every 5 minutes');
-
-// Initialize grace period processor for payment failure handling
-import { graceProcessor } from './graceProcessor';
+// Grace period processor for payment failure handling (unrelated to AI).
 graceProcessor.start();

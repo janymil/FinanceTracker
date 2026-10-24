@@ -24,7 +24,8 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    // Photos only: SVG can carry script, and the file extension is built from this type.
+    if (file.mimetype.startsWith('image/') && !file.mimetype.includes('svg')) {
       cb(null, true);
     } else {
       cb(new Error('Only image files are allowed'));
@@ -157,7 +158,8 @@ export const uploadReceiptHandler = [
           const amountForCategorization = extractedData.amount || 0;
           
           const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
-          predictedCategory = categorization.category;
+          // A failed answer is "Other 0.1", which would look like a real suggestion
+          if (!categorization.failed) predictedCategory = categorization.category;
         } catch (categoryError) {
           reportSwallowed(categoryError, {
             where: 'uploadReceipt.categorizeExpense',

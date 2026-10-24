@@ -1,19 +1,18 @@
 /**
- * Error Guard triage — the contract between the web app and the AI processor.
+ * Error Guard triage — payload and answer contract.
  *
- * The **prompt does not live here**. It lives in `external-services/ai-processor/errorGuardTriage.ts`,
- * because that service owns the provider keys and the AI logic. The web app's job is:
+ * The prompt lives in `server/errorGuard/triagePrompt.ts`; the model call goes through
+ * lib/aiProvider (ai-processor gateway first, direct providers behind it). This file's job is:
  *
  *   1. build a metadata-only payload (`buildTriagePayload`),
- *   2. POST it to `${AI_PROCESSOR_URL}/error-triage`,
- *   3. validate the answer with `parseTriageResponse` before anything is stored.
+ *   2. validate the answer with `parseTriageResponse` before anything is stored.
  *
  * Pure and isomorphic, so it is unit-testable with no keys, no network and no database.
  */
 import { z } from 'zod';
 import type { GuardAnalysis, GuardGroup, GuardSeverity } from './types';
 
-/** Path on the AI processor. The service-wide `x-api-key` middleware protects it. */
+/** Legacy gateway path, kept only so the contract test keeps pinning it. */
 export const TRIAGE_PATH = '/error-triage';
 
 export const TRIAGE_MAX_FRAMES = 5;

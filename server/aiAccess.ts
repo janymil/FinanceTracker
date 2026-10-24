@@ -11,6 +11,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { storage } from './storage';
 import { getUserId } from './clerkAuth';
+import { rateLimit } from './middleware/rateLimit';
 
 export type AiDenyCode = 'unauthenticated' | 'ai_disabled' | 'plan_required';
 
@@ -55,21 +56,45 @@ export function denyAi(res: Response, code: AiDenyCode) {
 }
 
 /**
- * Express middleware. Free plan and the off-switch are both denied by default; only a
- * route that is explicitly not AI-driven may pass `requirePaidPlan: false`.
+ * Every AI call costs real money, so the per-person ceiling lives in the same gate as the
+ * plan check: a short burst limit and a sustained hourly limit. Both are counted per user id
+ * (never per IP), and can be tuned without a deploy: AI_RATE_PER_MIN, AI_RATE_PER_HOUR.
  */
-export function aiGuard(options: { requirePaidPlan?: boolean } = {}) {
+const aiUserKey = (req: Request) => {
+  const id = (req as any).aiUser?.id;
+  return id ? `u:${id}` : null;
+};
+
+const burstLimit = rateLimit({
+  windowMs: 60_000,
+  max: Number(process.env.AI_RATE_PER_MIN) || 20,
+  keyPrefix: 'ai-min',
+  keyFn: aiUserKey,
+  code: 'ai_rate_limited',
+  message: 'Too many AI requests. Please wait a moment.',
+});
+
+const sustainedLimit = rateLimit({
+  windowMs: 60 * 60_000,
+  max: Number(process.env.AI_RATE_PER_HOUR) || 300,
+  keyPrefix: 'ai-hour',
+  keyFn: aiUserKey,
+  code: 'ai_rate_limited',
+  message: 'AI request limit reached for this hour. Please try again later.',
+});
+
+/**
+ * Express middleware. Denied by default: unauthenticated, the account off-switch and the free
+ * plan are all refused, then the request is counted against the person's AI limits.
+ */
+export function aiGuard() {
   return async (req: Request, res: Response, next: NextFunction) => {
     const userId = getUserId(req as any);
     const access = await checkAiAccess(userId);
     if (!access || !access.allowed) {
       return denyAi(res, access?.code ?? 'unauthenticated');
     }
-    if (options.requirePaidPlan === false && access.plan === 'free') {
-      (req as any).aiUser = { id: access.userId, plan: access.plan };
-      return next();
-    }
     (req as any).aiUser = { id: access.userId, plan: access.plan };
-    return next();
+    return burstLimit(req, res, () => sustainedLimit(req, res, next));
   };
 }

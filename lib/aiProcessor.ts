@@ -1,10 +1,12 @@
-// Centralized AI Processor with the optional processor service + local providers
+// Centralized AI entry point: prompts live in server/openai.ts, routing in lib/aiProvider.ts
 import crypto from 'crypto';
 import { storage } from '../server/storage.js';
 import { reportSwallowed } from '../server/errorGuard/report.js';
 import { collectAIUsage, type AIUsageRecord } from './aiProvider';
-import { anonymizeDeep } from '../shared/aiAnonymizer';
-import { 
+import { isAIFailure } from '../shared/aiResults';
+import {
+  categorizeExpense,
+  voiceExtraction,
   generateContextualFinancialTips,
   generateFinancialTips,
   generateDailyRecommendations,
@@ -50,6 +52,11 @@ async function trackAIUsage(
     if (usageRecords.some((record) => record.fallback)) {
       status = 'fallback';
     }
+    // The "service unavailable" payload is a failure even though nothing threw.
+    if (isAIFailure(result)) {
+      status = 'error';
+      errorMessage = String((result as any)?.error ?? 'AI failure');
+    }
 
     return result;
   } catch (error: any) {
@@ -90,223 +97,62 @@ async function trackAIUsage(
   }
 }
 
-/**
- * Optional AI processor service (external-services/ai-processor).
- *
- * Disabled by default: the app calls OpenAI/DeepSeek/Groq directly through lib/aiProvider.
- * Once the service is deployed (162.35.25.125 / ai-processor.formatika.dev), set:
- *   AI_PROCESSOR_ENABLED=true
- *   AI_PROCESSOR_URL=https://ai-processor.formatika.dev
- * A failed processor is skipped for 5 minutes so a dead host never adds latency.
- */
-const PROCESSOR_TIMEOUT_MS = Number(process.env.AI_PROCESSOR_TIMEOUT_MS) || 20_000;
-const PROCESSOR_COOLDOWN_MS = Number(process.env.AI_PROCESSOR_COOLDOWN_MS) || 300_000;
-let processorDownUntil = 0;
+/** Runs one task. Every task gets the person's language. */
+async function runDirect(task: string, userId: string, payload: Record<string, any>, userPlan: string): Promise<any> {
+  const language: string = payload.language || 'en-us';
 
-function isProcessorEnabled(): boolean {
-  return process.env.AI_PROCESSOR_ENABLED === 'true' && Boolean(process.env.AI_PROCESSOR_URL);
-}
-
-async function callAIProcessor(task: string, userId: string, payload: Record<string, any>): Promise<any | null> {
-  if (!isProcessorEnabled() || Date.now() < processorDownUntil) return null;
-
-  const baseUrl = String(process.env.AI_PROCESSOR_URL).replace(/\/+$/, '');
-  const timeoutMs = task === 'parseBankStatement'
-    ? Math.max(PROCESSOR_TIMEOUT_MS, 120_000)
-    : PROCESSOR_TIMEOUT_MS;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(`${baseUrl}/execute-gpt-task`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task, userId: 'anonymous', payload: anonymizeDeep(payload).value }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      throw new Error(`processor HTTP ${response.status}`);
-    }
-
-    const result = await response.json();
-    if (!result || result.error || (Array.isArray(result) && result.length === 0)) {
-      throw new Error('empty processor response');
-    }
-
-    return result;
-  } catch (error: any) {
-    processorDownUntil = Date.now() + PROCESSOR_COOLDOWN_MS;
-    console.warn(
-      `[AI ${task}] AI processor unavailable (${error?.message || error}); ` +
-      `using direct providers for ${Math.round(PROCESSOR_COOLDOWN_MS / 60000)} min`,
-    );
-    return null;
-  } finally {
-    clearTimeout(timeoutId);
+  switch (task) {
+    case 'voice-extraction':
+      return voiceExtraction(userId, payload as any, userPlan);
+    case 'contextual-tips':
+      return generateContextualFinancialTips(userId, payload as any, language);
+    case 'financial-tips':
+      return generateFinancialTips(userId, payload as any, language);
+    case 'daily-recommendations':
+      return generateDailyRecommendations(userId, payload as any, language);
+    case 'spending-insights':
+      return generateSpendingInsights(userId, payload.transactions, language);
+    case 'financial-health-score':
+      return generateAIFinancialHealthScore(payload as any, language);
+    case 'trend-predictions':
+      return generateTrendPredictions(userId, payload.transactions, payload.budgets, language);
+    case 'expense-predictions':
+      return generateExpensePredictions(userId, payload.transactions, language);
+    case 'categorizeExpense':
+      return categorizeExpense(
+        payload.description,
+        payload.amount,
+        language,
+        payload.userTransactions || [],
+        payload.userCategories || [],
+      );
+    case 'parseBankStatement':
+      return parseBankStatement(payload.text, language);
+    default:
+      throw new Error(`No direct provider path for task: ${task}`);
   }
 }
 
 /**
- * Centralized AI Processor
- * Simple interface: runAI(task, userId, payload, userPlan)
- * Handles: GPT Execution, Retry/Fallback, OpenAI Key Handling, Usage Tracking
+ * Centralized AI entry point: runAI(task, userId, payload, userPlan)
+ *
+ * Every task builds its prompt here in the app (server/openai.ts is the only copy) and sends it
+ * through lib/aiProvider, which tries the ai-processor gateway first and falls back to calling
+ * the providers directly. This function handles usage tracking and passes the language on.
+ * On total failure it returns `{ error, message }` — callers must check `isAIFailure`.
  */
 export async function runAI(task: string, userId: string, payload: Record<string, any>, userPlan: string = 'free') {
-  // Wrap the AI execution with usage tracking
   return await trackAIUsage(userId, task, userPlan, async () => {
-    console.log(`[AI ${task}] Processing (AI processor ${isProcessorEnabled() ? 'enabled' : 'disabled'}, direct providers ready)`);
-
     try {
-    if (!isProcessorEnabled() || Date.now() < processorDownUntil) {
-      throw new Error('AI processor disabled or cooling down');
-    }
-    console.log(`[AI ${task}] Calling AI processor...`);
-    
-    // Log contextual tips specific data
-    if (task === 'contextual-tips') {
-      console.log('[AI contextual-tips] Request payload:', {
-        hasSummary: !!payload.summary,
-        hasTransactions: !!payload.transactions,
-        transactionCount: payload.transactions?.length || 0,
-        language: payload.language
-      });
-    }
-    
-    // Create AbortController for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), PROCESSOR_TIMEOUT_MS);
-    
-    const response = await fetch(`${String(process.env.AI_PROCESSOR_URL || 'https://ai-processor.formatika.dev').replace(/\/+$/, '')}/execute-gpt-task`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(process.env.AI_PROCESSOR_API_KEY ? { "x-api-key": process.env.AI_PROCESSOR_API_KEY } : {}),
-      },
-      body: JSON.stringify({
-        task,
-        // The model never needs to know who this is. Local caching and usage accounting
-        // still use the real id; only the outbound request is anonymous.
-        userId: 'anonymous',
-        payload: anonymizeDeep(payload).value,
-      }),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      console.error(`[AI ${task}] Processor error:`, response.status, response.statusText);
-      throw new Error(`AI processor failed: ${response.status}`);
-    }
-
-    const result = await response.json();
-    
-    // Log contextual tips response
-    if (task === 'contextual-tips') {
-      console.log('[AI contextual-tips] AI processor response:', {
-        hasResult: !!result,
-        hasError: !!result?.error,
-        hasTips: !!result?.tips,
-        tipsCount: result?.tips?.length || 0,
-        resultKeys: result ? Object.keys(result) : []
-      });
-    }
-    
-    // Check if result is empty or error
-    if (result?.error || !result || (Array.isArray(result) && result.length === 0)) {
-
-      throw new Error('Empty or error response from the AI processor');
-    }
-
-    return result;
-
+      return await runDirect(task, userId, payload, userPlan);
     } catch (error: any) {
-      processorDownUntil = Date.now() + PROCESSOR_COOLDOWN_MS;
-      // The user still gets an answer from the local fallback, so nothing throws — which is
-      // exactly why this must be reported explicitly (blueprint 07 §17.1).
-      reportSwallowed(error, {
-        where: 'runAI.processor',
-        fallback: 'local',
-        route: `/ai/${task}`,
-      });
-      console.error(`[AI ${task}] AI processor unavailable:`, error.message || error);
-      
-      try {
-        console.log(`[AI ${task}] Attempting local fallback...`);
-        let fallbackResult;
-        
-        switch (task) {
-          case 'voice-extraction':
-            fallbackResult = await import('../server/openai.js').then(m => 
-              m.voiceExtraction(userId, payload as any, userPlan)
-            );
-            break;
-          case 'contextual-tips':
-            console.log('[AI contextual-tips] Running local fallback with payload:', {
-              hasSummary: !!payload.summary,
-              hasTransactions: !!payload.transactions,
-              transactionCount: payload.transactions?.length || 0,
-              language: payload.language || 'en-us'
-            });
-            fallbackResult = await generateContextualFinancialTips(userId, payload as any, payload.language || 'en-us');
-            console.log('[AI contextual-tips] Local fallback result:', {
-              hasResult: !!fallbackResult,
-              hasTips: !!fallbackResult?.tips,
-              tipsCount: fallbackResult?.tips?.length || 0
-            });
-            break;
-          case 'financial-tips':
-            fallbackResult = await generateFinancialTips(userId, payload as any);
-            break;
-          case 'daily-recommendations':
-            fallbackResult = await generateDailyRecommendations(userId, payload as any, payload.language || 'en-us');
-            break;
-          case 'spending-insights':
-            fallbackResult = await generateSpendingInsights(userId, payload.transactions);
-            break;
-          case 'financial-health-score':
-            fallbackResult = await generateAIFinancialHealthScore(payload as any, payload.language || 'en-us');
-            break;
-          case 'trend-predictions':
-            fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets);
-            break;
-          case 'expense-predictions':
-            fallbackResult = await generateExpensePredictions(userId, payload.transactions);
-            break;
-          case 'categorizeExpense':
-            const { categorizeExpense } = await import('../server/openai');
-            fallbackResult = await categorizeExpense(
-              payload.description, 
-              payload.amount, 
-              payload.language || 'en-us',
-              payload.userTransactions || [],
-              payload.userCategories || []
-            );
-            break;
-          case 'parseBankStatement':
-            fallbackResult = await parseBankStatement(payload.text, payload.language || 'en-us');
-            break;
-          default:
-            throw new Error(`No local fallback available for task: ${task}`);
-        }
-        
-        console.log(`[AI ${task}] SUCCESS: Local fallback completed`);
-        return fallbackResult;
-      } catch (fallbackError: any) {
-        // Both the service and the local path failed: the feature silently degrades to a
-        // canned error payload. Highest-value swallow in the app.
-        reportSwallowed(fallbackError, {
-          where: 'runAI.localFallback',
-          fallback: 'errorPayload',
-          route: `/ai/${task}`,
-        });
-        console.error(`[AI ${task}] Local fallback also failed:`, fallbackError.message);
-        return { 
-          error: 'AI service temporarily unavailable', 
-          message: 'Unable to process request at this time' 
-        };
-      }
+      // Highest-value swallow in the app: the feature degrades to an error payload.
+      reportSwallowed(error, { where: 'runAI', fallback: 'errorPayload', route: `/ai/${task}` });
+      console.error(`[AI ${task}] all providers failed:`, error?.message || error);
+      return {
+        error: 'AI service temporarily unavailable',
+        message: 'Unable to process request at this time',
+      };
     }
   });
 }
