@@ -698,7 +698,8 @@
     "increased": "increased",
     "decreased": "decreased",
     "review_recent_purchases": "Review recent purchases to identify spending increase",
-    "great_expense_reduction": "Great work on reducing expenses!"
+    "great_expense_reduction": "Great work on reducing expenses!",
+    "count": "insights"
   },
   "alerts": "Alerts",
   "hideDetails": "Hide Details",
@@ -776,7 +777,8 @@
     },
     "aiFinancialAnalysis": "AI Financial Analysis",
     "healthScore": "Health Score",
-    "aiInsights": "AI Insights"
+    "aiInsights": "AI Insights",
+    "generating": "Generating..."
   },
   "AI Expense Prediction": "AI Expense Prediction",
   "Machine learning predictions based on your spending patterns": "Machine learning predictions based on your spending patterns",
@@ -1295,7 +1297,8 @@
     "required_fields_error": "Please fill in all required fields",
     "note": "Note",
     "of": "of",
-    "transactions": "transactions"
+    "transactions": "transactions",
+    "loading": "Loading..."
   },
   "transactions_count": "transactions",
   "frequencies": {
@@ -1330,7 +1333,8 @@
     "updated_title": "Income Updated",
     "updated_description": "Income transaction has been updated successfully",
     "confirm_delete": "Are you sure you want to delete this income?",
-    "adding": "Adding..."
+    "adding": "Adding...",
+    "loading": "Loading income..."
   },
   "expenses": {
     "title": "Expense Management",
@@ -1458,7 +1462,9 @@
     "other": "Other",
     "salary": "Salary",
     "freelance": "Freelance",
-    "investments": "Investments"
+    "investments": "Investments",
+    "category_created": "Category created",
+    "category_added_successfully": "Category added successfully."
   },
   "colors": {
     "blue": "Blue",
@@ -1536,15 +1542,20 @@
       "goal_updated": "Goal updated successfully!",
       "goal_updated_desc": "Your goal details have been updated.",
       "goal_deleted": "Goal deleted successfully!",
-      "goal_deleted_desc": "Your goal has been removed."
+      "goal_deleted_desc": "Your goal has been removed.",
+      "goal_duplicated": "Goal duplicated",
+      "goal_duplicated_desc": "A copy of the goal has been created."
     },
     "errors": {
       "select_target_date": "Please select a target date",
       "valid_target_date": "Please enter a valid target date",
       "failed_create": "Failed to create goal",
       "failed_update": "Failed to update goal",
-      "failed_delete": "Failed to delete goal"
-    }
+      "failed_delete": "Failed to delete goal",
+      "failed_duplicate": "Could not duplicate the goal."
+    },
+    "copy": "Copy",
+    "create_new_goal": "Create New Goal"
   },
   "dashboard": {
     "total_income": "Total Income",
@@ -1632,7 +1643,24 @@
     "Turn AI back on in Profile to scan receipts.": "Turn AI back on in Profile to scan receipts.",
     "Receipt scanning is available on the Standard and Premium plans.": "Receipt scanning is available on the Standard and Premium plans.",
     "Go to Profile": "Go to Profile",
-    "Close": "Close"
+    "Close": "Close",
+    "invalid_file_type": "Invalid file type",
+    "please_select_image": "Please select an image file.",
+    "upload_failed": "Upload failed",
+    "please_try_again": "Please try again.",
+    "missing_information": "Missing information",
+    "please_fill_required": "Please fill in all required fields.",
+    "transaction_saved": "Transaction saved",
+    "receipt_saved_description": "Your receipt has been processed and saved.",
+    "save_failed": "Could not save",
+    "save_failed_description": "Please review the details and try again.",
+    "transaction_description_placeholder": "What was this transaction for?",
+    "select_category_placeholder": "Select a category",
+    "qr_code_error": "QR code error",
+    "failed_to_generate_qr": "We could not generate the QR code. Please try again.",
+    "upload_error": "Upload error",
+    "failed_to_process_mobile": "We could not process the mobile upload. Please try again.",
+    "timeout": "The request timed out. Please try again."
   },
   "trends": {
     "title": "Advanced Trends Analysis",
@@ -1911,7 +1939,36 @@
     "creating_backup": "Creating Backup...",
     "backup_now": "Backup Now",
     "restoring": "Restoring...",
-    "restore": "Restore"
+    "restore": "Restore",
+    "example_downloaded": "Example file downloaded",
+    "example_downloaded_desc": "Use this file as a template for your import.",
+    "invalid_file": "Invalid file",
+    "invalid_file_desc": "The selected file could not be read.",
+    "reading_file": "Reading file...",
+    "auth_required": "Please sign in to continue.",
+    "validating_data": "Validating data...",
+    "processing_import": "Processing import...",
+    "import_completed": "Import completed",
+    "import_successful": "Import successful",
+    "import_successful_desc": "Your transactions have been imported.",
+    "import_failed": "Import failed",
+    "import_failed_desc": "No transactions were imported. Please check the file and try again.",
+    "click_to_change_file": "Click to change file",
+    "step4_title": "Step 4: Review and import",
+    "merge_strategy": "Merge strategy",
+    "add_to_existing": "Add to existing transactions",
+    "replace_existing": "Replace existing transactions",
+    "merge_existing": "Merge with existing transactions",
+    "duplicate_handling": "Duplicate handling",
+    "skip_duplicates": "Skip duplicates",
+    "overwrite_duplicates": "Overwrite duplicates",
+    "rename_duplicates": "Keep both (rename)",
+    "skip_first_row": "Skip the first row (header)",
+    "auto_create_categories": "Create missing categories automatically",
+    "importing_data": "Importing data...",
+    "import_completed_successfully": "Import completed successfully.",
+    "categories": "Categories",
+    "created_count": "Created: {{count}}"
   },
   "upcomingReminders": {
     "title": "Upcoming Reminders",
@@ -2096,7 +2153,9 @@
   "nav": {
     "features": "Features",
     "help": "Help",
-    "contact": "Contact"
+    "contact": "Contact",
+    "budgets": "Budgets",
+    "goals": "Goals"
   },
   "contact": {
     "page_title": "Contact Us",
@@ -2197,7 +2256,8 @@
   "recurring": {
     "weekly": "Weekly",
     "monthly": "Monthly",
-    "yearly": "Yearly"
+    "yearly": "Yearly",
+    "title": "Recurring"
   },
   "collaborative_goals": {
     "title": "Collaborative Savings Goals",
@@ -2316,7 +2376,10 @@
       "link_copied": "Link Copied",
       "link_copied_description": "Goal sharing link has been copied to clipboard.",
       "share_failed": "Unable to share or copy link. Please copy the URL manually.",
-      "copy_failed": "Unable to copy link. Please copy the URL manually."
+      "copy_failed": "Unable to copy link. Please copy the URL manually.",
+      "contribution_added_description": "Your contribution has been recorded.",
+      "joined": "Joined goal",
+      "joined_description": "You can now contribute to this goal."
     },
     "hero": {
       "target": "Target",
@@ -2392,7 +2455,8 @@
       "back_to_goals": "Back to Collaborative Goals",
       "cancel": "Cancel",
       "share": "Share",
-      "copy_link": "Copy Link"
+      "copy_link": "Copy Link",
+      "join": "Join goal"
     },
     "statuses": {
       "active": "Active",
@@ -2450,7 +2514,8 @@
     "activities": {
       "title": "Recent Activities",
       "no_date": "No date"
-    }
+    },
+    "join_prompt": "You have been invited to join this goal. Join to see contributions and add your own."
   },
   "redeem": {
     "seo": {
@@ -2694,7 +2759,33 @@
       "contact_us": "8. Contact Us",
       "contact_desc": "If you have any questions about our use of cookies, please contact us at:",
       "email": "Email: info@kaptia.app",
-      "address": "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+      "address": "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120",
+      "consent_first_title": "Consent-First Tracking Notice",
+      "consent_first_desc": "We respect your choices. By default, no analytics or advertising tracking cookies or scripts are loaded when you visit our website. Tracking scripts (including Google Analytics and Google Ads) are activated only if and after you explicitly click 'Accept' on our Cookie Banner.",
+      "local_storage_title": "Cookies vs. Local Storage",
+      "local_storage_desc": "In addition to cookies, Kaptia uses browser local storage (localStorage) for client-side user interface preferences. Unlike cookies, localStorage items are stored only in your browser and are never transmitted in HTTP headers with your requests:",
+      "local_storage_theme": "Stores your UI theme selection (light or dark mode) locally in your browser.",
+      "local_storage_lang": "Stores your chosen display language (English, Spanish, or Slovak).",
+      "local_storage_consent": "Stores your cookie banner decision. It is saved directly in your browser's localStorage and remains until you modify or clear it.",
+      "clerk_desc": "Handles user authentication sessions and identity tokens.",
+      "cloudflare_desc": "Provides security, bot detection, and DDoS mitigation.",
+      "provider": "Provider",
+      "clerk_session": "User authentication session token",
+      "session_active": "Active session / token refresh",
+      "clerk_uat": "User activity timestamp for session validation",
+      "cf_bm": "Bot management and DDoS mitigation",
+      "minutes": "minutes",
+      "admin_session": "Internal admin panel authentication",
+      "hours": "hours",
+      "admin_only": "Admin only",
+      "ga_desc": "Pseudonymous client identifier to measure site usage",
+      "years": "years",
+      "analytics": "Analytics",
+      "consent_required": "Requires consent",
+      "ga_session_desc": "Maintains pseudonymous session state and interaction metrics",
+      "gcl_desc": "Measures pseudonymous conversion efficiency for advertising campaigns",
+      "days": "days",
+      "marketing": "Marketing"
     },
     "banner": {
       "title": "We value your privacy",
@@ -2781,7 +2872,11 @@
       "openai": "AI providers (OpenAI, Mistral):",
       "openai_desc": "Financial insights and categorization on anonymised text only",
       "bunny": "Cloudflare R2 (File Storage):",
-      "bunny_desc": "Object storage for receipt images on paid plans"
+      "bunny_desc": "Object storage for receipt images on paid plans",
+      "mercadopago": "Mercado Pago:",
+      "mercadopago_desc": "Subscription payment processing for Latin America (Peru).",
+      "cloudflare": "Cloudflare:",
+      "cloudflare_desc": "Encrypted receipt storage (R2) and DDoS defense."
     },
     "exercise_rights": {
       "title": "How to Exercise Your Rights",
@@ -3750,5 +3845,21 @@
     "cta": "Upgrade Now – {{price}}/month",
     "learn_more": "Learn More"
   },
-  "Monthly totals by category": "Monthly totals by category"
+  "Monthly totals by category": "Monthly totals by category",
+  "Cloud Backup & Restore": "Cloud Backup",
+  "Forever free": "Forever free",
+  "Simple overview dashboard": "Simple spending overview",
+  "Budgets and goal management": "Budgets and goal management",
+  "AI expense prediction": "AI expense prediction",
+  "noAchievements": "No achievements yet",
+  "courses": {
+    "title": "Financial Courses",
+    "subtitle": "Learn personal finance step by step and earn XP along the way.",
+    "stats": {
+      "totalXp": "Total XP",
+      "dayStreak": "Day Streak",
+      "bestStreak": "Best Streak",
+      "lessons": "Lessons Completed"
+    }
+  }
 }

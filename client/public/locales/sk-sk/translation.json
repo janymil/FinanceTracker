@@ -696,7 +696,8 @@
     "increased": "zvýšili",
     "decreased": "znížili",
     "review_recent_purchases": "Preskúmajte nedávne nákupy na identifikáciu nárastu výdavkov",
-    "great_expense_reduction": "Skvelá práca pri znižovaní výdavkov!"
+    "great_expense_reduction": "Skvelá práca pri znižovaní výdavkov!",
+    "count": "prehľadov"
   },
   "alerts": "Upozornenia",
   "hideDetails": "Skryť podrobnosti",
@@ -794,7 +795,8 @@
     },
     "aiFinancialAnalysis": "AI finančná analýza",
     "healthScore": "Skóre zdravia",
-    "aiInsights": "AI poznatky"
+    "aiInsights": "AI poznatky",
+    "generating": "Generuje sa..."
   },
   "aiAnalysisSection": "Sekcia AI analýzy",
   "analysisInProgress": "Analýza prebieha...",
@@ -1408,7 +1410,10 @@
     "recurring": "Opakujúci sa",
     "note": "Poznámka",
     "of": "z",
-    "transactions": "transakcií"
+    "transactions": "transakcií",
+    "loading": "Načítava sa...",
+    "required_fields_error": "Vyplňte všetky povinné polia",
+    "recurring_transactions": "Opakujúce sa transakcie"
   },
   "transactions_count": "transakcií",
   "frequencies": {
@@ -1443,7 +1448,8 @@
     "updated_title": "Príjem Aktualizovaný",
     "updated_description": "Transakcia príjmu bola úspešne aktualizovaná",
     "confirm_delete": "Ste si istí, že chcete vymazať tento príjem?",
-    "adding": "Pridávam..."
+    "adding": "Pridávam...",
+    "loading": "Načítavajú sa príjmy..."
   },
   "expenses": {
     "title": "Správa Výdavkov",
@@ -1571,7 +1577,9 @@
     "other": "Iné",
     "salary": "Plat",
     "freelance": "Voľná práca",
-    "investments": "Investície"
+    "investments": "Investície",
+    "category_created": "Kategória vytvorená",
+    "category_added_successfully": "Kategória bola úspešne pridaná."
   },
   "colors": {
     "blue": "Modrá",
@@ -1644,15 +1652,20 @@
       "goal_updated": "Cieľ úspešne aktualizovaný!",
       "goal_updated_desc": "Detaily vášho cieľa boli aktualizované.",
       "goal_deleted": "Cieľ úspešne vymazaný!",
-      "goal_deleted_desc": "Váš cieľ bol odstránený."
+      "goal_deleted_desc": "Váš cieľ bol odstránený.",
+      "goal_duplicated": "Cieľ duplikovaný",
+      "goal_duplicated_desc": "Bola vytvorená kópia cieľa."
     },
     "errors": {
       "select_target_date": "Prosím vyberte cieľový dátum",
       "valid_target_date": "Prosím zadajte platný cieľový dátum",
       "failed_create": "Nepodarilo sa vytvoriť cieľ",
       "failed_update": "Nepodarilo sa aktualizovať cieľ",
-      "failed_delete": "Nepodarilo sa vymazať cieľ"
-    }
+      "failed_delete": "Nepodarilo sa vymazať cieľ",
+      "failed_duplicate": "Cieľ sa nepodarilo duplikovať."
+    },
+    "copy": "kópia",
+    "create_new_goal": "Vytvoriť nový cieľ"
   },
   "dashboard": {
     "total_income": "Celkové Príjmy",
@@ -1740,7 +1753,24 @@
     "Turn AI back on in Profile to scan receipts.": "Ak chcete skenovať bločky, zapnite AI v Profile.",
     "Receipt scanning is available on the Standard and Premium plans.": "Skenovanie bločkov je dostupné v plánoch Standard a Premium.",
     "Go to Profile": "Prejsť do profilu",
-    "Close": "Zavrieť"
+    "Close": "Zavrieť",
+    "invalid_file_type": "Neplatný typ súboru",
+    "please_select_image": "Vyberte obrázkový súbor.",
+    "upload_failed": "Nahratie zlyhalo",
+    "please_try_again": "Skúste to znova.",
+    "missing_information": "Chýbajúce údaje",
+    "please_fill_required": "Vyplňte všetky povinné polia.",
+    "transaction_saved": "Transakcia bola uložená",
+    "receipt_saved_description": "Váš doklad bol spracovaný a uložený.",
+    "save_failed": "Nepodarilo sa uložiť",
+    "save_failed_description": "Skontrolujte údaje a skúste to znova.",
+    "transaction_description_placeholder": "Na čo bola táto transakcia?",
+    "select_category_placeholder": "Vyberte kategóriu",
+    "qr_code_error": "Chyba QR kódu",
+    "failed_to_generate_qr": "QR kód sa nepodarilo vytvoriť. Skúste to znova.",
+    "upload_error": "Chyba nahrávania",
+    "failed_to_process_mobile": "Nahratie z mobilu sa nepodarilo spracovať. Skúste to znova.",
+    "timeout": "Požiadavka vypršala. Skúste to znova."
   },
   "trends": {
     "title": "Pokročilá analýza trendov",
@@ -2018,7 +2048,37 @@
     "creating_backup": "Vytváram Zálohu...",
     "backup_now": "Zálohovať Teraz",
     "restoring": "Obnovujem...",
-    "restore": "Obnoviť"
+    "restore": "Obnoviť",
+    "example_downloaded": "Ukážkový súbor bol stiahnutý",
+    "example_downloaded_desc": "Použite tento súbor ako šablónu na import.",
+    "invalid_file": "Neplatný súbor",
+    "invalid_file_desc": "Vybraný súbor sa nepodarilo načítať.",
+    "reading_file": "Načítava sa súbor...",
+    "auth_required": "Ak chcete pokračovať, prihláste sa.",
+    "validating_data": "Overujú sa údaje...",
+    "processing_import": "Spracúva sa import...",
+    "import_completed": "Import dokončený",
+    "import_successful": "Import bol úspešný",
+    "import_successful_desc": "Vaše transakcie boli importované.",
+    "import_failed": "Import zlyhal",
+    "import_failed_desc": "Neboli importované žiadne transakcie. Skontrolujte súbor a skúste to znova.",
+    "processing_error": "Chyba spracovania",
+    "click_to_change_file": "Kliknutím zmeníte súbor",
+    "step4_title": "Krok 4: Skontrolovať a importovať",
+    "merge_strategy": "Stratégia zlúčenia",
+    "add_to_existing": "Pridať k existujúcim transakciám",
+    "replace_existing": "Nahradiť existujúce transakcie",
+    "merge_existing": "Zlúčiť s existujúcimi transakciami",
+    "duplicate_handling": "Spracovanie duplikátov",
+    "skip_duplicates": "Preskočiť duplikáty",
+    "overwrite_duplicates": "Prepísať duplikáty",
+    "rename_duplicates": "Ponechať oba (premenovať)",
+    "skip_first_row": "Preskočiť prvý riadok (hlavičku)",
+    "auto_create_categories": "Automaticky vytvoriť chýbajúce kategórie",
+    "importing_data": "Importujú sa údaje...",
+    "import_completed_successfully": "Import bol úspešne dokončený.",
+    "categories": "Kategórie",
+    "created_count": "Vytvorené: {{count}}"
   },
   "upcomingReminders": {
     "title": "Nadchádzajúce Pripomienky",
@@ -2064,7 +2124,8 @@
       "endDate": "Dátum Ukončenia",
       "paymentUrl": "URL Platby",
       "referenceNote": "Referenčná Poznámka",
-      "referenceNotePlaceholder": "Číslo účtu, referenčné ID, atď."
+      "referenceNotePlaceholder": "Číslo účtu, referenčné ID, atď.",
+      "dayBefore": "{{count}} deň pred"
     },
     "reminderCreated": "Pripomienka Vytvorená",
     "reminderCreatedDescription": "Pripomienka výdavku bola úspešne nastavená",
@@ -2114,7 +2175,9 @@
   "nav": {
     "features": "Funkcie",
     "help": "Pomoc",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "budgets": "Rozpočty",
+    "goals": "Ciele"
   },
   "contact": {
     "page_title": "Kontaktujte nás",
@@ -2214,7 +2277,8 @@
   "recurring": {
     "weekly": "Týždenne",
     "monthly": "Mesačne",
-    "yearly": "Ročne"
+    "yearly": "Ročne",
+    "title": "Opakujúce sa"
   },
   "budget": {
     "total_budget_for": "Celkový rozpočet pre",
@@ -2370,7 +2434,12 @@
       "link_copied": "Odkaz Skopírovaný",
       "link_copied_description": "Odkaz na cieľ bol skopírovaný do schránky.",
       "share_failed": "Nie je možné zdieľať alebo skopírovať odkaz. Prosím skopírujte URL manuálne.",
-      "copy_failed": "Nie je možné skopírovať odkaz. Prosím skopírujte URL manuálne."
+      "copy_failed": "Nie je možné skopírovať odkaz. Prosím skopírujte URL manuálne.",
+      "contribution_added_description": "Váš príspevok bol zaznamenaný.",
+      "user_added_to_goal": "Používateľ bol úspešne pridaný k cieľu.",
+      "invitation_email_sent": "Pozvánka bola odoslaná e-mailom.",
+      "joined": "Pripojili ste sa k cieľu",
+      "joined_description": "Teraz môžete prispievať k tomuto cieľu."
     },
     "hero": {
       "target": "Cieľ",
@@ -2446,7 +2515,8 @@
       "back_to_goals": "Späť na Spoločné Ciele",
       "cancel": "Zrušiť",
       "share": "Zdieľať",
-      "copy_link": "Kopírovať Odkaz"
+      "copy_link": "Kopírovať Odkaz",
+      "join": "Pripojiť sa k cieľu"
     },
     "statuses": {
       "active": "Aktívny",
@@ -2504,7 +2574,8 @@
     "activities": {
       "title": "Nedávne Aktivity",
       "no_date": "Žiadny dátum"
-    }
+    },
+    "join_prompt": "Boli ste pozvaní pripojiť sa k tomuto cieľu. Pripojte sa, aby ste videli príspevky a mohli pridať vlastné."
   },
   "redeem": {
     "seo": {
@@ -2748,7 +2819,33 @@
       "contact_us": "8. Kontaktujte nás",
       "contact_desc": "Ak máte akékoľvek otázky o našom používaní cookies, kontaktujte nás na:",
       "email": "Email: info@kaptia.app",
-      "address": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+      "address": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120",
+      "consent_first_title": "Upozornenie o sledovaní až po súhlase",
+      "consent_first_desc": "Rešpektujeme vaše voľby. Predvolene sa pri návšteve našej webovej stránky nenačítavajú žiadne analytické ani reklamné sledovacie cookies či skripty. Sledovacie skripty (vrátane Google Analytics a Google Ads) sa aktivujú iba vtedy a až potom, keď v našom cookie banneri výslovne kliknete na „Prijať“.",
+      "local_storage_title": "Cookies vs. lokálne úložisko",
+      "local_storage_desc": "Okrem cookies používa Kaptia lokálne úložisko prehliadača (localStorage) na ukladanie preferencií používateľského rozhrania na strane klienta. Na rozdiel od cookies sa položky v localStorage ukladajú iba vo vašom prehliadači a nikdy sa neposielajú v HTTP hlavičkách vašich požiadaviek:",
+      "local_storage_theme": "Ukladá vo vašom prehliadači zvolenú tému rozhrania (svetlý alebo tmavý režim).",
+      "local_storage_lang": "Ukladá zvolený jazyk rozhrania (angličtina, španielčina alebo slovenčina).",
+      "local_storage_consent": "Ukladá vaše rozhodnutie o cookie banneri. Uloží sa priamo do localStorage vášho prehliadača a zostane tam, kým ho nezmeníte alebo nevymažete.",
+      "clerk_desc": "Spracúva prihlasovacie relácie používateľov a identity tokeny.",
+      "cloudflare_desc": "Zabezpečuje ochranu, detekciu botov a mitigáciu DDoS útokov.",
+      "provider": "Poskytovateľ",
+      "clerk_session": "Token prihlasovacej relácie používateľa",
+      "session_active": "Aktívna relácia / obnovenie tokenu",
+      "clerk_uat": "Časová značka aktivity používateľa na overenie relácie",
+      "cf_bm": "Správa botov a mitigácia DDoS",
+      "minutes": "minút",
+      "admin_session": "Prihlásenie do interného administračného panela",
+      "hours": "hodín",
+      "admin_only": "Len pre administrátorov",
+      "ga_desc": "Pseudonymný identifikátor klienta na meranie používania stránky",
+      "years": "rokov",
+      "analytics": "Analytika",
+      "consent_required": "Vyžaduje súhlas",
+      "ga_session_desc": "Uchováva pseudonymný stav relácie a metriky interakcií",
+      "gcl_desc": "Meria pseudonymnú efektivitu konverzií reklamných kampaní",
+      "days": "dní",
+      "marketing": "Marketing"
     },
     "banner": {
       "title": "Vážime si vaše súkromie",
@@ -2835,7 +2932,11 @@
       "openai": "Poskytovatelia AI (OpenAI, Mistral):",
       "openai_desc": "Finančné prehľady a kategorizácia iba z anonymizovaného textu",
       "bunny": "Cloudflare R2 (Úložište súborov):",
-      "bunny_desc": "Objektové úložište obrázkov bločkov v platených plánoch"
+      "bunny_desc": "Objektové úložište obrázkov bločkov v platených plánoch",
+      "mercadopago": "Mercado Pago:",
+      "mercadopago_desc": "Spracovanie platieb predplatného pre Latinskú Ameriku (Peru).",
+      "cloudflare": "Cloudflare:",
+      "cloudflare_desc": "Šifrované ukladanie dokladov (R2) a ochrana pred DDoS."
     },
     "exercise_rights": {
       "title": "Ako uplatniť svoje práva",
@@ -3263,7 +3364,9 @@
     "AI processing is currently off for this account": "Spracovanie pomocou AI je pre tento účet momentálne vypnuté",
     "AI features enabled": "Funkcie AI sú zapnuté",
     "AI features disabled": "Funkcie AI sú vypnuté",
-    "Could not change the AI setting": "Nepodarilo sa zmeniť nastavenie AI"
+    "Could not change the AI setting": "Nepodarilo sa zmeniť nastavenie AI",
+    "Standard": "Štandardný",
+    "Premium": "Premium"
   },
   "pdf": {
     "anonymization_preview": {
@@ -3867,5 +3970,34 @@
     "cta": "Rozšíriť – {{price}}/mesiac",
     "learn_more": "Zistiť viac"
   },
-  "Mesačné súčty podľa kategórií": "Mesačné súčty podľa kategórií"
+  "Mesačné súčty podľa kategórií": "Mesačné súčty podľa kategórií",
+  "Cloud Backup & Restore": "Záloha v cloude",
+  "Forever free": "Navždy zadarmo",
+  "Simple overview dashboard": "Jednoduchý prehľad výdavkov",
+  "Budgets and goal management": "Správa rozpočtov a cieľov",
+  "AI expense prediction": "Predikcia výdavkov pomocou AI",
+  "Clear all filters": "Vymazať všetky filtre",
+  "Please fill in all required fields": "Vyplňte všetky povinné polia",
+  "Last 5 transactions": "Posledných 5 transakcií",
+  "Edit": "Upraviť",
+  "Deleting...": "Vymazáva sa...",
+  "Delete": "Vymazať",
+  "Edit Expense": "Upraviť výdavok",
+  "Edit Income": "Upraviť príjem",
+  "Update the expense details": "Aktualizujte údaje o výdavku",
+  "Save Changes": "Uložiť zmeny",
+  "Automatic backups keeping your financial history safe and accessible across devices": "Automatické zálohy, ktoré udržujú vašu finančnú históriu v bezpečí a dostupnú na všetkých zariadeniach",
+  "Your spending, finally decoded.": "Vaše výdavky konečne prehľadne.",
+  "Monthly totals by category": "Mesačné súčty podľa kategórie",
+  "noAchievements": "Zatiaľ žiadne úspechy",
+  "courses": {
+    "title": "Finančné kurzy",
+    "subtitle": "Naučte sa osobné financie krok za krokom a získavajte XP.",
+    "stats": {
+      "totalXp": "Celkové XP",
+      "dayStreak": "Séria dní",
+      "bestStreak": "Najlepšia séria",
+      "lessons": "Dokončené lekcie"
+    }
+  }
 }

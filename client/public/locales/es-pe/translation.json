@@ -689,7 +689,8 @@
     "increased": "aumentado",
     "decreased": "disminuido",
     "review_recent_purchases": "Revisa compras recientes para identificar el aumento de gastos",
-    "great_expense_reduction": "¡Excelente trabajo reduciendo gastos!"
+    "great_expense_reduction": "¡Excelente trabajo reduciendo gastos!",
+    "count": "análisis"
   },
   "alerts": "Alertas",
   "hideDetails": "Ocultar Detalles",
@@ -765,7 +766,8 @@
     },
     "aiFinancialAnalysis": "Análisis Financiero IA",
     "healthScore": "Puntuación de Salud",
-    "aiInsights": "Perspectivas IA"
+    "aiInsights": "Perspectivas IA",
+    "generating": "Generando..."
   },
   "aiAnalysisSection": "Sección de Análisis IA",
   "analysisInProgress": "Análisis en progreso...",
@@ -1348,7 +1350,10 @@
     "recurring": "Recurrente",
     "note": "Nota",
     "of": "de",
-    "transactions": "transacciones"
+    "transactions": "transacciones",
+    "loading": "Cargando...",
+    "required_fields_error": "Completa todos los campos obligatorios",
+    "recurring_transactions": "Transacciones recurrentes"
   },
   "transactions_count": "transacciones",
   "frequencies": {
@@ -1383,7 +1388,8 @@
     "updated_title": "Ingreso Actualizado",
     "updated_description": "La transacción de ingreso ha sido actualizada exitosamente",
     "confirm_delete": "¿Estás seguro de que quieres eliminar este ingreso?",
-    "adding": "Agregando..."
+    "adding": "Agregando...",
+    "loading": "Cargando ingresos..."
   },
   "expenses": {
     "title": "Gestión de Gastos",
@@ -1511,7 +1517,9 @@
     "other": "Otro",
     "salary": "Salario",
     "freelance": "Trabajo independiente",
-    "investments": "Inversiones"
+    "investments": "Inversiones",
+    "category_created": "Categoría creada",
+    "category_added_successfully": "Categoría agregada correctamente."
   },
   "colors": {
     "blue": "Azul",
@@ -1629,7 +1637,9 @@
     "AI processing is currently off for this account": "El procesamiento con IA está desactivado para esta cuenta",
     "AI features enabled": "Funciones de IA activadas",
     "AI features disabled": "Funciones de IA desactivadas",
-    "Could not change the AI setting": "No se pudo cambiar la configuración de IA"
+    "Could not change the AI setting": "No se pudo cambiar la configuración de IA",
+    "Standard": "Estándar",
+    "Premium": "Premium"
   },
   "types": {
     "expense": "gasto",
@@ -1692,15 +1702,20 @@
       "goal_updated": "¡Meta actualizada exitosamente!",
       "goal_updated_desc": "Los detalles de tu meta han sido actualizados.",
       "goal_deleted": "¡Meta eliminada exitosamente!",
-      "goal_deleted_desc": "Tu meta ha sido removida."
+      "goal_deleted_desc": "Tu meta ha sido removida.",
+      "goal_duplicated": "Meta duplicada",
+      "goal_duplicated_desc": "Se creó una copia de la meta."
     },
     "errors": {
       "select_target_date": "Por favor selecciona una fecha objetivo",
       "valid_target_date": "Por favor ingresa una fecha objetivo válida",
       "failed_create": "Error al crear la meta",
       "failed_update": "Error al actualizar la meta",
-      "failed_delete": "Error al eliminar la meta"
-    }
+      "failed_delete": "Error al eliminar la meta",
+      "failed_duplicate": "No se pudo duplicar la meta."
+    },
+    "copy": "copia",
+    "create_new_goal": "Crear nueva meta"
   },
   "dashboard": {
     "total_income": "Ingresos Totales",
@@ -1788,7 +1803,24 @@
     "Turn AI back on in Profile to scan receipts.": "Vuelve a activar la IA en tu perfil para escanear recibos.",
     "Receipt scanning is available on the Standard and Premium plans.": "El escaneo de recibos está disponible en los planes Standard y Premium.",
     "Go to Profile": "Ir al perfil",
-    "Close": "Cerrar"
+    "Close": "Cerrar",
+    "invalid_file_type": "Tipo de archivo no válido",
+    "please_select_image": "Selecciona un archivo de imagen.",
+    "upload_failed": "Error al subir el archivo",
+    "please_try_again": "Inténtalo de nuevo.",
+    "missing_information": "Falta información",
+    "please_fill_required": "Completa todos los campos obligatorios.",
+    "transaction_saved": "Transacción guardada",
+    "receipt_saved_description": "Tu recibo se procesó y se guardó correctamente.",
+    "save_failed": "No se pudo guardar",
+    "save_failed_description": "Revisa los datos e inténtalo de nuevo.",
+    "transaction_description_placeholder": "¿Para qué fue esta transacción?",
+    "select_category_placeholder": "Selecciona una categoría",
+    "qr_code_error": "Error del código QR",
+    "failed_to_generate_qr": "No se pudo generar el código QR. Inténtalo de nuevo.",
+    "upload_error": "Error de carga",
+    "failed_to_process_mobile": "No se pudo procesar la carga desde el móvil. Inténtalo de nuevo.",
+    "timeout": "La solicitud agotó el tiempo de espera. Inténtalo de nuevo."
   },
   "trends": {
     "title": "Análisis Avanzado de Tendencias",
@@ -2066,7 +2098,37 @@
     "creating_backup": "Creando Respaldo...",
     "backup_now": "Respaldar Ahora",
     "restoring": "Restaurando...",
-    "restore": "Restaurar"
+    "restore": "Restaurar",
+    "example_downloaded": "Archivo de ejemplo descargado",
+    "example_downloaded_desc": "Usa este archivo como plantilla para tu importación.",
+    "invalid_file": "Archivo no válido",
+    "invalid_file_desc": "No se pudo leer el archivo seleccionado.",
+    "reading_file": "Leyendo archivo...",
+    "auth_required": "Inicia sesión para continuar.",
+    "validating_data": "Validando datos...",
+    "processing_import": "Procesando la importación...",
+    "import_completed": "Importación completada",
+    "import_successful": "Importación exitosa",
+    "import_successful_desc": "Tus transacciones se importaron correctamente.",
+    "import_failed": "Error en la importación",
+    "import_failed_desc": "No se importó ninguna transacción. Revisa el archivo e inténtalo de nuevo.",
+    "processing_error": "Error de procesamiento",
+    "click_to_change_file": "Haz clic para cambiar el archivo",
+    "step4_title": "Paso 4: Revisar e importar",
+    "merge_strategy": "Estrategia de combinación",
+    "add_to_existing": "Agregar a las transacciones existentes",
+    "replace_existing": "Reemplazar las transacciones existentes",
+    "merge_existing": "Combinar con las transacciones existentes",
+    "duplicate_handling": "Manejo de duplicados",
+    "skip_duplicates": "Omitir duplicados",
+    "overwrite_duplicates": "Sobrescribir duplicados",
+    "rename_duplicates": "Conservar ambos (renombrar)",
+    "skip_first_row": "Omitir la primera fila (encabezado)",
+    "auto_create_categories": "Crear automáticamente las categorías que faltan",
+    "importing_data": "Importando datos...",
+    "import_completed_successfully": "Importación completada correctamente.",
+    "categories": "Categorías",
+    "created_count": "Creadas: {{count}}"
   },
   "upcomingReminders": {
     "title": "Recordatorios Próximos",
@@ -2243,7 +2305,9 @@
   "nav": {
     "features": "Funciones",
     "help": "Ayuda",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "budgets": "Presupuestos",
+    "goals": "Metas"
   },
   "contact": {
     "page_title": "Contáctanos",
@@ -2344,7 +2408,8 @@
   "recurring": {
     "weekly": "Semanal",
     "monthly": "Mensual",
-    "yearly": "Anual"
+    "yearly": "Anual",
+    "title": "Recurrente"
   },
   "collaborative_goals": {
     "title": "Metas de Ahorro Colaborativas",
@@ -2461,7 +2526,12 @@
       "link_copied": "Enlace Copiado",
       "link_copied_description": "El enlace de la meta ha sido copiado al portapapeles.",
       "share_failed": "No se pudo compartir o copiar el enlace. Por favor copia la URL manualmente.",
-      "copy_failed": "No se pudo copiar el enlace. Por favor copia la URL manualmente."
+      "copy_failed": "No se pudo copiar el enlace. Por favor copia la URL manualmente.",
+      "contribution_added_description": "Tu aporte se registró correctamente.",
+      "user_added_to_goal": "El usuario se agregó a la meta correctamente.",
+      "invitation_email_sent": "Se envió un correo de invitación.",
+      "joined": "Te uniste a la meta",
+      "joined_description": "Ahora puedes aportar a esta meta."
     },
     "hero": {
       "target": "Meta",
@@ -2537,7 +2607,8 @@
       "back_to_goals": "Volver a Metas Colaborativas",
       "cancel": "Cancelar",
       "share": "Compartir",
-      "copy_link": "Copiar Enlace"
+      "copy_link": "Copiar Enlace",
+      "join": "Unirme a la meta"
     },
     "statuses": {
       "active": "Activa",
@@ -2595,7 +2666,8 @@
     "activities": {
       "title": "Actividades Recientes",
       "no_date": "Sin fecha"
-    }
+    },
+    "join_prompt": "Te invitaron a unirte a esta meta. Únete para ver los aportes y agregar los tuyos."
   },
   "redeem": {
     "seo": {
@@ -2839,7 +2911,33 @@
       "contact_us": "8. Contáctanos",
       "contact_desc": "Si tienes alguna pregunta sobre nuestro uso de cookies, por favor contáctanos en:",
       "email": "Correo: info@kaptia.app",
-      "address": "Dirección: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+      "address": "Dirección: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120",
+      "consent_first_title": "Aviso de seguimiento con consentimiento previo",
+      "consent_first_desc": "Respetamos tus decisiones. De forma predeterminada, no se carga ningún script ni cookie de seguimiento analítico o publicitario cuando visitas nuestro sitio web. Los scripts de seguimiento (incluidos Google Analytics y Google Ads) se activan únicamente si, y después de que, haces clic explícitamente en «Aceptar» en nuestro banner de cookies.",
+      "local_storage_title": "Cookies vs. almacenamiento local",
+      "local_storage_desc": "Además de las cookies, Kaptia utiliza el almacenamiento local del navegador (localStorage) para preferencias de interfaz del lado del cliente. A diferencia de las cookies, los elementos de localStorage se guardan solo en tu navegador y nunca se transmiten en las cabeceras HTTP de tus solicitudes:",
+      "local_storage_theme": "Guarda localmente en tu navegador la selección de tema de la interfaz (modo claro u oscuro).",
+      "local_storage_lang": "Guarda el idioma de visualización que elijas (inglés, español o eslovaco).",
+      "local_storage_consent": "Guarda tu decisión sobre el banner de cookies. Se almacena directamente en el localStorage de tu navegador y permanece hasta que la modifiques o la borres.",
+      "clerk_desc": "Gestiona las sesiones de autenticación de usuarios y los tokens de identidad.",
+      "cloudflare_desc": "Proporciona seguridad, detección de bots y mitigación de DDoS.",
+      "provider": "Proveedor",
+      "clerk_session": "Token de sesión de autenticación del usuario",
+      "session_active": "Sesión activa / renovación del token",
+      "clerk_uat": "Marca de tiempo de actividad del usuario para validar la sesión",
+      "cf_bm": "Gestión de bots y mitigación de DDoS",
+      "minutes": "minutos",
+      "admin_session": "Autenticación del panel de administración interno",
+      "hours": "horas",
+      "admin_only": "Solo administradores",
+      "ga_desc": "Identificador de cliente seudónimo para medir el uso del sitio",
+      "years": "años",
+      "analytics": "Analítica",
+      "consent_required": "Requiere consentimiento",
+      "ga_session_desc": "Mantiene el estado de sesión seudónimo y las métricas de interacción",
+      "gcl_desc": "Mide la eficiencia de conversión seudónima de las campañas publicitarias",
+      "days": "días",
+      "marketing": "Marketing"
     },
     "banner": {
       "title": "Valoramos tu privacidad",
@@ -2926,7 +3024,11 @@
       "openai": "Proveedores de IA (OpenAI, Mistral):",
       "openai_desc": "Análisis y categorización solo de texto anonimizado",
       "bunny": "Cloudflare R2 (Almacenamiento de archivos):",
-      "bunny_desc": "Almacenamiento de imágenes de recibos en los planes de pago"
+      "bunny_desc": "Almacenamiento de imágenes de recibos en los planes de pago",
+      "mercadopago": "Mercado Pago:",
+      "mercadopago_desc": "Procesamiento de pagos de suscripciones para Latinoamérica (Perú).",
+      "cloudflare": "Cloudflare:",
+      "cloudflare_desc": "Almacenamiento cifrado de recibos (R2) y defensa contra DDoS."
     },
     "exercise_rights": {
       "title": "Cómo Ejercer Sus Derechos",
@@ -3787,5 +3889,39 @@
     "cta": "Mejorar ahora: {{price}}/mes",
     "learn_more": "Saber más"
   },
-  "Totales mensuales por categoría": "Totales mensuales por categoría"
+  "Totales mensuales por categoría": "Totales mensuales por categoría",
+  "Cloud Backup & Restore": "Respaldo en la nube",
+  "Forever free": "Gratis para siempre",
+  "Simple overview dashboard": "Vista general sencilla de gastos",
+  "Budgets and goal management": "Gestión de presupuestos y metas",
+  "AI expense prediction": "Predicción de gastos con IA",
+  "Clear all filters": "Borrar todos los filtros",
+  "Take Photo": "Tomar foto",
+  "Choose from Gallery": "Elegir de la galería",
+  "Please fill in all required fields": "Completa todos los campos obligatorios",
+  "What was this transaction for?": "¿Para qué fue esta transacción?",
+  "Select type": "Selecciona el tipo",
+  "Upgrade": "Mejorar plan",
+  "Last 5 transactions": "Últimas 5 transacciones",
+  "Edit": "Editar",
+  "Deleting...": "Eliminando...",
+  "Delete": "Eliminar",
+  "Edit Expense": "Editar gasto",
+  "Edit Income": "Editar ingreso",
+  "Update the expense details": "Actualiza los datos del gasto",
+  "Save Changes": "Guardar cambios",
+  "Automatic backups keeping your financial history safe and accessible across devices": "Respaldos automáticos que mantienen tu historial financiero seguro y accesible en todos tus dispositivos",
+  "Your spending, finally decoded.": "Tus gastos, por fin descifrados.",
+  "Monthly totals by category": "Totales mensuales por categoría",
+  "noAchievements": "Aún no hay logros",
+  "courses": {
+    "title": "Cursos financieros",
+    "subtitle": "Aprende finanzas personales paso a paso y gana XP mientras avanzas.",
+    "stats": {
+      "totalXp": "XP total",
+      "dayStreak": "Racha de días",
+      "bestStreak": "Mejor racha",
+      "lessons": "Lecciones completadas"
+    }
+  }
 }

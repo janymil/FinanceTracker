@@ -279,8 +279,8 @@ export default function FeaturesPage() {
                     {activeAiTab === 'statements' && (
                       <div className="p-4 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200/60 dark:border-white/5 space-y-3">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                          <span>{t('features.calculators.statements.pages_label', 'Statement pages:')} {statementPages[0]}</span>
-                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">~{statementPages[0] * 8} {t('features.calculators.statements.extracted', 'transactions')}</span>
+                          <span>{t('features.calculators.statements.pages')} {statementPages[0]}</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">~{statementPages[0] * 8} {t('features.calculators.statements.transactions')}</span>
                         </div>
                         <Slider
                           value={statementPages}

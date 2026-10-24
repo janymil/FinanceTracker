@@ -359,7 +359,7 @@ export default function FinancialHealthMascot() {
             <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
               <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                {healthData.insights?.length || 0} {t('insights')}
+                {healthData.insights?.length || 0} {t('insights.count')}
               </p>
             </div>
             <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
