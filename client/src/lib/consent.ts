@@ -1,8 +1,7 @@
 /**
  * One source of truth for the cookie banner's decision.
  *
- * Analytics must never start before the visitor said yes (GDPR/ePrivacy for our
- * SK and ES visitors). Every analytics call goes through `hasAnalyticsConsent()`,
+ * Analytics must never start before the visitor said yes (consent-first analytics). Every analytics call goes through `hasAnalyticsConsent()`,
  * so a future component cannot accidentally bypass the banner.
  */
 export const CONSENT_STORAGE_KEY = 'cookie-consent';

@@ -23,7 +23,7 @@ export default function TermsOfService() {
     <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("Terms of Service")}</h1>
-        <p className="text-muted-foreground mb-8">{t("Last updated: June 14, 2025")}</p>
+        <p className="text-muted-foreground mb-8">{t("terms.last_updated", "Last updated: October 24, 2026")}</p>
 
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <section className="mb-8">
@@ -82,17 +82,25 @@ export default function TermsOfService() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("5. Payment and Billing")}</h2>
-            <h3 className="text-lg font-semibold mb-2">{t("5.1 Subscription Plans")}</h3>
+            
+            <h3 className="text-lg font-semibold mb-2">{t("terms.pricing_title", "5.1 Subscription Plans and Pricing")}</h3>
             <p className="mb-4">
-              {t("Paid plans are billed monthly or annually in advance. All fees are non-refundable except as required by law or as specifically permitted in our refund policy.")}
+              {t("terms.pricing_desc", "Paid plans are billed in advance on a recurring monthly or annual basis. Prices are charged in United States Dollars (USD) or Peruvian Soles (PEN) depending on your region and selected payment method. Any applicable taxes (such as sales taxes, VAT, or local consumption taxes) are calculated and displayed at checkout or included where required by law.")}
             </p>
-            <h3 className="text-lg font-semibold mb-2">{t("5.2 Payment Processing")}</h3>
+
+            <h3 className="text-lg font-semibold mb-2">{t("terms.auto_renewal_title", "5.2 Automatic Renewal")}</h3>
             <p className="mb-4">
-              {t("Payments are processed securely through Stripe. We do not store your payment information.")}
+              {t("terms.auto_renewal_desc", "By subscribing to a paid plan, you agree that your subscription will automatically renew at the end of each billing cycle (monthly or annually) at the then-current price, and you authorize Kaptia to automatically charge your chosen payment method until you cancel. You may cancel recurring billing at any time in your account settings.")}
             </p>
-            <h3 className="text-lg font-semibold mb-2">{t("5.3 Cancellation")}</h3>
+
+            <h3 className="text-lg font-semibold mb-2">{t("terms.payment_processing_title", "5.3 Payment Processing")}</h3>
             <p className="mb-4">
-              {t("You may cancel your subscription at any time. Cancellations take effect at the end of your current billing period.")}
+              {t("terms.payment_processing_desc", "Payment transactions are handled securely through certified third-party payment gateways: Stripe (for USD credit and debit card payments worldwide) and Mercado Pago (for PEN payments in Peru and Latin America). Kaptia never receives, processes, or stores your credit card numbers, debit card numbers, or bank account credentials on our servers.")}
+            </p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("terms.cancellation_refund_title", "5.4 Cancellation and Refund Policy")}</h3>
+            <p className="mb-4">
+              {t("terms.cancellation_refund_desc", "You may cancel your subscription at any time through your Profile settings. Your cancellation will take effect at the end of your current paid billing cycle, and you will maintain full access to paid features until that period ends. All subscription fees are non-refundable, except where a refund is mandatory under applicable law.")}
             </p>
           </section>
 
@@ -108,20 +116,22 @@ export default function TermsOfService() {
               <li>{t("We use encryption to protect your data")}</li>
               <li>{t("AI features process anonymized data only (see Privacy Policy for details)")}</li>
             </ul>
-
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("7. Service Availability")}</h2>
             <p className="mb-4">
-              {t("While we strive for 99.9% uptime, we do not guarantee uninterrupted service. We may temporarily suspend service for maintenance or updates.")}
+              {t("terms.availability_desc", "Kaptia is hosted on cloud server infrastructure and provided on an 'as-available' and commercially reasonable efforts basis. We do not provide a guaranteed Service Level Agreement (SLA) or warrant uninterrupted, continuous, or error-free operation. We may temporarily suspend or restrict access to the service for maintenance, system updates, or emergency repairs.")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("8. Limitation of Liability")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("terms.liability_title", "8. Limitation of Liability and Liability Cap")}</h2>
             <p className="mb-4">
-              {t("Kaptia is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service.")}
+              {t("terms.liability_desc", "Kaptia is provided \"as is\" and \"as available\" without warranties of any kind, whether express, statutory, or implied. To the maximum extent permitted by applicable law, in no event shall Kaptia, NutriNova LLC, or its officers, employees, or affiliates be liable for any indirect, incidental, special, exemplary, or consequential damages, or loss of profits, data, or personal productivity arising from your use of the service.")}
+            </p>
+            <p className="mb-4">
+              {t("terms.liability_cap", "To the maximum extent permitted by applicable law, our total aggregate liability arising out of or relating to these Terms or the service shall not exceed the greater of one hundred United States dollars ($100 USD) or the total subscription fees paid by you to Kaptia in the twelve (12) months preceding the event giving rise to liability.")}
             </p>
           </section>
 
@@ -147,7 +157,14 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("12. Contact Information")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("terms.governing_law_title", "12. Governing Law and Jurisdiction")}</h2>
+            <p className="mb-4">
+              {t("terms.governing_law_desc", "These Terms of Service and any dispute, controversy, or claim arising out of or relating to them or the service shall be governed by and construed in accordance with the laws of the State of New Mexico, United States of America, without regard to conflict of law principles. Any legal action or proceeding arising under these Terms shall be instituted exclusively in the state or federal courts located in Bernalillo County, New Mexico, and each party irrevocably consents to personal jurisdiction and venue in such courts.")}
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">{t("terms.contact_title", "13. Contact Information")}</h2>
             <p className="mb-4">
               {t("For questions about these Terms of Service, please contact us at:")}
             </p>

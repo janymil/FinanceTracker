@@ -296,7 +296,23 @@
     "disclaimer_text": "Kaptia es estrictamente una herramienta de software de productividad para el registro personal, organización de recibos y planificación de presupuestos. Kaptia NO es un banco, cooperativa de crédito, prestamista, corredor ni institución financiera. Kaptia no presta servicios financieros, servicios bancarios, créditos, asesoramiento de inversiones, asesoría fiscal, contable ni legal. El software y los resúmenes o categorizaciones automáticas se proporcionan únicamente con fines informativos generales y de productividad personal. Usted es el único responsable de sus decisiones personales y registros.",
     "acceptable_use_illegal": "Usar el servicio para cualquier actividad ilegal o fraudulenta",
     "privacy_description": "Sus datos personales y registros de gastos le pertenecen. No vendemos ni compartimos su información personal con terceros excepto como se describe en nuestra Política de Privacidad.",
-    "privacy_ownership": "Usted es dueño de sus datos y registros de gastos"
+    "privacy_ownership": "Usted es dueño de sus datos y registros de gastos",
+    "last_updated": "Última actualización: 24 de octubre de 2026",
+    "pricing_title": "5.1 Planes de Suscripción y Precios",
+    "pricing_desc": "Los planes de pago se facturan por adelantado de manera recurrente mensual o anual. Los precios se cobran en dólares estadounidenses (USD) o soles peruanos (PEN) según su región y el método de pago seleccionado. Todos los impuestos aplicables se calcularán y mostrarán al momento del pago o estarán incluidos según lo exija la ley.",
+    "auto_renewal_title": "5.2 Renovación Automática",
+    "auto_renewal_desc": "Al suscribirse a un plan de pago, usted acepta que su suscripción se renovará automáticamente al final de cada ciclo de facturación (mensual o anual) a la tarifa vigente en ese momento, y autoriza a Kaptia a cargar automáticamente a su método de pago hasta que cancele. Puede cancelar la facturación recurrente en cualquier momento en la configuración de su cuenta.",
+    "payment_processing_title": "5.3 Procesamiento de Pagos",
+    "payment_processing_desc": "Las transacciones de pago son procesadas de forma segura por pasarelas de pago certificadas de terceros: Stripe (para pagos con tarjeta en USD a nivel mundial) y Mercado Pago (para pagos en PEN en Perú y América Latina). Kaptia nunca recibe, procesa ni almacena números de tarjetas de crédito, débito ni credenciales bancarias en nuestros servidores.",
+    "cancellation_refund_title": "5.4 Cancelación y Política de Reembolso",
+    "cancellation_refund_desc": "Puede cancelar su suscripción en cualquier momento a través de la configuración de su Perfil. Su cancelación entrará en vigencia al final de su período de facturación actual, y mantendrá el acceso completo hasta que finalice dicho período. Todas las tarifas de suscripción no son reembolsables, excepto cuando la ley aplicable exija un reembolso obligatorio.",
+    "availability_desc": "Kaptia se aloja en infraestructura en la nube y se proporciona sobre una base de esfuerzos comerciales razonables y según disponibilidad. No ofrecemos un Acuerdo de Nivel de Servicio (SLA) garantizado ni aseguramos un funcionamiento ininterrumpido o libre de errores. El servicio puede suspenderse temporalmente por mantenimiento, actualizaciones o reparaciones técnicas imprevistas.",
+    "liability_title": "8. Limitación de Responsabilidad y Límite Financiero",
+    "liability_desc": "Kaptia se proporciona \"tal como está\" y \"según disponibilidad\" sin garantías de ningún tipo. En la máxima medida permitida por la ley aplicable, en ningún caso NutriNova LLC ni sus directores o afiliados serán responsables de daños indirectos, incidentales, especiales, ejemplares o consecuentes, ni de pérdida de datos o beneficios.",
+    "liability_cap": "En la máxima medida permitida por la ley aplicable, nuestra responsabilidad total agregada que surja de estos Términos o del servicio no excederá la cantidad mayor entre cien dólares estadounidenses ($100 USD) o el monto total de las tarifas de suscripción pagadas por usted a Kaptia en los doce (12) meses anteriores al hecho causante.",
+    "governing_law_title": "12. Ley Aplicable y Jurisdicción",
+    "governing_law_desc": "Estos Términos de Servicio y cualquier controversia o reclamo que surja de ellos o del servicio se regirán e interpretarán de conformidad con las leyes del Estado de Nuevo México, Estados Unidos de América. Cualquier acción legal o procedimiento se someterá exclusivamente a los tribunales estatales o federales ubicados en el condado de Bernalillo, Nuevo México.",
+    "contact_title": "13. Información de Contacto"
   },
   "2.1 Service Plans": "2.1 Planes de Servicio",
   "Free Plan:": "Plan Gratis:",
@@ -1991,7 +2007,7 @@
       "compliance_title": "Estándares de Seguridad",
       "pci_dss": "Stripe PCI-DSS",
       "tls_encryption": "TLS 1.3 en Tránsito",
-      "gdpr": "Minimización de datos",
+      "data_minimization": "Minimización de datos",
       "aes_standard": "AES-256 en Reposo",
       "ai_processing_title": "Transparencia en Procesamiento IA",
       "ai_provider": "Proveedor de IA: OpenAI y Mistral con seguridad de nivel empresarial",
@@ -2969,7 +2985,7 @@
   },
   "privacy": {
     "title": "Política de Privacidad",
-    "last_updated": "Última actualización: 23 de octubre de 2026",
+    "last_updated": "Última actualización: 24 de octubre de 2026",
     "section1": {
       "title": "1. Información que Recopilamos",
       "description": "Recopilamos información que nos proporciona directamente, como cuando crea o modifica su cuenta, agrega transacciones financieras, establece presupuestos o se comunica con nosotros para soporte.",
@@ -3023,6 +3039,10 @@
         "title": "Propósito del Procesamiento:",
         "description": "El análisis con IA se usa solo para reconocer texto de recibos, categorizar gastos y generar resúmenes de gasto."
       },
+      "automated_processing": {
+        "title": "Procesamiento Automatizado y Toma de Decisiones:",
+        "description": "El escaneo de recibos y la categorización con IA son utilidades de productividad asistidas. Ninguna decisión que produzca efectos jurídicos, financieros o significativos se toma de forma automatizada. Usted conserva el control total para revisar, editar, corregir o eliminar cualquier registro, o desactivar las funciones de IA por completo en su cuenta."
+      },
       "data_retention": {
         "title": "Retención de Datos:",
         "description": "Los proveedores de IA reciben el texto anonimizado, devuelven un resultado y no se les pide que lo conserven para entrenamiento. Nuestra caché evita enviar dos veces la misma solicitud."
@@ -3074,8 +3094,34 @@
       "secure_backup": "Almacenamiento seguro de respaldo en la nube con cifrado"
     },
     "section6": {
-      "title": "6. Retención de Datos",
-      "description": "Retenemos su información mientras su cuenta esté activa o según sea necesario para proporcionar servicios. Puede eliminar su cuenta y datos en cualquier momento a través de la configuración de su cuenta."
+      "title": "6. Retención y Eliminación de Datos",
+      "description": "Retenemos su información únicamente mientras sea necesario para proporcionar nuestro servicio, resolver diagnósticos técnicos o cumplir con obligaciones legales. Puede eliminar su cuenta y registros en cualquier momento a través de la configuración de su Perfil.",
+      "table": {
+        "col_category": "Categoría de Datos",
+        "col_retention": "Período de Retención",
+        "col_purpose": "Propósito y Ciclo de Eliminación",
+        "user_session": "Sesiones Activas de Usuario",
+        "user_session_retention": "24 horas",
+        "user_session_desc": "Token de autenticación; expira automáticamente.",
+        "admin_session": "Sesiones de Administrador",
+        "admin_session_retention": "24 horas",
+        "admin_session_desc": "Cookie de acceso de administrador; expira automáticamente.",
+        "ai_cache": "Caché de Procesamiento de IA",
+        "ai_cache_retention": "24 horas a 7 días",
+        "ai_cache_desc": "Caché hash temporal para evitar solicitudes duplicadas a modelos de IA; purgada automáticamente.",
+        "diagnostics": "Diagnóstico de Errores y Registros del Servidor",
+        "diagnostics_retention": "30 días",
+        "diagnostics_desc": "Monitoreo de seguridad, depuración técnica y registros de fallos; purgados automáticamente tras 30 días.",
+        "receipts": "Recibos, Gastos y Registros de Presupuesto",
+        "receipts_retention": "Hasta eliminación por el usuario",
+        "receipts_desc": "Retenidos mientras la cuenta esté activa; eliminados de inmediato cuando el usuario los borra o al eliminar la cuenta.",
+        "backups": "Copias de Seguridad Cifradas para Recuperación ante Desastres",
+        "backups_retention": "30 días (rotativo)",
+        "backups_desc": "Copias de seguridad del sistema. Los datos eliminados se sobrescriben permanentemente y se purgan de todos los ciclos de respaldo en 30 días."
+      },
+      "deletion_notice_title": "Eliminación de Cuenta y Cancelación Automática de Suscripción",
+      "deletion_notice_desc": "Cuando decide eliminar su cuenta a través de la configuración de Perfil, sus datos personales, registros de gastos y recibos se eliminan de manera inmediata e irreversible de nuestras bases de datos en producción. Asimismo, cualquier suscripción recurrente activa con nuestro procesador de pagos (Stripe o Mercado Pago) se cancela automáticamente de inmediato, garantizando que no se efectúen cobros posteriores.",
+      "backup_notice_desc": "Tenga en cuenta que los archivos de copias de seguridad cifradas conservan instantáneas residuales para recuperación ante emergencias por un máximo de 30 días, transcurridos los cuales se sobrescriben de forma total y permanente."
     },
     "section7": {
       "title": "7. Sus Derechos",

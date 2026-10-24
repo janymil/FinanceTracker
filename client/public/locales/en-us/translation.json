@@ -296,7 +296,23 @@
     "disclaimer_text": "Kaptia is strictly a software productivity tool for personal record-keeping, receipt organization, and budget planning. Kaptia is NOT a bank, credit union, lender, broker, investment firm, or financial institution. Kaptia does not provide banking services, financial services, loan or credit services, investment advice, tax advice, accounting advice, or legal advice. The software and any automated summaries, categorizations, or insights are provided solely for general informational and personal productivity purposes. You are solely responsible for your personal decisions, expense entries, and records.",
     "acceptable_use_illegal": "Use the service for illegal or fraudulent activities",
     "privacy_description": "Your personal data and expense records belong to you. We do not sell or share your personal information with third parties except as described in our Privacy Policy.",
-    "privacy_ownership": "You own your data and expense records"
+    "privacy_ownership": "You own your data and expense records",
+    "last_updated": "Last updated: October 24, 2026",
+    "pricing_title": "5.1 Subscription Plans and Pricing",
+    "pricing_desc": "Paid plans are billed in advance on a recurring monthly or annual basis. Prices are charged in United States Dollars (USD) or Peruvian Soles (PEN) depending on your region and selected payment method. Any applicable taxes (such as sales taxes, VAT, or local consumption taxes) are calculated and displayed at checkout or included where required by law.",
+    "auto_renewal_title": "5.2 Automatic Renewal",
+    "auto_renewal_desc": "By subscribing to a paid plan, you agree that your subscription will automatically renew at the end of each billing cycle (monthly or annually) at the then-current price, and you authorize Kaptia to automatically charge your chosen payment method until you cancel. You may cancel recurring billing at any time in your account settings.",
+    "payment_processing_title": "5.3 Payment Processing",
+    "payment_processing_desc": "Payment transactions are handled securely through certified third-party payment gateways: Stripe (for USD credit and debit card payments worldwide) and Mercado Pago (for PEN payments in Peru and Latin America). Kaptia never receives, processes, or stores your credit card numbers, debit card numbers, or bank account credentials on our servers.",
+    "cancellation_refund_title": "5.4 Cancellation and Refund Policy",
+    "cancellation_refund_desc": "You may cancel your subscription at any time through your Profile settings. Your cancellation will take effect at the end of your current paid billing cycle, and you will maintain full access to paid features until that period ends. All subscription fees are non-refundable, except where a refund is mandatory under applicable law.",
+    "availability_desc": "Kaptia is hosted on cloud server infrastructure and provided on an 'as-available' and commercially reasonable efforts basis. We do not provide a guaranteed Service Level Agreement (SLA) or warrant uninterrupted, continuous, or error-free operation. We may temporarily suspend or restrict access to the service for maintenance, system updates, or emergency repairs.",
+    "liability_title": "8. Limitation of Liability and Liability Cap",
+    "liability_desc": "Kaptia is provided \"as is\" and \"as available\" without warranties of any kind, whether express, statutory, or implied. To the maximum extent permitted by applicable law, in no event shall Kaptia, NutriNova LLC, or its officers, employees, or affiliates be liable for any indirect, incidental, special, exemplary, or consequential damages, or loss of profits, data, or personal productivity arising from your use of the service.",
+    "liability_cap": "To the maximum extent permitted by applicable law, our total aggregate liability arising out of or relating to these Terms or the service shall not exceed the greater of one hundred United States dollars ($100 USD) or the total subscription fees paid by you to Kaptia in the twelve (12) months preceding the event giving rise to liability.",
+    "governing_law_title": "12. Governing Law and Jurisdiction",
+    "governing_law_desc": "These Terms of Service and any dispute, controversy, or claim arising out of or relating to them or the service shall be governed by and construed in accordance with the laws of the State of New Mexico, United States of America, without regard to conflict of law principles. Any legal action or proceeding arising under these Terms shall be instituted exclusively in the state or federal courts located in Bernalillo County, New Mexico, and each party irrevocably consents to personal jurisdiction and venue in such courts.",
+    "contact_title": "13. Contact Information"
   },
   "2.1 Service Plans": "2.1 Service Plans",
   "Free Plan:": "Free Plan:",
@@ -1836,7 +1852,7 @@
       "compliance_title": "Compliance Standards Met",
       "pci_dss": "Stripe PCI-DSS",
       "tls_encryption": "TLS 1.3 In-Transit",
-      "gdpr": "Data minimisation",
+      "data_minimization": "Data Minimization",
       "aes_standard": "AES-256 Storage",
       "ai_processing_title": "AI Processing Transparency",
       "ai_provider": "AI provider: OpenAI and Mistral with enterprise-grade security",
@@ -2824,7 +2840,7 @@
   },
   "privacy": {
     "title": "Privacy Policy",
-    "last_updated": "Last updated: October 23, 2026",
+    "last_updated": "Last updated: October 24, 2026",
     "section1": {
       "title": "1. Information We Collect",
       "description": "We collect information you provide directly to us, such as when you create or modify your account, add financial transactions, set budgets, or contact us for support.",
@@ -2878,6 +2894,10 @@
         "title": "Processing Purpose:",
         "description": "AI analysis is used only for receipt text recognition, expense categorization and spending summaries."
       },
+      "automated_processing": {
+        "title": "Automated Processing & Decision-Making:",
+        "description": "AI receipt scanning and categorization are assistive productivity utilities. No decision producing legal, financial, or similarly significant effects is ever taken automatically. You retain full discretion to review, edit, override, or delete any record, or disable AI processing entirely in your account."
+      },
       "data_retention": {
         "title": "Data Retention:",
         "description": "AI providers receive the anonymised text, return a result and are not asked to keep it for training. Our own cached results mean the same request is not sent twice."
@@ -2929,8 +2949,34 @@
       "secure_backup": "Secure cloud backup storage with encryption"
     },
     "section6": {
-      "title": "6. Data Retention",
-      "description": "We retain your information for as long as your account is active or as needed to provide services. You may delete your account and data at any time through your account settings."
+      "title": "6. Data Retention and Deletion",
+      "description": "We retain your information only as long as necessary to provide our service, resolve technical diagnostics, or fulfill legal obligations. You may delete your account and records at any time through your Profile settings.",
+      "table": {
+        "col_category": "Data Category",
+        "col_retention": "Retention Period",
+        "col_purpose": "Purpose & Purge Cycle",
+        "user_session": "User Active Sessions",
+        "user_session_retention": "24 hours",
+        "user_session_desc": "Authentication token expires automatically.",
+        "admin_session": "Admin Sessions",
+        "admin_session_retention": "24 hours",
+        "admin_session_desc": "Admin access cookie; expires automatically.",
+        "ai_cache": "AI Processing Cache",
+        "ai_cache_retention": "24 hours to 7 days",
+        "ai_cache_desc": "Temporary hash cache to prevent duplicate AI categorization requests; automatically purged.",
+        "diagnostics": "Error Diagnostics & Server Logs",
+        "diagnostics_retention": "30 days",
+        "diagnostics_desc": "Security monitoring, technical debugging, and error diagnostics; automatically purged after 30 days.",
+        "receipts": "Receipts, Spending & Expense Records",
+        "receipts_retention": "Until deleted by user",
+        "receipts_desc": "Retained while account is active; immediately deleted when removed by user or upon account deletion.",
+        "backups": "Encrypted Disaster Recovery Backups",
+        "backups_retention": "30 days (rolling)",
+        "backups_desc": "Automated system disaster recovery snapshots. Deleted data is permanently overwritten and purged from all backup cycles within 30 days."
+      },
+      "deletion_notice_title": "Account Deletion and Automatic Subscription Cancellation",
+      "deletion_notice_desc": "When you delete your account in Profile settings, your personal data, expense records, and uploaded receipts are immediately deleted from active production databases. In addition, any active recurring subscription with our payment processor (Stripe or Mercado Pago) is automatically cancelled immediately, ensuring no further subscription charges occur.",
+      "backup_notice_desc": "Please note that encrypted system backup archives retain residual snapshots for disaster recovery for up to 30 days, after which they are permanently and completely overwritten."
     },
     "section7": {
       "title": "7. Your Rights",

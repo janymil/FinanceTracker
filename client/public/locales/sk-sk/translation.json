@@ -296,7 +296,23 @@
     "disclaimer_text": "Kaptia je výhradne softvérový nástroj pre osobnú produktivitu, evidenciu výdavkov, organizáciu bločkov a plánovanie rozpočtov. Kaptia NIE JE banka, úverová inštitúcia, poskytovateľ pôžičiek, maklér ani finančná inštitúcia. Kaptia neposkytuje finančné služby, bankové služby, úverové produkty, investičné poradenstvo, daňové, účtovné ani právne poradenstvo. Softvér a akékoľvek automatizované prehľady, kategorizácie alebo tipy slúžia výlučne na všeobecné informačné účely a osobnú evidenciu. Nesiete výhradnú zodpovednosť za svoje osobné rozhodnutia a evidované záznamy.",
     "acceptable_use_illegal": "Používanie služby na akékoľvek nezákonné alebo podvodné aktivity",
     "privacy_description": "Vaše osobné údaje a záznamy o výdavkoch patria vám. Nepredávame ani nezdieľame vaše osobné informácie s tretími stranami okrem prípadov opísaných v našich Zásadách ochrany osobných údajov.",
-    "privacy_ownership": "Vlastníte svoje údaje a záznamy výdavkov"
+    "privacy_ownership": "Vlastníte svoje údaje a záznamy výdavkov",
+    "last_updated": "Posledná aktualizácia: 24. októbra 2026",
+    "pricing_title": "5.1 Plány predplatného a ceny",
+    "pricing_desc": "Platené plány sa účtujú vopred na báze pravidelného mesačného alebo ročného predplatného. Ceny sú účtované v amerických dolároch (USD) alebo peruánskych soloch (PEN) v závislosti od vášho regiónu a zvolenej platobnej metódy. Všetky príslušné dane sú vypočítané a zobrazené pri pokladni alebo zahrnuté v cene, ako vyžaduje zákon.",
+    "auto_renewal_title": "5.2 Automatické obnovovanie predplatného",
+    "auto_renewal_desc": "Aktiváciou plateného predplatného súhlasíte s tým, že predplatné sa automaticky obnovuje na konci každého fakturačného cyklu (mesačne alebo ročne) za vtedy platnú cenu a oprávňujete Kaptia automaticky účtovať zvolenú platobnú metódu, kým predplatné nezrušíte. Automatické obnovovanie môžete kedykoľvek zrušiť v nastaveniach svojho profilu.",
+    "payment_processing_title": "5.3 Spracovanie platieb",
+    "payment_processing_desc": "Platobné transakcie sú bezpečne spracovávané certifikovanými sprostredkovateľmi platieb: Stripe (pre platby kartou v USD globálne) a Mercado Pago (pre platby v PEN v Peru a Latinskej Amerike). Kaptia nikdy neprijíma, nespracúva ani neukladá čísla vašich platobných kariet na našich serveroch.",
+    "cancellation_refund_title": "5.4 Zrušenie a refundácie",
+    "cancellation_refund_desc": "Predplatné môžete zrušiť kedykoľvek v nastaveniach svojho profilu. Zrušenie nadobudne účinnosť na konci aktuálneho zaplateného fakturačného obdobia, počas ktorého máte naďalej plný prístup k plateným funkciám. Poplatky za predplatné sú nevratné, s výnimkou prípadov vyžadovaných platnými zákonmi.",
+    "availability_desc": "Kaptia je poskytovaná na cloudovej infraštruktúre na báze primeraného komerčného úsilia a podľa dostupnosti. Neposkytujeme garantovanú zmluvu o úrovni služieb (SLA) ani nezaručujeme nepretržitú prevádzku bez chýb. Služba môže byť dočasne pozastavená z dôvodu údržby, aktualizácií alebo technických výpadkov.",
+    "liability_title": "8. Obmedzenie zodpovednosti a finančný limit",
+    "liability_desc": "Kaptia je poskytovaná \"tak ako stojí a leží\" a \"podľa dostupnosti\" bez akýchkoľvek záruk. V maximálnom rozsahu povolenom príslušnými zákonmi spoločnosť NutriNova LLC ani jej predstavitelia nezodpovedajú za žiadne nepriame, náhodné, osobitné alebo následné škody, ušlý zisk či stratu údajov.",
+    "liability_cap": "V maximálnom rozsahu povolenom príslušnými zákonmi je naša celková kumulatívna zodpovednosť vyplývajúca z týchto Podmienok alebo služby striktne obmedzená na sumu 100 USD alebo sumu poplatkov, ktoré ste spoločnosti Kaptia uhradili za predchádzajúcich 12 mesiacov.",
+    "governing_law_title": "12. Rozhodné právo a súdna príslušnosť",
+    "governing_law_desc": "Tieto Podmienky služby a akékoľvek spory z nich vyplývajúce sa spravujú a vykladajú v súlade so zákonmi štátu Nové Mexiko, Spojené štáty americké. Všetky právne spory patria do výlučnej právomoci súdov so sídlom v Bernalillo County, Nové Mexiko.",
+    "contact_title": "13. Kontaktné informácie"
   },
   "2.1 Service Plans": "2.1 Servisné plány",
   "Free Plan:": "Bezplatný plán:",
@@ -1943,7 +1959,7 @@
       "compliance_title": "Bezpečnostné štandardy",
       "pci_dss": "Stripe PCI-DSS",
       "tls_encryption": "TLS 1.3 Prenos",
-      "gdpr": "Minimalizácia údajov",
+      "data_minimization": "Minimalizácia údajov",
       "aes_standard": "AES-256 Úložisko",
       "ai_processing_title": "Transparentnosť AI Spracovania",
       "ai_provider": "Poskytovateľ AI: OpenAI a Mistral s podnikovým zabezpečením",
@@ -2878,7 +2894,7 @@
   },
   "privacy": {
     "title": "Zásady ochrany súkromia",
-    "last_updated": "Posledná aktualizácia: 23. októbra 2026",
+    "last_updated": "Posledná aktualizácia: 24. októbra 2026",
     "section1": {
       "title": "1. Informácie, ktoré zhromažďujeme",
       "description": "Zhromažďujeme informácie, ktoré nám poskytujete priamo, napríklad keď vytvárate alebo upravujete svoj účet, pridávate finančné transakcie, nastavujete rozpočty alebo nás kontaktujete pre podporu.",
@@ -2932,6 +2948,10 @@
         "title": "Účel spracovávania:",
         "description": "AI analýza sa používa len na rozpoznanie textu bločkov, kategorizáciu výdavkov a prehľady míňania."
       },
+      "automated_processing": {
+        "title": "Automatizované spracovanie a rozhodovanie:",
+        "description": "Skenovanie bločkov pomocou umelej inteligencie a kategorizácia výdavkov slúžia výlučne ako pomocné nástroje produktivity. Automatizované spracovanie neprijíma žiadne rozhodnutie s právnymi, finančnými ani inak významnými účinkami. Všetky záznamy môžete kedykoľvek skontrolovať, upraviť, zmeniť ich kategóriu alebo zmazať, prípadne AI funkcie vo svojom účte úplne vypnúť."
+      },
       "data_retention": {
         "title": "Uchovávanie údajov:",
         "description": "Poskytovatelia AI dostanú anonymizovaný text, vrátia výsledok a nie sú požiadaní, aby si ho uchovávali na trénovanie. Vďaka našej cache sa tá istá požiadavka neposiela dvakrát."
@@ -2983,8 +3003,34 @@
       "secure_backup": "Bezpečné cloudové záložné úložisko so šifrovaním"
     },
     "section6": {
-      "title": "6. Uchovávanie údajov",
-      "description": "Uchovávame vaše informácie dovtedy, kým je váš účet aktívny alebo podľa potreby na poskytovanie služieb. Svoj účet a údaje môžete vymazať kedykoľvek prostredníctvom nastavení účtu."
+      "title": "6. Uchovávanie a výmaz údajov",
+      "description": "Vaše údaje uchovávame len po dobu nevyhnutnú na poskytovanie našej služby, riešenie technickej diagnostiky alebo splnenie zákonných povinností. Svoj účet a záznamy môžete kedykoľvek vymazať v nastaveniach Profilu.",
+      "table": {
+        "col_category": "Kategória údajov",
+        "col_retention": "Doba uchovávania",
+        "col_purpose": "Účel a cyklus výmazu",
+        "user_session": "Aktívne relácie používateľa",
+        "user_session_retention": "24 hodín",
+        "user_session_desc": "Autentifikačný token; vyprší automaticky.",
+        "admin_session": "Relácie administrátora",
+        "admin_session_retention": "24 hodín",
+        "admin_session_desc": "Súbor cookie administrátorského prístupu; vyprší automaticky.",
+        "ai_cache": "Vyrovnávacia pamäť AI spracovania",
+        "ai_cache_retention": "24 hodín až 7 dní",
+        "ai_cache_desc": "Dočasná hash cache zabraňujúca duplicitným požiadavkám na AI kategorizáciu; automaticky premazávaná.",
+        "diagnostics": "Diagnostika chýb a systémové logy",
+        "diagnostics_retention": "30 dní",
+        "diagnostics_desc": "Bezpečnostný monitoring, technické ladenie a diagnostika chýb servera; automaticky vymazané po 30 dňoch.",
+        "receipts": "Bločky, výdavky a záznamy rozpočtu",
+        "receipts_retention": "Do zmazania používateľom",
+        "receipts_desc": "Uchovávané počas platnosti účtu; okamžite zmazané pri ich odstránení používateľom alebo pri zrušení účtu.",
+        "backups": "Šifrované zálohy pre obnovu po havárii",
+        "backups_retention": "30 dní (rotujúci cyklus)",
+        "backups_desc": "Automatizované zálohy systému. Vymazané údaje sú natrvalo prepísané a odstránené zo všetkých záloh do 30 dní."
+      },
+      "deletion_notice_title": "Zmazanie účtu a automatické zrušenie predplatného",
+      "deletion_notice_desc": "Keď sa rozhodnete zmazať svoj účet v nastaveniach Profilu, vaše osobné údaje, záznamy výdavkov a nahrané bločky sa okamžite a nevratne vymažú z našich produkčných databáz. Zároveň sa okamžite a automaticky zruší akékoľvek aktívne pravidelné predplatné u nášho spracovateľa platieb (Stripe alebo Mercado Pago), čím sa zabezpečí, že vám nebudú účtované žiadne ďalšie poplatky.",
+      "backup_notice_desc": "Upozorňujeme, že šifrované záložné archívy systému uchovávajú reziduálne kópie pre obnovu po havárii po dobu maximálne 30 dní, po ktorých sú natrvalo a úplne prepísané."
     },
     "section7": {
       "title": "7. Vaše práva",

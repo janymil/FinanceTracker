@@ -65,6 +65,7 @@ export default function PrivacyPolicy() {
               <li><strong>{t("privacy.section3.ai_provider.title")}</strong> {t("privacy.section3.ai_provider.description")}</li>
               <li><strong>{t("privacy.section3.data_anonymization.title")}</strong> {t("privacy.section3.data_anonymization.description")}</li>
               <li><strong>{t("privacy.section3.processing_purpose.title")}</strong> {t("privacy.section3.processing_purpose.description")}</li>
+              <li><strong>{t("privacy.section3.automated_processing.title", "Automated Processing & Decision-Making:")}</strong> {t("privacy.section3.automated_processing.description", "AI receipt scanning and categorization are assistive productivity utilities. No decision producing legal, financial, or similarly significant effects is ever taken automatically. You retain full discretion to review, edit, override, or delete any record, or disable AI processing entirely in your account.")}</li>
               <li><strong>{t("privacy.section3.data_retention.title")}</strong> {t("privacy.section3.data_retention.description")}</li>
               <li><strong>{t("privacy.section3.user_control.title")}</strong> {t("privacy.section3.user_control.description")}</li>
               <li><strong>{t("privacy.section3.no_personal_data.title")}</strong> {t("privacy.section3.no_personal_data.description")}</li>
@@ -105,10 +106,64 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section6.title")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section6.title", "6. Data Retention and Deletion")}</h2>
             <p className="mb-4">
-              {t("privacy.section6.description")}
+              {t("privacy.section6.description", "We retain your information only as long as necessary to provide our service, resolve technical diagnostics, or fulfill legal obligations. You may delete your account and records at any time through your Profile settings.")}
             </p>
+
+            <div className="overflow-x-auto my-6 border rounded-lg">
+              <table className="min-w-full divide-y divide-border text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left font-semibold">{t("privacy.section6.table.col_category", "Data Category")}</th>
+                    <th scope="col" className="px-4 py-3 text-left font-semibold">{t("privacy.section6.table.col_retention", "Retention Period")}</th>
+                    <th scope="col" className="px-4 py-3 text-left font-semibold">{t("privacy.section6.table.col_purpose", "Purpose & Purge Cycle")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.user_session", "User Active Sessions")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.user_session_retention", "24 hours")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.user_session_desc", "Authentication token expires automatically.")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.admin_session", "Admin Sessions")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.admin_session_retention", "24 hours")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.admin_session_desc", "Admin access cookie; expires automatically.")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.ai_cache", "AI Processing Cache")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.ai_cache_retention", "24 hours to 7 days")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.ai_cache_desc", "Temporary hash cache to prevent duplicate AI categorization requests; automatically purged.")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.diagnostics", "Error Diagnostics & Server Logs")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.diagnostics_retention", "30 days")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.diagnostics_desc", "Security monitoring, technical debugging, and error diagnostics; automatically purged after 30 days.")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.receipts", "Receipts, Spending & Expense Records")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.receipts_retention", "Until deleted by user")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.receipts_desc", "Retained while account is active; immediately deleted when removed by user or upon account deletion.")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.backups", "Encrypted Disaster Recovery Backups")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.backups_retention", "30 days (rolling)")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.backups_desc", "Automated system disaster recovery snapshots. Deleted data is permanently overwritten and purged from all backup cycles within 30 days.")}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 p-4 rounded-lg space-y-2 mt-4 text-sm">
+              <h3 className="font-semibold text-foreground">{t("privacy.section6.deletion_notice_title", "Account Deletion and Automatic Subscription Cancellation")}</h3>
+              <p>
+                {t("privacy.section6.deletion_notice_desc", "When you delete your account in Profile settings, your personal data, expense records, and uploaded receipts are immediately deleted from active production databases. In addition, any active recurring subscription with our payment processor (Stripe or Mercado Pago) is automatically cancelled immediately, ensuring no further subscription charges occur.")}
+              </p>
+              <p className="text-muted-foreground">
+                {t("privacy.section6.backup_notice_desc", "Please note that encrypted system backup archives retain residual snapshots for disaster recovery for up to 30 days, after which they are permanently and completely overwritten.")}
+              </p>
+            </div>
           </section>
 
           <section className="mb-8">
@@ -177,8 +232,9 @@ export default function PrivacyPolicy() {
                 <ul className="list-disc list-inside mb-4 space-y-2">
                   <li><strong>{t("ccpa.providers.clerk")}</strong> {t("ccpa.providers.clerk_desc")}</li>
                   <li><strong>{t("ccpa.providers.stripe")}</strong> {t("ccpa.providers.stripe_desc")}</li>
+                  <li><strong>{t("ccpa.providers.mercadopago", "Mercado Pago:")}</strong> {t("ccpa.providers.mercadopago_desc", "Subscription payment processing for Latin America (Peru).")}</li>
                   <li><strong>{t("ccpa.providers.openai")}</strong> {t("ccpa.providers.openai_desc")}</li>
-                  <li><strong>{t("ccpa.providers.bunny")}</strong> {t("ccpa.providers.bunny_desc")}</li>
+                  <li><strong>{t("ccpa.providers.cloudflare", "Cloudflare:")}</strong> {t("ccpa.providers.cloudflare_desc", "Encrypted receipt storage (R2) and DDoS defense.")}</li>
                 </ul>
               </div>
 
