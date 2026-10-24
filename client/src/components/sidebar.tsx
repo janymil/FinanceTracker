@@ -284,7 +284,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
 
         {/* Footer */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
             <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
               <span>v1.0.0</span>
               {currentPlan === 'premium' ? (
@@ -295,6 +295,19 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
               ) : (
                 <Badge variant="secondary">{currentPlan}</Badge>
               )}
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 pt-1">
+              <Link href={`/${currentLang}/terms-of-service`} onClick={() => setIsOpen(false)} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                {t("Terms")}
+              </Link>
+              <span>•</span>
+              <Link href={`/${currentLang}/privacy-policy`} onClick={() => setIsOpen(false)} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                {t("Privacy")}
+              </Link>
+              <span>•</span>
+              <Link href={`/${currentLang}/cookie-policy`} onClick={() => setIsOpen(false)} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                {t("Cookies")}
+              </Link>
             </div>
           </div>
         )}

@@ -284,11 +284,21 @@
   "Take control of your financial future with intelligent expense tracking and budgeting.": "Take control of your financial future with intelligent expense tracking and budgeting.",
   "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. All rights reserved.",
   "Terms of Service": "Terms of Service",
+  "Terms": "Terms",
+  "Privacy": "Privacy",
+  "Cookies": "Cookies",
   "Last updated: June 14, 2025": "Last updated: June 14, 2025",
   "1. Acceptance of Terms": "1. Acceptance of Terms",
   "By accessing and using Kaptia, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.": "By accessing and using Kaptia, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.",
   "2. Description of Service": "2. Description of Service",
-  "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.",
+  "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "Kaptia is a personal productivity and expense organization software application that helps users track expenses, manage budgets, set personal spending goals, and organize receipts.",
+  "terms": {
+    "disclaimer_title": "Software Utility Disclaimer (Not a Financial Service)",
+    "disclaimer_text": "Kaptia is strictly a software productivity tool for personal record-keeping, receipt organization, and budget planning. Kaptia is NOT a bank, credit union, lender, broker, investment firm, or financial institution. Kaptia does not provide banking services, financial services, loan or credit services, investment advice, tax advice, accounting advice, or legal advice. The software and any automated summaries, categorizations, or insights are provided solely for general informational and personal productivity purposes. You are solely responsible for your personal decisions, expense entries, and records.",
+    "acceptable_use_illegal": "Use the service for illegal or fraudulent activities",
+    "privacy_description": "Your personal data and expense records belong to you. We do not sell or share your personal information with third parties except as described in our Privacy Policy.",
+    "privacy_ownership": "You own your data and expense records"
+  },
   "2.1 Service Plans": "2.1 Service Plans",
   "Free Plan:": "Free Plan:",
   "Basic transaction tracking (limited to 100 transactions)": "Basic transaction tracking (limited to 100 transactions)",
@@ -308,7 +318,7 @@
   "Transmit any harmful, threatening, or offensive content": "Transmit any harmful, threatening, or offensive content",
   "Attempt to gain unauthorized access to our systems": "Attempt to gain unauthorized access to our systems",
   "Interfere with or disrupt the service": "Interfere with or disrupt the service",
-  "Use the service for illegal financial activities": "Use the service for illegal financial activities",
+  "Use the service for illegal financial activities": "Use the service for illegal or fraudulent activities",
   "Share your account with others": "Share your account with others",
   "5. Payment and Billing": "5. Payment and Billing",
   "5.1 Subscription Plans": "5.1 Subscription Plans",
@@ -318,8 +328,8 @@
   "5.3 Cancellation": "5.3 Cancellation",
   "You may cancel your subscription at any time. Cancellations take effect at the end of your current billing period.": "You may cancel your subscription at any time. Cancellations take effect at the end of your current billing period.",
   "6. Data and Privacy": "6. Data and Privacy",
-  "Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.": "Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.",
-  "You own your financial data": "You own your financial data",
+  "Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.": "Your personal data and expense records belong to you. We do not sell or share your personal information with third parties except as described in our Privacy Policy.",
+  "You own your financial data": "You own your data and expense records",
   "We provide data export capabilities": "We provide data export capabilities",
   "You may delete your account and data at any time": "You may delete your account and data at any time",
   "We use encryption to protect your data": "We use encryption to protect your data",
@@ -1800,8 +1810,8 @@
     "no_import_history": "No import history yet",
     "processing_error": "Processing Error",
     "pdf_security": {
-      "modal_title": "Bank-Grade Security for PDF Processing",
-      "modal_description": "Before processing your bank statement, please review our comprehensive security measures.",
+      "modal_title": "Advanced Security for Document Processing",
+      "modal_description": "Before processing your document, please review our comprehensive security measures.",
       "security_architecture_title": "Complete Security Architecture",
       "aes_encryption": "AES-256-CBC Encryption - All data encrypted at rest and in transit",
       "zero_persistence": "Zero Data Persistence - PDFs processed in memory only, never stored",
@@ -1819,10 +1829,10 @@
       "step5_title": "Memory Cleanup",
       "step5_desc": "Secure deletion of all temporary data",
       "compliance_title": "Compliance Standards Met",
-      "pci_dss": "PCI DSS Level 1",
-      "sox_compliance": "SOX Compliance",
+      "pci_dss": "Stripe PCI-DSS",
+      "tls_encryption": "TLS 1.3 In-Transit",
       "gdpr": "GDPR Article 32",
-      "bank_secrecy": "Bank Secrecy Act",
+      "aes_standard": "AES-256 Storage",
       "ai_processing_title": "AI Processing Transparency",
       "ai_provider": "AI Service Provider: OpenAI (GPT-4) with enterprise-grade security",
       "ai_anonymization": "CRITICAL: Only anonymized data sent to OpenAI - All sensitive information (SSNs, account numbers, personal details) completely removed before AI processing",
@@ -2854,63 +2864,29 @@
       "procedure": "We may request additional information to verify your identity, such as account details or recent transaction information."
     }
   },
-  "financial_compliance": {
-    "title": "Financial Services Compliance",
-    "bsa": {
-      "title": "Bank Secrecy Act (BSA) Compliance",
-      "description": "Kaptia complies with the Bank Secrecy Act and Anti-Money Laundering (AML) regulations:",
-      "aml_procedures": "Implementation of comprehensive AML procedures and customer due diligence",
-      "transaction_monitoring": "Automated transaction monitoring for suspicious activity patterns",
-      "suspicious_activity": "Mandatory reporting of suspicious activity to FinCEN when required",
-      "record_keeping": "Maintenance of detailed transaction records as required by federal law"
-    },
-    "pci_dss": {
-      "title": "PCI DSS Compliance",
-      "description": "We adhere to Payment Card Industry Data Security Standards through our payment processor Stripe:",
-      "data_encryption": {
-        "title": "Data Encryption",
-        "description": "All payment data is encrypted using industry-standard AES-256 encryption"
-      },
-      "secure_networks": {
-        "title": "Secure Networks",
-        "description": "Firewalls and secure network architecture protect cardholder data"
-      },
-      "access_control": {
-        "title": "Access Control",
-        "description": "Strict access controls limit payment data access to authorized personnel only"
-      },
-      "monitoring": {
-        "title": "Network Monitoring",
-        "description": "Continuous monitoring and regular security testing ensure data protection"
-      }
+  "security_notice": {
+    "title": "Data Security & Software Notice",
+    "software_disclaimer": {
+      "title": "Software Application Notice (Not a Financial Institution)",
+      "p1": "Kaptia is strictly a personal productivity and expense organization software application developed by NutriNova LLC. Kaptia is NOT a bank, credit provider, depository institution, broker, or licensed financial advisor.",
+      "p2": "Kaptia does not provide financial services, banking services, loan facilities, investment advice, credit evaluation, tax, accounting, or legal counsel. All features, categories, receipt captures, and automated summaries are for personal record-keeping and productivity purposes only."
     },
     "data_security": {
-      "title": "Financial Data Security Standards",
-      "description": "We implement multiple layers of security to protect your financial information:",
-      "encryption": "End-to-End Encryption:",
-      "encryption_desc": "All data transmission is secured using HTTPS/TLS encryption",
-      "tokenization": "Access Controls:",
-      "tokenization_desc": "User data is isolated and protected with secure authentication",
-      "secure_transmission": "Secure Transmission:",
-      "transmission_desc": "All data transfers use TLS 1.3 and HTTPS protocols exclusively",
-      "regular_audits": "Regular Security Audits:",
-      "audits_desc": "Independent third-party security audits ensure ongoing compliance"
+      "title": "Data Protection and Security Standards",
+      "description": "We apply technical safeguards to protect your records and personal information:",
+      "encryption": "Encryption at Rest:",
+      "encryption_desc": "User records and attachments are encrypted using industry-standard AES-256 protocols.",
+      "isolation": "Tenant Isolation:",
+      "isolation_desc": "User records are logically separated and protected by authenticated access controls.",
+      "transmission": "Secure Transmission:",
+      "transmission_desc": "All communication with Kaptia servers occurs exclusively over HTTPS with modern TLS 1.3 encryption.",
+      "audits": "Continuous Monitoring:",
+      "audits_desc": "We maintain continuous vulnerability monitoring and secure development practices."
     },
-    "regulatory_disclosures": {
-      "title": "Regulatory Disclosures",
-      "not_advisor": "NOT A FINANCIAL ADVISOR: Kaptia is not a registered investment advisor or financial planner.",
-      "educational_purposes": "Our AI-powered insights and recommendations are for educational and informational purposes only.",
-      "consult_professional": "Always consult with qualified financial professionals before making investment or financial decisions."
-    },
-    "regulatory_oversight": {
-      "title": "Regulatory Oversight",
-      "description": "Kaptia operates under the oversight of multiple financial regulatory bodies:",
-      "finra": "FINRA:",
-      "finra_desc": "Compliance with Financial Industry Regulatory Authority guidelines for technology providers",
-      "sec": "SEC:",
-      "sec_desc": "Adherence to Securities and Exchange Commission regulations regarding financial technology",
-      "cfpb": "CFPB:",
-      "cfpb_desc": "Consumer Financial Protection Bureau compliance for consumer financial services"
+    "payment_processor": {
+      "title": "Subscription Payment Processing",
+      "description": "Kaptia software subscriptions are processed securely through Stripe, a certified PCI-DSS Level 1 payment processor.",
+      "details": "Kaptia does not process, handle, or store your payment card numbers. All billing transactions are managed directly by Stripe's secure infrastructure."
     }
   },
   "ai_act_compliance": {
@@ -2983,8 +2959,8 @@
         "description": "Email address, name, password (encrypted)"
       },
       "financial_data": {
-        "title": "Financial Data:",
-        "description": "Transaction details, categories, budgets, goals"
+        "title": "Expense & Budget Records:",
+        "description": "Spending entries, receipt uploads, categories, budgets, and personal savings targets"
       },
       "usage_data": {
         "title": "Usage Data:",
@@ -2998,9 +2974,9 @@
     "section2": {
       "title": "2. How We Use Your Information",
       "description": "We use the information we collect to:",
-      "services": "Provide, maintain, and improve our financial management services",
-      "transactions": "Process transactions and send related information",
-      "ai_insights": "Provide AI-powered insights and recommendations (Premium users)",
+      "services": "Provide, maintain, and improve our personal expense organization and productivity software",
+      "transactions": "Process and display your saved expense records and send related system notifications",
+      "ai_insights": "Provide AI-powered summaries and expense categorizations (Premium users)",
       "notifications": "Send technical notices, updates, security alerts, and support messages",
       "support": "Respond to your comments and questions",
       "analytics": "Analyze usage patterns to improve our service"
@@ -3015,18 +2991,18 @@
     },
     "section3": {
       "title": "3. AI-Powered Features and Data Processing",
-      "description": "Kaptia uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:",
+      "description": "Kaptia uses artificial intelligence to help process receipt text (OCR), categorize spending entries, and generate productivity tips. Here's how we handle your data for AI processing:",
       "ai_provider": {
         "title": "AI Service Provider:",
-        "description": "We use OpenAI's GPT models to analyze spending patterns and generate insights"
+        "description": "We use OpenAI's GPT models to analyze spending entries and generate categorization insights"
       },
       "data_anonymization": {
         "title": "Data Anonymization:",
-        "description": "All transaction data is anonymized and stripped of personally identifiable information before AI processing"
+        "description": "All receipt and expense text is anonymized and stripped of personal identifying details before AI processing"
       },
       "processing_purpose": {
         "title": "Processing Purpose:",
-        "description": "AI analysis is used exclusively for generating financial recommendations, spending insights, and personalized tips"
+        "description": "AI analysis is used exclusively for receipt OCR text recognition, expense categorization, and general productivity summaries"
       },
       "data_retention": {
         "title": "Data Retention:",
@@ -3058,7 +3034,7 @@
       },
       "ai_processing": {
         "title": "AI Processing:",
-        "description": "OpenAI for anonymized financial insights (as detailed in section 3 above)"
+        "description": "OpenAI for receipt OCR processing and text categorization (as detailed in section 3 above)"
       },
       "cloud_storage": {
         "title": "Cloud Storage:",
@@ -3233,7 +3209,19 @@
     "Your account was deleted": "Your account was deleted",
     "Could not prepare your data": "Could not prepare your data",
     "Could not delete your account": "Could not delete your account",
-    "See the pricing page for current prices": "See the pricing page for current prices"
+    "See the pricing page for current prices": "See the pricing page for current prices",
+    "legal": {
+      "title": "Legal Information & Policies",
+      "description": "Review the terms, privacy standards, and cookie policy that govern your use of Kaptia",
+      "notice_title": "Software Productivity Notice",
+      "notice_body": "Kaptia is a personal productivity and expense organization software application. It does not provide financial, banking, investment, or credit services.",
+      "terms": "Terms of Service",
+      "terms_desc": "Acceptable use, subscriptions, account rules, and service limitations",
+      "privacy": "Privacy Policy",
+      "privacy_desc": "GDPR rights, data protection, technical encryption, and AI processing",
+      "cookies": "Cookie Policy",
+      "cookies_desc": "Information on essential, functional, and consent-based cookies"
+    }
   },
   "pdf": {
     "anonymization_preview": {

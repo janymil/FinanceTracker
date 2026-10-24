@@ -91,7 +91,7 @@ export function PDFSecurityModal({ isOpen, onClose, onConsent }: PDFSecurityModa
                 {t('export.pdf_security.compliance_title')}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {['pci_dss', 'sox_compliance', 'gdpr', 'bank_secrecy'].map((standard) => (
+                {['pci_dss', 'tls_encryption', 'gdpr', 'aes_standard'].map((standard) => (
                   <div key={standard} className="text-center">
                     <div className="bg-blue-100 dark:bg-blue-800 p-2 rounded-lg mb-1">
                       <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400 mx-auto" />

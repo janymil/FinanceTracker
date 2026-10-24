@@ -38,6 +38,14 @@ export default function TermsOfService() {
             <p className="mb-4">
               {t("Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.")}
             </p>
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg my-4">
+              <h3 className="text-sm font-bold text-amber-900 dark:text-amber-200 mb-1">
+                {t("terms.disclaimer_title", "Software Utility Disclaimer (Not a Financial Service)")}
+              </h3>
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                {t("terms.disclaimer_text", "Kaptia is strictly a software productivity tool for personal record-keeping, receipt organization, and budget planning. Kaptia is NOT a bank, credit union, lender, broker, investment firm, or financial institution. Kaptia does not provide banking services, financial services, loan or credit services, investment advice, tax advice, accounting advice, or legal advice. The software and any automated summaries, categorizations, or insights are provided solely for general informational and personal productivity purposes. You are solely responsible for your personal decisions, expense entries, and records.")}
+              </p>
+            </div>
             <h3 className="text-lg font-semibold mb-2">{t("2.1 Service Plans")}</h3>
             <ul className="list-disc list-inside mb-4 space-y-2">
               <li><strong>{t("Free Plan:")}</strong> {t("Basic transaction tracking (limited to 100 transactions)")}</li>
@@ -67,7 +75,7 @@ export default function TermsOfService() {
               <li>{t("Transmit any harmful, threatening, or offensive content")}</li>
               <li>{t("Attempt to gain unauthorized access to our systems")}</li>
               <li>{t("Interfere with or disrupt the service")}</li>
-              <li>{t("Use the service for illegal financial activities")}</li>
+              <li>{t("terms.acceptable_use_illegal", "Use the service for illegal or fraudulent activities")}</li>
               <li>{t("Share your account with others")}</li>
             </ul>
           </section>
@@ -91,10 +99,10 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("6. Data and Privacy")}</h2>
             <p className="mb-4">
-              {t("Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.")}
+              {t("terms.privacy_description", "Your personal data and expense records belong to you. We do not sell or share your personal information with third parties except as described in our Privacy Policy.")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>{t("You own your financial data")}</li>
+              <li>{t("terms.privacy_ownership", "You own your data and expense records")}</li>
               <li>{t("We provide data export capabilities")}</li>
               <li>{t("You may delete your account and data at any time")}</li>
               <li>{t("We use encryption to protect your data")}</li>

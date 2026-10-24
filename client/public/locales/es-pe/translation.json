@@ -284,11 +284,21 @@
   "Take control of your financial future with intelligent expense tracking and budgeting.": "Toma control de tu futuro financiero con seguimiento inteligente de gastos y presupuestos.",
   "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. Todos los derechos reservados.",
   "Terms of Service": "Términos de Servicio",
+  "Terms": "Términos",
+  "Privacy": "Privacidad",
+  "Cookies": "Cookies",
   "Last updated: June 14, 2025": "Última actualización: 14 de junio, 2025",
   "1. Acceptance of Terms": "1. Aceptación de Términos",
   "By accessing and using Kaptia, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.": "Al acceder y usar Kaptia, aceptas y acuerdas estar sujeto a los términos y disposiciones de este acuerdo. Si no estás de acuerdo con estos términos, por favor no uses nuestro servicio.",
   "2. Description of Service": "2. Descripción del Servicio",
-  "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "Kaptia es una aplicación de gestión de finanzas personales que ayuda a los usuarios a rastrear gastos, gestionar presupuestos, establecer metas financieras y obtener información sobre sus patrones de gasto.",
+  "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "Kaptia es una aplicación de software para la productividad personal y organización de gastos que ayuda a los usuarios a registrar gastos, gestionar presupuestos, establecer metas personales y organizar recibos.",
+  "terms": {
+    "disclaimer_title": "Aviso de Utilidad de Software (No es un Servicio Financiero)",
+    "disclaimer_text": "Kaptia es estrictamente una herramienta de software de productividad para el registro personal, organización de recibos y planificación de presupuestos. Kaptia NO es un banco, cooperativa de crédito, prestamista, corredor ni institución financiera. Kaptia no presta servicios financieros, servicios bancarios, créditos, asesoramiento de inversiones, asesoría fiscal, contable ni legal. El software y los resúmenes o categorizaciones automáticas se proporcionan únicamente con fines informativos generales y de productividad personal. Usted es el único responsable de sus decisiones personales y registros.",
+    "acceptable_use_illegal": "Usar el servicio para cualquier actividad ilegal o fraudulenta",
+    "privacy_description": "Sus datos personales y registros de gastos le pertenecen. No vendemos ni compartimos su información personal con terceros excepto como se describe en nuestra Política de Privacidad.",
+    "privacy_ownership": "Usted es dueño de sus datos y registros de gastos"
+  },
   "2.1 Service Plans": "2.1 Planes de Servicio",
   "Free Plan:": "Plan Gratis:",
   "Basic transaction tracking (limited to 100 transactions)": "Seguimiento básico de transacciones (limitado a 100 transacciones)",
@@ -308,7 +318,7 @@
   "Transmit any harmful, threatening, or offensive content": "Transmitir cualquier contenido dañino, amenazante u ofensivo",
   "Attempt to gain unauthorized access to our systems": "Intentar obtener acceso no autorizado a nuestros sistemas",
   "Interfere with or disrupt the service": "Interferir con o interrumpir el servicio",
-  "Use the service for illegal financial activities": "Usar el servicio para actividades financieras ilegales",
+  "Use the service for illegal financial activities": "Usar el servicio para cualquier actividad ilegal o fraudulenta",
   "Share your account with others": "Compartir tu cuenta con otros",
   "5. Payment and Billing": "5. Pago y Facturación",
   "5.1 Subscription Plans": "5.1 Planes de Suscripción",
@@ -318,8 +328,8 @@
   "5.3 Cancellation": "5.3 Cancelación",
   "You may cancel your subscription at any time. Cancellations take effect at the end of your current billing period.": "Puedes cancelar tu suscripción en cualquier momento. Las cancelaciones toman efecto al final de tu período de facturación actual.",
   "6. Data and Privacy": "6. Datos y Privacidad",
-  "Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.": "Tus datos financieros te pertenecen. No vendemos ni compartimos tu información financiera personal con terceros excepto como se describe en nuestra Política de Privacidad.",
-  "You own your financial data": "Eres dueño de tus datos financieros",
+  "Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.": "Sus datos personales y registros de gastos le pertenecen. No vendemos ni compartimos su información personal con terceros excepto como se describe en nuestra Política de Privacidad.",
+  "You own your financial data": "Usted es dueño de sus datos y registros de gastos",
   "We provide data export capabilities": "Proporcionamos capacidades de exportación de datos",
   "You may delete your account and data at any time": "Puedes eliminar tu cuenta y datos en cualquier momento",
   "We use encryption to protect your data": "Usamos encriptación para proteger tus datos",
@@ -1585,7 +1595,19 @@
     "Your account was deleted": "Tu cuenta fue eliminada",
     "Could not prepare your data": "No se pudieron preparar tus datos",
     "Could not delete your account": "No se pudo eliminar tu cuenta",
-    "See the pricing page for current prices": "Consulta los precios actuales en la página de precios"
+    "See the pricing page for current prices": "Consulta los precios actuales en la página de precios",
+    "legal": {
+      "title": "Información Legal y Políticas",
+      "description": "Revise los términos, estándares de privacidad y política de cookies que rigen el uso de Kaptia",
+      "notice_title": "Aviso de Software de Productividad",
+      "notice_body": "Kaptia es una aplicación de software para la productividad personal y organización de gastos. No presta servicios financieros, bancarios, inversiones ni créditos.",
+      "terms": "Términos de Servicio",
+      "terms_desc": "Uso aceptable, suscripciones, reglas de cuenta y limitaciones del servicio",
+      "privacy": "Política de Privacidad",
+      "privacy_desc": "Derechos RGPD, protección de datos, cifrado técnico y procesamiento de IA",
+      "cookies": "Política de Cookies",
+      "cookies_desc": "Información sobre cookies esenciales, funcionales y de análisis"
+    }
   },
   "types": {
     "expense": "gasto",
@@ -1936,8 +1958,8 @@
     "records_count": "{{count}} registros",
     "no_import_history": "No hay historial de importación aún",
     "pdf_security": {
-      "modal_title": "Seguridad de Grado Bancario para Procesamiento de PDF",
-      "modal_description": "Antes de procesar tu estado de cuenta bancario, revisa nuestras medidas de seguridad integrales.",
+      "modal_title": "Seguridad Avanzada para Procesamiento de Documentos",
+      "modal_description": "Antes de procesar tu documento, revisa nuestras medidas de seguridad integrales.",
       "security_architecture_title": "Arquitectura de Seguridad Completa",
       "aes_encryption": "Cifrado AES-256-CBC - Todos los datos cifrados en reposo y en tránsito",
       "zero_persistence": "Cero Persistencia de Datos - PDFs procesados solo en memoria, nunca almacenados",
@@ -1954,11 +1976,11 @@
       "step4_desc": "Procesamiento IA seguro con almacenamiento cifrado",
       "step5_title": "Limpieza de Memoria",
       "step5_desc": "Eliminación segura de todos los datos temporales",
-      "compliance_title": "Estándares de Cumplimiento Cumplidos",
-      "pci_dss": "PCI DSS Nivel 1",
-      "sox_compliance": "Cumplimiento SOX",
+      "compliance_title": "Estándares de Seguridad",
+      "pci_dss": "Stripe PCI-DSS",
+      "tls_encryption": "TLS 1.3 en Tránsito",
       "gdpr": "GDPR Artículo 32",
-      "bank_secrecy": "Ley de Secreto Bancario",
+      "aes_standard": "AES-256 en Reposo",
       "ai_processing_title": "Transparencia en Procesamiento IA",
       "ai_provider": "Proveedor de Servicio IA: OpenAI (GPT-4) con seguridad de grado empresarial",
       "ai_anonymization": "CRÍTICO: Solo datos anonimizados enviados a OpenAI - Toda información sensible (SSNs, números de cuenta, detalles personales) completamente eliminada antes del procesamiento IA",
@@ -2980,63 +3002,29 @@
       "procedure": "Podemos solicitar información adicional para verificar su identidad, como detalles de cuenta o información de transacciones recientes."
     }
   },
-  "financial_compliance": {
-    "title": "Cumplimiento de Servicios Financieros",
-    "bsa": {
-      "title": "Cumplimiento de la Ley de Secreto Bancario (BSA)",
-      "description": "Kaptia cumple con la Ley de Secreto Bancario y las regulaciones Antilavado de Dinero (AML):",
-      "aml_procedures": "Implementación de procedimientos AML integrales y diligencia debida del cliente",
-      "transaction_monitoring": "Monitoreo automatizado de transacciones para patrones de actividad sospechosa",
-      "suspicious_activity": "Reporte obligatorio de actividad sospechosa a FinCEN cuando sea requerido",
-      "record_keeping": "Mantenimiento de registros detallados de transacciones según lo requiere la ley federal"
-    },
-    "pci_dss": {
-      "title": "Cumplimiento PCI DSS",
-      "description": "Nos adherimos a los Estándares de Seguridad de Datos de la Industria de Tarjetas de Pago a través de nuestro procesador de pagos Stripe:",
-      "data_encryption": {
-        "title": "Cifrado de Datos",
-        "description": "Todos los datos de pago están cifrados usando encriptación AES-256 estándar de la industria"
-      },
-      "secure_networks": {
-        "title": "Redes Seguras",
-        "description": "Firewalls y arquitectura de red segura protegen los datos del tarjetahabiente"
-      },
-      "access_control": {
-        "title": "Control de Acceso",
-        "description": "Controles de acceso estrictos limitan el acceso a datos de pago solo a personal autorizado"
-      },
-      "monitoring": {
-        "title": "Monitoreo de Red",
-        "description": "Monitoreo continuo y pruebas de seguridad regulares aseguran la protección de datos"
-      }
+  "security_notice": {
+    "title": "Seguridad de Datos y Aviso de Software",
+    "software_disclaimer": {
+      "title": "Aviso de Software (No es una Institución Financiera)",
+      "p1": "Kaptia es estrictamente una aplicación de software para la productividad personal y organización de gastos desarrollada por NutriNova LLC. Kaptia NO es un banco, entidad de crédito, corredor ni asesor financiero con licencia.",
+      "p2": "Kaptia no presta servicios financieros, servicios bancarios, préstamos, asesoramiento de inversiones ni consultoría fiscal o legal. Todas las funciones, categorías, escaneo de recibos y resúmenes automáticos son únicamente para registro personal y productividad."
     },
     "data_security": {
-      "title": "Estándares de Seguridad de Datos Financieros",
-      "description": "Implementamos múltiples capas de seguridad para proteger su información financiera:",
-      "encryption": "Cifrado Extremo a Extremo:",
-      "encryption_desc": "Todos los datos financieros están cifrados tanto en tránsito como en reposo usando AES-256",
-      "tokenization": "Tokenización de Datos:",
-      "tokenization_desc": "Los datos financieros sensibles están tokenizados para prevenir acceso no autorizado",
-      "secure_transmission": "Transmisión Segura:",
-      "transmission_desc": "Todas las transferencias de datos usan exclusivamente protocolos TLS 1.3 y HTTPS",
-      "regular_audits": "Auditorías de Seguridad Regulares:",
-      "audits_desc": "Auditorías de seguridad independientes de terceros aseguran el cumplimiento continuo"
+      "title": "Estándares de Protección y Seguridad de Datos",
+      "description": "Implementamos salvaguardas técnicas para proteger sus registros e información personal:",
+      "encryption": "Cifrado en Reposo:",
+      "encryption_desc": "Los registros del usuario y adjuntos se protegen mediante protocolos estándar de cifrado AES-256.",
+      "isolation": "Aislamiento de Datos:",
+      "isolation_desc": "Los registros de los usuarios están separados y protegidos por controles de acceso autenticados.",
+      "transmission": "Transmisión Segura:",
+      "transmission_desc": "Toda la comunicación con los servidores de Kaptia se realiza exclusivamente a través de HTTPS con cifrado moderno TLS 1.3.",
+      "audits": "Monitoreo Continuo:",
+      "audits_desc": "Mantenemos un monitoreo continuo de vulnerabilidades y prácticas de desarrollo seguro."
     },
-    "regulatory_disclosures": {
-      "title": "Divulgaciones Regulatorias",
-      "not_advisor": "NO ES UN ASESOR FINANCIERO: Kaptia no es un asesor de inversiones registrado o planificador financiero.",
-      "educational_purposes": "Nuestras perspectivas y recomendaciones impulsadas por IA son solo para fines educativos e informativos.",
-      "consult_professional": "Siempre consulte con profesionales financieros calificados antes de tomar decisiones de inversión o financieras."
-    },
-    "regulatory_oversight": {
-      "title": "Supervisión Regulatoria",
-      "description": "Kaptia opera bajo la supervisión de múltiples organismos reguladores financieros:",
-      "finra": "FINRA:",
-      "finra_desc": "Cumplimiento con las pautas de la Autoridad Reguladora de la Industria Financiera para proveedores de tecnología",
-      "sec": "SEC:",
-      "sec_desc": "Adherencia a las regulaciones de la Comisión de Valores y Bolsa sobre tecnología financiera",
-      "cfpb": "CFPB:",
-      "cfpb_desc": "Cumplimiento de la Oficina de Protección Financiera del Consumidor para servicios financieros al consumidor"
+    "payment_processor": {
+      "title": "Procesamiento de Pagos de Suscripción",
+      "description": "Las suscripciones de software de Kaptia se procesan de forma segura a través de Stripe, proveedor certificado PCI-DSS Nivel 1.",
+      "details": "Kaptia no procesa, gestiona ni almacena los números completos de sus tarjetas de pago. La facturación se gestiona en la infraestructura segura de Stripe."
     }
   },
   "ai_act_compliance": {
@@ -3109,8 +3097,8 @@
         "description": "Dirección de correo electrónico, nombre, contraseña (cifrada)"
       },
       "financial_data": {
-        "title": "Datos Financieros:",
-        "description": "Detalles de transacciones, categorías, presupuestos, objetivos"
+        "title": "Registros de Gastos y Presupuestos:",
+        "description": "Entradas de gastos, fotos de recibos, categorías, presupuestos y metas de ahorro"
       },
       "usage_data": {
         "title": "Datos de Uso:",
@@ -3124,9 +3112,9 @@
     "section2": {
       "title": "2. Cómo Usamos Su Información",
       "description": "Utilizamos la información que recopilamos para:",
-      "services": "Proporcionar, mantener y mejorar nuestros servicios de gestión financiera",
-      "transactions": "Procesar transacciones y enviar información relacionada",
-      "ai_insights": "Proporcionar perspectivas y recomendaciones impulsadas por IA (usuarios Premium)",
+      "services": "Proporcionar, mantener y mejorar nuestro software de productividad y registro de gastos",
+      "transactions": "Procesar y mostrar sus registros de gastos guardados y enviar notificaciones del sistema",
+      "ai_insights": "Proporcionar resúmenes impulsados por IA y categorizaciones de gastos (usuarios Premium)",
       "notifications": "Enviar avisos técnicos, actualizaciones, alertas de seguridad y mensajes de soporte",
       "support": "Responder a sus comentarios y preguntas",
       "analytics": "Analizar patrones de uso para mejorar nuestro servicio"
@@ -3141,18 +3129,18 @@
     },
     "section3": {
       "title": "3. Características Impulsadas por IA y Procesamiento de Datos",
-      "description": "Kaptia utiliza inteligencia artificial para proporcionar perspectivas financieras personalizadas y recomendaciones. Así es como manejamos sus datos para el procesamiento de IA:",
+      "description": "Kaptia utiliza inteligencia artificial para procesar texto de recibos (OCR), categorizar gastos y generar consejos de productividad. Así es como manejamos sus datos para el procesamiento de IA:",
       "ai_provider": {
         "title": "Proveedor de Servicios de IA:",
-        "description": "Utilizamos los modelos GPT de OpenAI para analizar patrones de gasto y generar perspectivas"
+        "description": "Utilizamos los modelos GPT de OpenAI para analizar entradas de gastos y generar sugerencias de categorías"
       },
       "data_anonymization": {
         "title": "Anonimización de Datos:",
-        "description": "Todos los datos de transacciones son anonimizados y despojados de información de identificación personal antes del procesamiento de IA"
+        "description": "Todos los textos de recibos y gastos son anonimizados y despojados de información de identificación personal antes del procesamiento de IA"
       },
       "processing_purpose": {
         "title": "Propósito del Procesamiento:",
-        "description": "El análisis de IA se utiliza exclusivamente para generar recomendaciones financieras, perspectivas de gasto y consejos personalizados"
+        "description": "El análisis de IA se utiliza exclusivamente para el reconocimiento de texto de recibos (OCR), categorización de gastos y resúmenes de productividad"
       },
       "data_retention": {
         "title": "Retención de Datos:",
@@ -3184,7 +3172,7 @@
       },
       "ai_processing": {
         "title": "Procesamiento de IA:",
-        "description": "OpenAI para perspectivas financieras anonimizadas (como se detalla en la sección 3 anterior)"
+        "description": "OpenAI para procesamiento OCR de recibos y categorización de texto (como se detalla en la sección 3 anterior)"
       },
       "cloud_storage": {
         "title": "Almacenamiento en la Nube:",

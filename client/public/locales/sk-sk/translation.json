@@ -284,11 +284,21 @@
   "Take control of your financial future with intelligent expense tracking and budgeting.": "Prevezmite kontrolu nad finančnou budúcnosťou s inteligentným sledovaním výdavkov a rozpočtovaním.",
   "© 2025 Kaptia. All rights reserved.": "© 2025 Kaptia. Všetky práva vyhradené.",
   "Terms of Service": "Podmienky služby",
+  "Terms": "Podmienky",
+  "Privacy": "Súkromie",
+  "Cookies": "Cookies",
   "Last updated: June 14, 2025": "Posledná aktualizácia: 14. jún 2025",
   "1. Acceptance of Terms": "1. Prijatie podmienok",
   "By accessing and using Kaptia, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.": "Prístupom a používaním Kaptia prijímate a súhlasíte s podmienkami tejto zmluvy. Ak nesúhlasíte s týmito podmienkami, nepoužívajte našu službu.",
   "2. Description of Service": "2. Popis služby",
-  "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "Kaptia je aplikácia na správu osobných financií, ktorá pomáha používateľom sledovať výdavky, spravovať rozpočty, stanoviť finančné ciele a získať prehľad o vzorcoch utrácania.",
+  "Kaptia is a personal finance management application that helps users track expenses, manage budgets, set financial goals, and gain insights into their spending patterns.": "Kaptia je softvérová aplikácia pre osobnú produktivitu a organizáciu výdavkov, ktorá používateľom pomáha evidovať výdavky, spravovať rozpočty, stanoviť si osobné ciele a organizovať bločky.",
+  "terms": {
+    "disclaimer_title": "Upozornenie o povahe softvéru (Nie sme finančná služba)",
+    "disclaimer_text": "Kaptia je výhradne softvérový nástroj pre osobnú produktivitu, evidenciu výdavkov, organizáciu bločkov a plánovanie rozpočtov. Kaptia NIE JE banka, úverová inštitúcia, poskytovateľ pôžičiek, maklér ani finančná inštitúcia. Kaptia neposkytuje finančné služby, bankové služby, úverové produkty, investičné poradenstvo, daňové, účtovné ani právne poradenstvo. Softvér a akékoľvek automatizované prehľady, kategorizácie alebo tipy slúžia výlučne na všeobecné informačné účely a osobnú evidenciu. Nesiete výhradnú zodpovednosť za svoje osobné rozhodnutia a evidované záznamy.",
+    "acceptable_use_illegal": "Používanie služby na akékoľvek nezákonné alebo podvodné aktivity",
+    "privacy_description": "Vaše osobné údaje a záznamy o výdavkoch patria vám. Nepredávame ani nezdieľame vaše osobné informácie s tretími stranami okrem prípadov opísaných v našich Zásadách ochrany osobných údajov.",
+    "privacy_ownership": "Vlastníte svoje údaje a záznamy výdavkov"
+  },
   "2.1 Service Plans": "2.1 Servisné plány",
   "Free Plan:": "Bezplatný plán:",
   "Basic transaction tracking (limited to 100 transactions)": "Základné sledovanie transakcií (obmedzené na 100 transakcií)",
@@ -308,7 +318,7 @@
   "Transmit any harmful, threatening, or offensive content": "Prenášanie škodlivého, hrozivého alebo urážlivého obsahu",
   "Attempt to gain unauthorized access to our systems": "Pokus o získanie neoprávneného prístupu k našim systémom",
   "Interfere with or disrupt the service": "Zasahovanie do služby alebo jej narušovanie",
-  "Use the service for illegal financial activities": "Používanie služby na nezákonné finančné aktivity",
+  "Use the service for illegal financial activities": "Používanie služby na akékoľvek nezákonné alebo podvodné aktivity",
   "Share your account with others": "Zdieľanie účtu s ostatnými",
   "5. Payment and Billing": "5. Platby a fakturácia",
   "5.1 Subscription Plans": "5.1 Predplatné plány",
@@ -318,8 +328,8 @@
   "5.3 Cancellation": "5.3 Zrušenie",
   "You may cancel your subscription at any time. Cancellations take effect at the end of your current billing period.": "Môžete zrušiť predplatné kedykoľvek. Zrušenia nadobúdajú účinnosť na konci aktuálneho fakturačného obdobia.",
   "6. Data and Privacy": "6. Údaje a súkromie",
-  "Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.": "Vaše finančné údaje patria vám. Nepredávame ani nezdieľame vaše osobné finančné informácie s tretími stranami okrem prípadov opísaných v našich zásadách ochrany súkromia.",
-  "You own your financial data": "Vlastníte svoje finančné údaje",
+  "Your financial data belongs to you. We do not sell or share your personal financial information with third parties except as described in our Privacy Policy.": "Vaše osobné údaje a záznamy o výdavkoch patria vám. Nepredávame ani nezdieľame vaše osobné informácie s tretími stranami okrem prípadov opísaných v našich Zásadách ochrany osobných údajov.",
+  "You own your financial data": "Vlastníte svoje údaje a záznamy výdavkov",
   "We provide data export capabilities": "Poskytujeme možnosti exportu údajov",
   "You may delete your account and data at any time": "Môžete zmazať svoj účet a údaje kedykoľvek",
   "We use encryption to protect your data": "Používame šifrovanie na ochranu vašich údajov",
@@ -1907,8 +1917,8 @@
     "records_count": "{{count}} záznamov",
     "no_import_history": "Zatiaľ žiadna história importu",
     "pdf_security": {
-      "modal_title": "Banková Bezpečnosť pre Spracovanie PDF",
-      "modal_description": "Pred spracovaním vášho bankového výpisu si prečítajte naše komplexné bezpečnostné opatrenia.",
+      "modal_title": "Pokročilá bezpečnosť pre spracovanie dokumentov",
+      "modal_description": "Pred spracovaním vášho dokumentu si prečítajte naše komplexné bezpečnostné opatrenia.",
       "security_architecture_title": "Kompletná Bezpečnostná Architektúra",
       "aes_encryption": "AES-256-CBC Šifrovanie - Všetky údaje šifrované v pokoji a počas prenosu",
       "zero_persistence": "Nulová Perzistencia Údajov - PDFka spracované len v pamäti, nikdy neuložené",
@@ -1925,11 +1935,11 @@
       "step4_desc": "Bezpečné AI spracovanie so šifrovaným uložením",
       "step5_title": "Čistenie Pamäte",
       "step5_desc": "Bezpečné zmazanie všetkých dočasných údajov",
-      "compliance_title": "Splnené Štandardy Compliance",
-      "pci_dss": "PCI DSS Úroveň 1",
-      "sox_compliance": "SOX Compliance",
+      "compliance_title": "Bezpečnostné štandardy",
+      "pci_dss": "Stripe PCI-DSS",
+      "tls_encryption": "TLS 1.3 Prenos",
       "gdpr": "GDPR Článok 32",
-      "bank_secrecy": "Zákon o Bankovom Tajomstve",
+      "aes_standard": "AES-256 Úložisko",
       "ai_processing_title": "Transparentnosť AI Spracovania",
       "ai_provider": "Poskytovateľ AI Služby: OpenAI (GPT-4) s podnikovou bezpečnosťou",
       "ai_anonymization": "KRITICKÉ: Len anonymizované údaje odoslané do OpenAI - Všetky citlivé informácie (SSN, čísla účtov, osobné údaje) úplne odstránené pred AI spracovaním",
@@ -2908,63 +2918,29 @@
       "procedure": "Môžeme požiadať o dodatočné informácie na overenie vašej identity, ako sú podrobnosti účtu alebo informácie o nedávnych transakciách."
     }
   },
-  "financial_compliance": {
-    "title": "Súlad s finančnými službami",
-    "bsa": {
-      "title": "Súlad s Bank Secrecy Act (BSA)",
-      "description": "Kaptia dodržiava Bank Secrecy Act a nariadenia o boji proti praniu špinavých peňazí (AML):",
-      "aml_procedures": "Implementácia komplexných AML postupov a náležitej starostlivosti voči zákazníkom",
-      "transaction_monitoring": "Automatizované monitorovanie transakcií pre vzory podozrivej aktivity",
-      "suspicious_activity": "Povinné hlásenie podozrivej aktivity pre FinCEN keď je to potrebné",
-      "record_keeping": "Vedenie podrobných záznamov transakcií podľa požiadaviek federálneho zákona"
-    },
-    "pci_dss": {
-      "title": "Súlad s PCI DSS",
-      "description": "Dodržiavame štandardy bezpečnosti dát platobnej karty prostredníctvom nášho platobného procesora Stripe:",
-      "data_encryption": {
-        "title": "Šifrovanie dát",
-        "description": "Všetky platobné údaje sú šifrované pomocou priemyselného štandardu AES-256"
-      },
-      "secure_networks": {
-        "title": "Bezpečné siete",
-        "description": "Firewally a bezpečná sieťová architektúra chránia údaje držiteľa karty"
-      },
-      "access_control": {
-        "title": "Kontrola prístupu",
-        "description": "Prísne kontroly prístupu obmedzujú prístup k platobným údajom len na autorizovaný personál"
-      },
-      "monitoring": {
-        "title": "Monitorovanie siete",
-        "description": "Nepretržité monitorovanie a pravidelné bezpečnostné testovanie zabezpečujú ochranu údajov"
-      }
+  "security_notice": {
+    "title": "Zabezpečenie údajov a softvérové upozornenie",
+    "software_disclaimer": {
+      "title": "Upozornenie o povahe softvéru (Nie sme finančná inštitúcia)",
+      "p1": "Kaptia je softvérová aplikácia pre osobnú produktivitu a organizáciu výdavkov vyvinutá spoločnosťou NutriNova LLC. Kaptia NIE JE banka, úverová inštitúcia, sprostredkovateľ ani licencovaný finančný poradca.",
+      "p2": "Kaptia neposkytuje finančné služby, bankové služby, úvery, investičné poradenstvo, daňové ani právne služby. Všetky funkcie, kategórie, skenovanie bločkov a automatizované prehľady slúžia výhradne na vlastnú evidenciu a osobnú organizáciu."
     },
     "data_security": {
-      "title": "Štandardy bezpečnosti finančných údajov",
-      "description": "Implementujeme viacero vrstiev bezpečnosti na ochranu vašich finančných informácií:",
-      "encryption": "End-to-End šifrovanie:",
-      "encryption_desc": "Všetky finančné údaje sú šifrované v prenose aj v pokoji pomocou AES-256",
-      "tokenization": "Tokenizácia údajov:",
-      "tokenization_desc": "Citlivé finančné údaje sú tokenizované na zabránenie neoprávnenému prístupu",
-      "secure_transmission": "Bezpečný prenos:",
-      "transmission_desc": "Všetky prenosy údajov používajú výlučne protokoly TLS 1.3 a HTTPS",
-      "regular_audits": "Pravidelné bezpečnostné audity:",
-      "audits_desc": "Nezávislé audity bezpečnosti tretích strán zabezpečujú pokračujúci súlad"
+      "title": "Štandardy ochrany a bezpečnosti údajov",
+      "description": "Používame technické bezpečnostné opatrenia na ochranu vašich záznamov a osobných údajov:",
+      "encryption": "Šifrovanie uložených dát:",
+      "encryption_desc": "Záznamy používateľov a prílohy sú chránené šifrovaním podľa štandardu AES-256.",
+      "isolation": "Izolácia údajov:",
+      "isolation_desc": "Záznamy každého používateľa sú oddelené a chránené overovaným prístupovým systémom.",
+      "transmission": "Bezpečný prenos:",
+      "transmission_desc": "Komunikácia so servermi Kaptia prebieha výhradne cez protokol HTTPS s moderným šifrovaním TLS 1.3.",
+      "audits": "Priebežné monitorovanie:",
+      "audits_desc": "Uplatňujeme priebežné monitorovanie bezpečnosti a overené bezpečnostné postupy."
     },
-    "regulatory_disclosures": {
-      "title": "Regulačné zverejnenia",
-      "not_advisor": "NIE JE FINANČNÝ PORADCA: Kaptia nie je registrovaný investičný poradca alebo finančný plánovač.",
-      "educational_purposes": "Naše AI-poháňané poznatky a odporúčania sú len pre vzdelávacie a informačné účely.",
-      "consult_professional": "Vždy sa poraďte s kvalifikovanými finančnými profesionálmi pred prijatím investičných alebo finančných rozhodnutí."
-    },
-    "regulatory_oversight": {
-      "title": "Regulačný dozor",
-      "description": "Kaptia pôsobí pod dozorom viacerých finančných regulačných orgánov:",
-      "finra": "FINRA:",
-      "finra_desc": "Dodržiavanie smerníc Financial Industry Regulatory Authority pre poskytovateľov technológií",
-      "sec": "SEC:",
-      "sec_desc": "Dodržiavanie nariadení Securities and Exchange Commission týkajúcich sa finančných technológií",
-      "cfpb": "CFPB:",
-      "cfpb_desc": "Súlad s Consumer Financial Protection Bureau pre spotrebiteľské finančné služby"
+    "payment_processor": {
+      "title": "Spracovanie platieb za predplatné",
+      "description": "Platby za softvérové predplatné Kaptia sú bezpečne spracovávané prostredníctvom spoločnosti Stripe, certifikovaného poskytovateľa PCI-DSS Level 1.",
+      "details": "Kaptia nespracúva, neuchováva ani nemá prístup k číslam vašich platobných kariet. Fakturácia prebieha priamo na zabezpečenej infraštruktúre Stripe."
     }
   },
   "ai_act_compliance": {
@@ -3037,8 +3013,8 @@
         "description": "Emailová adresa, meno, heslo (šifrované)"
       },
       "financial_data": {
-        "title": "Finančné údaje:",
-        "description": "Podrobnosti transakcií, kategórie, rozpočty, ciele"
+        "title": "Záznamy výdavkov a rozpočtu:",
+        "description": "Položky výdavkov, bločky, kategórie, rozpočty a ciele úspor"
       },
       "usage_data": {
         "title": "Údaje o používaní:",
@@ -3052,9 +3028,9 @@
     "section2": {
       "title": "2. Ako používame vaše informácie",
       "description": "Informácie, ktoré zhromažďujeme, používame na:",
-      "services": "Poskytovanie, údržbu a zlepšovanie našich služieb finančného riadenia",
-      "transactions": "Spracovanie transakcií a zasielanie súvisiacich informácií",
-      "ai_insights": "Poskytovanie AI-poháňaných poznatkov a odporúčaní (Premium používatelia)",
+      "services": "Poskytovanie, údržbu a zlepšovanie našich služieb organizácie výdavkov a produktivity",
+      "transactions": "Spracovanie a zobrazovanie vašich záznamov výdavkov a zasielanie systémových notifikácií",
+      "ai_insights": "Poskytovanie AI-poháňaných prehľadov a kategorizácie výdavkov (Premium používatelia)",
       "notifications": "Zasielanie technických oznámení, aktualizácií, bezpečnostných upozornení a správ podpory",
       "support": "Odpoveď na vaše komentáre a otázky",
       "analytics": "Analýza vzorcov používania na zlepšenie našej služby"
@@ -3069,18 +3045,18 @@
     },
     "section3": {
       "title": "3. AI-poháňané funkcie a spracovanie údajov",
-      "description": "Kaptia používa umelú inteligenciu na poskytovanie personalizovaných finančných poznatkov a odporúčaní. Takto spracovávame vaše údaje pre AI spracovanie:",
+      "description": "Kaptia používa umelú inteligenciu na spracovanie textu bločkov (OCR), kategorizáciu výdavkov a generovanie tipov pre produktivitu. Takto spracovávame vaše údaje pre AI spracovanie:",
       "ai_provider": {
         "title": "Poskytovateľ AI služieb:",
-        "description": "Používame GPT modely OpenAI na analýzu vzorcov utrácania a generovanie poznatkov"
+        "description": "Používame GPT modely OpenAI na rozpoznávanie položiek výdavkov a generovanie prehľadov"
       },
       "data_anonymization": {
-        "title": "Anonimizácia údajov:",
-        "description": "Všetky transakčné údaje sú anonimizované a zbavené osobných identifikačných informácií pred AI spracovaním"
+        "title": "Anonymizácia údajov:",
+        "description": "Všetky texty bločkov a výdavkov sú anonymizované a zbavené osobných identifikačných údajov pred AI spracovaním"
       },
       "processing_purpose": {
         "title": "Účel spracovávania:",
-        "description": "AI analýza sa používa výlučne na generovanie finančných odporúčaní, poznatkov o utrácaní a personalizovaných tipov"
+        "description": "AI analýza sa používa výlučne na OCR rozpoznávanie textu bločkov, kategorizáciu výdavkov a všeobecné tipy produktivity"
       },
       "data_retention": {
         "title": "Uchovávanie údajov:",
@@ -3112,7 +3088,7 @@
       },
       "ai_processing": {
         "title": "AI spracovanie:",
-        "description": "OpenAI pre anonimizované finančné poznatky (ako je podrobne uvedené v sekcii 3 vyššie)"
+        "description": "OpenAI pre OCR spracovanie bločkov a kategorizáciu textu (ako je uvedené v sekcii 3 vyššie)"
       },
       "cloud_storage": {
         "title": "Cloudové úložisko:",
@@ -3346,7 +3322,19 @@
     "Your account was deleted": "Váš účet bol zmazaný",
     "Could not prepare your data": "Údaje sa nepodarilo pripraviť",
     "Could not delete your account": "Účet sa nepodarilo zmazať",
-    "See the pricing page for current prices": "Aktuálne ceny nájdete na stránke s cenami"
+    "See the pricing page for current prices": "Aktuálne ceny nájdete na stránke s cenami",
+    "legal": {
+      "title": "Právne informácie a podmienky",
+      "description": "Prehľad zmluvných podmienok, ochrany osobných údajov a zásad používania cookies",
+      "notice_title": "Upozornenie o povahe softvéru",
+      "notice_body": "Kaptia je softvérová aplikácia pre osobnú produktivitu a organizáciu výdavkov. Neposkytuje finančné, bankové, investičné ani úverové služby.",
+      "terms": "Podmienky používania",
+      "terms_desc": "Pravidlá používania, predplatné, správa účtu a obmedzenia služby",
+      "privacy": "Zásady ochrany osobných údajov",
+      "privacy_desc": "Práva GDPR, ochrana a šifrovanie údajov, lokálne a AI spracovanie",
+      "cookies": "Zásady používania cookies",
+      "cookies_desc": "Informácie o nevyhnutných, funkčných a analytických cookies"
+    }
   },
   "pdf": {
     "anonymization_preview": {

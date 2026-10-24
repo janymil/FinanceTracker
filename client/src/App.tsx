@@ -281,8 +281,11 @@ export function AuthenticatedApp() {
               {/* Public pages with language prefix for authenticated users */}
               <Route path="/:lang/features" component={FeaturesPage} />
               <Route path="/:lang/pricing" component={Pricing} />
+              <Route path="/:lang/terms" component={TermsOfService} />
               <Route path="/:lang/terms-of-service" component={TermsOfService} />
+              <Route path="/:lang/privacy" component={PrivacyPolicy} />
               <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/:lang/cookies" component={CookiePolicy} />
               <Route path="/:lang/cookie-policy" component={CookiePolicy} />
               <Route path="/:lang/contact" component={Contact} />
               <Route path="/:lang/help" component={Help} />

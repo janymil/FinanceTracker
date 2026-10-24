@@ -308,73 +308,34 @@ export default function PrivacyPolicy() {
           </div>
           )}
 
-          {/* Financial Services Compliance Section */}
-          <section className="mb-8 border-l-4 border-green-500 pl-4 bg-green-50 dark:bg-green-900/20 p-4 rounded-r-lg">
-            <h2 className="text-2xl font-semibold mb-4 text-green-800 dark:text-green-200">{t("financial_compliance.title")}</h2>
+          {/* Data Security & Software Notice */}
+          <section className="mb-8 border-l-4 border-indigo-500 pl-4 bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-r-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-indigo-900 dark:text-indigo-200">{t("security_notice.title")}</h2>
             
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.bsa.title")}</h3>
-              <p className="mb-4">{t("financial_compliance.bsa.description")}</p>
-              <div className="bg-white dark:bg-gray-800 p-3 rounded">
-                <ul className="list-disc list-inside space-y-2">
-                  <li>{t("financial_compliance.bsa.aml_procedures")}</li>
-                  <li>{t("financial_compliance.bsa.transaction_monitoring")}</li>
-                  <li>{t("financial_compliance.bsa.suspicious_activity")}</li>
-                  <li>{t("financial_compliance.bsa.record_keeping")}</li>
-                </ul>
+              <h3 className="text-lg font-semibold mb-3">{t("security_notice.software_disclaimer.title")}</h3>
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg">
+                <p className="text-sm font-medium mb-2">{t("security_notice.software_disclaimer.p1")}</p>
+                <p className="text-sm">{t("security_notice.software_disclaimer.p2")}</p>
               </div>
             </div>
 
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.pci_dss.title")}</h3>
-              <p className="mb-4">{t("financial_compliance.pci_dss.description")}</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-gray-800 p-3 rounded">
-                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.data_encryption.title")}</h4>
-                  <p className="text-sm">{t("financial_compliance.pci_dss.data_encryption.description")}</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 p-3 rounded">
-                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.secure_networks.title")}</h4>
-                  <p className="text-sm">{t("financial_compliance.pci_dss.secure_networks.description")}</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 p-3 rounded">
-                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.access_control.title")}</h4>
-                  <p className="text-sm">{t("financial_compliance.pci_dss.access_control.description")}</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 p-3 rounded">
-                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.monitoring.title")}</h4>
-                  <p className="text-sm">{t("financial_compliance.pci_dss.monitoring.description")}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.data_security.title")}</h3>
-              <p className="mb-4">{t("financial_compliance.data_security.description")}</p>
-              <ul className="list-disc list-inside mb-4 space-y-2">
-                <li><strong>{t("financial_compliance.data_security.encryption")}</strong> {t("financial_compliance.data_security.encryption_desc")}</li>
-                <li><strong>{t("financial_compliance.data_security.tokenization")}</strong> {t("financial_compliance.data_security.tokenization_desc")}</li>
-                <li><strong>{t("financial_compliance.data_security.secure_transmission")}</strong> {t("financial_compliance.data_security.transmission_desc")}</li>
-                <li><strong>{t("financial_compliance.data_security.regular_audits")}</strong> {t("financial_compliance.data_security.audits_desc")}</li>
+              <h3 className="text-lg font-semibold mb-3">{t("security_notice.data_security.title")}</h3>
+              <p className="mb-4">{t("security_notice.data_security.description")}</p>
+              <ul className="list-disc list-inside space-y-2">
+                <li><strong>{t("security_notice.data_security.encryption")}</strong> {t("security_notice.data_security.encryption_desc")}</li>
+                <li><strong>{t("security_notice.data_security.isolation")}</strong> {t("security_notice.data_security.isolation_desc")}</li>
+                <li><strong>{t("security_notice.data_security.transmission")}</strong> {t("security_notice.data_security.transmission_desc")}</li>
+                <li><strong>{t("security_notice.data_security.audits")}</strong> {t("security_notice.data_security.audits_desc")}</li>
               </ul>
             </div>
 
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.regulatory_disclosures.title")}</h3>
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
-                <p className="text-sm font-medium mb-2">{t("financial_compliance.regulatory_disclosures.not_advisor")}</p>
-                <p className="text-sm mb-2">{t("financial_compliance.regulatory_disclosures.educational_purposes")}</p>
-                <p className="text-sm">{t("financial_compliance.regulatory_disclosures.consult_professional")}</p>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.regulatory_oversight.title")}</h3>
-              <p className="mb-4">{t("financial_compliance.regulatory_oversight.description")}</p>
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
-                <p className="text-sm"><strong>{t("financial_compliance.regulatory_oversight.finra")}</strong> {t("financial_compliance.regulatory_oversight.finra_desc")}</p>
-                <p className="text-sm"><strong>{t("financial_compliance.regulatory_oversight.sec")}</strong> {t("financial_compliance.regulatory_oversight.sec_desc")}</p>
-                <p className="text-sm"><strong>{t("financial_compliance.regulatory_oversight.cfpb")}</strong> {t("financial_compliance.regulatory_oversight.cfpb_desc")}</p>
+              <h3 className="text-lg font-semibold mb-3">{t("security_notice.payment_processor.title")}</h3>
+              <p className="mb-4">{t("security_notice.payment_processor.description")}</p>
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border">
+                <p className="text-sm">{t("security_notice.payment_processor.details")}</p>
               </div>
             </div>
           </section>

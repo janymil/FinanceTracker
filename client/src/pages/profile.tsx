@@ -8,12 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { useToast } from "../hooks/use-toast";
-import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2 } from "lucide-react";
+import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2, FileText, ShieldCheck } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import { SubscriptionSchedule } from "../components/subscription-schedule";
 import { useTranslation } from "react-i18next";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
+  const [currentPath] = useLocation();
+  const currentLang = currentPath.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] || 'en';
   const { user } = useUser();
   const { user: authUser } = useAuth();
   const { getAuthHeaders } = useClerkUserReady();
@@ -423,6 +426,69 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Legal & Policies — Convenient access for logged-in users */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            {t('profile.legal.title', 'Legal Information & Policies')}
+          </CardTitle>
+          <CardDescription>
+            {t('profile.legal.description', 'Review the terms, privacy standards, and cookie policy that govern your use of Kaptia')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-lg border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-200">
+            <strong>{t('profile.legal.notice_title', 'Software Productivity Notice')}:</strong>{' '}
+            {t('profile.legal.notice_body', 'Kaptia is a personal productivity and expense organization software application. It does not provide financial, banking, investment, or credit services.')}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+            <Link href={`/${currentLang}/terms-of-service`}>
+              <div className="p-4 border rounded-lg hover:border-primary/60 hover:bg-muted/40 transition-colors cursor-pointer flex flex-col justify-between h-full">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-semibold text-sm">{t('profile.legal.terms', 'Terms of Service')}</h4>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t('profile.legal.terms_desc', 'Acceptable use, subscriptions, account rules, and service limitations')}
+                  </p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href={`/${currentLang}/privacy-policy`}>
+              <div className="p-4 border rounded-lg hover:border-primary/60 hover:bg-muted/40 transition-colors cursor-pointer flex flex-col justify-between h-full">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-semibold text-sm">{t('profile.legal.privacy', 'Privacy Policy')}</h4>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t('profile.legal.privacy_desc', 'GDPR rights, data protection, technical encryption, and AI processing')}
+                  </p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href={`/${currentLang}/cookie-policy`}>
+              <div className="p-4 border rounded-lg hover:border-primary/60 hover:bg-muted/40 transition-colors cursor-pointer flex flex-col justify-between h-full">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-semibold text-sm">{t('profile.legal.cookies', 'Cookie Policy')}</h4>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t('profile.legal.cookies_desc', 'Information on essential, functional, and consent-based cookies')}
+                  </p>
+                </div>
+              </div>
+            </Link>
           </div>
         </CardContent>
       </Card>

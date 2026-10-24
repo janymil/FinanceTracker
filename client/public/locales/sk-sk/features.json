@@ -199,8 +199,8 @@
   "features.core_features.collaboration.features.planning": "Kolaboratívne plánovanie rozpočtu",
   "features.core_features.collaboration.features.updates": "Aktualizácie pokroku v reálnom čase",
   "features.core_features.collaboration.features.notifications": "Systém notifikácií pre partnerov",
-  "features.core_features.security.title": "Bezpečnosť bankového štandardu",
-  "features.core_features.security.description": "Vaše finančné údaje sú chránené bezpečnostnými a súkromnými opatreniami podnikovej úrovne",
+  "features.core_features.security.title": "Pokročilé šifrovanie údajov",
+  "features.core_features.security.description": "Vaše záznamy a údaje sú chránené bezpečnostnými a súkromnými opatreniami podnikovej úrovne",
   "features.core_features.security.features.encryption": "AES-256 šifrovanie pre citlivé údaje",
   "features.core_features.security.features.privacy": "Lokálne OCR spracovanie pre súkromie",
   "features.core_features.security.features.authentication": "Bezpečná autentifikácia používateľov",
@@ -573,8 +573,8 @@
         }
       },
       "security": {
-        "title": "Bezpečnosť bankového štandardu",
-        "description": "Vaše finančné údaje sú chránené bezpečnostnými a súkromnými opatreniami podnikovej úrovne",
+        "title": "Pokročilé šifrovanie údajov",
+        "description": "Vaše záznamy a údaje sú chránené bezpečnostnými a súkromnými opatreniami podnikovej úrovne",
         "features": {
           "encryption": "AES-256 šifrovanie pre citlivé údaje",
           "privacy": "Lokálne OCR spracovanie pre súkromie",

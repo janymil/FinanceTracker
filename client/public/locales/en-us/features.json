@@ -376,8 +376,8 @@
         }
       },
       "security": {
-        "title": "Bank-Grade Security",
-        "description": "Your financial data is protected with enterprise-level security and privacy measures",
+        "title": "Advanced Data Encryption",
+        "description": "Your records and data are protected with enterprise-level security and privacy measures",
         "features": {
           "encryption": "AES-256 encryption for sensitive data",
           "privacy": "Local OCR processing for privacy",

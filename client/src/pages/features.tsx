@@ -369,7 +369,7 @@ export default function FeaturesPage() {
                   <div className="p-2.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 w-fit mb-3">
                     <Shield className="h-6 w-6" />
                   </div>
-                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.security.title', 'Bank-Grade Security')}</h3>
+                  <h3 className="font-display font-bold text-lg mb-2">{t('features.core_features.security.title', 'Advanced Data Encryption')}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     {t('features.core_features.security.description', 'Enterprise security with end-to-end data encryption')}
                   </p>

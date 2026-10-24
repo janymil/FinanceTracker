@@ -376,8 +376,8 @@
         }
       },
       "security": {
-        "title": "Seguridad de Grado Bancario",
-        "description": "Tus datos financieros están protegidos con medidas de seguridad y privacidad de nivel empresarial",
+        "title": "Cifrado Avanzado de Datos",
+        "description": "Tus registros y datos están protegidos con medidas de seguridad y privacidad de nivel empresarial",
         "features": {
           "encryption": "Cifrado AES-256 para datos sensibles",
           "privacy": "Procesamiento OCR local para privacidad",
