@@ -324,9 +324,12 @@ export default function CollaborativeGoalDetailPage() {
     setIsJoining(true);
     try {
       const headers = await getAuthHeaders();
+      // The invitation link carries the code (?code=...); without it the server refuses.
+      const joinCode = new URLSearchParams(window.location.search).get('code') || '';
       const response = await fetch(`/api/collaborative-goals/${id}/join`, {
         method: 'POST',
-        headers
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ joinCode })
       });
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
@@ -899,7 +902,7 @@ export default function CollaborativeGoalDetailPage() {
                       }}
                       className="flex-1"
                     />
-                    <Button onClick={sendMessage} disabled={!newMessage.trim()}>
+                    <Button aria-label={t('a11y.send')} onClick={sendMessage} disabled={!newMessage.trim()}>
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>

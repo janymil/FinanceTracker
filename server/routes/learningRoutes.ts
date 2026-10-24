@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { requireAuth } from "@clerk/express";
 import { getUserId } from "../clerkAuth";
+import { adminAuth } from "../adminAuth";
 import { z } from "zod";
 import { 
   recordMerchantLearning, 
@@ -96,9 +97,8 @@ export function registerLearningRoutes(app: Router) {
   });
 
   // Get learning analytics (admin only)
-  router.get('/analytics', requireAuth(), async (req: Request, res: Response) => {
+  router.get('/analytics', adminAuth, async (req: Request, res: Response) => {
     try {
-      // TODO: Add admin role check
       const analytics = await getLearningAnalytics();
       
       res.json(analytics);

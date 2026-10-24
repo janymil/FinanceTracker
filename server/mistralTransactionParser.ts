@@ -1,5 +1,6 @@
-import { MistralClient } from './mistralClient.js';
+import { AI_MODELS, createRoutedClient } from '../lib/aiProvider';
 import { normalizeLanguageCode, getLanguageLabel } from '../lib/languageUtils';
+import { parseModelJson, validCategoryId } from '../shared/aiResults';
 import { applyAmountCorrections, findAmountCorrection } from '../shared/voiceCorrections';
 
 interface ParsedTransaction {
@@ -11,7 +12,21 @@ interface ParsedTransaction {
   note: string;
 }
 
-const mistralClient = new MistralClient();
+/**
+ * Voice parsing used to call Mistral directly. It now goes through lib/aiProvider like every
+ * other prompt: the ai-processor gateway first (Mistral model), then the shared fallback chain,
+ * with the anonymiser applied at that one choke point.
+ */
+const routed = createRoutedClient();
+const mistralClient = {
+  createChatCompletion: (request: any) =>
+    routed.chat.completions.create({
+      ...request,
+      model: AI_MODELS.voice,
+      max_tokens: request.max_tokens ?? 1000,
+      task: 'voice-parse',
+    } as any),
+};
 
 export async function parseTransactionWithMistral(
   transcript: string,
@@ -124,10 +139,8 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
       response_format: { type: 'json_object' }
     });
 
-    const rawResponse = response.choices[0].message.content;
-    console.log('🤖 Raw Mistral response:', rawResponse);
-    
-    const result = JSON.parse(rawResponse);
+    // Not logged: it is derived from what the person said.
+    const result = parseModelJson(response.choices[0].message.content);
     
     // Post-process amount parsing for Spanish patterns
     const correction = applyAmountCorrections(transcript, result.amount);
@@ -208,10 +221,17 @@ Find the best match or suggest creating a new category.`;
       response_format: { type: 'json_object' }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
-    console.log('🧠 Mistral category matching result:', result);
-    
-    return result;
+    const result = parseModelJson(response.choices[0].message.content);
+
+    // The model may only match one of the person's own categories; an id it made up is no match.
+    if (result.matchedCategory && validCategoryId(result.matchedCategory.id, existingCategories) === undefined) {
+      return {
+        createNew: true,
+        newCategoryName: String(result.newCategoryName || suggestedCategory),
+      };
+    }
+
+    return result as any;
     
   } catch (error) {
     console.error('❌ Mistral category matching failed:', error);

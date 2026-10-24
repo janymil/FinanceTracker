@@ -173,7 +173,7 @@
   "Transaction Management": "Gestión de Transacciones",
   "Add income and expense transactions": "Agregar transacciones de ingresos y gastos",
   "Receipt OCR scanning (Standard+)": "Escaneo OCR de recibos (Estándar+)",
-  "Mobile QR code upload": "Subida de código QR móvil",
+  "Mobile QR code upload": "Subida de código QR desde el celular",
   "AI-powered automatic categorization": "Categorización automática impulsada por IA",
   "Smart search and filtering": "Búsqueda y filtrado inteligente",
   "Monthly view with dynamic navigation": "Vista mensual con navegación dinámica",
@@ -305,14 +305,25 @@
     "payment_processing_title": "5.3 Procesamiento de Pagos",
     "payment_processing_desc": "Las transacciones de pago son procesadas de forma segura por pasarelas de pago certificadas de terceros: Stripe (para pagos con tarjeta en USD a nivel mundial) y Mercado Pago (para pagos en PEN en Perú y América Latina). Kaptia nunca recibe, procesa ni almacena números de tarjetas de crédito, débito ni credenciales bancarias en nuestros servidores.",
     "cancellation_refund_title": "5.4 Cancelación y Política de Reembolso",
-    "cancellation_refund_desc": "Puede cancelar su suscripción en cualquier momento a través de la configuración de su Perfil. Su cancelación entrará en vigencia al final de su período de facturación actual, y mantendrá el acceso completo hasta que finalice dicho período. Todas las tarifas de suscripción no son reembolsables, excepto cuando la ley aplicable exija un reembolso obligatorio.",
+    "cancellation_refund_desc": "Puedes cancelar tu suscripción en cualquier momento desde tu Perfil. La cancelación se aplica al final del periodo que ya pagaste y mantienes tus funciones de pago hasta entonces. Lo ya pagado, en general, no se reembolsa, salvo que la ley de tu país exija un reembolso o se te haya cobrado por error: si crees que es tu caso, escríbenos a info@kaptia.app y lo revisaremos.",
     "availability_desc": "Kaptia se aloja en infraestructura en la nube y se proporciona sobre una base de esfuerzos comerciales razonables y según disponibilidad. No ofrecemos un Acuerdo de Nivel de Servicio (SLA) garantizado ni aseguramos un funcionamiento ininterrumpido o libre de errores. El servicio puede suspenderse temporalmente por mantenimiento, actualizaciones o reparaciones técnicas imprevistas.",
     "liability_title": "8. Limitación de Responsabilidad y Límite Financiero",
     "liability_desc": "Kaptia se proporciona \"tal como está\" y \"según disponibilidad\" sin garantías de ningún tipo. En la máxima medida permitida por la ley aplicable, en ningún caso NutriNova LLC ni sus directores o afiliados serán responsables de daños indirectos, incidentales, especiales, ejemplares o consecuentes, ni de pérdida de datos o beneficios.",
     "liability_cap": "En la máxima medida permitida por la ley aplicable, nuestra responsabilidad total agregada que surja de estos Términos o del servicio no excederá la cantidad mayor entre cien dólares estadounidenses ($100 USD) o el monto total de las tarifas de suscripción pagadas por usted a Kaptia en los doce (12) meses anteriores al hecho causante.",
     "governing_law_title": "12. Ley Aplicable y Jurisdicción",
     "governing_law_desc": "Estos Términos de Servicio y cualquier controversia o reclamo que surja de ellos o del servicio se regirán e interpretarán de conformidad con las leyes del Estado de Nuevo México, Estados Unidos de América. Cualquier acción legal o procedimiento se someterá exclusivamente a los tribunales estatales o federales ubicados en el condado de Bernalillo, Nuevo México.",
-    "contact_title": "13. Información de Contacto"
+    "contact_title": "13. Información de Contacto",
+    "seo": {
+      "title": "Términos de Servicio",
+      "description": "Los términos que aplican al usar Kaptia: planes, cobros, renovación automática, cancelación, reembolsos y tus derechos como consumidor."
+    },
+    "consumer_rights_title": "5.5 Tus derechos como consumidor",
+    "consumer_rights_desc": "Nada en estos Términos limita los derechos que tengas como consumidor según la ley del país donde vives y que no se pueden renunciar por contrato. Por ejemplo, en el Perú conservas los derechos que te da el Código de Protección y Defensa del Consumidor (Ley N.º 29571), incluido el derecho a registrar un reclamo en nuestro Libro de Reclamaciones y a acudir al INDECOPI.",
+    "consumer_rights_link": "Abrir el Libro de Reclamaciones",
+    "receipts_title": "5.6 Comprobantes de pago",
+    "receipts_desc": "Después de cada cobro recibes por correo un comprobante de pago de nuestro procesador de pagos (Stripe o Mercado Pago). Si necesitas otro documento por un pago, escríbenos a info@kaptia.app.",
+    "governing_law_consumer": "Si eres consumidor, esta cláusula no te quita la protección de las normas imperativas de consumo del país donde vives, ni tu derecho a reclamar ante los tribunales o la autoridad de consumo de ese país.",
+    "age_requirement": "Debes tener al menos 18 años para usar este servicio"
   },
   "2.1 Service Plans": "2.1 Planes de Servicio",
   "Free Plan:": "Plan Gratis:",
@@ -428,7 +439,7 @@
   "Cookie Policy": "Política de Cookies",
   "We use cookies and similar tracking technologies to track activity on our service and store certain information. This Cookie Policy explains what cookies are, how we use them, and your choices regarding cookies.": "Usamos cookies y tecnologías de seguimiento similares para rastrear actividad en nuestro servicio y almacenar cierta información. Esta Política de Cookies explica qué son las cookies, cómo las usamos y tus opciones con respecto a las cookies.",
   "1. What Are Cookies": "1. Qué son las Cookies",
-  "Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners to make their websites work efficiently and provide reporting information.": "Las cookies son pequeños archivos de datos que se colocan en tu computadora o dispositivo móvil cuando visitas un sitio web. Las cookies son ampliamente utilizadas por los propietarios de sitios web para hacer que sus sitios web funcionen eficientemente y proporcionar información de reportes.",
+  "Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners to make their websites work efficiently and provide reporting information.": "Las cookies son pequeños archivos de datos que se colocan en tu computadora o celular cuando visitas un sitio web. Las cookies son ampliamente utilizadas por los propietarios de sitios web para hacer que sus sitios web funcionen eficientemente y proporcionar información de reportes.",
   "2. How We Use Cookies": "2. Cómo Usamos las Cookies",
   "We use cookies for several reasons:": "Usamos cookies por varias razones:",
   "Essential Cookies:": "Cookies Esenciales:",
@@ -833,9 +844,9 @@
   "How does AI categorization work?": "¿Cómo funciona la categorización IA?",
   "Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.": "Nuestra IA analiza las descripciones y montos de tus transacciones para sugerir automáticamente la categoría más apropiada. Aprende de tus patrones y se vuelve más precisa con el tiempo. Disponible para planes Standard y Premium.",
   "How does receipt scanning work?": "¿Cómo funciona el escaneo de recibos?",
-  "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.": "Sube fotos de recibos usando el botón 'Subir Imagen' en cualquier página de transacciones. Nuestra tecnología OCR extrae automáticamente el nombre del comerciante, monto y fecha. Los usuarios Standard+ obtienen sugerencias de categorías impulsadas por IA. Funciona con cámara móvil o fotos de galería.",
-  "How does mobile QR code upload work?": "¿Cómo funciona la subida de códigos QR móvil?",
-  "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.": "Haz clic en 'Subir Imagen' en tu computadora y selecciona 'Escanear con Teléfono'. Aparece un código QR en tu pantalla. Escanéalo con la cámara de tu teléfono para abrir la página de subida móvil. Toma una foto de tu recibo en tu teléfono, y los datos extraídos aparecen automáticamente en el formulario de transacción de tu computadora. Perfecto para escaneo de recibos sin interrupciones entre dispositivos.",
+  "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.": "Sube fotos de recibos usando el botón 'Subir Imagen' en cualquier página de transacciones. Nuestra tecnología OCR extrae automáticamente el nombre del comerciante, monto y fecha. Los usuarios Standard+ obtienen sugerencias de categorías impulsadas por IA. Funciona con cámara del celular o fotos de galería.",
+  "How does mobile QR code upload work?": "¿Cómo funciona la subida de códigos QR desde el celular?",
+  "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.": "Haz clic en 'Subir Imagen' en tu computadora y selecciona 'Escanear con Teléfono'. Aparece un código QR en tu pantalla. Escanéalo con la cámara de tu teléfono para abrir la página de subida celular. Toma una foto de tu recibo en tu teléfono, y los datos extraídos aparecen automáticamente en el formulario de transacción de tu computadora. Perfecto para escaneo de recibos sin interrupciones entre dispositivos.",
   "What if OCR doesn't read my receipt correctly?": "¿Qué pasa si el OCR no lee mi recibo correctamente?",
   "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results.": "Puedes editar cualquier información extraída antes de guardar. El sistema muestra los datos extraídos en campos editables, permitiéndote corregir nombres de comerciantes, montos o fechas. Las fotos claras y bien iluminadas producen los mejores resultados.",
   "What types of receipts are supported?": "¿Qué tipos de recibos son compatibles?",
@@ -844,8 +855,8 @@
   "Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.": "Navega a la sección de Presupuestos o Metas desde la barra lateral. Establece límites de gasto mensual por categoría para presupuestos, o crea objetivos de ahorro con fechas límite para metas. La aplicación rastreará tu progreso automáticamente.",
   "Can I export my data?": "¿Puedo exportar mis datos?",
   "Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.": "Sí, los usuarios Premium pueden exportar datos en formatos CSV, Excel o JSON. También puedes configurar respaldos automáticos en la nube e importar datos de otras aplicaciones financieras como Mint, QuickBooks y YNAB.",
-  "Is Kaptia available on mobile?": "¿Está Kaptia disponible en móvil?",
-  "Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "Kaptia es una aplicación web receptiva que funciona perfectamente en navegadores móviles. Simplemente marca el sitio en tu teléfono para acceso fácil desde cualquier lugar.",
+  "Is Kaptia available on mobile?": "¿Está Kaptia disponible en el celular?",
+  "Kaptia is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "Kaptia es una aplicación web receptiva que funciona perfectamente en navegadores del celular. Simplemente marca el sitio en tu teléfono para acceso fácil desde cualquier lugar.",
   "What widgets are available on the dashboard?": "¿Qué widgets están disponibles en el tablero?",
   "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.": "El tablero incluye Tarjetas de Resumen Financiero (ingresos/gastos/balance), widget de Transacciones Recientes, Vista General del Presupuesto (Standard+), Puntuación de Salud Financiera, Consejos Financieros IA (Premium), Mascota Financiera (Premium) y Recordatorios de Transacciones (Standard+). Todos los widgets se actualizan automáticamente.",
   "How do I edit or delete transactions?": "¿Cómo edito o elimino transacciones?",
@@ -861,7 +872,7 @@
   "Can I share goals with family members?": "¿Puedo compartir metas con miembros de la familia?",
   "Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts.": "Sí, los usuarios Standard+ pueden crear metas colaborativas e invitar a miembros de la familia o parejas. Rastrea contribuciones compartidas, ve el progreso juntos y celebra logros como equipo para esfuerzos de ahorro conjunto.",
   "What is the calendar view feature?": "¿Qué es la función de vista de calendario?",
-  "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.": "Los usuarios Standard+ pueden ver transacciones en una cuadrícula de calendario mensual que muestra totales de gasto diario y vistas previas de transacciones. Navega entre meses para ver patrones de gasto a lo largo del tiempo con diseño responsivo móvil.",
+  "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.": "Los usuarios Standard+ pueden ver transacciones en una cuadrícula de calendario mensual que muestra totales de gasto diario y vistas previas de transacciones. Navega entre meses para ver patrones de gasto a lo largo del tiempo con diseño responsivo celular.",
   "What are AI trend predictions?": "¿Qué son las predicciones de tendencias IA?",
   "Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends.": "Los usuarios Premium obtienen pronósticos financieros impulsados por IA que muestran predicciones de gasto, proyecciones de ingresos, recomendaciones de presupuesto y estimaciones de cronograma de metas. Usa aprendizaje automático para analizar patrones y predecir tendencias financieras futuras.",
   "What is the Financial Mascot feature?": "¿Qué es la función de Mascota Financiera?",
@@ -871,13 +882,13 @@
   "Can I import data from other financial apps?": "¿Puedo importar datos de otras aplicaciones financieras?",
   "Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling.": "Los usuarios Premium pueden importar desde Mint, QuickBooks, YNAB, Personal Capital y exportaciones bancarias. Las características incluyen mapeo de columnas, validación de datos, vista previa antes de importar y procesamiento por lotes con manejo de errores.",
   "Can I use my phone's camera for receipts?": "¿Puedo usar la cámara de mi teléfono para recibos?",
-  "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.": "Sí, los navegadores móviles soportan acceso directo a la cámara. Elige 'Tomar Foto' para usar tu cámara o 'Elegir de Galería' para seleccionar fotos existentes. El escaneo de códigos QR permite subida entre dispositivos desde teléfono a computadora.",
+  "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.": "Sí, los navegadores del celular soportan acceso directo a la cámara. Elige 'Tomar Foto' para usar tu cámara o 'Elegir de Galería' para seleccionar fotos existentes. El escaneo de códigos QR permite subida entre dispositivos desde teléfono a computadora.",
   "How do I filter and view reports?": "¿Cómo filtro y veo reportes?",
   "Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports.": "Usa menús desplegables de mes y filtros de período (semana/mes/trimestre/año) en la página de Reportes. Ve resúmenes financieros, desgloses por categoría y análisis. Los usuarios Premium obtienen análisis de tendencias avanzado y reportes comparativos.",
   "How do plan upgrades and downgrades work?": "¿Cómo funcionan las actualizaciones y reducciones de plan?",
   "Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration.": "Las actualizaciones se aplican inmediatamente con facturación prorrateada. Las reducciones se programan para el final de tu período de facturación actual. Accede a la gestión de suscripción a través de la página de Perfil con transparencia total de facturación e integración del portal de clientes de Stripe.",
-  "Is the app fully mobile-friendly?": "¿Es la aplicación completamente compatible con móviles?",
-  "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.": "Sí, diseño completamente responsivo con interfaces táctiles, navegación móvil, filtros colapsables, formularios optimizados e integración de cámara. Toda la funcionalidad de escritorio es accesible en navegadores móviles sin requerir descargas de aplicaciones.",
+  "Is the app fully mobile-friendly?": "¿Es la aplicación completamente compatible con celulares?",
+  "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.": "Sí, diseño completamente responsivo con interfaces táctiles, navegación en el celular, filtros colapsables, formularios optimizados e integración de cámara. Toda la funcionalidad de escritorio es accesible en navegadores del celular sin requerir descargas de aplicaciones.",
   "How can I get help or support?": "¿Cómo puedo obtener ayuda o soporte?",
   "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.": "Usa este asistente de chat IA para ayuda inmediata, revisa nuestra documentación completa a continuación, o contacta a nuestro equipo de soporte a través de la página de contacto para asistencia personalizada.",
   "Financial Mascot (Premium)": "Mascota Financiera (Premium)",
@@ -893,7 +904,7 @@
   "All transaction pages": "Todas las páginas de transacciones",
   "View, search, and filter transaction history": "Ver, buscar y filtrar historial de transacciones",
   "Month selection, category filtering, transaction type, date ranges": "Selección de mes, filtrado por categoría, tipo de transacción, rangos de fechas",
-  "Responsive design, mobile-friendly collapsible filters, real-time search": "Diseño responsivo, filtros colapsables compatibles con móviles, búsqueda en tiempo real",
+  "Responsive design, mobile-friendly collapsible filters, real-time search": "Diseño responsivo, filtros colapsables compatibles con celulares, búsqueda en tiempo real",
   "Transaction Editing and Deletion": "Edición y Eliminación de Transacciones",
   "Transaction list items and dashboard widgets": "Elementos de lista de transacciones y widgets del tablero",
   "Modify or remove existing transactions": "Modificar o eliminar transacciones existentes",
@@ -905,7 +916,7 @@
   "Receipt OCR Processing (Standard+)": "Procesamiento OCR de Recibos (Standard+)",
   "Upload Image buttons on transaction pages": "Botones de Cargar Imagen en páginas de transacciones",
   "Extract transaction data from receipt photos": "Extraer datos de transacciones de fotos de recibos",
-  "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "OCR de Google Cloud Vision, categorización IA, soporte de cámara móvil, carga QR entre dispositivos",
+  "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "OCR de Google Cloud Vision, categorización IA, soporte de la cámara del celular, carga QR entre dispositivos",
   "Category Creation and Editing": "Creación y Edición de Categorías",
   "Categories page": "Página de Categorías",
   "Create custom expense and income categories": "Crear categorías personalizadas de gastos e ingresos",
@@ -950,7 +961,7 @@
   "Calendar View (Standard+)": "Vista de Calendario (Standard+)",
   "Calendar page": "Página de Calendario",
   "Monthly grid view of all transactions": "Vista de cuadrícula mensual de todas las transacciones",
-  "Daily spending totals, transaction previews, monthly navigation, mobile responsive grid": "Totales de gasto diarios, vistas previas de transacciones, navegación mensual, cuadrícula responsiva móvil",
+  "Daily spending totals, transaction previews, monthly navigation, mobile responsive grid": "Totales de gasto diarios, vistas previas de transacciones, navegación mensual, cuadrícula adaptable al celular",
   "Data Management (Premium)": "Gestión de Datos (Premium)",
   "Cloud Backup System": "Sistema de Respaldo en la Nube",
   "Data Management page - Backup tab": "Página de Gestión de Datos - Pestaña Respaldo",
@@ -966,7 +977,7 @@
   "Data Management page - Import tab": "Página de Gestión de Datos - Pestaña Importar",
   "Import transactions from other financial apps": "Importar transacciones de otras aplicaciones financieras",
   "Supported": "Compatible",
-  "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, exportaciones bancarias",
+  "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, exportaciones de cuenta",
   "Column mapping, data validation, preview before import, batch processing": "Mapeo de columnas, validación de datos, vista previa antes de importar, procesamiento por lotes",
   "Profile and Settings": "Perfil y Configuración",
   "Account Management": "Gestión de Cuenta",
@@ -981,11 +992,11 @@
   "Profile page - Notifications tab": "Página de Perfil - Pestaña Notificaciones",
   "Control alert and reminder settings": "Controlar configuraciones de alertas y recordatorios",
   "Budget alerts, goal reminders, transaction notifications, email preferences": "Alertas de presupuesto, recordatorios de metas, notificaciones de transacciones, preferencias de email",
-  "Mobile Features": "Características Móviles",
+  "Mobile Features": "Características para el Celular",
   "Responsive Design": "Diseño Responsivo",
-  "Full mobile optimization for all features": "Optimización móvil completa para todas las características",
-  "Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms": "Interfaces táctiles, navegación móvil, diseños responsivos, formularios optimizados",
-  "Mobile Camera Integration": "Integración de Cámara Móvil",
+  "Full mobile optimization for all features": "Optimización completa para el celular para todas las características",
+  "Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms": "Interfaces táctiles, navegación en el celular, diseños responsivos, formularios optimizados",
+  "Mobile Camera Integration": "Integración con la Cámara del Celular",
   "Direct camera access for receipt scanning": "Acceso directo a cámara para escaneo de recibos",
   "Camera capture, gallery selection, image preview, auto-focus optimization": "Captura de cámara, selección de galería, vista previa de imagen, optimización de auto-enfoque",
   "QR Code Cross-Device Upload": "Subida QR de Dispositivo Cruzado",
@@ -1043,8 +1054,8 @@
     "microphone_not_found": "No se encontró micrófono. Por favor conecta un micrófono e intenta de nuevo.",
     "microphone_in_use": "El micrófono ya está siendo usado por otra aplicación."
   },
-  "Scan receipts on mobile, process on desktop": "Escanear recibos en móvil, procesar en escritorio",
-  "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso móvil anónimo, sondeo en tiempo real, población automática de formularios",
+  "Scan receipts on mobile, process on desktop": "Escanear recibos en el celular, procesar en escritorio",
+  "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso anónimo desde el celular, sondeo en tiempo real, población automática de formularios",
   "Fields": "Campos",
   "Validation": "Validación",
   "Receipt OCR Scanning (Standard+)": "Escaneo OCR de Recibos (Standard+)",
@@ -1053,10 +1064,10 @@
   "Desktop/Web Upload": "Subida Desktop/Web",
   "Navigate to Expenses, Income, or Transactions page": "Navegar a la página de Gastos, Ingresos o Transacciones",
   "Click the \"Upload Image\" button next to \"Add Transaction\"": "Hacer clic en el botón \"Subir Imagen\" junto a \"Agregar Transacción\"",
-  "Choose \"Take Photo\" (mobile camera) or \"Choose from Gallery\"": "Elegir \"Tomar Foto\" (cámara móvil) o \"Elegir de Galería\"",
+  "Choose \"Take Photo\" (mobile camera) or \"Choose from Gallery\"": "Elegir \"Tomar Foto\" (cámara del celular) o \"Elegir de Galería\"",
   "Select or capture a clear image of your receipt": "Seleccionar o capturar una imagen clara de tu recibo",
   "Wait for OCR processing - extracted data will appear automatically": "Esperar el procesamiento OCR - los datos extraídos aparecerán automáticamente",
-  "Mobile QR Code Upload": "Subida QR Móvil",
+  "Mobile QR Code Upload": "Subida QR desde el Celular",
   "From your computer, click \"Upload Image\" and select \"Scan with Phone\"": "Desde tu computadora, hacer clic en \"Subir Imagen\" y seleccionar \"Escanear con Teléfono\"",
   "A QR code will appear on your screen": "Un código QR aparecerá en tu pantalla",
   "Use your phone's camera to scan the QR code": "Usar la cámara de tu teléfono para escanear el código QR",
@@ -1537,6 +1548,10 @@
     "failed_to_cleanup_expired_cache": "Error al limpiar caché expirado"
   },
   "profile": {
+    "mp_cancel": "Cancelar suscripción",
+    "mp_cancel_note": "Al cancelar se detienen los cobros futuros en MercadoPago.",
+    "mp_cancel_confirm": "¿Cancelar tu suscripción de MercadoPago? Tu plan volverá a Gratis.",
+    "mp_cancelled": "Suscripción cancelada",
     "Loading...": "Cargando...",
     "No Stripe Subscription": "Sin Suscripción de Stripe",
     "You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.": "Actualmente tienes acceso premium pero no tienes suscripción de Stripe. Contacta soporte o visita la página de precios para configurar la facturación.",
@@ -1579,7 +1594,7 @@
     "• Interactive charts and reports": "• Gráficos y reportes interactivos",
     "• AI expense categorization": "• Categorización de gastos con IA",
     "• Receipt OCR scanning": "• Escaneo OCR de recibos",
-    "• Mobile QR code upload": "• Carga de código QR móvil",
+    "• Mobile QR code upload": "• Carga de código QR desde el celular",
     "• Calendar view and reminders": "• Vista de calendario y recordatorios",
     "• Unlimited transaction history": "• Historial de transacciones ilimitado",
     "• Everything in Standard plan": "• Todo lo del plan Estándar",
@@ -1639,7 +1654,30 @@
     "AI features disabled": "Funciones de IA desactivadas",
     "Could not change the AI setting": "No se pudo cambiar la configuración de IA",
     "Standard": "Estándar",
-    "Premium": "Premium"
+    "Premium": "Premium",
+    "profile": {
+      "Error": "Error",
+      "User": "Usuario",
+      "Tip": "Consejo",
+      "Free": "Gratis",
+      "Standard": "Standard",
+      "Premium": "Premium",
+      "Note": "Nota"
+    },
+    "emailNotifications": {
+      "title": "Recordatorios por correo",
+      "description": "Recibe un correo antes de que venza un pago. Puedes desactivarlo cuando quieras.",
+      "on": "Recordatorios por correo activados",
+      "off": "Recordatorios por correo desactivados",
+      "failed": "No se pudo guardar este ajuste. Inténtalo de nuevo."
+    },
+    "timezone": {
+      "title": "Zona horaria",
+      "description": "Define cuándo empieza y termina \"este mes\", los presupuestos y los reportes, para que una compra de madrugada caiga en el mes correcto.",
+      "use_device": "Usar la de mi dispositivo ({{zone}})",
+      "saved": "Zona horaria guardada",
+      "failed": "No se pudo guardar la zona horaria. Inténtalo de nuevo."
+    }
   },
   "types": {
     "expense": "gasto",
@@ -1737,11 +1775,25 @@
   "currency": {
     "welcome_title": "¡Bienvenido a Kaptia! 🌎",
     "welcome_description": "Por favor elige tu moneda preferida para comenzar. Puedes cambiarla más tarde hasta que agregues tu primera transacción.",
-    "choose_description": "🌎 Elige entre 15 monedas incluyendo opciones latinoamericanas:",
+    "choose_description": "O elige otra moneda:",
+    "suggested": "Sugerida para ti",
+    "saving": "Guardando...",
+    "error_inline": "No pudimos guardar tu moneda. Revisa tu conexión y elígela de nuevo.",
+    "load_failed": "No pudimos cargar la configuración de tu cuenta.",
+    "retry": "Reintentar",
     "success_title": "Moneda Configurada Exitosamente",
     "success_description": "Tu moneda ha sido configurada a {{symbol}}. Usa el ícono de engranaje en el encabezado para cambiarla antes de agregar transacciones.",
     "error_title": "Error",
-    "error_description": "Error al configurar la moneda. Por favor inténtalo de nuevo."
+    "error_description": "Error al configurar la moneda. Por favor inténtalo de nuevo.",
+    "group_latam": "Latinoamérica",
+    "group_other": "Otras monedas",
+    "change": "Cambiar moneda",
+    "settings": "Configuración de moneda",
+    "current": "Actual:",
+    "locked": "Moneda bloqueada: ya tienes movimientos registrados",
+    "select": "Elegir moneda",
+    "select_description": "Elige la moneda en la que llevas tu dinero.",
+    "label": "Moneda"
   },
   "upgrade": {
     "standard_name": "Estándar",
@@ -1787,7 +1839,7 @@
     "qr_step_1": "1. Escanea este código QR con la cámara de tu teléfono",
     "qr_step_2": "2. Toma una foto de tu recibo",
     "qr_step_3": "3. Los datos aparecerán aquí automáticamente",
-    "waiting_upload": "Esperando subida desde móvil...",
+    "waiting_upload": "Esperando subida desde el celular...",
     "cancel_qr": "Cancelar Escaneo QR",
     "edit_details": "Editar Detalles de Transacción",
     "amount_required": "Cantidad *",
@@ -1819,7 +1871,7 @@
     "qr_code_error": "Error del código QR",
     "failed_to_generate_qr": "No se pudo generar el código QR. Inténtalo de nuevo.",
     "upload_error": "Error de carga",
-    "failed_to_process_mobile": "No se pudo procesar la carga desde el móvil. Inténtalo de nuevo.",
+    "failed_to_process_mobile": "No se pudo procesar la carga desde el celular. Inténtalo de nuevo.",
     "timeout": "La solicitud agotó el tiempo de espera. Inténtalo de nuevo."
   },
   "trends": {
@@ -2001,6 +2053,10 @@
     "export_successful": "Exportación Completada Exitosamente",
     "export_successful_desc": "Tus datos han sido exportados en formato {{format}}",
     "export_failed": "Exportación Falló",
+    "export_button": "Exportar",
+    "exporting": "Preparando tu archivo...",
+    "nothing_selected": "Elige al menos transacciones, presupuestos o metas para exportar.",
+    "pick_dates": "Elige una fecha de inicio y una de fin para el rango personalizado.",
     "export_failed_desc": "Error al exportar datos. Inténtalo de nuevo.",
     "restore_successful": "Restauración Completada Exitosamente",
     "restore_successful_desc": "Se restauraron exitosamente {{transactions}} transacciones y {{budgets}} presupuestos de {{filename}}",
@@ -2023,7 +2079,7 @@
       "security_architecture_title": "Arquitectura de Seguridad Completa",
       "aes_encryption": "Cifrado AES-256-CBC - Todos los datos cifrados en reposo y en tránsito",
       "zero_persistence": "Cero Persistencia de Datos - PDFs procesados solo en memoria, nunca almacenados",
-      "data_sanitization": "Sanitización de Datos Sensibles - SSNs, tarjetas de crédito y PII redactados automáticamente",
+      "data_sanitization": "Sanitización de Datos Sensibles - SSNs, tarjetas de pago y PII redactados automáticamente",
       "memory_management": "Gestión Segura de Memoria - Limpieza automática de buffers y recolección de basura",
       "processing_flow_title": "Flujo de Procesamiento de Seguridad",
       "step1_title": "Validación de Seguridad PDF",
@@ -2052,7 +2108,7 @@
       "delete_option": "Opción de eliminar datos importados en cualquier momento",
       "audit_log": "Registro de auditoría de seguridad completo para transparencia",
       "important_notice": "Aviso Importante",
-      "consent_text": "Al proceder, consientes al procesamiento seguro de tu estado de cuenta bancario usando las medidas de seguridad descritas arriba. Tu PDF será procesado según nuestra Política de Privacidad y Términos de Servicio.",
+      "consent_text": "Al proceder, consientes al procesamiento seguro de tu estado de cuenta usando las medidas de seguridad descritas arriba. Tu PDF será procesado según nuestra Política de Privacidad y Términos de Servicio.",
       "cancel": "Cancelar",
       "consent_button": "Consiento al Procesamiento Seguro"
     },
@@ -2128,7 +2184,35 @@
     "importing_data": "Importando datos...",
     "import_completed_successfully": "Importación completada correctamente.",
     "categories": "Categorías",
-    "created_count": "Creadas: {{count}}"
+    "created_count": "Creadas: {{count}}",
+    "bank_file": {
+      "title": "Archivo de tu cuenta (CSV o Excel)",
+      "description": "Descarga tus movimientos desde tu cuenta en línea e impórtalos aquí.",
+      "drop_text": "Suelta aquí el archivo que descargaste de tu cuenta o haz clic para buscarlo",
+      "supports": "Funciona con CSV y Excel (.xlsx, .xls) de BCP, Interbank, BBVA, Scotiabank y otros",
+      "reading": "Leyendo tu archivo…",
+      "invalid_type": "Elige un archivo CSV o Excel (.csv, .xlsx, .xls).",
+      "too_big": "El archivo es demasiado grande. El límite es 8 MB.",
+      "not_understood_title": "No pudimos leer este archivo",
+      "no_header": "No encontramos las columnas de fecha, descripción y monto. Revisa que el archivo tenga una fila de encabezados.",
+      "no_rows": "El archivo no tiene movimientos que podamos leer.",
+      "plan_required": "Importar el archivo de tu cuenta requiere el plan Standard o Premium.",
+      "read_title": "Archivo leído",
+      "read_description": "Encontramos {{count}} movimientos ({{skipped}} líneas omitidas). Revísalos antes de importar.",
+      "imported_title": "Movimientos importados",
+      "imported_description": "Se importaron {{count}} movimientos."
+    },
+    "pdf_statement": {
+      "title": "Estado de cuenta en PDF",
+      "description": "Extrae movimientos de un estado de cuenta en PDF",
+      "drop_text": "Suelta aquí tu estado de cuenta en PDF o haz clic para buscarlo",
+      "supports": "Acepta archivos PDF con movimientos",
+      "invalid_type": "Selecciona un archivo PDF.",
+      "failed": "No se pudo procesar el PDF",
+      "failed_title": "Falló el procesamiento del PDF",
+      "done_title": "PDF procesado",
+      "done_description": "Se extrajeron {{count}} movimientos con {{confidence}}% de confianza."
+    }
   },
   "upcomingReminders": {
     "title": "Recordatorios Próximos",
@@ -2172,7 +2256,10 @@
       "endDate": "Fecha de fin",
       "paymentUrl": "URL de pago",
       "referenceNote": "Nota de referencia",
-      "referenceNotePlaceholder": "Número de cuenta u otra información de referencia"
+      "referenceNotePlaceholder": "Número de cuenta u otra información de referencia",
+      "amountPlaceholder": "0.00",
+      "reminderDays": "Recuérdame",
+      "recurring": "Hacer que se repita"
     },
     "reminderCreated": "Recordatorio Creado",
     "reminderCreatedDescription": "El recordatorio de gasto se ha configurado exitosamente",
@@ -2350,6 +2437,8 @@
   "auth": {
     "signUp": "Registrarse",
     "signIn": "Iniciar Sesión",
+    "loading": "Cargando...",
+    "termsNotice": "Al crear una cuenta aceptas nuestros <terms>Términos de servicio</terms> y nuestra <privacy>Política de privacidad</privacy>.",
     "accountCreationProcess": "Proceso de Creación de Cuenta",
     "accountCreationDescription": "Después de hacer clic en \"Registrarse\", crearemos tu cuenta segura y enviaremos un email de verificación. Esto típicamente toma 6-8 segundos.",
     "creatingSecureAccount": "Creando cuenta segura...",
@@ -2409,7 +2498,21 @@
     "weekly": "Semanal",
     "monthly": "Mensual",
     "yearly": "Anual",
-    "title": "Recurrente"
+    "title": "Movimientos que se repiten",
+    "description": "Se agregan solos en su fecha. Si detienes uno, se mantiene lo que ya se agregó.",
+    "stop": "Detener",
+    "stopped": "Movimiento recurrente detenido",
+    "stop_failed": "No se pudo detener. Inténtalo de nuevo.",
+    "since": "desde el {{date}}",
+    "until": "hasta el {{date}}",
+    "frequency": {
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "biweekly": "Cada 2 semanas",
+      "monthly": "Mensual",
+      "quarterly": "Cada 3 meses",
+      "yearly": "Anual"
+    }
   },
   "collaborative_goals": {
     "title": "Metas de Ahorro Colaborativas",
@@ -2770,7 +2873,7 @@
         "title": "Guía de Inicio Rápido",
         "add_first": "Agregando tu primera transacción",
         "upload_receipt": "Subiendo fotos de recibos para escaneo OCR",
-        "mobile_qr": "Subida QR móvil: Haz clic en 'Subir Imagen' → 'Escanear con Teléfono' para escaneo de recibos entre dispositivos",
+        "mobile_qr": "Subida QR desde el celular: Haz clic en 'Subir Imagen' → 'Escanear con Teléfono' para escaneo de recibos entre dispositivos",
         "edit_transactions": "Editando transacciones: Haz clic en cualquier transacción en listas o widgets del panel para modificar",
         "set_budgets": "Configurando presupuestos: Ve a la página de Presupuestos y crea límites de gasto basados en categorías (Standard+)",
         "create_goals": "Creando objetivos: Usa la página de Objetivos para establecer metas de ahorro con fechas límite (Standard+)",
@@ -2811,7 +2914,7 @@
           "Hasta 100 transacciones",
           "Seguimiento básico de transacciones",
           "Panel simple",
-          "Diseño responsivo móvil"
+          "Diseño adaptable al celular"
         ],
         "standard": [
           "Hasta 100 transacciones",
@@ -3036,7 +3139,8 @@
       "email": "Correo:",
       "phone": "Teléfono:",
       "response_time": "Tiempo de Respuesta:",
-      "response_desc": "Responderemos a solicitudes verificables dentro de 45 días (extensible por 45 días)"
+      "response_desc": "Responderemos a solicitudes verificables dentro de 45 días (extensible por 45 días)",
+      "email_only": "Atendemos estas solicitudes únicamente por correo electrónico."
     },
     "verification": {
       "title": "Proceso de Verificación",
@@ -3238,6 +3342,36 @@
       "description": "Si tiene alguna pregunta sobre esta Política de Privacidad, contáctenos en:",
       "email": "Correo: info@kaptia.app",
       "address": "Dirección: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+    },
+    "peru": {
+      "title": "Perú: tus derechos sobre tus datos personales (Ley 29733)",
+      "intro": "Si usas Kaptia desde el Perú, tus datos personales también están protegidos por la Ley de Protección de Datos Personales (Ley N.º 29733) y su reglamento (D.S. 003-2013-JUS). Aquí te explicamos tus derechos y cómo ejercerlos.",
+      "controller_title": "Quién es responsable de tus datos",
+      "controller_desc": "NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120, Estados Unidos, opera Kaptia y es responsable del tratamiento de tus datos personales.",
+      "purposes_title": "Para qué usamos tus datos",
+      "purposes_desc": "Para crear y mantener tu cuenta, registrar y ordenar tus ingresos y gastos, ofrecerte las funciones de IA opcionales, procesar los pagos de tu suscripción, mantener el servicio seguro y atender tus solicitudes. No usamos tus datos para ningún otro fin sin pedirte permiso antes.",
+      "consent_title": "Tu consentimiento",
+      "consent_desc": "Al crear tu cuenta y aceptar los Términos y esta Política, consientes este tratamiento. Las funciones de IA que leen boletas o estados de cuenta son opcionales y puedes desactivarlas en tu Perfil; los datos que enviamos a los proveedores de IA se anonimizan antes.",
+      "rights_title": "Tus derechos ARCO",
+      "rights_desc": "Puedes ejercer estos derechos de forma gratuita:",
+      "right_access": "Acceso: pedirnos qué datos personales tuyos tenemos y cómo los usamos.",
+      "right_rectification": "Rectificación: pedirnos que corrijamos datos errados o incompletos (la mayoría puedes editarlos tú mismo en la app).",
+      "right_cancellation": "Cancelación: pedirnos que eliminemos tus datos (también puedes eliminar tu cuenta tú mismo desde tu Perfil).",
+      "right_opposition": "Oposición: oponerte a un uso concreto de tus datos, por ejemplo desactivando el procesamiento con IA en tu Perfil.",
+      "exercise_title": "Cómo ejercer tus derechos",
+      "exercise_desc": "Escríbenos a info@kaptia.app con el asunto «Derechos ARCO», indícanos tu nombre completo y el correo de tu cuenta, y describe tu solicitud. Respondemos dentro de los plazos que fija la ley peruana (entre 8 y 20 días hábiles, según el derecho).",
+      "transfers_title": "Transferencias internacionales",
+      "transfers_desc": "Tus datos se almacenan y procesan fuera del Perú, en Estados Unidos y otros países, con proveedores que los protegen: Neon (base de datos), Cloudflare (almacenamiento y red), Clerk (inicio de sesión), Stripe y Mercado Pago (pagos) y, solo si usas funciones de IA y únicamente después de anonimizarlos, nuestros proveedores de IA.",
+      "authority_title": "Reclamos",
+      "authority_desc": "Si crees que no se respetaron tus derechos, puedes presentar un reclamo ante la Autoridad Nacional de Protección de Datos Personales (ANPDP) del Ministerio de Justicia y Derechos Humanos del Perú."
+    },
+    "children": {
+      "title": "Privacidad de menores",
+      "description": "Kaptia no está dirigida a menores de 13 años y no recopilamos a sabiendas datos personales de ellos. Debes tener 18 años o más para crear una cuenta. Si crees que un menor nos dio información, escríbenos a info@kaptia.app y la eliminaremos."
+    },
+    "seo": {
+      "title": "Política de Privacidad",
+      "description": "Cómo Kaptia recopila, usa y protege tus datos personales, incluidos tus derechos bajo la ley peruana y la CCPA de California."
     }
   },
   "subscribe": {
@@ -3322,7 +3456,7 @@
       "ai_processing_data": "Datos Enviados para Procesamiento de IA",
       "ai_data_description": "Estos datos anonimizados se envían a OpenAI para análisis de transacciones. Toda la información sensible ha sido eliminada.",
       "original_data_title": "Datos Originales del PDF",
-      "original_data_description": "Estos datos originales nunca salen de tu dispositivo y NO se envían a ningún servicio de IA.",
+      "original_data_description": "Los datos originales, sin ocultar, nunca se envían a ningún servicio de IA; solo se envía la versión anonimizada.",
       "hide_original": "Ocultar Original",
       "show_original": "Mostrar Original",
       "hidden_for_privacy": "Oculto por protección de privacidad",
@@ -3333,7 +3467,7 @@
       "proceed": "Proceder con Procesamiento de IA"
     },
     "processing": {
-      "title": "Procesando Estado de Cuenta Bancario",
+      "title": "Procesando Estado de Cuenta",
       "subtitle": "Extracción de transacciones con IA en progreso",
       "connected": "Conectado al flujo de procesamiento",
       "pdf_validation": "Validación de Seguridad",
@@ -3423,7 +3557,7 @@
       "start_free": "Comenzar con Cuenta Gratuita",
       "watch_demo": "Ver Demo",
       "guarantee": "Garantía de devolución de 30 días",
-      "no_card": "No se requiere tarjeta de crédito",
+      "no_card": "No se requiere tarjeta",
       "cancel_anytime": "Cancelar en cualquier momento"
     },
     "demo": {
@@ -3552,13 +3686,13 @@
       }
     },
     "statements": {
-      "title": "Analizador IA de Estados Bancarios",
+      "title": "Analizador IA de Estados de Cuenta",
       "badge": "Todos los Planes",
-      "description": "OCR avanzado y extracción potenciada por IA de transacciones desde PDFs e imágenes de estados bancarios con soporte multiidioma y 95%+ de precisión en detección de transacciones.",
+      "description": "OCR avanzado y extracción potenciada por IA de transacciones desde PDFs e imágenes de estados de cuenta con soporte multiidioma y 95%+ de precisión en detección de transacciones.",
       "benefits": {
         "processing": {
           "title": "Procesamiento de PDF",
-          "desc": "Extrae transacciones de cualquier formato de estado bancario"
+          "desc": "Extrae transacciones de cualquier formato de estado de cuenta"
         },
         "ocr": {
           "title": "Tecnología OCR",
@@ -3628,9 +3762,9 @@
       }
     },
     "contextual": {
-      "title": "Asesor Financiero Inteligente",
+      "title": "Consejos Inteligentes de Dinero",
       "badge": "Estándar+",
-      "description": "Asesoramiento financiero inteligente que se adapta al gasto de tu mes actual, estado del presupuesto y progreso de metas para proporcionar la orientación más relevante cuando la necesitas.",
+      "description": "Consejos inteligentes que se adaptan al gasto de tu mes actual, al estado de tu presupuesto y al progreso de tus metas.",
       "benefits": {
         "realtime": {
           "title": "Contexto en Tiempo Real",
@@ -3691,7 +3825,9 @@
     "type": "Tipo de Transacción",
     "descriptionPlaceholder": "Ingresa descripción",
     "selectCategory": "Selecciona una categoría",
-    "followUp": "Información adicional necesaria"
+    "followUp": "Información adicional necesaria",
+    "extracted": "Extraído",
+    "at": "a las"
   },
   "AI that does the tracking for you": "IA que hace el seguimiento por ti",
   "Your spending,": "Tus gastos,",
@@ -3749,8 +3885,8 @@
   "Point your camera at any receipt. OCR reads every line and files it instantly.": "Apunta tu cámara a cualquier recibo. El OCR lee cada línea y lo archiva al instante.",
   "Statements, imported in seconds": "Historial de gastos, importado en segundos",
   "Financial history, imported in seconds": "Historial de gastos, importado en segundos",
-  "Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.": "Suelta tus registros de gastos y mira cómo meses de historial se convierten en transacciones limpias y buscables, procesadas de forma privada en tu propio dispositivo.",
-  "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.": "Suelta tus registros de gastos y mira cómo meses de historial se convierten en transacciones limpias y buscables, procesadas de forma privada en tu propio dispositivo.",
+  "Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.": "Sube los registros de tu cuenta y mira cómo meses de historial se convierten en movimientos limpios y fáciles de buscar. Tus datos personales se eliminan antes de que cualquier IA los lea.",
+  "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.": "Sube los registros de tu cuenta y mira cómo meses de historial se convierten en movimientos limpios y fáciles de buscar. Tus datos personales se eliminan antes de que cualquier IA los lea.",
   "Goals that keep you honest": "Metas que te mantienen honesto",
   "Budgets and shared goals with gentle nudges before you overspend - not after.": "Presupuestos y metas compartidas con avisos amables antes de gastar de más, no después.",
   "Private by design": "Privado por diseño",
@@ -3815,7 +3951,7 @@
   "No questions matched your search.": "No se encontraron preguntas para tu búsqueda.",
   "Clear search": "Borrar búsqueda",
   "Ready to transform your financial management?": "¿Listo para transformar la gestión de tus finanzas?",
-  "Start free with no credit card required.": "Comienza gratis sin tarjeta de crédito.",
+  "Start free with no credit card required.": "Empieza gratis, sin tarjeta.",
   "pricing": {
     "seo_title": "Precios de Kaptia: planes simples para registrar tus gastos",
     "seo_description": "Empieza gratis y mejora cuando quieras más. Planes Standard y Premium en soles peruanos.",
@@ -3913,6 +4049,10 @@
   "Automatic backups keeping your financial history safe and accessible across devices": "Respaldos automáticos que mantienen tu historial financiero seguro y accesible en todos tus dispositivos",
   "Your spending, finally decoded.": "Tus gastos, por fin descifrados.",
   "Monthly totals by category": "Totales mensuales por categoría",
+  "Recurring entries": "Registros recurrentes",
+  "Receipt photo scanning": "Escaneo de recibos con foto",
+  "Companion mascot": "Mascota compañera",
+  "Contextual tips": "Consejos contextuales",
   "noAchievements": "Aún no hay logros",
   "courses": {
     "title": "Cursos financieros",
@@ -3923,5 +4063,150 @@
       "bestStreak": "Mejor racha",
       "lessons": "Lecciones completadas"
     }
+  },
+  "checkout": {
+    "auto_renewal": "Tu suscripción se renueva automáticamente cada {{period}} por {{price}} hasta que la canceles. Puedes cancelarla en cualquier momento desde tu Perfil.",
+    "period_monthly": "mes",
+    "period_yearly": "año",
+    "auto_renewal_terms": "Términos de Servicio"
+  },
+  "reclamaciones": {
+    "seo": {
+      "title": "Libro de Reclamaciones",
+      "description": "Registra un reclamo o una queja sobre Kaptia, tal como lo establece el Código de Protección y Defensa del Consumidor del Perú."
+    },
+    "title": "Libro de Reclamaciones",
+    "subtitle": "Conforme al Código de Protección y Defensa del Consumidor (Ley N.º 29571), aquí puedes registrar un reclamo o una queja sobre nuestro servicio.",
+    "provider": "Proveedor: NutriNova LLC (Kaptia) · 2105 Vista Oeste NW, Albuquerque, NM 87120, EE. UU. · info@kaptia.app",
+    "explain_claim": "Reclamo: disconformidad con el servicio que contrataste o con un pago.",
+    "explain_grievance": "Queja: malestar por cómo te atendimos, no relacionado con el servicio en sí.",
+    "section_consumer": "1. Tus datos",
+    "section_service": "2. El servicio",
+    "section_detail": "3. Tu reclamo o queja",
+    "kind": "Tipo",
+    "kind_claim": "Reclamo",
+    "kind_grievance": "Queja",
+    "full_name": "Nombre completo",
+    "doc_type": "Tipo de documento",
+    "doc_number": "Número de documento",
+    "address": "Domicilio",
+    "email": "Correo electrónico",
+    "phone": "Celular o teléfono",
+    "service": "Servicio contratado",
+    "service_placeholder": "Por ejemplo: plan Standard de Kaptia",
+    "amount": "Monto reclamado (opcional)",
+    "detail": "Cuéntanos qué pasó",
+    "request": "¿Qué nos pides que hagamos?",
+    "truth": "Confirmo que la información que doy es verdadera.",
+    "submit": "Registrar",
+    "submitting": "Registrando…",
+    "success_title": "Tu reclamo fue registrado",
+    "success_desc": "Tu código es {{code}}. Te enviamos una copia a {{email}}. Te responderemos en un plazo máximo de 30 días calendario.",
+    "error": "No pudimos registrar tu reclamo. Revisa los campos e inténtalo de nuevo.",
+    "note": "Registrar un reclamo aquí no te impide acudir al INDECOPI ni a otras vías legales.",
+    "doc_dni": "DNI",
+    "doc_ce": "Carné de extranjería (CE)",
+    "doc_passport": "Pasaporte",
+    "doc_ruc": "RUC"
+  },
+  "footer": {
+    "reclamaciones": "Libro de Reclamaciones",
+    "rights": "© {{year}} Kaptia. Todos los derechos reservados."
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "La página que buscas no existe o fue movida.",
+    "home": "Ir al inicio"
+  },
+  "aiInsights": {
+    "title": "Análisis con IA",
+    "groupedInsights": "Análisis agrupados",
+    "smartInsights": "💡 Análisis inteligentes",
+    "spendingPatterns": "📊 Patrones de gasto",
+    "savingOpportunities": "💰 Oportunidades de ahorro",
+    "budgetOptimization": "📋 Optimización del presupuesto",
+    "financialHealth": "❤️ Salud de tu dinero",
+    "actionableAdvice": "⚡ Consejos prácticos",
+    "generateInsights": "Generar análisis con IA",
+    "generating": "Generando análisis...",
+    "noInsights": "No hay análisis disponibles",
+    "addMoreData": "Agrega más movimientos para obtener análisis personalizados con IA",
+    "confidence": "confianza",
+    "category": "Categoría",
+    "insight": "Análisis"
+  },
+  "streak": {
+    "title": "Tu racha de registro",
+    "description": "Días seguidos en los que registraste al menos un movimiento.",
+    "days_in_a_row": "días seguidos",
+    "best": "mejor racha",
+    "logged_today": "¡Ya registraste algo hoy! Muy bien.",
+    "log_today": "Registra un movimiento hoy para mantener tu racha."
+  },
+  "welcome": {
+    "step": "Paso {{current}} de {{total}}",
+    "title": "Te damos la bienvenida a Kaptia",
+    "zone_intro": "Primero revisa tu zona horaria. Define dónde empieza y termina cada mes.",
+    "next": "Continuar",
+    "skip": "Omitir por ahora",
+    "first_title": "Registra tu primera transacción",
+    "first_intro": "Empieza con algo de hoy. Puedes editarla o borrarla cuando quieras.",
+    "type_label": "Tipo de transacción",
+    "type_expense": "Gasto",
+    "type_income": "Ingreso",
+    "amount": "Monto ({{currency}})",
+    "description": "¿Qué fue?",
+    "description_placeholder": "Café, sueldo, alquiler...",
+    "save": "Guardar transacción",
+    "saved": "Tu primera transacción está guardada",
+    "invalid": "Escribe un monto mayor que cero y una descripción corta.",
+    "error": "No pudimos guardarla. Inténtalo de nuevo."
+  },
+  "onboarding": {
+    "title": "Empieza con Kaptia",
+    "subtitle": "Unos pasos rápidos para ver tu dinero con claridad.",
+    "dismiss": "Ocultar esta lista",
+    "go": "Empezar",
+    "see_plans": "Ver planes",
+    "steps": {
+      "income": {
+        "title": "Registra tus ingresos",
+        "description": "Anota tu sueldo o cualquier dinero que entre, para que tu saldo sea real."
+      },
+      "upgrade": {
+        "title": "Desbloquea presupuestos y metas",
+        "description": "El plan Standard añade presupuestos mensuales, metas de ahorro y recordatorios."
+      },
+      "transaction": {
+        "title": "Registra tu primer movimiento",
+        "description": "Escríbelo, dilo en voz alta o toma una foto de la boleta."
+      },
+      "budget": {
+        "title": "Define un presupuesto mensual",
+        "description": "Elige una categoría y el monto que quieres respetar."
+      },
+      "goal": {
+        "title": "Crea una meta de ahorro",
+        "description": "Un viaje, un fondo de emergencia, un celular nuevo: ponle una meta."
+      },
+      "import": {
+        "title": "Importa el archivo de tu cuenta",
+        "description": "Trae tus meses anteriores desde el CSV o Excel de tu cuenta en línea."
+      }
+    }
+  },
+  "a11y": {
+    "open_menu": "Abrir menú",
+    "zoom_out": "Alejar",
+    "zoom_in": "Acercar",
+    "reset_zoom": "Restablecer zoom",
+    "download_chart": "Descargar gráfico",
+    "previous_months": "Meses anteriores",
+    "next_months": "Meses siguientes",
+    "more_actions": "Más acciones",
+    "close": "Cerrar",
+    "filters": "Filtros",
+    "send": "Enviar",
+    "delete": "Eliminar"
   }
 }

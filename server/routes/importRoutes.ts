@@ -23,6 +23,9 @@ import {
 } from "../../lib/saveImportLog";
 import multer from "multer";
 import { processBankStatementPDF, validateTransactions } from "../../lib/pdfProcessor";
+import { detectDuplicateTransactions } from "../../shared/duplicateDetection";
+import { rateLimit } from "../middleware/rateLimit";
+import { notifyDataChange } from "../realtime";
 import { getCurrentLanguageForAPI } from "../../lib/languageUtils";
 
 // Configure multer for PDF uploads
@@ -587,7 +590,7 @@ export function registerImportRoutes(app: Express) {
   });
 
   // PDF Bank Statement Upload Route
-  app.post("/api/import/pdf-statement", upload.single('pdf'), async (req, res) => {
+  app.post("/api/import/pdf-statement", isAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 10, keyPrefix: 'pdf-statement', perUser: true }), upload.single('pdf'), async (req, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -698,100 +701,160 @@ export function registerImportRoutes(app: Express) {
     }
   });
 
-  // Final import endpoint - saves transactions and creates user-edited categories
-  app.post('/api/import/bank-statement/confirm', isAuthenticated, async (req: any, res: any) => {
+  // Rows read from a bank's CSV/Excel export (parsed in the browser by
+  // shared/statementImport.ts). No AI is involved, so any paid plan may use it; the server
+  // validates every row again and flags likely duplicates of what is already recorded.
+  app.post('/api/import/statement-preview',
+    isAuthenticated,
+    rateLimit({ windowMs: 10 * 60 * 1000, max: 20, keyPrefix: 'statement-preview', perUser: true }),
+    async (req: any, res: any) => {
+      try {
+        const userId = getUserId(req);
+        if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+        const user = await storage.getUser(userId);
+        if (!user || user.plan === 'free') {
+          return res.status(403).json({ error: 'Importing an account file requires the Standard or Premium plan', code: 'plan_required' });
+        }
+
+        const parsed = z.object({
+          transactions: z.array(z.object({
+            date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            description: z.string().trim().min(1).max(300),
+            amount: z.number().positive().max(999_999_999),
+            type: z.enum(['income', 'expense']),
+          })).min(1).max(5000),
+        }).safeParse(req.body);
+
+        if (!parsed.success) {
+          return res.status(400).json({ error: 'Invalid statement rows' });
+        }
+
+        const oneYearAgo = new Date(Date.now() - 366 * 24 * 60 * 60 * 1000);
+        const existing = (await storage.getUserTransactions(userId))
+          .filter((tx) => tx.date >= oneYearAgo)
+          .map((tx) => ({
+            id: tx.id,
+            date: tx.date.toISOString().split('T')[0],
+            description: tx.description,
+            amount: parseFloat(tx.amount),
+            type: tx.type as 'income' | 'expense',
+          }));
+
+        const rows = parsed.data.transactions.map((row) => ({ ...row, confidence: 1 }));
+        const duplicates = detectDuplicateTransactions(rows, existing);
+
+        return res.json({
+          success: true,
+          processingMethod: 'file',
+          totalPages: 1,
+          extractedTransactions: rows.length,
+          invalidTransactions: 0,
+          overallConfidence: 1,
+          errors: [],
+          transactions: rows,
+          invalidData: [],
+          duplicates,
+          preview: true,
+        });
+      } catch (error) {
+        console.error('Statement preview error:', error instanceof Error ? error.message : error);
+        return res.status(500).json({ error: 'Could not prepare the preview', success: false });
+      }
+    });
+
+  // Final import endpoint - saves transactions and creates the categories the person named.
+  app.post('/api/import/bank-statement/confirm', isAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 10, keyPrefix: 'statement-confirm', perUser: true }), async (req: any, res: any) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      const { transactions, categoryMappings } = req.body;
-      
+      const user = await storage.getUser(userId);
+      if (!user || user.plan === 'free') {
+        return res.status(403).json({ error: 'Importing transactions requires the Standard or Premium plan', code: 'plan_required' });
+      }
+
+      const { transactions } = req.body;
+
       if (!transactions || !Array.isArray(transactions)) {
         return res.status(400).json({ error: 'Transactions array is required' });
       }
-
-      console.log(`Processing final import for ${transactions.length} transactions with category mappings`);
-
-      // Step 1: Create new categories from user-edited names
-      const categoryNameToIdMap: Record<string, number> = {};
-      
-      if (categoryMappings && typeof categoryMappings === 'object') {
-        for (const [originalName, userEditedName] of Object.entries(categoryMappings)) {
-          if (userEditedName && typeof userEditedName === 'string') {
-            try {
-              // Check if category already exists
-              const existingCategories = await storage.getCategories(userId);
-              const existingCategory = existingCategories.find(cat => 
-                cat.name.toLowerCase() === userEditedName.toLowerCase() && cat.type === 'expense'
-              );
-              
-              if (existingCategory) {
-                categoryNameToIdMap[originalName] = existingCategory.id;
-                console.log(`Using existing category: ${userEditedName} (ID: ${existingCategory.id})`);
-              } else {
-                const newCategory = await storage.createCategory({
-                  userId,
-                  name: userEditedName,
-                  type: 'expense',
-                  icon: 'Tag',
-                  color: '#6366f1'
-                });
-                categoryNameToIdMap[originalName] = newCategory.id;
-                console.log(`Created new category: ${userEditedName} (ID: ${newCategory.id})`);
-              }
-            } catch (error) {
-              console.error(`Failed to create/find category ${userEditedName}:`, error);
-            }
-          }
-        }
+      if (transactions.length > 5000) {
+        return res.status(400).json({ error: 'Too many transactions in one import (5000 max)' });
       }
 
-      // Step 2: Process and save transactions
+      // Categories are matched by name within the transaction's own type (an income called
+      // "Salary" and an expense called "Salary" are different categories) and created when
+      // they do not exist yet.
+      const categories = await storage.getCategories(userId);
+      const categoryIdByKey = new Map<string, number>();
+      categories.forEach((category) => categoryIdByKey.set(`${category.type}|${category.name.toLowerCase()}`, category.id));
+      let createdCategories = 0;
+
       const savedTransactions = [];
-      const errors = [];
+      const errors: string[] = [];
 
       for (const transaction of transactions) {
         try {
-          // Determine category ID
-          let categoryId = null;
-          
-          if (transaction.categoryId) {
-            // Existing category ID
-            categoryId = transaction.categoryId;
-          } else if (transaction.category && categoryNameToIdMap[transaction.category]) {
-            // New category created from mapping
-            categoryId = categoryNameToIdMap[transaction.category];
+          const amount = Math.abs(parseFloat(transaction.amount));
+          // yyyy-MM-dd means a calendar day: noon UTC shows the same day in every timezone
+          // (midnight UTC would display as the previous evening in Lima).
+          const rawDate = String(transaction.date ?? '');
+          const date = /^d{4}-d{2}-d{2}$/.test(rawDate) ? new Date(`${rawDate}T12:00:00Z`) : new Date(transaction.date);
+          const description = String(transaction.description ?? '').trim();
+          const type: 'income' | 'expense' = transaction.type === 'income' ? 'income' : 'expense';
+
+          if (!Number.isFinite(amount) || amount <= 0 || Number.isNaN(date.getTime()) || !description) {
+            errors.push(`Skipped an invalid row: ${description || '(no description)'}`);
+            continue;
           }
 
-          const transactionData = {
+          let categoryId: number | null = null;
+          if (Number.isInteger(transaction.categoryId)) {
+            // Only the person's own (or shared default) categories may be used.
+            categoryId = categories.some((category) => category.id === transaction.categoryId) ? transaction.categoryId : null;
+          } else if (typeof transaction.category === 'string' && transaction.category.trim()) {
+            const name = transaction.category.trim().slice(0, 60);
+            const key = `${type}|${name.toLowerCase()}`;
+            let id = categoryIdByKey.get(key);
+            if (!id) {
+              const created = await storage.createCategory({ userId, name, type, icon: 'Tag', color: '#6366f1' });
+              id = created.id;
+              categoryIdByKey.set(key, id);
+              createdCategories++;
+            }
+            categoryId = id;
+          }
+
+          const savedTransaction = await storage.createTransaction({
             userId,
-            amount: String(Math.abs(parseFloat(transaction.amount))),
-            description: transaction.description,
-            date: new Date(transaction.date),
-            type: (transaction.type || 'expense') as 'income' | 'expense',
-            categoryId: categoryId,
+            amount: String(amount),
+            description,
+            date,
+            type,
+            categoryId,
             referenceNote: transaction.reference || null,
             isRecurring: false,
-            imageUrl: null
-          };
-
-          const savedTransaction = await storage.createTransaction(transactionData);
+            imageUrl: null,
+          });
           savedTransactions.push(savedTransaction);
         } catch (error) {
-          console.error(`Failed to save transaction: ${transaction.description}`, error);
-          errors.push(`Failed to save: ${transaction.description}`);
+          console.error('Failed to save an imported transaction:', error instanceof Error ? error.message : error);
+          errors.push(`Failed to save: ${String(transaction?.description ?? '').slice(0, 80)}`);
         }
       }
 
-      console.log(`Import completed: ${savedTransactions.length} transactions saved, ${errors.length} errors`);
+      if (savedTransactions.length > 0) {
+        notifyDataChange(userId, 'transaction');
+      }
 
       return res.json({
         success: true,
         savedTransactions: savedTransactions.length,
-        createdCategories: Object.keys(categoryNameToIdMap).length,
-        errors: errors
+        createdCategories,
+        errors
       });
 
     } catch (error) {

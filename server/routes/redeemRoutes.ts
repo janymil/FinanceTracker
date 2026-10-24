@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { z } from "zod";
 import { storage } from "../storage";
 import { isAuthenticated } from "../clerkAuth";
+import { rateLimit } from "../middleware/rateLimit";
 
 const redeemSchema = z.object({
   codes: z.array(z.string().min(1)).min(1).max(2)
@@ -70,7 +71,11 @@ export function registerRedeemRoutes(app: Express) {
     }
   });
 
-  app.post("/api/redeem", isAuthenticated, async (req: any, res) => {
+  // Capped per person and per address so codes cannot be guessed by brute force.
+  app.post("/api/redeem", isAuthenticated,
+    rateLimit({ windowMs: 60 * 60 * 1000, max: 10, keyPrefix: 'redeem-user', perUser: true, message: 'Too many attempts. Please try again later.' }),
+    rateLimit({ windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'redeem-ip', message: 'Too many attempts. Please try again later.' }),
+    async (req: any, res) => {
     try {
       const auth = req.auth();
       const userId = auth?.userId;
@@ -139,15 +144,28 @@ export function registerRedeemRoutes(app: Express) {
         });
       }
 
-      // Redeem all valid codes
-      const redeemedCodes = [];
+      // Redeem all valid codes. The final UPDATE is atomic, so a code someone else took in
+      // the meantime comes back empty; only the codes actually redeemed count.
+      const redeemedCodes: any[] = [];
+      const lostRace: string[] = [];
       for (const code of validCodes) {
-        const redeemedCode = await storage.redeemCode(code, userId);
-        redeemedCodes.push(redeemedCode);
+        try {
+          redeemedCodes.push(await storage.redeemCode(code, userId));
+        } catch {
+          lostRace.push(code);
+        }
+      }
+
+      if (redeemedCodes.length === 0) {
+        return res.status(400).json({
+          error: "Some codes are invalid or already redeemed by another user",
+          invalidCodes: lostRace,
+          currentCodes: currentRedeemedCodes.map((code: any) => code.code)
+        });
       }
 
       // Determine new plan based on total codes after successful redemption
-      const totalCodesAfterRedemption = currentCodeCount + validCodes.length;
+      const totalCodesAfterRedemption = currentCodeCount + redeemedCodes.length;
       let plan: string;
       
       if (totalCodesAfterRedemption >= 2) {
@@ -168,10 +186,10 @@ export function registerRedeemRoutes(app: Express) {
         success: true,
         plan,
         validCodes: redeemedCodes,
-        invalidCodes: [],
+        invalidCodes: lostRace,
         totalCodes: totalCodesAfterRedemption,
         previousCodes: currentRedeemedCodes.map((code: any) => code.code),
-        newlyRedeemed: validCodes
+        newlyRedeemed: redeemedCodes.map((c: any) => c.code)
       });
 
     } catch (error) {

@@ -103,13 +103,13 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Every `useQuery({ queryKey: ["/api/..."] })` fetches the URL in its first key element.
       queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: 0, // Always fresh
-      gcTime: 5 * 60 * 1000,
-      retry: 2,
-      retryDelay: 500,
+      // Same runtime behaviour the app has always had in the browser (this is the one client the
+      // provider renders from): always fresh, nothing kept once nobody is looking at it.
+      staleTime: 0,
+      gcTime: 0,
+      retry: 1,
       networkMode: 'online',
     },
     mutations: {

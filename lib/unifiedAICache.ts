@@ -71,6 +71,11 @@ export class UnifiedAICache {
         return null;
       }
 
+      // A stored failure is a stand-in for an outage, not an answer: never serve it as one.
+      if (entry.isError) {
+        return null;
+      }
+
       // Check if expired
       if (entry.expiresAt && new Date() > entry.expiresAt) {
         return null;
@@ -109,8 +114,10 @@ export class UnifiedAICache {
     try {
       const inputHash = this.hashInput(input);
       
-      // Use default TTL if not provided
-      const finalTtlHours = ttlHours || this.getDefaultTTL();
+      // Use default TTL if not provided. A failure is remembered for an hour at most so the
+      // next request can try the providers again.
+      const requestedTtl = ttlHours || this.getDefaultTTL();
+      const finalTtlHours = isError ? Math.min(requestedTtl, 1) : requestedTtl;
       
       // Use storage layer to set cache entry with TTL
       await storage.setAICacheEntry(

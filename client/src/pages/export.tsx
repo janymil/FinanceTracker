@@ -38,7 +38,8 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { parseCsvText, parseStatementTable } from '@shared/statementImport';
 
 interface ExportOptions {
   format: "pdf" | "csv" | "excel" | "json";
@@ -53,7 +54,7 @@ interface ExportOptions {
 }
 
 interface ImportOptions {
-  source: "csv" | "excel" | "json" | "mint" | "quickbooks" | "ynab" | "personalcapital" | "bank" | "pdf-statement";
+  source: "csv" | "excel" | "json" | "mint" | "quickbooks" | "ynab" | "personalcapital" | "bank" | "pdf-statement" | "bank-file";
   mapColumns: boolean;
   skipFirstRow: boolean;
   dateFormat: string;
@@ -487,6 +488,8 @@ export default function ExportPage() {
   const [pdfProcessingResult, setPdfProcessingResult] = useState<PDFProcessingResult | null>(null);
   const [previewTransactions, setPreviewTransactions] = useState<PreviewTransaction[]>([]);
   const [isProcessingPDF, setIsProcessingPDF] = useState(false);
+  const [isReadingBankFile, setIsReadingBankFile] = useState(false);
+  const queryClient = useQueryClient();
   const [processingSessionId, setProcessingSessionId] = useState<string | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedTransactions, setSelectedTransactions] = useState<Set<number>>(new Set());
@@ -523,7 +526,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'financerpro-import-example.csv';
+    a.download = 'kaptia-import-example.csv';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -546,6 +549,14 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
   const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
+    if (file && importOptions.source === 'bank-file') {
+      void handleBankFile(file);
+      return;
+    }
+    if (file && importOptions.source === 'pdf-statement') {
+      void handlePDFUpload({ target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>);
+      return;
+    }
     if (file && (file.type === 'text/csv' || file.type === 'application/json')) {
       setSelectedFile(file);
       setImportResults(null);
@@ -687,7 +698,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     if (file.type !== 'application/pdf') {
       toast({
         title: t('export.invalid_file'),
-        description: 'Please select a PDF file.',
+        description: t('export.pdf_statement.invalid_type'),
         variant: "destructive",
       });
       return;
@@ -721,7 +732,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to process PDF');
+        throw new Error(errorData.error || t('export.pdf_statement.failed'));
       }
 
       const result: PDFProcessingResult = await response.json();
@@ -745,16 +756,16 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         setShowPreviewModal(true);
         
         toast({
-          title: 'PDF Processing Complete',
-          description: `Extracted ${result.extractedTransactions} transactions with ${(result.overallConfidence * 100).toFixed(0)}% confidence.`,
+          title: t('export.pdf_statement.done_title'),
+          description: t('export.pdf_statement.done_description', { count: result.extractedTransactions, confidence: (result.overallConfidence * 100).toFixed(0) }),
         });
       }
 
     } catch (error) {
       console.error('PDF processing error:', error);
       toast({
-        title: 'PDF Processing Failed',
-        description: error instanceof Error ? error.message : 'Failed to process PDF',
+        title: t('export.pdf_statement.failed_title'),
+        description: error instanceof Error ? error.message : t('export.pdf_statement.failed'),
         variant: "destructive",
       });
     } finally {
@@ -762,8 +773,102 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     }
   };
 
+  // Bank CSV / Excel export: read in the browser, previewed by the server (duplicates),
+  // then committed through the same confirm step as the PDF flow.
+  const handleBankFile = async (file: File) => {
+    const name = file.name.toLowerCase();
+    if (!/\.(csv|txt|xlsx|xls)$/.test(name)) {
+      toast({
+        title: t('export.invalid_file'),
+        description: t('export.bank_file.invalid_type'),
+        variant: "destructive",
+      });
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast({ title: t('export.invalid_file'), description: t('export.bank_file.too_big'), variant: "destructive" });
+      return;
+    }
+
+    setIsProcessingPDF(false);
+    setPdfProcessingResult(null);
+    setPreviewTransactions([]);
+    setIsReadingBankFile(true);
+
+    try {
+      let table: unknown[][];
+      if (/\.(xlsx|xls)$/.test(name)) {
+        // Loaded on demand: the spreadsheet reader is large and most people never need it.
+        const XLSX = await import('xlsx');
+        const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        table = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: '' }) as unknown[][];
+      } else {
+        table = parseCsvText(await file.text());
+      }
+
+      const parsed = parseStatementTable(table);
+      if (parsed.error || parsed.transactions.length === 0) {
+        toast({
+          title: t('export.bank_file.not_understood_title'),
+          description: t(parsed.error === 'no_header'
+            ? 'export.bank_file.no_header'
+            : 'export.bank_file.no_rows'),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const token = await getToken();
+      if (!token) throw new Error(t('export.auth_required'));
+
+      const response = await fetch('/api/import/statement-preview', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactions: parsed.transactions }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result.code === 'plan_required' ? t('export.bank_file.plan_required') : (result.error || t('export.import_failed_desc'))
+        );
+      }
+
+      setPdfProcessingResult(result);
+      setPreviewTransactions(result.transactions);
+
+      toast({
+        title: t('export.bank_file.read_title'),
+        description: t('export.bank_file.read_description', { count: parsed.transactions.length, skipped: parsed.skipped }),
+      });
+
+      if (result.duplicates && result.duplicates.length > 0) {
+        setDuplicateDetections(result.duplicates);
+        setShowDuplicateWarning(true);
+      } else {
+        setSelectedTransactions(new Set<number>(result.transactions.map((_: unknown, index: number) => index)));
+        setShowPreviewModal(true);
+      }
+    } catch (error) {
+      toast({
+        title: t('export.import_failed'),
+        description: error instanceof Error ? error.message : t('export.import_failed_desc'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsReadingBankFile(false);
+    }
+  };
+
+  const handleBankFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = ''; // lets the same file be picked again
+    if (file) void handleBankFile(file);
+  };
+
   // Duplicate warning handlers
-  const handleDuplicateWarningProceed = (selectedTransactions: any[]) => {
+  const handleDuplicateWarningProceed =(selectedTransactions: any[]) => {
     setShowDuplicateWarning(false);
     setPreviewTransactions(selectedTransactions);
     
@@ -801,60 +906,56 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         selectedTransactions.has(index)
       );
 
-      // Convert to import format
-      const importData = transactionsToImport.map(tx => ({
-        dataType: 'transaction',
-        transactionType: tx.type,
-        amount: Math.abs(tx.amount),
-        description: tx.description,
-        date: tx.date,
-        category: tx.category || '',
-        isRecurring: false,
-        recurringFrequency: ''
-      }));
-
-      // Create CSV content with headers
-      const headers = 'dataType,transactionType,amount,description,date,category,isRecurring,recurringFrequency';
-      const csvRows = importData.map(row => Object.values(row).join(','));
-      const csvContent = [headers, ...csvRows].join('\n');
-
-      const response = await fetch('/api/import-data', {
+      // JSON, not CSV: statement descriptions contain commas and quotes, which a
+      // hand-built CSV line silently splits apart.
+      const response = await fetch('/api/import/bank-statement/confirm', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          content: csvContent,
-          format: 'csv',
-          options: {
-            ...importOptions,
-            skipFirstRow: true // Now we have headers, so skip first row
-          }
+          transactions: transactionsToImport.map(tx => ({
+            type: tx.type,
+            amount: Math.abs(tx.amount),
+            description: tx.description,
+            date: tx.date,
+            category: tx.category || '',
+          })),
         })
       });
 
+      const result = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Import failed');
+        throw new Error(
+          result.code === 'plan_required' ? t('export.bank_file.plan_required') : (result.error || result.message || t('export.import_failed_desc'))
+        );
       }
 
-      const result = await response.json();
-      
       setShowPreviewModal(false);
-      setImportResults(result.summary);
+      setImportResults({
+        categories: result.createdCategories ?? 0,
+        incomes: transactionsToImport.filter(tx => tx.type === 'income').length,
+        expenses: transactionsToImport.filter(tx => tx.type === 'expense').length,
+        budgets: 0,
+        goals: 0,
+        collaborativeGoals: 0,
+        errors: result.errors ?? [],
+      });
       loadImportLogs();
+      localStorage.setItem('invalidate-ai-cache', 'true');
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
 
       toast({
-        title: 'Transactions Imported Successfully',
-        description: `Imported ${selectedTransactions.size} transactions from your bank statement.`,
+        title: t('export.bank_file.imported_title'),
+        description: t('export.bank_file.imported_description', { count: result.savedTransactions ?? transactionsToImport.length }),
       });
 
     } catch (error) {
       console.error('Import error:', error);
       toast({
-        title: 'Import Failed',
-        description: error instanceof Error ? error.message : 'Failed to import transactions',
+        title: t('export.import_failed'),
+        description: error instanceof Error ? error.message : t('export.import_failed_desc'),
         variant: "destructive",
       });
     } finally {
@@ -940,9 +1041,21 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
   const hasBackupData = backupStatusData !== null;
 
-  const handleExport = async () => {
-    if (!isReady || !user?.id) return;
+  const [isExporting, setIsExporting] = useState(false);
 
+  const handleExport = async () => {
+    if (!isReady || !user?.id || isExporting) return;
+
+    if (!exportOptions.includeTransactions && !exportOptions.includeBudgets && !exportOptions.includeGoals) {
+      toast({ title: t('export.export_failed'), description: t('export.nothing_selected'), variant: "destructive" });
+      return;
+    }
+    if (exportOptions.dateRange === 'custom' && (!exportOptions.startDate || !exportOptions.endDate)) {
+      toast({ title: t('export.export_failed'), description: t('export.pick_dates'), variant: "destructive" });
+      return;
+    }
+
+    setIsExporting(true);
     try {
       const token = await getToken();
       if (!token) return;
@@ -953,9 +1066,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         dateRange: exportOptions.dateRange,
         includeTransactions: exportOptions.includeTransactions.toString(),
         includeBudgets: exportOptions.includeBudgets.toString(),
-        includeGoals: exportOptions.includeGoals.toString(),
-        includeSummary: exportOptions.includeSummary.toString(),
-        includeCharts: exportOptions.includeCharts.toString()
+        includeGoals: exportOptions.includeGoals.toString()
       });
 
       if (exportOptions.startDate) params.append('startDate', exportOptions.startDate);
@@ -968,43 +1079,36 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
       });
 
       if (response.ok) {
-        if (exportOptions.format === 'pdf') {
-          const blob = await response.blob();
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = `financial-export-${new Date().toISOString().split('T')[0]}.pdf`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(downloadUrl);
-        } else {
-          const data = await response.json();
-          const dataStr = JSON.stringify(data, null, 2);
-          const dataBlob = new Blob([dataStr], { type: 'application/json' });
-          const downloadUrl = window.URL.createObjectURL(dataBlob);
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = `financial-export-${new Date().toISOString().split('T')[0]}.${exportOptions.format}`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(downloadUrl);
-        }
+        // Every format comes back as a real file; save it under the name the server chose.
+        const blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const serverName = /filename="?([^";]+)"?/i.exec(disposition)?.[1];
+        const extension = exportOptions.format === 'excel' ? 'xlsx' : exportOptions.format;
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = serverName || `financial-export-${new Date().toISOString().split('T')[0]}.${extension}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
 
         toast({
           title: t('export.export_successful'),
           description: t('export.export_successful_desc', { format: exportOptions.format.toUpperCase() }),
         });
       } else {
-        throw new Error('Export failed');
+        const failure = await response.json().catch(() => null);
+        throw new Error(failure?.message || 'Export failed');
       }
     } catch (error) {
       toast({
         title: t('export.export_failed'),
-        description: t('export.export_failed_desc'),
+        description: error instanceof Error && error.message !== 'Export failed' ? error.message : t('export.export_failed_desc'),
         variant: "destructive",
       });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -1221,33 +1325,20 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           />
                           <label htmlFor="goals" className="text-sm">{t('export.include_goals')}</label>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="summary"
-                            checked={exportOptions.includeSummary}
-                            onCheckedChange={(checked) => 
-                              setExportOptions(prev => ({ ...prev, includeSummary: !!checked }))}
-                          />
-                          <label htmlFor="summary" className="text-sm">{t('export.include_summary')}</label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="charts"
-                            checked={exportOptions.includeCharts}
-                            onCheckedChange={(checked) => 
-                              setExportOptions(prev => ({ ...prev, includeCharts: !!checked }))}
-                          />
-                          <label htmlFor="charts" className="text-sm">{t('export.include_charts')}</label>
-                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-center py-8 text-muted-foreground">
-                  <Download className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>{t('export.coming_soon')}</p>
-                  <p className="text-sm">{t('export.coming_soon_desc')}</p>
+                <div className="flex justify-end">
+                  <Button onClick={handleExport} disabled={isExporting || !isReady} data-testid="export-run">
+                    {isExporting ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="mr-2 h-4 w-4" />
+                    )}
+                    {isExporting ? t('export.exporting') : t('export.export_button')}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1337,10 +1428,29 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             </div>
                           </div>
                         </div>
-                        <div 
+                        <div
                           className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                            importOptions.source === 'pdf-statement' 
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
+                            importOptions.source === 'bank-file'
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => setImportOptions(prev => ({ ...prev, source: 'bank-file' }))}
+                          data-testid="import-source-bank-file"
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-5 w-5 text-green-600" />
+                            <div>
+                              <div className="font-medium">{t('export.bank_file.title')}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {t('export.bank_file.description')}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                            importOptions.source === 'pdf-statement'
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                           onClick={() => {
@@ -1353,9 +1463,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           <div className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-blue-600" />
                             <div>
-                              <div className="font-medium">PDF Bank Statement</div>
+                              <div className="font-medium">{t('export.pdf_statement.title')}</div>
                               <div className="text-sm text-muted-foreground">
-                                Extract transactions from bank statement PDF
+                                {t('export.pdf_statement.description')}
                               </div>
                             </div>
                           </div>
@@ -1403,13 +1513,21 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           <input
                             ref={fileInputRef}
                             type="file"
-                            accept={importOptions.source === 'pdf-statement' ? '.pdf' : '.csv,.json'}
-                            onChange={importOptions.source === 'pdf-statement' ? handlePDFUpload : handleFileSelect}
+                            accept={importOptions.source === 'pdf-statement' ? '.pdf' : importOptions.source === 'bank-file' ? '.csv,.txt,.xlsx,.xls' : '.csv,.json'}
+                            onChange={importOptions.source === 'pdf-statement' ? handlePDFUpload : importOptions.source === 'bank-file' ? handleBankFileChange : handleFileSelect}
                             className="hidden"
                           />
                           <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {selectedFile ? (
+                            {isReadingBankFile ? (
+                              t('export.bank_file.reading')
+                            ) : importOptions.source === 'bank-file' ? (
+                              <>
+                                {t('export.bank_file.drop_text')}
+                                <br />
+                                <span className="text-xs">{t('export.bank_file.supports')}</span>
+                              </>
+                            ) : selectedFile ? (
                               <>
                                 <span className="font-medium text-green-600">{selectedFile.name}</span>
                                 <br />
@@ -1417,9 +1535,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                               </>
                             ) : importOptions.source === 'pdf-statement' ? (
                               <>
-                                Drop your bank statement PDF here or click to browse
+                                {t('export.pdf_statement.drop_text')}
                                 <br />
-                                <span className="text-xs">Supports PDF files with transaction data</span>
+                                <span className="text-xs">{t('export.pdf_statement.supports')}</span>
                               </>
                             ) : (
                               <>
@@ -1436,7 +1554,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                 </div>
 
                 {/* Step 4: Import Options (skip for PDF since they show preview modal) */}
-                {selectedFile && importOptions.source !== 'pdf-statement' && (
+                {selectedFile && importOptions.source !== 'pdf-statement' && importOptions.source !== 'bank-file' && (
                   <div className="border rounded-lg p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-6 h-6 bg-gray-500 text-white rounded-full flex items-center justify-center text-sm font-medium">

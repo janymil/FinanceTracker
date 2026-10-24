@@ -304,19 +304,19 @@ export default function InteractiveChart({
             </Select>
 
             <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-md">
-              <Button variant="ghost" size="sm" onClick={handleZoomOut}>
+              <Button aria-label={t('a11y.zoom_out')} variant="ghost" size="sm" onClick={handleZoomOut}>
                 <ZoomOut className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleZoomIn}>
+              <Button aria-label={t('a11y.zoom_in')} variant="ghost" size="sm" onClick={handleZoomIn}>
                 <ZoomIn className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleReset}>
+              <Button aria-label={t('a11y.reset_zoom')} variant="ghost" size="sm" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
 
             {onExport && (
-              <Button variant="outline" size="sm" onClick={onExport}>
+              <Button aria-label={t('a11y.download_chart')} variant="outline" size="sm" onClick={onExport}>
                 <Download className="h-4 w-4" />
               </Button>
             )}

@@ -4,9 +4,9 @@
  * "undefined", and everything is length-bounded.
  */
 import { describe, expect, it } from 'vitest';
-import { buildUserPrompt } from '../../external-services/ai-processor/errorGuardTriage';
+import { buildUserPrompt } from '../../server/errorGuard/triagePrompt';
 
-describe('buildUserPrompt (AI processor)', () => {
+describe('buildUserPrompt (Error Guard)', () => {
   it('renders the metadata the model needs', () => {
     const prompt = buildUserPrompt({
       title: 'TypeError: boom',

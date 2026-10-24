@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Crown, Check, ArrowLeft, CreditCard } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { useBillingRegion } from "@/hooks/useBillingRegion";
+import { AutoRenewalNotice } from "@/components/AutoRenewalNotice";
 import {
   amountFor,
-  currencyForLanguage,
   formatMoney,
   yearlySaving,
   type BillingCurrency,
@@ -27,8 +29,9 @@ export default function Subscribe() {
   const currentLang = langMatch
     ? langMatch[1]
     : (localStorage.getItem('preferredLanguage') || i18n.language || 'en').slice(0, 2);
-  // Same rule as the pricing page: Spanish visitors pay in soles, everyone else in dollars.
-  const currency: BillingCurrency = currencyForLanguage(currentLang);
+  // The server decides from the visitor's country: Peru pays in soles (MercadoPago),
+  // everyone else in dollars (Stripe). Language is only the fallback.
+  const currency: BillingCurrency = useBillingRegion(currentLang).currency;
   const priceLabel = (plan: PlanId, interval: BillingInterval) =>
     formatMoney(amountFor(plan, interval, currency), currency);
 
@@ -57,6 +60,7 @@ export default function Subscribe() {
       return;
     }
 
+    trackEvent('begin_checkout', 'subscription', `${plan}-${interval}`);
     setLoading(true);
     try {
       // Get the Clerk session token for authentication
@@ -257,6 +261,7 @@ export default function Subscribe() {
                         </>
                       )}
                     </Button>
+                    <AutoRenewalNotice plan="standard" interval="monthly" currency={currency} lang={currentLang} />
                   </CardContent>
                 </Card>
 
@@ -323,6 +328,7 @@ export default function Subscribe() {
                         </>
                       )}
                     </Button>
+                    <AutoRenewalNotice plan="premium" interval="monthly" currency={currency} lang={currentLang} />
                   </CardContent>
                 </Card>
               </div>
@@ -385,6 +391,7 @@ export default function Subscribe() {
                         </>
                       )}
                     </Button>
+                    <AutoRenewalNotice plan="standard" interval="yearly" currency={currency} lang={currentLang} />
                   </CardContent>
                 </Card>
 
@@ -456,6 +463,7 @@ export default function Subscribe() {
                         </>
                       )}
                     </Button>
+                    <AutoRenewalNotice plan="premium" interval="yearly" currency={currency} lang={currentLang} />
                   </CardContent>
                 </Card>
               </div>

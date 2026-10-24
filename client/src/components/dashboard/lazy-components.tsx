@@ -8,7 +8,6 @@ const FinancialHealthScore = lazy(() => import("@/components/financial-health-sc
 const FinancialHealthMascot = lazy(() => import("@/components/financial-health-mascot"));
 const QuickFinancialSnapshot = lazy(() => import("@/components/quick-financial-snapshot"));
 const ContextualFinancialTips = lazy(() => import("@/components/contextual-financial-tips"));
-const RemindersStreaks = lazy(() => import("@/components/reminders-streaks"));
 const ExpensePrediction = lazy(() => import("@/components/expense-prediction"));
 const DailyRecommendations = lazy(() => import("@/components/daily-recommendations"));
 const AutoCategorization = lazy(() => import("@/components/auto-categorization"));
@@ -107,14 +106,6 @@ export function LazyContextualFinancialTips(props: any) {
   return (
     <LazyComponentWrapper>
       <ContextualFinancialTips {...props} />
-    </LazyComponentWrapper>
-  );
-}
-
-export function LazyRemindersStreaks(props: any) {
-  return (
-    <LazyComponentWrapper>
-      <RemindersStreaks {...props} />
     </LazyComponentWrapper>
   );
 }

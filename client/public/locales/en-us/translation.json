@@ -303,16 +303,27 @@
     "auto_renewal_title": "5.2 Automatic Renewal",
     "auto_renewal_desc": "By subscribing to a paid plan, you agree that your subscription will automatically renew at the end of each billing cycle (monthly or annually) at the then-current price, and you authorize Kaptia to automatically charge your chosen payment method until you cancel. You may cancel recurring billing at any time in your account settings.",
     "payment_processing_title": "5.3 Payment Processing",
-    "payment_processing_desc": "Payment transactions are handled securely through certified third-party payment gateways: Stripe (for USD credit and debit card payments worldwide) and Mercado Pago (for PEN payments in Peru and Latin America). Kaptia never receives, processes, or stores your credit card numbers, debit card numbers, or bank account credentials on our servers.",
+    "payment_processing_desc": "Payment transactions are handled securely through certified third-party payment gateways: Stripe (for USD card payments worldwide) and Mercado Pago (for PEN payments in Peru and Latin America). Kaptia never receives, processes, or stores your credit card numbers, debit card numbers, or bank account credentials on our servers.",
     "cancellation_refund_title": "5.4 Cancellation and Refund Policy",
-    "cancellation_refund_desc": "You may cancel your subscription at any time through your Profile settings. Your cancellation will take effect at the end of your current paid billing cycle, and you will maintain full access to paid features until that period ends. All subscription fees are non-refundable, except where a refund is mandatory under applicable law.",
+    "cancellation_refund_desc": "You may cancel your subscription at any time in your Profile. Cancellation takes effect at the end of the billing period you already paid for, and you keep your paid features until then. Fees already paid are generally not refundable, except where the law of your country requires a refund or you were charged by mistake: if you think that applies to you, write to info@kaptia.app and we will review it.",
     "availability_desc": "Kaptia is hosted on cloud server infrastructure and provided on an 'as-available' and commercially reasonable efforts basis. We do not provide a guaranteed Service Level Agreement (SLA) or warrant uninterrupted, continuous, or error-free operation. We may temporarily suspend or restrict access to the service for maintenance, system updates, or emergency repairs.",
     "liability_title": "8. Limitation of Liability and Liability Cap",
     "liability_desc": "Kaptia is provided \"as is\" and \"as available\" without warranties of any kind, whether express, statutory, or implied. To the maximum extent permitted by applicable law, in no event shall Kaptia, NutriNova LLC, or its officers, employees, or affiliates be liable for any indirect, incidental, special, exemplary, or consequential damages, or loss of profits, data, or personal productivity arising from your use of the service.",
     "liability_cap": "To the maximum extent permitted by applicable law, our total aggregate liability arising out of or relating to these Terms or the service shall not exceed the greater of one hundred United States dollars ($100 USD) or the total subscription fees paid by you to Kaptia in the twelve (12) months preceding the event giving rise to liability.",
     "governing_law_title": "12. Governing Law and Jurisdiction",
     "governing_law_desc": "These Terms of Service and any dispute, controversy, or claim arising out of or relating to them or the service shall be governed by and construed in accordance with the laws of the State of New Mexico, United States of America, without regard to conflict of law principles. Any legal action or proceeding arising under these Terms shall be instituted exclusively in the state or federal courts located in Bernalillo County, New Mexico, and each party irrevocably consents to personal jurisdiction and venue in such courts.",
-    "contact_title": "13. Contact Information"
+    "contact_title": "13. Contact Information",
+    "seo": {
+      "title": "Terms of Service",
+      "description": "The terms that apply when you use Kaptia: plans, billing, automatic renewal, cancellation, refunds and your consumer rights."
+    },
+    "consumer_rights_title": "5.5 Your Consumer Rights",
+    "consumer_rights_desc": "Nothing in these Terms limits any right you have as a consumer under the law of the country where you live that cannot be waived by contract. For example, in Peru you keep the rights granted by the Consumer Protection and Defense Code (Ley N.º 29571), including the right to register a complaint in our Libro de Reclamaciones and to go to INDECOPI.",
+    "consumer_rights_link": "Open the Libro de Reclamaciones",
+    "receipts_title": "5.6 Payment Receipts",
+    "receipts_desc": "After each charge you receive a payment receipt by email from our payment processor (Stripe or Mercado Pago). If you need another document for a payment, write to info@kaptia.app.",
+    "governing_law_consumer": "If you are a consumer, this clause does not take away the protection of the mandatory consumer laws of the country where you live, nor your right to bring a claim before the courts or the consumer authority of that country.",
+    "age_requirement": "You must be at least 18 years old to use this service"
   },
   "2.1 Service Plans": "2.1 Service Plans",
   "Free Plan:": "Free Plan:",
@@ -913,7 +924,7 @@
   "Data Management page - Import tab": "Data Management page - Import tab",
   "Import transactions from other financial apps": "Import transactions from other financial apps",
   "Supported": "Supported",
-  "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, bank exports",
+  "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, account exports",
   "Column mapping, data validation, preview before import, batch processing": "Column mapping, data validation, preview before import, batch processing",
   "Profile and Settings": "Profile and Settings",
   "Account Management": "Account Management",
@@ -1178,7 +1189,9 @@
     "avg_expense": "Avg Expense",
     "unlock_advanced_reports": "Unlock Advanced Reports",
     "get_ai_insights": "Get AI insights, interactive charts, export tools, and auto-categorization",
-    "upgrade_now": "Upgrade Now"
+    "upgrade_now": "Upgrade Now",
+    "recurring_transactions": "Recurring Transactions",
+    "required_fields_error": "Please fill in all required fields"
   },
   "ai_insights": {
     "title": "AI-Powered Insights",
@@ -1577,11 +1590,25 @@
   "currency": {
     "welcome_title": "Welcome to Kaptia! 🌎",
     "welcome_description": "Please choose your preferred currency to get started. You can change this later until you add your first transaction.",
-    "choose_description": "🌎 Choose from 15 currencies including Latin American options:",
+    "choose_description": "Or pick another currency:",
+    "suggested": "Suggested for you",
+    "saving": "Saving...",
+    "error_inline": "We could not save your currency. Check your connection and choose it again.",
+    "load_failed": "We could not load your account settings.",
+    "retry": "Try again",
     "success_title": "Currency Set Successfully",
     "success_description": "Your currency has been set to {{symbol}}. Use the gear icon in the header to change it before adding transactions.",
     "error_title": "Error",
-    "error_description": "Failed to set currency. Please try again."
+    "error_description": "Failed to set currency. Please try again.",
+    "group_latam": "Latin America",
+    "group_other": "Other currencies",
+    "change": "Change currency",
+    "settings": "Currency settings",
+    "current": "Current:",
+    "locked": "Currency locked - you already have transactions",
+    "select": "Select currency",
+    "select_description": "Choose the currency you track your money in.",
+    "label": "Currency"
   },
   "upgrade": {
     "standard_name": "Standard",
@@ -1841,6 +1868,10 @@
     "export_successful": "Export Completed Successfully",
     "export_successful_desc": "Your data has been exported in {{format}} format",
     "export_failed": "Export Failed",
+    "export_button": "Export",
+    "exporting": "Preparing your file...",
+    "nothing_selected": "Choose at least one of transactions, budgets or goals to export.",
+    "pick_dates": "Choose a start and an end date for the custom range.",
     "export_failed_desc": "Failed to export data. Please try again.",
     "restore_successful": "Restore Completed Successfully",
     "restore_successful_desc": "Successfully restored {{transactions}} transactions and {{budgets}} budgets from {{filename}}",
@@ -1864,7 +1895,7 @@
       "security_architecture_title": "Complete Security Architecture",
       "aes_encryption": "AES-256-CBC Encryption - All data encrypted at rest and in transit",
       "zero_persistence": "Zero Data Persistence - PDFs processed in memory only, never stored",
-      "data_sanitization": "Sensitive Data Sanitization - SSNs, credit cards, and PII automatically redacted",
+      "data_sanitization": "Sensitive Data Sanitization - SSNs, payment cards, and PII automatically redacted",
       "memory_management": "Secure Memory Management - Automatic buffer cleanup and garbage collection",
       "processing_flow_title": "Security Processing Flow",
       "step1_title": "PDF Security Validation",
@@ -1885,7 +1916,7 @@
       "ai_processing_title": "AI Processing Transparency",
       "ai_provider": "AI provider: OpenAI and Mistral with enterprise-grade security",
       "ai_anonymization": "Only anonymised text is sent: e-mails, phones, IBANs, card numbers, IDs, addresses, account numbers and your name are removed before AI processing",
-      "ai_retention": "No Data Retention: AI providers do not store your bank statement content",
+      "ai_retention": "No Data Retention: AI providers do not store your account statement content",
       "ai_purpose": "Purpose: Transaction categorization and financial insights only",
       "user_rights_title": "Your Rights and Control",
       "transaction_control": "Full control over which transactions to import after preview",
@@ -1893,7 +1924,7 @@
       "delete_option": "Option to delete imported data at any time",
       "audit_log": "Complete security audit log for transparency",
       "important_notice": "Important Notice",
-      "consent_text": "By proceeding, you consent to the secure processing of your bank statement using the security measures described above. Your PDF will be processed according to our Privacy Policy and Terms of Service.",
+      "consent_text": "By proceeding, you consent to the secure processing of your account statement using the security measures described above. Your PDF will be processed according to our Privacy Policy and Terms of Service.",
       "cancel": "Cancel",
       "consent_button": "I Consent to Secure Processing"
     },
@@ -1968,7 +1999,35 @@
     "importing_data": "Importing data...",
     "import_completed_successfully": "Import completed successfully.",
     "categories": "Categories",
-    "created_count": "Created: {{count}}"
+    "created_count": "Created: {{count}}",
+    "bank_file": {
+      "title": "Account export (CSV or Excel)",
+      "description": "Download your movements from your online account and import them here.",
+      "drop_text": "Drop the file you downloaded from your account here or click to browse",
+      "supports": "Works with CSV and Excel (.xlsx, .xls) from BCP, Interbank, BBVA, Scotiabank and others",
+      "reading": "Reading your file…",
+      "invalid_type": "Please choose a CSV or Excel file (.csv, .xlsx, .xls).",
+      "too_big": "This file is too large. The limit is 8 MB.",
+      "not_understood_title": "We could not read this file",
+      "no_header": "We could not find the columns for date, description and amount. Check that the file has a header row.",
+      "no_rows": "The file has no movements we could read.",
+      "plan_required": "Importing an account file requires the Standard or Premium plan.",
+      "read_title": "File read",
+      "read_description": "Found {{count}} movements ({{skipped}} lines skipped). Review them before importing.",
+      "imported_title": "Transactions imported",
+      "imported_description": "Imported {{count}} transactions."
+    },
+    "pdf_statement": {
+      "title": "PDF account statement",
+      "description": "Extract transactions from an account statement PDF",
+      "drop_text": "Drop your account statement PDF here or click to browse",
+      "supports": "Supports PDF files with transaction data",
+      "invalid_type": "Please select a PDF file.",
+      "failed": "Could not process the PDF",
+      "failed_title": "PDF processing failed",
+      "done_title": "PDF processed",
+      "done_description": "Extracted {{count}} transactions with {{confidence}}% confidence."
+    }
   },
   "upcomingReminders": {
     "title": "Upcoming Reminders",
@@ -2198,6 +2257,8 @@
   "auth": {
     "signUp": "Sign Up",
     "signIn": "Sign In",
+    "loading": "Loading...",
+    "termsNotice": "By creating an account you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
     "accountCreationProcess": "Account Creation Process",
     "accountCreationDescription": "After clicking \"Sign Up\", we'll create your secure account and send a verification email. This typically takes 6-8 seconds.",
     "creatingSecureAccount": "Creating secure account...",
@@ -2257,7 +2318,21 @@
     "weekly": "Weekly",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "title": "Recurring"
+    "title": "Repeating transactions",
+    "description": "These are added automatically on their due date. Stopping one keeps what was already added.",
+    "stop": "Stop",
+    "stopped": "Recurring transaction stopped",
+    "stop_failed": "Could not stop it. Please try again.",
+    "since": "since {{date}}",
+    "until": "until {{date}}",
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "biweekly": "Every 2 weeks",
+      "monthly": "Monthly",
+      "quarterly": "Every 3 months",
+      "yearly": "Yearly"
+    }
   },
   "collaborative_goals": {
     "title": "Collaborative Savings Goals",
@@ -2884,7 +2959,8 @@
       "email": "Email:",
       "phone": "Phone:",
       "response_time": "Response Time:",
-      "response_desc": "We will respond to verifiable requests within 45 days (extendable by 45 days)"
+      "response_desc": "We will respond to verifiable requests within 45 days (extendable by 45 days)",
+      "email_only": "We handle these requests by email only."
     },
     "verification": {
       "title": "Verification Process",
@@ -3086,6 +3162,36 @@
       "description": "If you have any questions about this Privacy Policy, please contact us at:",
       "email": "Email: info@kaptia.app",
       "address": "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+    },
+    "peru": {
+      "title": "Peru: Your Personal Data Rights (Law 29733)",
+      "intro": "If you use Kaptia from Peru, your personal data is also protected by Peru's Personal Data Protection Law (Ley N.º 29733) and its regulation (D.S. 003-2013-JUS). This section explains your rights and how to use them.",
+      "controller_title": "Who is responsible for your data",
+      "controller_desc": "NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120, United States, operates Kaptia and is responsible for processing your personal data.",
+      "purposes_title": "What we use your data for",
+      "purposes_desc": "To create and run your account, record and organize your income and expenses, provide optional AI features, process subscription payments, keep the service secure and answer your requests. We do not use your data for any other purpose without asking you first.",
+      "consent_title": "Your consent",
+      "consent_desc": "By creating an account and accepting the Terms and this Policy you consent to this processing. AI features that read receipts or statements are optional and can be turned off in your Profile; the data we send to AI providers is anonymized first.",
+      "rights_title": "Your ARCO rights",
+      "rights_desc": "You may exercise these rights free of charge:",
+      "right_access": "Access: ask what personal data we hold about you and how we use it.",
+      "right_rectification": "Rectification: ask us to correct data that is wrong or incomplete (you can edit most of it yourself in the app).",
+      "right_cancellation": "Cancellation: ask us to delete your data (you can also delete your account yourself in Profile).",
+      "right_opposition": "Opposition: object to a specific use of your data, for example by turning off AI processing in your Profile.",
+      "exercise_title": "How to exercise your rights",
+      "exercise_desc": "Write to info@kaptia.app with the subject “Derechos ARCO”, tell us your full name and the email of your account, and describe your request. We reply within the deadlines set by Peruvian law (between 8 and 20 business days, depending on the right).",
+      "transfers_title": "International transfers",
+      "transfers_desc": "Your data is stored and processed outside Peru, in the United States and other countries, by providers that protect it: Neon (database), Cloudflare (storage and network), Clerk (sign-in), Stripe and Mercado Pago (payments) and, only if you use AI features and only after anonymization, our AI providers.",
+      "authority_title": "Complaints",
+      "authority_desc": "If you believe your rights were not respected, you can file a complaint with the Autoridad Nacional de Protección de Datos Personales (ANPDP) of Peru’s Ministry of Justice and Human Rights."
+    },
+    "children": {
+      "title": "Children's Privacy",
+      "description": "Kaptia is not directed to children under 13 and we do not knowingly collect personal information from them. You must be 18 or older to create an account. If you believe a child has given us information, write to info@kaptia.app and we will delete it."
+    },
+    "seo": {
+      "title": "Privacy Policy",
+      "description": "How Kaptia collects, uses and protects your personal data, including your rights under Peruvian law and the California CCPA."
     }
   },
   "subscribe": {
@@ -3143,6 +3249,10 @@
     "payment_error": "We could not start the payment. Please try again."
   },
   "profile": {
+    "mp_cancel": "Cancel subscription",
+    "mp_cancel_note": "Cancelling stops future charges in MercadoPago.",
+    "mp_cancel_confirm": "Cancel your MercadoPago subscription? Your plan returns to Free.",
+    "mp_cancelled": "Subscription cancelled",
     "Profile Settings": "Profile Settings",
     "Manage your account settings and preferences": "Manage your account settings and preferences",
     "User": "User",
@@ -3245,7 +3355,30 @@
     "AI processing is currently off for this account": "AI processing is currently off for this account",
     "AI features enabled": "AI features enabled",
     "AI features disabled": "AI features disabled",
-    "Could not change the AI setting": "Could not change the AI setting"
+    "Could not change the AI setting": "Could not change the AI setting",
+    "profile": {
+      "Error": "Error",
+      "User": "User",
+      "Tip": "Tip",
+      "Free": "Free",
+      "Standard": "Standard",
+      "Premium": "Premium",
+      "Note": "Note"
+    },
+    "emailNotifications": {
+      "title": "Email reminders",
+      "description": "Get an email before a bill is due. You can turn this off at any time.",
+      "on": "Email reminders turned on",
+      "off": "Email reminders turned off",
+      "failed": "Could not save this setting. Please try again."
+    },
+    "timezone": {
+      "title": "Time zone",
+      "description": "Decides where \"this month\", budgets and reports start and end, so a late-night purchase lands in the right month.",
+      "use_device": "Use my device ({{zone}})",
+      "saved": "Time zone saved",
+      "failed": "Could not save the time zone. Please try again."
+    }
   },
   "pdf": {
     "anonymization_preview": {
@@ -3275,7 +3408,7 @@
       "ai_processing_data": "Data Sent for AI Processing",
       "ai_data_description": "This anonymized data is sent to OpenAI for transaction parsing. All sensitive information has been removed.",
       "original_data_title": "Original PDF Data",
-      "original_data_description": "This original data never leaves your device and is NOT sent to any AI service.",
+      "original_data_description": "The original, unredacted data is never sent to any AI service; only the anonymized version is.",
       "hide_original": "Hide Original",
       "show_original": "Show Original",
       "hidden_for_privacy": "Hidden for privacy protection",
@@ -3286,7 +3419,7 @@
       "proceed": "Proceed with AI Processing"
     },
     "processing": {
-      "title": "Processing Bank Statement",
+      "title": "Processing Account Statement",
       "subtitle": "AI-powered transaction extraction in progress",
       "connected": "Connected to processing stream",
       "pdf_validation": "Security Validation",
@@ -3376,7 +3509,7 @@
       "start_free": "Start with Free Account",
       "watch_demo": "Watch Demo",
       "guarantee": "30-day money-back guarantee",
-      "no_card": "No credit card required",
+      "no_card": "No card required",
       "cancel_anytime": "Cancel anytime"
     },
     "demo": {
@@ -3505,13 +3638,13 @@
       }
     },
     "statements": {
-      "title": "AI Bank Statement Parser",
+      "title": "AI Statement Parser",
       "badge": "All Plans",
-      "description": "Advanced OCR and AI-powered extraction of transactions from bank statement PDFs and images with multilingual support and 95%+ accuracy in transaction detection.",
+      "description": "Advanced OCR and AI-powered extraction of transactions from account statement PDFs and images with multilingual support and 95%+ accuracy in transaction detection.",
       "benefits": {
         "processing": {
           "title": "PDF Processing",
-          "desc": "Extract transactions from any bank statement format"
+          "desc": "Extract transactions from any account statement format"
         },
         "ocr": {
           "title": "OCR Technology",
@@ -3581,7 +3714,7 @@
       }
     },
     "contextual": {
-      "title": "Smart Financial Advisor",
+      "title": "Smart Money Tips",
       "badge": "Standard+",
       "description": "Intelligent financial advice that adapts to your current month's spending, budget status, and goal progress to provide the most relevant guidance when you need it.",
       "benefits": {
@@ -3644,7 +3777,9 @@
     "type": "Transaction Type",
     "descriptionPlaceholder": "Enter description",
     "selectCategory": "Select a category",
-    "followUp": "Additional information needed"
+    "followUp": "Additional information needed",
+    "extracted": "Extracted",
+    "at": "at"
   },
   "AI that does the tracking for you": "AI that does the tracking for you",
   "Your spending,": "Your spending,",
@@ -3702,8 +3837,8 @@
   "Point your camera at any receipt. OCR reads every line and files it instantly.": "Point your camera at any receipt. OCR reads every line and files it instantly.",
   "Statements, imported in seconds": "Financial history, imported in seconds",
   "Financial history, imported in seconds": "Financial history, imported in seconds",
-  "Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.": "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.",
-  "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.": "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.",
+  "Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.": "Drop your account records and watch months of history become clean, searchable transactions. Personal details are removed before any AI reads them.",
+  "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.": "Drop your account records and watch months of history become clean, searchable transactions. Personal details are removed before any AI reads them.",
   "Goals that keep you honest": "Goals that keep you honest",
   "Budgets and shared goals with gentle nudges before you overspend - not after.": "Budgets and shared goals with gentle nudges before you overspend - not after.",
   "Private by design": "Private by design",
@@ -3771,7 +3906,7 @@
   "No questions matched your search.": "No questions matched your search.",
   "Clear search": "Clear search",
   "Ready to transform your financial management?": "Ready to transform your financial management?",
-  "Start free with no credit card required.": "Start free with no credit card required.",
+  "Start free with no credit card required.": "Start free, no card required.",
   "pricing": {
     "seo_title": "Kaptia Pricing - Simple plans for tracking your spending",
     "seo_description": "Start free and upgrade when you want more. Standard and Premium plans in US dollars.",
@@ -3846,6 +3981,10 @@
     "learn_more": "Learn More"
   },
   "Monthly totals by category": "Monthly totals by category",
+  "Recurring entries": "Recurring entries",
+  "Receipt photo scanning": "Receipt photo scanning",
+  "Companion mascot": "Companion mascot",
+  "Contextual tips": "Contextual tips",
   "Cloud Backup & Restore": "Cloud Backup",
   "Forever free": "Forever free",
   "Simple overview dashboard": "Simple spending overview",
@@ -3861,5 +4000,150 @@
       "bestStreak": "Best Streak",
       "lessons": "Lessons Completed"
     }
+  },
+  "checkout": {
+    "auto_renewal": "Your subscription renews automatically every {{period}} at {{price}} until you cancel. You can cancel at any time in your Profile.",
+    "period_monthly": "month",
+    "period_yearly": "year",
+    "auto_renewal_terms": "Terms of Service"
+  },
+  "reclamaciones": {
+    "seo": {
+      "title": "Complaints Book (Libro de Reclamaciones)",
+      "description": "Register a complaint or a grievance about Kaptia, as provided by Peru’s Consumer Protection and Defense Code."
+    },
+    "title": "Complaints Book",
+    "subtitle": "Libro de Reclamaciones — in line with Peru’s Consumer Protection and Defense Code (Ley N.º 29571) you can register a claim or a grievance about our service here.",
+    "provider": "Provider: NutriNova LLC (Kaptia) · 2105 Vista Oeste NW, Albuquerque, NM 87120, USA · info@kaptia.app",
+    "explain_claim": "Claim (reclamo): disagreement about the service you contracted or a payment.",
+    "explain_grievance": "Grievance (queja): discomfort about how you were treated, not about the service itself.",
+    "section_consumer": "1. Your details",
+    "section_service": "2. The service",
+    "section_detail": "3. Your claim or grievance",
+    "kind": "Type",
+    "kind_claim": "Claim (reclamo)",
+    "kind_grievance": "Grievance (queja)",
+    "full_name": "Full name",
+    "doc_type": "Document type",
+    "doc_number": "Document number",
+    "address": "Address",
+    "email": "Email",
+    "phone": "Phone",
+    "service": "Service contracted",
+    "service_placeholder": "For example: Kaptia Standard plan",
+    "amount": "Amount in dispute (optional)",
+    "detail": "Describe what happened",
+    "request": "What do you ask us to do?",
+    "truth": "I confirm that the information I give is true.",
+    "submit": "Register",
+    "submitting": "Registering…",
+    "success_title": "Your complaint was registered",
+    "success_desc": "Your code is {{code}}. We sent a copy to {{email}}. We will answer within 30 calendar days.",
+    "error": "We could not register your complaint. Please check the fields and try again.",
+    "note": "Registering a complaint here does not stop you from going to INDECOPI or to other legal channels.",
+    "doc_dni": "DNI",
+    "doc_ce": "Foreigner card (CE)",
+    "doc_passport": "Passport",
+    "doc_ruc": "RUC"
+  },
+  "footer": {
+    "reclamaciones": "Complaints Book (Peru)",
+    "rights": "© {{year}} Kaptia. All rights reserved."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "home": "Go to the home page"
+  },
+  "aiInsights": {
+    "title": "AI-Powered Insights",
+    "groupedInsights": "Grouped Insights",
+    "smartInsights": "💡 Smart Insights",
+    "spendingPatterns": "📊 Spending Patterns",
+    "savingOpportunities": "💰 Saving Opportunities",
+    "budgetOptimization": "📋 Budget Optimization",
+    "financialHealth": "❤️ Money Health",
+    "actionableAdvice": "⚡ Actionable Tips",
+    "generateInsights": "Generate AI Insights",
+    "generating": "Generating insights...",
+    "noInsights": "No insights available",
+    "addMoreData": "Add more transactions for personalized AI insights",
+    "confidence": "confidence",
+    "category": "Category",
+    "insight": "Insight"
+  },
+  "streak": {
+    "title": "Your tracking streak",
+    "description": "Days in a row you recorded at least one transaction.",
+    "days_in_a_row": "days in a row",
+    "best": "best streak",
+    "logged_today": "You already logged something today. Nice!",
+    "log_today": "Log a transaction today to keep your streak going."
+  },
+  "welcome": {
+    "step": "Step {{current}} of {{total}}",
+    "title": "Welcome to Kaptia",
+    "zone_intro": "First, check your time zone. It decides where each month starts and ends.",
+    "next": "Continue",
+    "skip": "Skip for now",
+    "first_title": "Add your first transaction",
+    "first_intro": "Start with something from today. You can edit or delete it any time.",
+    "type_label": "Type of transaction",
+    "type_expense": "Expense",
+    "type_income": "Income",
+    "amount": "Amount ({{currency}})",
+    "description": "What was it?",
+    "description_placeholder": "Coffee, salary, rent...",
+    "save": "Save transaction",
+    "saved": "Your first transaction is saved",
+    "invalid": "Enter an amount above zero and a short description.",
+    "error": "We could not save it. Please try again."
+  },
+  "onboarding": {
+    "title": "Get started with Kaptia",
+    "subtitle": "A few quick steps to see your money clearly.",
+    "dismiss": "Hide this checklist",
+    "go": "Start",
+    "see_plans": "See plans",
+    "steps": {
+      "income": {
+        "title": "Add your income",
+        "description": "Record your salary or any money that comes in, so your balance is real."
+      },
+      "upgrade": {
+        "title": "Unlock budgets and goals",
+        "description": "The Standard plan adds monthly budgets, savings goals and reminders."
+      },
+      "transaction": {
+        "title": "Add your first transaction",
+        "description": "Type it, say it out loud or snap a photo of the receipt."
+      },
+      "budget": {
+        "title": "Set a monthly budget",
+        "description": "Pick a category and the amount you want to stay under."
+      },
+      "goal": {
+        "title": "Create a savings goal",
+        "description": "A trip, an emergency fund, a new phone: give it a target."
+      },
+      "import": {
+        "title": "Import your account file",
+        "description": "Bring in past months from the CSV or Excel file of your online account."
+      }
+    }
+  },
+  "a11y": {
+    "open_menu": "Open menu",
+    "zoom_out": "Zoom out",
+    "zoom_in": "Zoom in",
+    "reset_zoom": "Reset zoom",
+    "download_chart": "Download chart",
+    "previous_months": "Previous months",
+    "next_months": "Next months",
+    "more_actions": "More actions",
+    "close": "Close",
+    "filters": "Filters",
+    "send": "Send",
+    "delete": "Delete"
   }
 }

@@ -575,7 +575,7 @@ export default function Help() {
                     disabled={isLoading}
                     className="rounded-xl bg-white/90 dark:bg-[#0f111a]/90 text-sm"
                   />
-                  <Button
+                  <Button aria-label={t('a11y.send')}
                     onClick={handleSendMessage}
                     disabled={isLoading || !chatInput.trim()}
                     className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-4 shrink-0"

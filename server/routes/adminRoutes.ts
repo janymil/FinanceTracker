@@ -1,13 +1,18 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage.js";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
+import { rateLimit } from "../middleware/rateLimit";
 import { db } from "../db.js";
 import { blockedCountries } from "../../shared/schema.ts";
 import { eq } from "drizzle-orm";
 
 export function registerAdminRoutes(app: Express) {
   // Admin login
-  app.post('/api/admin-analytics/login', adminLogin);
+  app.post(
+    '/api/admin-analytics/login',
+    rateLimit({ windowMs: 15 * 60 * 1000, max: 5, keyPrefix: 'admin-login', message: 'Too many login attempts. Try again in 15 minutes.' }),
+    adminLogin
+  );
 
   // Admin logout
   app.post('/api/admin-analytics/logout', adminLogout);
@@ -704,11 +709,6 @@ export function registerAdminRoutes(app: Express) {
       console.error("Error removing blocked country:", error);
       res.status(500).json({ error: "Failed to remove blocked country" });
     }
-  });
-
-  // Simple test route without auth
-  app.get("/api/test-simple", (req: any, res: Response) => {
-    res.json({ working: true });
   });
 
   // Get common country codes for UI

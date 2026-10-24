@@ -1,21 +1,111 @@
 import { UnifiedAICache } from "../lib/unifiedAICache";
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
-import { MistralClient } from "./mistralClient.js";
 import { createRoutedClient, AI_MODELS } from "../lib/aiProvider";
 import {
+  emptyStateCopy,
   financialTipsFallback,
+  healthFallbackCopy,
   isTextInLanguage,
   progressTipFallback,
 } from "../shared/aiFallbacks";
+import {
+  AIResponseError,
+  clampConfidence,
+  finiteNumber,
+  parseModelJson,
+  validCategoryId,
+} from "../shared/aiResults";
 
-// All model calls go through lib/aiProvider: gpt-6-luna by default, with DeepSeek/Groq
-// fallbacks, JSON fence stripping and real token/cost accounting.
+// All model calls go through lib/aiProvider: the ai-processor gateway first, then OpenAI
+// directly (DeepSeek/Groq behind it), with JSON fence stripping and real token/cost accounting.
+// The prompts in this file are the only copy: the gateway never holds a Kaptia prompt.
 const openai = createRoutedClient();
+
+/**
+ * House rules for every answer a person reads (tips, insights, scores, forecasts).
+ * Not applied to extraction or categorisation, where a merchant may really be a bank.
+ */
+export const PROSE_RULES = `HOUSE RULES (always apply):
+- Kaptia is a personal budgeting tool, not a licensed financial service. Never present yourself as an advisor or adviser.
+- Do not recommend investments, loans, credit products or banks, and do not use the words bank, loan, credit, invest or advisor (or their Spanish or Slovak equivalents).
+- Amounts are in the person's own currency. Never add a currency symbol or name unless one appears in the data.
+- Only describe what the data shows. Never invent amounts, merchants or dates.`;
+
+/** Adds the house rules to the system message (or creates one). Pure, so it can be tested. */
+export function withProseRules<T extends { messages?: any[] }>(params: T): T {
+  const messages = Array.isArray(params?.messages) ? [...params.messages] : [];
+  const index = messages.findIndex((message) => message?.role === 'system' && typeof message.content === 'string');
+  if (index >= 0) {
+    messages[index] = { ...messages[index], content: `${messages[index].content}\n\n${PROSE_RULES}` };
+  } else {
+    messages.unshift({ role: 'system', content: PROSE_RULES });
+  }
+  return { ...params, messages };
+}
+
+function generateProse(params: any) {
+  return openai.chat.completions.create(withProseRules(params));
+}
+
+const DEFAULT_FORECAST: FinancialForecast = {
+  nextMonthExpenses: 0,
+  expectedSavings: 0,
+  budgetVariance: 0,
+  confidence: 0,
+  keyInsights: [],
+  recommendations: [],
+  riskFactors: [],
+};
+
+function textList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object') {
+        const record = item as Record<string, unknown>;
+        const title = typeof record.title === 'string' ? record.title.trim() : '';
+        const body = typeof record.description === 'string' ? record.description.trim() : '';
+        return title && body ? `${title}: ${body}` : title || body;
+      }
+      return '';
+    })
+    .filter(Boolean);
+}
+
+/**
+ * The trends page renders every forecast list as plain text, so whatever shape the model used
+ * (strings, or {title, description} objects) becomes sentences, and every number is finite.
+ */
+export function normalizeForecast(raw: unknown): FinancialForecast {
+  const forecast = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  return {
+    ...DEFAULT_FORECAST,
+    nextMonthExpenses: finiteNumber(forecast.nextMonthExpenses),
+    expectedSavings: finiteNumber(forecast.expectedSavings),
+    budgetVariance: finiteNumber(forecast.budgetVariance),
+    confidence: clampConfidence(forecast.confidence, 0),
+    keyInsights: textList(forecast.keyInsights),
+    recommendations: textList(forecast.recommendations),
+    riskFactors: textList(forecast.riskFactors),
+  };
+}
 
 export interface ExpenseCategorizationResult {
   category: string;
   confidence: number;
   reasoning: string;
+  /** True when no real answer was produced; callers must not treat the rest as a result. */
+  failed?: boolean;
+}
+
+export interface UserCategoryChoice {
+  categoryId?: number;
+  suggestedCategory?: string;
+  confidence: number;
+  reasoning: string;
+  /** True when no real answer was produced; callers must not treat the rest as a result. */
+  failed?: boolean;
 }
 
 export interface FinancialTip {
@@ -47,13 +137,8 @@ export interface FinancialForecast {
   budgetVariance: number;
   confidence: number;
   keyInsights: string[];
-  recommendations: Array<{
-    id: string;
-    title: string;
-    description: string;
-    priority: 'high' | 'medium' | 'low';
-    actionable: boolean;
-  }>;
+  /** Plain sentences: the trends page renders each one as text. */
+  recommendations: string[];
   riskFactors: string[];
 }
 
@@ -84,14 +169,40 @@ export interface FinancialHealthData {
   insights: string[];
   achievements: string[];
   warnings: string[];
+  /** True when the model could not be reached and the score was computed from savings alone. */
+  degraded?: boolean;
+}
+
+/**
+ * Turns the model's category answer into something safe to act on: the id must be one of the
+ * person's own categories (a model can invent ids), and the confidence is always 0..1.
+ */
+export function toCategoryChoice(
+  result: Record<string, any>,
+  userCategories: Array<{ id: number; name: string }>,
+): UserCategoryChoice {
+  const categoryId = validCategoryId(result.categoryId, userCategories);
+  const suggested = typeof result.suggestedCategory === 'string' ? result.suggestedCategory.trim() : '';
+  const reasoning = typeof result.reasoning === 'string' && result.reasoning ? result.reasoning : 'Unable to determine category';
+
+  if (categoryId === undefined && !suggested) {
+    // An id that is not theirs and no name either: nothing usable, so say so.
+    return { confidence: 0.1, reasoning, failed: true };
+  }
+  return {
+    categoryId,
+    suggestedCategory: categoryId === undefined ? suggested : undefined,
+    confidence: clampConfidence(result.confidence),
+    reasoning,
+  };
 }
 
 export async function categorizeIncomeWithUserCategories(
-  description: string, 
-  amount: number, 
+  description: string,
+  amount: number,
   userCategories: Array<{id: number, name: string, type: string}>,
   language: string = 'en-us'
-): Promise<{categoryId?: number, suggestedCategory?: string, confidence: number, reasoning: string}> {
+): Promise<UserCategoryChoice> {
   const normalizedLanguage = normalizeLanguageCode(language);
   try {
     const userCategoryList = userCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n');
@@ -138,7 +249,7 @@ IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
         {
           role: "user",
           content: `Income Description: "${description}"
-Amount: +$${amount}
+Amount: +${amount}
 
 INCOME ANALYSIS:
 1. This is money COMING INTO the account (positive income)
@@ -157,20 +268,14 @@ Analyze this income transaction:`
       temperature: 0.1
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    
-    return {
-      categoryId: result.categoryId || undefined,
-      suggestedCategory: result.suggestedCategory || undefined,
-      confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
-      reasoning: result.reasoning || 'Unable to determine income category'
-    };
+    return toCategoryChoice(parseModelJson(response.choices[0].message.content), userCategories);
   } catch (error) {
     console.error('Error categorizing income with user categories:', error);
     return {
       suggestedCategory: 'Income',
       confidence: 0.1,
-      reasoning: 'Error occurred during income categorization'
+      reasoning: 'Error occurred during income categorization',
+      failed: true,
     };
   }
 }
@@ -180,11 +285,11 @@ export async function categorizeExpenseWithUserCategories(
   amount: number, 
   userCategories: Array<{id: number, name: string, type: string}>,
   language: string = 'en-us'
-): Promise<{categoryId?: number, suggestedCategory?: string, confidence: number, reasoning: string}> {
+): Promise<UserCategoryChoice> {
   const normalizedLanguage = normalizeLanguageCode(language);
   try {
     const userCategoryList = userCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n');
-    
+
     const response = await openai.chat.completions.create({
       model: AI_MODELS.default,
       messages: [
@@ -263,7 +368,7 @@ IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
         {
           role: "user",
           content: `Transaction Description: "${description}"
-Amount: $${amount}
+Amount: ${amount}
 
 DETAILED ANALYSIS REQUIRED:
 1. Extract the merchant name from the description
@@ -284,20 +389,14 @@ Analyze this transaction and provide consistent categorization:`
       temperature: 0.1
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    
-    return {
-      categoryId: result.categoryId || undefined,
-      suggestedCategory: result.suggestedCategory || undefined,
-      confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
-      reasoning: result.reasoning || 'Unable to determine category'
-    };
+    return toCategoryChoice(parseModelJson(response.choices[0].message.content), userCategories);
   } catch (error) {
     console.error('Error categorizing expense with user categories:', error);
     return {
       suggestedCategory: 'Other',
       confidence: 0.1,
-      reasoning: 'Error occurred during categorization'
+      reasoning: 'Error occurred during categorization',
+      failed: true,
     };
   }
 }
@@ -386,7 +485,7 @@ Respond with JSON:
           role: "user",
           content: `TRANSACTION TO ANALYZE:
 Description: "${description}"
-Amount: $${amount}
+Amount: ${amount}
 
 REQUIRED ANALYSIS STEPS:
 
@@ -418,19 +517,20 @@ Use your intelligence to categorize correctly.`
       temperature: 0.2
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const result = parseModelJson(response.choices[0].message.content);
 
     return {
-      category: result.category || 'Other',
-      confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
-      reasoning: result.reasoning || 'Unable to determine category'
+      category: typeof result.category === 'string' && result.category.trim() ? result.category.trim() : 'Other',
+      confidence: clampConfidence(result.confidence),
+      reasoning: typeof result.reasoning === 'string' && result.reasoning ? result.reasoning : 'Unable to determine category'
     };
   } catch (error) {
     console.error('Error categorizing expense (fallback):', error);
     return {
       category: 'Other',
       confidence: 0.1,
-      reasoning: 'Error occurred during categorization'
+      reasoning: 'Error occurred during categorization',
+      failed: true,
     };
   }
 }
@@ -460,10 +560,11 @@ export async function generateFinancialTips(
   try {
     // Initialize UnifiedAICache with 168 hours (7 days) TTL
     const cache = new UnifiedAICache('financial-tips', userId);
+    const cacheKey = { ...financialData, language: normalizedLanguage };
 
     // Check cache first (unless bypassing with timestamp)
     if (!financialData.timestamp) {
-      const cachedResult = await cache.get(financialData);
+      const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
 
         return cachedResult;
@@ -473,91 +574,47 @@ export async function generateFinancialTips(
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
-    // Prepare the financial summary for the AI processor
+    // Prepare the financial summary for the model
     const netBalance = totalIncome - totalExpenses;
     const transactionCount = recentTransactions.length;
     
     const summary = `Financial Summary:
-- Monthly Income: $${totalIncome}
-- Monthly Expenses: $${totalExpenses}
-- Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
+- Monthly Income: ${totalIncome}
+- Monthly Expenses: ${totalExpenses}
+- Net Balance: ${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
 - Transaction Count: ${transactionCount}
 - Raw Transactions Retrieved: ${recentTransactions.length}
 
 Spending by Category:
 ${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
+  `- ${cat.categoryName}: ${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
 ).join('\n')}
 
 Income by Category:
 ${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
+  `- ${cat.categoryName}: ${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
 ).join('\n')}
 
 Recent Transactions (last 10):
 ${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
+  `- ${t.description}: ${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
 ).join('\n')}
 
 Transaction Pattern Analysis:
-- Average transaction size: $${(totalIncome + totalExpenses) / transactionCount}
+- Average transaction size: ${((totalIncome + totalExpenses) / Math.max(transactionCount, 1)).toFixed(2)}
 - Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
 - Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
 - Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 
-    // Call the optional AI processor service with fallback to direct OpenAI
-    let result: any;
-    try {
-      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://ai-processor.formatika.dev';
-      
-      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/execute-gpt-task`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(process.env.AI_PROCESSOR_API_KEY ? { 'x-api-key': process.env.AI_PROCESSOR_API_KEY } : {}),
-        },
-        body: JSON.stringify({ 
-          task: "financial-tips",
-          userId: "system",
-          payload: { ...financialData, language: normalizedLanguage }
-        }),
-        signal: AbortSignal.timeout(30000) // 30 second timeout
-      });
-
-      if (!aiResponse.ok) {
-        throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
-      }
-
-      const aiData = await aiResponse.json();
-      // The processor answers with an array of sections: [{ title, content }, …].
-      // The app used to take `aiData[0]` and read `.description`, which does not exist —
-      // so every tips card was silently the static fallback. Normalise both shapes here.
-      result = Array.isArray(aiData)
-        ? {
-            title: aiData[0]?.title ?? '',
-            description: aiData
-              .map((section: any) => `${section?.title ? `${section.title}: ` : ''}${section?.content ?? ''}`)
-              .join('\n\n'),
-            category: aiData[0]?.category ?? 'budgeting',
-            priority: aiData[0]?.priority ?? 'high',
-            actionable: true,
-          }
-        : (aiData.tip || aiData);
-    } catch (aiProcessorError) {
-      console.warn(
-        'AI processor service unavailable, falling back to direct OpenAI:',
-        aiProcessorError instanceof Error ? aiProcessorError.message : String(aiProcessorError)
-      );
-      
-      // Fallback to direct OpenAI call
-      const response = await openai.chat.completions.create({
-        model: AI_MODELS.default,
-        messages: [
-          {
-            role: "system",
-            content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (analysis, insights, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
+    // One prompt, one copy: lib/aiProvider sends it to the gateway first, then direct.
+    const response = await generateProse({
+      model: AI_MODELS.default,
+      messages: [
+        {
+          role: "system",
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (analysis, insights, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
 
 You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
@@ -579,7 +636,7 @@ GENERATE VARIED RESPONSES by focusing on different analytical angles:
 - Income-to-expense ratio analysis with improvement strategies  
 - Cash flow optimization with timing recommendations
 - Risk assessment with protection strategies
-- Wealth building analysis with investment allocation suggestions
+- Long-term saving habits analysis
 - Efficiency analysis identifying wasteful spending patterns
 
 Return comprehensive analysis in JSON:
@@ -592,22 +649,23 @@ Return comprehensive analysis in JSON:
   "estimatedSaving": [realistic_amount],
   "educational": false
 }`
-          },
-          {
-            role: "user",
-            content: summary
-          }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.9
-      });
+        },
+        {
+          role: "user",
+          content: summary
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.9
+    });
 
-      result = JSON.parse(response.choices[0].message.content || '{}');
-    }
+    const result = parseModelJson(response.choices[0].message.content);
 
     // Handle comprehensive analysis response. A model that answers in the wrong language
     // is not shown to the user: the localised fallback takes its place, and the drift is
     // reported so it can be fixed in the prompt rather than silently shipped.
+    // Only a real model answer is worth keeping for a week; a stand-in is rebuilt every time.
+    let cacheable = Boolean(result.title && result.description);
     const rawTips: FinancialTip[] = result.title && result.description ? [{
       title: result.title,
       description: result.description,
@@ -624,13 +682,14 @@ Return comprehensive analysis in JSON:
         console.warn(
           `[AI] Replacing tips written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
         );
+        cacheable = false;
         return financialTipsFallback(normalizedLanguage);
       }
       return tip;
     });
 
     // Cache the result with 168 hours (7 days) TTL
-    await cache.set(financialData, processedTips, false, 168);
+    if (cacheable) await cache.set(cacheKey, processedTips, false, 168);
     
     return processedTips;
   } catch (error) {
@@ -648,7 +707,8 @@ export async function generateSpendingInsights(
     date: string;
     categoryName?: string;
     type: string;
-  }>
+  }>,
+  language: string = 'en-us'
 ): Promise<Array<{
   id: string;
   type: "warning" | "suggestion" | "achievement" | "trend";
@@ -660,10 +720,11 @@ export async function generateSpendingInsights(
   recommendation?: string;
   actionable: boolean;
 }>> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Initialize UnifiedAICache with 72 hours TTL
     const cache = new UnifiedAICache('spending-insights', userId);
-    const inputData = { transactions };
+    const inputData = { transactions, language: normalizedLanguage };
 
     // Check cache first
     const cachedResult = await cache.get(inputData);
@@ -677,12 +738,14 @@ export async function generateSpendingInsights(
       return [];
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
           role: "system",
-          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (title, description, category, recommendation) must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
 
 Generate 2-4 insights focusing on:
 - Unusual spending patterns
@@ -720,7 +783,7 @@ Respond with JSON array format:
           content: `Analyze these expense transactions:
 
 ${expenseTransactions.slice(0, 20).map(t => 
-  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) on ${t.date}`
+  `- ${t.description}: ${t.amount} (${t.categoryName || 'Uncategorized'}) on ${t.date}`
 ).join('\n')}
 
 Total transactions: ${expenseTransactions.length}
@@ -733,14 +796,19 @@ Generate financial insights based on this spending data.`
       temperature: 0.2
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
-    const insights = Array.isArray(result) ? result : (result.insights || []);
+    const result = parseModelJson(response.choices[0].message.content);
+    const insights = Array.isArray(result) ? result : (Array.isArray(result.insights) ? result.insights : []);
 
-    const processedInsights = insights.map((insight: any, index: number) => ({
+    // An insight without a title or a body is not shown; no English placeholder takes its place.
+    const processedInsights = insights
+      .filter((insight: any) => insight
+        && typeof insight.title === 'string' && insight.title.trim()
+        && typeof insight.description === 'string' && insight.description.trim())
+      .map((insight: any, index: number) => ({
       id: insight.id || `ai_insight_${index}`,
       type: ['warning', 'suggestion', 'achievement', 'trend'].includes(insight.type) ? insight.type : 'suggestion',
-      title: insight.title || 'Financial Insight',
-      description: insight.description || 'No description available',
+      title: insight.title,
+      description: insight.description,
       impact: ['high', 'medium', 'low'].includes(insight.impact) ? insight.impact : 'medium',
       category: insight.category || undefined,
       amount: insight.amount || undefined,
@@ -753,8 +821,9 @@ Generate financial insights based on this spending data.`
     
     return processedInsights;
   } catch (error) {
+    // A provider failure is not "no insights": let the caller report it and cache nothing.
     console.error('Error generating spending insights:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -804,7 +873,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     // Cache system removed
     // Cache system removed - direct processing only
 
-    const response = await openai.chat.completions.create({
+    const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
@@ -851,13 +920,13 @@ Respond with JSON in this format:
           content: `Analyze this financial data for a personalized health score:
 
 Financial Summary:
-- Income: $${summary.totalIncome}
-- Expenses: $${summary.totalExpenses}
-- Net Balance: $${summary.netBalance}
+- Income: ${summary.totalIncome}
+- Expenses: ${summary.totalExpenses}
+- Net Balance: ${summary.netBalance}
 
 Transaction History (${transactions.length} transactions):
 ${transactions.slice(0, 20).map(t => 
-  `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
+  `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 
 Budgets: ${budgets.length} active budgets
@@ -870,10 +939,14 @@ Provide an AI-powered financial health score that adapts to this user's specific
       temperature: 0.3
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    
+    const result = parseModelJson(response.choices[0].message.content);
+    // A reply with no score is a failed reply, not a score of 50.
+    if (!Number.isFinite(Number(result.score))) {
+      throw new AIResponseError('The health score reply had no score');
+    }
+
     // Ensure score is properly bounded
-    const score = Math.max(0, Math.min(100, result.score || 50));
+    const score = Math.max(0, Math.min(100, Number(result.score)));
     
     // Determine category based on score (this ensures consistency)
     let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
@@ -896,11 +969,11 @@ Provide an AI-powered financial health score that adapts to this user's specific
       icon: result.icon || 'Shield',
       aiAnalysis: {
         personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
-        riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
-        recommendations: Array.isArray(result.aiAnalysis?.recommendations) 
-          ? result.aiAnalysis.recommendations.map((rec: any, index: number) => ({
-              action: rec.action || rec.title || `Recommendation ${index + 1}`,
-              impact: rec.impact || rec.description || 'Positive financial impact',
+        riskAssessment: result.aiAnalysis?.riskAssessment || '',
+        recommendations: Array.isArray(result.aiAnalysis?.recommendations)
+          ? result.aiAnalysis.recommendations.map((rec: any) => ({
+              action: rec.action || rec.title || '',
+              impact: rec.impact || rec.description || '',
               priority: rec.priority || 'medium'
             }))
           : [],
@@ -913,26 +986,9 @@ Provide an AI-powered financial health score that adapts to this user's specific
     
     return processedResult;
   } catch (error) {
+    // No invented "score 50": the caller reports the failure and nothing is cached.
     console.error('Error generating AI financial health score:', error);
-    return {
-      score: 50,
-      status: 'Analysis Unavailable',
-      color: 'gray',
-      factors: [],
-      icon: 'AlertTriangle',
-      aiAnalysis: {
-        personalizedFactors: [],
-        riskAssessment: 'Unable to assess risk',
-        recommendations: [
-          {
-            action: 'Please try again later',
-            impact: 'Health score could not be calculated right now',
-            priority: 'medium'
-          }
-        ],
-        confidence: 0
-      }
-    };
+    throw error;
   }
 }
 
@@ -952,34 +1008,24 @@ export async function generateTrendPredictions(
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;
 }> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Return zeros for empty data instead of AI-generated examples
     if (!transactions || transactions.length === 0) {
+      const copy = emptyStateCopy(normalizedLanguage);
       return {
         categoryPredictions: [],
         financialForecast: {
-          nextMonthExpenses: 0,
-          expectedSavings: 0,
-          budgetVariance: 0,
-          confidence: 0,
-          keyInsights: ['Add transactions to generate AI-powered financial forecasts'],
-          recommendations: [
-            {
-              id: 'rec-start-tracking',
-              title: 'Start tracking your expenses',
-              description: 'Add transactions to receive personalized predictions',
-              priority: 'medium',
-              actionable: true
-            }
-          ],
-          riskFactors: []
+          ...DEFAULT_FORECAST,
+          keyInsights: [copy.forecastInsight],
+          recommendations: [`${copy.forecastTitle}: ${copy.forecastDescription}`],
         }
       };
     }
 
     // Initialize UnifiedAICache with 48 hours TTL
     const cache = new UnifiedAICache('trend-predictions', userId);
-    const inputData = { transactions, budgets };
+    const inputData = { transactions, budgets, language: normalizedLanguage };
 
     // Check cache first
     const cachedResult = await cache.get(inputData);
@@ -1069,12 +1115,12 @@ Analysis Requirements:
 - Include next 3 months forecast for each category
 - Analyze budget adherence and variance predictions`;
 
-    const response = await openai.chat.completions.create({
+    const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (predictions, insights, analysis) must be in ${getLanguageLabel(language)}.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (predictions, insights, analysis) must be in ${getLanguageLabel(normalizedLanguage)}.
 
 You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions.`
         },
@@ -1088,19 +1134,11 @@ You are an advanced financial forecasting AI that analyzes spending patterns and
       temperature: 0.3 // Lower temperature for more consistent predictions
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
+    const result = parseModelJson(response.choices[0].message.content);
 
     const predictions = {
-      categoryPredictions: result.categoryPredictions || [],
-      financialForecast: result.financialForecast || {
-        nextMonthExpenses: 0,
-        expectedSavings: 0,
-        budgetVariance: 0,
-        confidence: 0,
-        keyInsights: [],
-        recommendations: [],
-        riskFactors: []
-      }
+      categoryPredictions: Array.isArray(result.categoryPredictions) ? result.categoryPredictions : [],
+      financialForecast: normalizeForecast(result.financialForecast),
     };
 
     // Cache the result with 48 hours TTL
@@ -1109,19 +1147,9 @@ You are an advanced financial forecasting AI that analyzes spending patterns and
     return predictions;
 
   } catch (error) {
+    // A provider failure is not "an empty forecast": let the caller report it and cache nothing.
     console.error('Error generating trend predictions:', error);
-    return {
-      categoryPredictions: [],
-      financialForecast: {
-        nextMonthExpenses: 0,
-        expectedSavings: 0,
-        budgetVariance: 0,
-        confidence: 0,
-        keyInsights: [],
-        recommendations: [],
-        riskFactors: []
-      }
-    };
+    throw error;
   }
 }
 
@@ -1140,6 +1168,7 @@ export async function generateExpensePredictions(
   }>,
   language: string = 'en-us'
 ): Promise<ExpensePrediction> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Return empty predictions for insufficient data
     if (!transactions || transactions.length < 5) {
@@ -1167,7 +1196,8 @@ export async function generateExpensePredictions(
 
     // Initialize UnifiedAICache with 48 hours TTL
     const cache = new UnifiedAICache('expense-predictions', userId);
-    const cacheInput = { 
+    const cacheInput = {
+      language: normalizedLanguage,
       transactions: expenseTransactions.map(t => ({
         id: t.id,
         amount: t.amount,
@@ -1302,12 +1332,12 @@ ANALYSIS GUIDELINES:
 - Account for seasonal variations if detectable
 - Ensure all numeric values are provided (no null/undefined)`;
 
-    const response = await openai.chat.completions.create({
+    const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (predictions, analysis, insights) must be in ${getLanguageLabel(language)}.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (predictions, analysis, insights) must be in ${getLanguageLabel(normalizedLanguage)}.
 
 You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels.`
         },
@@ -1321,23 +1351,27 @@ You are an advanced financial forecasting AI specializing in expense prediction 
       temperature: 0.2 // Low temperature for consistent financial predictions
     });
 
-    const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+    const aiResponse = parseModelJson(response.choices[0].message.content);
     
     // Ensure all required fields are present with proper data types
     const categoryPredictions = Array.isArray(aiResponse.categoryPredictions) 
-      ? aiResponse.categoryPredictions.map((pred: any) => ({
-          category: pred.category || 'Unknown',
+      ? aiResponse.categoryPredictions
+      .filter((pred: any) => pred && typeof pred.category === 'string' && pred.category.trim())
+      .map((pred: any) => ({
+          category: pred.category,
           currentMonth: Number(pred.currentMonth) || 0,
           predictedNext: Number(pred.predictedNext) || 0,
           confidence: Number(pred.confidence) || 0.5,
           trend: pred.trend || 'stable',
-          factors: Array.isArray(pred.factors) ? pred.factors : ['No specific factors identified']
+          factors: Array.isArray(pred.factors) ? pred.factors : []
         }))
       : [];
 
     const monthlyPredictions = Array.isArray(aiResponse.monthlyPredictions)
-      ? aiResponse.monthlyPredictions.map((month: any) => ({
-          month: month.month || 'Unknown',
+      ? aiResponse.monthlyPredictions
+      .filter((month: any) => month && typeof month.month === 'string' && month.month.trim())
+      .map((month: any) => ({
+          month: month.month,
           predicted: Number(month.predicted) || 0,
           confidence: Number(month.confidence) || 0.5,
           breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
@@ -1355,11 +1389,9 @@ You are an advanced financial forecasting AI specializing in expense prediction 
     return finalResult;
 
   } catch (error) {
+    // A provider failure is not "no predictions": let the caller report it and cache nothing.
     console.error('Error generating expense predictions:', error);
-    return {
-      categoryPredictions: [],
-      monthlyPredictions: []
-    };
+    throw error;
   }
 }
 
@@ -1389,12 +1421,13 @@ export async function generateDailyRecommendations(
   },
   language: string = 'en-us'
 ) {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Initialize UnifiedAICache with 24 hours TTL
     const cache = new UnifiedAICache('daily-recommendations', userId);
 
     // Check cache first with language-aware key
-    const cacheKey = { ...financialData, language: language };
+    const cacheKey = { ...financialData, language: normalizedLanguage };
     const cachedResult = await cache.get(cacheKey);
     if (cachedResult) {
       return cachedResult;
@@ -1431,24 +1464,24 @@ export async function generateDailyRecommendations(
     const avgDailySpending = Array.from(dailySpending.values())
       .reduce((sum, amount) => sum + amount, 0) / Math.max(dailySpending.size, 1);
 
-    const prompt = `You are a financial advisor analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
+    const prompt = `You are a personal budgeting coach analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
 
 Financial Summary:
-- Total Income: $${(financialData.summary?.totalIncome || 0).toFixed(2)}
-- Total Expenses: $${(financialData.summary?.totalExpenses || 0).toFixed(2)}
-- Net Amount: $${(financialData.summary?.netAmount || 0).toFixed(2)}
+- Total Income: ${(financialData.summary?.totalIncome || 0).toFixed(2)}
+- Total Expenses: ${(financialData.summary?.totalExpenses || 0).toFixed(2)}
+- Net Amount: ${(financialData.summary?.netAmount || 0).toFixed(2)}
 - Recent Transactions: ${recentTransactions.length}
-- Average Daily Spending: $${avgDailySpending.toFixed(2)}
+- Average Daily Spending: ${avgDailySpending.toFixed(2)}
 
 Top Spending Categories:
-${topCategories.map(([cat, amount]) => `- ${cat}: $${amount.toFixed(2)}`).join('\n')}
+${topCategories.map(([cat, amount]) => `- ${cat}: ${amount.toFixed(2)}`).join('\n')}
 
 Budget Information:
-${financialData.budgets.map(b => `- ${b.name}: $${b.amount} (${b.period})`).join('\n')}
+${financialData.budgets.map(b => `- ${b.name}: ${b.amount} (${b.period})`).join('\n')}
 
 Recent Transaction Sample:
 ${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.date}: ${t.type} $${t.amount} - ${t.description}`
+  `- ${t.date}: ${t.type} ${t.amount} - ${t.description}`
 ).join('\n')}
 
 IMPORTANT: Use actual category names from the Top Spending Categories list above. Do NOT use "Category 1", "Category 2", etc. Use the real category names like "Transportation", "Food", "Utilities", etc.
@@ -1491,12 +1524,12 @@ Focus on:
 
 Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
 
-    const response = await openai.chat.completions.create({
+    const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (recommendations, insights, descriptions) must be in ${getLanguageLabel(language)}.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (recommendations, insights, descriptions) must be in ${getLanguageLabel(normalizedLanguage)}.
 
 You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.`
         },
@@ -1513,29 +1546,33 @@ You are an expert financial advisor who provides personalized, actionable recomm
       temperature: 0.3 // Moderate creativity for personalized recommendations
     });
 
-    const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+    const aiResponse = parseModelJson(response.choices[0].message.content);
     
     // Ensure proper data structure
     const recommendations = Array.isArray(aiResponse.recommendations) 
-      ? aiResponse.recommendations.map((rec: any, index: number) => ({
+      ? aiResponse.recommendations
+      .filter((rec: any) => rec && typeof rec.title === 'string' && rec.title.trim())
+      .map((rec: any, index: number) => ({
           id: rec.id || `rec-${index + 1}`,
           type: rec.type || 'general',
           priority: rec.priority || 'medium',
-          title: rec.title || 'Financial Task',
-          description: rec.description || 'Complete this financial task',
-          action: rec.action || 'Take action on this recommendation',
-          impact: rec.impact || 'Positive financial impact',
-          timeToComplete: rec.timeToComplete || '10 minutes'
+          title: rec.title,
+          description: rec.description || '',
+          action: rec.action || '',
+          impact: rec.impact || '',
+          timeToComplete: rec.timeToComplete || ''
         }))
       : [];
 
     const insights = Array.isArray(aiResponse.insights)
-      ? aiResponse.insights.map((insight: any, index: number) => ({
+      ? aiResponse.insights
+      .filter((insight: any) => insight && typeof insight.insight === 'string' && insight.insight.trim())
+      .map((insight: any, index: number) => ({
           id: insight.id || `insight-${index + 1}`,
-          insight: insight.insight || 'Financial insight based on your data',
-          basedOn: insight.basedOn || 'Transaction analysis',
+          insight: insight.insight,
+          basedOn: insight.basedOn || '',
           confidence: Number(insight.confidence) || 0.7,
-          timeframe: insight.timeframe || 'Recent activity'
+          timeframe: insight.timeframe || ''
         }))
       : [];
 
@@ -1550,11 +1587,9 @@ You are an expert financial advisor who provides personalized, actionable recomm
     return result;
 
   } catch (error) {
+    // A provider failure is not "no recommendations": let the caller report it and cache nothing.
     console.error('Error generating daily recommendations:', error);
-    return {
-      recommendations: [],
-      insights: []
-    };
+    throw error;
   }
 }
 
@@ -1622,8 +1657,8 @@ export async function generateContextualFinancialTips(
       return {
         tips: [{
           id: 'basic_tip',
-          title: 'Start Your Financial Journey',
-          description: 'Begin by tracking your income and expenses to get personalized financial insights.',
+          title: emptyStateCopy(normalizedLanguage).firstTipTitle,
+          description: emptyStateCopy(normalizedLanguage).firstTipDescription,
           category: 'budgeting',
           priority: 'high',
           actionable: true
@@ -1695,10 +1730,10 @@ export async function generateContextualFinancialTips(
           const avgTransactionInCategory = categoryTransactions.length > 0 ? 
             categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
           
-          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budgetCatName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budgetCatName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: ${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
         } else if (budget.remaining < budget.budgetAmount * 0.1) {
           // Budget almost exhausted
-          scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budgetCatName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+          scenarios.push(`🟨 Budget warning: Only ${budget.remaining.toFixed(2)} remaining in your ${budgetCatName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
         }
       });
     }
@@ -1718,9 +1753,9 @@ export async function generateContextualFinancialTips(
         const monthlyNeeded = daysToTarget > 0 ? (goal.targetAmount - goal.currentAmount) / (daysToTarget / 30) : 0;
         
         if (progressPercent >= 90) {
-          scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only $${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
+          scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only ${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
         } else if (monthlyNeeded > netBalance) {
-          scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs $${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is $${netBalance.toFixed(2)}.`);
+          scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs ${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is ${netBalance.toFixed(2)}.`);
         }
       });
     }
@@ -1732,7 +1767,7 @@ export async function generateContextualFinancialTips(
       const incomeVariability = incomeAmounts.some(amt => Math.abs(amt - avgIncome) / avgIncome > 0.3);
       
       if (incomeVariability && incomeTransactions.length > 1) {
-        scenarios.push(`🟦 Income variability: Your income shows fluctuation. Largest: $${Math.max(...incomeAmounts).toFixed(2)}, Smallest: $${Math.min(...incomeAmounts).toFixed(2)}. Consider setting aside a buffer.`);
+        scenarios.push(`🟦 Income variability: Your income shows fluctuation. Largest: ${Math.max(...incomeAmounts).toFixed(2)}, Smallest: ${Math.min(...incomeAmounts).toFixed(2)}. Consider setting aside a buffer.`);
       }
     }
     
@@ -1742,7 +1777,7 @@ export async function generateContextualFinancialTips(
       const categoryFreq = transactionFrequency.get(category) || 0;
       
       if (categoryPercent > 40) {
-        scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of expenses ($${amount.toFixed(2)} across ${categoryFreq} transactions).`);
+        scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of expenses (${amount.toFixed(2)} across ${categoryFreq} transactions).`);
       }
     });
     
@@ -1750,7 +1785,7 @@ export async function generateContextualFinancialTips(
     if (expenseTransactions.length > 0) {
       const avgTransactionAmount = summary.totalExpenses / expenseTransactions.length;
       if (avgTransactionAmount < 30 && expenseTransactions.length > 15) {
-        scenarios.push(`🟩 Controlled spending: Great job! You're averaging $${avgTransactionAmount.toFixed(2)} per transaction, showing mindful spending habits.`);
+        scenarios.push(`🟩 Controlled spending: Great job! You're averaging ${avgTransactionAmount.toFixed(2)} per transaction, showing mindful spending habits.`);
       }
     }
     
@@ -1758,27 +1793,27 @@ export async function generateContextualFinancialTips(
     if (recurringTransactions.length > 0) {
       const recurringTotal = recurringTransactions.reduce((sum, t) => sum + t.amount, 0);
       const recurringPercent = (recurringTotal / summary.totalExpenses) * 100;
-      scenarios.push(`🟦 Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring ($${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
+      scenarios.push(`🟦 Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring (${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
     }
 
     // Build detailed prompt with scenario analysis
-    const prompt = `You are an expert financial advisor analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data and identified scenarios.
+    const prompt = `You are an expert personal budgeting coach analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data and identified scenarios.
 
 FINANCIAL OVERVIEW:
-- Total Income: $${summary.totalIncome.toLocaleString()}
-- Total Expenses: $${summary.totalExpenses.toLocaleString()}
-- Net Balance: $${netBalance.toLocaleString()}
+- Total Income: ${summary.totalIncome.toLocaleString()}
+- Total Expenses: ${summary.totalExpenses.toLocaleString()}
+- Net Balance: ${netBalance.toLocaleString()}
 - Savings Rate: ${savingsRate.toFixed(1)}%
 - Number of Transactions: ${summary.transactionCount}
 
 TOP SPENDING CATEGORIES:
-${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
+${topSpendingCategories.map(([cat, amount]) => `- ${cat}: ${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
 
 BUDGET STATUS:
-${budgets.length > 0 ? budgets.map((b: any) => `- ${b.categoryName || b.category || 'Uncategorized'}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
+${budgets.length > 0 ? budgets.map((b: any) => `- ${b.categoryName || b.category || 'Uncategorized'}: ${b.spent.toLocaleString()}/${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by ${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
 
 FINANCIAL GOALS:
-${goals.length > 0 ? goals.map(g => `- ${g.name}: $${g.currentAmount.toLocaleString()}/$${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
+${goals.length > 0 ? goals.map(g => `- ${g.name}: ${g.currentAmount.toLocaleString()}/${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
 
 TRANSACTION ANALYSIS:
 - Total Transactions: ${transactions.length}
@@ -1792,7 +1827,7 @@ IDENTIFIED FINANCIAL SCENARIOS:
 ${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
 
 RECENT TRANSACTIONS (last 8):
-${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.categoryName || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
+${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - ${t.amount.toLocaleString()} (${t.categoryName || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
 
 CONTEXTUAL ANALYSIS REQUIREMENTS:
 1. Address specific scenarios identified above with targeted, data-driven advice
@@ -1822,7 +1857,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
   ]
 }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
@@ -1841,7 +1876,7 @@ You are an expert financial advisor who provides personalized, contextual recomm
       temperature: 0.3 // Moderate creativity for personalized recommendations
     });
 
-    const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+    const aiResponse = parseModelJson(response.choices[0].message.content);
     
     // Ensure proper data structure. Every tip must be in the requested language; a tip
     // that is not (or a missing description, which used to default to English) is
@@ -1943,6 +1978,7 @@ export async function generateFinancialHealthScore(
     // Create a more stable hash that focuses on significant financial changes
     // Exclude transaction IDs and exact timestamps to reduce cache misses
     const stableData = {
+      language: normalizedLanguage,
       transactionCount: transactions.length,
       totalIncome: summary.totalIncome,
       totalExpenses: summary.totalExpenses,
@@ -1975,7 +2011,7 @@ export async function generateFinancialHealthScore(
       }
     });
 
-    const response = await openai.chat.completions.create({
+    const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
@@ -2022,13 +2058,13 @@ Respond with JSON in this format:
           content: `Analyze this financial data for a personalized health score:
 
 Financial Summary:
-- Income: $${summary.totalIncome}
-- Expenses: $${summary.totalExpenses}
-- Net Balance: $${summary.netBalance}
+- Income: ${summary.totalIncome}
+- Expenses: ${summary.totalExpenses}
+- Net Balance: ${summary.netBalance}
 
 Transaction History (${recentTransactions.length} transactions):
 ${recentTransactions.slice(0, 20).map(t => 
-  `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
+  `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 
 Budgets: ${budgets.length} active budgets
@@ -2040,17 +2076,21 @@ Provide an AI-powered financial health score that adapts to this user's specific
       temperature: 0.2
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    
+    const result = parseModelJson(response.choices[0].message.content);
+    // A reply with no score is a failed reply, not a score of 50.
+    if (!Number.isFinite(Number(result.score))) {
+      throw new AIResponseError('The health score reply had no score');
+    }
+
     const processedResult = {
-      score: Math.max(0, Math.min(100, result.score || 50)),
+      score: Math.max(0, Math.min(100, Number(result.score))),
       status: result.status || 'Fair',
       color: result.color || 'yellow',
       factors: result.factors || [],
       icon: result.icon || 'Shield',
       aiAnalysis: {
         personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
-        riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
+        riskAssessment: result.aiAnalysis?.riskAssessment || '',
         recommendations: result.aiAnalysis?.recommendations || [],
         confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
       }
@@ -2083,6 +2123,8 @@ Provide an AI-powered financial health score that adapts to this user's specific
     let score = 50;
     let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
     
+    const healthCopy = healthFallbackCopy(normalizedLanguage);
+
     // Use proper score-based thresholds for category determination
     if (savingsRate > 0.2) {
       score = 92; // Set to 92 for excellent savings rate
@@ -2102,9 +2144,10 @@ Provide an AI-powered financial health score that adapts to this user's specific
       score,
       trend: 'stable',
       category,
-      insights: ['Financial analysis temporarily unavailable'],
-      achievements: summary.netBalance > 0 ? ['Positive net balance'] : [],
-      warnings: summary.netBalance < 0 ? ['Expenses exceed income'] : []
+      insights: [healthCopy.unavailable],
+      achievements: summary.netBalance > 0 ? [healthCopy.positiveBalance] : [],
+      warnings: summary.netBalance < 0 ? [healthCopy.expensesExceedIncome] : [],
+      degraded: true,
     };
   }
 }
@@ -2122,35 +2165,10 @@ export async function voiceExtraction(
   const language = payload.language || 'en-us';
   const normalizedLanguage = normalizeLanguageCode(language);
   try {
-    // Try Mistral first for voice extraction
-    try {
-      console.log('🤖 [Local Voice] Trying Mistral Small 3.2...');
-      const mistralClient = new MistralClient();
-      const mistralResponse = await mistralClient.createChatCompletion({
-        messages: [
-          {
-            role: "system",
-            content: `You are a JSON extraction AI. Respond ONLY with valid JSON. No explanations, no markdown, no code blocks.
-CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)} for all text fields (vendor, description, categoryName, ambiguities, followUpQuestions).`
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.1,
-        max_tokens: 500
-      });
-      console.log('✅ [Local Voice] Mistral successful');
-      return mistralResponse.choices[0]?.message?.content || '';
-    } catch (mistralError: any) {
-      console.warn('⚠️ [Local Voice] Mistral failed, using OpenAI fallback:', mistralError?.message);
-    }
-
-    // Fallback to OpenAI
+    // Mistral first (fast, cheap), then the shared fallback chain. Everything goes through
+    // lib/aiProvider, so the gateway and the anonymiser see it like every other call.
     const response = await openai.chat.completions.create({
-      model: AI_MODELS.default,
+      model: AI_MODELS.voice,
       messages: [
         {
           role: "system",
@@ -2233,7 +2251,7 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
       temperature: 0.1
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const result = parseModelJson(response.choices[0].message.content);
     
     if (result.transactions && Array.isArray(result.transactions)) {
       const formattedResult = {

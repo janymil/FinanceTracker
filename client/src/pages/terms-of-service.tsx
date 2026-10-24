@@ -1,26 +1,24 @@
 import { useEffect } from "react";
 import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
 import { AppLayout } from "@/components/AppLayout";
 import { useTranslation } from 'react-i18next';
 
 export default function TermsOfService() {
-  const [, setLocation] = useLocation();
+  const [location] = useLocation();
   const { t } = useTranslation();
-  
-  useEffect(() => {
-    document.title = "Terms of Service - Kaptia";
-  }, []);
-
-  const handleLogin = () => {
-    setLocation("/auth");
-  };
+  const currentLang = location.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] || localStorage.getItem('preferredLanguage') || 'en';
 
   return (
     <AppLayout>
+      <SEO
+        title={t("terms.seo.title")}
+        description={t("terms.seo.description")}
+        canonical={`https://kaptia.app/${currentLang}/terms-of-service`}
+      />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("Terms of Service")}</h1>
         <p className="text-muted-foreground mb-8">{t("terms.last_updated", "Last updated: October 24, 2026")}</p>
@@ -60,7 +58,7 @@ export default function TermsOfService() {
               {t("To use our service, you must create an account and provide accurate, current, and complete information. You are responsible for maintaining the confidentiality of your account credentials.")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>{t("You must be at least 18 years old to use this service")}</li>
+              <li>{t("terms.age_requirement")}</li>
               <li>{t("One account per person is allowed")}</li>
               <li>{t("You are responsible for all activities under your account")}</li>
               <li>{t("Notify us immediately of any unauthorized use")}</li>
@@ -100,8 +98,19 @@ export default function TermsOfService() {
 
             <h3 className="text-lg font-semibold mb-2">{t("terms.cancellation_refund_title", "5.4 Cancellation and Refund Policy")}</h3>
             <p className="mb-4">
-              {t("terms.cancellation_refund_desc", "You may cancel your subscription at any time through your Profile settings. Your cancellation will take effect at the end of your current paid billing cycle, and you will maintain full access to paid features until that period ends. All subscription fees are non-refundable, except where a refund is mandatory under applicable law.")}
+              {t("terms.cancellation_refund_desc")}
             </p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("terms.consumer_rights_title")}</h3>
+            <p className="mb-4">
+              {t("terms.consumer_rights_desc")}{" "}
+              <Link href={`/${currentLang}/reclamaciones`} className="text-indigo-600 dark:text-indigo-300 underline">
+                {t("terms.consumer_rights_link")}
+              </Link>
+            </p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("terms.receipts_title")}</h3>
+            <p className="mb-4">{t("terms.receipts_desc")}</p>
           </section>
 
           <section className="mb-8">
@@ -161,6 +170,7 @@ export default function TermsOfService() {
             <p className="mb-4">
               {t("terms.governing_law_desc", "These Terms of Service and any dispute, controversy, or claim arising out of or relating to them or the service shall be governed by and construed in accordance with the laws of the State of New Mexico, United States of America, without regard to conflict of law principles. Any legal action or proceeding arising under these Terms shall be instituted exclusively in the state or federal courts located in Bernalillo County, New Mexico, and each party irrevocably consents to personal jurisdiction and venue in such courts.")}
             </p>
+            <p className="mb-4">{t("terms.governing_law_consumer")}</p>
           </section>
 
           <section className="mb-8">

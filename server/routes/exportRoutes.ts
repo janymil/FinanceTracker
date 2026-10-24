@@ -4,6 +4,17 @@ import { storage } from "../storage";
 import { getUserLanguage } from "../categoryTranslations";
 import { buildMonthlyPayload, requestPdf, PdfProcessorError } from "../pdfProcessorClient";
 import { cloudStorage } from "../cloudStorage";
+import {
+  cleanDateValue,
+  cleanId,
+  csvField,
+  neutralizeSpreadsheetCell,
+} from "@shared/trackingInput";
+import { localParts, monthRange, presetRange, rangeEndFrom, rangeStartFrom, resolveTimeZone } from "@shared/timezones";
+
+const MONTH_NAMES = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
+const asFlag = (value: unknown) => value === true || value === 'true' || value === '1';
 
 export function registerExportRoutes(app: Express) {
 
@@ -28,42 +39,52 @@ export function registerExportRoutes(app: Express) {
         return res.status(400).json({ message: "Invalid transaction data format" });
       }
 
+      if (importTransactions.length > 5000) {
+        return res.status(400).json({ message: "Import at most 5000 transactions at a time" });
+      }
+
       let importedCount = 0;
       let skippedCount = 0;
       const errors: Array<{ row: number; field: string; message: string }> =[];
+
+      // One lookup for the whole file instead of one per row.
+      const allowedCategoryIds = new Set((await storage.getCategories(userId)).map((category) => category.id));
+      const existingTransactions = mergeStrategy !== 'append' ? await storage.getUserTransactions(userId) : [];
 
       // Process each transaction
       for (let i = 0; i < importTransactions.length; i++) {
         const transaction = importTransactions[i];
 
         try {
-          // Validate required fields
-          if (!transaction.description || !transaction.amount || !transaction.type || !transaction.date) {
+          const description = typeof transaction?.description === 'string' ? transaction.description.trim() : '';
+          const amountNumber = Math.abs(Number.parseFloat(transaction?.amount));
+          const date = cleanDateValue(transaction?.date);
+          if (!description || description.length > 200 || !Number.isFinite(amountNumber) || amountNumber <= 0 || !date || !transaction?.type) {
             errors.push({
               row: i + 1,
               field: 'required',
-              message: 'Missing required fields: description, amount, type, or date'
+              message: 'Needs a description (up to 200 characters), a positive amount, a type and a valid date'
             });
             skippedCount++;
             continue;
           }
 
-          // Convert and validate data
+          // A category that is not the person's own is dropped, never guessed.
+          const requestedCategory = cleanId(transaction.categoryId);
           const transactionData = {
             userId,
-            description: String(transaction.description).trim(),
-            amount: String(Math.abs(parseFloat(transaction.amount))),
-            type: transaction.type.toLowerCase() === 'income' ? 'income' : 'expense',
-            date: new Date(transaction.date),
-            categoryId: transaction.categoryId || 1, // Default to first category
+            description,
+            amount: amountNumber.toFixed(2),
+            type: String(transaction.type).toLowerCase() === 'income' ? 'income' : 'expense',
+            date,
+            categoryId: requestedCategory !== null && allowedCategoryIds.has(requestedCategory) ? requestedCategory : null,
           };
 
           // Check for duplicates if merge strategy is not 'append'
           if (mergeStrategy !== 'append') {
-            const existingTransactions = await storage.getUserTransactions(userId);
-            const isDuplicate = existingTransactions.some(existing => 
+            const isDuplicate = existingTransactions.some(existing =>
               existing.description === transactionData.description &&
-              existing.amount === transactionData.amount &&
+              Number(existing.amount) === Number(transactionData.amount) &&
               Math.abs(new Date(existing.date).getTime() - transactionData.date.getTime()) < 86400000 // Within 1 day
             );
 
@@ -82,7 +103,7 @@ export function registerExportRoutes(app: Express) {
           errors.push({
             row: i + 1,
             field: 'general',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: 'Could not be saved'
           });
           skippedCount++;
         }
@@ -105,30 +126,34 @@ export function registerExportRoutes(app: Express) {
   // Dedicated PDF export endpoint
   app.post('/api/export-pdf', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('PDF Export Request:', req.body);
-      
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const user = await storage.getUser(userId);
-      console.log('PDF Export User:', user?.plan);
 
       if (!user || user.plan === 'free') {
-        console.log('PDF Export Error: Plan restriction');
         return res.status(403).json({ message: "PDF export requires Standard or Premium subscription" });
       }
 
       const { month, year } = req.body;
-      console.log('PDF Export Parameters:', { month, year });
 
       // Parse month and year
-      const targetYear = year || new Date().getFullYear();
-      const targetMonth = month ? new Date(Date.parse(month + " 1, 2000")).getMonth() : new Date().getMonth();
+      const timeZone = resolveTimeZone(user.timezone);
+      const today = localParts(new Date(), timeZone);
+      const targetYear = Number.isInteger(Number(year)) && Number(year) >= 2000 && Number(year) <= 2100 ? Number(year) : today.year;
+      let targetMonth = today.month - 1;
+      if (month !== undefined && month !== null && month !== '') {
+        const named = MONTH_NAMES.findIndex((name) => name.startsWith(String(month).trim().toLowerCase().slice(0, 3)) && String(month).trim().length >= 3);
+        const numbered = Number(month) - 1;
+        targetMonth = named >= 0 ? named : Number.isInteger(numbered) && numbered >= 0 && numbered <= 11 ? numbered : -1;
+        if (targetMonth < 0) {
+          return res.status(400).json({ message: "Invalid month" });
+        }
+      }
 
-      // Get date range for the specified month
-      const start = new Date(targetYear, targetMonth, 1);
-      const end = new Date(targetYear, targetMonth + 1, 0);
+      // The whole month in the person's time zone, last day included.
+      const { start, end } = monthRange(targetYear, targetMonth + 1, timeZone);
 
       // Get all user data
       const transactions = await storage.getUserTransactions(userId);
@@ -178,7 +203,8 @@ export function registerExportRoutes(app: Express) {
         );
       }
 
-      const reportPeriod = `${month || new Date().toLocaleDateString('en-US', { month: 'long' })} ${targetYear}`;
+      const monthLabel = MONTH_NAMES[targetMonth][0].toUpperCase() + MONTH_NAMES[targetMonth].slice(1);
+      const reportPeriod = `${monthLabel} ${targetYear}`;
       const spentByCategory = new Map<number, number>();
       for (const transaction of monthlyTransactions) {
         if (transaction.type !== 'expense' || transaction.categoryId == null) continue;
@@ -228,7 +254,7 @@ export function registerExportRoutes(app: Express) {
       
       // Send PDF response
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="kaptia-report-${month}-${targetYear}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="kaptia-report-${monthLabel.toLowerCase()}-${targetYear}.pdf"`);
       return res.send(pdfBuffer);
 
     } catch (error) {
@@ -247,7 +273,7 @@ export function registerExportRoutes(app: Express) {
     }
   });
 
-  app.post('/api/export', isAuthenticated, async (req: any, res) => {
+  const handleExport = async (req: any, res: any) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -259,17 +285,41 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Data export requires Premium subscription" });
       }
 
-      const { format, dateRange, includeTransactions, includeBudgets, includeGoals, startDate, endDate } = req.body;
+      // The export page sends a GET with query parameters; scripts may POST a JSON body.
+      const input = req.method === 'GET' ? req.query : req.body;
+      const format = String(input.format || '');
+      const dateRange = String(input.dateRange || 'all');
+      const startDate = input.startDate;
+      const endDate = input.endDate;
+      const includeTransactions = asFlag(input.includeTransactions);
+      const includeBudgets = asFlag(input.includeBudgets);
+      const includeGoals = asFlag(input.includeGoals);
+
+      const timeZone = resolveTimeZone(user.timezone);
+      let range: { start: Date; end: Date } | null =
+        dateRange === 'month' || dateRange === 'quarter' || dateRange === 'year' ? presetRange(dateRange, timeZone) : null;
+      if (dateRange === 'custom') {
+        const parsedStart = cleanDateValue(startDate);
+        const parsedEnd = cleanDateValue(endDate);
+        if (!parsedStart || !parsedEnd) {
+          return res.status(400).json({ message: "Choose a valid start and end date" });
+        }
+        const start = rangeStartFrom(startDate, parsedStart, timeZone);
+        const end = rangeEndFrom(endDate, parsedEnd, timeZone);
+        if (end < start) {
+          return res.status(400).json({ message: "End date must not be before the start date" });
+        }
+        range = { start, end };
+      }
 
       const exportData: any = {};
 
       if (includeTransactions) {
         let transactions = await storage.getUserTransactions(userId);
         
-        // Filter by date range if specified
-        if (dateRange === 'custom' && startDate && endDate) {
-          const start = new Date(startDate);
-          const end = new Date(endDate);
+        // Filter by the chosen period, last day included
+        if (range) {
+          const { start, end } = range;
           transactions = transactions.filter(t => {
             const transactionDate = new Date(t.date);
             return transactionDate >= start && transactionDate <= end;
@@ -299,7 +349,6 @@ export function registerExportRoutes(app: Express) {
 
       // Add metadata
       exportData.exportDate = new Date().toISOString();
-      exportData.userId = userId;
       exportData.userName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
 
       if (format === 'json') {
@@ -309,15 +358,16 @@ export function registerExportRoutes(app: Express) {
       } else if (format === 'csv') {
         // For CSV, we'll export transactions only as CSV format is tabular
         if (exportData.transactions) {
-          const csvHeader = 'Date,Description,Amount,Type,Category\n';
+          // Text cells are quoted and defused against spreadsheet formulas; the BOM keeps accents readable in Excel.
+          const csvHeader = 'Date,Description,Amount,Type,Category\r\n';
           const csvRows = exportData.transactions.map((t: any) => {
             const dateStr = t.date instanceof Date ? t.date.toISOString().split('T')[0] : String(t.date || '').split('T')[0];
-            return `${dateStr},"${(t.description || '').replace(/"/g, '""')}",${t.amount},${t.type},${t.categoryName || 'Uncategorized'}`;
-          }).join('\n');
-          
-          res.setHeader('Content-Type', 'text/csv');
+            return [dateStr, csvField(t.description), Number(t.amount).toFixed(2), t.type, csvField(t.categoryName || 'Uncategorized')].join(',');
+          }).join('\r\n');
+
+          res.setHeader('Content-Type', 'text/csv; charset=utf-8');
           res.setHeader('Content-Disposition', 'attachment; filename="kaptia-transactions.csv"');
-          return res.send(csvHeader + csvRows);
+          return res.send('\uFEFF' + csvHeader + csvRows);
         } else {
           return res.status(400).json({ message: "CSV export requires transactions to be included" });
         }
@@ -329,17 +379,17 @@ export function registerExportRoutes(app: Express) {
         if (exportData.transactions?.length) {
           const rows = exportData.transactions.map((t: any) => ({
             Date: (t.date instanceof Date ? t.date : new Date(t.date)).toISOString().split('T')[0],
-            Description: t.description,
+            Description: neutralizeSpreadsheetCell(t.description),
             Amount: Number(t.amount),
             Type: t.type,
-            Category: t.categoryName || 'Uncategorized'
+            Category: neutralizeSpreadsheetCell(t.categoryName || 'Uncategorized')
           }));
           XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Transactions');
         }
 
         if (exportData.budgets?.length) {
           const rows = exportData.budgets.map((b: any) => ({
-            Category: b.categoryName || String(b.categoryId ?? ''),
+            Category: neutralizeSpreadsheetCell(b.categoryName || String(b.categoryId ?? '')),
             Budget: Number(b.amount),
             Spent: Number(b.spent ?? 0),
             Remaining: Number(b.remaining ?? 0),
@@ -350,7 +400,7 @@ export function registerExportRoutes(app: Express) {
 
         if (exportData.goals?.length) {
           const rows = exportData.goals.map((g: any) => ({
-            Goal: g.name,
+            Goal: neutralizeSpreadsheetCell(g.name),
             Target: Number(g.targetAmount),
             Current: Number(g.currentAmount ?? 0),
             TargetDate: g.targetDate ? String(g.targetDate).split('T')[0] : ''
@@ -386,10 +436,11 @@ export function registerExportRoutes(app: Express) {
           byCategory.set(name, (byCategory.get(name) || 0) + (Number(t.amount) || 0));
         }
 
-        const periodLabel =
-          dateRange === 'custom' && startDate && endDate
-            ? `${startDate} - ${endDate}`
-            : dateRange || 'all time';
+        const dayLabel = (instant: Date) => {
+          const day = localParts(instant, timeZone);
+          return `${day.year}-${String(day.month).padStart(2, '0')}-${String(day.day).padStart(2, '0')}`;
+        };
+        const periodLabel = range ? `${dayLabel(range.start)} - ${dayLabel(range.end)}` : 'all time';
 
         const pdfBuffer = await requestPdf(
           buildMonthlyPayload({
@@ -426,7 +477,9 @@ export function registerExportRoutes(app: Express) {
       }
       return res.status(500).json({ message: "Failed to export data" });
     }
-  });
+  };
+  app.get('/api/export', isAuthenticated, handleExport);
+  app.post('/api/export', isAuthenticated, handleExport);
 
   // Cloud backup endpoints using Cloud Storage (Cloudflare R2 or Bunny fallback)
   const backupStorage = cloudStorage;
@@ -643,13 +696,11 @@ export function registerExportRoutes(app: Express) {
       }
 
       const { filename } = req.body;
-      if (!filename) {
-        return res.status(400).json({ message: "Backup filename required" });
+      // A plain file name only: no slashes, so it cannot climb out of the user's folder.
+      if (typeof filename !== 'string' || !/^[\w.-]+\.json$/.test(filename) || filename.includes('..')) {
+        return res.status(400).json({ message: "A valid backup filename is required" });
       }
 
-      console.log(`RESTORE DEBUG: Restoring backup file: ${filename} for user: ${userId}`);
-
-      // Use the existing downloadFile method with proper path
       const filePath = `backups/user-${userId}/${filename}`;
       const backupContent = await backupStorage.downloadFile(filePath);
       const parsedData = JSON.parse(backupContent);
@@ -658,98 +709,100 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Unauthorized backup access" });
       }
 
-      // Actually restore the data to the database
-      const restoredData = {
-        transactions: 0,
-        budgets: 0,
-        goals: 0
+      // Validate and convert the WHOLE backup before touching any live data, so a bad
+      // file is rejected while the user's current data is still intact. Rows always
+      // belong to the signed-in user, whatever the file claims.
+      const toDate = (value: unknown, label: string): Date => {
+        const date = new Date(value as string);
+        if (Number.isNaN(date.getTime())) throw new Error(`Backup has an invalid date in ${label}`);
+        return date;
       };
+      const rows = (value: unknown): any[] => (Array.isArray(value) ? value : []);
 
-      // Clear existing user data first
-      const existingTransactions = await storage.getUserTransactions(userId);
-      for (const transaction of existingTransactions) {
-        await storage.deleteTransaction(transaction.id, userId);
-      }
+      const backupData = parsedData.data ?? {};
+      const newTransactions = rows(backupData.transactions).map((t) => {
+        const { id, categoryName, categoryIcon, categoryColor, ...rest } = t;
+        return {
+          ...rest,
+          userId,
+          date: toDate(t.date, 'a transaction'),
+          createdAt: toDate(t.createdAt ?? t.date, 'a transaction'),
+          updatedAt: toDate(t.updatedAt ?? t.date, 'a transaction'),
+        };
+      });
+      const newBudgets = rows(backupData.budgets).map((b) => {
+        const { id, categoryName, categoryIcon, categoryColor, spent, remaining, percentage, ...rest } = b;
+        return {
+          ...rest,
+          userId,
+          startDate: toDate(b.startDate, 'a budget'),
+          endDate: toDate(b.endDate, 'a budget'),
+          createdAt: toDate(b.createdAt ?? b.startDate, 'a budget'),
+        };
+      });
+      const newGoals = rows(backupData.goals).map((g) => {
+        const { id, ...rest } = g;
+        return {
+          ...rest,
+          userId,
+          deadline: g.deadline ? toDate(g.deadline, 'a goal') : null,
+          createdAt: toDate(g.createdAt ?? Date.now(), 'a goal'),
+          updatedAt: toDate(g.updatedAt ?? Date.now(), 'a goal'),
+        };
+      });
 
-      const existingBudgets = await storage.getUserBudgets(userId);
-      for (const budget of existingBudgets) {
-        await storage.deleteBudget(budget.id, userId);
-      }
+      // Keep the current rows so the restore can be undone if it fails half way.
+      const oldTransactions = await storage.getUserTransactions(userId);
+      const oldBudgets = await storage.getUserBudgets(userId);
+      const oldGoals = await storage.getUserGoals(userId).catch(() => []);
+
+      const restoredData = { transactions: 0, budgets: 0, goals: 0 };
+
+      const stripForReinsert = ({ id, categoryName, categoryIcon, categoryColor, spent, remaining, percentage, ...row }: any) => row;
 
       try {
-        const existingGoals = await storage.getUserGoals(userId);
-        for (const goal of existingGoals) {
-          await storage.deleteGoal(goal.id, userId);
-        }
-      } catch (error) {
-        console.log('Goals not available for deletion:', error);
-      }
+        for (const transaction of oldTransactions) await storage.deleteTransaction(transaction.id, userId);
+        for (const budget of oldBudgets) await storage.deleteBudget(budget.id, userId);
+        for (const goal of oldGoals) await storage.deleteGoal(goal.id, userId);
 
-      // Restore transactions
-      if (parsedData.data.transactions) {
-        for (const transaction of parsedData.data.transactions) {
-          // Convert string dates back to Date objects
-          const transactionData = {
-            ...transaction,
-            date: new Date(transaction.date),
-            createdAt: new Date(transaction.createdAt),
-            updatedAt: new Date(transaction.updatedAt)
-          };
-          delete transactionData.id; // Let database generate new ID
-          await storage.createTransaction(transactionData);
+        for (const row of newTransactions) {
+          await storage.createTransaction(row as any);
           restoredData.transactions++;
         }
-      }
-
-      // Restore budgets
-      if (parsedData.data.budgets) {
-        for (const budget of parsedData.data.budgets) {
-          const budgetData = {
-            ...budget,
-            startDate: new Date(budget.startDate),
-            endDate: new Date(budget.endDate),
-            createdAt: new Date(budget.createdAt)
-          };
-          delete budgetData.id; // Let database generate new ID
-          await storage.createBudget(budgetData);
+        for (const row of newBudgets) {
+          await storage.createBudget(row as any);
           restoredData.budgets++;
         }
-      }
-
-      // Restore goals
-      if (parsedData.data.goals) {
-        try {
-          for (const goal of parsedData.data.goals) {
-            const goalData = {
-              ...goal,
-              deadline: goal.deadline ? new Date(goal.deadline) : null,
-              createdAt: new Date(goal.createdAt),
-              updatedAt: new Date(goal.updatedAt)
-            };
-            delete goalData.id; // Let database generate new ID
-            await storage.createGoal(goalData);
-            restoredData.goals++;
-          }
-        } catch (error) {
-          console.log('Goals not available for restoration:', error);
+        for (const row of newGoals) {
+          await storage.createGoal(row as any);
+          restoredData.goals++;
         }
+      } catch (restoreError) {
+        console.error('Restore failed part-way; putting the previous data back:', restoreError);
+        try {
+          for (const t of await storage.getUserTransactions(userId)) await storage.deleteTransaction(t.id, userId);
+          for (const b of await storage.getUserBudgets(userId)) await storage.deleteBudget(b.id, userId);
+          for (const g of await storage.getUserGoals(userId).catch(() => [])) await storage.deleteGoal(g.id, userId);
+          for (const row of oldTransactions) await storage.createTransaction(stripForReinsert(row));
+          for (const row of oldBudgets) await storage.createBudget(stripForReinsert(row));
+          for (const row of oldGoals) await storage.createGoal(stripForReinsert(row));
+        } catch (rollbackError) {
+          console.error('RESTORE ROLLBACK FAILED:', rollbackError);
+        }
+        return res.status(500).json({ message: "Failed to restore backup. Your previous data was kept." });
       }
 
-      console.log(`RESTORE DEBUG: Successfully restored backup: ${filename} with data:`, restoredData);
-
-      return res.json({ 
-        success: true, 
+      return res.json({
+        success: true,
         message: "Backup restored successfully",
         restoredData,
-        filename: filename,
+        filename,
         backupDate: parsedData.timestamp
       });
 
     } catch (error: any) {
       console.error("RESTORE ERROR: Error restoring backup:", error);
-      console.error("RESTORE ERROR: Error details:", error.message);
-      console.error("RESTORE ERROR: Error stack:", error.stack);
-      return res.status(500).json({ message: "Failed to restore backup", error: error.message });
+      return res.status(500).json({ message: "Failed to restore backup" });
     }
   });
 }

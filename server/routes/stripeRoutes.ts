@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import Stripe from "stripe";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { regionForRequest } from "../billingRegion";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -19,6 +20,31 @@ function currencyForRequest(req: Request): BillingCurrency {
   const language = req.header('x-user-language') || '';
   return language.toLowerCase().startsWith('es') ? 'pen' : 'usd';
 }
+
+const processedEvents = new Map<string, number>();
+const EVENT_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** True if this Stripe event id was already handled; otherwise records it. */
+function alreadyProcessed(eventId: string): boolean {
+  const now = Date.now();
+  Array.from(processedEvents.entries()).forEach(([id, at]) => {
+    if (now - at > EVENT_TTL_MS) processedEvents.delete(id);
+  });
+  if (processedEvents.has(eventId)) return true;
+  processedEvents.set(eventId, now);
+  return false;
+}
+
+function forgetEvent(eventId: string): void {
+  processedEvents.delete(eventId);
+}
+
+/** Customers are only ever sent back to our own site, never to a caller-supplied origin. */
+function appBaseUrl(): string {
+  return (process.env.APP_URL || process.env.BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
+}
+
+const VALID_PLANS = new Set(['free', 'standard', 'standard-yearly', 'premium', 'premium-yearly']);
 
 /**
  * Two price lists: US dollars and Peruvian soles. The page language picks the currency
@@ -156,7 +182,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, currency: Bi
       return res.status(400).json({ error: "You are already subscribed to this plan" });
     }
 
-    const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+    const baseUrl = appBaseUrl();
 
     // For subscription modifications, create a checkout session that will update the existing subscription
     // This properly handles proration and billing
@@ -206,21 +232,36 @@ export function registerStripeRoutes(app: Express) {
       const { plan } = req.body;
       const userId = getUserId(req);
       
-      // Currency follows the page language unless the client sends it explicitly.
-      const currency = currencyForRequest(req);
-
-      console.log('Checkout session request - Plan:', plan, 'Currency:', currency, 'User ID:', userId);
-      
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
-      
+
       // Get user from database
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      
+
+      // Stripe is for dollars only. Peru pays in soles through MercadoPago, so a new
+      // Stripe checkout from there is refused (existing Stripe subscribers are untouched).
+      const region = regionForRequest(req);
+      if (user.mpPreapprovalId && user.plan !== 'free' && !user.stripeSubscriptionId) {
+        return res.status(409).json({
+          error: "You already have an active MercadoPago subscription. Cancel it before switching.",
+          code: 'already_subscribed',
+        });
+      }
+      if (!user.stripeSubscriptionId && region.gateway !== 'stripe') {
+        return res.status(403).json({
+          error: "Payments from your country go through MercadoPago.",
+          code: 'wrong_gateway',
+          gateway: region.gateway,
+        });
+      }
+      const currency: BillingCurrency = user.stripeSubscriptionId ? currencyForRequest(req) : 'usd';
+
+      console.log('Checkout session request - Plan:', plan, 'Currency:', currency, 'User ID:', userId);
+
       // Check if user has existing subscription - redirect to Customer Portal
       if (user.stripeSubscriptionId && user.stripeCustomerId && user.plan !== 'free') {
         try {
@@ -231,7 +272,7 @@ export function registerStripeRoutes(app: Express) {
             
             const portalSession = await stripe.billingPortal.sessions.create({
               customer: user.stripeCustomerId,
-              return_url: `${req.headers.origin || 'http://localhost:5000'}/dashboard?subscription_update=success`,
+              return_url: `${appBaseUrl()}/dashboard?subscription_update=success`,
               flow_data: {
                 type: 'subscription_update',
                 subscription_update: {
@@ -254,7 +295,10 @@ export function registerStripeRoutes(app: Express) {
       const auth = req.auth();
       const userEmail = auth?.sessionClaims?.email;
       
-      const baseUrl = `${req.headers.origin || 'http://localhost:5000'}`;
+      if (!VALID_PLANS.has(String(plan))) {
+        return res.status(400).json({ error: "Invalid plan selected" });
+      }
+      const baseUrl = appBaseUrl();
       const successUrl = `${baseUrl}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${baseUrl}/subscribe`;
 
@@ -346,18 +390,23 @@ export function registerStripeRoutes(app: Express) {
     }
 
     try {
-      const { plan, session_id } = req.query;
-      
-      if (!session_id || !plan) {
+      const { session_id } = req.query;
+
+      if (!session_id || typeof session_id !== 'string') {
         return res.redirect('/?error=invalid_params');
       }
 
-      // Verify the session with Stripe
-      const session = await stripe.checkout.sessions.retrieve(session_id as string);
-      
+      // Verify the session with Stripe. The plan comes from the metadata the server
+      // wrote when it created the session, never from the query string.
+      const session = await stripe.checkout.sessions.retrieve(session_id);
+      const plan = session.metadata?.plan;
+      if (!plan) {
+        return res.redirect('/?error=invalid_params');
+      }
+
       // For free plans, we don't require payment completion
       const planRequiresPayment = plan !== 'free';
-      if (planRequiresPayment && session.payment_status !== 'paid') {
+      if (planRequiresPayment && session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
         return res.redirect('/?error=payment_not_completed');
       }
       
@@ -390,8 +439,12 @@ export function registerStripeRoutes(app: Express) {
 
 
 
-      // Handle existing subscription if this is an upgrade
-      if (session.metadata?.existingSubscriptionId) {
+      // Handle existing subscription if this is an upgrade (the id was written by our
+      // own checkout code, and the new subscription is never the one cancelled).
+      if (
+        session.metadata?.existingSubscriptionId &&
+        session.subscription !== session.metadata.existingSubscriptionId
+      ) {
         try {
           // Cancel the existing subscription
           await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
@@ -431,62 +484,6 @@ export function registerStripeRoutes(app: Express) {
     }
   });
 
-  // Handle subscription change success (after prorated payment)
-  app.get("/api/subscription-change-success", async (req: Request, res: Response) => {
-    if (!stripe) {
-      return res.redirect('/?error=payment_processing_unavailable');
-    }
-
-    try {
-      const { plan, session_id, subscription_id } = req.query;
-      
-      if (!session_id || !plan || !subscription_id) {
-        return res.redirect('/?error=invalid_params');
-      }
-
-      // Verify the payment session
-      const session = await stripe.checkout.sessions.retrieve(session_id as string);
-      
-      if (session.payment_status !== 'paid') {
-        return res.redirect('/?error=payment_not_completed');
-      }
-
-      // Now update the subscription with the new price
-      const subscription = await stripe.subscriptions.retrieve(subscription_id as string);
-      const newPriceId = session.metadata?.newPriceId;
-      
-      if (newPriceId) {
-        await stripe.subscriptions.update(subscription_id as string, {
-          items: [{
-            id: subscription.items.data[0].id,
-            price: newPriceId,
-          }],
-          proration_behavior: 'create_prorations',
-        });
-      }
-
-      // Update user plan in database
-      const planMapping = {
-        'standard': { plan: 'standard', interval: 'monthly' },
-        'standard-yearly': { plan: 'standard', interval: 'yearly' },
-        'premium': { plan: 'premium', interval: 'monthly' },
-        'premium-yearly': { plan: 'premium', interval: 'yearly' }
-      };
-
-      const planConfig = planMapping[plan as keyof typeof planMapping];
-      if (planConfig && session.metadata?.userId) {
-        await storage.updateUserPlan(session.metadata.userId, planConfig.plan as 'free' | 'standard' | 'premium', planConfig.interval as 'monthly' | 'yearly');
-      }
-
-      console.log(`Successfully changed subscription ${subscription_id} to ${plan}`);
-      return res.redirect(`/dashboard?upgrade=success&plan=${planConfig?.plan}&interval=${planConfig?.interval}`);
-
-    } catch (error) {
-      console.error('Error processing subscription change:', error);
-      return res.redirect('/?error=subscription_change_failed');
-    }
-  });
-
   // Switch subscription plan with upgrade/downgrade logic
   app.post("/api/switch-plan", isAuthenticated, async (req: any, res: Response) => {
     if (!stripe) {
@@ -494,10 +491,13 @@ export function registerStripeRoutes(app: Express) {
     }
 
     try {
-      const { subscriptionId, newPriceId } = req.body;
+      const { newPriceId } = req.body;
+      // Always the caller's own subscription, never an id from the request body.
+      const ownUser = await storage.getUser(getUserId(req) as string);
+      const subscriptionId = ownUser?.stripeSubscriptionId;
 
       if (!subscriptionId || !newPriceId) {
-        return res.status(400).json({ success: false, error: "Missing subscriptionId or newPriceId" });
+        return res.status(400).json({ success: false, error: "No active subscription or missing newPriceId" });
       }
 
       // Plan hierarchy weights, keyed by the price ids actually in use.
@@ -668,6 +668,7 @@ export function registerStripeRoutes(app: Express) {
           await stripe.subscriptions.cancel(user.stripeSubscriptionId);
         } catch (stripeError) {
           console.error('Error cancelling subscription in Stripe:', stripeError);
+          return res.status(502).json({ error: "We could not cancel the subscription. Nothing was changed." });
         }
       }
 
@@ -688,15 +689,27 @@ export function registerStripeRoutes(app: Express) {
       return res.status(503).json({ message: "Payment processing unavailable" });
     }
 
-    const sig = req.headers['stripe-signature'] as string;
-    let event;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error('[Stripe] STRIPE_WEBHOOK_SECRET is not set; refusing to process webhooks.');
+      return res.status(503).json({ message: "Webhook not configured" });
+    }
 
+    const sig = req.headers['stripe-signature'];
+    if (!sig || !Buffer.isBuffer(req.body)) {
+      return res.status(400).send('Missing signature');
+    }
+
+    let event: Stripe.Event;
     try {
-      // For development, we'll skip webhook signature verification
-      event = req.body;
+      event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
     } catch (err) {
-      console.log('Webhook signature verification failed:', err);
+      console.warn('Stripe webhook signature verification failed:', err instanceof Error ? err.message : err);
       return res.status(400).send('Webhook signature verification failed');
+    }
+
+    if (alreadyProcessed(event.id)) {
+      return res.json({ received: true, duplicate: true });
     }
 
     console.log(`Received webhook event: ${event.type}`);
@@ -735,6 +748,8 @@ export function registerStripeRoutes(app: Express) {
           console.log(`Unhandled webhook event type: ${event.type}`);
       }
     } catch (error) {
+      // Not kept as processed and answered with 500, so Stripe retries the event.
+      forgetEvent(event.id);
       console.error('Error processing webhook:', error);
       return res.status(500).json({ error: 'Webhook processing failed' });
     }
@@ -753,15 +768,24 @@ export function registerStripeRoutes(app: Express) {
   }
 
   // Helper function to map Stripe price ID to plan details
-  function mapStripePriceToPlan(priceId: string) {
-    const priceMapping: { [key: string]: { plan: 'free' | 'standard' | 'premium', interval: 'monthly' | 'yearly' } } = {
-      [process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID || '']: { plan: 'standard', interval: 'monthly' },
-      [process.env.STRIPE_STANDARD_YEARLY_PRICE_ID || '']: { plan: 'standard', interval: 'yearly' },
-      [process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || '']: { plan: 'premium', interval: 'monthly' },
-      [process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || '']: { plan: 'premium', interval: 'yearly' }
+  // Both price lists (usd and pen) are covered. An unknown price returns null so a
+  // paying customer is never downgraded because of a price we do not recognise.
+  async function mapStripePriceToPlan(priceId: string) {
+    const planDetails: Record<PlanKey, { plan: 'standard' | 'premium', interval: 'monthly' | 'yearly' }> = {
+      'standard': { plan: 'standard', interval: 'monthly' },
+      'standard-yearly': { plan: 'standard', interval: 'yearly' },
+      'premium': { plan: 'premium', interval: 'monthly' },
+      'premium-yearly': { plan: 'premium', interval: 'yearly' },
     };
-    
-    return priceMapping[priceId] || { plan: 'free', interval: 'monthly' };
+
+    for (const currency of ['usd', 'pen'] as BillingCurrency[]) {
+      for (const key of Object.keys(planDetails) as PlanKey[]) {
+        if ((await getPlanPriceId(key, currency)) === priceId) return planDetails[key];
+      }
+    }
+
+    console.warn(`[Billing] Unknown Stripe price ${priceId}; plan left unchanged`);
+    return null;
   }
 
   // Handle initial successful checkout
@@ -772,8 +796,9 @@ export function registerStripeRoutes(app: Express) {
       // Extract plan from metadata
       const plan = session.metadata?.plan;
       const userId = session.metadata?.userId;
+      const settled = session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
 
-      if (userId && plan) {
+      if (userId && plan && settled) {
         // Map plan names to database values  
         const planMapping = {
           'free': { plan: 'free', interval: 'monthly' },
@@ -798,6 +823,7 @@ export function registerStripeRoutes(app: Express) {
       }
     } catch (error) {
       console.error('Error processing checkout session completed:', error);
+      throw error;
     }
   }
 
@@ -864,6 +890,7 @@ export function registerStripeRoutes(app: Express) {
       
     } catch (error) {
       console.error('Error handling payment failure:', error);
+      throw error;
     }
   }
 
@@ -890,12 +917,13 @@ export function registerStripeRoutes(app: Express) {
       const priceId = subscription.items.data[0]?.price.id;
       
       if (priceId) {
-        const planConfig = mapStripePriceToPlan(priceId);
-        
+        const planConfig = await mapStripePriceToPlan(priceId);
+
         // Ensure user has the correct plan (in case they were downgraded)
-        await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
-        
-        console.log(`Confirmed user ${user.id} on ${planConfig.plan} plan (${planConfig.interval})`);
+        if (planConfig) {
+          await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
+          console.log(`Confirmed user ${user.id} on ${planConfig.plan} plan (${planConfig.interval})`);
+        }
       }
 
       // Clear grace period and reset failure count
@@ -913,6 +941,7 @@ export function registerStripeRoutes(app: Express) {
       
     } catch (error) {
       console.error('Error handling successful payment:', error);
+      throw error;
     }
   }
 
@@ -933,9 +962,11 @@ export function registerStripeRoutes(app: Express) {
           // Subscription is active, ensure user has correct plan
           const priceId = subscription.items.data[0]?.price.id;
           if (priceId) {
-            const planConfig = mapStripePriceToPlan(priceId);
-            await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
-            console.log(`User ${user.id} subscription active: ${planConfig.plan} (${planConfig.interval})`);
+            const planConfig = await mapStripePriceToPlan(priceId);
+            if (planConfig) {
+              await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
+              console.log(`User ${user.id} subscription active: ${planConfig.plan} (${planConfig.interval})`);
+            }
           }
           break;
           
@@ -946,6 +977,10 @@ export function registerStripeRoutes(app: Express) {
           
         case 'canceled':
         case 'unpaid':
+          if (user.stripeSubscriptionId && user.stripeSubscriptionId !== subscription.id) {
+            console.log(`Ignoring ${subscription.status} old subscription ${subscription.id} for user ${user.id}`);
+            break;
+          }
           // Subscription cancelled or unpaid, downgrade to free
           await storage.updateUserPlan(user.id, 'free', 'monthly');
           console.log(`User ${user.id} downgraded to free due to subscription status: ${subscription.status}`);
@@ -957,6 +992,7 @@ export function registerStripeRoutes(app: Express) {
       
     } catch (error) {
       console.error('Error handling subscription update:', error);
+      throw error;
     }
   }
 
@@ -971,6 +1007,13 @@ export function registerStripeRoutes(app: Express) {
         return;
       }
 
+      // An upgrade cancels the old subscription on purpose. Only the subscription we have
+      // stored for this person may end their plan.
+      if (user.stripeSubscriptionId && user.stripeSubscriptionId !== subscription.id) {
+        console.log(`Ignoring deletion of old subscription ${subscription.id} for user ${user.id}`);
+        return;
+      }
+
       // Downgrade user to free plan
       await storage.updateUserPlan(user.id, 'free', 'monthly');
       
@@ -981,6 +1024,7 @@ export function registerStripeRoutes(app: Express) {
       
     } catch (error) {
       console.error('Error handling subscription deletion:', error);
+      throw error;
     }
   }
 
@@ -998,16 +1042,18 @@ export function registerStripeRoutes(app: Express) {
       // Get plan details from subscription
       const priceId = subscription.items.data[0]?.price.id;
       if (priceId) {
-        const planConfig = mapStripePriceToPlan(priceId);
-        
-        await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
-        await storage.updateUserStripeInfo(user.id, subscription.customer, subscription.id);
-        
-        console.log(`User ${user.id} new subscription: ${planConfig.plan} (${planConfig.interval})`);
+        const planConfig = await mapStripePriceToPlan(priceId);
+
+        if (planConfig) {
+          await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
+          await storage.updateUserStripeInfo(user.id, subscription.customer, subscription.id);
+          console.log(`User ${user.id} new subscription: ${planConfig.plan} (${planConfig.interval})`);
+        }
       }
       
     } catch (error) {
       console.error('Error handling subscription creation:', error);
+      throw error;
     }
   }
 
@@ -1057,8 +1103,7 @@ export function registerStripeRoutes(app: Express) {
       }
 
       // Construct proper return URL with HTTPS scheme
-      const origin = req.headers.origin || 'http://localhost:5000';
-      const returnUrl = origin.startsWith('http') ? `${origin}/profile` : `https://${origin}/profile`;
+      const returnUrl = `${appBaseUrl()}/profile`;
       
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: user.stripeCustomerId,

@@ -141,11 +141,15 @@ export function verifyWebhookSignature(params: {
   requestId: string | undefined;
   dataId: string | undefined;
   secret: string | undefined;
+  /** When given, signatures older than `toleranceMs` are rejected (replay protection). */
+  now?: number;
+  toleranceMs?: number;
 }): boolean {
-  const { signatureHeader, requestId, dataId, secret } = params;
-  // Without a configured secret there is nothing to verify; callers still re-read the
-  // preapproval from the API, so a forged id cannot upgrade anyone who did not pay.
-  if (!secret) return true;
+  const { signatureHeader, requestId, dataId, secret, now, toleranceMs = 10 * 60 * 1000 } = params;
+  // Production never skips verification. Elsewhere a missing secret is allowed (local
+  // dev); callers still re-read the preapproval from the API, so a forged id cannot
+  // upgrade anyone who did not pay.
+  if (!secret) return process.env.NODE_ENV !== 'production';
   if (!signatureHeader || !dataId) return false;
 
   const parts = signatureHeader.split(',').reduce<Record<string, string>>((acc, part) => {
@@ -157,6 +161,13 @@ export function verifyWebhookSignature(params: {
   const ts = parts.ts;
   const v1 = parts.v1;
   if (!ts || !v1) return false;
+
+  if (now !== undefined) {
+    const stamp = Number(ts);
+    if (!Number.isFinite(stamp)) return false;
+    const stampMs = stamp < 1e12 ? stamp * 1000 : stamp; // seconds or milliseconds
+    if (Math.abs(now - stampMs) > toleranceMs) return false;
+  }
 
   const manifest = `id:${dataId};request-id:${requestId ?? ''};ts:${ts};`;
   const expected = crypto.createHmac('sha256', secret).update(manifest).digest('hex');

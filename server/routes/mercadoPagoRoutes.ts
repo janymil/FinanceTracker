@@ -9,6 +9,7 @@ import {
   isMercadoPagoConfigured,
   verifyWebhookSignature,
 } from '../mercadopago';
+import { regionForRequest } from '../billingRegion';
 import type { BillingInterval, PlanId } from '../../shared/pricing';
 
 const PAID_PLANS: PlanId[] = ['standard', 'premium'];
@@ -17,12 +18,13 @@ const INTERVALS: BillingInterval[] = ['monthly', 'yearly'];
 function baseUrl(req: Request): string {
   const configured = process.env.APP_URL || process.env.UPTIME_BASE_URL;
   if (configured) return configured.replace(/\/$/, '');
-  const origin = req.headers.origin;
-  if (typeof origin === 'string' && origin.startsWith('http')) return origin.replace(/\/$/, '');
   return 'https://kaptia.app';
 }
 
 async function activatePlan(userId: string, plan: PlanId, interval: BillingInterval, preapprovalId: string) {
+  const current = await storage.getUser(userId);
+  // Stripe stays in charge when it is the one paying for a plan.
+  if (current?.stripeSubscriptionId && current.plan !== 'free') return;
   await storage.updateUserPlan(userId, plan, interval);
   await storage.updateUser(userId, { mpPreapprovalId: preapprovalId });
   console.log(`[MercadoPago] ${userId} activated ${plan} (${interval}) via preapproval ${preapprovalId}`);
@@ -31,6 +33,8 @@ async function activatePlan(userId: string, plan: PlanId, interval: BillingInter
 async function deactivatePlan(userId: string, preapprovalId: string) {
   const user = await storage.getUser(userId);
   if (!user) return;
+  // A replaced (old) preapproval ending must not downgrade someone already on a new one.
+  if (user.mpPreapprovalId && user.mpPreapprovalId !== preapprovalId) return;
   // A Stripe subscription, if any, stays in charge.
   if (user.stripeSubscriptionId) return;
   await storage.updateUserPlan(userId, 'free', 'monthly');
@@ -61,11 +65,41 @@ export function registerMercadoPagoRoutes(app: Express) {
 
     const user = await storage.getUser(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // One paid subscription at a time: a Stripe subscriber must cancel it first.
+    if (user.stripeSubscriptionId && user.plan !== 'free') {
+      return res.status(409).json({
+        error: 'You already have an active card subscription. Cancel it before switching.',
+        code: 'already_subscribed',
+      });
+    }
+
+    // MercadoPago charges soles, so it is only for Peru. The id is saved before the payer
+    // authorises, so only a *paid* plan counts as an existing MercadoPago subscriber who
+    // may change plan from anywhere.
+    const region = regionForRequest(req);
+    const activeMercadoPagoSubscriber = Boolean(user.mpPreapprovalId) && user.plan !== 'free';
+    if (!activeMercadoPagoSubscriber && region.gateway !== 'mercadopago') {
+      return res.status(403).json({
+        error: 'MercadoPago is only available in Peru.',
+        code: 'wrong_gateway',
+        gateway: region.gateway,
+      });
+    }
     if (!user.email) {
       return res.status(400).json({ error: 'Add an e-mail address to your account before subscribing' });
     }
 
     try {
+      // A second preapproval must never run next to the first: end the old one first.
+      if (user.mpPreapprovalId && user.plan !== 'free') {
+        await cancelPreapproval(user.mpPreapprovalId);
+        // The old plan ends with it; the new plan starts when the new preapproval is
+        // authorised. Someone who walks away from the new authorisation is not left on a
+        // paid plan that nothing is paying for.
+        await deactivatePlan(userId, user.mpPreapprovalId);
+      }
+
       const created = await createPreapproval({
         userId,
         plan,
@@ -149,6 +183,7 @@ export function registerMercadoPagoRoutes(app: Express) {
       requestId: req.headers['x-request-id'] as string | undefined,
       dataId,
       secret: process.env.MERCADOPAGO_WEBHOOK_SECRET,
+      now: Date.now(),
     })) {
       console.warn('[MercadoPago] Rejected webhook with an invalid signature');
       return res.status(401).json({ error: 'Invalid signature' });
@@ -172,6 +207,7 @@ export function registerMercadoPagoRoutes(app: Express) {
       // is already active, so nothing needs to change.
     } catch (error: any) {
       console.error('[MercadoPago] Webhook handling failed:', error?.message || error);
+      return res.status(500).json({ error: 'Webhook handling failed' });
     }
 
     return res.status(200).json({ received: true });

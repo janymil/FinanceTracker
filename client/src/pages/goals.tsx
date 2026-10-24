@@ -729,7 +729,7 @@ export default function Goals() {
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline">
+                            <Button aria-label={t('a11y.delete')} size="sm" variant="outline">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>

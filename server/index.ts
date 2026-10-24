@@ -1,4 +1,6 @@
+import './zodInspect';
 import { config } from "dotenv";
+import { clerkWebhookHandler } from "./clerkWebhook";
 import path from "path";
 import fs from "fs";
 
@@ -33,6 +35,8 @@ import { reportServerError } from './errorGuard/report.js';
 import { verifyEmailTransport } from './emailService.js';
 
 import "./batch-processor.js"; // Initialize batch processing system
+import { startRecurringScheduler } from "./recurringProcessor.js";
+import { startReminderScheduler } from "./reminderNotifier.js";
 
 const app = express();
 
@@ -71,157 +75,10 @@ app.use((req, res, next) => {
 
 // Register Clerk webhooks with raw body parser BEFORE any other middleware
 app.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
-app.post('/api/clerk-webhooks', async (req, res) => {
-  try {
-    // Completely isolated webhook handler - no middleware chain
-    if (process.env.NODE_ENV !== 'production') {
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Webhook disabled in dev' }));
-      return;
-    }
-    
-    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      console.error('CLERK_WEBHOOK_SECRET is not configured');
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Webhook secret not configured' }));
-      return;
-    }
-
-    const svix_id = req.get('svix-id');
-    const svix_timestamp = req.get('svix-timestamp');
-    const svix_signature = req.get('svix-signature');
-
-    if (!svix_id || !svix_timestamp || !svix_signature) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Missing required svix headers' }));
-      return;
-    }
-
-    // Import Webhook here to avoid circular imports
-    const { Webhook } = await import('svix');
-    const wh = new Webhook(webhookSecret);
-    let evt;
-
-    try {
-      evt = wh.verify(req.body, {
-        'svix-id': svix_id,
-        'svix-timestamp': svix_timestamp,
-        'svix-signature': svix_signature,
-      });
-    } catch (err) {
-      console.error('Webhook verification failed:', err);
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Webhook verification failed' }));
-      return;
-    }
-
-    const { type, data } = evt as any;
-    console.log(`Clerk webhook received: ${type} for user ${data.id}`);
-
-    // Import storage here to avoid circular imports
-    const { storage } = await import('./storage');
-
-    switch (type) {
-      case 'user.created':
-        await handleUserCreatedInline(data, storage);
-        break;
-      case 'user.updated':
-        await handleUserUpdatedInline(data, storage);
-        break;
-      case 'user.deleted':
-        await handleUserDeletedInline(data, storage);
-        break;
-      default:
-        console.log(`Unhandled webhook event type: ${type}`);
-    }
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ received: true }));
-    
-  } catch (error) {
-    console.error('Clerk webhook error:', error);
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Internal server error' }));
-  }
-});
-
-// Inline webhook handlers to avoid imports
-async function handleUserCreatedInline(userData: any, storage: any) {
-  try {
-    const { id, email_addresses, first_name, last_name, image_url, phone_numbers, created_at } = userData;
-    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id)?.email_address;
-    const primaryPhone = phone_numbers?.find((phone: any) => phone.id === userData.primary_phone_number_id)?.phone_number;
-
-    const newUser = {
-      id: id,
-      email: primaryEmail || null,
-      firstName: first_name || null,
-      lastName: last_name || null,
-      profileImageUrl: image_url || null,
-      phone: primaryPhone || null,
-      plan: 'free',
-      settings: null,
-      createdAt: new Date(created_at),
-      updatedAt: new Date()
-    };
-
-    await storage.createUser(newUser);
-    console.log(`User created in database: ${id} (${primaryEmail})`);
-  } catch (error) {
-    console.error('Error creating user from webhook:', error);
-    throw error;
-  }
-}
-
-async function handleUserUpdatedInline(userData: any, storage: any) {
-  try {
-    const { id, email_addresses, first_name, last_name, image_url, phone_numbers, updated_at } = userData;
-    const existingUser = await storage.getUser(id);
-    
-    if (!existingUser) {
-      console.log(`User ${id} not found in database, creating from update event`);
-      return await handleUserCreatedInline(userData, storage);
-    }
-    
-    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id)?.email_address;
-    const primaryPhone = phone_numbers?.find((phone: any) => phone.id === userData.primary_phone_number_id)?.phone_number;
-
-    const updatedUser = {
-      ...existingUser,
-      email: primaryEmail || existingUser.email,
-      firstName: first_name || existingUser.firstName,
-      lastName: last_name || existingUser.lastName,
-      profileImageUrl: image_url || existingUser.profileImageUrl,
-      phone: primaryPhone || existingUser.phone,
-      updatedAt: new Date(updated_at || Date.now())
-    };
-
-    await storage.updateUser(id, updatedUser);
-    console.log(`User updated in database: ${id} (${primaryEmail})`);
-  } catch (error) {
-    console.error('Error updating user from webhook:', error);
-    throw error;
-  }
-}
-
-async function handleUserDeletedInline(userData: any, storage: any) {
-  try {
-    const { id } = userData;
-    const existingUser = await storage.getUser(id);
-    
-    if (!existingUser) {
-      console.log(`User ${id} not found in database, nothing to delete`);
-      return;
-    }
-
-    await storage.deleteUserCompletely(id);
-    console.log(`User deleted from database: ${id}`);
-  } catch (error) {
-    console.error('Error deleting user from webhook:', error);
-    throw error;
-  }
-}
+// Stripe signs the exact bytes it sends, so its webhook also needs the raw body.
+app.use('/api/stripe-webhook', express.raw({ type: 'application/json' }));
+// Signature-checked in every environment; see server/clerkWebhook.ts.
+app.post('/api/clerk-webhooks', clerkWebhookHandler);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -234,8 +91,12 @@ app.set('trust proxy', 1);
 const isProduction = process.env.NODE_ENV === 'production';
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
+  if (isProduction) {
+    // A guessable secret would let anyone forge an admin session cookie.
+    throw new Error('SESSION_SECRET must be set in production.');
+  }
   console.error(
-    '[SESSION] SESSION_SECRET is missing — falling back to an insecure default. ' +
+    '[SESSION] SESSION_SECRET is missing — falling back to an insecure development default. ' +
     'Set SESSION_SECRET in .env and restart.'
   );
 }
@@ -327,8 +188,26 @@ app.use((req, res, next) => {
       // Security headers for frontend user routes
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('X-Frame-Options', 'DENY');
-      res.setHeader('X-XSS-Protection', '1; mode=block');
+      res.setHeader('X-XSS-Protection', '0'); // legacy filter is itself an attack surface
       res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+      res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=(), payment=(self)');
+      // Report-only for now: watch the browser console on a staging pass, then rename to
+      // `Content-Security-Policy` to enforce. Lists every third party the app talks to.
+      res.setHeader('Content-Security-Policy-Report-Only', [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.kaptia.app https://js.stripe.com https://www.googletagmanager.com https://challenges.cloudflare.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com data:",
+        "img-src 'self' data: blob: https:",
+        "media-src 'self' blob: https:",
+        "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.kaptia.app https://api.stripe.com https://www.google-analytics.com https://*.google-analytics.com https://*.mercadopago.com",
+        "frame-src https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.mercadopago.com",
+        "worker-src 'self' blob:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self' https://*.mercadopago.com",
+        "frame-ancestors 'none'",
+      ].join('; '));
       
       // HTTPS Security headers for production
       if (process.env.NODE_ENV === 'production') {
@@ -435,27 +314,12 @@ seoRoutes.forEach(route => {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
+  // Response bodies are not logged: they carry people's financial data.
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
     }
   });
 
@@ -467,7 +331,8 @@ app.use((req, res, next) => {
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    // Server faults never echo their internal message to the browser.
+    const message = status >= 500 ? "Internal Server Error" : (err.message || "Bad request");
 
     // Never crash the process for a single failed request; report and answer.
     // Error Guard takes this over from Sentry (blueprint 07): same data, ours only.
@@ -479,6 +344,12 @@ app.use((req, res, next) => {
     if (!res.headersSent) {
       res.status(status).json({ message });
     }
+  });
+
+  // An endpoint that does not exist answers 404 as JSON. Without this the page fallback below
+  // answers 200 with the HTML of the home page, so a wrong URL or method looks like success.
+  app.use('/api', (_req: Request, res: Response) => {
+    res.status(404).json({ message: 'Not found' });
   });
 
   // importantly only setup vite in development and after
@@ -528,6 +399,10 @@ app.use((req, res, next) => {
     ...(process.platform === "win32" ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
+    // Creates the repeats that recurring transactions owe (hourly, idempotent).
+    startRecurringScheduler();
+    // E-mails bill reminders when their "remind me N days before" moment arrives.
+    startReminderScheduler();
   });
 })();
 

@@ -1,29 +1,27 @@
 /**
- * AI triage client — talks to the **AI processor service**, not to a provider directly.
+ * AI triage client.
  *
- * The processor (`external-services/ai-processor`, deployed at `AI_PROCESSOR_URL`) owns the
- * provider keys, the model router, the prompt and the cost log. It exposes one new route,
- * `POST /error-triage`, mounted by `registerErrorGuardTriage(app)`. Nothing else in that
- * service changed.
+ * The prompt and the model call live in ./triagePrompt (the Kaptia app owns its prompts); the
+ * call goes through lib/aiProvider, so it reaches the ai-processor gateway first and falls back
+ * to a provider directly. There is no Kaptia-specific route on the gateway any more.
  *
  * This module's job is narrow:
  *  - decide whether to call at all (off switch, daily budget, one call at a time),
  *  - build a metadata-only payload (`buildTriagePayload`),
- *  - survive a dead/hanging service (timeout + cooldown),
+ *  - survive a dead/hanging model (cooldown),
  *  - validate the answer and store it.
  *
  * It never throws into the caller: the caller is the flush path of the error tracker.
  */
 import {
-  TRIAGE_PATH,
   buildTriagePayload,
   parseTriageResponse,
   toGuardAnalysis,
   type TriagePayload,
 } from '@shared/errorGuard/triage';
 import { getGroup, getSamples, saveAnalysis, setAIStatus } from './store';
+import { runTriageModel } from './triagePrompt';
 
-const PROCESSOR_TIMEOUT_MS = Number(process.env.ERROR_GUARD_AI_TIMEOUT_MS) || 20_000;
 const PROCESSOR_COOLDOWN_MS = Number(process.env.ERROR_GUARD_AI_COOLDOWN_MS) || 300_000;
 const DAILY_BUDGET = Number(process.env.ERROR_GUARD_AI_BUDGET) || 25;
 const MAX_CONCURRENT = 1;
@@ -33,11 +31,7 @@ let budgetDay = new Date().toISOString().slice(0, 10);
 let processorDownUntil = 0;
 const inFlight = new Set<string>();
 
-function processorUrl(): string {
-  return (process.env.AI_PROCESSOR_URL || 'https://ai-processor.formatika.dev').replace(/\/+$/, '');
-}
-
-/** `ERROR_GUARD_AI=off` is the only switch. The keys live in the processor, not here. */
+/** `ERROR_GUARD_AI=off` is the only switch. */
 export function isTriageEnabled(): boolean {
   return process.env.ERROR_GUARD_AI !== 'off';
 }
@@ -48,7 +42,7 @@ export interface TriageStats {
   budget: number;
   inFlight: number;
   processorReachable: boolean;
-  processorUrl: string;
+  processorUrl: string | null;
 }
 
 export function getTriageStats(): TriageStats {
@@ -58,7 +52,7 @@ export function getTriageStats(): TriageStats {
     budget: DAILY_BUDGET,
     inFlight: inFlight.size,
     processorReachable: Date.now() >= processorDownUntil,
-    processorUrl: processorUrl(),
+    processorUrl: process.env.AI_PROCESSOR_ENABLED === 'true' ? (process.env.AI_PROCESSOR_URL ?? null) : null,
   };
 }
 
@@ -80,43 +74,8 @@ export type TriageOutcome =
       reason: 'disabled' | 'budget' | 'in-flight' | 'missing' | 'invalid' | 'unavailable' | 'failed';
     };
 
-interface ProcessorResponse {
-  analysis?: unknown;
-  model?: string;
-}
-
-async function callProcessor(payload: TriagePayload): Promise<ProcessorResponse> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), PROCESSOR_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(`${processorUrl()}${TRIAGE_PATH}`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(process.env.AI_PROCESSOR_API_KEY ? { 'x-api-key': process.env.AI_PROCESSOR_API_KEY } : {}),
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const detail = (await response.text()).slice(0, 120);
-      const error: Error & { status?: number } = new Error(
-        `processor HTTP ${response.status}: ${detail}`,
-      );
-      error.status = response.status;
-      throw error;
-    }
-
-    return (await response.json()) as ProcessorResponse;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
 /**
- * Analyse one group through the AI processor.
+ * Analyse one group.
  *
  * Fire-and-forget from the flush path; returns an outcome so the admin "Explain this"
  * button can say what happened instead of hanging.
@@ -146,17 +105,17 @@ export async function analyzeGroup(groupId: string): Promise<TriageOutcome> {
 
     const samples = await getSamples(groupId, 3);
     const payload = buildTriagePayload(group, samples);
-    const response = await callProcessor(payload);
+    const response = await runTriageModel(payload);
 
     const parsed = parseTriageResponse(response.analysis);
     if (!parsed) {
       await setAIStatus(groupId, 'failed').catch(() => undefined);
       // Log the group id, never the payload: it is derived from user-facing text.
-      console.warn(`[errorGuard] processor returned an unusable shape for group ${groupId}`);
+      console.warn(`[errorGuard] model returned an unusable shape for group ${groupId}`);
       return { ok: false, reason: 'invalid' };
     }
 
-    const model = response.model ?? 'ai-processor';
+    const model = response.model;
     await saveAnalysis(groupId, toGuardAnalysis(parsed), model);
     processorDownUntil = 0;
     return { ok: true, model };

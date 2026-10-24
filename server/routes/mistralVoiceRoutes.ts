@@ -6,7 +6,11 @@ import { storage } from '../storage.js';
 import { matchCategoryLocally } from '../categoryMatcher.js';
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith('audio/') || file.mimetype === 'video/webm'),
+});
 const mistralClient = new MistralClient();
 
 // Mistral voice transcription and parsing endpoint

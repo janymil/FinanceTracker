@@ -54,6 +54,12 @@ export const users = pgTable("users", {
   aiEnabled: boolean("ai_enabled").default(true).notNull(),
   // MercadoPago subscription that pays for the current plan in Peru (null for Stripe).
   mpPreapprovalId: varchar("mp_preapproval_id"),
+  // Last language the person used in the app ('en' | 'es' | 'sk'); e-mails are sent in it.
+  language: varchar("language", { length: 5 }),
+  // Bill reminders and the weekly summary by e-mail. On by default, off in Profile.
+  emailNotifications: boolean("email_notifications").default(true).notNull(),
+  // IANA zone (America/Lima) that decides where "this month" starts and ends. null = not chosen yet.
+  timezone: varchar("timezone", { length: 64 }),
 });
 
 // Payment failure log table for tracking payment issues
@@ -79,7 +85,9 @@ export const categories = pgTable("categories", {
   icon: varchar("icon", { length: 50 }).notNull(),
   color: varchar("color", { length: 20 }).notNull(),
   type: varchar("type", { length: 20 }).notNull(), // 'income', 'expense', or 'goal'
-});
+}, (table) => [
+  index("IDX_categories_user").on(table.userId),
+]);
 
 // Financial transactions
 export const transactions = pgTable("transactions", {
@@ -105,7 +113,10 @@ export const transactions = pgTable("transactions", {
   ocrVendor: varchar("ocr_vendor", { length: 255 }),
   ocrDetectedAmount: decimal("ocr_detected_amount", { precision: 12, scale: 2 }),
   ocrDetectedDate: timestamp("ocr_detected_date"),
-});
+}, (table) => [
+  index("IDX_transactions_user_date").on(table.userId, table.date),
+  index("IDX_transactions_category").on(table.categoryId),
+]);
 
 // Recurring transactions table (separate for cleaner implementation)
 export const recurringTransactions = pgTable("recurring_transactions", {
@@ -121,7 +132,9 @@ export const recurringTransactions = pgTable("recurring_transactions", {
   isActive: boolean("is_active").default(true),
   lastProcessed: timestamp("last_processed"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+  // The transaction the user entered; deleting or un-recurring it stops the rule.
+  sourceTransactionId: integer("source_transaction_id"),
+}, (table) => [index("IDX_recurring_active_user").on(table.isActive, table.userId)]);
 
 // Budget categories
 export const budgets = pgTable("budgets", {
@@ -133,7 +146,9 @@ export const budgets = pgTable("budgets", {
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("IDX_budgets_user").on(table.userId),
+]);
 
 // Expense reminders for future and recurring payments
 export const expenseReminders = pgTable("expense_reminders", {
@@ -156,7 +171,9 @@ export const expenseReminders = pgTable("expense_reminders", {
   referenceNote: text("reference_note"), // Account number or other reference info
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("IDX_expense_reminders_user_due").on(table.userId, table.dueDate),
+]);
 
 // Financial goals
 export const goals = pgTable("goals", {
@@ -171,7 +188,9 @@ export const goals = pgTable("goals", {
   status: varchar("status", { length: 50 }).default("active").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("IDX_goals_user").on(table.userId),
+]);
 
 // Backup settings for cloud storage
 export const backupSettings = pgTable("backup_settings", {
@@ -246,7 +265,9 @@ export const goalContributions = pgTable("goal_contributions", {
   contributionType: varchar("contribution_type", { length: 50 }).default("manual").notNull(), // manual, automatic, milestone
   transactionId: integer("transaction_id").references(() => transactions.id), // Link to actual transaction
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("IDX_goal_contributions_goal").on(table.goalId),
+]);
 
 // Merchant learning from user corrections
 export const merchantLearning = pgTable("merchant_learning", {
@@ -291,7 +312,9 @@ export const goalMessages = pgTable("goal_messages", {
   metadata: jsonb("metadata"), // Additional data like contribution amount, etc.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("IDX_goal_messages_goal").on(table.goalId),
+]);
 
 // Challenge activities and updates
 export const challengeActivities = pgTable("challenge_activities", {
@@ -798,4 +821,33 @@ export const jobRuns = pgTable(
     durationMs: integer("duration_ms"),
   },
   (table) => [index("IDX_job_runs_name_started").on(table.jobName, table.startedAt)],
+);
+
+/**
+ * Libro de Reclamaciones (Peru, Ley 29571). Public form, so there is no user foreign key:
+ * a consumer does not need an account to register a claim. Rows are kept as the legal record.
+ */
+export const complaints = pgTable(
+  "complaints",
+  {
+    id: serial("id").primaryKey(),
+    code: varchar("code", { length: 24 }).notNull(),
+    kind: varchar("kind", { length: 10 }).notNull(), // 'reclamo' | 'queja'
+    fullName: varchar("full_name", { length: 160 }).notNull(),
+    documentType: varchar("document_type", { length: 12 }).notNull(), // dni | ce | passport | ruc
+    documentNumber: varchar("document_number", { length: 24 }).notNull(),
+    address: varchar("address", { length: 240 }).notNull(),
+    email: varchar("email", { length: 160 }).notNull(),
+    phone: varchar("phone", { length: 32 }),
+    service: varchar("service", { length: 160 }).notNull(),
+    amountClaimed: varchar("amount_claimed", { length: 32 }),
+    detail: text("detail").notNull(),
+    request: text("request").notNull(),
+    language: varchar("language", { length: 5 }).notNull().default("es"),
+    status: varchar("status", { length: 12 }).notNull().default("open"), // open | answered
+    response: text("response"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    answeredAt: timestamp("answered_at"),
+  },
+  (table) => [uniqueIndex("UQ_complaints_code").on(table.code), index("IDX_complaints_email").on(table.email)],
 );

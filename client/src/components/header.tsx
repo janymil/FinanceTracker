@@ -207,7 +207,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       <div className="flex items-center justify-between h-full px-4">
         {/* Left side - Mobile menu button and quick actions */}
         <div className="flex items-center space-x-4">
-          <Button
+          <Button aria-label={t('a11y.open_menu')}
             variant="ghost"
             size="sm"
             onClick={onMenuClick}

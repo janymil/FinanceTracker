@@ -1,5 +1,5 @@
 import Groq from 'groq-sdk';
-import { anonymizeMessages } from '../shared/aiAnonymizer';
+import { createRoutedClient } from '../lib/aiProvider';
 
 if (!process.env.GROQ_API_KEY) {
   console.warn('GROQ_API_KEY not set in environment variables - Groq voice features will be unavailable until configured.');
@@ -9,12 +9,16 @@ export const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY || 'missing-groq-api-key',
 });
 
-/** Every chat call is scrubbed: no e-mails, IBANs, cards, phones or names reach Groq. */
+const routed = createRoutedClient();
+
+/**
+ * Chat goes through lib/aiProvider like every other prompt: the ai-processor gateway first,
+ * then the shared fallback chain, with the anonymiser applied at that one choke point (no
+ * e-mails, IBANs, cards, phones or names leave). Speech-to-text below still calls Groq directly:
+ * the gateway only carries chat requests.
+ */
 async function createChat(params: any): Promise<any> {
-  return groq.chat.completions.create({
-    ...params,
-    messages: anonymizeMessages(params.messages),
-  });
+  return routed.chat.completions.create({ ...params, model: 'openai/gpt-oss-120b', task: 'voice-groq' } as any);
 }
 
 // Groq STT using Distil-Whisper

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { E2E_ENABLED, SKIP_REASON, ensureSession, path } from './support/env';
+import { E2E_ENABLED, SKIP_REASON, ensureSession, path, setPlan } from './support/env';
 
 /**
  * The two promises that must hold in production, checked against the running server:
@@ -8,33 +8,43 @@ import { E2E_ENABLED, SKIP_REASON, ensureSession, path } from './support/env';
  *      `plan_required`, including receipt scanning);
  *   2. the switch in Profile → Preferences really stops AI for the account.
  *
- * The demo account is on the free plan, so it can prove (1) directly and (2) for the
- * persistence part of the switch.
+ * The demo account is put on the free plan for (1) and back on Standard afterwards, so the
+ * other specs (PDF export needs a paid plan) are not affected by the order they run in.
  */
 test.describe('AI consent gate', () => {
   test.skip(!E2E_ENABLED, SKIP_REASON);
 
   test('free plan is refused by every AI endpoint', async ({ page }) => {
     await ensureSession(page);
+    await setPlan(page, 'free');
 
-    const me = await page.request.get('/api/auth/user');
-    expect(me.ok()).toBeTruthy();
-    expect((await me.json()).plan).toBe('free');
+    try {
+      const me = await page.request.get('/api/auth/user');
+      expect(me.ok()).toBeTruthy();
+      expect((await me.json()).plan).toBe('free');
 
-    for (const endpoint of ['/api/ai/insights', '/api/ai/tip']) {
-      const response = await page.request.post(endpoint, { data: {} });
-      expect(response.status(), endpoint).toBe(403);
-      expect((await response.json()).code, endpoint).toBe('plan_required');
+      // Methods matter: insights is a GET, tip is a POST (a wrong method would hit no route at all).
+      const calls = [
+        { endpoint: '/api/ai/insights', send: () => page.request.get('/api/ai/insights') },
+        { endpoint: '/api/ai/tip', send: () => page.request.post('/api/ai/tip', { data: {} }) },
+      ];
+      for (const { endpoint, send } of calls) {
+        const response = await send();
+        expect(response.status(), endpoint).toBe(403);
+        expect((await response.json()).code, endpoint).toBe('plan_required');
+      }
+
+      // Receipt scanning is AI: the photo must not be read for a free account.
+      const upload = await page.request.post('/api/upload-receipt', {
+        multipart: {
+          receipt: { name: 'receipt.png', mimeType: 'image/png', buffer: Buffer.from('not-an-image') },
+        },
+      });
+      expect(upload.status()).toBe(403);
+      expect((await upload.json()).code).toBe('plan_required');
+    } finally {
+      await setPlan(page, 'standard');
     }
-
-    // Receipt scanning is AI: the photo must not be read for a free account.
-    const upload = await page.request.post('/api/upload-receipt', {
-      multipart: {
-        receipt: { name: 'receipt.png', mimeType: 'image/png', buffer: Buffer.from('not-an-image') },
-      },
-    });
-    expect(upload.status()).toBe(403);
-    expect((await upload.json()).code).toBe('plan_required');
   });
 
   test('the AI switch persists and can be turned back on', async ({ page }) => {

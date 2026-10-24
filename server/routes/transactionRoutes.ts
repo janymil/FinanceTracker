@@ -5,13 +5,43 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage, translateCategoryName } from "../categoryTranslations";
 import { insertTransactionSchema } from "@shared/schema";
-import { categorizeExpense } from "../openai";
+import { autoCategorizeTransaction } from "../autoCategorize";
 import { batchProcessor } from "../batch-processor";
+import { monthRange, localParts, rangeStartFrom, rangeEndFrom } from "@shared/timezones";
+import {
+  cleanPositiveAmount as cleanAmount,
+  cleanDateValue as cleanDate,
+  cleanText,
+  cleanId,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_NOTE_LENGTH,
+} from "@shared/trackingInput";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe',
   '#00c49f', '#ffbb28', '#ff8042', '#8dd1e1', '#d084d0'
 ];
+
+const RECURRING_FREQUENCIES = ['daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'];
+
+/** Only web links may be stored; `javascript:` and friends would run when clicked. */
+function cleanUrl(value: unknown): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === '') return null;
+  try {
+    const url = new URL(String(value));
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The category must be the person's own or a shared default (userId null); otherwise its name and colour would leak. */
+async function categoryAllowed(categoryId: number | null | undefined, userId: string): Promise<boolean> {
+  if (categoryId === null || categoryId === undefined) return true;
+  const categories = await storage.getCategories(userId);
+  return categories.some((category) => category.id === categoryId);
+}
 
 export function registerTransactionRoutes(app: Express) {
   // Transaction routes
@@ -25,8 +55,7 @@ export function registerTransactionRoutes(app: Express) {
 
       // Check transaction limits for free plan users
       if (user?.plan === 'free') {
-        const existingTransactions = await storage.getUserTransactions(userId);
-        if (existingTransactions.length >= 100) {
+        if ((await storage.countUserTransactions(userId)) >= 100) {
           return res.status(403).json({ 
             message: "Free plan limited to 100 transaction entries. Upgrade to Standard or Premium for unlimited transaction storage." 
           });
@@ -46,12 +75,45 @@ export function registerTransactionRoutes(app: Express) {
         ocrText = ocrText.substring(0, 500) + '...'; // Truncate for free users
       }
 
+      const amount = cleanAmount(req.body.amount);
+      const date = cleanDate(req.body.date);
+      if (!amount || !date) {
+        return res.status(400).json({ message: "A positive amount and a valid date are required" });
+      }
+      if (!['income', 'expense'].includes(req.body.type)) {
+        return res.status(400).json({ message: "Type must be 'income' or 'expense'" });
+      }
+      const description = cleanText(req.body.description, MAX_DESCRIPTION_LENGTH);
+      if (!description) {
+        return res.status(400).json({ message: `A description of up to ${MAX_DESCRIPTION_LENGTH} characters is required` });
+      }
+      if (req.body.referenceNote && String(req.body.referenceNote).length > MAX_NOTE_LENGTH) {
+        return res.status(400).json({ message: `Note is limited to ${MAX_NOTE_LENGTH} characters` });
+      }
+      const paymentUrl = cleanUrl(req.body.paymentUrl);
+      if (paymentUrl === undefined && req.body.paymentUrl !== undefined) {
+        return res.status(400).json({ message: "Payment link must be an http(s) address" });
+      }
+      if (req.body.recurringFrequency && !RECURRING_FREQUENCIES.includes(req.body.recurringFrequency)) {
+        return res.status(400).json({ message: "Invalid recurring frequency" });
+      }
+
+      const requestedCategory = req.body.categoryId ? cleanId(req.body.categoryId) : null;
+      if (req.body.categoryId && requestedCategory === null) {
+        return res.status(400).json({ message: "Unknown category" });
+      }
+      if (!(await categoryAllowed(requestedCategory, userId))) {
+        return res.status(400).json({ message: "Unknown category" });
+      }
+
       const validatedData = insertTransactionSchema.parse({
         ...req.body,
         userId,
-        categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
-        amount: req.body.amount.toString(),
-        date: new Date(req.body.date),
+        description,
+        paymentUrl: paymentUrl ?? null,
+        categoryId: requestedCategory,
+        amount,
+        date,
         recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
         // OCR fields (optional)
         imageUrl: req.body.imageUrl || null,
@@ -71,8 +133,6 @@ export function registerTransactionRoutes(app: Express) {
       // Handle background processing asynchronously (no await)
       setImmediate(async () => {
         try {
-          const user = await storage.getUser(userId);
-
           // Process voice learning data if present
           if (req.body.voiceLearningData) {
             try {
@@ -107,23 +167,14 @@ export function registerTransactionRoutes(app: Express) {
             }
           }
 
-          // Auto-categorization for premium users (immediate processing)
-          if (user?.plan === 'premium' && !transaction.categoryId && transaction.type === 'expense') {
-            try {
-              const categorization = await categorizeExpense(transaction.description, parseFloat(transaction.amount));
-              if (categorization.confidence > 0.7) { // Only auto-apply if confidence is high
-                // Update transaction with suggested category
-                const categories = await storage.getCategories(userId);
-                const matchingCategory = categories.find(cat => cat.name === categorization.category);
-                if (matchingCategory) {
-                  // userId is required by storage.updateTransaction's ownership guard
-                  await storage.updateTransaction(transaction.id, { categoryId: matchingCategory.id, userId } as any);
-                  console.log(`Auto-categorized transaction ${transaction.id} as ${categorization.category}`);
-                }
-              }
-            } catch (error) {
-              console.error('Auto-categorization error:', error);
+          // Auto-categorization for premium users: same AI gate, the person's own categories
+          try {
+            const outcome = await autoCategorizeTransaction(transaction, userId, getUserLanguage(req));
+            if (outcome.applied) {
+              console.log(`Auto-categorized transaction ${transaction.id} (confidence ${outcome.confidence.toFixed(2)})`);
             }
+          } catch (error) {
+            console.error('Auto-categorization error:', error);
           }
 
           // Schedule this user for batch processing
@@ -185,39 +236,72 @@ export function registerTransactionRoutes(app: Express) {
       }
       const user = await storage.getUser(userId);
 
-      const transactionId = parseInt(req.params.id);
+      const transactionId = cleanId(req.params.id);
 
       // Only update fields that are actually provided in the request
       const updateData: any = { userId }; // Always include userId for security
 
+      if (transactionId === null) {
+        return res.status(400).json({ message: "Invalid transaction id" });
+      }
+
       if (req.body.amount !== undefined) {
-        updateData.amount = req.body.amount.toString();
+        const amount = cleanAmount(req.body.amount);
+        if (!amount) return res.status(400).json({ message: "Amount must be a positive number" });
+        updateData.amount = amount;
       }
       if (req.body.description !== undefined) {
-        updateData.description = req.body.description;
+        const description = cleanText(req.body.description, MAX_DESCRIPTION_LENGTH);
+        if (!description) {
+          return res.status(400).json({ message: `A description of up to ${MAX_DESCRIPTION_LENGTH} characters is required` });
+        }
+        updateData.description = description;
       }
       if (req.body.categoryId !== undefined) {
-        updateData.categoryId = req.body.categoryId ? parseInt(req.body.categoryId) : null;
+        updateData.categoryId = req.body.categoryId ? cleanId(req.body.categoryId) : null;
+        if (req.body.categoryId && updateData.categoryId === null) {
+          return res.status(400).json({ message: "Unknown category" });
+        }
+        if (!(await categoryAllowed(updateData.categoryId, userId))) {
+          return res.status(400).json({ message: "Unknown category" });
+        }
       }
       if (req.body.date !== undefined) {
-        updateData.date = new Date(req.body.date);
+        const date = cleanDate(req.body.date);
+        if (!date) return res.status(400).json({ message: "Invalid date" });
+        updateData.date = date;
       }
       if (req.body.type !== undefined) {
+        if (!['income', 'expense'].includes(req.body.type)) {
+          return res.status(400).json({ message: "Type must be 'income' or 'expense'" });
+        }
         updateData.type = req.body.type;
       }
       if (req.body.isRecurring !== undefined) {
-        updateData.isRecurring = req.body.isRecurring;
+        updateData.isRecurring = Boolean(req.body.isRecurring);
       }
       if (req.body.recurringFrequency !== undefined) {
+        if (req.body.recurringFrequency && !RECURRING_FREQUENCIES.includes(req.body.recurringFrequency)) {
+          return res.status(400).json({ message: "Invalid recurring frequency" });
+        }
         updateData.recurringFrequency = req.body.recurringFrequency;
       }
       if (req.body.recurringEndDate !== undefined) {
-        updateData.recurringEndDate = req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null;
+        const end = cleanDate(req.body.recurringEndDate);
+        if (req.body.recurringEndDate && !end) return res.status(400).json({ message: "Invalid end date" });
+        updateData.recurringEndDate = end;
       }
       if (req.body.paymentUrl !== undefined) {
-        updateData.paymentUrl = req.body.paymentUrl;
+        const paymentUrl = cleanUrl(req.body.paymentUrl);
+        if (paymentUrl === undefined) {
+          return res.status(400).json({ message: "Payment link must be an http(s) address" });
+        }
+        updateData.paymentUrl = paymentUrl;
       }
       if (req.body.referenceNote !== undefined) {
+        if (req.body.referenceNote && String(req.body.referenceNote).length > MAX_NOTE_LENGTH) {
+          return res.status(400).json({ message: `Note is limited to ${MAX_NOTE_LENGTH} characters` });
+        }
         updateData.referenceNote = req.body.referenceNote;
       }
 
@@ -226,6 +310,9 @@ export function registerTransactionRoutes(app: Express) {
 
       return res.json(transaction);
     } catch (error) {
+      if (error instanceof Error && error.message === 'Transaction not found') {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
       console.error("Error updating transaction:", error);
       return res.status(400).json({ message: "Failed to update transaction" });
     }
@@ -237,10 +324,13 @@ export function registerTransactionRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      const user = await storage.getUser(userId);
-
-      const transactionId = parseInt(req.params.id);
-      await storage.deleteTransaction(transactionId, userId);
+      const transactionId = cleanId(req.params.id);
+      if (transactionId === null) {
+        return res.status(400).json({ message: "Invalid transaction id" });
+      }
+      if (!(await storage.deleteTransaction(transactionId, userId))) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
       notifyDataChange(userId, 'transaction');
       return res.json({ success: true });
     } catch (error) {
@@ -270,6 +360,30 @@ export function registerTransactionRoutes(app: Express) {
     }
   });
 
+  // Stop a recurring rule. Transactions it already created stay; no new ones are made.
+  app.delete('/api/recurring-transactions/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const ruleId = parseInt(req.params.id);
+      if (!Number.isInteger(ruleId)) {
+        return res.status(400).json({ message: "Invalid id" });
+      }
+
+      const stopped = await storage.stopRecurringRule(ruleId, userId);
+      if (!stopped) {
+        return res.status(404).json({ message: "Recurring rule not found" });
+      }
+      notifyDataChange(userId, 'transaction');
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error stopping recurring rule:", error);
+      return res.status(500).json({ message: "Failed to stop the recurring rule" });
+    }
+  });
+
   // Financial summary
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
@@ -283,17 +397,20 @@ export function registerTransactionRoutes(app: Express) {
       if (!startDate || !endDate) {
         return res.status(400).json({ message: "Start date and end date are required" });
       }
+      const parsedStart = cleanDate(startDate);
+      const parsedEnd = cleanDate(endDate);
+      if (!parsedStart || !parsedEnd) {
+        return res.status(400).json({ message: "Start date and end date must be valid dates" });
+      }
+      // A plain "2026-10-01" means that calendar day in the person's own time zone.
+      const timeZone = await storage.getUserTimeZone(userId);
+      const start = rangeStartFrom(startDate, parsedStart, timeZone);
+      const end = rangeEndFrom(endDate, parsedEnd, timeZone);
+      if (end < start) {
+        return res.status(400).json({ message: "End date must not be before the start date" });
+      }
 
-      const summary = await storage.getUserFinancialSummary(
-        userId,
-        new Date(startDate as string),
-        new Date(endDate as string)
-      );
-
-      console.log(`🔍 Financial Summary Debug for user ${userId}:`);
-      console.log(`📅 Query params received: startDate=${startDate}, endDate=${endDate}`);
-      console.log(`📅 Date range: ${startDate} to ${endDate}`);
-      console.log(`💰 Raw summary:`, JSON.stringify(summary, null, 2));
+      const summary = await storage.getUserFinancialSummary(userId, start, end);
 
       // Get user language and translate predefined category names
       const userLanguage = getUserLanguage(req);
@@ -305,7 +422,6 @@ export function registerTransactionRoutes(app: Express) {
         }))
       };
 
-      console.log(`🌍 Translated summary:`, JSON.stringify(translatedSummary, null, 2));
       res.json(translatedSummary);
     } catch (error) {
       console.error("Error fetching financial summary:", error);
@@ -321,10 +437,10 @@ export function registerTransactionRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      // Get current month date range
-      const now = new Date();
-      const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      // The current month as the person's own calendar shows it
+      const timeZone = await storage.getUserTimeZone(userId);
+      const today = localParts(new Date(), timeZone);
+      const { start: startDate, end: endDate } = monthRange(today.year, today.month, timeZone);
 
       const summary = await storage.getUserFinancialSummary(userId, startDate, endDate);
 
@@ -354,37 +470,30 @@ export function registerTransactionRoutes(app: Express) {
   // Automatic transaction reminders (Standard/Premium only)
   app.get('/api/transaction-reminders', async (req: any, res) => {
     try {
-      console.log('Transaction reminders endpoint hit - checking authentication...');
       
       // Check authentication first
       let userId: string | null = null;
       try {
         const auth = req.auth();
         userId = auth?.userId || null;
-        console.log(`Auth check result: userId=${userId}, auth=${!!auth}`);
       } catch (authError) {
         console.error('Authentication error:', authError);
         return res.status(401).json({ message: "Authentication required" });
       }
       
       if (!userId) {
-        console.log('No user ID found, returning 401');
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      console.log(`Transaction reminders API called for user: ${userId}`);
       const user = await storage.getUser(userId);
-      console.log(`Transaction reminders check - User: ${userId}, User plan: ${user?.plan}`);
 
       if (!user || user.plan === 'free') {
-        console.log(`Transaction reminders blocked - User plan: ${user?.plan}`);
         return res.status(403).json({ message: "Transaction reminders require Standard or Premium subscription" });
       }
 
-      const daysAhead = req.query.days ? parseInt(req.query.days as string) : 7;
-      console.log(`Fetching reminders for ${daysAhead} days ahead`);
+      const requestedDays = req.query.days ? Number(req.query.days) : 7;
+      const daysAhead = Number.isInteger(requestedDays) ? Math.min(Math.max(requestedDays, 1), 365) : 7;
       const reminders = await storage.getUpcomingTransactionReminders(userId, daysAhead);
-      console.log(`Found ${reminders.length} reminders for user ${userId}:`, JSON.stringify(reminders, null, 2));
       
       // Get user language and translate predefined category names
       const userLanguage = getUserLanguage(req);

@@ -82,7 +82,7 @@ export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeR
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("Filter by Month")}</span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
-            <Button
+            <Button aria-label={t('a11y.previous_months')}
               variant="ghost"
               size="sm"
               onClick={handlePrevMonths}

@@ -1,4 +1,6 @@
+import crypto from 'crypto';
 import {
+  merchantLearning,
   users,
   transactions,
   recurringTransactions,
@@ -81,8 +83,10 @@ import { db } from "./db";
 import { DataEncryption } from "./encryption";
 import { centsToNumber, parseAmountToCents } from "@shared/money";
 import { checkSummary } from "@shared/invariants";
+import { calendarDaysRange, resolveTimeZone } from "@shared/timezones";
 import { reportInvariant } from "./errorGuard/report.js";
 import { UNCATEGORIZED } from "@shared/calculations";
+import { isRecurrenceFrequency, occurrenceAt } from "@shared/recurrence";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, inArray } from "drizzle-orm";
 
 // Verified identity fields fetched from Clerk (see server/routes/authRoutes.ts)
@@ -117,15 +121,17 @@ export interface IStorage {
   getUserTransactions(userId: string, limit?: number): Promise<(Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null })[]>;
   getTransactionsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Array<Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null }>>;
   updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction>;
-  deleteTransaction(id: number, userId: string): Promise<void>;
+  deleteTransaction(id: number, userId: string): Promise<boolean>;
+  countUserTransactions(userId: string): Promise<number>;
+  getUserTimeZone(userId: string): Promise<string>;
   clearUserTransactions(userId: string): Promise<void>;
 
   // Budget operations
   createBudget(budget: InsertBudget): Promise<Budget>;
-  getUserBudgets(userId: string): Promise<(Budget & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null; spent?: number; remaining?: number; percentage?: number })[]>;
+  getUserBudgets(userId: string, timeZone?: string): Promise<(Budget & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null; spent?: number; remaining?: number; percentage?: number })[]>;
   getBudget(id: number): Promise<Budget | undefined>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
-  deleteBudget(id: number, userId: string): Promise<void>;
+  deleteBudget(id: number, userId: string): Promise<boolean>;
   clearUserBudgets(userId: string): Promise<void>;
 
   // Goal operations
@@ -133,7 +139,7 @@ export interface IStorage {
   getUserGoals(userId: string): Promise<Goal[]>;
   getGoal(id: number, userId: string): Promise<Goal | undefined>;
   updateGoal(id: number, userId: string, goal: Partial<InsertGoal>): Promise<Goal>;
-  deleteGoal(id: number, userId: string): Promise<void>;
+  deleteGoal(id: number, userId: string): Promise<boolean>;
 
   // Category operations
   getCategories(userId?: string): Promise<Category[]>;
@@ -257,8 +263,32 @@ export interface IStorage {
   awardAchievement(userId: string, badgeId: string): Promise<UserAchievement>;
 }
 
+/**
+ * What other members of a shared goal may see about a person: a name and an avatar.
+ * Never the e-mail, phone, plan or any billing id that lives on the users row.
+ */
+function publicUser(user: User): User {
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    profileImageUrl: user.profileImageUrl,
+  } as User;
+}
+
+/** A friend is someone you chose to connect with by e-mail, so the e-mail may be shown; billing ids and phone never. */
+function friendUser(user: User): User {
+  return { ...publicUser(user), email: user.email } as User;
+}
+
 export class DatabaseStorage implements IStorage {
   // User operations
+  /** The zone the person chose in Profile; UTC until they do. */
+  async getUserTimeZone(userId: string): Promise<string> {
+    const [row] = await db.select({ timezone: users.timezone }).from(users).where(eq(users.id, userId));
+    return resolveTimeZone(row?.timezone);
+  }
+
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
@@ -503,7 +533,9 @@ export class DatabaseStorage implements IStorage {
     const [newTransaction] = await db.insert(transactions).values(encryptedTransaction).returning();
 
     // If this is a recurring transaction, create a recurring transaction record
-    if (transaction.isRecurring && transaction.recurringFrequency) {
+    // Repeats made by the job carry parentTransactionId; restoring or importing them must not
+    // start a new rule for each one.
+    if (transaction.isRecurring && transaction.recurringFrequency && !transaction.parentTransactionId) {
       try {
         await db.insert(recurringTransactions).values({
           userId: transaction.userId,
@@ -516,6 +548,7 @@ export class DatabaseStorage implements IStorage {
           endDate: transaction.recurringEndDate,
           isActive: true,
           lastProcessed: transaction.date,
+          sourceTransactionId: newTransaction.id,
         });
       } catch (error) {
         console.error('Error creating recurring transaction record:', error);
@@ -679,6 +712,13 @@ export class DatabaseStorage implements IStorage {
             .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId!)))
             .returning();
 
+        if (!updatedTransaction) {
+            throw new Error('Transaction not found');
+        }
+
+        // Keep the repeat rule in step with the transaction the user just edited.
+        await this.syncRecurringRule(updatedTransaction, transaction);
+
         // Return value with proper decryption
         return {
             ...updatedTransaction,
@@ -688,10 +728,95 @@ export class DatabaseStorage implements IStorage {
         };
   }
 
-  async deleteTransaction(id: number, userId: string): Promise<void> {
-    await db
+  async countUserTransactions(userId: string): Promise<number> {
+    const [row] = await db.select({ total: count(transactions.id) }).from(transactions).where(eq(transactions.userId, userId));
+    return Number(row?.total || 0);
+  }
+
+  /** True when a transaction was removed; false when it does not exist or is not the user's. */
+  async deleteTransaction(id: number, userId: string): Promise<boolean> {
+    const deleted = await db
       .delete(transactions)
-      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+      .returning({ id: transactions.id });
+
+    // Deleting the transaction a repeat rule came from also stops the rule.
+    if (deleted.length > 0) {
+      await db
+        .update(recurringTransactions)
+        .set({ isActive: false })
+        .where(and(eq(recurringTransactions.sourceTransactionId, id), eq(recurringTransactions.userId, userId)));
+    }
+    return deleted.length > 0;
+  }
+
+  /** Deactivates one of the user's recurring rules; false when it is not theirs. */
+  async stopRecurringRule(ruleId: number, userId: string): Promise<boolean> {
+    const stopped = await db
+      .update(recurringTransactions)
+      .set({ isActive: false })
+      .where(and(eq(recurringTransactions.id, ruleId), eq(recurringTransactions.userId, userId)))
+      .returning({ id: recurringTransactions.id });
+    return stopped.length > 0;
+  }
+
+  /**
+   * After an edit: un-ticking "recurring" stops the rule; changing the amount, text,
+   * category, type, frequency or end date updates what future repeats will look like.
+   */
+  private async syncRecurringRule(updated: Transaction, patch: Partial<InsertTransaction>): Promise<void> {
+    try {
+      if (patch.isRecurring === false || updated.isRecurring === false) {
+        await db
+          .update(recurringTransactions)
+          .set({ isActive: false })
+          .where(and(eq(recurringTransactions.sourceTransactionId, updated.id), eq(recurringTransactions.userId, updated.userId)));
+        return;
+      }
+
+      if (patch.isRecurring === true && isRecurrenceFrequency(updated.recurringFrequency)) {
+        const [existingRule] = await db
+          .select({ id: recurringTransactions.id })
+          .from(recurringTransactions)
+          .where(and(eq(recurringTransactions.sourceTransactionId, updated.id), eq(recurringTransactions.userId, updated.userId)));
+        if (!existingRule) {
+          await db.insert(recurringTransactions).values({
+            userId: updated.userId,
+            categoryId: updated.categoryId,
+            description: patch.description ?? DataEncryption.decryptDescription(updated.description),
+            amount: updated.amount,
+            type: updated.type,
+            frequency: updated.recurringFrequency,
+            startDate: updated.date,
+            endDate: updated.recurringEndDate,
+            isActive: true,
+            lastProcessed: updated.date,
+            sourceTransactionId: updated.id,
+          });
+          return;
+        }
+        // A stopped rule is switched back on when the person ticks recurring again.
+        await db.update(recurringTransactions).set({ isActive: true }).where(eq(recurringTransactions.id, existingRule.id));
+      }
+
+      const changes: Partial<typeof recurringTransactions.$inferInsert> = {};
+      if (patch.amount !== undefined) changes.amount = patch.amount;
+      if (patch.description !== undefined && patch.description !== DataEncryption.UNREADABLE) changes.description = patch.description;
+      if (patch.categoryId !== undefined) changes.categoryId = patch.categoryId;
+      if (patch.type !== undefined) changes.type = patch.type;
+      if (patch.recurringFrequency) changes.frequency = patch.recurringFrequency;
+      if (patch.recurringEndDate !== undefined) changes.endDate = patch.recurringEndDate;
+
+      if (Object.keys(changes).length > 0) {
+        await db
+          .update(recurringTransactions)
+          .set(changes)
+          .where(and(eq(recurringTransactions.sourceTransactionId, updated.id), eq(recurringTransactions.userId, updated.userId)));
+      }
+    } catch (error) {
+      // The edit itself already succeeded; a rule that could not be synced must not undo it.
+      console.error('Could not sync the recurring rule:', error instanceof Error ? error.message : error);
+    }
   }
 
   async clearUserTransactions(userId: string): Promise<void> {
@@ -709,7 +834,7 @@ export class DatabaseStorage implements IStorage {
     return newBudget;
   }
 
-  async getUserBudgets(userId: string): Promise<(Budget & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null; spent?: number; remaining?: number; percentage?: number })[]> {
+  async getUserBudgets(userId: string, timeZone?: string): Promise<(Budget & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null; spent?: number; remaining?: number; percentage?: number })[]> {
     const budgetData = await db
       .select({
         id: budgets.id,
@@ -729,9 +854,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(budgets.userId, userId))
       .orderBy(desc(budgets.createdAt));
 
+    const zone = timeZone ? resolveTimeZone(timeZone) : await this.getUserTimeZone(userId);
+
     // Calculate actual spending for each budget
     const budgetsWithSpending = await Promise.all(
       budgetData.map(async (budget) => {
+        // The budget covers whole calendar days in the person's zone, first and last day included.
+        const period = calendarDaysRange(budget.startDate, budget.endDate, zone);
         // Calculate total spending for this category within the budget period
         const spendingResult = budget.categoryId ? await db
           .select({
@@ -743,8 +872,8 @@ export class DatabaseStorage implements IStorage {
               eq(transactions.userId, userId),
               eq(transactions.categoryId, budget.categoryId),
               eq(transactions.type, 'expense'),
-              gte(transactions.date, budget.startDate),
-              lte(transactions.date, budget.endDate)
+              gte(transactions.date, period.start),
+              lte(transactions.date, period.end)
             )
           ) : [{ totalSpent: 0 }];
 
@@ -773,20 +902,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(budgets.id, id))
       .limit(1);
 
-    console.log('Storage updateBudget debug:', {
-      budgetId: id,
-      existingBudget: existingBudget[0] || null,
-      budgetUserIdFromRequest: budget.userId,
-      existingBudgetLength: existingBudget.length
-    });
-
     if (!existingBudget.length || existingBudget[0].userId !== budget.userId) {
-      console.log('Budget update failed - ownership check:', {
-        noBudgetFound: !existingBudget.length,
-        userIdMismatch: existingBudget.length > 0 ? existingBudget[0].userId !== budget.userId : 'N/A',
-        existingUserId: existingBudget[0]?.userId,
-        requestUserId: budget.userId
-      });
       throw new Error("Budget not found or unauthorized access");
     }
 
@@ -798,10 +914,12 @@ export class DatabaseStorage implements IStorage {
     return updatedBudget;
   }
 
-  async deleteBudget(id: number, userId: string): Promise<void> {
-    await db
+  async deleteBudget(id: number, userId: string): Promise<boolean> {
+    const deleted = await db
       .delete(budgets)
-      .where(and(eq(budgets.id, id), eq(budgets.userId, userId)));
+      .where(and(eq(budgets.id, id), eq(budgets.userId, userId)))
+      .returning({ id: budgets.id });
+    return deleted.length > 0;
   }
 
   async getBudget(id: number): Promise<Budget | undefined> {
@@ -867,10 +985,12 @@ export class DatabaseStorage implements IStorage {
     return updatedGoal;
   }
 
-  async deleteGoal(id: number, userId: string): Promise<void> {
-    await db
+  async deleteGoal(id: number, userId: string): Promise<boolean> {
+    const deleted = await db
       .delete(goals)
-      .where(and(eq(goals.id, id), eq(goals.userId, userId)));
+      .where(and(eq(goals.id, id), eq(goals.userId, userId)))
+      .returning({ id: goals.id });
+    return deleted.length > 0;
   }
 
   async clearUserGoals(userId: string): Promise<void> {
@@ -1362,6 +1482,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markExpenseReminderCompleted(id: number, userId: string): Promise<void> {
+    const [reminder] = await db
+      .select()
+      .from(expenseReminders)
+      .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId)));
+
+    if (!reminder) return;
+
+    // A repeating bill is not finished when it is paid: it moves to its next due date
+    // (until its end date) and is reminded about again.
+    if (reminder.isRecurring && isRecurrenceFrequency(reminder.recurringFrequency)) {
+      let step = 1;
+      let nextDue = occurrenceAt(reminder.dueDate, reminder.recurringFrequency, step);
+      while (nextDue <= new Date() && step < 1000) {
+        step++;
+        nextDue = occurrenceAt(reminder.dueDate, reminder.recurringFrequency, step);
+      }
+      const withinEnd = !reminder.recurringEndDate || nextDue <= reminder.recurringEndDate;
+      if (withinEnd) {
+        // Compare-and-set on the old due date: a second click finds it already moved.
+        await db
+          .update(expenseReminders)
+          .set({ dueDate: nextDue, isCompleted: false, lastReminded: null, updatedAt: new Date() })
+          .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId), eq(expenseReminders.dueDate, reminder.dueDate)));
+        return;
+      }
+    }
+
     await db
       .update(expenseReminders)
       .set({ isCompleted: true, updatedAt: new Date() })
@@ -1500,6 +1647,9 @@ export class DatabaseStorage implements IStorage {
         // The AI switch and the MercadoPago subscription id must be persistable, otherwise
         // the toggle answers 200 and changes nothing.
         aiEnabled: userData.aiEnabled,
+        emailNotifications: userData.emailNotifications,
+        timezone: userData.timezone,
+        language: userData.language,
         mpPreapprovalId: userData.mpPreapprovalId,
         updatedAt: new Date(),
       };
@@ -1535,6 +1685,28 @@ export class DatabaseStorage implements IStorage {
       if (!existingUser) {
         throw new Error(`User ${userId} not found`);
       }
+
+      // Everything below runs in one transaction (the parameter deliberately shadows the
+      // module-level `db`), so a failure part-way leaves the account untouched.
+      await (db as any).transaction(async (db: any) => {
+      // Goals the person created take everything inside them along: other members' rows
+      // reference the goal, so they must go before the goal (and before the user).
+      const createdGoalIds: number[] = (
+        await db.select({ id: collaborativeGoals.id }).from(collaborativeGoals).where(eq(collaborativeGoals.createdBy, userId))
+      ).map((row: { id: number }) => row.id);
+      if (createdGoalIds.length > 0) {
+        await db.delete(goalMessages).where(inArray(goalMessages.goalId, createdGoalIds));
+        await db.delete(milestoneAchievements).where(inArray(milestoneAchievements.goalId, createdGoalIds));
+        await db.delete(challengeActivities).where(inArray(challengeActivities.goalId, createdGoalIds));
+        await db.delete(goalContributions).where(inArray(goalContributions.goalId, createdGoalIds));
+        await db.delete(collaborativeGoalParticipants).where(inArray(collaborativeGoalParticipants.goalId, createdGoalIds));
+      }
+      // Tables that point at the user and used to block the deletion for anyone who had used AI
+      await db.delete(merchantLearning).where(eq(merchantLearning.userId, userId));
+      await db.delete(aiUsage).where(eq(aiUsage.userId, userId));
+      await db.delete(aiUserOverrides).where(eq(aiUserOverrides.userId, userId));
+      // Chat the person wrote in other people's goals, before their participation goes
+      await db.delete(goalMessages).where(eq(goalMessages.userId, userId));
 
       // Delete all user transactions first
       const deletedTransactions = await db.delete(transactions).where(eq(transactions.userId, userId)).execute();
@@ -1602,6 +1774,7 @@ export class DatabaseStorage implements IStorage {
       // Finally delete the user record
       const deletedUser = await db.delete(users).where(eq(users.id, userId)).execute();
       console.log(`Deleted user record: ${userId}`);
+      });
 
       console.log(`Successfully completed deletion of user: ${userId}`);
 
@@ -1808,7 +1981,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    return friends.map(f => ({ ...f.friendship, friend: f.friend }));
+    return friends.map(f => ({ ...f.friendship, friend: friendUser(f.friend) }));
   }
 
   async getPendingFriendRequests(userId: string): Promise<Array<Friendship & { requester: User }>> {
@@ -1826,7 +1999,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    return requests.map(r => ({ ...r.friendship, requester: r.requester }));
+    return requests.map(r => ({ ...r.friendship, requester: friendUser(r.requester) }));
   }
 
   // Collaborative goal management
@@ -1851,7 +2024,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   private generateJoinCode(): string {
-    return Math.random().toString(36).substring(2, 10).toUpperCase();
+    // 10 characters from a 32-letter alphabet (50 bits) out of a CSPRNG; Math.random is guessable.
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const bytes = crypto.randomBytes(10);
+    return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join('');
+  }
+
+  /** Joins only when the invite code matches (compared in constant time). */
+  async joinCollaborativeGoalWithCode(goalId: number, userId: string, joinCode: string, personalTarget?: number): Promise<CollaborativeGoalParticipant> {
+    const [goal] = await db.select({ joinCode: collaborativeGoals.joinCode }).from(collaborativeGoals).where(eq(collaborativeGoals.id, goalId));
+    const expected = Buffer.from(String(goal?.joinCode ?? '').toUpperCase());
+    const given = Buffer.from(String(joinCode ?? '').trim().toUpperCase());
+    if (!goal || expected.length === 0 || expected.length !== given.length || !crypto.timingSafeEqual(expected, given)) {
+      throw new Error('Invalid invitation code');
+    }
+    return this.joinCollaborativeGoal(goalId, userId, personalTarget);
   }
 
   async getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User }>> {
@@ -1889,10 +2076,10 @@ export class DatabaseStorage implements IStorage {
 
       const participants = participantsWithUsers.map(({ participant, user }) => ({
         ...participant,
-        user,
+        user: publicUser(user),
       }));
 
-      result.push({ ...goal, participants, creator });
+      result.push({ ...goal, participants, creator: publicUser(creator) });
     }
 
     return result;
@@ -1921,7 +2108,9 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    return { ...row.goal, creator: row.creator, participantCount: participants.length };
+    // The invite code is the secret that lets someone in, so a non-member never sees it.
+    const { joinCode: _hidden, ...goalWithoutCode } = row.goal;
+    return { ...goalWithoutCode, joinCode: '', creator: publicUser(row.creator), participantCount: participants.length };
   }
 
   async getGoalParticipant(goalId: number, userId: string): Promise<CollaborativeGoalParticipant | undefined> {
@@ -1956,7 +2145,7 @@ export class DatabaseStorage implements IStorage {
 
     return participantsWithUsers.map(({ participant, user }) => ({
       ...participant,
-      user,
+      user: publicUser(user),
     }));
   }
 
@@ -2017,8 +2206,8 @@ export class DatabaseStorage implements IStorage {
 
     return {
       ...goalWithCreator.goal,
-      creator: goalWithCreator.creator,
-      participants: participants.map(p => ({ ...p.participant, user: p.user })),
+      creator: publicUser(goalWithCreator.creator),
+      participants: participants.map(p => ({ ...p.participant, user: publicUser(p.user) })),
       contributions,
       activities,
     };
@@ -2141,6 +2330,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Delete related data
+    await db.delete(goalMessages).where(eq(goalMessages.goalId, goalId));
     await db.delete(milestoneAchievements).where(eq(milestoneAchievements.goalId, goalId));
     await db.delete(challengeActivities).where(eq(challengeActivities.goalId, goalId));
     await db.delete(goalContributions).where(eq(goalContributions.goalId, goalId));
@@ -2232,7 +2422,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(goalContributions.goalId, goalId))
       .orderBy(desc(goalContributions.createdAt));
 
-    return contributions.map(c => ({ ...c.contribution, user: c.user }));
+    return contributions.map(c => ({ ...c.contribution, user: publicUser(c.user) }));
   }
 
   async updateGoalProgress(goalId: number): Promise<void> {
@@ -2272,7 +2462,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(challengeActivities.goalId, goalId))
       .orderBy(desc(challengeActivities.createdAt));
 
-    return activities.map(a => ({ ...a.activity, user: a.user }));
+    return activities.map(a => ({ ...a.activity, user: publicUser(a.user) }));
   }
 
   // Milestone and achievement tracking
@@ -2821,23 +3011,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(goalMessages.goalId, goalId))
       .orderBy(goalMessages.createdAt);
 
-    return messages.map(m => ({ ...m.message, user: m.user }));
+    return messages.map(m => ({ ...m.message, user: publicUser(m.user) }));
   }
 
-  async updateGoalMessage(messageId: number, updates: Partial<InsertGoalMessage>): Promise<GoalMessage | null> {
+  /** Only the author can edit a message; the userId is part of the WHERE clause. */
+  async updateGoalMessage(messageId: number, userId: string, updates: Partial<InsertGoalMessage>): Promise<GoalMessage | null> {
     const [updatedMessage] = await db
       .update(goalMessages)
       .set({
         ...updates,
         updatedAt: new Date(),
       })
-      .where(eq(goalMessages.id, messageId))
+      .where(and(eq(goalMessages.id, messageId), eq(goalMessages.userId, userId)))
       .returning();
 
     return updatedMessage || null;
   }
 
-  async deleteGoalMessage(messageId: number): Promise<boolean> {
+  /** The author or the goal's creator may delete a message. */
+  async deleteGoalMessage(messageId: number, userId: string): Promise<boolean> {
+    const [row] = await db
+      .select({ authorId: goalMessages.userId, creatorId: collaborativeGoals.createdBy })
+      .from(goalMessages)
+      .innerJoin(collaborativeGoals, eq(goalMessages.goalId, collaborativeGoals.id))
+      .where(eq(goalMessages.id, messageId));
+
+    if (!row || (row.authorId !== userId && row.creatorId !== userId)) {
+      return false;
+    }
+
     const result = await db
       .delete(goalMessages)
       .where(eq(goalMessages.id, messageId))

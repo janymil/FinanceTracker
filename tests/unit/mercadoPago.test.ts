@@ -128,3 +128,30 @@ describe('verifyWebhookSignature', () => {
     expect(verifyWebhookSignature({ signatureHeader: undefined, requestId, dataId, secret: undefined })).toBe(true);
   });
 });
+
+describe('verifyWebhookSignature hardening', () => {
+  const secret = 'whsec_test';
+  const dataId = 'pre-123';
+  const requestId = 'req-1';
+  const sign = (ts: string) =>
+    `ts=${ts},v1=${crypto.createHmac('sha256', secret).update(`id:${dataId};request-id:${requestId};ts:${ts};`).digest('hex')}`;
+
+  it('refuses everything in production when no secret is configured', () => {
+    process.env.NODE_ENV = 'production';
+    expect(verifyWebhookSignature({ signatureHeader: undefined, requestId, dataId, secret: undefined })).toBe(false);
+  });
+
+  it('accepts a fresh signature and rejects an old one (replay)', () => {
+    const now = 1_800_000_000_000;
+    const fresh = sign(String(now - 60_000));
+    const old = sign(String(now - 60 * 60_000));
+    expect(verifyWebhookSignature({ signatureHeader: fresh, requestId, dataId, secret, now })).toBe(true);
+    expect(verifyWebhookSignature({ signatureHeader: old, requestId, dataId, secret, now })).toBe(false);
+  });
+
+  it('reads timestamps in seconds as well as milliseconds', () => {
+    const now = 1_800_000_000_000;
+    const seconds = sign(String(Math.floor((now - 30_000) / 1000)));
+    expect(verifyWebhookSignature({ signatureHeader: seconds, requestId, dataId, secret, now })).toBe(true);
+  });
+});

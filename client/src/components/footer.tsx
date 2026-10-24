@@ -95,7 +95,7 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
           <div>
-            {t("© 2025 Kaptia. All rights reserved.")}
+            {t("footer.rights", { year: new Date().getFullYear() })}
           </div>
           <div className="flex flex-wrap items-center gap-6">
             <Link href={`/${currentLang}/privacy-policy`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
@@ -106,6 +106,9 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
             </Link>
             <Link href={`/${currentLang}/cookie-policy`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("Cookie Policy")}
+            </Link>
+            <Link href={`/${currentLang}/reclamaciones`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
+              {t("footer.reclamaciones")}
             </Link>
           </div>
         </div>

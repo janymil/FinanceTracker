@@ -5,8 +5,20 @@ import fetch from "node-fetch";
 import FormData from "form-data";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 
+import { rateLimit } from "../middleware/rateLimit";
+
 // In-memory storage for mobile upload sessions
 const mobileUploadSessions = new Map<string, any>();
+const SESSION_TTL_MS = 60 * 60 * 1000;
+const MAX_SESSIONS_PER_USER = 5;
+
+const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+};
 
 // Configure multer for memory storage
 const upload = multer({ 
@@ -16,36 +28,35 @@ const upload = multer({
 
 export function registerMobileUploadRoutes(app: any) {
   // Create a new mobile upload session
-  app.post('/api/mobile-upload/create-session', async (req: any, res: any) => {
+  app.post('/api/mobile-upload/create-session', isAuthenticated, rateLimit({ windowMs: 60_000, max: 20, keyPrefix: 'mobile-session', perUser: true }), async (req: any, res: any) => {
     try {
-      // Get user ID from Authorization header directly
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      // The user id is the verified Clerk id, never something the caller typed.
+      const userId = getUserId(req);
+      if (!userId) {
         return res.status(401).json({ message: 'Authentication required' });
       }
-      
-      const token = authHeader.split(' ')[1];
-      // Use the actual user ID from the Bearer token
-      const userId = token;
-      
-      console.log('Creating session for user:', userId);
-      
-      const sessionId = crypto.randomUUID();
-      
-      // Store session data
-      mobileUploadSessions.set(sessionId, {
-        userId: userId,
-        status: 'pending',
-        createdAt: new Date()
-      });
-      
-      // Clean up old sessions (older than 1 hour) and sessions from different users
+
+      // Drop expired sessions (any user), then cap how many one user can hold open.
       for (const [id, session] of Array.from(mobileUploadSessions.entries())) {
-        if (Date.now() - session.createdAt.getTime() > 60 * 60 * 1000 || session.userId !== userId) {
+        if (Date.now() - session.createdAt.getTime() > SESSION_TTL_MS) {
           mobileUploadSessions.delete(id);
         }
       }
-      
+      const mine = Array.from(mobileUploadSessions.entries()).filter(([, s]) => s.userId === userId);
+      if (mine.length >= MAX_SESSIONS_PER_USER) {
+        mine
+          .sort((a, b) => a[1].createdAt.getTime() - b[1].createdAt.getTime())
+          .slice(0, mine.length - MAX_SESSIONS_PER_USER + 1)
+          .forEach(([id]) => mobileUploadSessions.delete(id));
+      }
+
+      const sessionId = crypto.randomUUID();
+      mobileUploadSessions.set(sessionId, {
+        userId,
+        status: 'pending',
+        createdAt: new Date()
+      });
+
       return res.json({ sessionId });
     } catch (error) {
       console.error('Session creation error:', error);
@@ -54,7 +65,9 @@ export function registerMobileUploadRoutes(app: any) {
   });
 
   // Upload receipt from mobile
-  app.post('/api/mobile-upload/upload/:sessionId', upload.single('receipt'), async (req: any, res: any) => {
+  // The phone has no login: the unguessable session id from the QR code is the credential,
+  // and it was issued to an authenticated user above.
+  app.post('/api/mobile-upload/upload/:sessionId', rateLimit({ windowMs: 60_000, max: 10, keyPrefix: 'mobile-upload' }), upload.single('receipt'), async (req: any, res: any) => {
     try {
       const { sessionId } = req.params;
       const file = req.file;
@@ -63,31 +76,26 @@ export function registerMobileUploadRoutes(app: any) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      // Check if session exists
+      const extension = ALLOWED_IMAGE_TYPES[file.mimetype];
+      if (!extension) {
+        return res.status(415).json({ error: 'Only JPEG, PNG, WebP or HEIC photos are accepted' });
+      }
+
       const existingSession = mobileUploadSessions.get(sessionId);
-      if (!existingSession) {
+      if (
+        !existingSession ||
+        Date.now() - existingSession.createdAt.getTime() > SESSION_TTL_MS
+      ) {
         return res.status(404).json({ error: 'Session not found' });
       }
-
-      const userToken = existingSession.userId;
-      
-      // Extract user ID from JWT token stored in session
-      let userId: string;
-      try {
-        // Parse JWT token to extract user ID
-        const tokenParts = userToken.split('.');
-        if (tokenParts.length === 3) {
-          const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-          userId = payload.sub;
-        } else {
-          throw new Error('Invalid JWT format');
-        }
-      } catch (error) {
-        console.error('Failed to extract user ID from JWT:', error);
-        return res.status(401).json({ error: 'Invalid session token' });
+      if (existingSession.status !== 'pending' && existingSession.status !== 'error') {
+        return res.status(409).json({ error: 'This session already received a photo' });
       }
 
-      console.log('Processing mobile upload for user:', userId, 'file size:', file.buffer.length);
+      const userId: string = existingSession.userId;
+      existingSession.status = 'processing';
+
+      console.log('Processing mobile upload, file size:', file.buffer.length);
 
       // Validate file buffer
       if (!file.buffer || file.buffer.length === 0) {
@@ -170,7 +178,8 @@ export function registerMobileUploadRoutes(app: any) {
             const descriptionForCategorization = extractedData.vendor || recognizedText;
             const amountForCategorization = extractedData.amount || 0;
             const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
-            predictedCategory = categorization.category;
+            // A failed answer is "Other 0.1", which would look like a real suggestion
+            if (!categorization.failed) predictedCategory = categorization.category;
             console.log('AI categorization completed');
           } catch (categoryError) {
             console.error('AI categorization failed:', categoryError);
@@ -182,7 +191,7 @@ export function registerMobileUploadRoutes(app: any) {
         // Upload to Bunny.net if user has appropriate plan
         if (canStore) {
           const timestamp = Date.now();
-          const fileName = `receipt-${userId}-${timestamp}.${file.mimetype.split('/')[1]}`;
+          const fileName = `receipt-${userId}-${timestamp}.${extension}`;
           
           try {
             imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);

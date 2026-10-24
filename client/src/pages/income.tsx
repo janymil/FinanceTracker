@@ -40,6 +40,7 @@ import { useDateFormat } from "@/hooks/useDateFormat";
 import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 import TransactionFilters from "@/components/TransactionFilters";
+import { RecurringRulesCard } from "@/components/RecurringRulesCard";
 import SimpleVoiceButton from "@/components/simple-voice-button";
 
 
@@ -599,6 +600,8 @@ export default function Income() {
           </CardContent>
         </Card>
       </div>
+
+      <RecurringRulesCard kind="income" />
 
       {/* Filters */}
       <TransactionFilters

@@ -25,6 +25,10 @@ export interface RateLimitOptions {
   message?: string;
   /** When true, the authenticated user id is used instead of the IP. */
   perUser?: boolean;
+  /** Explicit bucket key (e.g. a user id the caller already resolved). Wins over `perUser`. */
+  keyFn?: (req: Request) => string | null | undefined;
+  /** Stable machine-readable code returned next to the message, so the UI can translate it. */
+  code?: string;
 }
 
 const buckets = new Map<string, Bucket>();
@@ -46,6 +50,9 @@ function prune(now: number): void {
 }
 
 function clientKey(req: Request, options: RateLimitOptions): string {
+  const explicit = options.keyFn?.(req);
+  if (explicit) return explicit;
+
   if (options.perUser) {
     try {
       const auth = typeof (req as any).auth === 'function' ? (req as any).auth() : null;
@@ -95,7 +102,11 @@ export function rateLimit(options: RateLimitOptions) {
       if (existing.count > max) {
         const retryAfter = Math.max(1, Math.ceil((existing.resetAt - now) / 1000));
         res.setHeader('Retry-After', String(retryAfter));
-        return res.status(429).json({ error: message, retryAfterSeconds: retryAfter });
+        return res.status(429).json({
+          error: message,
+          ...(options.code ? { code: options.code } : {}),
+          retryAfterSeconds: retryAfter,
+        });
       }
 
       return next();

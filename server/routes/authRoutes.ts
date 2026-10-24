@@ -1,6 +1,8 @@
 import type { Express } from "express";
+import { isValidTimeZone } from "@shared/timezones";
 import { setupClerkAuth, isAuthenticated, getUserId } from "../clerkAuth";
 import { storage, type ClerkProfile } from "../storage";
+import { resolveStoredCurrency } from "../../shared/currencies";
 
 let clerkClientPromise: Promise<any> | null = null;
 
@@ -121,6 +123,16 @@ export function registerAuthRoutes(app: Express) {
         }
       }
 
+      // Remember the language so reminder e-mails arrive in it.
+      const headerLanguage = String(req.headers['x-user-language'] || '').toLowerCase().slice(0, 2);
+      if (user && ['en', 'es', 'sk'].includes(headerLanguage) && (user as any).language !== headerLanguage) {
+        try {
+          user = await storage.updateUser(userId, { language: headerLanguage } as any);
+        } catch (languageError) {
+          console.warn('[AUTH] Could not store the language preference:', (languageError as Error).message);
+        }
+      }
+
       return res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -137,7 +149,7 @@ export function registerAuthRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const { currency, aiEnabled, firstName, lastName, phone, website } = req.body ?? {};
+      const { currency, aiEnabled, emailNotifications, firstName, lastName, phone, website, timezone } = req.body ?? {};
 
       // Validate currency if provided
       if (currency !== undefined && typeof currency !== "string") {
@@ -147,8 +159,29 @@ export function registerAuthRoutes(app: Express) {
       // Explicit allow-list. The old handler spread the whole body into the update, which
       // let a request change its own `plan`, `stripeCustomerId` or `graceExpiresAt`.
       const updateData: any = {};
-      if (typeof currency === "string") updateData.currency = currency;
+      if (typeof currency === "string") {
+        // Stored as the ISO code. Older clients may still send a symbol; it is translated.
+        const resolved = resolveStoredCurrency(currency);
+        if (!resolved) {
+          return res.status(400).json({ message: "Unsupported currency" });
+        }
+        // Amounts are stored without a currency, so switching it later would silently relabel the
+        // person's whole history. The app already hides the switch once transactions exist.
+        const current = await storage.getUser(userId);
+        const storedCode = current?.currency ? resolveStoredCurrency(current.currency)?.code : null;
+        if (storedCode && storedCode !== resolved.code && (await storage.countUserTransactions(userId)) > 0) {
+          return res.status(409).json({ message: "The currency can't be changed after you have added transactions" });
+        }
+        updateData.currency = resolved.code;
+      }
+      if (timezone !== undefined) {
+        if (!isValidTimeZone(timezone)) {
+          return res.status(400).json({ message: "Unknown time zone" });
+        }
+        updateData.timezone = timezone;
+      }
       if (typeof aiEnabled === "boolean") updateData.aiEnabled = aiEnabled;
+      if (typeof emailNotifications === "boolean") updateData.emailNotifications = emailNotifications;
       for (const [key, value] of Object.entries({ firstName, lastName, phone, website })) {
         if (typeof value === "string") updateData[key] = value;
       }

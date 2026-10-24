@@ -6,6 +6,7 @@ import { storage } from "../storage";
 import { getUserLanguage, translateCategories } from "../categoryTranslations";
 import { rateLimit } from "../middleware/rateLimit";
 import { reportServerError } from "../errorGuard/report";
+import { cancelPreapproval } from "../mercadopago";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -103,6 +104,22 @@ export function registerUserRoutes(app: Express) {
           }
         }
 
+        // A Peruvian subscriber is billed by MercadoPago, which must be stopped as well.
+        if ((user as any).mpPreapprovalId) {
+          try {
+            await cancelPreapproval((user as any).mpPreapprovalId);
+          } catch (billingError) {
+            reportServerError(billingError, {
+              where: 'account.delete.mercadopago',
+              route: '/api/account/delete',
+              moneyPath: true,
+            });
+            return res.status(409).json({
+              message: 'We could not stop the subscription. Nothing was deleted. Please contact support.',
+            });
+          }
+        }
+
         await storage.deleteUserCompletely(userId);
 
         try {
@@ -118,38 +135,6 @@ export function registerUserRoutes(app: Express) {
       }
     }
   );
-
-  // Update user plan (only allows switching to 'free' directly; paid plans require Stripe checkout or promo code)
-  app.post('/api/update-plan', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = getUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      const { plan } = req.body;
-
-      if (!plan || !['free', 'standard', 'premium'].includes(plan)) {
-        return res.status(400).json({ message: "Invalid plan. Must be 'free', 'standard', or 'premium'" });
-      }
-
-      if (plan !== 'free') {
-        const user = await storage.getUser(userId);
-        const isAdmin = user?.email === 'jan.milata@gmail.com';
-        if (!isAdmin) {
-          return res.status(403).json({ message: "Paid plan upgrades require active payment checkout or promo code" });
-        }
-      }
-
-      await storage.updateUserPlan(userId, plan);
-
-      // Add cache busting header
-      res.set('Cache-Control', 'no-cache');
-      return res.json({ success: true, message: `Plan updated to ${plan}` });
-    } catch (error) {
-      console.error("Error updating plan:", error);
-      return res.status(500).json({ message: "Failed to update plan" });
-    }
-  });
 
   // Categories
   app.get('/api/categories', isAuthenticated, async (req: any, res) => {
@@ -250,41 +235,6 @@ export function registerUserRoutes(app: Express) {
     } catch (error) {
       console.error("Error deleting category:", error);
       return res.status(500).json({ message: "Failed to delete category" });
-    }
-  });
-
-  // Initialize default categories if none exist
-  app.post('/api/init-categories', isAuthenticated, async (req, res) => {
-    try {
-      const userId = getUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      const existingCategories = await storage.getCategories(userId);
-
-      if (existingCategories.length === 0) {
-        // Initialize default categories
-        const defaultCategories = [
-          { name: 'Food', icon: 'utensils', color: '#3B82F6', type: 'expense' },
-          { name: 'Entertainment', icon: 'film', color: '#F59E0B', type: 'expense' },
-          { name: 'Housing', icon: 'home', color: '#10B981', type: 'expense' },
-          { name: 'Transportation', icon: 'car', color: '#EF4444', type: 'expense' },
-          { name: 'Healthcare', icon: 'heart', color: '#8B5CF6', type: 'expense' },
-          { name: 'Shopping', icon: 'shopping-bag', color: '#F97316', type: 'expense' },
-          { name: 'Salary', icon: 'dollar-sign', color: '#10B981', type: 'income' },
-          { name: 'Freelance', icon: 'laptop', color: '#3B82F6', type: 'income' },
-          { name: 'Investments', icon: 'trending-up', color: '#8B5CF6', type: 'income' },
-        ];
-
-        // Insert categories into database (this would need to be implemented in storage)
-        // For now, return mock data
-        return res.json(defaultCategories);
-      } else {
-        return res.json(existingCategories);
-      }
-    } catch (error) {
-      console.error("Error initializing categories:", error);
-      return res.status(500).json({ message: "Failed to initialize categories" });
     }
   });
 }

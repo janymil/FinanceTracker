@@ -6,25 +6,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SEO } from "@/components/SEO";
 import { AppLayout } from "@/components/AppLayout";
 import { useTranslation } from 'react-i18next';
-import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function PrivacyPolicy() {
-  const [, setLocation] = useLocation();
-  const { t } = useTranslation();
-  // Kaptia serves customers in the United States and Peru. The EU/EEA (GDPR) section was
-  // removed on purpose: we do not offer the service to EU residents.
-  const { requiresCCPA } = useGeolocation();
-  
-  useEffect(() => {
-    document.title = "Privacy Policy - Kaptia";
-  }, []);
-
-  const handleLogin = () => {
-    setLocation("/auth");
-  };
+  const { t, i18n } = useTranslation();
+  // Kaptia serves customers in the United States and Latin America (Peru first). The
+  // EU/EEA (GDPR) section was removed on purpose: we do not offer the service to EU
+  // residents. The Peru and California sections are always visible, so visitors who
+  // are behind a VPN, and search engines, still see them.
 
   return (
     <AppLayout>
+      <SEO
+        title={t("privacy.seo.title")}
+        description={t("privacy.seo.description")}
+        canonical={`https://kaptia.app/${i18n.language?.slice(0, 2) || 'en'}/privacy-policy`}
+      />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("privacy.title")}</h1>
         <p className="text-muted-foreground mb-8">{t("privacy.last_updated")}</p>
@@ -177,9 +173,41 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
-          {/* CCPA Compliance Section - Only shown to California/US users */}
-          {requiresCCPA && (
-          <div className="ccpa-section">
+          {/* Peru: Ley 29733 (ARCO rights) */}
+          <section className="mb-8 border-l-4 border-red-500 pl-4 bg-red-50 dark:bg-red-900/20 p-4 rounded-r-lg" id="peru">
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.peru.title")}</h2>
+            <p className="mb-4">{t("privacy.peru.intro")}</p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.controller_title")}</h3>
+            <p className="mb-4">{t("privacy.peru.controller_desc")}</p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.purposes_title")}</h3>
+            <p className="mb-4">{t("privacy.peru.purposes_desc")}</p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.consent_title")}</h3>
+            <p className="mb-4">{t("privacy.peru.consent_desc")}</p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.rights_title")}</h3>
+            <p className="mb-2">{t("privacy.peru.rights_desc")}</p>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li>{t("privacy.peru.right_access")}</li>
+              <li>{t("privacy.peru.right_rectification")}</li>
+              <li>{t("privacy.peru.right_cancellation")}</li>
+              <li>{t("privacy.peru.right_opposition")}</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.exercise_title")}</h3>
+            <p className="mb-4">{t("privacy.peru.exercise_desc")}</p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.transfers_title")}</h3>
+            <p className="mb-4">{t("privacy.peru.transfers_desc")}</p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.authority_title")}</h3>
+            <p>{t("privacy.peru.authority_desc")}</p>
+          </section>
+
+          {/* CCPA Compliance Section */}
+          <div className="ccpa-section" id="ccpa">
             <section className="mb-8 border-l-4 border-yellow-500 pl-4 bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-r-lg">
               <h2 className="text-2xl font-semibold mb-4 text-yellow-800 dark:text-yellow-200">{t("ccpa.title")}</h2>
               
@@ -242,8 +270,8 @@ export default function PrivacyPolicy() {
                 <h3 className="text-lg font-semibold mb-3">{t("ccpa.exercise_rights.title")}</h3>
                 <p className="mb-4">{t("ccpa.exercise_rights.description")}</p>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.email")}</strong> privacy@kaptia.app</p>
-                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.phone")}</strong> +1 (505) 555-0123</p>
+                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.email")}</strong> info@kaptia.app</p>
+                  <p className="text-sm">{t("ccpa.exercise_rights.email_only")}</p>
                   <p className="text-sm"><strong>{t("ccpa.exercise_rights.response_time")}</strong> {t("ccpa.exercise_rights.response_desc")}</p>
                 </div>
               </div>
@@ -257,7 +285,6 @@ export default function PrivacyPolicy() {
               </div>
             </section>
           </div>
-          )}
 
           {/* Data Security & Software Notice */}
           <section className="mb-8 border-l-4 border-indigo-500 pl-4 bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-r-lg">
@@ -302,6 +329,11 @@ export default function PrivacyPolicy() {
               <li>{t("data_transfers.payments")}</li>
             </ul>
             <p className="mt-4 text-sm">{t("data_transfers.note")}</p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.children.title")}</h2>
+            <p className="mb-4">{t("privacy.children.description")}</p>
           </section>
 
           <section className="mb-8">
