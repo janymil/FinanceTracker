@@ -59,10 +59,17 @@ export async function uploadReceiptFile(fileName: string, fileBuffer: Buffer, mi
 export async function performLocalReceiptOCR(buffer: Buffer): Promise<string> {
   const { createWorker } = await import('tesseract.js');
   const worker = await createWorker('eng', 1, { logger: () => {} });
+  let timer: NodeJS.Timeout | undefined;
   try {
-    const { data } = await worker.recognize(buffer);
+    // A 12-megapixel phone photo can take a long time; fail predictably instead of
+    // holding the request open indefinitely.
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error('ocr_timeout')), 30_000);
+    });
+    const { data } = await Promise.race([worker.recognize(buffer), timeout]);
     return data.text ?? '';
   } finally {
+    if (timer) clearTimeout(timer);
     await worker.terminate().catch(() => undefined);
   }
 }
