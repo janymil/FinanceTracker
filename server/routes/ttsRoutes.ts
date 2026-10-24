@@ -3,6 +3,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { aiGuard } from "../aiAccess";
+import { anonymizeText } from "../../shared/aiAnonymizer";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || 'missing-openai-api-key',
@@ -57,7 +58,8 @@ export function registerTTSRoutes(app: Router) {
       const mp3 = await openai.audio.speech.create({
         model: "tts-1",
         voice: selectedVoice as any,
-        input: text,
+        // Same boundary as every other AI call: no identifiers leave the server.
+        input: anonymizeText(text).text,
         speed: speed,
       });
 
