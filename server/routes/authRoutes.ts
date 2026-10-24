@@ -137,16 +137,24 @@ export function registerAuthRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const { currency, ...otherFields } = req.body;
-      
+      const { currency, aiEnabled, firstName, lastName, phone, website } = req.body ?? {};
+
       // Validate currency if provided
-      if (currency && typeof currency !== 'string') {
+      if (currency !== undefined && typeof currency !== "string") {
         return res.status(400).json({ message: "Invalid currency format" });
       }
 
-      const updateData: any = { ...otherFields };
-      if (currency) {
-        updateData.currency = currency;
+      // Explicit allow-list. The old handler spread the whole body into the update, which
+      // let a request change its own `plan`, `stripeCustomerId` or `graceExpiresAt`.
+      const updateData: any = {};
+      if (typeof currency === "string") updateData.currency = currency;
+      if (typeof aiEnabled === "boolean") updateData.aiEnabled = aiEnabled;
+      for (const [key, value] of Object.entries({ firstName, lastName, phone, website })) {
+        if (typeof value === "string") updateData[key] = value;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "No supported fields to update" });
       }
 
       const updatedUser = await storage.updateUser(userId, updateData);

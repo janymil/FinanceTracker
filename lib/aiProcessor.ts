@@ -1,8 +1,9 @@
-// Centralized AI Processor with Fly.io Primary + Local Fallback
+// Centralized AI Processor with the optional processor service + local providers
 import crypto from 'crypto';
 import { storage } from '../server/storage.js';
 import { reportSwallowed } from '../server/errorGuard/report.js';
 import { collectAIUsage, type AIUsageRecord } from './aiProvider';
+import { anonymizeDeep } from '../shared/aiAnonymizer';
 import { 
   generateContextualFinancialTips,
   generateFinancialTips,
@@ -120,7 +121,7 @@ async function callAIProcessor(task: string, userId: string, payload: Record<str
     const response = await fetch(`${baseUrl}/execute-gpt-task`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task, userId, payload }),
+      body: JSON.stringify({ task, userId: 'anonymous', payload: anonymizeDeep(payload).value }),
       signal: controller.signal,
     });
 
@@ -147,7 +148,7 @@ async function callAIProcessor(task: string, userId: string, payload: Record<str
 }
 
 /**
- * Centralized AI Processor for Fly.io Integration
+ * Centralized AI Processor
  * Simple interface: runAI(task, userId, payload, userPlan)
  * Handles: GPT Execution, Retry/Fallback, OpenAI Key Handling, Usage Tracking
  */
@@ -184,8 +185,10 @@ export async function runAI(task: string, userId: string, payload: Record<string
       },
       body: JSON.stringify({
         task,
-        userId,
-        payload
+        // The model never needs to know who this is. Local caching and usage accounting
+        // still use the real id; only the outbound request is anonymous.
+        userId: 'anonymous',
+        payload: anonymizeDeep(payload).value,
       }),
       signal: controller.signal
     });
@@ -193,15 +196,15 @@ export async function runAI(task: string, userId: string, payload: Record<string
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error(`[AI ${task}] Fly.io error:`, response.status, response.statusText);
-      throw new Error(`Fly.io processor failed: ${response.status}`);
+      console.error(`[AI ${task}] Processor error:`, response.status, response.statusText);
+      throw new Error(`AI processor failed: ${response.status}`);
     }
 
     const result = await response.json();
     
     // Log contextual tips response
     if (task === 'contextual-tips') {
-      console.log('[AI contextual-tips] Fly.io response:', {
+      console.log('[AI contextual-tips] AI processor response:', {
         hasResult: !!result,
         hasError: !!result?.error,
         hasTips: !!result?.tips,
@@ -213,7 +216,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
     // Check if result is empty or error
     if (result?.error || !result || (Array.isArray(result) && result.length === 0)) {
 
-      throw new Error('Empty or error response from Fly.io');
+      throw new Error('Empty or error response from the AI processor');
     }
 
     return result;

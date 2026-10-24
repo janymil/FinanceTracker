@@ -2,9 +2,9 @@
 import multer from 'multer';
 import { Request, Response } from 'express';
 import { getUserId } from './clerkAuth';
-import { db } from './db';
-import { users } from '../shared/schema.ts';
-import { eq } from 'drizzle-orm';
+
+
+
 import { categorizeExpense } from './openai';
 // Receipt extraction is split on purpose:
 //   shared/receiptExtraction.ts – pure normalization (unit tested, no SDK/keys)
@@ -31,8 +31,13 @@ const upload = multer({
 });
 
 // OCR lives in ./ocr: Mistral primary, Google Vision fallback, both injectable for tests.
+// The upload route below no longer calls it: receipts are read locally with Tesseract so
+// the image itself never leaves this server. The function stays exported for the mobile
+// pipeline and the tests.
 import { performOCR } from './ocr';
 export { performOCR };
+import { checkAiAccess, denyAi } from './aiAccess';
+import { anonymizeText } from '../shared/aiAnonymizer';
 
 import { cloudStorage } from './cloudStorage';
 
@@ -40,27 +45,26 @@ interface UserPlan {
   plan: 'free' | 'standard' | 'premium';
 }
 
-// Get user plan from database
-async function getUserPlan(userId: string): Promise<UserPlan> {
-  try {
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (user.length > 0) {
-      return { plan: (user[0].plan as 'free' | 'standard' | 'premium') || 'free' };
-    }
-    return { plan: 'free' };
-  } catch (error) {
-    // Swallowed on purpose (the upload must still work for a free plan), but no longer
-    // silently: blueprint 07 §17.1.
-    reportSwallowed(error, { where: 'uploadReceipt.getUserPlan', fallback: 'free' });
-    console.error('Error fetching user plan:', error);
-    return { plan: 'free' };
-  }
-}
-
 // Upload receipt file to Cloud Storage (Cloudflare R2 or fallback)
 export async function uploadReceiptFile(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
   const filePath = `receipts/${fileName}`;
   return await cloudStorage.uploadFile(filePath, fileBuffer, mimeType);
+}
+
+/**
+ * Reads the receipt **on this server**. Tesseract runs in-process, so the photo is never
+ * uploaded to an OCR provider — which is what makes the "text is anonymised before AI"
+ * promise hold for images as well.
+ */
+export async function performLocalReceiptOCR(buffer: Buffer): Promise<string> {
+  const { createWorker } = await import('tesseract.js');
+  const worker = await createWorker('eng', 1, { logger: () => {} });
+  try {
+    const { data } = await worker.recognize(buffer);
+    return data.text ?? '';
+  } finally {
+    await worker.terminate().catch(() => undefined);
+  }
 }
 
 // Legacy alias
@@ -86,14 +90,29 @@ export const uploadReceiptHandler = [
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
+      // Reading a receipt is an AI feature: paid plan, and only while the account switch
+      // is on. Free accounts never reach an OCR or AI provider.
+      const access = await checkAiAccess(userId);
+      if (!access?.allowed) {
+        return denyAi(res, access?.code ?? 'unauthenticated');
+      }
+
       // Get user plan
-      const userPlan = await getUserPlan(userId);
+      const userPlan = { plan: access.plan as 'free' | 'standard' | 'premium' };
       const canStore = userPlan.plan === 'standard' || userPlan.plan === 'premium';
 
-      // Perform OCR
-      const recognizedText = await performOCR(req.file.buffer);
+      // OCR locally, then strip identifiers before anything is sent to the AI model.
+      const rawText = await performLocalReceiptOCR(req.file.buffer);
+      const recognizedText = anonymizeText(rawText).text;
 
-      // Extract structured data using OpenAI
+      if (recognizedText.trim().length < 5) {
+        return res.status(422).json({
+          error: 'We could not read this receipt. Please enter the details manually.',
+          code: 'ocr_empty',
+        });
+      }
+
+      // Extract structured data using the AI model (text only, already anonymised)
       const extractedData = await extractStructuredData(recognizedText);
 
       // Money invariant (blueprint 07 §18): a draft with a non-positive amount, a future

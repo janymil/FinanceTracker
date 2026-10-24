@@ -50,6 +50,10 @@ export const users = pgTable("users", {
   gracePeriodActive: boolean("grace_period_active").default(false),
   paymentFailureCount: integer("payment_failure_count").default(0),
   lastPaymentFailureNotified: timestamp("last_payment_failure_notified"),
+  // The account switch in Profile. false = no OCR, no AI, no voice transcription.
+  aiEnabled: boolean("ai_enabled").default(true).notNull(),
+  // MercadoPago subscription that pays for the current plan in Peru (null for Stripe).
+  mpPreapprovalId: varchar("mp_preapproval_id"),
 });
 
 // Payment failure log table for tracking payment issues

@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { anonymizeMessages } from '../shared/aiAnonymizer';
 
 /**
  * Central AI routing layer.
@@ -207,6 +208,12 @@ async function callModel(spec: AIModelSpec, params: any, fallback: boolean, task
 }
 
 async function routeChat(params: any): Promise<any> {
+  // Single choke point: nothing reaches a provider with an e-mail, IBAN, card, phone,
+  // address, account number or the user's own name inside the prompt.
+  if (Array.isArray(params?.messages)) {
+    params = { ...params, messages: anonymizeMessages(params.messages) };
+  }
+
   const primaryName = String(params?.model || AI_MODELS.default);
   const chain = [primaryName, ...(FALLBACKS[primaryName] ?? FALLBACKS.default)];
   let lastError: any;

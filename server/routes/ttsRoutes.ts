@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import OpenAI from "openai";
 import { isAuthenticated, getUserId } from "../clerkAuth";
+import { aiGuard } from "../aiAccess";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || 'missing-openai-api-key',
@@ -20,7 +21,7 @@ export function registerTTSRoutes(app: Router) {
   // Text-to-Speech endpoint
   // Uses the app's isAuthenticated middleware (401 JSON) instead of Clerk's
   // requireAuth(), which redirects unauthenticated browser requests to "/".
-  router.post('/speak', isAuthenticated, async (req: Request, res: Response) => {
+  router.post('/speak', isAuthenticated, aiGuard(), async (req: Request, res: Response) => {
     try {
       const { text, voice, speed, language } = ttsSchema.parse(req.body);
       const userId = getUserId(req);

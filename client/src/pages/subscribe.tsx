@@ -64,6 +64,33 @@ export default function Subscribe() {
 
       const planName = interval === 'year' ? `${plan}-yearly` : plan;
 
+      // Peru pays in soles through MercadoPago; everything else goes to Stripe.
+      if (currency === 'pen') {
+        const mpResponse = await fetch('/api/mercadopago/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-user-language': currentLang,
+          },
+          body: JSON.stringify({
+            plan,
+            interval: interval === 'year' ? 'yearly' : 'monthly',
+          }),
+        });
+
+        const mpData = await mpResponse.json().catch(() => ({}));
+
+        if (mpResponse.ok && mpData?.init_point) {
+          window.location.href = mpData.init_point;
+          return;
+        }
+
+        alert(mpData?.error || t('subscribe.payment_error'));
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -159,6 +186,11 @@ export default function Subscribe() {
             <p className="text-gray-600 dark:text-gray-300">
               {t('subscribe.subtitle')}
             </p>
+            {currency === 'pen' && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2" data-testid="mercadopago-note">
+                {t('subscribe.mercadopago_note')}
+              </p>
+            )}
           </div>
 
           {/* Billing Toggle */}

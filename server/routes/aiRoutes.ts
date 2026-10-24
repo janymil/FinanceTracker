@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
+import { aiGuard } from "../aiAccess";
 import { storage } from "../storage";
 import { getUserLanguage } from "../categoryTranslations";
 import { 
@@ -35,7 +36,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // Auto-categorization endpoint for bulk processing
-  app.post('/api/auto-categorize', isAuthenticated, async (req: any, res) => {
+  app.post('/api/auto-categorize', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -116,7 +117,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // AI Categorization endpoint
-  app.post('/api/ai/categorize', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/categorize', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -167,7 +168,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // AI Financial Tips endpoint with detailed transaction data
-  app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/tip', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -277,7 +278,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // AI Spending Insights endpoint
-  app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
+  app.get('/api/ai/insights', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -330,7 +331,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // AI Financial Health Score (Standard+ required)
-  app.post('/api/ai/financial-health-score', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/financial-health-score', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -348,7 +349,7 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      console.log('AI financial health score: Making Fly.io API call via centralized processor');
+      console.log('AI financial health score: calling the AI processor');
       
       // Get user language from consistent header detection
       const language = getUserLanguage(req);
@@ -382,7 +383,7 @@ export function registerAIRoutes(app: Express) {
       // Cache the result for 24 hours
       await cache.set(aiPayload, aiScore, false, 24);
       
-      console.log('Financial health: Fly.io response structure:', {
+      console.log('Financial health: AI response structure:', {
         hasScore: typeof aiScore?.score === 'number',
         score: aiScore?.score,
         hasStatus: !!aiScore?.status,
@@ -398,7 +399,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // AI Trend Predictions (Premium only)
-  app.get('/api/trend-predictions', isAuthenticated, async (req: any, res) => {
+  app.get('/api/trend-predictions', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -459,7 +460,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // Daily Recommendations endpoint (Premium only)
-  app.post('/api/ai/daily-recommendations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/daily-recommendations', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -532,17 +533,17 @@ export function registerAIRoutes(app: Express) {
       // Generate new AI response
       let recommendations = await runAI('daily-recommendations', userId, aiPayload, user.plan || 'free');
       
-      console.log('Daily recommendations: Received response from Fly.io:', {
+      console.log('Daily recommendations: received response from the AI processor:', {
         hasRecommendations: Array.isArray(recommendations?.recommendations),
         recommendationCount: recommendations?.recommendations?.length || 0,
         hasInsights: Array.isArray(recommendations?.insights),
         insightCount: recommendations?.insights?.length || 0,
-        source: 'fly.io-external-service',
+        source: 'ai-processor',
         actualRecommendations: recommendations?.recommendations,
         actualInsights: recommendations?.insights
       });
 
-      console.log('Daily recommendations: Fly.io response structure:', {
+      console.log('Daily recommendations: AI response structure:', {
         hasRecommendations: !!recommendations?.recommendations,
         recommendationCount: recommendations?.recommendations?.length || 0,
         hasInsights: !!recommendations?.insights,
@@ -562,7 +563,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // Financial Health Score (AI-powered for Standard+ users only)
-  app.get('/api/financial-health', isAuthenticated, async (req: any, res) => {
+  app.get('/api/financial-health', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -800,7 +801,7 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  app.post('/api/mascot/generate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/mascot/generate', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -1021,7 +1022,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // AI Expense Predictions endpoint
-  app.post('/api/ai/expense-predictions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/expense-predictions', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -1037,7 +1038,7 @@ export function registerAIRoutes(app: Express) {
 
       const { transactions } = req.body;
 
-      // Always call Fly.io even with empty data for testing
+      // Always call the AI processor even with empty data for testing
       console.log('EXPENSE PREDICTIONS: Processing with', transactions.length, 'transactions');
 
       // Filter expense transactions for consistent cache hashing
@@ -1143,7 +1144,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
   });
 
   // Contextual Financial Tips endpoint (moved from contextualFinancialTipsRoutes.ts)
-  app.post('/api/ai/contextual-financial-tips', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/contextual-financial-tips', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
       console.log('🎯 [CONTEXTUAL-TIPS] Starting request processing...');
       const userId = getUserId(req);

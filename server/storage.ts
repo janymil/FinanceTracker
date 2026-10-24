@@ -1497,6 +1497,10 @@ export class DatabaseStorage implements IStorage {
         stripeCustomerId: userData.stripeCustomerId,
         stripeSubscriptionId: userData.stripeSubscriptionId,
         settings: userData.settings,
+        // The AI switch and the MercadoPago subscription id must be persistable, otherwise
+        // the toggle answers 200 and changes nothing.
+        aiEnabled: userData.aiEnabled,
+        mpPreapprovalId: userData.mpPreapprovalId,
         updatedAt: new Date(),
       };
 

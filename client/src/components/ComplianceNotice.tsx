@@ -8,7 +8,7 @@ import { MapPin, Shield, Globe } from 'lucide-react';
  * Shows appropriate legal notices based on user location
  */
 export function ComplianceNotice() {
-  const { location, loading, requiresGDPR, requiresCCPA, isEU, isUS } = useGeolocation();
+  const { location, loading, requiresCCPA, isUS } = useGeolocation();
   const { t } = useTranslation();
 
   if (loading) {
@@ -28,19 +28,7 @@ export function ComplianceNotice() {
           <MapPin className="h-4 w-4" />
           <AlertDescription className="text-xs">
             DEBUG: Location detected - {location.country} ({location.countryCode}) 
-            | GDPR: {requiresGDPR ? 'Yes' : 'No'} 
             | CCPA: {requiresCCPA ? 'Yes' : 'No'}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* GDPR Notice for EU users */}
-      {requiresGDPR && (
-        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950">
-          <Shield className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-sm">
-            <strong>{t('compliance.gdpr.title', 'European Privacy Rights')}</strong><br />
-            {t('compliance.gdpr.notice', 'As an EU resident, you have enhanced privacy rights under GDPR. See our Privacy Policy for details about your rights to access, rectify, and delete your data.')}
           </AlertDescription>
         </Alert>
       )}

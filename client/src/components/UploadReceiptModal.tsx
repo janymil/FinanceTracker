@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
 import { queryClient } from "@/lib/queryClient";
+import { useAiAccess } from "@/hooks/useAiAccess";
 import QRCode from "qrcode";
 
 interface UploadReceiptModalProps {
@@ -57,9 +58,11 @@ function generateUUID() {
 }
 
 export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: UploadReceiptModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { getToken } = useAuth();
+  const aiAccess = useAiAccess();
+  const currentLocale = (i18n.language || 'en').split('-')[0];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -523,11 +526,30 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button variant="outline" className="flex items-center gap-2" data-testid="receipt-upload-trigger">
           <ImageIcon className="h-4 w-4" />
           {buttonText || t("upload.button_text")}
         </Button>
       </DialogTrigger>
+      {!aiAccess.allowed && (
+        <DialogContent className="max-w-md" data-testid="receipt-ai-blocked">
+          <DialogHeader>
+            <DialogTitle>{aiAccess.reason === 'ai_disabled' ? t('upload.AI is turned off') : t('upload.AI scanning needs a paid plan')}</DialogTitle>
+            <DialogDescription>
+              {aiAccess.reason === 'ai_disabled'
+                ? t('upload.Turn AI back on in Profile to scan receipts.')
+                : t('upload.Receipt scanning is available on the Standard and Premium plans.')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setIsOpen(false)}>{t('upload.Close')}</Button>
+            <Button asChild>
+              <a href={`/${currentLocale}/profile`}>{t('upload.Go to Profile')}</a>
+            </Button>
+          </div>
+        </DialogContent>
+      )}
+      {aiAccess.allowed && (
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -794,6 +816,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
           )}
         </div>
       </DialogContent>
+      )}
     </Dialog>
   );
 }

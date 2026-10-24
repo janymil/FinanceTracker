@@ -8,9 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { useToast } from "../hooks/use-toast";
-import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2, FileText, ShieldCheck } from "lucide-react";
+import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2, FileText, ShieldCheck, Sparkles } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { SubscriptionSchedule } from "../components/subscription-schedule";
+import { Switch } from "../components/ui/switch";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 export default function ProfilePage() {
@@ -27,6 +29,44 @@ export default function ProfilePage() {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const clerk = useClerk();
+  const queryClient = useQueryClient();
+  // The AI switch. `aiEnabled` is false only when the account explicitly turned AI off.
+  const [aiEnabled, setAiEnabled] = useState<boolean>((authUser as any)?.aiEnabled !== false);
+  const [isSavingAi, setIsSavingAi] = useState(false);
+
+  useEffect(() => {
+    setAiEnabled((authUser as any)?.aiEnabled !== false);
+  }, [(authUser as any)?.aiEnabled]);
+
+  const handleAiToggle = async (next: boolean) => {
+    setIsSavingAi(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/auth/user', {
+        method: 'PUT',
+        headers: { ...headers },
+        credentials: 'include',
+        body: JSON.stringify({ aiEnabled: next }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || t('profile.Could not change the AI setting'));
+      }
+
+      setAiEnabled(next);
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({ title: next ? t('profile.AI features enabled') : t('profile.AI features disabled') });
+    } catch (error: any) {
+      toast({
+        title: t('profile.Error'),
+        description: error?.message || t('profile.Could not change the AI setting'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingAi(false);
+    }
+  };
 
   if (!user || !authUser) {
     return <div>{t('profile.Loading...')}</div>;
@@ -238,7 +278,32 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>{t('profile.App preferences will be managed here.')}</p>
+              <div className="flex items-start justify-between gap-4 rounded-lg border p-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 font-medium">
+                    <Sparkles className="h-4 w-4" />
+                    <span>{t('profile.AI features')}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t('profile.Let AI process my data')}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('profile.When this is off, receipt scanning, voice input, financial tips, insights and predictions are disabled. No data is sent to any AI provider for this account.')}
+                  </p>
+                  {!aiEnabled && (
+                    <p className="text-xs font-medium text-amber-600">
+                      {t('profile.AI processing is currently off for this account')}
+                    </p>
+                  )}
+                </div>
+                <Switch
+                  checked={aiEnabled}
+                  disabled={isSavingAi}
+                  onCheckedChange={handleAiToggle}
+                  aria-label={t('profile.AI features')}
+                  data-testid="ai-toggle"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -365,7 +430,7 @@ export default function ProfilePage() {
         </TabsContent>
       </Tabs>
 
-      {/* Data & privacy — required by GDPR, and the only place a user can leave. */}
+      {/* Data & privacy — the only place a user can leave. */}
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>{t('profile.Data & privacy')}</CardTitle>
@@ -470,7 +535,7 @@ export default function ProfilePage() {
                     <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {t('profile.legal.privacy_desc', 'GDPR rights, data protection, technical encryption, and AI processing')}
+                    {t('profile.legal.privacy_desc', 'Privacy rights, data protection and AI processing')}
                   </p>
                 </div>
               </div>

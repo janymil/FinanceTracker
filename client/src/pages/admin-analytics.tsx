@@ -1645,7 +1645,7 @@ export default function AdminAnalytics() {
                         <ul className="mt-2 space-y-1 text-gray-600">
                           <li>• Cache-based rate limiting via TTL</li>
                           <li>• Plan-based feature access control</li>
-                          <li>• External Fly.io processing with fallback</li>
+                          <li>• External AI processing with local fallback</li>
                           <li>• User isolation in cache system</li>
                         </ul>
                       </div>

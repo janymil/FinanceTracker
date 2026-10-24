@@ -116,22 +116,42 @@ export function registerMobileUploadRoutes(app: any) {
         console.log('Processing OCR directly...');
         
         // Import OCR processing functions
-        const { performOCR, extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
+        const { performLocalReceiptOCR, extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
         const { categorizeExpense } = await import('../openai');
-        const { db } = await import('../db');
-        const { users } = await import('../../shared/schema');
-        const { eq } = await import('drizzle-orm');
+        const { checkAiAccess } = await import('../aiAccess');
+        const { anonymizeText } = await import('../../shared/aiAnonymizer');
         
-        // Get user plan
-        const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-        const userPlan = user.length > 0 ? (user[0].plan as 'free' | 'standard' | 'premium') || 'free' : 'free';
+        // Same gate as the web upload: paid plan, AI switch on.
+        const access = await checkAiAccess(userId);
+        if (!access?.allowed) {
+          mobileUploadSessions.set(sessionId, {
+            userId,
+            status: 'error',
+            error: access?.code === 'ai_disabled' ? 'AI is turned off for this account' : 'AI receipt scanning requires the Standard or Premium plan',
+            createdAt: new Date()
+          });
+          return res.status(403).json({ error: 'AI receipt scanning is not available for this account', code: access?.code });
+        }
+
+        const userPlan = access.plan as 'free' | 'standard' | 'premium';
         const canStore = userPlan === 'standard' || userPlan === 'premium';
 
-        // Perform OCR
-        const recognizedText = await performOCR(file.buffer);
-        console.log('OCR completed successfully');
+        // Read the photo locally, then strip identifiers before the AI sees any text.
+        const rawText = await performLocalReceiptOCR(file.buffer);
+        const recognizedText = anonymizeText(rawText).text;
+        console.log('Local OCR completed successfully');
 
-        // Extract structured data using OpenAI
+        if (recognizedText.trim().length < 5) {
+          mobileUploadSessions.set(sessionId, {
+            userId,
+            status: 'error',
+            error: 'We could not read this receipt. Please enter the details manually.',
+            createdAt: new Date()
+          });
+          return res.status(422).json({ error: 'We could not read this receipt', code: 'ocr_empty' });
+        }
+
+        // Extract structured data using the AI model (anonymised text only)
         const extractedData = await extractStructuredData(recognizedText);
         console.log('Data extraction completed');
 

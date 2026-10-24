@@ -223,7 +223,6 @@
   "Industry-standard data encryption": "Industry-standard data encryption",
   "Secure authentication with Clerk": "Secure authentication with Clerk",
   "Private data isolation": "Private data isolation",
-  "GDPR compliance and privacy controls": "GDPR compliance and privacy controls",
   "Cookie consent management": "Cookie consent management",
   "Secure API endpoints": "Secure API endpoints",
   "Regular security audits": "Regular security audits",
@@ -1611,7 +1610,13 @@
     "close": "Close",
     "modal_title": "Upload Receipt",
     "modal_subtitle": "Upload a receipt photo to automatically extract transaction data",
-    "button_text": "Upload Image"
+    "button_text": "Upload Image",
+    "AI is turned off": "AI is turned off",
+    "AI scanning needs a paid plan": "AI scanning needs a paid plan",
+    "Turn AI back on in Profile to scan receipts.": "Turn AI back on in Profile to scan receipts.",
+    "Receipt scanning is available on the Standard and Premium plans.": "Receipt scanning is available on the Standard and Premium plans.",
+    "Go to Profile": "Go to Profile",
+    "Close": "Close"
   },
   "trends": {
     "title": "Advanced Trends Analysis",
@@ -1831,11 +1836,11 @@
       "compliance_title": "Compliance Standards Met",
       "pci_dss": "Stripe PCI-DSS",
       "tls_encryption": "TLS 1.3 In-Transit",
-      "gdpr": "GDPR Article 32",
+      "gdpr": "Data minimisation",
       "aes_standard": "AES-256 Storage",
       "ai_processing_title": "AI Processing Transparency",
-      "ai_provider": "AI Service Provider: OpenAI (GPT-4) with enterprise-grade security",
-      "ai_anonymization": "CRITICAL: Only anonymized data sent to OpenAI - All sensitive information (SSNs, account numbers, personal details) completely removed before AI processing",
+      "ai_provider": "AI provider: OpenAI and Mistral with enterprise-grade security",
+      "ai_anonymization": "Only anonymised text is sent: e-mails, phones, IBANs, card numbers, IDs, addresses, account numbers and your name are removed before AI processing",
       "ai_retention": "No Data Retention: AI providers do not store your bank statement content",
       "ai_purpose": "Purpose: Transaction categorization and financial insights only",
       "user_rights_title": "Your Rights and Control",
@@ -2703,94 +2708,6 @@
       "back": "Back"
     }
   },
-  "gdpr": {
-    "title": "European Privacy Rights (GDPR)",
-    "legal_basis": {
-      "title": "Legal Basis for Processing",
-      "description": "Under GDPR, we process your personal data based on the following legal grounds:",
-      "contract": "Contractual Necessity:",
-      "contract_desc": "Processing necessary to provide our financial management services and perform our contract with you",
-      "legitimate_interest": "Legitimate Interest:",
-      "legitimate_desc": "Processing for fraud prevention, service improvement, and business operations",
-      "consent": "Consent:",
-      "consent_desc": "Processing for marketing communications and optional features (you may withdraw consent at any time)",
-      "legal_obligation": "Legal Obligation:",
-      "legal_desc": "Processing required to comply with legal and regulatory requirements"
-    },
-    "data_subject_rights": {
-      "title": "Your Data Subject Rights",
-      "description": "As an EU resident, you have the following rights under GDPR:"
-    },
-    "rights": {
-      "access": {
-        "title": "Right of Access",
-        "description": "Request a copy of your personal data and information about how we process it"
-      },
-      "rectification": {
-        "title": "Right to Rectification",
-        "description": "Request correction of inaccurate or incomplete personal data"
-      },
-      "erasure": {
-        "title": "Right to Erasure",
-        "description": "Request deletion of your personal data under certain circumstances"
-      },
-      "restriction": {
-        "title": "Right to Restriction",
-        "description": "Request limitation of processing in specific situations"
-      },
-      "portability": {
-        "title": "Right to Data Portability",
-        "description": "Receive your data in a structured, machine-readable format"
-      },
-      "objection": {
-        "title": "Right to Object",
-        "description": "Object to processing based on legitimate interests or for direct marketing"
-      }
-    },
-    "international_transfers": {
-      "title": "International Data Transfers",
-      "description": "Some of our service providers are located outside the EU. We ensure adequate protection through:"
-    },
-    "transfers": {
-      "us_services": "US-Based Services:",
-      "us_desc": "OpenAI (AI processing), Stripe (payments), Clerk (authentication) with adequate safeguards",
-      "safeguards": "Appropriate Safeguards:",
-      "safeguards_desc": "Standard contractual clauses, adequacy decisions, and certification schemes",
-      "adequacy": "Adequacy Decisions:",
-      "adequacy_desc": "Transfers to countries with adequate data protection as recognized by the EU Commission"
-    },
-    "breach_notification": {
-      "title": "Data Breach Notification",
-      "description": "In the event of a data breach affecting your personal data, we will:",
-      "procedure": "Notify the relevant supervisory authority within 72 hours and inform affected individuals without undue delay if the breach poses a high risk to your rights and freedoms."
-    },
-    "supervisory_authority": {
-      "title": "Supervisory Authority",
-      "description": "You have the right to lodge a complaint with your local data protection authority:",
-      "contact": "Contact your national Data Protection Authority",
-      "details": "Visit the European Data Protection Board website for contact information of all EU data protection authorities"
-    },
-    "dpo": {
-      "title": "Data Protection Officer",
-      "description": "We have appointed a Data Protection Officer to monitor our GDPR compliance:",
-      "contact": "DPO Contact:",
-      "responsibilities": "Responsibilities:",
-      "responsibilities_desc": "Monitoring compliance, conducting privacy impact assessments, and serving as contact point for data subjects and authorities"
-    },
-    "eu_representative": {
-      "title": "EU Representative",
-      "description": "For EU residents, our designated EU representative handles GDPR matters:",
-      "notice": "Notice: EU representative appointment is currently in progress. For GDPR inquiries, please contact our Data Protection Officer at dpo@kaptia.app or use our general privacy contact: privacy@kaptia.app"
-    },
-    "exercise_rights": {
-      "title": "How to Exercise Your Rights",
-      "description": "To exercise any of your data subject rights, please contact us:",
-      "email": "General Privacy Email:",
-      "dpo_email": "Data Protection Officer:",
-      "response_time": "Response Time:",
-      "response_desc": "We will respond to your request within 30 days (extendable by 60 days for complex requests)"
-    }
-  },
   "ccpa": {
     "title": "California Consumer Privacy Rights (CCPA)",
     "consumer_rights": {
@@ -2845,10 +2762,10 @@
       "clerk_desc": "User authentication and account management services",
       "stripe": "Stripe (Payment Processing):",
       "stripe_desc": "Secure payment processing and subscription management",
-      "openai": "OpenAI (AI Services):",
-      "openai_desc": "AI-powered financial insights and categorization (anonymized data)",
-      "bunny": "Bunny.net (File Storage):",
-      "bunny_desc": "Secure cloud storage for receipts and export files"
+      "openai": "AI providers (OpenAI, Mistral):",
+      "openai_desc": "Financial insights and categorization on anonymised text only",
+      "bunny": "Cloudflare R2 (File Storage):",
+      "bunny_desc": "Object storage for receipt images on paid plans"
     },
     "exercise_rights": {
       "title": "How to Exercise Your Rights",
@@ -2879,70 +2796,27 @@
       "isolation": "Tenant Isolation:",
       "isolation_desc": "User records are logically separated and protected by authenticated access controls.",
       "transmission": "Secure Transmission:",
-      "transmission_desc": "All communication with Kaptia servers occurs exclusively over HTTPS with modern TLS 1.3 encryption.",
+      "transmission_desc": "All communication with Kaptia servers occurs exclusively over HTTPS with modern TLS (1.2 or newer).",
       "audits": "Continuous Monitoring:",
       "audits_desc": "We maintain continuous vulnerability monitoring and secure development practices."
     },
     "payment_processor": {
       "title": "Subscription Payment Processing",
-      "description": "Kaptia software subscriptions are processed securely through Stripe, a certified PCI-DSS Level 1 payment processor.",
-      "details": "Kaptia does not process, handle, or store your payment card numbers. All billing transactions are managed directly by Stripe's secure infrastructure."
-    }
-  },
-  "ai_act_compliance": {
-    "title": "EU AI Act Compliance (2024)",
-    "classification": {
-      "title": "AI System Classification",
-      "description": "Under the EU AI Act, our AI systems are classified as:",
-      "limited_risk": "Limited Risk AI Systems:",
-      "limited_desc": "Our financial categorization and insights AI requires transparency disclosures",
-      "transparency": "Transparency Obligations:",
-      "transparency_desc": "Users are informed when interacting with AI systems and their capabilities"
-    },
-    "transparency": {
-      "title": "AI Transparency Requirements",
-      "description": "We provide full transparency about our AI systems:",
-      "clear_disclosure": "Clear disclosure when users interact with AI-powered features",
-      "model_information": "Information about AI model capabilities and limitations",
-      "data_usage": "Explanation of how user data is processed by AI systems",
-      "decision_logic": "Overview of AI decision-making processes and logic"
-    },
-    "bias_fairness": {
-      "title": "AI Bias and Fairness",
-      "description": "We implement measures to ensure fair and unbiased AI operation:",
-      "measures": "Regular bias testing, diverse training data, and algorithmic fairness assessments ensure equitable AI performance across all user demographics."
+      "description": "Kaptia software subscriptions are processed securely through Stripe (cards worldwide) and MercadoPago (Peru), both certified payment processors.",
+      "details": "Kaptia does not process, handle, or store your payment card numbers. All billing transactions are managed directly by the payment provider’s secure infrastructure."
     }
   },
   "data_transfers": {
-    "title": "International Data Transfers",
-    "scc": {
-      "title": "Standard Contractual Clauses (SCCs)",
-      "description": "We use EU-approved Standard Contractual Clauses for all international data transfers:",
-      "stripe_scc": "Stripe (Payment Processing): EU-US data transfers covered by SCCs and adequacy decisions",
-      "clerk_scc": "Clerk (Authentication): SCCs in place for EU-US user authentication data transfers",
-      "openai_scc": "OpenAI (AI Services): Data processing agreements with SCCs for AI analysis",
-      "bunny_scc": "Bunny.net (File Storage): European data centers with SCCs for global redundancy"
-    },
-    "adequacy": {
-      "title": "Adequacy Decisions",
-      "description": "We rely on European Commission adequacy decisions where available:",
-      "us_framework": "US-EU Data Privacy Framework provides adequate protection for transatlantic data flows where applicable."
-    },
-    "safeguards": {
-      "title": "Additional Safeguards",
-      "description": "Beyond SCCs, we implement additional protective measures:",
-      "technical": "Technical safeguards: Encryption, pseudonymization, and access controls",
-      "organizational": "Organizational measures: Staff training, data minimization policies",
-      "contractual": "Contractual protections: Data processing agreements with all third parties",
-      "monitoring": "Ongoing monitoring: Regular compliance assessments and audit procedures"
-    }
+    "title": "Where your data is stored",
+    "database": "Database: Neon Postgres, United States (us-east-2)",
+    "storage": "Receipt images: Cloudflare R2 object storage",
+    "auth": "Sign-in: Clerk",
+    "ai": "AI processing: OpenAI and Mistral receive anonymised text only",
+    "payments": "Payments: Stripe (cards worldwide) and MercadoPago (Peru)",
+    "note": "Each provider processes the data only to deliver its service to Kaptia. We never sell your data."
   },
   "compliance": {
     "detecting_location": "Detecting location...",
-    "gdpr": {
-      "title": "European Privacy Rights",
-      "notice": "As an EU resident, you have enhanced privacy rights under GDPR. See our Privacy Policy for details about your rights to access, rectify, and delete your data."
-    },
     "ccpa": {
       "title": "California Privacy Rights",
       "notice": "California residents have specific privacy rights under CCPA. You can request information about data collection and opt-out of data sales."
@@ -2950,13 +2824,13 @@
   },
   "privacy": {
     "title": "Privacy Policy",
-    "last_updated": "Last updated: June 14, 2025",
+    "last_updated": "Last updated: October 23, 2026",
     "section1": {
       "title": "1. Information We Collect",
       "description": "We collect information you provide directly to us, such as when you create or modify your account, add financial transactions, set budgets, or contact us for support.",
       "account_info": {
         "title": "Account Information:",
-        "description": "Email address, name, password (encrypted)"
+        "description": "Email address and name. Your password is handled by Clerk, our authentication provider, and is never stored by Kaptia."
       },
       "financial_data": {
         "title": "Expense & Budget Records:",
@@ -2976,7 +2850,7 @@
       "description": "We use the information we collect to:",
       "services": "Provide, maintain, and improve our personal expense organization and productivity software",
       "transactions": "Process and display your saved expense records and send related system notifications",
-      "ai_insights": "Provide AI-powered summaries and expense categorizations (Premium users)",
+      "ai_insights": "Provide AI-powered summaries and expense categorizations (Standard and Premium plans only)",
       "notifications": "Send technical notices, updates, security alerts, and support messages",
       "support": "Respond to your comments and questions",
       "analytics": "Analyze usage patterns to improve our service"
@@ -2991,34 +2865,34 @@
     },
     "section3": {
       "title": "3. AI-Powered Features and Data Processing",
-      "description": "Kaptia uses artificial intelligence to help process receipt text (OCR), categorize spending entries, and generate productivity tips. Here's how we handle your data for AI processing:",
+      "description": "Kaptia uses artificial intelligence for receipt text recognition, expense categorization and spending insights. Text is stripped of identifying details before it reaches an AI model:",
       "ai_provider": {
         "title": "AI Service Provider:",
-        "description": "We use OpenAI's GPT models to analyze spending entries and generate categorization insights"
+        "description": "AI models provided by OpenAI and Mistral process anonymised text on our behalf. We do not disclose which model version is used."
       },
       "data_anonymization": {
         "title": "Data Anonymization:",
-        "description": "All receipt and expense text is anonymized and stripped of personal identifying details before AI processing"
+        "description": "Before any text is sent, we remove e-mail addresses, phone numbers, IBANs, card numbers, national and tax IDs, postal addresses, bank account numbers, and your own name and e-mail. Amounts, dates, categories and merchant names are kept so the result stays accurate. Receipt images are read on our own server and are never uploaded to an AI provider."
       },
       "processing_purpose": {
         "title": "Processing Purpose:",
-        "description": "AI analysis is used exclusively for receipt OCR text recognition, expense categorization, and general productivity summaries"
+        "description": "AI analysis is used only for receipt text recognition, expense categorization and spending summaries."
       },
       "data_retention": {
         "title": "Data Retention:",
-        "description": "Anonymized data sent to OpenAI is not stored by the AI service beyond processing requirements"
+        "description": "AI providers receive the anonymised text, return a result and are not asked to keep it for training. Our own cached results mean the same request is not sent twice."
       },
       "user_control": {
         "title": "User Control:",
-        "description": "You can disable AI features in your account settings to opt-out of this processing"
+        "description": "You can switch AI off under Profile → Preferences. While it is off, receipt scanning, voice input, tips, insights and predictions are disabled and no data is sent to any AI provider."
       },
       "no_personal_data": {
         "title": "No Personal Data:",
-        "description": "Your name, email, account details, or any identifying information is never shared with AI services"
+        "description": "We never send your name, e-mail address, account identifiers, IBANs, card numbers, phone numbers or postal addresses to an AI model."
       },
       "important": {
         "title": "Important:",
-        "description": "AI processing only occurs for Standard and Premium subscribers who have AI features enabled. Free plan users do not have their data processed by AI services."
+        "description": "AI processing happens only on the Standard and Premium plans and only while the AI switch in your account is on. Free plan accounts are never processed by AI services."
       }
     },
     "section4": {
@@ -3030,15 +2904,15 @@
       },
       "payment_processing": {
         "title": "Payment Processing:",
-        "description": "Stripe for subscription payments (no financial transaction data shared)"
+        "description": "Stripe for card subscriptions and MercadoPago for subscriptions paid in Peru. We never see or store your card details."
       },
       "ai_processing": {
         "title": "AI Processing:",
-        "description": "OpenAI for receipt OCR processing and text categorization (as detailed in section 3 above)"
+        "description": "OpenAI and Mistral receive anonymised text only, as described in section 3."
       },
       "cloud_storage": {
         "title": "Cloud Storage:",
-        "description": "Encrypted backups for Premium users"
+        "description": "Cloudflare R2 for receipt images on paid plans"
       },
       "legal_requirements": {
         "title": "Legal Requirements:",
@@ -3049,7 +2923,7 @@
       "title": "5. Data Security",
       "description": "We implement appropriate security measures to protect your personal information:",
       "ssl_encryption": "All data transmission is encrypted using SSL/TLS",
-      "password_hashing": "Passwords are hashed using industry-standard encryption",
+      "password_hashing": "Passwords are handled by Clerk, our authentication provider; Kaptia never stores them",
       "security_audits": "Regular security audits and updates",
       "limited_access": "Limited access to personal data on a need-to-know basis",
       "secure_backup": "Secure cloud backup storage with encryption"
@@ -3063,7 +2937,7 @@
       "description": "You have the right to:",
       "access_rights": "Access, update, or delete your personal information",
       "export_rights": "Export your data in a portable format",
-      "opt_out_rights": "Opt out of certain communications",
+      "opt_out_rights": "Turn AI processing off at any time in Profile → Preferences",
       "information_rights": "Request information about how your data is used"
     },
     "section10": {
@@ -3123,7 +2997,9 @@
           "7": "Priority email support"
         }
       }
-    }
+    },
+    "mercadopago_note": "Payments in Peru are processed securely by MercadoPago.",
+    "payment_error": "We could not start the payment. Please try again."
   },
   "profile": {
     "Profile Settings": "Profile Settings",
@@ -3218,10 +3094,17 @@
       "terms": "Terms of Service",
       "terms_desc": "Acceptable use, subscriptions, account rules, and service limitations",
       "privacy": "Privacy Policy",
-      "privacy_desc": "GDPR rights, data protection, technical encryption, and AI processing",
+      "privacy_desc": "Privacy rights, data protection and AI processing",
       "cookies": "Cookie Policy",
       "cookies_desc": "Information on essential, functional, and consent-based cookies"
-    }
+    },
+    "AI features": "AI features",
+    "Let AI process my data": "Let AI process my data",
+    "When this is off, receipt scanning, voice input, financial tips, insights and predictions are disabled. No data is sent to any AI provider for this account.": "When this is off, receipt scanning, voice input, financial tips, insights and predictions are disabled. No data is sent to any AI provider for this account.",
+    "AI processing is currently off for this account": "AI processing is currently off for this account",
+    "AI features enabled": "AI features enabled",
+    "AI features disabled": "AI features disabled",
+    "Could not change the AI setting": "Could not change the AI setting"
   },
   "pdf": {
     "anonymization_preview": {
@@ -3777,7 +3660,7 @@
           "Manual categorization",
           "Up to 100 transaction entries",
           "Simple spending overview",
-          "Personalized smart tips"
+          "Monthly totals by category"
         ]
       },
       "standard": {
@@ -3820,5 +3703,6 @@
     "export_note": "CSV & PDF reports",
     "cta": "Upgrade Now – {{price}}/month",
     "learn_more": "Learn More"
-  }
+  },
+  "Monthly totals by category": "Monthly totals by category"
 }

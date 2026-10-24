@@ -75,10 +75,18 @@ error-data retention daily). Schema changes are **not** part of the deploy scrip
 - **Key Tables**: users, transactions, budgets, goals, categories, ai_cache
 
 ### External Services Integration
-- **AI Processing**: External Fly.io service at `finanzerpro.fly.dev`
-- **File Storage**: Bunny.net CDN for receipts and exports
-- **OCR**: Dual system - Google Cloud Vision for receipt uploads, Local Tesseract.js for bank statements (privacy-first)
-- **Email**: SendGrid for notifications and alerts
+- **AI Processing**: `lib/aiProvider.ts` routes every chat call to OpenAI / DeepSeek / Groq / Mistral directly (with fallbacks). The optional `ai-processor` service runs on the same VPS (`AI_PROCESSOR_ENABLED`), it is not hosted on Fly.io.
+- **File Storage**: Cloudflare R2 (`server/cloudStorage.ts`) for receipts and exports
+- **OCR**: Local Tesseract.js only — receipt photos and statement pages never leave the server
+- **Email**: Zoho SMTP (verified at boot; `email: ok` in `/api/health/deep`)
+
+### AI data boundary (do not weaken)
+Every outbound AI request passes through `shared/aiAnonymizer.ts`, enforced in three places:
+`lib/aiProvider.routeChat`, `lib/aiProcessor.runAI` and `server/mistralClient` / `server/groqClient`.
+It removes e-mails, phones, IBANs, card numbers, national/tax IDs, addresses, account numbers
+and the signed-in user's name, and drops `userId` from the payload. Access is gated by
+`server/aiAccess.ts`: free plans never reach an AI provider, and `users.ai_enabled = false`
+stops OCR, voice, tips, insights and predictions for that account.
 
 ## Language and Internationalization
 
@@ -115,8 +123,9 @@ if (currentLang.startsWith('es')) {
 
 ### AI Processing Flow
 1. Check unified cache for existing results
-2. If not cached, call external Fly.io AI processor
-3. Fallback to local server AI processing if external fails
+2. If not cached, anonymise the payload (`shared/aiAnonymizer.ts`) and call the provider chain
+   (`lib/aiProvider.ts`); the optional `ai-processor` service on this VPS is tried first when enabled
+3. Fall back to the next provider if one fails
 4. Store results in cache with appropriate TTL
 5. Return localized response to frontend
 

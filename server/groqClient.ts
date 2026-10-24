@@ -1,4 +1,5 @@
 import Groq from 'groq-sdk';
+import { anonymizeMessages } from '../shared/aiAnonymizer';
 
 if (!process.env.GROQ_API_KEY) {
   console.warn('GROQ_API_KEY not set in environment variables - Groq voice features will be unavailable until configured.');
@@ -7,6 +8,14 @@ if (!process.env.GROQ_API_KEY) {
 export const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY || 'missing-groq-api-key',
 });
+
+/** Every chat call is scrubbed: no e-mails, IBANs, cards, phones or names reach Groq. */
+async function createChat(params: any): Promise<any> {
+  return groq.chat.completions.create({
+    ...params,
+    messages: anonymizeMessages(params.messages),
+  });
+}
 
 // Groq STT using Distil-Whisper
 export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<string> {
@@ -117,7 +126,7 @@ IMPORTANT: This transcript contains "X soles Y" format. This means X.Y, not X+Y.
 For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
       : `Parse this transaction: "${transcript}"`;
 
-    const completion = await groq.chat.completions.create({
+    const completion = await createChat({
       messages: [
         {
           role: 'system',
@@ -250,7 +259,7 @@ ${existingCategories.map(cat => `- ${cat.name} (ID: ${cat.id}, Type: ${cat.type}
 
 Find the best match or decide if new category should be created.`;
 
-    const response = await groq.chat.completions.create({
+    const response = await createChat({
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }

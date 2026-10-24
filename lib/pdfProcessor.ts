@@ -4,7 +4,7 @@
  * SECURITY: Enhanced protection for sensitive financial data
  */
 
-import { performOCR } from '../server/uploadReceipt';
+// Statement text is produced locally by Tesseract; no page image is sent anywhere.
 import { getCurrentLanguageForAPI } from './languageUtils';
 import { DataEncryption } from '../server/encryption';
 import { runAI } from './aiProcessor';
@@ -691,90 +691,6 @@ async function performLocalOCROnPDF(pdfBuffer: Buffer, securityLog: SecurityEven
  * DEPRECATED: Google Cloud Vision OCR (sends data to external servers)
  * Kept for reference but should not be used for sensitive financial data
  */
-async function performOCROnPDF(pdfBuffer: Buffer): Promise<string> {
-  try {
-    // Dynamic imports to avoid startup issues
-    const { fromBuffer } = await import('pdf2pic');
-    const fs = await import('fs');
-    const path = await import('path');
-    const os = await import('os');
-    
-    console.log('Converting PDF pages to images for OCR processing...');
-    
-    // Create a unique temp directory for this operation
-    const tempDir = path.join(os.tmpdir(), `pdf-ocr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
-    
-    try {
-      await fs.promises.mkdir(tempDir, { recursive: true });
-      
-      // Configure pdf2pic options to use buffer response (no file saving)
-      const convert = fromBuffer(pdfBuffer, {
-        density: 200,           // DPI - higher = better quality but slower
-        saveFilename: "page",   // filename prefix (not used with buffer response)
-        savePath: tempDir,      // temp directory (not used with buffer response)
-        format: "png",          // image format
-        width: 2000,            // max width
-        height: 2000            // max height
-      });
-      
-      // Convert all pages to images in memory (buffer response)
-      const convertedPages = await convert.bulk(-1, { responseType: "buffer" });
-      
-      if (!convertedPages || convertedPages.length === 0) {
-        console.log('No pages converted from PDF');
-        return '';
-      }
-      
-      console.log(`Converted ${convertedPages.length} PDF pages to images`);
-      
-      // Perform OCR on each page using Google Cloud Vision
-      let combinedText = '';
-      
-      for (let i = 0; i < convertedPages.length; i++) {
-        const page = convertedPages[i];
-        if (page && page.buffer) {
-          try {
-            console.log(`Performing OCR on page ${i + 1}/${convertedPages.length}`);
-            
-            // Use existing Google Cloud Vision OCR function
-            const pageText = await performOCR(page.buffer);
-            
-            if (pageText && pageText.trim()) {
-              combinedText += `\n--- PAGE ${i + 1} ---\n${pageText}\n`;
-            }
-          } catch (ocrError) {
-            console.error(`OCR failed for page ${i + 1}:`, ocrError);
-            // Continue with other pages even if one fails
-          }
-        }
-      }
-      
-      console.log(`OCR completed. Extracted ${combinedText.length} characters from PDF`);
-      return combinedText.trim();
-      
-    } finally {
-      // Cleanup temp directory
-      try {
-        await fs.promises.rmdir(tempDir, { recursive: true });
-      } catch (cleanupError) {
-        console.warn('Failed to cleanup temp directory:', cleanupError);
-      }
-    }
-    
-  } catch (error) {
-    console.error('PDF to image conversion failed:', error);
-    
-    // If pdf2pic fails, try alternative approach with existing OCR
-    try {
-      console.log('Falling back to direct OCR attempt...');
-      return await performOCR(pdfBuffer);
-    } catch (fallbackError) {
-      console.error('Fallback OCR also failed:', fallbackError);
-      throw new Error(`PDF OCR processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-}
-
 /**
  * Add AI categorization to extracted transactions
  */

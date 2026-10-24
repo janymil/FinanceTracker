@@ -16,6 +16,7 @@ import { reportHttpServerError } from "../errorGuard/report.js";
 import { registerErrorGuardRoutes } from "../errorGuard/routes.js";
 import { normalizeRoute } from "@shared/errorGuard/fingerprint";
 import { registerStripeRoutes } from "./stripeRoutes";
+import { registerMercadoPagoRoutes } from "./mercadoPagoRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 import { registerImportRoutes } from "./importRoutes";
@@ -28,6 +29,7 @@ import courseRoutes from "../courseRoutes.js";
 import { DataEncryption } from "../encryption.js";
 import { getEmailTransportStatus } from "../emailService.js";
 import { isAuthenticated } from "../clerkAuth.js";
+import { aiGuard } from "../aiAccess.js";
 import { rateLimit } from "../middleware/rateLimit.js";
 import { db } from "../db.js";
 import { sql } from "drizzle-orm";
@@ -120,6 +122,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerExportRoutes(app);
   registerImportRoutes(app);
   registerStripeRoutes(app);
+  // Peru pays in soles through MercadoPago; USD keeps going through Stripe.
+  registerMercadoPagoRoutes(app);
   registerRedeemRoutes(app);
 
   // Receipt upload endpoint — OCR and AI run per file, so it needs both a login and a cap.
@@ -143,6 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(
     '/api/voice-groq',
     isAuthenticated,
+    aiGuard(),
     rateLimit({ windowMs: 10 * 60 * 1000, max: 30, keyPrefix: 'voice-groq', perUser: true }),
     groqVoiceRoutes
   );
@@ -151,6 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(
     '/api/voice-mistral',
     isAuthenticated,
+    aiGuard(),
     rateLimit({ windowMs: 10 * 60 * 1000, max: 30, keyPrefix: 'voice-mistral', perUser: true }),
     mistralVoiceRoutes
   );

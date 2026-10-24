@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
+import { checkAiAccess, denyAi } from "../aiAccess";
 import { storage } from "../storage";
 import { checkImport } from "@shared/invariants";
 import { reportInvariant } from "../errorGuard/report.js";
@@ -534,7 +535,7 @@ export function registerImportRoutes(app: Express) {
       );
 
       // Clear all AI caches after successful import to trigger fresh AI insights
-      // Cache system removed - direct Fly.io calls only
+      // Cache system removed - direct AI calls only
       
       console.log(`Cleared all AI caches for user ${userId} after data import`);
 
@@ -591,6 +592,13 @@ export function registerImportRoutes(app: Express) {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Reading a PDF statement means AI parsing, so the same gate applies as every other
+      // AI feature: paid plan + the account switch on.
+      const access = await checkAiAccess(userId);
+      if (!access?.allowed) {
+        return denyAi(res, access?.code ?? 'unauthenticated');
       }
 
       if (!req.file) {

@@ -223,7 +223,6 @@
   "Industry-standard data encryption": "Šifrovanie údajov priemyselného štandardu",
   "Secure authentication with Clerk": "Bezpečná autentifikácia s Clerk",
   "Private data isolation": "Izolácia súkromných údajov",
-  "GDPR compliance and privacy controls": "Súlad s GDPR a kontroly súkromia",
   "Cookie consent management": "Správa súhlasu s cookies",
   "Secure API endpoints": "Bezpečné API endpoints",
   "Regular security audits": "Pravidelné bezpečnostné audity",
@@ -1719,7 +1718,13 @@
     "close": "Zavrieť",
     "modal_title": "Nahrať Účet",
     "modal_subtitle": "Nahrajte fotografiu účtu na automatické extrakcie údajov transakcie",
-    "button_text": "Nahrať Obrázok"
+    "button_text": "Nahrať Obrázok",
+    "AI is turned off": "AI je vypnutá",
+    "AI scanning needs a paid plan": "Skenovanie pomocou AI vyžaduje platený plán",
+    "Turn AI back on in Profile to scan receipts.": "Ak chcete skenovať bločky, zapnite AI v Profile.",
+    "Receipt scanning is available on the Standard and Premium plans.": "Skenovanie bločkov je dostupné v plánoch Standard a Premium.",
+    "Go to Profile": "Prejsť do profilu",
+    "Close": "Zavrieť"
   },
   "trends": {
     "title": "Pokročilá analýza trendov",
@@ -1938,11 +1943,11 @@
       "compliance_title": "Bezpečnostné štandardy",
       "pci_dss": "Stripe PCI-DSS",
       "tls_encryption": "TLS 1.3 Prenos",
-      "gdpr": "GDPR Článok 32",
+      "gdpr": "Minimalizácia údajov",
       "aes_standard": "AES-256 Úložisko",
       "ai_processing_title": "Transparentnosť AI Spracovania",
-      "ai_provider": "Poskytovateľ AI Služby: OpenAI (GPT-4) s podnikovou bezpečnosťou",
-      "ai_anonymization": "KRITICKÉ: Len anonymizované údaje odoslané do OpenAI - Všetky citlivé informácie (SSN, čísla účtov, osobné údaje) úplne odstránené pred AI spracovaním",
+      "ai_provider": "Poskytovateľ AI: OpenAI a Mistral s podnikovým zabezpečením",
+      "ai_anonymization": "Odosiela sa iba anonymizovaný text: e-maily, telefóny, IBAN, čísla kariet, ID, adresy, čísla účtov a vaše meno sa pred AI spracovaním odstránia",
       "ai_retention": "Bez Retencie Údajov: AI poskytovatelia neukladajú obsah vášho bankového výpisu",
       "ai_purpose": "Účel: Len kategorizácia transakcií a finančné insights",
       "user_rights_title": "Vaše Práva a Kontrola",
@@ -2757,94 +2762,6 @@
       "back": "Späť"
     }
   },
-  "gdpr": {
-    "title": "Európske práva na súkromie (GDPR)",
-    "legal_basis": {
-      "title": "Právny základ pre spracovanie",
-      "description": "Podľa GDPR spracúvame vaše osobné údaje na základe nasledujúcich právnych základov:",
-      "contract": "Zmluvná nevyhnutnosť:",
-      "contract_desc": "Spracovanie potrebné na poskytovanie našich služieb finančného riadenia a plnenie zmluvy s vami",
-      "legitimate_interest": "Oprávnený záujem:",
-      "legitimate_desc": "Spracovanie na predchádzanie podvodom, zlepšovanie služieb a obchodné operácie",
-      "consent": "Súhlas:",
-      "consent_desc": "Spracovanie pre marketingové komunikácie a voliteľné funkcie (súhlas môžete kedykoľvek odvolať)",
-      "legal_obligation": "Právna povinnosť:",
-      "legal_desc": "Spracovanie vyžadované na splnenie právnych a regulačných požiadaviek"
-    },
-    "data_subject_rights": {
-      "title": "Vaše práva dotknutej osoby",
-      "description": "Ako obyvateľ EÚ máte podľa GDPR nasledujúce práva:"
-    },
-    "rights": {
-      "access": {
-        "title": "Právo na prístup",
-        "description": "Požiadať o kópiu vašich osobných údajov a informácie o tom, ako ich spracúvame"
-      },
-      "rectification": {
-        "title": "Právo na opravu",
-        "description": "Požiadať o opravu nepresných alebo neúplných osobných údajov"
-      },
-      "erasure": {
-        "title": "Právo na výmaz",
-        "description": "Požiadať o vymazanie vašich osobných údajov za určitých okolností"
-      },
-      "restriction": {
-        "title": "Právo na obmedzenie",
-        "description": "Požiadať o obmedzenie spracovávania v špecifických situáciách"
-      },
-      "portability": {
-        "title": "Právo na prenosnosť",
-        "description": "Získať vaše údaje v štruktúrovanom, strojovo čitateľnom formáte"
-      },
-      "objection": {
-        "title": "Právo na námietku",
-        "description": "Namietať proti spracovaniu založenému na oprávnených záujmoch alebo priamom marketingu"
-      }
-    },
-    "international_transfers": {
-      "title": "Medzinárodné prenosy údajov",
-      "description": "Niektorí naši poskytovatelia služieb sú umiestnení mimo EÚ. Zabezpečujeme primeranú ochranu prostredníctvom:"
-    },
-    "transfers": {
-      "us_services": "Služby so sídlom v USA:",
-      "us_desc": "OpenAI (spracovanie AI), Stripe (platby), Clerk (overovanie) s primeranými zárukam",
-      "safeguards": "Primerané záruky:",
-      "safeguards_desc": "Štandardné zmluvné doložky, rozhodnutia o primeranosti a certifikačné schémy",
-      "adequacy": "Rozhodnutia o primeranosti:",
-      "adequacy_desc": "Prenosy do krajín s primeranou ochranou údajov uznanou Európskou komisiou"
-    },
-    "breach_notification": {
-      "title": "Oznámenie narušenia údajov",
-      "description": "V prípade narušenia údajov ovplyvňujúceho vaše osobné údaje:",
-      "procedure": "Oznámime príslušnému dozornému orgánu do 72 hodín a informujeme dotknuté osoby bez zbytočného odkladu, ak narušenie predstavuje vysoké riziko pre vaše práva a slobody."
-    },
-    "supervisory_authority": {
-      "title": "Dozorný orgán",
-      "description": "Máte právo podať sťažnosť u vašej miestnej autorty na ochranu údajov:",
-      "contact": "Kontaktujte vašu národnú autoritu na ochranu údajov",
-      "details": "Navštívte webovú stránku Európskej rady pre ochranu údajov pre kontaktné informácie všetkých autorít na ochranu údajov v EÚ"
-    },
-    "dpo": {
-      "title": "Poverník pre ochranu údajov",
-      "description": "Vymenovali sme povereníka pre ochranu údajov na monitorovanie našej súladu s GDPR:",
-      "contact": "Kontakt na DPO:",
-      "responsibilities": "Zodpovednosti:",
-      "responsibilities_desc": "Monitorovanie súladu, vykonávanie hodnotení vplyvu na súkromie a slúženie ako kontaktný bod pre subjekty údajov a orgány"
-    },
-    "eu_representative": {
-      "title": "Zástupca v EÚ",
-      "description": "Pre obyvateľov EÚ náš určený zástupca v EÚ rieši záležitosti GDPR:",
-      "notice": "Upozornenie: Určenie zástupcu v EÚ prebieha. Pre GDPR otázky kontaktujte nášho Povereníka pre ochranu údajov na dpo@kaptia.app alebo použite náš všeobecný kontakt pre súkromie: privacy@kaptia.app"
-    },
-    "exercise_rights": {
-      "title": "Ako uplatniť vaše práva",
-      "description": "Na uplatnenie akéhokoľvek z vašich práv dotknutej osoby nás kontaktujte:",
-      "email": "Všeobecný email pre súkromie:",
-      "dpo_email": "Poverník pre ochranu údajov:",
-      "response_time": "Doba odozvy:",
-      "response_desc": "Odpovieme na vašu žiadosť do 30 dní (predĺžiteľné o 60 dní pre komplexné žiadosti)"
-    }
-  },
   "ccpa": {
     "title": "Kalifornské práva spotrebiteľov na súkromie (CCPA)",
     "consumer_rights": {
@@ -2899,10 +2816,10 @@
       "clerk_desc": "Služby autentifikácie používateľov a správy účtov",
       "stripe": "Stripe (Spracovanie platieb):",
       "stripe_desc": "Bezpečné spracovanie platieb a správa predplatného",
-      "openai": "OpenAI (AI služby):",
-      "openai_desc": "AI podporované finančné poznatky a kategorizácia (anonymizované údaje)",
-      "bunny": "Bunny.net (Úložisko súborov):",
-      "bunny_desc": "Bezpečné cloudové úložisko pre účtenky a exportované súbory"
+      "openai": "Poskytovatelia AI (OpenAI, Mistral):",
+      "openai_desc": "Finančné prehľady a kategorizácia iba z anonymizovaného textu",
+      "bunny": "Cloudflare R2 (Úložište súborov):",
+      "bunny_desc": "Objektové úložište obrázkov bločkov v platených plánoch"
     },
     "exercise_rights": {
       "title": "Ako uplatniť svoje práva",
@@ -2933,70 +2850,27 @@
       "isolation": "Izolácia údajov:",
       "isolation_desc": "Záznamy každého používateľa sú oddelené a chránené overovaným prístupovým systémom.",
       "transmission": "Bezpečný prenos:",
-      "transmission_desc": "Komunikácia so servermi Kaptia prebieha výhradne cez protokol HTTPS s moderným šifrovaním TLS 1.3.",
+      "transmission_desc": "Všetka komunikácia so servermi Kaptia prebieha výdavne cez HTTPS s moderným TLS (1.2 alebo novším).",
       "audits": "Priebežné monitorovanie:",
       "audits_desc": "Uplatňujeme priebežné monitorovanie bezpečnosti a overené bezpečnostné postupy."
     },
     "payment_processor": {
       "title": "Spracovanie platieb za predplatné",
-      "description": "Platby za softvérové predplatné Kaptia sú bezpečne spracovávané prostredníctvom spoločnosti Stripe, certifikovaného poskytovateľa PCI-DSS Level 1.",
-      "details": "Kaptia nespracúva, neuchováva ani nemá prístup k číslam vašich platobných kariet. Fakturácia prebieha priamo na zabezpečenej infraštruktúre Stripe."
-    }
-  },
-  "ai_act_compliance": {
-    "title": "Súlad s EU AI Act (2024)",
-    "classification": {
-      "title": "Klasifikácia AI systému",
-      "description": "Podľa EU AI Act sú naše AI systémy klasifikované ako:",
-      "limited_risk": "AI systémy s obmedzeným rizikom:",
-      "limited_desc": "Naša finančná kategorizácia a AI poznatky vyžadujú zverejnenia transparentnosti",
-      "transparency": "Povinnosti transparentnosti:",
-      "transparency_desc": "Používatelia sú informovaní pri interakcii s AI systémami a ich schopnosťami"
-    },
-    "transparency": {
-      "title": "Požiadavky na transparentnosť AI",
-      "description": "Poskytujeme úplnú transparentnosť o našich AI systémoch:",
-      "clear_disclosure": "Jasné zverejnenie keď používatelia interagujú s AI-poháňanými funkciami",
-      "model_information": "Informácie o schopnostiach a obmedzeniach AI modelu",
-      "data_usage": "Vysvetlenie ako sú údaje používateľov spracovávané AI systémami",
-      "decision_logic": "Prehľad procesov a logiky rozhodovania AI"
-    },
-    "bias_fairness": {
-      "title": "AI zaujatosť a spravodlivosť",
-      "description": "Implementujeme opatrenia na zabezpečenie spravodlivej a nestrannej prevádzky AI:",
-      "measures": "Pravidelné testovanie zaujatosti, rozmanité trénovacie údaje a hodnotenia algoritmickej spravodlivosti zabezpečujú spravodlivý výkon AI naprieč všetkými demografiami používateľov."
+      "description": "Predplatné Kaptia sa bezpečne spracúvajú cez Stripe (karty celosvetovo) a MercadoPago (Peru), obaja certifikovaní spracovatelia platieb.",
+      "details": "Kaptia nespracúva, neobsluhuje ani neukladá čísla platobných kariet. Všetky platby spravuje priamo bezpečná infraštruktúra poskytovateľa platieb."
     }
   },
   "data_transfers": {
-    "title": "Medzinárodné prenosy údajov",
-    "scc": {
-      "title": "Štandardné zmluvné doložky (SCC)",
-      "description": "Používame EU-schválené štandardné zmluvné doložky pre všetky medzinárodné prenosy údajov:",
-      "stripe_scc": "Stripe (spracovanie platieb): EU-US prenosy údajov pokryté SCC a rozhodnutiami o primeranosti",
-      "clerk_scc": "Clerk (autentifikácia): SCC na mieste pre EU-US prenosy autentifikačných údajov používateľov",
-      "openai_scc": "OpenAI (AI služby): Dohody o spracovaní údajov so SCC pre AI analýzu",
-      "bunny_scc": "Bunny.net (úložisko súborov): Európske dátové centrá so SCC pre globálnu redundanciu"
-    },
-    "adequacy": {
-      "title": "Rozhodnutia o primeranosti",
-      "description": "Spoliehame sa na rozhodnutia Európskej komisie o primeranosti kde sú dostupné:",
-      "us_framework": "US-EU Data Privacy Framework poskytuje primeranú ochranu pre transatlantické toky údajov kde je to aplikovateľné."
-    },
-    "safeguards": {
-      "title": "Dodatočné ochranné opatrenia",
-      "description": "Okrem SCC implementujeme dodatočné ochranné opatrenia:",
-      "technical": "Technické ochranné opatrenia: Šifrovanie, pseudonymizácia a kontroly prístupu",
-      "organizational": "Organizačné opatrenia: Školenie personálu, politiky minimalizácie údajov",
-      "contractual": "Zmluvné ochrany: Dohody o spracovaní údajov so všetkými tretími stranami",
-      "monitoring": "Pokračujúce monitorovanie: Pravidelné hodnotenia súladu a postupy auditu"
-    }
+    "title": "Kde sú uložené vaše údaje",
+    "database": "Databáza: Neon Postgres, Spojené štáty (us-east-2)",
+    "storage": "Obrázky bločkov: Cloudflare R2",
+    "auth": "Prihlásenie: Clerk",
+    "ai": "Spracovanie AI: OpenAI a Mistral dostávajú iba anonymizovaný text",
+    "payments": "Platby: Stripe (karty celosvetovo) a MercadoPago (Peru)",
+    "note": "Každý poskytovateľ spracúva údaje len na to, aby poskytol svoju službu Kaptii. Vaše údaje nikdy nepredávame."
   },
   "compliance": {
     "detecting_location": "Detekuje sa poloha...",
-    "gdpr": {
-      "title": "Európske práva na súkromie",
-      "notice": "Ako obyvateľ EÚ máte rozšírené práva na súkromie podľa GDPR. Pozrite si naše Zásady ochrany súkromia pre podrobnosti o vašich právach na prístup, opravu a vymazanie údajov."
-    },
     "ccpa": {
       "title": "Kalifornské práva na súkromie",
       "notice": "Obyvatelia Kalifornie majú špecifické práva na súkromie podľa CCPA. Môžete požiadať o informácie o zbere údajov a odmietnuť predaj údajov."
@@ -3004,13 +2878,13 @@
   },
   "privacy": {
     "title": "Zásady ochrany súkromia",
-    "last_updated": "Posledná aktualizácia: 14. júna 2025",
+    "last_updated": "Posledná aktualizácia: 23. októbra 2026",
     "section1": {
       "title": "1. Informácie, ktoré zhromažďujeme",
       "description": "Zhromažďujeme informácie, ktoré nám poskytujete priamo, napríklad keď vytvárate alebo upravujete svoj účet, pridávate finančné transakcie, nastavujete rozpočty alebo nás kontaktujete pre podporu.",
       "account_info": {
         "title": "Informácie o účte:",
-        "description": "Emailová adresa, meno, heslo (šifrované)"
+        "description": "E-mailová adresa a meno. Vaše heslo spravuje Clerk, náš poskytovateľ prihlásenia, a Kaptia ho nikdy neukladá."
       },
       "financial_data": {
         "title": "Záznamy výdavkov a rozpočtu:",
@@ -3030,7 +2904,7 @@
       "description": "Informácie, ktoré zhromažďujeme, používame na:",
       "services": "Poskytovanie, údržbu a zlepšovanie našich služieb organizácie výdavkov a produktivity",
       "transactions": "Spracovanie a zobrazovanie vašich záznamov výdavkov a zasielanie systémových notifikácií",
-      "ai_insights": "Poskytovanie AI-poháňaných prehľadov a kategorizácie výdavkov (Premium používatelia)",
+      "ai_insights": "Poskytovanie AI prehľadov a kategorizácie výdavkov (iba plány Standard a Premium)",
       "notifications": "Zasielanie technických oznámení, aktualizácií, bezpečnostných upozornení a správ podpory",
       "support": "Odpoveď na vaše komentáre a otázky",
       "analytics": "Analýza vzorcov používania na zlepšenie našej služby"
@@ -3045,34 +2919,34 @@
     },
     "section3": {
       "title": "3. AI-poháňané funkcie a spracovanie údajov",
-      "description": "Kaptia používa umelú inteligenciu na spracovanie textu bločkov (OCR), kategorizáciu výdavkov a generovanie tipov pre produktivitu. Takto spracovávame vaše údaje pre AI spracovanie:",
+      "description": "Kaptia používa umelú inteligenciu na rozpoznávanie textu bločkov, kategorizáciu výdavkov a prehľady míňania. Text je zbavený identifikačných údajov skôr, než sa dostane k AI modelu:",
       "ai_provider": {
         "title": "Poskytovateľ AI služieb:",
-        "description": "Používame GPT modely OpenAI na rozpoznávanie položiek výdavkov a generovanie prehľadov"
+        "description": "AI modely od OpenAI a Mistral spracúvajú anonymizovaný text v našom mene. Neuvádzame, ktorá verzia modelu sa používa."
       },
       "data_anonymization": {
         "title": "Anonymizácia údajov:",
-        "description": "Všetky texty bločkov a výdavkov sú anonymizované a zbavené osobných identifikačných údajov pred AI spracovaním"
+        "description": "Pred odoslaním textu odstraňujeme e-mailové adresy, telefónne čísla, IBAN, čísla kariet, rodné čísla a daňové identifikátory, poštové adresy, čísla bankových účtov a vaše meno a e-mail. Sumy, dátumy, kategórie a názvy obchodníkov zostávajú, aby bol výsledok presný. Obrázky bločkov čítame na vlastnom serveri a nikdy ich neposielame poskytovateľovi AI."
       },
       "processing_purpose": {
         "title": "Účel spracovávania:",
-        "description": "AI analýza sa používa výlučne na OCR rozpoznávanie textu bločkov, kategorizáciu výdavkov a všeobecné tipy produktivity"
+        "description": "AI analýza sa používa len na rozpoznanie textu bločkov, kategorizáciu výdavkov a prehľady míňania."
       },
       "data_retention": {
         "title": "Uchovávanie údajov:",
-        "description": "Anonimizované údaje poslané do OpenAI nie sú uchovávané AI službou nad rámec požiadaviek spracovania"
+        "description": "Poskytovatelia AI dostanú anonymizovaný text, vrátia výsledok a nie sú požiadaní, aby si ho uchovávali na trénovanie. Vďaka našej cache sa tá istá požiadavka neposiela dvakrát."
       },
       "user_control": {
         "title": "Kontrola používateľa:",
-        "description": "Môžete deaktivovať AI funkcie v nastaveniach svojho účtu a vypadnúť z tohto spracovania"
+        "description": "AI môžete vypnúť v Profile → Preferencie. Počas vypnutia sú skenovanie bločkov, hlasový vstup, tipy, prehľady a predpovede zakázané a žiadne údaje sa neposielajú poskytovateľovi AI."
       },
       "no_personal_data": {
         "title": "Žiadne osobné údaje:",
-        "description": "Vaše meno, e-mail, podrobnosti účtu alebo akékoľvek identifikačné informácie sa nikdy nezdieľajú s AI službami"
+        "description": "AI modelu nikdy neposielame vaše meno, e-mailovú adresu, identifikátory účtu, IBAN, čísla kariet, telefónne čísla ani poštové adresy."
       },
       "important": {
         "title": "Dôležité:",
-        "description": "AI spracovanie sa vyskytuje len pre predplatiteľov Štandard a Premium, ktorí majú AI funkcie povolené. Používatelia bezplatného plánu nemajú svoje údaje spracovávané AI službami."
+        "description": "AI spracovanie prebieha iba v plánoch Standard a Premium a iba vtedy, keď je AI v účte zapnutá. Účty s bezplatným plánom sa AI službami nikdy nespracúvajú."
       }
     },
     "section4": {
@@ -3084,15 +2958,15 @@
       },
       "payment_processing": {
         "title": "Spracovanie platieb:",
-        "description": "Stripe pre platby predplatného (nezdieľajú sa údaje finančných transakcií)"
+        "description": "Stripe pre kartové predplatné a MercadoPago pre predplatné platené v Peru. Údaje o vašej karte nikdy nevidíme ani neukladáme."
       },
       "ai_processing": {
         "title": "AI spracovanie:",
-        "description": "OpenAI pre OCR spracovanie bločkov a kategorizáciu textu (ako je uvedené v sekcii 3 vyššie)"
+        "description": "OpenAI a Mistral dostávajú iba anonymizovaný text, ako je uvedené v sekcii 3."
       },
       "cloud_storage": {
         "title": "Cloudové úložisko:",
-        "description": "Šifrované zálohy pre Premium používateľov"
+        "description": "Cloudflare R2 pre obrázky bločkov v platených plánoch"
       },
       "legal_requirements": {
         "title": "Právne požiadavky:",
@@ -3103,7 +2977,7 @@
       "title": "5. Bezpečnosť údajov",
       "description": "Implementujeme primerané bezpečnostné opatrenia na ochranu vašich osobných informácií:",
       "ssl_encryption": "Všetky prenosy údajov sú šifrované pomocou SSL/TLS",
-      "password_hashing": "Heslá sú šifrované pomocou štandardnej priemyselnej enkrypcie",
+      "password_hashing": "Heslá spravuje Clerk, náš poskytovateľ prihlásenia; Kaptia ich nikdy neukladá",
       "security_audits": "Pravidelné bezpečnostné audity a aktualizácie",
       "limited_access": "Obmedzený prístup k osobným údajom na báze potreby vedieť",
       "secure_backup": "Bezpečné cloudové záložné úložisko so šifrovaním"
@@ -3117,7 +2991,7 @@
       "description": "Máte právo na:",
       "access_rights": "Prístup, aktualizáciu alebo vymazanie vašich osobných informácií",
       "export_rights": "Export vašich údajov v prenositeľnom formáte",
-      "opt_out_rights": "Odmietnutie určitých komunikácií",
+      "opt_out_rights": "AI spracovanie môžete kedykoľvek vypnúť v Profile → Preferencie",
       "information_rights": "Požiadanie informácií o tom, ako sa vaše údaje používajú"
     },
     "section10": {
@@ -3177,7 +3051,9 @@
           "7": "Prioritná e-mailová podpora"
         }
       }
-    }
+    },
+    "mercadopago_note": "Platby v Peru bezpečne spracúva MercadoPago.",
+    "payment_error": "Platbu sa nepodarilo spustiť. Skúste to znova."
   },
   "admin": {
     "failed_to_clear_function_cache": "Nepodarilo sa vymazať cache funkcií",
@@ -3331,10 +3207,17 @@
       "terms": "Podmienky používania",
       "terms_desc": "Pravidlá používania, predplatné, správa účtu a obmedzenia služby",
       "privacy": "Zásady ochrany osobných údajov",
-      "privacy_desc": "Práva GDPR, ochrana a šifrovanie údajov, lokálne a AI spracovanie",
+      "privacy_desc": "Práva na súkromie, ochrana údajov a spracovanie pomocou AI",
       "cookies": "Zásady používania cookies",
       "cookies_desc": "Informácie o nevyhnutných, funkčných a analytických cookies"
-    }
+    },
+    "AI features": "Funkcie AI",
+    "Let AI process my data": "Povoliť spracovanie mojich údajov pomocou AI",
+    "When this is off, receipt scanning, voice input, financial tips, insights and predictions are disabled. No data is sent to any AI provider for this account.": "Keď je toto vypnuté, skenovanie bločkov, hlasový vstup, finančné tipy, prehľady a predpovede sú vypnuté. Pre tento účet sa žiadne údaje neposielajú žiadnemu poskytovateľovi AI.",
+    "AI processing is currently off for this account": "Spracovanie pomocou AI je pre tento účet momentálne vypnuté",
+    "AI features enabled": "Funkcie AI sú zapnuté",
+    "AI features disabled": "Funkcie AI sú vypnuté",
+    "Could not change the AI setting": "Nepodarilo sa zmeniť nastavenie AI"
   },
   "pdf": {
     "anonymization_preview": {
@@ -3894,7 +3777,7 @@
           "Ručné kategorizovanie",
           "Do 100 záznamov transakcií",
           "Jednoduchý prehľad výdavkov",
-          "Personalizované inteligentné tipy"
+          "Mesačné súčty podľa kategórií"
         ]
       },
       "standard": {
@@ -3937,5 +3820,6 @@
     "export_note": "CSV a PDF prehľady",
     "cta": "Rozšíriť – {{price}}/mesiac",
     "learn_more": "Zistiť viac"
-  }
+  },
+  "Mesačné súčty podľa kategórií": "Mesačné súčty podľa kategórií"
 }

@@ -1,0 +1,130 @@
+import crypto from 'crypto';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  createPreapproval,
+  isMercadoPagoConfigured,
+  verifyWebhookSignature,
+} from '../../server/mercadopago';
+
+const ORIGINAL_ENV = { ...process.env };
+
+afterEach(() => {
+  process.env = { ...ORIGINAL_ENV };
+  vi.unstubAllGlobals();
+});
+
+/**
+ * The integration cannot be exercised end-to-end without live MercadoPago credentials, so
+ * these tests pin down the two things that would silently charge the wrong amount or let a
+ * forged webhook through: the request body and the signature check.
+ */
+describe('MercadoPago preapproval', () => {
+  it('reports configuration only when the access token is present', () => {
+    delete process.env.MERCADOPAGO_ACCESS_TOKEN;
+    expect(isMercadoPagoConfigured()).toBe(false);
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    expect(isMercadoPagoConfigured()).toBe(true);
+  });
+
+  it('creates a PEN, monthly preapproval with the price from the shared catalogue', async () => {
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      text: async () => JSON.stringify({ id: 'pre-123', init_point: 'https://mp/checkout/pre-123' }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const created = await createPreapproval({
+      userId: 'user_1',
+      plan: 'premium',
+      interval: 'monthly',
+      payerEmail: 'payer@example.com',
+      backUrl: 'https://kaptia.app/es/profile?mp=return',
+    });
+
+    expect(created).toEqual({ id: 'pre-123', initPoint: 'https://mp/checkout/pre-123' });
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(String(init.body));
+    expect(body.external_reference).toBe('user_1');
+    expect(body.payer_email).toBe('payer@example.com');
+    expect(body.auto_recurring).toMatchObject({
+      transaction_amount: 19.9,
+      currency_id: 'PEN',
+      frequency: 1,
+      frequency_type: 'months',
+    });
+  });
+
+  it('uses a yearly frequency for the yearly plan', async () => {
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      text: async () => JSON.stringify({ id: 'pre-9', init_point: 'https://mp/checkout/pre-9' }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await createPreapproval({
+      userId: 'user_1',
+      plan: 'standard',
+      interval: 'yearly',
+      payerEmail: 'payer@example.com',
+      backUrl: 'https://kaptia.app/es/profile?mp=return',
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(String(init.body));
+    expect(body.auto_recurring).toMatchObject({
+      transaction_amount: 99.9,
+      currency_id: 'PEN',
+      frequency_type: 'years',
+    });
+  });
+
+  it('surfaces MercadoPago errors instead of returning a broken checkout URL', async () => {
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: false,
+      status: 401,
+      text: async () => JSON.stringify({ message: 'invalid_token' }),
+    })));
+
+    await expect(createPreapproval({
+      userId: 'user_1',
+      plan: 'standard',
+      interval: 'monthly',
+      payerEmail: 'payer@example.com',
+      backUrl: 'https://kaptia.app/es/profile?mp=return',
+    })).rejects.toThrow('invalid_token');
+  });
+});
+
+describe('verifyWebhookSignature', () => {
+  const secret = 'whsec_test';
+  const dataId = 'pre-123';
+  const requestId = 'req-1';
+  const ts = '1700000000';
+
+  function sign(manifest: string): string {
+    return crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+  }
+
+  it('accepts a correctly signed payload', () => {
+    const signature = `ts=${ts},v1=${sign(`id:${dataId};request-id:${requestId};ts:${ts};`)}`;
+    expect(verifyWebhookSignature({ signatureHeader: signature, requestId, dataId, secret })).toBe(true);
+  });
+
+  it('rejects a tampered payload', () => {
+    const signature = `ts=${ts},v1=${sign(`id:other;request-id:${requestId};ts:${ts};`)}`;
+    expect(verifyWebhookSignature({ signatureHeader: signature, requestId, dataId, secret })).toBe(false);
+  });
+
+  it('rejects a malformed header', () => {
+    expect(verifyWebhookSignature({ signatureHeader: 'v1=abc', requestId, dataId, secret })).toBe(false);
+    expect(verifyWebhookSignature({ signatureHeader: undefined, requestId, dataId, secret })).toBe(false);
+  });
+
+  it('only skips verification when no secret is configured', () => {
+    expect(verifyWebhookSignature({ signatureHeader: undefined, requestId, dataId, secret: undefined })).toBe(true);
+  });
+});

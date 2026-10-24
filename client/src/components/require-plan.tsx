@@ -6,7 +6,7 @@ import { apiRequest } from '@/lib/queryClient';
 import UpgradePrompt from './upgrade-prompt';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
-import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users, Lock, Crown } from 'lucide-react';
+import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users, Lock, Crown, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 type PlanType = 'free' | 'standard' | 'premium';
@@ -18,6 +18,8 @@ interface RequirePlanProps {
   description?: string;
   benefits?: string[];
   compact?: boolean;
+  /** Set for widgets that call an AI endpoint; they disappear when the account switches AI off. */
+  ai?: boolean;
 }
 
 const planHierarchy: Record<PlanType, number> = {
@@ -103,7 +105,7 @@ const getFeatureConfigs = (t: any) => ({
   }
 });
 
-export default function RequirePlan({ plan, children, feature, description, benefits, compact }: RequirePlanProps) {
+export default function RequirePlan({ plan, children, feature, description, benefits, compact, ai }: RequirePlanProps) {
   const { isLoaded, isSignedIn, user } = useUser();
   const isReady = isLoaded && isSignedIn && !!user?.id;
   const queryClient = useQueryClient();
@@ -150,6 +152,18 @@ export default function RequirePlan({ plan, children, feature, description, bene
 
   // Only render children if user's plan level is equal or higher than required
   if (userPlanLevel >= requiredPlanLevel) {
+    // The account switch wins over the plan: no AI widget runs while AI is off.
+    if (ai && databaseUser?.aiEnabled === false) {
+      return (
+        <div className="rounded-xl border border-dashed p-6 text-center space-y-2" data-testid="ai-off-placeholder">
+          <Sparkles className="mx-auto h-5 w-5 text-muted-foreground" />
+          <p className="font-medium">{t('profile.AI features')}: {t('profile.AI processing is currently off for this account')}</p>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/profile">{t('upload.Go to Profile')}</Link>
+          </Button>
+        </div>
+      );
+    }
     return <>{children}</>;
   }
 

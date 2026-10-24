@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils.js";
+import { anonymizeMessages } from "../shared/aiAnonymizer.js";
 
 export interface MistralRequest {
   messages: Array<{
@@ -97,7 +98,7 @@ export class MistralClient {
 
     const payload = {
       model: request.model || this.defaultModel,
-      messages: request.messages,
+      messages: anonymizeMessages(request.messages),
       temperature: request.temperature || 0.1,
       max_tokens: request.max_tokens || 1000,
       top_p: request.top_p || 1.0,

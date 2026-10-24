@@ -782,6 +782,7 @@ export default function Dashboard() {
             <RequirePlan
               plan="standard"
               compact
+              ai
               feature={t("Daily Recommendations")}
               description={t("Personalized suggestions to improve your spending every day.")}
             >
@@ -798,6 +799,7 @@ export default function Dashboard() {
             <RequirePlan
               plan="premium"
               compact
+              ai
               feature={t("Expense Prediction")}
               description={t("AI forecast of your upcoming expenses and cash flow.")}
             >
@@ -809,6 +811,7 @@ export default function Dashboard() {
             <RequirePlan
               plan="standard"
               compact
+              ai
               feature={t("Auto-Categorization")}
               description={t("Let AI categorize your transactions automatically as they arrive.")}
             >
@@ -820,6 +823,7 @@ export default function Dashboard() {
           <RequirePlan
             plan="premium"
             compact
+            ai
             feature={t("AI Financial Tips")}
             description={t("In-depth AI analysis of your spending with actionable advice.")}
           >
