@@ -93,3 +93,29 @@ Rules the specs follow:
   control ids (`#amount`, `#description`). Never i18n copy.
 - `trace`/`video`/`screenshot` are kept on failure in `test-results/`.
 - `workers: 1` and one user per run: a crashed run must not poison the next one.
+
+## No Docker? Use a throw-away embedded Postgres
+
+`embedded-postgres` ships real Postgres binaries as an npm package (no admin rights, no install):
+
+```bash
+mkdir /tmp/pgdb && cd /tmp/pgdb && npm init -y && npm i embedded-postgres
+# start it with user e2e / password e2e on port 55432 and create the databases as UTF8:
+#   create database kaptia template template0 encoding 'UTF8' lc_collate 'C' lc_ctype 'C';
+```
+
+Create the database as **UTF8**. On Windows the default is WIN1252, which rejects characters such
+as "—" or "č" with "untranslatable character" and makes the suite fail for the wrong reason.
+Then follow the steps above with `DATABASE_URL=postgresql://e2e:e2e@127.0.0.1:55432/kaptia`.
+
+## What the specs cover
+
+| Spec | What it proves |
+|---|---|
+| `core-tracking.spec.ts` | income, expense create/edit/delete, budgets, goals, reports, every export format (CSV/JSON/Excel/PDF) and the Export button, time-zone month boundary |
+| `onboarding.spec.ts` | anonymous API access, JSON 404, sign-in deep link, currency suggestion, welcome + first transaction, Free-plan checklist, currency lock, signed Clerk webhook, failing-network recovery |
+| `ai-consent.spec.ts` | Free plan and the AI switch really stop every AI route |
+| `human-flow.spec.ts`, `add-expense.spec.ts` | a person adding an expense, desktop and mobile |
+
+`onboarding.spec.ts` creates throw-away users in the Clerk **test** instance and deletes them
+afterwards; the standing demo account is kept on purpose.

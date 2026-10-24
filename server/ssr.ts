@@ -74,7 +74,7 @@ const multilingualContent: Record<string, Record<string, any>> = {
     },
     '/help': {
       title: 'Ayuda y Documentación de Kaptia',
-      description: 'Guía completa para usar Kaptia efectivamente. Aprende sobre seguimiento de gastos, presupuestos, metas, funciones de IA y escaneo móvil de recibos.',
+      description: 'Guía completa para usar Kaptia efectivamente. Aprende sobre seguimiento de gastos, presupuestos, metas, funciones de IA y escaneo celular de recibos.',
       keywords: 'ayuda, documentación, guía, tutorial, soporte, funciones',
       lang: 'es'
     },
@@ -296,10 +296,11 @@ function getNavContent(lang: string): string {
 }
 
 function getCopyrightText(lang: string): string {
+  const year = new Date().getFullYear();
   const texts = {
-    'en': '© 2025 Kaptia. All rights reserved.',
-    'es': '© 2025 Kaptia. Todos los derechos reservados.',
-    'sk': '© 2025 Kaptia. Všetky práva vyhradené.'
+    'en': `© ${year} Kaptia. All rights reserved.`,
+    'es': `© ${year} Kaptia. Todos los derechos reservados.`,
+    'sk': `© ${year} Kaptia. Všetky práva vyhradené.`
   };
   
   return texts[lang as keyof typeof texts] || texts['en'];
@@ -333,7 +334,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <h3>Standard Plan - $4.99/month</h3>
                 <p>Enhanced features including budgets, goals, AI categorization, and receipt scanning</p>
                 
-                <h3>Premium Plan - $9.99/month</h3>
+                <h3>Premium Plan - $9.90/month</h3>
                 <p>Unlimited transactions, advanced analytics, AI insights, and cloud backup</p>
             </div>
         </section>
@@ -361,16 +362,16 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Receipt OCR scanning</li>
                     <li>Mobile QR code upload</li>
                     <li>Transaction reminders</li>
+                    <li>Collaborative goals</li>
                 </ul>
                 
-                <h2>Premium Plan - $9.99/month</h2>
+                <h2>Premium Plan - $9.90/month</h2>
                 <ul>
                     <li>Everything in Standard</li>
                     <li>Advanced AI insights</li>
                     <li>Spending health analysis</li>
                     <li>Predictive forecasting</li>
                     <li>Cloud backup & export</li>
-                    <li>Collaborative goals</li>
                     <li>Priority support</li>
                 </ul>
             </div>
@@ -457,7 +458,6 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>256-bit SSL encryption</li>
                 <li>Secure cloud storage</li>
                 <li>Regular security audits</li>
-                <li>GDPR compliance</li>
             </ul>
         </section>
       `,
@@ -539,7 +539,6 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>AES-256 encryption for sensitive data</li>
                 <li>Local OCR processing - no external data transmission</li>
                 <li>Privacy-first AI analysis</li>
-                <li>GDPR and industry compliance standards</li>
             </ul>
         </section>
       `
@@ -570,7 +569,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <h3>Plan Estándar - $4.99/mes</h3>
                 <p>Características mejoradas incluyendo presupuestos, metas, categorización IA y escaneo de recibos</p>
                 
-                <h3>Plan Premium - $9.99/mes</h3>
+                <h3>Plan Premium - $9.90/mes</h3>
                 <p>Transacciones ilimitadas, análisis avanzados, insights de IA y respaldo en la nube</p>
             </div>
         </section>
@@ -596,18 +595,18 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Metas de ahorro</li>
                     <li>Categorización de gastos con IA</li>
                     <li>Escaneo OCR de recibos</li>
-                    <li>Carga de códigos QR móviles</li>
+                    <li>Carga de códigos QR desde el celular</li>
                     <li>Recordatorios de transacciones</li>
+                    <li>Metas colaborativas</li>
                 </ul>
                 
-                <h2>Plan Premium - $9.99/mes</h2>
+                <h2>Plan Premium - $9.90/mes</h2>
                 <ul>
                     <li>Todo en Estándar</li>
                     <li>Insights avanzados de IA</li>
                     <li>Análisis de hábitos de gasto</li>
                     <li>Pronósticos predictivos</li>
                     <li>Respaldo en la nube y exportación</li>
-                    <li>Metas colaborativas</li>
                     <li>Soporte prioritario</li>
                 </ul>
             </div>
@@ -623,7 +622,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Crear tu cuenta</li>
                 <li>Agregar tu primera transacción</li>
                 <li>Configurar categorías</li>
-                <li>Configuración de la app móvil</li>
+                <li>Configuración de la app en el celular</li>
             </ul>
             
             <h2>Características</h2>
@@ -669,7 +668,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Registro gratuito</li>
                 <li>Acceso instantáneo</li>
                 <li>Almacenamiento seguro de datos</li>
-                <li>Sincronización móvil</li>
+                <li>Sincronización con el celular</li>
             </ul>
             
             <h2>¿Ya Tienes una Cuenta?</h2>
@@ -694,7 +693,6 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Cifrado SSL de 256 bits</li>
                 <li>Almacenamiento en nube seguro</li>
                 <li>Auditorías de seguridad regulares</li>
-                <li>Cumplimiento con GDPR</li>
             </ul>
         </section>
       `,
@@ -776,7 +774,6 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Cifrado AES-256 para datos sensibles</li>
                 <li>Procesamiento OCR local - sin transmisión externa de datos</li>
                 <li>Análisis de IA que prioriza la privacidad</li>
-                <li>Estándares de cumplimiento GDPR e industria</li>
             </ul>
         </section>
       `
@@ -807,7 +804,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <h3>Štandardný Plán - $4.99/mesiac</h3>
                 <p>Vylepšené funkcie vrátane rozpočtov, cieľov, AI kategorizácie a skenovania účteniek</p>
                 
-                <h3>Prémiový Plán - $9.99/mesiac</h3>
+                <h3>Prémiový Plán - $9.90/mesiac</h3>
                 <p>Neobmedzené transakcie, pokročilé analýzy, AI poznatky a cloudové zálohovanie</p>
             </div>
         </section>
@@ -835,16 +832,16 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>OCR skenovanie účteniek</li>
                     <li>Mobilné QR kód nahrávanie</li>
                     <li>Pripomienky transakcií</li>
+                    <li>Spolupracujúce ciele</li>
                 </ul>
                 
-                <h2>Prémiový Plán - $9.99/mesiac</h2>
+                <h2>Prémiový Plán - $9.90/mesiac</h2>
                 <ul>
                     <li>Všetko v Štandardnom</li>
                     <li>Pokročilé AI poznatky</li>
                     <li>Analýza návykov míňania</li>
                     <li>Prediktívne prognózy</li>
                     <li>Cloudové zálohovanie a export</li>
-                    <li>Spolupracujúce ciele</li>
                     <li>Prioritná podpora</li>
                 </ul>
             </div>
@@ -931,7 +928,6 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>256-bitové SSL šifrovanie</li>
                 <li>Zabezpečené cloudové úložisko</li>
                 <li>Pravidelné bezpečnostné audity</li>
-                <li>Súlad s GDPR</li>
             </ul>
         </section>
       `,
@@ -1013,7 +1009,6 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>AES-256 šifrovanie pre citlivé údaje</li>
                 <li>Lokálne OCR spracovanie - žiadny externý prenos údajov</li>
                 <li>AI analýza s prioritou súkromia</li>
-                <li>GDPR a priemyselné štandardy compliance</li>
             </ul>
         </section>
       `

@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import React from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -29,13 +30,14 @@ import {
   LazyFinancialHealthScore,
   LazyQuickFinancialSnapshot,
   LazyContextualFinancialTips,
-  LazyRemindersStreaks,
   LazyExpensePrediction,
   LazyDailyRecommendations,
   LazyAutoCategorization,
   LazyAIFinancialTips,
   LazyTransactionRemindersWidget
 } from "@/components/dashboard/lazy-components";
+import { LoggingStreakCard } from "@/components/LoggingStreakCard";
+import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 import { 
   TrendingUp,
   TrendingDown,
@@ -109,6 +111,7 @@ export default function Dashboard() {
     const error = urlParams.get('error');
 
     if (upgrade === 'success' && plan) {
+      trackEvent('purchase', 'subscription', plan);
       toast({
         title: t("Subscription Successful!"),
         description: `${t("You've been upgraded to the")} ${plan} ${t("plan. Enjoy your new features!")}`,
@@ -291,6 +294,9 @@ export default function Dashboard() {
       return response.json();
     },
     onSuccess: () => {
+      if (!Array.isArray(transactions) || transactions.length === 0) {
+        trackEvent('first_transaction', 'activation');
+      }
       // Invalidate all relevant queries to force refresh
       queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['transaction-reminders', user?.id] });
@@ -679,6 +685,17 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {!transactionsLoading && (
+          <OnboardingChecklist
+            userId={user?.id}
+            lang={i18n.language?.slice(0, 2) || 'en'}
+            plan={databaseUser?.plan ?? 'free'}
+            transactionsCount={Array.isArray(transactions) ? transactions.length : 0}
+            incomeCount={Array.isArray(transactions) ? transactions.filter((tx: any) => tx.type === 'income').length : 0}
+            budgetsCount={Array.isArray(budgets) ? budgets.length : 0}
+          />
+        )}
+
         {/* Financial Overview Cards */}
         <FinancialCards
           key={i18n.language} // Force re-render when language changes
@@ -771,16 +788,19 @@ export default function Dashboard() {
 
           {/* Reminders + daily recommendations (Standard+) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-8">
+              <RequirePlan
+                plan="standard"
+                compact
+                feature={t("Reminders")}
+                description={t("Bill reminders and saving streaks to keep you on track.")}
+              >
+                <LazyTransactionRemindersWidget />
+              </RequirePlan>
+              <LoggingStreakCard transactions={Array.isArray(transactions) ? transactions : []} />
+            </div>
             <RequirePlan
-              plan="standard"
-              compact
-              feature={t("Reminders")}
-              description={t("Bill reminders and saving streaks to keep you on track.")}
-            >
-              <LazyTransactionRemindersWidget />
-            </RequirePlan>
-            <RequirePlan
-              plan="standard"
+              plan="premium"
               compact
               ai
               feature={t("Daily Recommendations")}

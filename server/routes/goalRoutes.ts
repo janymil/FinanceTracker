@@ -4,6 +4,7 @@ import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { insertGoalSchema, insertExpenseReminderSchema } from "@shared/schema";
+import { cleanPositiveAmount, cleanNonNegativeAmount, cleanDateValue, cleanText, cleanId } from "@shared/trackingInput";
 
 export function registerGoalRoutes(app: Express) {
   // Goals routes
@@ -39,15 +40,34 @@ export function registerGoalRoutes(app: Express) {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
-      // Transform and validate the data
       const { name, targetAmount, targetDate, category, description } = req.body;
+
+      const cleanName = cleanText(name, 100);
+      if (!cleanName) {
+        return res.status(400).json({ message: "A goal name of up to 100 characters is required" });
+      }
+      const cleanTarget = cleanPositiveAmount(targetAmount);
+      if (!cleanTarget) {
+        return res.status(400).json({ message: "Target amount must be a positive number" });
+      }
+      const cleanTargetDate = cleanDateValue(targetDate);
+      if (!cleanTargetDate) {
+        return res.status(400).json({ message: "A valid target date is required" });
+      }
+      const cleanCategory = cleanText(category, 100);
+      if (!cleanCategory) {
+        return res.status(400).json({ message: "A category is required" });
+      }
+      if (description && String(description).length > 1000) {
+        return res.status(400).json({ message: "Description is limited to 1000 characters" });
+      }
 
       const goalData = {
         userId,
-        name: String(name),
-        targetAmount: String(targetAmount), // Convert number to string for decimal storage
-        targetDate: new Date(targetDate), // Convert string to Date
-        category: String(category),
+        name: cleanName,
+        targetAmount: cleanTarget, // decimal column takes a string
+        targetDate: cleanTargetDate,
+        category: cleanCategory,
         description: description ? String(description) : null,
         currentAmount: "0.00",
         status: "active"
@@ -74,22 +94,50 @@ export function registerGoalRoutes(app: Express) {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
-      const id = parseInt(req.params.id);
+      const id = cleanId(req.params.id);
+      if (id === null) {
+        return res.status(400).json({ message: "Invalid goal id" });
+      }
       const { name, targetAmount, targetDate, category, description, currentAmount } = req.body;
 
       // Security: Verify goal ownership before update
       const existingGoal = await storage.getGoal(id, userId);
       if (!existingGoal) {
-        return res.status(403).json({ message: "Goal not found or access denied" });
+        return res.status(404).json({ message: "Goal not found" });
       }
 
       const updateData: any = {};
-      if (name !== undefined) updateData.name = String(name);
-      if (targetAmount !== undefined) updateData.targetAmount = String(targetAmount);
-      if (targetDate !== undefined) updateData.targetDate = new Date(targetDate);
-      if (category !== undefined) updateData.category = String(category);
-      if (description !== undefined) updateData.description = description ? String(description) : null;
-      if (currentAmount !== undefined) updateData.currentAmount = String(currentAmount);
+      if (name !== undefined) {
+        const cleanName = cleanText(name, 100);
+        if (!cleanName) return res.status(400).json({ message: "A goal name of up to 100 characters is required" });
+        updateData.name = cleanName;
+      }
+      if (targetAmount !== undefined) {
+        const cleanTarget = cleanPositiveAmount(targetAmount);
+        if (!cleanTarget) return res.status(400).json({ message: "Target amount must be a positive number" });
+        updateData.targetAmount = cleanTarget;
+      }
+      if (targetDate !== undefined) {
+        const cleanTargetDate = cleanDateValue(targetDate);
+        if (!cleanTargetDate) return res.status(400).json({ message: "A valid target date is required" });
+        updateData.targetDate = cleanTargetDate;
+      }
+      if (category !== undefined) {
+        const cleanCategory = cleanText(category, 100);
+        if (!cleanCategory) return res.status(400).json({ message: "A category is required" });
+        updateData.category = cleanCategory;
+      }
+      if (description !== undefined) {
+        if (description && String(description).length > 1000) {
+          return res.status(400).json({ message: "Description is limited to 1000 characters" });
+        }
+        updateData.description = description ? String(description) : null;
+      }
+      if (currentAmount !== undefined) {
+        const cleanCurrent = cleanNonNegativeAmount(currentAmount);
+        if (!cleanCurrent) return res.status(400).json({ message: "Saved amount must be zero or more" });
+        updateData.currentAmount = cleanCurrent;
+      }
 
       const goal = await storage.updateGoal(id, userId, updateData);
       notifyDataChange(userId, 'goal');
@@ -112,8 +160,13 @@ export function registerGoalRoutes(app: Express) {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
-      const id = parseInt(req.params.id);
-      await storage.deleteGoal(id, userId);
+      const id = cleanId(req.params.id);
+      if (id === null) {
+        return res.status(400).json({ message: "Invalid goal id" });
+      }
+      if (!(await storage.deleteGoal(id, userId))) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
       notifyDataChange(userId, 'goal');
       return res.json({ success: true });
     } catch (error) {

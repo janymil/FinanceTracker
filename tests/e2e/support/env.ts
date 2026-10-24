@@ -17,25 +17,34 @@ export const SKIP_REASON =
  * the first API call of a spec answers 401 even though the user is "signed in".
  */
 /**
- * A brand-new account is asked "which currency?" in a modal overlay. While that overlay is
- * open, every click on the page below fails with "element intercepts pointer events" — a
- * confusing failure that has nothing to do with the feature under test. Dismiss it the way
- * a person would, with an API fallback if the animation swallows the click.
+ * A brand-new account is asked "which currency?" and then welcomed with a two-step first run.
+ * While either dialog is open every click on the page below fails with "element intercepts
+ * pointer events" - a confusing failure that has nothing to do with the feature under test.
+ * This gets past both the way a person would (suggested currency, "Skip for now"), and returns
+ * immediately for an account that was already set up.
  */
 export async function dismissCurrencyModal(page: Page): Promise<void> {
-  const dialog = page.getByRole('dialog').first();
-  try {
-    await dialog.waitFor({ state: 'visible', timeout: 10_000 });
-  } catch {
-    return; // no modal for this account
+  const me = await (await page.request.get('/api/auth/user')).json();
+
+  if (!me.currency) {
+    const dialog = page.getByRole('dialog').first();
+    try {
+      await dialog.waitFor({ state: 'visible', timeout: 15_000 });
+      await dialog.locator('[data-testid^="currency-suggested-"]').first().click();
+      await expect(dialog).toBeHidden({ timeout: 10_000 });
+    } catch {
+      await page.request.put('/api/auth/user', { data: { currency: 'USD' } });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+    }
   }
 
-  await dialog.getByRole('button').first().click().catch(() => undefined);
+  const welcome = page.getByTestId('first-run-welcome');
   try {
-    await expect(dialog).toBeHidden({ timeout: 10_000 });
+    await welcome.waitFor({ state: 'visible', timeout: me.currency ? 1_500 : 8_000 });
+    await welcome.getByTestId('welcome-skip').first().click();
+    await expect(welcome).toBeHidden({ timeout: 10_000 });
   } catch {
-    await page.request.put('/api/auth/user', { data: { currency: '$' } });
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    // no welcome for this account (already finished, or it has transactions)
   }
 }
 
@@ -95,3 +104,23 @@ export function uniqueDescription(prefix = 'E2E'): string {
 }
 
 export type { Page };
+
+/**
+ * Puts the signed-in account on a plan in the disposable E2E database (the app has no API for
+ * that, on purpose). Refuses anything that looks like the hosted Neon database.
+ */
+export async function setPlan(page: Page, plan: 'free' | 'standard' | 'premium'): Promise<void> {
+  const databaseUrl = process.env.DATABASE_URL ?? '';
+  if (!databaseUrl || databaseUrl.includes('neon.tech')) {
+    throw new Error('Refusing to change a plan: DATABASE_URL must be the disposable E2E database.');
+  }
+  const me = await (await page.request.get('/api/auth/user')).json();
+  const { Client } = await import('pg');
+  const client = new Client({ connectionString: databaseUrl });
+  await client.connect();
+  try {
+    await client.query('update users set plan = $1 where id = $2', [plan, me.id]);
+  } finally {
+    await client.end();
+  }
+}

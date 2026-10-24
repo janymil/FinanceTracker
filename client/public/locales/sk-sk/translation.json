@@ -305,14 +305,25 @@
     "payment_processing_title": "5.3 Spracovanie platieb",
     "payment_processing_desc": "Platobné transakcie sú bezpečne spracovávané certifikovanými sprostredkovateľmi platieb: Stripe (pre platby kartou v USD globálne) a Mercado Pago (pre platby v PEN v Peru a Latinskej Amerike). Kaptia nikdy neprijíma, nespracúva ani neukladá čísla vašich platobných kariet na našich serveroch.",
     "cancellation_refund_title": "5.4 Zrušenie a refundácie",
-    "cancellation_refund_desc": "Predplatné môžete zrušiť kedykoľvek v nastaveniach svojho profilu. Zrušenie nadobudne účinnosť na konci aktuálneho zaplateného fakturačného obdobia, počas ktorého máte naďalej plný prístup k plateným funkciám. Poplatky za predplatné sú nevratné, s výnimkou prípadov vyžadovaných platnými zákonmi.",
+    "cancellation_refund_desc": "Predplatné môžete kedykoľvek zrušiť vo svojom Profile. Zrušenie nadobudne účinnosť na konci už zaplateného obdobia a platené funkcie si ponecháte dovtedy. Už zaplatené poplatky sa spravidla nevracajú, okrem prípadov, keď vrátenie vyžaduje právo vašej krajiny alebo vám bolo omylom strhnuté: ak sa domnievate, že sa to týka vás, napíšte na info@kaptia.app a posúdime to.",
     "availability_desc": "Kaptia je poskytovaná na cloudovej infraštruktúre na báze primeraného komerčného úsilia a podľa dostupnosti. Neposkytujeme garantovanú zmluvu o úrovni služieb (SLA) ani nezaručujeme nepretržitú prevádzku bez chýb. Služba môže byť dočasne pozastavená z dôvodu údržby, aktualizácií alebo technických výpadkov.",
     "liability_title": "8. Obmedzenie zodpovednosti a finančný limit",
     "liability_desc": "Kaptia je poskytovaná \"tak ako stojí a leží\" a \"podľa dostupnosti\" bez akýchkoľvek záruk. V maximálnom rozsahu povolenom príslušnými zákonmi spoločnosť NutriNova LLC ani jej predstavitelia nezodpovedajú za žiadne nepriame, náhodné, osobitné alebo následné škody, ušlý zisk či stratu údajov.",
     "liability_cap": "V maximálnom rozsahu povolenom príslušnými zákonmi je naša celková kumulatívna zodpovednosť vyplývajúca z týchto Podmienok alebo služby striktne obmedzená na sumu 100 USD alebo sumu poplatkov, ktoré ste spoločnosti Kaptia uhradili za predchádzajúcich 12 mesiacov.",
     "governing_law_title": "12. Rozhodné právo a súdna príslušnosť",
     "governing_law_desc": "Tieto Podmienky služby a akékoľvek spory z nich vyplývajúce sa spravujú a vykladajú v súlade so zákonmi štátu Nové Mexiko, Spojené štáty americké. Všetky právne spory patria do výlučnej právomoci súdov so sídlom v Bernalillo County, Nové Mexiko.",
-    "contact_title": "13. Kontaktné informácie"
+    "contact_title": "13. Kontaktné informácie",
+    "seo": {
+      "title": "Podmienky používania",
+      "description": "Podmienky platné pri používaní Kaptie: plány, platby, automatické obnovenie, zrušenie, vrátenie peňazí a vaše práva spotrebiteľa."
+    },
+    "consumer_rights_title": "5.5 Vaše práva spotrebiteľa",
+    "consumer_rights_desc": "Nič v týchto Podmienkach neobmedzuje práva, ktoré máte ako spotrebiteľ podľa práva krajiny, v ktorej žijete, a ktoré sa nemožno zmluvne vzdať. Napríklad v Peru si ponechávate práva z Kódexu ochrany a obrany spotrebiteľa (Ley N.º 29571) vrátane práva zapísať reklamáciu do našej Knihy reklamácií (Libro de Reclamaciones) a obrátiť sa na INDECOPI.",
+    "consumer_rights_link": "Otvoriť Knihu reklamácií",
+    "receipts_title": "5.6 Doklady o platbe",
+    "receipts_desc": "Po každej platbe dostanete e-mailom doklad o platbe od nášho spracovateľa platieb (Stripe alebo Mercado Pago). Ak potrebujete iný doklad o platbe, napíšte na info@kaptia.app.",
+    "governing_law_consumer": "Ak ste spotrebiteľ, táto klauzula vám neodníma ochranu vyplývajúcu z donucovacích spotrebiteľských predpisov krajiny, v ktorej žijete, ani právo podať nárok na súde alebo u spotrebiteľského orgánu tejto krajiny.",
+    "age_requirement": "Na používanie tejto služby musíte mať aspoň 18 rokov"
   },
   "2.1 Service Plans": "2.1 Servisné plány",
   "Free Plan:": "Bezplatný plán:",
@@ -975,7 +986,7 @@
   "Data Management page - Import tab": "Stránka Správy Údajov - Záložka Import",
   "Import transactions from other financial apps": "Import transakcií z iných finančných aplikácií",
   "Supported": "Podporované",
-  "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, bankové exporty",
+  "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, exporty z účtu",
   "Column mapping, data validation, preview before import, batch processing": "Mapovanie stĺpcov, validácia údajov, náhľad pred importom, dávkové spracovanie",
   "Profile and Settings": "Profil a Nastavenia",
   "Account Management": "Správa Účtu",
@@ -1687,11 +1698,25 @@
   "currency": {
     "welcome_title": "Vitajte v Kaptia! 🌎",
     "welcome_description": "Prosím vyberte svoju preferovanú menu na začiatok. Môžete ju zmeniť neskôr, kým nepridáte vašu prvú transakciu.",
-    "choose_description": "🌎 Vyberte si z 15 mien vrátane latinskoamerických opcií:",
+    "choose_description": "Alebo vyberte inú menu:",
+    "suggested": "Odporúčané pre vás",
+    "saving": "Ukladá sa...",
+    "error_inline": "Menu sa nepodarilo uložiť. Skontrolujte pripojenie a vyberte ju znova.",
+    "load_failed": "Nepodarilo sa načítať nastavenia vášho účtu.",
+    "retry": "Skúsiť znova",
     "success_title": "Mena Úspešne Nastavená",
     "success_description": "Vaša mena bola nastavená na {{symbol}}. Použite ikonu ozubeného kolieska v hlavičke na zmenu pred pridaním transakcií.",
     "error_title": "Chyba",
-    "error_description": "Nepodarilo sa nastaviť menu. Prosím skúste to znovu."
+    "error_description": "Nepodarilo sa nastaviť menu. Prosím skúste to znovu.",
+    "group_latam": "Latinská Amerika",
+    "group_other": "Ostatné meny",
+    "change": "Zmeniť menu",
+    "settings": "Nastavenie meny",
+    "current": "Aktuálna:",
+    "locked": "Mena je zamknutá - už máte zapísané transakcie",
+    "select": "Vybrať menu",
+    "select_description": "Vyberte menu, v ktorej sledujete svoje peniaze.",
+    "label": "Mena"
   },
   "upgrade": {
     "standard_name": "Štandard",
@@ -1951,6 +1976,10 @@
     "export_successful": "Export Úspešne Dokončený",
     "export_successful_desc": "Vaše údaje boli exportované vo formáte {{format}}",
     "export_failed": "Export Zlyhal",
+    "export_button": "Exportovať",
+    "exporting": "Pripravuje sa váš súbor...",
+    "nothing_selected": "Vyberte aspoň transakcie, rozpočty alebo ciele na export.",
+    "pick_dates": "Vyberte začiatok a koniec vlastného obdobia.",
     "export_failed_desc": "Export údajov zlyhal. Skúste znovu.",
     "restore_successful": "Obnovenie Úspešne Dokončené",
     "restore_successful_desc": "Úspešne obnovených {{transactions}} transakcií a {{budgets}} rozpočtov z {{filename}}",
@@ -1994,7 +2023,7 @@
       "ai_processing_title": "Transparentnosť AI Spracovania",
       "ai_provider": "Poskytovateľ AI: OpenAI a Mistral s podnikovým zabezpečením",
       "ai_anonymization": "Odosiela sa iba anonymizovaný text: e-maily, telefóny, IBAN, čísla kariet, ID, adresy, čísla účtov a vaše meno sa pred AI spracovaním odstránia",
-      "ai_retention": "Bez Retencie Údajov: AI poskytovatelia neukladajú obsah vášho bankového výpisu",
+      "ai_retention": "Bez Retencie Údajov: AI poskytovatelia neukladajú obsah vášho výpisu z účtu",
       "ai_purpose": "Účel: Len kategorizácia transakcií a finančné insights",
       "user_rights_title": "Vaše Práva a Kontrola",
       "transaction_control": "Úplná kontrola nad tým, ktoré transakcie importovať po náhľade",
@@ -2002,7 +2031,7 @@
       "delete_option": "Možnosť vymazať importované údaje kedykoľvek",
       "audit_log": "Kompletný bezpečnostný audit log pre transparentnosť",
       "important_notice": "Dôležité Upozornenie",
-      "consent_text": "Pokračovaním súhlasíte s bezpečným spracovaním vášho bankového výpisu pomocou bezpečnostných opatrení opísaných vyššie. Váš PDF bude spracovaný podľa našich Zásad Ochrany Súkromia a Podmienok Služby.",
+      "consent_text": "Pokračovaním súhlasíte s bezpečným spracovaním vášho výpisu z účtu pomocou bezpečnostných opatrení opísaných vyššie. Váš PDF bude spracovaný podľa našich Zásad Ochrany Súkromia a Podmienok Služby.",
       "cancel": "Zrušiť",
       "consent_button": "Súhlasím s Bezpečným Spracovaním"
     },
@@ -2078,7 +2107,35 @@
     "importing_data": "Importujú sa údaje...",
     "import_completed_successfully": "Import bol úspešne dokončený.",
     "categories": "Kategórie",
-    "created_count": "Vytvorené: {{count}}"
+    "created_count": "Vytvorené: {{count}}",
+    "bank_file": {
+      "title": "Export z účtu (CSV alebo Excel)",
+      "description": "Stiahnite si pohyby zo svojho online účtu a importujte ich sem.",
+      "drop_text": "Presuňte sem súbor stiahnutý z vášho účtu alebo kliknite a vyberte ho",
+      "supports": "Funguje s CSV a Excelom (.xlsx, .xls) z BCP, Interbank, BBVA, Scotiabank a ďalších",
+      "reading": "Číta sa súbor…",
+      "invalid_type": "Vyberte súbor CSV alebo Excel (.csv, .xlsx, .xls).",
+      "too_big": "Súbor je príliš veľký. Limit je 8 MB.",
+      "not_understood_title": "Súbor sa nepodarilo prečítať",
+      "no_header": "Nenašli sme stĺpce s dátumom, popisom a sumou. Skontrolujte, či súbor obsahuje riadok s hlavičkou.",
+      "no_rows": "Súbor neobsahuje pohyby, ktoré by sme vedeli prečítať.",
+      "plan_required": "Import súboru z účtu vyžaduje plán Standard alebo Premium.",
+      "read_title": "Súbor prečítaný",
+      "read_description": "Nájdených pohybov: {{count}} (preskočených riadkov: {{skipped}}). Pred importom ich skontrolujte.",
+      "imported_title": "Transakcie importované",
+      "imported_description": "Importovaných transakcií: {{count}}."
+    },
+    "pdf_statement": {
+      "title": "Výpis z účtu v PDF",
+      "description": "Získajte transakcie z výpisu z účtu v PDF",
+      "drop_text": "Presuňte sem výpis z účtu v PDF alebo kliknite a vyberte ho",
+      "supports": "Podporuje súbory PDF s transakciami",
+      "invalid_type": "Vyberte súbor PDF.",
+      "failed": "PDF sa nepodarilo spracovať",
+      "failed_title": "Spracovanie PDF zlyhalo",
+      "done_title": "PDF spracované",
+      "done_description": "Získaných transakcií: {{count}} s istotou {{confidence}} %."
+    }
   },
   "upcomingReminders": {
     "title": "Nadchádzajúce Pripomienky",
@@ -2109,7 +2166,7 @@
       "selectCategory": "Vybrať kategóriu",
       "reminderDays": "Pripomenúť mi",
       "remindMe": "Pripomenúť mi",
-      "daysBefore": "dní pred",
+      "daysBefore": "{{count}} dní pred",
       "weekBefore": "1 týždeň pred",
       "onDueDate": "V deň splatnosti",
       "oneDayBefore": "1 deň pred",
@@ -2220,6 +2277,8 @@
   "auth": {
     "signUp": "Registrácia",
     "signIn": "Prihlásenie",
+    "loading": "Načítava sa...",
+    "termsNotice": "Vytvorením účtu súhlasíte s našimi <terms>Podmienkami používania</terms> a <privacy>Zásadami ochrany osobných údajov</privacy>.",
     "accountCreationProcess": "Proces Vytvorenia Účtu",
     "accountCreationDescription": "Po kliknutí na \"Registrácia\", vytvoríme váš bezpečný účet a pošleme overovací email. Toto typicky trvá 6-8 sekúnd.",
     "creatingSecureAccount": "Vytváranie bezpečného účtu...",
@@ -2278,7 +2337,21 @@
     "weekly": "Týždenne",
     "monthly": "Mesačne",
     "yearly": "Ročne",
-    "title": "Opakujúce sa"
+    "title": "Opakujúce sa transakcie",
+    "description": "Pridávajú sa automaticky v deň splatnosti. Zastavením sa ponechá to, čo už bolo pridané.",
+    "stop": "Zastaviť",
+    "stopped": "Opakujúca sa transakcia bola zastavená",
+    "stop_failed": "Nepodarilo sa zastaviť. Skúste to znova.",
+    "since": "od {{date}}",
+    "until": "do {{date}}",
+    "frequency": {
+      "daily": "Denne",
+      "weekly": "Týždenne",
+      "biweekly": "Každé 2 týždne",
+      "monthly": "Mesačne",
+      "quarterly": "Každé 3 mesiace",
+      "yearly": "Ročne"
+    }
   },
   "budget": {
     "total_budget_for": "Celkový rozpočet pre",
@@ -2944,7 +3017,8 @@
       "email": "Email:",
       "phone": "Telefón:",
       "response_time": "Doba odozvy:",
-      "response_desc": "Odpovieme na overiteľné žiadosti do 45 dní (predĺžiteľné o 45 dní)"
+      "response_desc": "Odpovieme na overiteľné žiadosti do 45 dní (predĺžiteľné o 45 dní)",
+      "email_only": "Tieto žiadosti vybavujeme iba e-mailom."
     },
     "verification": {
       "title": "Proces overenia",
@@ -3146,6 +3220,36 @@
       "description": "Ak máte akékoľvek otázky týkajúce sa týchto Zásad ochrany súkromia, kontaktujte nás na:",
       "email": "Email: info@kaptia.app",
       "address": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+    },
+    "peru": {
+      "title": "Peru: vaše práva k osobným údajom (zákon 29733)",
+      "intro": "Ak používate Kaptiu z Peru, vaše osobné údaje chráni aj peruánsky zákon o ochrane osobných údajov (Ley N.º 29733) a jeho vykonávací predpis (D.S. 003-2013-JUS). Tu vysvetľujeme vaše práva a ako ich uplatniť.",
+      "controller_title": "Kto zodpovedá za vaše údaje",
+      "controller_desc": "Kaptiu prevádzkuje NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120, USA, ktorá zodpovedá za spracúvanie vašich osobných údajov.",
+      "purposes_title": "Na čo údaje používame",
+      "purposes_desc": "Na vytvorenie a vedenie vášho účtu, evidenciu a triedenie príjmov a výdavkov, poskytovanie voliteľných funkcií AI, spracovanie platieb za predplatné, zabezpečenie služby a vybavovanie vašich žiadostí. Na iný účel údaje nepoužívame bez toho, aby sme sa vás najprv opýtali.",
+      "consent_title": "Váš súhlas",
+      "consent_desc": "Vytvorením účtu a prijatím Podmienok a týchto Zásad súhlasíte s týmto spracúvaním. Funkcie AI, ktoré čítajú bločky alebo výpisy, sú voliteľné a môžete ich vypnúť vo svojom Profile; údaje, ktoré posielame poskytovateľom AI, sa najprv anonymizujú.",
+      "rights_title": "Vaše práva ARCO",
+      "rights_desc": "Tieto práva môžete uplatniť bezplatne:",
+      "right_access": "Prístup: opýtať sa, aké vaše osobné údaje máme a ako ich používame.",
+      "right_rectification": "Oprava: požiadať nás o opravu nesprávnych alebo neúplných údajov (väčšinu z nich môžete upraviť sami v aplikácii).",
+      "right_cancellation": "Vymazanie: požiadať nás o vymazanie vašich údajov (účet môžete vymazať aj sami vo svojom Profile).",
+      "right_opposition": "Námietka: namietať proti konkrétnemu použitiu vašich údajov, napríklad vypnutím spracovania pomocou AI vo svojom Profile.",
+      "exercise_title": "Ako svoje práva uplatniť",
+      "exercise_desc": "Napíšte na info@kaptia.app s predmetom „Derechos ARCO“, uveďte svoje celé meno a e-mail účtu a popíšte svoju žiadosť. Odpovieme v lehotách stanovených peruánskym právom (od 8 do 20 pracovných dní podľa práva).",
+      "transfers_title": "Medzinárodné prenosy",
+      "transfers_desc": "Vaše údaje sa ukladajú a spracúvajú mimo Peru, v USA a ďalších krajinách, u poskytovateľov, ktorí ich chránia: Neon (databáza), Cloudflare (úložisko a sieť), Clerk (prihlásenie), Stripe a Mercado Pago (platby) a, len ak používate funkcie AI a až po anonymizácii, naši poskytovatelia AI.",
+      "authority_title": "Sťažnosti",
+      "authority_desc": "Ak sa domnievate, že vaše práva neboli rešpektované, môžete podať sťažnosť na Autoridad Nacional de Protección de Datos Personales (ANPDP) pri peruánskom ministerstve spravodlivosti a ľudských práv."
+    },
+    "children": {
+      "title": "Súkromie detí",
+      "description": "Kaptia nie je určená deťom do 13 rokov a vedome od nich nezhromažďujeme osobné údaje. Na vytvorenie účtu musíte mať aspoň 18 rokov. Ak sa domnievate, že nám dieťa poskytlo údaje, napíšte na info@kaptia.app a vymažeme ich."
+    },
+    "seo": {
+      "title": "Zásady ochrany súkromia",
+      "description": "Ako Kaptia zhromažďuje, používa a chráni vaše osobné údaje vrátane vašich práv podľa peruánskeho práva a kalifornského zákona CCPA."
     }
   },
   "subscribe": {
@@ -3208,6 +3312,10 @@
     "failed_to_cleanup_expired_cache": "Nepodarilo sa vyčistiť expirovanú cache"
   },
   "profile": {
+    "mp_cancel": "Zrušiť predplatné",
+    "mp_cancel_note": "Zrušením sa zastavia ďalšie platby v MercadoPago.",
+    "mp_cancel_confirm": "Zrušiť predplatné MercadoPago? Váš plán sa vráti na Free.",
+    "mp_cancelled": "Predplatné bolo zrušené",
     "Loading...": "Načítava sa...",
     "No Stripe Subscription": "Žiadne Stripe Predplatné",
     "You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.": "Momentálne máte prémiový prístup, ale žiadne Stripe predplatné. Kontaktujte podporu alebo navštívte stránku s cenami pre nastavenie účtovania.",
@@ -3366,7 +3474,21 @@
     "AI features disabled": "Funkcie AI sú vypnuté",
     "Could not change the AI setting": "Nepodarilo sa zmeniť nastavenie AI",
     "Standard": "Štandardný",
-    "Premium": "Premium"
+    "Premium": "Premium",
+    "emailNotifications": {
+      "title": "E-mailové pripomienky",
+      "description": "Dostanete e-mail pred splatnosťou platby. Môžete ich kedykoľvek vypnúť.",
+      "on": "E-mailové pripomienky zapnuté",
+      "off": "E-mailové pripomienky vypnuté",
+      "failed": "Toto nastavenie sa nepodarilo uložiť. Skúste to znova."
+    },
+    "timezone": {
+      "title": "Časové pásmo",
+      "description": "Určuje, kedy sa začína a končí „tento mesiac“, rozpočty a prehľady, aby sa nákup neskoro večer započítal do správneho mesiaca.",
+      "use_device": "Použiť pásmo zariadenia ({{zone}})",
+      "saved": "Časové pásmo bolo uložené",
+      "failed": "Časové pásmo sa nepodarilo uložiť. Skúste to znova."
+    }
   },
   "pdf": {
     "anonymization_preview": {
@@ -3396,7 +3518,7 @@
       "ai_processing_data": "Údaje Poslané na Spracovanie AI",
       "ai_data_description": "Tieto anonymizované údaje sa posielajú do OpenAI na analýzu transakcií. Všetky citlivé informácie boli odstránené.",
       "original_data_title": "Pôvodné PDF Údaje",
-      "original_data_description": "Tieto pôvodné údaje nikdy neopustia vaše zariadenie a NEPOSIELAJÚ sa žiadnej AI službe.",
+      "original_data_description": "Pôvodné, nezakryté údaje sa nikdy neposielajú žiadnej službe AI; posiela sa iba anonymizovaná verzia.",
       "hide_original": "Skryť Pôvodné",
       "show_original": "Zobraziť Pôvodné",
       "hidden_for_privacy": "Skryté kvôli ochrane súkromia",
@@ -3407,7 +3529,7 @@
       "proceed": "Pokračovať v AI Spracovaní"
     },
     "processing": {
-      "title": "Spracovávanie Bankového Výpisu",
+      "title": "Spracovanie výpisu z účtu",
       "subtitle": "Extrakcia transakcií s AI prebieha",
       "connected": "Pripojené k prúdu spracovania",
       "pdf_validation": "Bezpečnostná Validácia",
@@ -3497,7 +3619,7 @@
       "start_free": "Začať s Bezplatným Účtom",
       "watch_demo": "Pozrieť Demo",
       "guarantee": "30-dňová záruka vrátenia peňazí",
-      "no_card": "Nie je potrebná kreditná karta",
+      "no_card": "Karta nie je potrebná",
       "cancel_anytime": "Zrušiť kedykoľvek"
     },
     "demo": {
@@ -3626,13 +3748,13 @@
       }
     },
     "statements": {
-      "title": "AI analyzátor bankových výpisov",
+      "title": "AI analyzátor výpisov z účtu",
       "badge": "Všetky plány",
-      "description": "Pokročilé OCR a AI-poháňaná extrakcia transakcií z PDF a obrázkov bankových výpisov s viacjazyčnou podporou a 95%+ presnosťou detekcie transakcií.",
+      "description": "Pokročilé OCR a AI-poháňaná extrakcia transakcií z PDF a obrázkov výpisov z účtu s viacjazyčnou podporou a 95%+ presnosťou detekcie transakcií.",
       "benefits": {
         "processing": {
           "title": "Spracovanie PDF",
-          "desc": "Extraktujte transakcie z akéhokoľvek formátu bankového výpisu"
+          "desc": "Extrahujte transakcie z akéhokoľvek formátu výpisu z účtu"
         },
         "ocr": {
           "title": "OCR technológia",
@@ -3702,7 +3824,7 @@
       }
     },
     "contextual": {
-      "title": "Inteligentný finančný poradca",
+      "title": "Inteligentné tipy pre peniaze",
       "badge": "Štandard+",
       "description": "Inteligentné finančné poradenstvo, ktoré sa prispôsobuje vašim aktuálnym mesačným výdavkom, stavu rozpočtu a pokroku cieľov na poskytnutie najrelevantnejšieho vedenia keď ho potrebujete.",
       "benefits": {
@@ -3831,8 +3953,8 @@
   "Point your camera at any receipt. OCR reads every line and files it instantly.": "Namierťe kameru na akúkoľvek účtenku. OCR prečíta každý riadok a okamžite ho založí.",
   "Statements, imported in seconds": "História výdavkov, importovaná za sekundy",
   "Financial history, imported in seconds": "História výdavkov, importovaná za sekundy",
-  "Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.": "Presuňte svoje záznamy o výdavkoch a sledujte, ako sa mesiace histórie premenia na prehľadné transakcie - spracované bezpečne a súkromne.",
-  "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.": "Presuňte svoje záznamy o výdavkoch a sledujte, ako sa mesiace histórie premenia na prehľadné transakcie - spracované bezpečne a súkromne.",
+  "Drop a PDF statement and watch pages of history become clean, searchable transactions - processed privately on your own device.": "Nahrajte záznamy zo svojho účtu a sledujte, ako sa mesiace histórie zmenia na prehľadné transakcie, ktoré sa dajú vyhľadávať. Osobné údaje sa odstránia skôr, než ich prečíta akákoľvek AI.",
+  "Drop your financial records and watch months of history become clean, searchable transactions - processed privately on your own device.": "Nahrajte záznamy zo svojho účtu a sledujte, ako sa mesiace histórie zmenia na prehľadné transakcie, ktoré sa dajú vyhľadávať. Osobné údaje sa odstránia skôr, než ich prečíta akákoľvek AI.",
   "Goals that keep you honest": "Ciele, ktoré vás držia v kondícii",
   "Budgets and shared goals with gentle nudges before you overspend - not after.": "Rozpočty a zdieľané ciele s jemnými upozorneniami skôr, než miniete viac - nie až potom.",
   "Private by design": "Súkromie od základu",
@@ -3896,7 +4018,7 @@
   "No questions matched your search.": "Na váš dotaz sme nenašli žiadne otázky.",
   "Clear search": "Zrušiť vyhľadávanie",
   "Ready to transform your financial management?": "Pripravení zjednodušiť si správu výdavkov?",
-  "Start free with no credit card required.": "Začnite zadarmo ešte dnes bez kreditnej karty.",
+  "Start free with no credit card required.": "Začnite zadarmo, bez karty.",
   "pricing": {
     "seo_title": "Kaptia – cenník. Jednoduché plány na sledovanie výdavkov",
     "seo_description": "Začnite zadarmo a rozšírte, keď budete chcieť viac. Plány Standard a Premium v amerických dolároch.",
@@ -3989,6 +4111,10 @@
   "Automatic backups keeping your financial history safe and accessible across devices": "Automatické zálohy, ktoré udržujú vašu finančnú históriu v bezpečí a dostupnú na všetkých zariadeniach",
   "Your spending, finally decoded.": "Vaše výdavky konečne prehľadne.",
   "Monthly totals by category": "Mesačné súčty podľa kategórie",
+  "Recurring entries": "Opakované záznamy",
+  "Receipt photo scanning": "Skenovanie účteniek fotkou",
+  "Companion mascot": "Maskot spoločník",
+  "Contextual tips": "Kontextové tipy",
   "noAchievements": "Zatiaľ žiadne úspechy",
   "courses": {
     "title": "Finančné kurzy",
@@ -3999,5 +4125,133 @@
       "bestStreak": "Najlepšia séria",
       "lessons": "Dokončené lekcie"
     }
+  },
+  "checkout": {
+    "auto_renewal": "Vaše predplatné sa automaticky obnovuje každý {{period}} za {{price}}, kým ho nezrušíte. Zrušiť ho môžete kedykoľvek vo svojom Profile.",
+    "period_monthly": "mesiac",
+    "period_yearly": "rok",
+    "auto_renewal_terms": "Podmienky používania"
+  },
+  "reclamaciones": {
+    "seo": {
+      "title": "Kniha reklamácií (Libro de Reclamaciones)",
+      "description": "Zapíšte reklamáciu alebo sťažnosť na Kaptiu, ako to ustanovuje peruánsky Kódex ochrany a obrany spotrebiteľa."
+    },
+    "title": "Kniha reklamácií",
+    "subtitle": "Libro de Reclamaciones — podľa peruánskeho Kódexu ochrany a obrany spotrebiteľa (Ley N.º 29571) tu môžete zapísať reklamáciu alebo sťažnosť na našu službu.",
+    "provider": "Poskytovateľ: NutriNova LLC (Kaptia) · 2105 Vista Oeste NW, Albuquerque, NM 87120, USA · info@kaptia.app",
+    "explain_claim": "Reklamácia (reclamo): nesúhlas so službou, ktorú ste si objednali, alebo s platbou.",
+    "explain_grievance": "Sťažnosť (queja): nespokojnosť s tým, ako sme sa k vám správali, nie so samotnou službou.",
+    "section_consumer": "1. Vaše údaje",
+    "section_service": "2. Služba",
+    "section_detail": "3. Vaša reklamácia alebo sťažnosť",
+    "kind": "Druh",
+    "kind_claim": "Reklamácia (reclamo)",
+    "kind_grievance": "Sťažnosť (queja)",
+    "full_name": "Celé meno",
+    "doc_type": "Druh dokladu",
+    "doc_number": "Číslo dokladu",
+    "address": "Adresa",
+    "email": "E-mail",
+    "phone": "Telefón",
+    "service": "Objednaná služba",
+    "service_placeholder": "Napríklad: plán Standard v Kaptii",
+    "amount": "Sporná suma (voliteľné)",
+    "detail": "Popíšte, čo sa stalo",
+    "request": "Čo od nás požadujete?",
+    "truth": "Potvrdzujem, že uvedené údaje sú pravdivé.",
+    "submit": "Zapísať",
+    "submitting": "Zapisujem…",
+    "success_title": "Vaša reklamácia bola zapísaná",
+    "success_desc": "Váš kód je {{code}}. Kópiu sme poslali na {{email}}. Odpovieme do 30 kalendárnych dní.",
+    "error": "Reklamáciu sa nepodarilo zapísať. Skontrolujte polia a skúste to znova.",
+    "note": "Zápis reklamácie tu vám nebráni obrátiť sa na INDECOPI ani na iné právne cesty.",
+    "doc_dni": "DNI",
+    "doc_ce": "Preukaz cudzinca (CE)",
+    "doc_passport": "Pas",
+    "doc_ruc": "RUC"
+  },
+  "footer": {
+    "reclamaciones": "Kniha reklamácií (Peru)",
+    "rights": "© {{year}} Kaptia. Všetky práva vyhradené."
+  },
+  "notFound": {
+    "title": "Stránka sa nenašla",
+    "description": "Stránka, ktorú hľadáte, neexistuje alebo bola presunutá.",
+    "home": "Prejsť na úvodnú stránku"
+  },
+  "streak": {
+    "title": "Vaša séria zapisovania",
+    "description": "Dni po sebe, v ktorých ste zapísali aspoň jednu transakciu.",
+    "days_in_a_row": "dní po sebe",
+    "best": "najlepšia séria",
+    "logged_today": "Dnes ste už niečo zapísali. Skvelé!",
+    "log_today": "Zapíšte dnes transakciu, aby ste udržali sériu."
+  },
+  "welcome": {
+    "step": "Krok {{current}} z {{total}}",
+    "title": "Vitajte v Kaptii",
+    "zone_intro": "Najprv skontrolujte časové pásmo. Určuje, kedy sa každý mesiac začína a končí.",
+    "next": "Pokračovať",
+    "skip": "Zatiaľ preskočiť",
+    "first_title": "Pridajte prvú transakciu",
+    "first_intro": "Začnite niečím z dnešného dňa. Môžete ju kedykoľvek upraviť alebo zmazať.",
+    "type_label": "Typ transakcie",
+    "type_expense": "Výdavok",
+    "type_income": "Príjem",
+    "amount": "Suma ({{currency}})",
+    "description": "Čo to bolo?",
+    "description_placeholder": "Káva, plat, nájom...",
+    "save": "Uložiť transakciu",
+    "saved": "Vaša prvá transakcia je uložená",
+    "invalid": "Zadajte sumu vyššiu ako nula a krátky popis.",
+    "error": "Nepodarilo sa ju uložiť. Skúste to znova."
+  },
+  "onboarding": {
+    "title": "Začnite s Kaptiou",
+    "subtitle": "Niekoľko rýchlych krokov, aby ste mali svoje peniaze prehľadne.",
+    "dismiss": "Skryť tento zoznam",
+    "go": "Začať",
+    "see_plans": "Zobraziť plány",
+    "steps": {
+      "income": {
+        "title": "Pridajte svoje príjmy",
+        "description": "Zapíšte plat alebo akékoľvek peniaze, ktoré vám prídu, aby bol váš zostatok skutočný."
+      },
+      "upgrade": {
+        "title": "Odomknite rozpočty a ciele",
+        "description": "Plán Standard pridáva mesačné rozpočty, sporiace ciele a pripomienky."
+      },
+      "transaction": {
+        "title": "Pridajte prvú transakciu",
+        "description": "Napíšte ju, povedzte ju nahlas alebo odfoťte bloček."
+      },
+      "budget": {
+        "title": "Nastavte mesačný rozpočet",
+        "description": "Vyberte kategóriu a sumu, ktorú chcete dodržať."
+      },
+      "goal": {
+        "title": "Vytvorte cieľ sporenia",
+        "description": "Cesta, rezerva na núdzu, nový telefón: určte si cieľ."
+      },
+      "import": {
+        "title": "Importujte súbor z účtu",
+        "description": "Doplňte staršie mesiace z CSV alebo Excelu vášho online účtu."
+      }
+    }
+  },
+  "a11y": {
+    "open_menu": "Otvoriť menu",
+    "zoom_out": "Oddialiť",
+    "zoom_in": "Priblížiť",
+    "reset_zoom": "Obnoviť priblíženie",
+    "download_chart": "Stiahnuť graf",
+    "previous_months": "Predchádzajúce mesiace",
+    "next_months": "Nasledujúce mesiace",
+    "more_actions": "Ďalšie akcie",
+    "close": "Zavrieť",
+    "filters": "Filtre",
+    "send": "Odoslať",
+    "delete": "Odstrániť"
   }
 }

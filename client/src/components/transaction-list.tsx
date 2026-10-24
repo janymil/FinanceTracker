@@ -170,7 +170,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
             />
             <Popover>
               <PopoverTrigger asChild>
-                <Button size="sm" variant="outline">
+                <Button aria-label={t('a11y.filters')} size="sm" variant="outline">
                   <Filter className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>

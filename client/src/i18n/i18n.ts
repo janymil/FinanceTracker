@@ -81,6 +81,8 @@ async function initializeI18n() {
         supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
         fallbackLng: 'en',
         debug: false,
+        // No namespaces are used, and sentence keys such as "Free Plan:" contain colons.
+        nsSeparator: false,
         
         resources,
 
@@ -114,6 +116,16 @@ async function initializeI18n() {
     console.log('i18n initialized with fallback');
   }
 }
+
+// Keep <html lang> in step with the language in use: screen readers pick the right voice
+// and browsers stop offering to translate a page that is already in the visitor's language.
+function syncDocumentLanguage(language: string | undefined) {
+  if (typeof document === 'undefined' || !language) return;
+  const code = language.slice(0, 2).toLowerCase();
+  document.documentElement.lang = code === 'es' ? 'es-PE' : code === 'sk' ? 'sk' : 'en';
+}
+i18n.on('languageChanged', syncDocumentLanguage);
+i18n.on('initialized', () => syncDocumentLanguage(i18n.language));
 
 // Initialize on module load
 initializeI18n();

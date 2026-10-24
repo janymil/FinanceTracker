@@ -1,19 +1,25 @@
 
 import crypto from 'crypto';
 
-// Get encryption key from Replit Secrets or generate a fallback for development
+// The key is 32 bytes written as 64 hex characters. Development may fall back to a
+// throwaway key; production must never do so, because every row written with a key that
+// disappears on restart becomes unreadable.
 const getEncryptionKey = (): Buffer => {
-  if (!process.env.ENCRYPTION_KEY) {
-    console.warn('ENCRYPTION_KEY not found in environment variables. Using temporary key for development.');
+  const raw = process.env.ENCRYPTION_KEY;
+  const valid = Boolean(raw && /^[0-9a-fA-F]{64}$/.test(raw));
+
+  if (!valid) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('ENCRYPTION_KEY must be set to exactly 64 hex characters in production.');
+    }
+    console.warn('ENCRYPTION_KEY missing or not 64 hex characters. Using a temporary key for development.');
     return crypto.randomBytes(32);
   }
-  
-  // Convert hex string from environment to Buffer
-  return Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
+
+  return Buffer.from(raw as string, 'hex');
 };
 
 const ENCRYPTION_KEY = getEncryptionKey();
-const ALGORITHM = 'aes-256-gcm';
 const DECRYPTION_WARNING_INTERVAL_MS = 60_000;
 
 let lastDecryptionWarning = 0;
@@ -48,8 +54,9 @@ export class DataEncryption {
       // Return format: iv:encrypted
       return iv.toString('hex') + ':' + encrypted;
     } catch (error) {
+      // Never fall back to storing the plain text of something that should be encrypted.
       console.error('Encryption error:', error);
-      return text; // Fallback to original text if encryption fails
+      throw new Error('Encryption failed');
     }
   }
 

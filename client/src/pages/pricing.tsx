@@ -10,7 +10,6 @@ import { useUser } from "@clerk/clerk-react";
 import { AppLayout } from "@/components/AppLayout";
 import {
   amountFor,
-  currencyForLanguage,
   formatMoney,
   monthlyEquivalent,
   yearlySaving,
@@ -18,6 +17,8 @@ import {
   type BillingInterval,
   type PlanId,
 } from "@shared/pricing";
+import { useBillingRegion } from "@/hooks/useBillingRegion";
+import { AutoRenewalNotice } from "@/components/AutoRenewalNotice";
 
 /**
  * Public price list.
@@ -38,7 +39,7 @@ export default function Pricing() {
     ? langMatch[1]
     : (localStorage.getItem('preferredLanguage') || i18n.language || 'en').slice(0, 2);
 
-  const currency: BillingCurrency = currencyForLanguage(currentLang);
+  const currency: BillingCurrency = useBillingRegion(currentLang).currency;
 
   // Public page: the visitor is not signed in, so nobody's plan is highlighted.
   const userPlan = 'free';
@@ -146,6 +147,9 @@ export default function Pricing() {
           >
             {buttonLabel(plan)}
           </Button>
+          {!isFree && (
+            <AutoRenewalNotice plan={plan as PlanId} interval={interval} currency={currency} lang={currentLang} />
+          )}
         </CardContent>
       </Card>
     );

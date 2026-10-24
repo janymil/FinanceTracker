@@ -2,7 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { esES, skSK } from '@clerk/localizations';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider } from 'react-i18next';
@@ -18,6 +19,16 @@ clearStaleSession();
 // Installed before the first render, so errors thrown during mount are captured.
 // This is the app's only error reporter — there is no Sentry in this project.
 installErrorGuard();
+
+// Installable app + offline page (see client/public/sw.js, which caches nothing but the
+// offline page). Production only: in development a service worker only gets in the way.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((error) => {
+      console.warn('Service worker not registered:', error);
+    });
+  });
+}
 
 // Simple browser language detection function
 function detectLanguageFromBrowser(): string {
@@ -62,16 +73,8 @@ if (!clerkPubKey) {
   throw new Error('Missing Clerk Publishable Key');
 }
 
-// Create query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 0,
-      gcTime: 0,
-    },
-  },
-});
+// One client for the whole app: components that invalidate caches, and the logout that clears
+// them, import this same instance from lib/queryClient.
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root element not found');

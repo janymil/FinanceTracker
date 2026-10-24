@@ -6,7 +6,8 @@ import { DollarSign, TrendingUp, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SEO } from "@/components/SEO";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import { safeRedirect } from "@/lib/authRedirect";
 import { AppLayout } from "@/components/AppLayout";
 
 export default function AuthPage() {
@@ -27,7 +28,10 @@ export default function AuthPage() {
     (savedLang && supportedLangs.includes(savedLang) ? savedLang : 
     (supportedLangs.includes(browserLang) ? browserLang : 'en'));
   
-  const dashboardUrl = `/${currentLang}/dashboard`;
+  // A visitor sent here from a deep link goes back to it after signing in.
+  // Read once: Clerk rewrites the address while it signs the person in.
+  const [requestedPage] = useState(() => safeRedirect(new URLSearchParams(window.location.search).get('redirect')));
+  const dashboardUrl = requestedPage ?? `/${currentLang}/dashboard`;
 
   // Check URL hash to determine which tab to show
   useEffect(() => {
@@ -68,7 +72,7 @@ export default function AuthPage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-300">{t("auth.loading")}</p>
         </div>
       </div>
     );
@@ -102,12 +106,7 @@ export default function AuthPage() {
                 <SignUp 
                   routing="virtual"
                   signInUrl="#sign-in"
-                  afterSignUpUrl={dashboardUrl}
-                  initialValues={{
-                    emailAddress: "",
-                    firstName: "",
-                    lastName: ""
-                  }}
+                  forceRedirectUrl={dashboardUrl}
                   appearance={{
                     elements: {
                       formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 w-full disabled:opacity-75 disabled:transform-none disabled:cursor-wait disabled:animate-pulse",
@@ -142,6 +141,15 @@ export default function AuthPage() {
                     }
                   }}
                 />
+                <p className="mt-3 px-2 text-center text-xs text-gray-500 dark:text-gray-400" data-testid="signup-terms-notice">
+                  <Trans
+                    i18nKey="auth.termsNotice"
+                    components={{
+                      terms: <a href={`/${currentLang}/terms-of-service`} target="_blank" rel="noopener noreferrer" className="underline" />,
+                      privacy: <a href={`/${currentLang}/privacy-policy`} target="_blank" rel="noopener noreferrer" className="underline" />,
+                    }}
+                  />
+                </p>
               </div>
             </TabsContent>
 
@@ -150,7 +158,7 @@ export default function AuthPage() {
                 <SignIn 
                   routing="virtual"
                   signUpUrl="#sign-up"
-                  afterSignInUrl={dashboardUrl}
+                  forceRedirectUrl={dashboardUrl}
                   appearance={{
                     elements: {
                       formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 w-full",
@@ -190,35 +198,6 @@ export default function AuthPage() {
 
         {/* Hero Section - Second Column */}
         <div className="space-y-6 text-center lg:text-left order-2 lg:order-2">
-          {/* Signup Info Banner */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <div className="animate-pulse">
-                  <svg className="h-5 w-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-3">
-                <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  {t("auth.accountCreationProcess")}
-                </h4>
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  {t("auth.accountCreationDescription")}
-                </p>
-                <div className="mt-2 flex items-center text-xs text-blue-700 dark:text-blue-300">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                  </div>
-                  <span className="ml-2">{t("auth.creatingSecureAccount")}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className="space-y-4">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
               {t("auth.takeControlOfFinances")}

@@ -1,3 +1,4 @@
+import { useCurrency } from '@/context/CurrencyContext';
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -104,7 +105,8 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
   }, [allCategories, accumulatedData.type]);
 
   const userLanguage = (user as any)?.language || i18n.language || 'en-us';
-  const userCurrency = (user as any)?.currency || '$';
+  // The display symbol ("S/", "$"); the account itself stores the ISO code.
+  const { currency: userCurrency } = useCurrency();
 
   // Intelligent category matching function
   const matchCategoryIntelligently = async (suggestedCategory: string, categories: any[]) => {
@@ -784,7 +786,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">{t('voice.title')}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button aria-label={t('a11y.close')} variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>

@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage } from "../categoryTranslations";
+import { rateLimit } from "../middleware/rateLimit";
 
 // Multilingual server messages
 const serverMessages = {
@@ -224,9 +225,12 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const goalId = parseInt(req.params.id);
-      const { personalTarget } = req.body;
-      
-      const participant = await storage.joinCollaborativeGoal(goalId, userId, personalTarget);
+      const { personalTarget, joinCode } = req.body;
+      if (typeof joinCode !== 'string' || !joinCode.trim()) {
+        return res.status(403).json({ message: "An invitation code is required to join this goal" });
+      }
+
+      const participant = await storage.joinCollaborativeGoalWithCode(goalId, userId, joinCode, personalTarget);
       return res.json(participant);
     } catch (error) {
       console.error("Error joining collaborative goal:", error);
@@ -316,7 +320,11 @@ export function registerCollaborativeGoalRoutes(app: Express) {
 
   app.get('/api/collaborative-goals/:id/contributions', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
+      if (!userId || !(await requireActiveParticipant(goalId, userId))) {
+        return res.status(403).json({ message: "You are not a participant of this goal" });
+      }
       const contributions = await storage.getGoalContributions(goalId);
       return res.json(contributions);
     } catch (error) {
@@ -327,7 +335,11 @@ export function registerCollaborativeGoalRoutes(app: Express) {
 
   app.get('/api/collaborative-goals/:id/activities', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
+      if (!userId || !(await requireActiveParticipant(goalId, userId))) {
+        return res.status(403).json({ message: "You are not a participant of this goal" });
+      }
       const activities = await storage.getGoalActivities(goalId);
       return res.json(activities);
     } catch (error) {
@@ -337,7 +349,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
   });
 
   // Email invitation endpoint for collaborative goals
-  app.post('/api/collaborative-goals/:id/invite', isAuthenticated, async (req: any, res) => {
+  app.post('/api/collaborative-goals/:id/invite', isAuthenticated, rateLimit({ windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'goal-invite', perUser: true }), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -356,6 +368,9 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const goal = await storage.getCollaborativeGoal(goalId, userId);
       if (!goal) {
         return res.status(404).json({ message: "Goal not found or access denied" });
+      }
+      if (goal.createdBy !== userId) {
+        return res.status(403).json({ message: getLocalizedMessage(userLanguage, 'permissionDenied') });
       }
 
       // Get inviter details
@@ -380,7 +395,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
           
           // Send notification email to existing user
           const { sendGoalInvitationEmail } = await import('../emailService');
-          const goalUrl = `${req.get('origin') || 'https://kaptia.app'}/collaborative-goals/${goalId}`;
+          const goalUrl = `${process.env.APP_URL || 'https://kaptia.app'}/collaborative-goals/${goalId}?code=${encodeURIComponent(goal.joinCode ?? "")}`;
           
           const emailSent = await sendGoalInvitationEmail({
             recipientEmail: email,
@@ -406,7 +421,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       } else {
         // User doesn't exist - send invitation email
         const { sendGoalInvitationEmail } = await import('../emailService');
-        const goalUrl = `${req.get('origin') || 'https://kaptia.app'}/collaborative-goals/${goalId}`;
+        const goalUrl = `${process.env.APP_URL || 'https://kaptia.app'}/collaborative-goals/${goalId}?code=${encodeURIComponent(goal.joinCode ?? "")}`;
         
         const emailSent = await sendGoalInvitationEmail({
           recipientEmail: email,
@@ -558,10 +573,8 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(400).json({ message: "Message content is required" });
       }
       
-      // Check if user owns the message
-      const messages = await storage.getGoalMessages(0); // We'll need to get the specific message first
-      
-      const updatedMessage = await storage.updateGoalMessage(messageId, {
+      // Only the author's own message matches (userId is part of the query).
+      const updatedMessage = await storage.updateGoalMessage(messageId, userId, {
         message,
       });
       
@@ -585,8 +598,8 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       
       const messageId = parseInt(req.params.messageId);
       
-      // Check if user owns the message or is the goal creator
-      const deleted = await storage.deleteGoalMessage(messageId);
+      // Allowed for the author or the goal creator (checked in storage).
+      const deleted = await storage.deleteGoalMessage(messageId, userId);
       
       if (!deleted) {
         return res.status(404).json({ message: "Message not found" });

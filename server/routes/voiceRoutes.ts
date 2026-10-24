@@ -10,10 +10,14 @@ const router = Router();
 // Voice parsing endpoint
 router.post('/parse', async (req, res) => {
   try {
-    const { transcript, userLanguage } = z.object({
-      transcript: z.string().min(1),
+    const body = z.object({
+      transcript: z.string().trim().min(1),
       userLanguage: z.string().default('en-us')
-    }).parse(req.body);
+    }).safeParse(req.body);
+    if (!body.success) {
+      return res.status(400).json({ success: false, error: 'A transcript is required' });
+    }
+    const { transcript, userLanguage } = body.data;
 
     console.log('🎤 Voice parse request:', { transcript, userLanguage });
 
@@ -82,7 +86,7 @@ router.post('/parse', async (req, res) => {
     res.json({ success: true, data: result });
 
   } catch (error) {
-    console.error('❌ Voice parsing error:', error);
+    console.error('❌ Voice parsing error:', error instanceof Error ? error.message : String(error));
     res.status(400).json({
       success: false,
       error: error instanceof Error ? error.message : 'Voice parsing failed'

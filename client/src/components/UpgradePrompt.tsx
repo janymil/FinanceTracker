@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown, TrendingUp, Check, X } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { useBillingRegion } from "@/hooks/useBillingRegion";
+import { amountFor, formatMoney } from "@shared/pricing";
 
 interface UpgradePromptProps {
   currentPlan: string;
@@ -13,7 +15,8 @@ interface UpgradePromptProps {
 export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currency = useBillingRegion(i18n.language?.slice(0, 2) || 'en').currency;
 
   useEffect(() => {
     // Check if user selected a paid plan during signup
@@ -66,7 +69,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   const planDetails = {
     standard: {
       name: t('upgrade.standard_name'),
-      price: t('upgrade.standard_price'),
+      price: `${formatMoney(amountFor('standard', 'monthly', currency), currency)}/${t('checkout.period_monthly')}`,
       color: 'blue',
       icon: TrendingUp,
       features: [
@@ -79,7 +82,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
     },
     premium: {
       name: t('upgrade.premium_name'),
-      price: t('upgrade.premium_price'),
+      price: `${formatMoney(amountFor('premium', 'monthly', currency), currency)}/${t('checkout.period_monthly')}`,
       color: 'purple',
       icon: Crown,
       features: [
@@ -100,7 +103,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   return (
     <Card className="border-2 border-dashed border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50">
       <CardHeader className="relative">
-        <Button
+        <Button aria-label={t('a11y.close')}
           variant="ghost"
           size="sm"
           onClick={handleDismiss}

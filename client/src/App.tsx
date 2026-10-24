@@ -29,6 +29,9 @@ import Dashboard from "@/pages/dashboard";
 
 // Other components loaded on demand
 import AuthPage from "@/pages/auth-page";
+import { signInUrl } from "@/lib/authRedirect";
+import { useAutoTimeZone } from "@/hooks/useAutoTimeZone";
+import { FirstRunWelcome } from "@/components/FirstRunWelcome";
 import TransactionsPage from "@/pages/transactions";
 import IncomePage from "@/pages/income";
 import ExpensesPage from "@/pages/expenses";
@@ -47,6 +50,7 @@ import Pricing from "@/pages/pricing";
 import TermsOfService from "@/pages/terms-of-service";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import CookiePolicy from "@/pages/cookie-policy";
+import Reclamaciones from "@/pages/reclamaciones";
 import Contact from "@/pages/contact";
 import Help from "@/pages/help";
 import NotFoundPage from "./pages/not-found";
@@ -141,6 +145,7 @@ function Router() {
         <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
         <Route path="/:lang/cookies" component={CookiePolicy} />
         <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+        <Route path="/:lang/reclamaciones" component={Reclamaciones} />
         <Route path="/:lang/contact" component={Contact} />
         <Route path="/:lang/help" component={Help} />
         <Route path="/:lang/auth" component={AuthPage} />
@@ -227,9 +232,13 @@ export function AuthenticatedApp() {
   // Keep the language prefix when bouncing an anonymous visitor to sign-in
   const currentLang = currentPath.match(/^\/([a-z]{2})(\/|$)/)?.[1] || 'en';
 
+  // The time zone decides where "this month" starts, so a new account gets the device's.
+  useAutoTimeZone();
+
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      setLocation(`/${currentLang}/auth#sign-in`);
+      // Come back to the page they asked for once they are signed in.
+      setLocation(signInUrl(currentLang, `${window.location.pathname}${window.location.search}`));
     }
   }, [isLoaded, isSignedIn, currentLang, setLocation]);
 
@@ -240,6 +249,7 @@ export function AuthenticatedApp() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <FirstRunWelcome />
       <Header 
         onMenuClick={() => setSidebarOpen(true)} 
         sidebarCollapsed={sidebarCollapsed}
@@ -287,6 +297,7 @@ export function AuthenticatedApp() {
               <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
               <Route path="/:lang/cookies" component={CookiePolicy} />
               <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+              <Route path="/:lang/reclamaciones" component={Reclamaciones} />
               <Route path="/:lang/contact" component={Contact} />
               <Route path="/:lang/help" component={Help} />
               

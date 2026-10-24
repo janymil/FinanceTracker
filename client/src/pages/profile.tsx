@@ -14,9 +14,11 @@ import { SubscriptionSchedule } from "../components/subscription-schedule";
 import { Switch } from "../components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useBillingRegion } from "../hooks/useBillingRegion";
+import { TimeZoneSetting } from "../components/TimeZoneSetting";
 
 export default function ProfilePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentPath] = useLocation();
   const currentLang = currentPath.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] || 'en';
   const { user } = useUser();
@@ -33,6 +35,7 @@ export default function ProfilePage() {
   // The AI switch. `aiEnabled` is false only when the account explicitly turned AI off.
   const [aiEnabled, setAiEnabled] = useState<boolean>((authUser as any)?.aiEnabled !== false);
   const [isSavingAi, setIsSavingAi] = useState(false);
+  const billingRegion = useBillingRegion(i18n.language || 'en');
 
   useEffect(() => {
     setAiEnabled((authUser as any)?.aiEnabled !== false);
@@ -65,6 +68,35 @@ export default function ProfilePage() {
       });
     } finally {
       setIsSavingAi(false);
+    }
+  };
+
+  const [emailNotifications, setEmailNotifications] = useState<boolean>((authUser as any)?.emailNotifications !== false);
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
+
+  useEffect(() => {
+    setEmailNotifications((authUser as any)?.emailNotifications !== false);
+  }, [(authUser as any)?.emailNotifications]);
+
+  const handleEmailToggle = async (next: boolean) => {
+    setIsSavingEmail(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/auth/user', {
+        method: 'PUT',
+        headers: { ...headers },
+        credentials: 'include',
+        body: JSON.stringify({ emailNotifications: next }),
+      });
+      if (!response.ok) throw new Error('save failed');
+
+      setEmailNotifications(next);
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({ title: next ? t('profile.emailNotifications.on') : t('profile.emailNotifications.off') });
+    } catch {
+      toast({ title: t('profile.Error'), description: t('profile.emailNotifications.failed'), variant: 'destructive' });
+    } finally {
+      setIsSavingEmail(false);
     }
   };
 
@@ -104,6 +136,31 @@ export default function ProfilePage() {
         title: t('profile.Error'),
         description: t('profile.Failed to open subscription management: {{errorMessage}}', { errorMessage }),
         variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleCancelMercadoPago = async () => {
+    if (!window.confirm(t('profile.mp_cancel_confirm'))) return;
+    setIsLoading(true);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/mercadopago/cancel', {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || t('profile.Unknown error occurred'));
+
+      toast({ title: t('profile.mp_cancelled') });
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        title: t('profile.Error'),
+        description: error?.message || t('profile.Unknown error occurred'),
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -304,6 +361,27 @@ export default function ProfilePage() {
                   data-testid="ai-toggle"
                 />
               </div>
+
+              <div className="mt-4 flex items-start justify-between gap-4 rounded-lg border p-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 font-medium">
+                    <Bell className="h-4 w-4" />
+                    <span>{t('profile.emailNotifications.title')}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t('profile.emailNotifications.description')}
+                  </p>
+                </div>
+                <Switch
+                  checked={emailNotifications}
+                  disabled={isSavingEmail}
+                  onCheckedChange={handleEmailToggle}
+                  aria-label={t('profile.emailNotifications.title')}
+                  data-testid="email-notifications-toggle"
+                />
+              </div>
+
+              <TimeZoneSetting />
             </CardContent>
           </Card>
         </TabsContent>
@@ -377,6 +455,18 @@ export default function ProfilePage() {
               {authUser.plan !== 'free' && (
                 <div className="space-y-4">
                   <h4 className="font-medium">{t('profile.Subscription Management')}</h4>
+                  {billingRegion.gateway === 'mercadopago' ? (
+                    <div className="grid gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={handleCancelMercadoPago}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? t('profile.Opening...') : t('profile.mp_cancel')}
+                      </Button>
+                      <p className="text-xs text-muted-foreground">{t('profile.mp_cancel_note')}</p>
+                    </div>
+                  ) : (
                   <div className="grid gap-3">
                     <Button
                       onClick={handleManageSubscription}
@@ -403,6 +493,7 @@ export default function ProfilePage() {
                       <li>{t('profile.• Cancel subscription')}</li>
                     </ul>
                   </div>
+                  )}
                 </div>
               )}
 

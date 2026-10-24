@@ -15,7 +15,7 @@ export const setupClerkAuth = (app: any) => {
   } else if (!secretKey.startsWith('sk_') || secretKey.includes('REPLACE_WITH')) {
     console.error(
       '[AUTH] CLERK_SECRET_KEY is INVALID - it must be a real secret key starting with "sk_test_" or "sk_live_" (current value: "' +
-      secretKey.slice(0, 12) + '...").\n' +
+      'hidden").\n' +
       '       Fix: Clerk Dashboard -> Configure -> API Keys -> copy the Secret key into .env as CLERK_SECRET_KEY=sk_... .\n' +
       '       Until this is fixed every authenticated request is rejected with 401 and dashboards render without data.'
     );
@@ -24,9 +24,9 @@ export const setupClerkAuth = (app: any) => {
     console.error('[AUTH] CLERK_PUBLISHABLE_KEY looks invalid - it must start with "pk_test_" or "pk_live_".');
   }
 
-  console.log('Setting up Clerk middleware with keys:', {
-    publishable: publishableKey?.substring(0, 20) + '...',
-    secret: secretKey?.substring(0, 20) + '...'
+  console.log('Setting up Clerk middleware:', {
+    publishableKeyPresent: Boolean(publishableKey),
+    secretKeyPresent: Boolean(secretKey),
   });
   
   // Create single Clerk middleware instance
