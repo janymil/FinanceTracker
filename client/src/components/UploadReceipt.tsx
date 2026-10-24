@@ -277,7 +277,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                   className="w-full flex items-center gap-2"
                 >
                   <Camera className="h-4 w-4" />
-                  Take Photo
+                  {t("Take Photo")}
                 </Button>
                 <Button
                   onClick={() => fileInputRef.current?.click()}
@@ -285,7 +285,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                   className="w-full flex items-center gap-2"
                 >
                   <Upload className="h-4 w-4" />
-                  Choose from Gallery
+                  {t("Choose from Gallery")}
                 </Button>
               </div>
               
