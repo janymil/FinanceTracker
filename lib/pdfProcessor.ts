@@ -4,7 +4,8 @@
  * SECURITY: Enhanced protection for sensitive financial data
  */
 
-// Statement text is produced locally by Tesseract; no page image is sent anywhere.
+// Scanned statements are rendered locally, anonymised (PII lines blacked out) and then
+// read by the OCR models; Tesseract only locates the lines to mask.
 import { getCurrentLanguageForAPI } from './languageUtils';
 import { DataEncryption } from '../server/encryption';
 import { runAI } from './aiProcessor';
@@ -397,7 +398,7 @@ export async function processBankStatementPDF(
       
       try {
         // Use local OCR that doesn't send data to external services
-        const ocrText = await performLocalOCROnPDF(pdfBuffer, result.securityLog);
+        const ocrText = await performAnonymisedOCROnPDF(pdfBuffer, result.securityLog, userId);
         if (ocrText.length > extractedText.length * 0.8) {
           extractedText = ocrText;
           result.processingMethod = 'ocr';
@@ -609,81 +610,96 @@ function assessTextQuality(text: string): number {
 /**
  * Perform LOCAL OCR on PDF using Tesseract.js (privacy-first, no external services)
  */
-async function performLocalOCROnPDF(pdfBuffer: Buffer, securityLog: SecurityEvent[]): Promise<string> {
+/**
+ * Reads a scanned statement with the OCR models.
+ *
+ * Tesseract is only used inside `anonymizeImageForAI` to *locate* identifying lines; the
+ * page images that are sent to Mistral OCR / Google Vision / OpenAI vision have those
+ * lines painted black first. This is what makes a scanned bank statement readable again
+ * without shipping the account holder's name, IBAN or address to a provider.
+ */
+async function performAnonymisedOCROnPDF(
+  pdfBuffer: Buffer,
+  securityLog: SecurityEvent[],
+  userId?: string,
+): Promise<string> {
+  const { mkdtemp, readdir, readFile, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const path = await import('node:path');
+  const { execFile } = await import('node:child_process');
+  const { promisify } = await import('node:util');
+  const run = promisify(execFile);
+
+  PDFSecurityManager.logSecurityEvent(securityLog, 'ocr_start', 'success', 'Rendering statement pages for anonymised OCR');
+
+  const dir = await mkdtemp(path.join(tmpdir(), 'kaptia-statement-'));
+  let extras: { names?: Array<string | null | undefined>; email?: string | null } = {};
+
   try {
-    PDFSecurityManager.logSecurityEvent(securityLog, 'local_ocr_start', 'success', 'Starting local Tesseract OCR processing');
-    
-    // Dynamic imports for Tesseract.js
-    const { createWorker } = await import('tesseract.js');
-    const { fromBuffer } = await import('pdf2pic');
-    
-    console.log('Converting PDF to images for LOCAL OCR processing...');
-    
-    // Configure pdf2pic for in-memory processing (no external data transmission)
-    const convert = fromBuffer(pdfBuffer, {
-      density: 200,
-      format: "png",
-      width: 2000,
-      height: 2000
+    const pdfPath = path.join(dir, 'statement.pdf');
+    await (await import('node:fs/promises')).writeFile(pdfPath, pdfBuffer);
+
+    // poppler renders locally; no ImageMagick/GraphicsMagick needed on the host.
+    await run('pdftoppm', ['-png', '-r', '150', '-scale-to', '2200', pdfPath, path.join(dir, 'page')], {
+      timeout: 120_000,
+      maxBuffer: 1024 * 1024 * 64,
     });
-    
-    // Convert all pages to images in memory
-    const convertedPages = await convert.bulk(-1, { responseType: "buffer" });
-    
-    if (!convertedPages || convertedPages.length === 0) {
-      PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_conversion_failed', 'error', 'No pages converted from PDF');
+
+    const files = (await readdir(dir)).filter((name) => name.startsWith('page') && name.endsWith('.png')).sort();
+    if (files.length === 0) {
+      PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_conversion_failed', 'error', 'No pages rendered from PDF');
       return '';
     }
-    
-    PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_conversion_success', 'success', `Converted ${convertedPages.length} pages locally`);
-    
-    // Initialize Tesseract worker for LOCAL processing
-    const worker = await createWorker('eng', 1, {
-      logger: (m) => console.log(`Tesseract: ${m.status} ${m.progress}`)
-    });
-    
-    let combinedText = '';
-    
-    try {
-      // Process each page locally with Tesseract
-      for (let i = 0; i < convertedPages.length; i++) {
-        const page = convertedPages[i];
-        if (page && page.buffer) {
-          try {
-            console.log(`Performing LOCAL OCR on page ${i + 1}/${convertedPages.length}`);
-            
-            // OCR processing happens entirely in Node.js - no external transmission
-            const { data } = await worker.recognize(page.buffer);
-            
-            if (data.text && data.text.trim()) {
-              combinedText += `\n--- PAGE ${i + 1} ---\n${data.text}\n`;
-              PDFSecurityManager.logSecurityEvent(securityLog, `local_ocr_page_${i + 1}`, 'success', 
-                `Extracted ${data.text.length} chars locally (confidence: ${data.confidence}%)`);
-            }
-          } catch (pageError) {
-            console.error(`Local OCR failed for page ${i + 1}:`, pageError);
-            PDFSecurityManager.logSecurityEvent(securityLog, `local_ocr_page_${i + 1}_failed`, 'warning', 
-              pageError instanceof Error ? pageError.message : 'Unknown page OCR error');
-          }
-        }
+
+    if (userId) {
+      try {
+        const { storage } = await import('../server/storage.js');
+        const user = await storage.getUser(userId);
+        extras = { names: [user?.firstName, user?.lastName], email: user?.email };
+      } catch (error) {
+        console.warn('Could not load the user for image anonymisation:', (error as Error).message);
       }
-    } finally {
-      // Cleanup Tesseract worker
-      await worker.terminate();
-      PDFSecurityManager.logSecurityEvent(securityLog, 'tesseract_cleanup', 'success', 'Local OCR worker terminated');
     }
-    
-    console.log(`LOCAL OCR completed. Extracted ${combinedText.length} characters without external transmission`);
-    PDFSecurityManager.logSecurityEvent(securityLog, 'local_ocr_complete', 'success', 
-      `Total extraction: ${combinedText.length} chars - all processing local`);
-    
+
+    const { anonymizeImageForAI } = await import('../server/imageAnonymizer.js');
+    const { performOCR } = await import('../server/ocr.js');
+
+    let combinedText = '';
+
+    for (let index = 0; index < files.length; index += 1) {
+      const pageBuffer = await readFile(path.join(dir, files[index]));
+      try {
+        const { image, maskedLines, detectedWords } = await anonymizeImageForAI(pageBuffer, extras);
+        if (detectedWords === 0) {
+          PDFSecurityManager.logSecurityEvent(securityLog, `ocr_page_${index + 1}_skipped`, 'warning',
+            'No text located on the page; nothing sent to the OCR provider');
+          continue;
+        }
+
+        const pageText = await performOCR(image);
+        if (pageText && pageText.trim()) {
+          combinedText += `\n--- PAGE ${index + 1} ---\n${pageText}\n`;
+        }
+        PDFSecurityManager.logSecurityEvent(securityLog, `ocr_page_${index + 1}`, 'success',
+          `Page read by the OCR model; ${maskedLines} identifying line(s) masked`);
+      } catch (pageError) {
+        console.error(`OCR failed for page ${index + 1}:`, pageError);
+        PDFSecurityManager.logSecurityEvent(securityLog, `ocr_page_${index + 1}_failed`, 'warning',
+          pageError instanceof Error ? pageError.message : 'Unknown page OCR error');
+      }
+    }
+
+    PDFSecurityManager.logSecurityEvent(securityLog, 'ocr_complete', 'success',
+      `Extracted ${combinedText.length} chars from ${files.length} page(s)`);
+
     return combinedText.trim();
-    
   } catch (error) {
-    console.error('Local OCR processing failed:', error);
-    PDFSecurityManager.logSecurityEvent(securityLog, 'local_ocr_error', 'error', 
-      error instanceof Error ? error.message : 'Unknown local OCR error');
-    throw new Error(`Local OCR processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('Anonymised statement OCR failed:', error);
+    PDFSecurityManager.logSecurityEvent(securityLog, 'ocr_error', 'error',
+      error instanceof Error ? error.message : 'Unknown OCR error');
+    throw new Error(`Statement OCR failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  } finally {
+    await rm(dir, { recursive: true, force: true }).catch(() => undefined);
   }
 }
 

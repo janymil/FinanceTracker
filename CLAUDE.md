@@ -77,16 +77,22 @@ error-data retention daily). Schema changes are **not** part of the deploy scrip
 ### External Services Integration
 - **AI Processing**: `lib/aiProvider.ts` routes every chat call to OpenAI / DeepSeek / Groq / Mistral directly (with fallbacks). The optional `ai-processor` service runs on the same VPS (`AI_PROCESSOR_ENABLED`), it is not hosted on Fly.io.
 - **File Storage**: Cloudflare R2 (`server/cloudStorage.ts`) for receipts and exports
-- **OCR**: Local Tesseract.js only — receipt photos and statement pages never leave the server
+- **OCR**: AI OCR (Mistral → Google Vision → OpenAI vision) on images whose identifying lines were blacked out locally by `server/imageAnonymizer.ts`; Tesseract only locates the lines to mask
 - **Email**: Zoho SMTP (verified at boot; `email: ok` in `/api/health/deep`)
 
 ### AI data boundary (do not weaken)
 Every outbound AI request passes through `shared/aiAnonymizer.ts`, enforced in three places:
 `lib/aiProvider.routeChat`, `lib/aiProcessor.runAI` and `server/mistralClient` / `server/groqClient`.
 It removes e-mails, phones, IBANs, card numbers, national/tax IDs, addresses, account numbers
-and the signed-in user's name, and drops `userId` from the payload. Access is gated by
-`server/aiAccess.ts`: free plans never reach an AI provider, and `users.ai_enabled = false`
-stops OCR, voice, tips, insights and predictions for that account.
+and the signed-in user's name, and drops `userId` from the payload.
+
+Images take a different route: `server/imageAnonymizer.ts` uses Tesseract **only to locate**
+text lines, blacks out every line carrying an identifier, and the cleaned image is then sent
+to the OCR providers (`server/ocr.ts`: Mistral OCR → Google Vision → OpenAI vision). Never
+replace that with local Tesseract text extraction — Tesseract cannot read bank statements.
+
+Access is gated by `server/aiAccess.ts`: free plans never reach an AI provider, and
+`users.ai_enabled = false` stops OCR, voice, tips, insights and predictions for that account.
 
 ## Language and Internationalization
 

@@ -2,6 +2,8 @@
 import multer from 'multer';
 import { Request, Response } from 'express';
 import { getUserId } from './clerkAuth';
+import { storage } from './storage';
+import { anonymizeImageForAI } from './imageAnonymizer';
 
 
 
@@ -52,27 +54,11 @@ export async function uploadReceiptFile(fileName: string, fileBuffer: Buffer, mi
 }
 
 /**
- * Reads the receipt **on this server**. Tesseract runs in-process, so the photo is never
- * uploaded to an OCR provider — which is what makes the "text is anonymised before AI"
- * promise hold for images as well.
+ * Receipt images are read by the OCR models (Mistral → Google Vision → OpenAI vision).
+ * Before the image leaves the server it is passed through `anonymizeImageForAI`, which
+ * blacks out every line carrying an identifier. Tesseract is used only to locate those
+ * lines, never as the reader.
  */
-export async function performLocalReceiptOCR(buffer: Buffer): Promise<string> {
-  const { createWorker } = await import('tesseract.js');
-  const worker = await createWorker('eng', 1, { logger: () => {} });
-  let timer: NodeJS.Timeout | undefined;
-  try {
-    // A 12-megapixel phone photo can take a long time; fail predictably instead of
-    // holding the request open indefinitely.
-    const timeout = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new Error('ocr_timeout')), 30_000);
-    });
-    const { data } = await Promise.race([worker.recognize(buffer), timeout]);
-    return data.text ?? '';
-  } finally {
-    if (timer) clearTimeout(timer);
-    await worker.terminate().catch(() => undefined);
-  }
-}
 
 // Legacy alias
 export const uploadToBunny = uploadReceiptFile;
@@ -108,9 +94,34 @@ export const uploadReceiptHandler = [
       const userPlan = { plan: access.plan as 'free' | 'standard' | 'premium' };
       const canStore = userPlan.plan === 'standard' || userPlan.plan === 'premium';
 
-      // OCR locally, then strip identifiers before anything is sent to the AI model.
-      const rawText = await performLocalReceiptOCR(req.file.buffer);
-      const recognizedText = anonymizeText(rawText).text;
+      // Black out the identifying lines, then let the OCR model read the cleaned image.
+      const user = await storage.getUser(userId);
+      const extras = { names: [user?.firstName, user?.lastName], email: user?.email };
+      let safeImage: Buffer;
+      let detectedWords = 0;
+      try {
+        const anonymized = await anonymizeImageForAI(req.file.buffer, extras);
+        safeImage = anonymized.image;
+        detectedWords = anonymized.detectedWords;
+        console.log(`[Receipt] OCR image prepared: ${anonymized.maskedLines}/${anonymized.detectedLines} identifying lines masked`);
+      } catch (error) {
+        console.warn('[Receipt] Could not prepare the image for OCR:', (error as Error).message);
+        return res.status(422).json({
+          error: 'This image format could not be read. Please use a JPEG, PNG or WebP photo.',
+          code: 'ocr_unsupported',
+        });
+      }
+
+      if (detectedWords === 0) {
+        return res.status(422).json({
+          error: 'We could not read this receipt. Please enter the details manually.',
+          code: 'ocr_empty',
+        });
+      }
+
+      // Mistral OCR → Google Vision → OpenAI vision, on the masked image only.
+      const rawText = await performOCR(safeImage);
+      const recognizedText = anonymizeText(rawText, extras).text;
 
       if (recognizedText.trim().length < 5) {
         return res.status(422).json({

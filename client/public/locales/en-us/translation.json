@@ -2872,7 +2872,7 @@
       },
       "data_anonymization": {
         "title": "Data Anonymization:",
-        "description": "Before any text is sent, we remove e-mail addresses, phone numbers, IBANs, card numbers, national and tax IDs, postal addresses, bank account numbers, and your own name and e-mail. Amounts, dates, categories and merchant names are kept so the result stays accurate. Receipt images are read on our own server and are never uploaded to an AI provider."
+        "description": "Receipt and statement images are anonymised before they leave our servers: lines carrying a name, address, IBAN, card, document number or account number are blacked out, and the OCR provider only receives the cleaned image. Text returned by OCR is scrubbed again before it reaches a language model."
       },
       "processing_purpose": {
         "title": "Processing Purpose:",

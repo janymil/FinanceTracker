@@ -127,7 +127,7 @@ async function runMistralOcr(imageBuffer: Buffer, deps: OcrDeps, apiKey: string)
         model: deps.mistralModel ?? process.env.MISTRAL_OCR_MODEL ?? DEFAULT_MISTRAL_MODEL,
         document: {
           type: 'image_url',
-          image_url: `data:image/jpeg;base64,${imageBuffer.toString('base64')}`,
+          image_url: `data:image/png;base64,${imageBuffer.toString('base64')}`,
         },
       }),
     });
@@ -169,7 +169,7 @@ async function runOpenAiVision(imageBuffer: Buffer, deps: OcrDeps): Promise<stri
 
   const { createRoutedClient } = await import('../lib/aiProvider.js');
   const client = createRoutedClient();
-  const dataUrl = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
+  const dataUrl = `data:image/png;base64,${imageBuffer.toString('base64')}`;
 
   const response = await client.chat.completions.create({
     model: 'gpt-6-luna',

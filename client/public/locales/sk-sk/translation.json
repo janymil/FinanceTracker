@@ -2926,7 +2926,7 @@
       },
       "data_anonymization": {
         "title": "Anonymizácia údajov:",
-        "description": "Pred odoslaním textu odstraňujeme e-mailové adresy, telefónne čísla, IBAN, čísla kariet, rodné čísla a daňové identifikátory, poštové adresy, čísla bankových účtov a vaše meno a e-mail. Sumy, dátumy, kategórie a názvy obchodníkov zostávajú, aby bol výsledok presný. Obrázky bločkov čítame na vlastnom serveri a nikdy ich neposielame poskytovateľovi AI."
+        "description": "Obrázky bločkov a výpisov anonymizujeme predtým, než opustia naše servery: riadky s menom, adresou, IBAN, kartou, číslom dokladu alebo čísla účtu začiernime a poskytovateľ OCR dostane iba takto upravený obrázok. Text z OCR sa pred odoslaním jazykovému modelu čistí ešte raz."
       },
       "processing_purpose": {
         "title": "Účel spracovávania:",

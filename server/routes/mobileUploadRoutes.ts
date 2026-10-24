@@ -116,10 +116,13 @@ export function registerMobileUploadRoutes(app: any) {
         console.log('Processing OCR directly...');
         
         // Import OCR processing functions
-        const { performLocalReceiptOCR, extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
+        const { extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
         const { categorizeExpense } = await import('../openai');
         const { checkAiAccess } = await import('../aiAccess');
         const { anonymizeText } = await import('../../shared/aiAnonymizer');
+        const { anonymizeImageForAI } = await import('../imageAnonymizer');
+        const { performOCR } = await import('../ocr');
+        const { storage } = await import('../storage');
         
         // Same gate as the web upload: paid plan, AI switch on.
         const access = await checkAiAccess(userId);
@@ -136,12 +139,13 @@ export function registerMobileUploadRoutes(app: any) {
         const userPlan = access.plan as 'free' | 'standard' | 'premium';
         const canStore = userPlan === 'standard' || userPlan === 'premium';
 
-        // Read the photo locally, then strip identifiers before the AI sees any text.
-        const rawText = await performLocalReceiptOCR(file.buffer);
-        const recognizedText = anonymizeText(rawText).text;
-        console.log('Local OCR completed successfully');
+        // Read the photo with the OCR models, but only after the identifying lines have
+        // been blacked out locally.
+        const user = await storage.getUser(userId);
+        const extras = { names: [user?.firstName, user?.lastName], email: user?.email };
+        const { image: safeImage, detectedWords } = await anonymizeImageForAI(file.buffer, extras);
 
-        if (recognizedText.trim().length < 5) {
+        if (detectedWords === 0) {
           mobileUploadSessions.set(sessionId, {
             userId,
             status: 'error',
@@ -150,6 +154,10 @@ export function registerMobileUploadRoutes(app: any) {
           });
           return res.status(422).json({ error: 'We could not read this receipt', code: 'ocr_empty' });
         }
+
+        const rawText = await performOCR(safeImage);
+        const recognizedText = anonymizeText(rawText, extras).text;
+        console.log('OCR completed successfully');
 
         // Extract structured data using the AI model (anonymised text only)
         const extractedData = await extractStructuredData(recognizedText);

@@ -70,7 +70,9 @@ describe('Mistral OCR (primary provider)', () => {
     const body = JSON.parse(init.body);
     expect(body.model).toBe('mistral-ocr-latest');
     expect(body.document.type).toBe('image_url');
-    expect(body.document.image_url).toMatch(/^data:image\/jpeg;base64,/);
+    // Images reach this function as PNG from server/imageAnonymizer, so the data URL must
+    // say PNG — a wrong MIME type is exactly the kind of detail a strict OCR API rejects.
+    expect(body.document.image_url).toMatch(/^data:image\/png;base64,/);
   });
 
   it('honours a model override', async () => {

@@ -3017,7 +3017,7 @@
       },
       "data_anonymization": {
         "title": "Anonimización de Datos:",
-        "description": "Antes de enviar cualquier texto eliminamos correos electrónicos, teléfonos, IBAN, números de tarjeta, documentos nacionales y fiscales, direcciones postales, números de cuenta bancaria y tu propio nombre y correo. Los importes, fechas, categorías y nombres de comercios se mantienen para que el resultado sea preciso. Las imágenes de recibos se leen en nuestro propio servidor y nunca se envían a un proveedor de IA."
+        "description": "Las imágenes de recibos y estados de cuenta se anonimizan antes de salir de nuestros servidores: las líneas con nombre, dirección, IBAN, tarjeta, número de documento o de cuenta se tapan en negro y el proveedor de OCR solo recibe la imagen limpia. El texto devuelto por el OCR se vuelve a depurar antes de llegar a un modelo de lenguaje."
       },
       "processing_purpose": {
         "title": "Propósito del Procesamiento:",
