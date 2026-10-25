@@ -2,22 +2,26 @@
 
 ## Why this kept failing (read this first)
 
-The owner had to ask twice. Both times the same mistake: the technical part was written
-well and the closing note was written **last**, still in the technical voice, so it read
-like a changelog. The rule was known and still broken, because nothing forced a check.
+The owner had to ask three times. The first two times the same mistake: the technical part
+was written well and the closing note was written **last**, still in the technical voice, so
+it read like a changelog. The third time the note had no forbidden word in it and was still
+too dense to read, because "no banned word" had been treated as the whole rule. The rule was
+known and still broken, because nothing forced a check that could actually fail.
 
 So the order below is not a style preference. Write the note **first**, before the
 technical part exists to contaminate it.
 
 ## The two-step gate (do this on every reply that changed something)
 
-**Step 1 — before writing anything else, write the closing note.** Three to five sentences.
-It must pass all four of these:
+**Step 1 — before writing anything else, write the closing note.** Three to six sentences.
+It must pass all five of these:
 
 1. Read only the note. Can the owner tell *what is different for them or their customers*?
 2. Does every sentence survive after deleting all code, file names and command names?
 3. Are there zero words from the banned list below?
 4. Is there a clear "what they have to do" line — including "nothing"?
+5. Is it inside the two numbers below — six sentences, twenty-five words each? Count them.
+   This is the step that was skipped, so it is a step, not an intention.
 
 **Step 2 — only then write the technical part above it**, for the record. If a sentence in
 the note needs a technical word to be true, that sentence belongs in the technical part
@@ -59,6 +63,21 @@ This is the part they read. Everything else is optional; this is not.
 - Do not open with "I've successfully...", do not repeat the plan, do not paste code.
 - Technical detail goes **above** the closing note, and only when it changes a decision for
   them or when they asked for it.
+
+### The two numbers (count them, do not estimate)
+
+A note can contain no banned word and still be unreadable. That is how it failed the third
+time: every forbidden word removed, no file path, no library name, and the owner still had
+to say *"again you wrote a difficult summary"*. The banned list had been checked. The note
+had never been counted.
+
+- **Six sentences maximum.** More than six means the note is carrying the report instead of
+  what changed.
+- **Twenty-five words maximum per sentence.** Count them. A sentence past that line is two
+  ideas wearing one sentence: split it, or drop the weaker one.
+- **Never restate the report.** If the note walks through the same points as the technical
+  part above it, it is a summary of your work, not a note to the owner. Keep the one or two
+  things that changed for them; the rest stays above.
 
 Example of the right shape:
 
