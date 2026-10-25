@@ -57,6 +57,22 @@ export interface CreatedPreapproval {
   initPoint: string;
 }
 
+/**
+ * Where MercadoPago must send the lifecycle events for one preapproval.
+ *
+ * The application currently has no account-wide notification URL, and a preapproval without
+ * `notification_url` produces no webhook at all — the payer would be charged while the plan
+ * stayed `free`. Prefer the origin of the return URL, fall back to APP_URL.
+ */
+function webhookUrlFor(backUrl: string): string {
+  try {
+    return `${new URL(backUrl).origin}/api/mercadopago/webhook`;
+  } catch {
+    const base = (process.env.APP_URL || 'https://kaptia.app').replace(/\/$/, '');
+    return `${base}/api/mercadopago/webhook`;
+  }
+}
+
 export async function createPreapproval(input: CreatePreapprovalInput): Promise<CreatedPreapproval> {
   const amount = PLAN_PRICES[input.plan].pen[input.interval];
 
@@ -65,6 +81,7 @@ export async function createPreapproval(input: CreatePreapprovalInput): Promise<
     external_reference: input.userId,
     payer_email: input.payerEmail,
     back_url: input.backUrl,
+    notification_url: webhookUrlFor(input.backUrl),
     status: 'pending',
     auto_recurring: {
       frequency: 1,

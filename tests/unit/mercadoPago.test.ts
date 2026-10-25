@@ -81,6 +81,51 @@ describe('MercadoPago preapproval', () => {
     });
   });
 
+  it('registers the app webhook on the preapproval so the plan can actually activate', async () => {
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      text: async () => JSON.stringify({ id: 'pre-7', init_point: 'https://mp/checkout/pre-7' }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await createPreapproval({
+      userId: 'user_1',
+      plan: 'standard',
+      interval: 'monthly',
+      payerEmail: 'payer@example.com',
+      backUrl: 'https://kaptia.app/es/profile?mp=return',
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(String(init.body)).notification_url).toBe(
+      'https://kaptia.app/api/mercadopago/webhook',
+    );
+  });
+
+  it('falls back to APP_URL for the webhook when the return URL is not absolute', async () => {
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    process.env.APP_URL = 'https://staging.kaptia.app/';
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      text: async () => JSON.stringify({ id: 'pre-8', init_point: 'https://mp/checkout/pre-8' }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await createPreapproval({
+      userId: 'user_1',
+      plan: 'standard',
+      interval: 'monthly',
+      payerEmail: 'payer@example.com',
+      backUrl: '/es/profile',
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(String(init.body)).notification_url).toBe(
+      'https://staging.kaptia.app/api/mercadopago/webhook',
+    );
+  });
+
   it('surfaces MercadoPago errors instead of returning a broken checkout URL', async () => {
     process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
     vi.stubGlobal('fetch', vi.fn(async () => ({
