@@ -32,6 +32,7 @@ import {
   // contextualFinancialTips, // Removed - using unified ai_cache
   type User,
   type InsertUser,
+  type RecurringTransaction,
   type Transaction,
   type InsertTransaction,
   type Budget,
@@ -100,12 +101,22 @@ export interface ClerkProfile {
   profileImageUrl: string | null;
 }
 
+/**
+ * A recurring rule as the API returns it: the stored row plus the category labels it was joined
+ * with. Declared instead of `any[]` because the shape is what the client renders.
+ */
+export type RecurringRuleWithCategory = RecurringTransaction & {
+  categoryName: string | null;
+  categoryIcon: string | null;
+  categoryColor: string | null;
+};
+
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
-  upsertUser(user: any): Promise<User>;
+  upsertUser(userData: InsertUser): Promise<User>;
   adoptUserAccount(sourceUserId: string, targetUserId: string, profile?: Partial<ClerkProfile>): Promise<User>;
   createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User>;
@@ -442,7 +453,7 @@ export class DatabaseStorage implements IStorage {
     return newUser;
   }
 
-  async upsertUser(userData: any): Promise<User> {
+  async upsertUser(userData: InsertUser): Promise<User> {
     try {
       // Try to insert new user first
       const [newUser] = await db
@@ -561,7 +572,7 @@ export class DatabaseStorage implements IStorage {
           sourceTransactionId: newTransaction.id,
         });
       } catch (error) {
-        console.error('Error creating recurring transaction record:', error);
+        log.error('Error creating recurring transaction record:', error);
       }
     }
 
@@ -825,7 +836,7 @@ export class DatabaseStorage implements IStorage {
       }
     } catch (error) {
       // The edit itself already succeeded; a rule that could not be synced must not undo it.
-      console.error('Could not sync the recurring rule:', error instanceof Error ? error.message : error);
+      log.error('Could not sync the recurring rule:', error instanceof Error ? error.message : error);
     }
   }
 
@@ -1243,7 +1254,7 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
-  async getUserRecurringTransactions(userId: string): Promise<any[]> {
+  async getUserRecurringTransactions(userId: string): Promise<RecurringRuleWithCategory[]> {
     const results = await db
       .select({
         id: recurringTransactions.id,
@@ -1258,6 +1269,7 @@ export class DatabaseStorage implements IStorage {
         isActive: recurringTransactions.isActive,
         lastProcessed: recurringTransactions.lastProcessed,
         createdAt: recurringTransactions.createdAt,
+        sourceTransactionId: recurringTransactions.sourceTransactionId,
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColor: categories.color,
@@ -1681,7 +1693,7 @@ export class DatabaseStorage implements IStorage {
 
       return updatedUser;
     } catch (error: any) {
-      console.error('Failed to update user in database:', error);
+      log.error('Failed to update user in database:', error);
       throw new Error('Failed to update user profile in database');
     }
   }
@@ -1789,7 +1801,7 @@ export class DatabaseStorage implements IStorage {
       log.info(`Successfully completed deletion of user: ${userId}`);
 
     } catch (error: any) {
-      console.error(`Error deleting user ${userId}:`, error);
+      log.error(`Error deleting user ${userId}:`, error);
       throw new Error(`Failed to delete user ${userId}: ${error.message}`);
     }
   }
@@ -3853,7 +3865,7 @@ export class DatabaseStorage implements IStorage {
       return { allowed: true };
 
     } catch (error) {
-      console.error('Error checking AI function access:', error);
+      log.error('Error checking AI function access:', error);
       return { allowed: true }; // Allow on error
     }
   }

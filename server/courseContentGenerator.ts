@@ -1,4 +1,5 @@
 import { createRoutedClient, AI_MODELS } from "../lib/aiProvider";
+import { log } from './logger';
 
 // Routed through lib/aiProvider (gpt-6-luna by default, DeepSeek/Groq fallbacks).
 const openai = createRoutedClient();
@@ -123,7 +124,7 @@ Make the content engaging with:
     const courseData = JSON.parse(response.choices[0].message.content || '{}');
     return courseData.modules as CourseModule[];
   } catch (error) {
-    console.error('Error generating course content:', error);
+    log.error('Error generating course content:', error);
     throw new Error('Failed to generate course content');
   }
 }
@@ -183,7 +184,7 @@ Make descriptions motivational and achievements feel rewarding.
     const badgeData = JSON.parse(response.choices[0].message.content || '{}');
     return badgeData.badges;
   } catch (error) {
-    console.error('Error generating badges:', error);
+    log.error('Error generating badges:', error);
     throw new Error('Failed to generate achievement badges');
   }
 }

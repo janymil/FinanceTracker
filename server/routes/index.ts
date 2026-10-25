@@ -41,6 +41,7 @@ import { registerLearningRoutes } from "./learningRoutes.js";
 import { registerVoiceRoutes } from "./voiceRoutes.js";
 import groqVoiceRoutes from "./groqVoiceRoutes.js";
 import mistralVoiceRoutes from "./mistralVoiceRoutes.js";
+import { log } from '../logger';
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -102,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error('[health] deep check failed:', error);
+      log.error('[health] deep check failed:', error);
       res.status(503).json({
         status: 'error',
         timestamp: new Date().toISOString(),

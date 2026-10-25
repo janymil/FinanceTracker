@@ -1,4 +1,5 @@
 import { log } from './logger';
+import type { BackupSettings } from '@shared/schema';
 import { storage } from './storage';
 import { bunnyStorage } from './bunnyStorage';
 import { withJobRun } from './errorGuard/jobs.js';
@@ -44,7 +45,7 @@ class BackupScheduler {
       
       log.info(`Scheduled backups for ${activeBackupUsers.length} users`);
     } catch (error) {
-      console.error('Failed to schedule active users:', error);
+      log.error('Failed to schedule active users:', error);
     }
   }
 
@@ -83,11 +84,11 @@ class BackupScheduler {
 
       log.info(`Scheduled backup for user ${userId} at ${nextBackupTime.toISOString()}`);
     } catch (error) {
-      console.error(`Failed to schedule backup for user ${userId}:`, error);
+      log.error(`Failed to schedule backup for user ${userId}:`, error);
     }
   }
 
-  private calculateNextBackupTime(settings: any): Date | null {
+  private calculateNextBackupTime(settings: BackupSettings): Date | null {
     const now = new Date();
     const lastBackup = settings.lastBackupDate ? new Date(settings.lastBackupDate) : null;
     
@@ -179,7 +180,7 @@ class BackupScheduler {
         try {
           await bunnyStorage.cleanupOldBackups(userId, settings.retentionDays);
         } catch (error) {
-          console.error(`Failed to cleanup old backups for user ${userId}:`, error);
+          log.error(`Failed to cleanup old backups for user ${userId}:`, error);
           // Don't fail the backup process if cleanup fails
         }
       }
@@ -199,7 +200,7 @@ class BackupScheduler {
       await this.scheduleUserBackup(userId);
       
     } catch (error) {
-      console.error(`Backup failed for user ${userId} (attempt ${retryCount + 1}):`, error);
+      log.error(`Backup failed for user ${userId} (attempt ${retryCount + 1}):`, error);
       
       // Update status to error
       await storage.updateBackupSettings(userId, {
@@ -212,7 +213,7 @@ class BackupScheduler {
           this.performBackup(userId, retryCount + 1);
         }, this.RETRY_DELAY);
       } else {
-        console.error(`Backup failed permanently for user ${userId} after ${this.RETRY_ATTEMPTS} attempts`);
+        log.error(`Backup failed permanently for user ${userId} after ${this.RETRY_ATTEMPTS} attempts`);
       }
     } finally {
       this.activeBackups.delete(userId);
@@ -274,7 +275,7 @@ class BackupScheduler {
         }
       }
     } catch (error) {
-      console.error('Failed to check for missed backups:', error);
+      log.error('Failed to check for missed backups:', error);
     }
   }
 

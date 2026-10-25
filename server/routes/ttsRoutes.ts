@@ -77,7 +77,7 @@ export function registerTTSRoutes(app: Router) {
       res.send(buffer);
 
     } catch (error) {
-      console.error('💥 [TTS] Error:', error);
+      log.error('💥 [TTS] Error:', error);
       
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 

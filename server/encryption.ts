@@ -1,5 +1,6 @@
 
 import crypto from 'crypto';
+import { log } from './logger';
 
 // The key is 32 bytes written as 64 hex characters. Development may fall back to a
 // throwaway key; production must never do so, because every row written with a key that
@@ -12,7 +13,7 @@ const getEncryptionKey = (): Buffer => {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('ENCRYPTION_KEY must be set to exactly 64 hex characters in production.');
     }
-    console.warn('ENCRYPTION_KEY missing or not 64 hex characters. Using a temporary key for development.');
+    log.warn('ENCRYPTION_KEY missing or not 64 hex characters. Using a temporary key for development.');
     return crypto.randomBytes(32);
   }
 
@@ -55,7 +56,7 @@ export class DataEncryption {
       return iv.toString('hex') + ':' + encrypted;
     } catch (error) {
       // Never fall back to storing the plain text of something that should be encrypted.
-      console.error('Encryption error:', error);
+      log.error('Encryption error:', error);
       throw new Error('Encryption failed');
     }
   }
@@ -112,7 +113,7 @@ export class DataEncryption {
       const now = Date.now();
       suppressedDecryptionWarnings++;
       if (now - lastDecryptionWarning > DECRYPTION_WARNING_INTERVAL_MS) {
-        console.error(
+        log.error(
           `[ENCRYPTION] ${suppressedDecryptionWarnings} value(s) could not be decrypted with the current ENCRYPTION_KEY. ` +
           'This database was encrypted with a different key - restore the original ENCRYPTION_KEY to read it.'
         );

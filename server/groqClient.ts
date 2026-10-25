@@ -3,7 +3,7 @@ import Groq from 'groq-sdk';
 import { createRoutedClient } from '../lib/aiProvider';
 
 if (!process.env.GROQ_API_KEY) {
-  console.warn('GROQ_API_KEY not set in environment variables - Groq voice features will be unavailable until configured.');
+  log.warn('GROQ_API_KEY not set in environment variables - Groq voice features will be unavailable until configured.');
 }
 
 export const groq = new Groq({
@@ -37,7 +37,7 @@ export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<stri
     log.debug('Groq STT finished', { characters: String(transcription || '').length });
     return String(transcription || '');
   } catch (error) {
-    console.error('❌ Groq STT failed:', error);
+    log.error('❌ Groq STT failed:', error);
     throw new Error(`Speech-to-text failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
@@ -202,7 +202,7 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
     return parsedTransaction;
     
   } catch (error) {
-    console.error('❌ Groq LLaMA parsing failed:', error);
+    log.error('❌ Groq LLaMA parsing failed:', error);
     throw new Error(`Transaction parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
@@ -287,7 +287,7 @@ Find the best match or decide if new category should be created.`;
     return result;
 
   } catch (error) {
-    console.error('❌ Groq category matching failed:', error);
+    log.error('❌ Groq category matching failed:', error);
     throw new Error(`Category matching failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

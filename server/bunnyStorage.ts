@@ -46,7 +46,7 @@ export class BunnyStorage {
     };
 
     if (!this.config.storageZone || !this.config.accessKey || !this.config.storagePassword) {
-      console.warn('Bunny.net credentials not configured - cloud storage features will be unavailable until configured.');
+      log.warn('Bunny.net credentials not configured - cloud storage features will be unavailable until configured.');
     }
 
     this.baseUrl = `https://la.storage.bunnycdn.com/${this.config.storageZone}`;
@@ -93,7 +93,7 @@ export class BunnyStorage {
       }
       return null;
     } catch (error) {
-      console.error(`Bunny.net request failed for ${method} ${path}:`, error);
+      log.error(`Bunny.net request failed for ${method} ${path}:`, error);
       throw error;
     }
   }
@@ -102,7 +102,7 @@ export class BunnyStorage {
     try {
       await this.makeRequest('PUT', `/${filePath}`, data, contentType);
     } catch (error) {
-      console.error(`Upload failed for ${filePath}:`, error);
+      log.error(`Upload failed for ${filePath}:`, error);
       throw error;
     }
   }
@@ -123,7 +123,7 @@ export class BunnyStorage {
       // Return raw text content for backup files
       return await response.text();
     } catch (error) {
-      console.error(`Download failed for ${filePath}:`, error);
+      log.error(`Download failed for ${filePath}:`, error);
       throw error;
     }
   }
@@ -177,7 +177,7 @@ export class BunnyStorage {
         log.info(`Directory ${path} doesn't exist yet - this is normal for new users`);
         return [];
       }
-      console.error(`Failed to list files in ${path}:`, error);
+      log.error(`Failed to list files in ${path}:`, error);
       return [];
     }
   }
@@ -193,7 +193,7 @@ export class BunnyStorage {
       await this.uploadFile(filePath, backupContent, 'application/json');
       log.info(`Backup created successfully: ${filePath}`);
     } catch (error) {
-      console.error(`Failed to create backup ${filePath}:`, error);
+      log.error(`Failed to create backup ${filePath}:`, error);
       throw error;
     }
     
@@ -251,7 +251,7 @@ export class BunnyStorage {
           await this.deleteFile(`backups/user-${userId}/${backup.ObjectName}`);
           deletedCount++;
         } catch (error) {
-          console.error(`Failed to delete old backup ${backup.ObjectName}:`, error);
+          log.error(`Failed to delete old backup ${backup.ObjectName}:`, error);
         }
       }
     }

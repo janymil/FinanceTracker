@@ -77,7 +77,7 @@ if (!sessionSecret) {
     // A guessable secret would let anyone forge an admin session cookie.
     throw new Error('SESSION_SECRET must be set in production.');
   }
-  console.error(
+  logger.error(
     '[SESSION] SESSION_SECRET is missing — falling back to an insecure development default. ' +
     'Set SESSION_SECRET in .env and restart.'
   );
@@ -105,7 +105,7 @@ if (isProduction) {
     });
     logger.info('[SESSION] Using the PostgreSQL session store.');
   } else {
-    console.error('[SESSION] No database URL available — sessions fall back to memory.');
+    logger.error('[SESSION] No database URL available — sessions fall back to memory.');
   }
 }
 
@@ -141,7 +141,7 @@ app.use(async (req, res, next) => {
   try {
     await countryBlockingMiddleware(req, res, next);
   } catch (error) {
-    console.error('Country blocking middleware error:', error);
+    logger.error('Country blocking middleware error:', error);
     next();
   }
 });
@@ -200,7 +200,7 @@ app.use((req, res, next) => {
         res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
       }
     } catch (error) {
-      console.error('Error setting security headers:', error);
+      logger.error('Error setting security headers:', error);
     }
   }
   
@@ -214,7 +214,7 @@ app.use((req, res, next) => {
         res.setHeader('X-Admin-Portal', 'Kaptia-Official');
       }
     } catch (error) {
-      console.error('Error setting admin headers:', error);
+      logger.error('Error setting admin headers:', error);
     }
   }
   
@@ -322,7 +322,7 @@ app.use((req, res, next) => {
 
     // Never crash the process for a single failed request; report and answer.
     // Error Guard takes this over from Sentry (blueprint 07): same data, ours only.
-    console.error("Unhandled route error:", err);
+    logger.error("Unhandled route error:", err);
     reportServerError(err, {
       where: 'express.errorHandler',
       route: String(req.originalUrl || '').split('?')[0],
@@ -358,7 +358,7 @@ app.use((req, res, next) => {
       try {
         const result = await verifyEmailTransport();
         if (result.status === 'failed') {
-          console.error(
+          logger.error(
             `[EMAIL] Transport verification FAILED: ${result.detail}. ` +
             'Contact form, reminders, payment notices and alerts will not be delivered.'
           );
@@ -368,10 +368,10 @@ app.use((req, res, next) => {
         } else if (result.status === 'ok') {
           log(`[EMAIL] Transport verified: ${result.detail}`);
         } else {
-          console.warn('[EMAIL] No transport configured — outgoing mail is disabled.');
+          logger.warn('[EMAIL] No transport configured — outgoing mail is disabled.');
         }
       } catch (error) {
-        console.error('[EMAIL] Transport verification crashed:', error);
+        logger.error('[EMAIL] Transport verification crashed:', error);
       }
     })();
   }, 5000);
@@ -414,12 +414,12 @@ app.use((req, res, next) => {
 })();
 
 process.on('uncaughtException', (err) => {
-  console.error('CRITICAL: Uncaught Exception:', err);
+  logger.error('CRITICAL: Uncaught Exception:', err);
   reportServerError(err, { where: 'process.uncaughtException' });
 });
 
 process.on('unhandledRejection', (reason) => {
-  console.error('CRITICAL: Unhandled Rejection:', reason);
+  logger.error('CRITICAL: Unhandled Rejection:', reason);
   reportServerError(reason, { where: 'process.unhandledRejection' });
 });
 

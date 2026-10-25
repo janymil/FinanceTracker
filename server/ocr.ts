@@ -8,6 +8,7 @@
  */
 import nodeFetch from 'node-fetch';
 import { existsSync } from 'node:fs';
+import { log } from './logger';
 
 export type OcrSource = 'mistral' | 'vision' | 'openai';
 
@@ -79,7 +80,7 @@ async function defaultVisionClient(): Promise<VisionLike | null> {
   if (cachedVisionClient !== undefined) return cachedVisionClient;
 
   if (!hasGoogleCloudConfig()) {
-    console.warn('Google Cloud Vision not configured - OCR will rely on Mistral OCR (no Vision fallback).');
+    log.warn('Google Cloud Vision not configured - OCR will rely on Mistral OCR (no Vision fallback).');
     cachedVisionClient = null;
     return cachedVisionClient;
   }
@@ -216,7 +217,7 @@ export async function performOCRDetailed(imageBuffer: Buffer, deps: OcrDeps = {}
     try {
       return { text: await runMistralOcr(imageBuffer, deps, mistralKey), source: 'mistral' };
     } catch (error) {
-      console.warn('[OCR] Mistral OCR failed, falling back to Google Vision:', (error as Error).message);
+      log.warn('[OCR] Mistral OCR failed, falling back to Google Vision:', (error as Error).message);
     }
   }
 
@@ -232,14 +233,14 @@ export async function performOCRDetailed(imageBuffer: Buffer, deps: OcrDeps = {}
 
       return { text: result?.fullTextAnnotation?.text || '', source: 'vision' };
     } catch (error) {
-      console.error('[OCR] Google Vision failed, falling back to OpenAI vision:', error);
+      log.error('[OCR] Google Vision failed, falling back to OpenAI vision:', error);
     }
   }
 
   try {
     return { text: await runOpenAiVision(imageBuffer, deps), source: 'openai' };
   } catch (error) {
-    console.error('[OCR] OpenAI vision failed:', error);
+    log.error('[OCR] OpenAI vision failed:', error);
     throw new Error(
       'OCR is unavailable right now (Mistral quota, Google Vision not configured, OpenAI failed)',
     );

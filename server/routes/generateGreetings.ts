@@ -45,7 +45,7 @@ export async function generateVoiceGreetings() {
       log.info(`✅ Generated ${lang} greeting: ${audioPath}`);
       
     } catch (error) {
-      console.error(`❌ Failed to generate ${lang} greeting:`, error);
+      log.error(`❌ Failed to generate ${lang} greeting:`, error);
     }
   }
 }

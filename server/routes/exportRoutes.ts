@@ -100,7 +100,7 @@ export function registerExportRoutes(app: Express) {
           importedCount++;
 
         } catch (error) {
-          console.error(`Error importing transaction ${i + 1}:`, error);
+          log.error(`Error importing transaction ${i + 1}:`, error);
           errors.push({
             row: i + 1,
             field: 'general',
@@ -119,7 +119,7 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Error importing transactions:", error);
+      log.error("Error importing transactions:", error);
       return res.status(500).json({ message: "Failed to import transactions" });
     }
   });
@@ -198,7 +198,7 @@ export function registerExportRoutes(app: Express) {
           categoryNames.set(category.id, category.name);
         }
       } catch (error) {
-        console.warn(
+        log.warn(
           '[PDF] Could not load category names:',
           error instanceof Error ? error.message : String(error)
         );
@@ -259,8 +259,8 @@ export function registerExportRoutes(app: Express) {
       return res.send(pdfBuffer);
 
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      log.error("Error generating PDF:", error);
+      log.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       if (error instanceof PdfProcessorError) {
         return res.status(error.statusCode).json({
           message: error.message,
@@ -472,7 +472,7 @@ export function registerExportRoutes(app: Express) {
       }
 
     } catch (error) {
-      console.error("Error exporting data:", error);
+      log.error("Error exporting data:", error);
       if (error instanceof PdfProcessorError) {
         return res.status(error.statusCode).json({ message: error.message, details: error.details });
       }
@@ -545,8 +545,8 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error: any) {
-      console.error("BACKUP ERROR: Error creating backup:", error);
-      console.error("BACKUP ERROR: Error details:", error.message);
+      log.error("BACKUP ERROR: Error creating backup:", error);
+      log.error("BACKUP ERROR: Error details:", error.message);
       return res.status(500).json({ message: "Failed to create backup", error: error.message });
     }
   });
@@ -614,7 +614,7 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Error getting backup status:", error);
+      log.error("Error getting backup status:", error);
       return res.status(500).json({ message: "Failed to get backup status" });
     }
   });
@@ -653,7 +653,7 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Error getting available backups:", error);
+      log.error("Error getting available backups:", error);
       return res.status(500).json({ message: "Failed to get available backups" });
     }
   });
@@ -674,7 +674,7 @@ export function registerExportRoutes(app: Express) {
       return res.json({ success: true, message: "Backup settings updated" });
 
     } catch (error) {
-      console.error("Error updating backup settings:", error);
+      log.error("Error updating backup settings:", error);
       return res.status(500).json({ message: "Failed to update backup settings" });
     }
   });
@@ -779,7 +779,7 @@ export function registerExportRoutes(app: Express) {
           restoredData.goals++;
         }
       } catch (restoreError) {
-        console.error('Restore failed part-way; putting the previous data back:', restoreError);
+        log.error('Restore failed part-way; putting the previous data back:', restoreError);
         try {
           for (const t of await storage.getUserTransactions(userId)) await storage.deleteTransaction(t.id, userId);
           for (const b of await storage.getUserBudgets(userId)) await storage.deleteBudget(b.id, userId);
@@ -788,7 +788,7 @@ export function registerExportRoutes(app: Express) {
           for (const row of oldBudgets) await storage.createBudget(stripForReinsert(row));
           for (const row of oldGoals) await storage.createGoal(stripForReinsert(row));
         } catch (rollbackError) {
-          console.error('RESTORE ROLLBACK FAILED:', rollbackError);
+          log.error('RESTORE ROLLBACK FAILED:', rollbackError);
         }
         return res.status(500).json({ message: "Failed to restore backup. Your previous data was kept." });
       }
@@ -802,7 +802,7 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error: any) {
-      console.error("RESTORE ERROR: Error restoring backup:", error);
+      log.error("RESTORE ERROR: Error restoring backup:", error);
       return res.status(500).json({ message: "Failed to restore backup" });
     }
   });

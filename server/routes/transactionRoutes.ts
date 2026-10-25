@@ -170,7 +170,7 @@ export function registerTransactionRoutes(app: Express) {
               
               log.info('📚 Voice learning recorded for transaction:', transaction.id);
             } catch (error) {
-              console.error('Voice learning error:', error);
+              log.error('Voice learning error:', error);
             }
           }
 
@@ -181,7 +181,7 @@ export function registerTransactionRoutes(app: Express) {
               log.info(`Auto-categorized transaction ${transaction.id} (confidence ${outcome.confidence.toFixed(2)})`);
             }
           } catch (error) {
-            console.error('Auto-categorization error:', error);
+            log.error('Auto-categorization error:', error);
           }
 
           // Schedule this user for batch processing
@@ -189,13 +189,13 @@ export function registerTransactionRoutes(app: Express) {
 
           log.info('Background processing completed for transaction:', transaction.id);
         } catch (error) {
-          console.error('Background processing error:', error);
+          log.error('Background processing error:', error);
           // Don't affect the user experience even if background processing fails
         }
       });
 
     } catch (error) {
-      console.error("Error creating transaction:", error);
+      log.error("Error creating transaction:", error);
       res.status(400).json({ message: "Failed to create transaction" });
     }
   });
@@ -230,7 +230,7 @@ export function registerTransactionRoutes(app: Express) {
 
       res.json(translatedTransactions);
     } catch (error) {
-      console.error("Error fetching transactions:", error);
+      log.error("Error fetching transactions:", error);
       res.status(500).json({ message: "Failed to fetch transactions" });
     }
   });
@@ -320,7 +320,7 @@ export function registerTransactionRoutes(app: Express) {
       if (error instanceof Error && error.message === 'Transaction not found') {
         return res.status(404).json({ message: "Transaction not found" });
       }
-      console.error("Error updating transaction:", error);
+      log.error("Error updating transaction:", error);
       return res.status(400).json({ message: "Failed to update transaction" });
     }
   });
@@ -341,7 +341,7 @@ export function registerTransactionRoutes(app: Express) {
       notifyDataChange(userId, 'transaction');
       return res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting transaction:", error);
+      log.error("Error deleting transaction:", error);
       return res.status(500).json({ message: "Failed to delete transaction" });
     }
   });
@@ -362,7 +362,7 @@ export function registerTransactionRoutes(app: Express) {
       const recurringTransactions = await storage.getUserRecurringTransactions(userId);
       res.json(recurringTransactions);
     } catch (error) {
-      console.error("Error fetching recurring transactions:", error);
+      log.error("Error fetching recurring transactions:", error);
       res.status(500).json({ message: "Failed to fetch recurring transactions" });
     }
   });
@@ -386,7 +386,7 @@ export function registerTransactionRoutes(app: Express) {
       notifyDataChange(userId, 'transaction');
       return res.json({ success: true });
     } catch (error) {
-      console.error("Error stopping recurring rule:", error);
+      log.error("Error stopping recurring rule:", error);
       return res.status(500).json({ message: "Failed to stop the recurring rule" });
     }
   });
@@ -431,7 +431,7 @@ export function registerTransactionRoutes(app: Express) {
 
       res.json(translatedSummary);
     } catch (error) {
-      console.error("Error fetching financial summary:", error);
+      log.error("Error fetching financial summary:", error);
       res.status(500).json({ message: "Failed to fetch financial summary" });
     }
   });
@@ -469,7 +469,7 @@ export function registerTransactionRoutes(app: Express) {
         totalExpenses: summary.totalExpenses
       });
     } catch (error) {
-      console.error("Error fetching expense breakdown:", error);
+      log.error("Error fetching expense breakdown:", error);
       res.status(500).json({ message: "Failed to fetch expense breakdown" });
     }
   });
@@ -484,7 +484,7 @@ export function registerTransactionRoutes(app: Express) {
         const auth = req.auth();
         userId = auth?.userId || null;
       } catch (authError) {
-        console.error('Authentication error:', authError);
+        log.error('Authentication error:', authError);
         return res.status(401).json({ message: "Authentication required" });
       }
       
@@ -511,7 +511,7 @@ export function registerTransactionRoutes(app: Express) {
       
       res.json(translatedReminders);
     } catch (error) {
-      console.error("Error fetching transaction reminders:", error);
+      log.error("Error fetching transaction reminders:", error);
       res.status(500).json({ message: "Failed to fetch transaction reminders" });
     }
   });

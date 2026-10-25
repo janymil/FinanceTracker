@@ -16,7 +16,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_ROLE = 'admin';
 
 if (!ADMIN_PASSWORD) {
-  console.warn('ADMIN_PASSWORD environment variable is not set - legacy admin login will be disabled until configured.');
+  log.warn('ADMIN_PASSWORD environment variable is not set - legacy admin login will be disabled until configured.');
 }
 
 interface AdminRequest extends Request {
@@ -93,7 +93,7 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   }
 
   if (!ADMIN_PASSWORD || !passwordMatches(password, ADMIN_PASSWORD)) {
-    console.warn('Invalid admin login attempt');
+    log.warn('Invalid admin login attempt');
     return res.status(401).json({ message: 'Invalid admin password' });
   }
 
@@ -106,7 +106,7 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   if (typeof req.session?.regenerate === 'function') {
     return req.session.regenerate((error: unknown) => {
       if (error) {
-        console.error('Admin session regenerate failed:', error);
+        log.error('Admin session regenerate failed:', error);
         return res.status(500).json({ message: 'Login failed' });
       }
       return markAuthenticated();

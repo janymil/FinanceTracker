@@ -7,6 +7,7 @@ import {
   type LegacyExtractedReceipt,
   type ReceiptExtractionDraft,
 } from '../shared/receiptExtraction';
+import { log } from './logger';
 
 /**
  * IMPURE half of receipt extraction: the only place that talks to a model.
@@ -49,7 +50,7 @@ export async function extractReceiptWithAI(ocrText: string): Promise<ReceiptExtr
 
     return normalizeReceiptExtraction(parsed, meta);
   } catch (error) {
-    console.error('Receipt extraction error:', error);
+    log.error('Receipt extraction error:', error);
     return {
       amountInCents: null,
       date: null,

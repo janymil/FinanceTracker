@@ -60,7 +60,7 @@ export function registerMobileUploadRoutes(app: any) {
 
       return res.json({ sessionId });
     } catch (error) {
-      console.error('Session creation error:', error);
+      log.error('Session creation error:', error);
       return res.status(500).json({ error: 'Failed to create session' });
     }
   });
@@ -183,7 +183,7 @@ export function registerMobileUploadRoutes(app: any) {
             if (!categorization.failed) predictedCategory = categorization.category;
             log.info('AI categorization completed');
           } catch (categoryError) {
-            console.error('AI categorization failed:', categoryError);
+            log.error('AI categorization failed:', categoryError);
           }
         }
 
@@ -198,7 +198,7 @@ export function registerMobileUploadRoutes(app: any) {
             imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
             log.info('Image upload to Bunny.net completed');
           } catch (uploadError) {
-            console.error('Upload to Bunny.net failed:', uploadError);
+            log.error('Upload to Bunny.net failed:', uploadError);
           }
         }
 
@@ -219,7 +219,7 @@ export function registerMobileUploadRoutes(app: any) {
         log.info('Direct OCR processing completed successfully');
         
       } catch (error) {
-        console.error('Direct OCR processing failed:', error);
+        log.error('Direct OCR processing failed:', error);
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
@@ -251,7 +251,7 @@ export function registerMobileUploadRoutes(app: any) {
         message: 'Receipt processed successfully' 
       });
     } catch (error) {
-      console.error('Mobile upload error:', error);
+      log.error('Mobile upload error:', error);
       return res.status(500).json({ error: 'Upload failed' });
     }
   });
@@ -289,7 +289,7 @@ export function registerMobileUploadRoutes(app: any) {
           error: session.error || null,
         });
       } catch (error) {
-        console.error('Status check error:', error);
+        log.error('Status check error:', error);
         return res.status(500).json({ error: 'Status check failed' });
       }
     }

@@ -114,7 +114,7 @@ export const uploadReceiptHandler = [
         detectedWords = anonymized.detectedWords;
         log.info(`[Receipt] OCR image prepared: ${anonymized.maskedLines}/${anonymized.detectedLines} identifying lines masked`);
       } catch (error) {
-        console.warn('[Receipt] Could not prepare the image for OCR:', (error as Error).message);
+        log.warn('[Receipt] Could not prepare the image for OCR:', (error as Error).message);
         return res.status(422).json({
           error: 'This image format could not be read. Please use a JPEG, PNG or WebP photo.',
           code: 'ocr_unsupported',
@@ -154,7 +154,7 @@ export const uploadReceiptHandler = [
           language: 'en-us',
         });
       } catch (error) {
-        console.warn('[Receipt] Could not record AI usage:', (error as Error).message);
+        log.warn('[Receipt] Could not record AI usage:', (error as Error).message);
       }
 
       // Money invariant (blueprint 07 §18): a draft with a non-positive amount, a future
@@ -190,7 +190,7 @@ export const uploadReceiptHandler = [
             route: '/api/upload-receipt',
             moneyPath: true,
           });
-          console.error('AI categorization failed:', categoryError);
+          log.error('AI categorization failed:', categoryError);
           // Continue without categorization
         }
       }
@@ -211,7 +211,7 @@ export const uploadReceiptHandler = [
             fallback: 'no imageUrl',
             route: '/api/upload-receipt',
           });
-          console.error('Upload to Cloud Storage failed:', uploadError);
+          log.error('Upload to Cloud Storage failed:', uploadError);
           // Continue without storing the image, but still return OCR results
         }
       }
@@ -233,7 +233,7 @@ export const uploadReceiptHandler = [
       return res.json(response);
 
     } catch (error) {
-      console.error('Receipt upload error:', error);
+      log.error('Receipt upload error:', error);
       
       if (error instanceof multer.MulterError) {
         if (error.code === 'LIMIT_FILE_SIZE') {

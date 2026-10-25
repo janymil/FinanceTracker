@@ -15,6 +15,7 @@ import {
   parseModelJson,
   validCategoryId,
 } from "../shared/aiResults";
+import { log } from './logger';
 
 // All model calls go through lib/aiProvider: the ai-processor gateway first, then OpenAI
 // directly (DeepSeek/Groq behind it), with JSON fence stripping and real token/cost accounting.
@@ -270,7 +271,7 @@ Analyze this income transaction:`
 
     return toCategoryChoice(parseModelJson(response.choices[0].message.content), userCategories);
   } catch (error) {
-    console.error('Error categorizing income with user categories:', error);
+    log.error('Error categorizing income with user categories:', error);
     return {
       suggestedCategory: 'Income',
       confidence: 0.1,
@@ -391,7 +392,7 @@ Analyze this transaction and provide consistent categorization:`
 
     return toCategoryChoice(parseModelJson(response.choices[0].message.content), userCategories);
   } catch (error) {
-    console.error('Error categorizing expense with user categories:', error);
+    log.error('Error categorizing expense with user categories:', error);
     return {
       suggestedCategory: 'Other',
       confidence: 0.1,
@@ -525,7 +526,7 @@ Use your intelligence to categorize correctly.`
       reasoning: typeof result.reasoning === 'string' && result.reasoning ? result.reasoning : 'Unable to determine category'
     };
   } catch (error) {
-    console.error('Error categorizing expense (fallback):', error);
+    log.error('Error categorizing expense (fallback):', error);
     return {
       category: 'Other',
       confidence: 0.1,
@@ -679,7 +680,7 @@ Return comprehensive analysis in JSON:
     const processedTips: FinancialTip[] = rawTips.map((tip) => {
       const inLanguage = isTextInLanguage(`${tip.title} ${tip.description}`, normalizedLanguage);
       if (!inLanguage) {
-        console.warn(
+        log.warn(
           `[AI] Replacing tips written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
         );
         cacheable = false;
@@ -693,7 +694,7 @@ Return comprehensive analysis in JSON:
     
     return processedTips;
   } catch (error) {
-    console.error('Error generating financial tips:', error);
+    log.error('Error generating financial tips:', error);
     // Deterministic fallback, in the caller's language — never English on a Slovak screen.
     return [financialTipsFallback(normalizedLanguage)];
   }
@@ -822,7 +823,7 @@ Generate financial insights based on this spending data.`
     return processedInsights;
   } catch (error) {
     // A provider failure is not "no insights": let the caller report it and cache nothing.
-    console.error('Error generating spending insights:', error);
+    log.error('Error generating spending insights:', error);
     throw error;
   }
 }
@@ -987,7 +988,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
     return processedResult;
   } catch (error) {
     // No invented "score 50": the caller reports the failure and nothing is cached.
-    console.error('Error generating AI financial health score:', error);
+    log.error('Error generating AI financial health score:', error);
     throw error;
   }
 }
@@ -1148,7 +1149,7 @@ You are an advanced financial forecasting AI that analyzes spending patterns and
 
   } catch (error) {
     // A provider failure is not "an empty forecast": let the caller report it and cache nothing.
-    console.error('Error generating trend predictions:', error);
+    log.error('Error generating trend predictions:', error);
     throw error;
   }
 }
@@ -1390,7 +1391,7 @@ You are an advanced financial forecasting AI specializing in expense prediction 
 
   } catch (error) {
     // A provider failure is not "no predictions": let the caller report it and cache nothing.
-    console.error('Error generating expense predictions:', error);
+    log.error('Error generating expense predictions:', error);
     throw error;
   }
 }
@@ -1588,7 +1589,7 @@ You are an expert financial advisor who provides personalized, actionable recomm
 
   } catch (error) {
     // A provider failure is not "no recommendations": let the caller report it and cache nothing.
-    console.error('Error generating daily recommendations:', error);
+    log.error('Error generating daily recommendations:', error);
     throw error;
   }
 }
@@ -1898,7 +1899,7 @@ You are an expert financial advisor who provides personalized, contextual recomm
           tip.description &&
           isTextInLanguage(`${tip.title} ${tip.description}`, normalizedLanguage);
         if (!ok) {
-          console.warn(
+          log.warn(
             `[AI] Dropping a contextual tip written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
           );
         }
@@ -1917,7 +1918,7 @@ You are an expert financial advisor who provides personalized, contextual recomm
     return { tips };
 
   } catch (error) {
-    console.error('Error generating contextual financial tips (local fallback):', error);
+    log.error('Error generating contextual financial tips (local fallback):', error);
     type ContextualTip = {
       id: string;
       title: string;
@@ -1937,7 +1938,7 @@ You are an expert financial advisor who provides personalized, contextual recomm
     try {
       await cache.set(data, fallbackResult, true, 72);
     } catch (cacheError) {
-      console.error('Failed to cache fallback result:', cacheError);
+      log.error('Failed to cache fallback result:', cacheError);
     }
     
     return fallbackResult;
@@ -2113,7 +2114,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
     
     return healthData;
   } catch (error) {
-    console.error('Error generating financial health score:', error);
+    log.error('Error generating financial health score:', error);
     
     // Return fallback data based on simple calculations
     const { summary } = financialData;
@@ -2187,7 +2188,7 @@ CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)
 
     return response.choices[0]?.message?.content || '';
   } catch (error) {
-    console.error('Voice extraction error (openai.ts fallback):', error);
+    log.error('Voice extraction error (openai.ts fallback):', error);
     throw new Error('Failed to extract voice transaction data');
   }
 }
@@ -2274,7 +2275,7 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
     return { transactions: [] };
 
   } catch (error) {
-    console.error('Bank statement parsing error (server fallback):', error);
+    log.error('Bank statement parsing error (server fallback):', error);
     throw new Error('Failed to parse bank statement transactions');
   }
 }

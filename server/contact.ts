@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as nodemailer from 'nodemailer';
+import { log } from './logger';
 
 export async function handleContactForm(req: Request, res: Response) {
   // No need for req.method check since this is already a POST route
@@ -37,10 +38,10 @@ export async function handleContactForm(req: Request, res: Response) {
     return res.json({ success: true });
   } catch (error) {
     if (!res.headersSent) {
-      console.error('Contact form error:', error);
+      log.error('Contact form error:', error);
       return res.status(500).json({ success: false, error: 'Failed to send message' });
     } else {
-      console.error('Headers already sent. Contact form error:', error);
+      log.error('Headers already sent. Contact form error:', error);
     }
   }
 }

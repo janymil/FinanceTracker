@@ -7,6 +7,15 @@
  *
  *   npm run check:logging
  *
+ * All five levels are covered. `error` and `warn` were exempt until 2026-10-25, which is why the
+ * check used to report nothing while 321 `console.error`/`console.warn` calls lived in server
+ * code: they bypassed the scrubber in `logger.ts`, so a stack trace could carry a person's email
+ * or a card number into pm2. They were converted first, then the rule was tightened — tightening
+ * it first would have blocked every deploy, since this check gates `scripts/deploy.sh`.
+ *
+ * `server/logger.ts` is the only exemption: it is the sink, and it prints through `console.*` on
+ * purpose (pm2 already timestamps and rotates its output).
+ *
  * Exit code 0 = no direct console calls; 1 = the offending file and line are printed.
  */
 import fs from 'node:fs';
@@ -14,7 +23,7 @@ import path from 'node:path';
 
 const SERVER_DIR = path.resolve(process.cwd(), 'server');
 const LOGGER_FILE = path.join(SERVER_DIR, 'logger.ts');
-const FORBIDDEN = /console\.(log|info|debug)\s*\(/;
+const FORBIDDEN = /console\.(log|info|debug|warn|error)\s*\(/;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

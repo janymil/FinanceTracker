@@ -11,6 +11,7 @@
  */
 import { reportSwallowed } from './report';
 import { recordJobRun } from './store';
+import { log } from '../logger';
 
 export async function withJobRun(jobName: string, fn: () => Promise<unknown>): Promise<void> {
   const startedAt = new Date();
@@ -26,7 +27,7 @@ export async function withJobRun(jobName: string, fn: () => Promise<unknown>): P
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     reportSwallowed(error, { where: `job.${jobName}`, fallback: 'job aborted' });
-    console.error(`[errorGuard] job ${jobName} failed:`, message.slice(0, 200));
+    log.error(`[errorGuard] job ${jobName} failed:`, message.slice(0, 200));
     await recordJobRun({
       jobName,
       status: 'failed',

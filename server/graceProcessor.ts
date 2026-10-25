@@ -45,7 +45,7 @@ class GraceProcessor {
 
           log.info(`Successfully downgraded user ${user.id}`);
         } catch (error) {
-          console.error(`Error downgrading user ${user.id}:`, error);
+          log.error(`Error downgrading user ${user.id}:`, error);
         }
       }
 
@@ -84,13 +84,13 @@ class GraceProcessor {
             }
           }
         } catch (error) {
-          console.error(`Error processing grace warning for user ${user.id}:`, error);
+          log.error(`Error processing grace warning for user ${user.id}:`, error);
         }
       }
 
       log.info('Grace period processing completed');
     } catch (error) {
-      console.error('Error in grace period processor:', error);
+      log.error('Error in grace period processor:', error);
     } finally {
       this.isRunning = false;
     }

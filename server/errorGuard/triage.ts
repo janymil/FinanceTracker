@@ -21,6 +21,7 @@ import {
 } from '@shared/errorGuard/triage';
 import { getGroup, getSamples, saveAnalysis, setAIStatus } from './store';
 import { runTriageModel } from './triagePrompt';
+import { log } from '../logger';
 
 const PROCESSOR_COOLDOWN_MS = Number(process.env.ERROR_GUARD_AI_COOLDOWN_MS) || 300_000;
 const DAILY_BUDGET = Number(process.env.ERROR_GUARD_AI_BUDGET) || 25;
@@ -111,7 +112,7 @@ export async function analyzeGroup(groupId: string): Promise<TriageOutcome> {
     if (!parsed) {
       await setAIStatus(groupId, 'failed').catch(() => undefined);
       // Log the group id, never the payload: it is derived from user-facing text.
-      console.warn(`[errorGuard] model returned an unusable shape for group ${groupId}`);
+      log.warn(`[errorGuard] model returned an unusable shape for group ${groupId}`);
       return { ok: false, reason: 'invalid' };
     }
 
@@ -126,7 +127,7 @@ export async function analyzeGroup(groupId: string): Promise<TriageOutcome> {
     if (!status || status >= 500) processorDownUntil = Date.now() + PROCESSOR_COOLDOWN_MS;
 
     await setAIStatus(groupId, 'failed').catch(() => undefined);
-    console.warn(
+    log.warn(
       `[errorGuard] triage failed for group ${groupId}:`,
       error instanceof Error ? error.message.slice(0, 160) : 'unknown',
     );

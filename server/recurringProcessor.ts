@@ -80,7 +80,7 @@ export async function processRecurringTransactions(now: Date = new Date()): Prom
       created += due.length;
       touchedUsers.add(rule.userId);
     } catch (error) {
-      console.error(
+      log.error(
         `[recurring] could not create transactions for rule ${rule.id}:`,
         error instanceof Error ? error.message : error
       );

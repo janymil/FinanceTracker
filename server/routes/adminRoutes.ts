@@ -50,7 +50,7 @@ export function registerAdminRoutes(app: Express) {
       log.info(`Admin analytics - Fetched ${usersWithPaymentData.length} users with payment data`);
       return res.json(usersWithPaymentData);
     } catch (error) {
-      console.error("Error fetching users with payment data for admin:", error);
+      log.error("Error fetching users with payment data for admin:", error);
       return res.status(500).json({ message: "Failed to fetch users with payment data" });
     }
   });
@@ -68,7 +68,7 @@ export function registerAdminRoutes(app: Express) {
       }));
       return res.json(stats);
     } catch (error) {
-      console.error("Error fetching user stats for admin:", error);
+      log.error("Error fetching user stats for admin:", error);
       return res.status(500).json({ message: "Failed to fetch user stats" });
     }
   });
@@ -109,7 +109,7 @@ export function registerAdminRoutes(app: Express) {
             log.info(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
           }
         } catch (userError: any) {
-          console.error(`Failed to sync user ${user.id}:`, userError);
+          log.error(`Failed to sync user ${user.id}:`, userError);
           errors.push({ userId: user.id, error: userError.message });
         }
       }
@@ -122,7 +122,7 @@ export function registerAdminRoutes(app: Express) {
         details: errors
       });
     } catch (error: any) {
-      console.error("Error syncing users with Clerk:", error);
+      log.error("Error syncing users with Clerk:", error);
       return res.status(500).json({ 
         success: false, 
         message: "Failed to sync users with Clerk",
@@ -152,7 +152,7 @@ export function registerAdminRoutes(app: Express) {
         }
       });
     } catch (error) {
-      console.error("Error updating user plan:", error);
+      log.error("Error updating user plan:", error);
       return res.status(500).json({ message: "Failed to update user plan" });
     }
   });
@@ -173,7 +173,7 @@ export function registerAdminRoutes(app: Express) {
       };
       return res.json(overview);
     } catch (error) {
-      console.error("Error fetching system overview for admin:", error);
+      log.error("Error fetching system overview for admin:", error);
       return res.status(500).json({ message: "Failed to fetch system overview" });
     }
   });
@@ -201,7 +201,7 @@ export function registerAdminRoutes(app: Express) {
         user: updatedUser
       });
     } catch (error) {
-      console.error("Error updating user:", error);
+      log.error("Error updating user:", error);
       return res.status(500).json({ message: "Failed to update user" });
     }
   });
@@ -231,7 +231,7 @@ export function registerAdminRoutes(app: Express) {
         message: "User deleted successfully"
       });
     } catch (error: any) {
-      console.error("Error deleting user:", error);
+      log.error("Error deleting user:", error);
       return res.status(500).json({ 
         success: false, 
         message: error.message || "Failed to delete user" 
@@ -249,7 +249,7 @@ export function registerAdminRoutes(app: Express) {
       }, {} as Record<string, number>);
       return res.json(planStats);
     } catch (error) {
-      console.error("Error fetching plan stats for admin:", error);
+      log.error("Error fetching plan stats for admin:", error);
       return res.status(500).json({ message: "Failed to fetch plan stats" });
     }
   });
@@ -291,7 +291,7 @@ export function registerAdminRoutes(app: Express) {
         functionStats
       });
     } catch (error) {
-      console.error("Error fetching AI cache global stats:", error);
+      log.error("Error fetching AI cache global stats:", error);
       return res.status(500).json({ message: "Failed to fetch AI cache stats" });
     }
   });
@@ -347,7 +347,7 @@ export function registerAdminRoutes(app: Express) {
 
       return res.json(result);
     } catch (error) {
-      console.error("Error fetching AI cache function stats:", error);
+      log.error("Error fetching AI cache function stats:", error);
       return res.status(500).json({ message: "Failed to fetch AI cache function stats" });
     }
   });
@@ -401,7 +401,7 @@ export function registerAdminRoutes(app: Express) {
 
       return res.json(result);
     } catch (error) {
-      console.error("Error fetching AI cache user stats:", error);
+      log.error("Error fetching AI cache user stats:", error);
       return res.status(500).json({ message: "Failed to fetch AI cache user stats" });
     }
   });
@@ -421,7 +421,7 @@ export function registerAdminRoutes(app: Express) {
         message: `Cleared ${deletedCount} cache entries for function ${functionKey}` 
       });
     } catch (error) {
-      console.error("Error clearing AI cache by function:", error);
+      log.error("Error clearing AI cache by function:", error);
       return res.status(500).json({ message: "Failed to clear cache by function" });
     }
   });
@@ -441,7 +441,7 @@ export function registerAdminRoutes(app: Express) {
         message: `Cleared ${deletedCount} cache entries for user ${userId}` 
       });
     } catch (error) {
-      console.error("Error clearing AI cache by user:", error);
+      log.error("Error clearing AI cache by user:", error);
       return res.status(500).json({ message: "Failed to clear cache by user" });
     }
   });
@@ -460,7 +460,7 @@ export function registerAdminRoutes(app: Express) {
         message: `Cleaned up ${deletedCount} expired cache entries` 
       });
     } catch (error) {
-      console.error("Error cleaning up expired cache:", error);
+      log.error("Error cleaning up expired cache:", error);
       return res.status(500).json({ message: "Failed to clean up expired cache" });
     }
   });
@@ -481,7 +481,7 @@ export function registerAdminRoutes(app: Express) {
       
       return res.json(defaultTTLConfig);
     } catch (error) {
-      console.error("Error fetching TTL config:", error);
+      log.error("Error fetching TTL config:", error);
       return res.status(500).json({ message: "Failed to fetch TTL configuration" });
     }
   });
@@ -494,7 +494,7 @@ export function registerAdminRoutes(app: Express) {
       const stats = await storage.getAIUsageByFunction();
       return res.json(stats);
     } catch (error) {
-      console.error("Error fetching AI function stats:", error);
+      log.error("Error fetching AI function stats:", error);
       return res.status(500).json({ message: "Failed to fetch AI function statistics" });
     }
   });
@@ -505,7 +505,7 @@ export function registerAdminRoutes(app: Express) {
       const stats = await storage.getAIUsageByUser();
       return res.json(stats);
     } catch (error) {
-      console.error("Error fetching AI user stats:", error);
+      log.error("Error fetching AI user stats:", error);
       return res.status(500).json({ message: "Failed to fetch AI user statistics" });
     }
   });
@@ -541,7 +541,7 @@ export function registerAdminRoutes(app: Express) {
         totalUsers: users.length
       });
     } catch (error) {
-      console.error("Error fetching global AI stats:", error);
+      log.error("Error fetching global AI stats:", error);
       return res.status(500).json({ message: "Failed to fetch global AI statistics" });
     }
   });
@@ -629,7 +629,7 @@ export function registerAdminRoutes(app: Express) {
         topUsers,
       });
     } catch (error) {
-      console.error("Error fetching AI quota stats:", error);
+      log.error("Error fetching AI quota stats:", error);
       return res.status(500).json({ message: "Failed to fetch AI quota statistics" });
     }
   });
@@ -640,7 +640,7 @@ export function registerAdminRoutes(app: Express) {
       const limits = await storage.getAllAIUsageLimits();
       return res.json(limits);
     } catch (error) {
-      console.error("Error fetching AI usage limits:", error);
+      log.error("Error fetching AI usage limits:", error);
       return res.status(500).json({ message: "Failed to fetch AI usage limits" });
     }
   });
@@ -670,7 +670,7 @@ export function registerAdminRoutes(app: Express) {
 
       return res.json({ success: true, limit });
     } catch (error) {
-      console.error("Error setting AI usage limit:", error);
+      log.error("Error setting AI usage limit:", error);
       return res.status(500).json({ message: "Failed to set AI usage limit" });
     }
   });
@@ -692,7 +692,7 @@ export function registerAdminRoutes(app: Express) {
 
       return res.json(overridesWithUsers);
     } catch (error) {
-      console.error("Error fetching AI user overrides:", error);
+      log.error("Error fetching AI user overrides:", error);
       return res.status(500).json({ message: "Failed to fetch AI user overrides" });
     }
   });
@@ -723,7 +723,7 @@ export function registerAdminRoutes(app: Express) {
 
       return res.json({ success: true, override });
     } catch (error) {
-      console.error("Error setting AI user override:", error);
+      log.error("Error setting AI user override:", error);
       return res.status(500).json({ message: "Failed to set AI user override" });
     }
   });
@@ -737,7 +737,7 @@ export function registerAdminRoutes(app: Express) {
       
       return res.json({ success: true, message: "User override deleted successfully" });
     } catch (error) {
-      console.error("Error deleting AI user override:", error);
+      log.error("Error deleting AI user override:", error);
       return res.status(500).json({ message: "Failed to delete AI user override" });
     }
   });
@@ -753,7 +753,7 @@ export function registerAdminRoutes(app: Express) {
 
       res.json({ countries });
     } catch (error) {
-      console.error("Error fetching blocked countries:", error);
+      log.error("Error fetching blocked countries:", error);
       res.status(500).json({ error: "Failed to fetch blocked countries" });
     }
   });
@@ -790,7 +790,7 @@ export function registerAdminRoutes(app: Express) {
 
       res.json({ country: newCountry });
     } catch (error) {
-      console.error("Error adding blocked country:", error);
+      log.error("Error adding blocked country:", error);
       res.status(500).json({ error: "Failed to add blocked country" });
     }
   });
@@ -812,7 +812,7 @@ export function registerAdminRoutes(app: Express) {
 
       res.json({ success: true });
     } catch (error) {
-      console.error("Error removing blocked country:", error);
+      log.error("Error removing blocked country:", error);
       res.status(500).json({ error: "Failed to remove blocked country" });
     }
   });

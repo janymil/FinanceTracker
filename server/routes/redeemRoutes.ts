@@ -37,7 +37,7 @@ export function registerRedeemRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Get my codes error:", error);
+      log.error("Get my codes error:", error);
       return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"
@@ -64,7 +64,7 @@ export function registerRedeemRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Get redeem status error:", error);
+      log.error("Get redeem status error:", error);
       return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"
@@ -194,7 +194,7 @@ export function registerRedeemRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Redeem codes error:", error);
+      log.error("Redeem codes error:", error);
       return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"

@@ -71,7 +71,7 @@ export function createClerkWebhookHandler(deps: WebhookDeps = defaultDeps) {
     try {
       const secret = process.env.CLERK_WEBHOOK_SECRET;
       if (!secret) {
-        console.error('CLERK_WEBHOOK_SECRET is not configured; refusing the Clerk webhook');
+        log.error('CLERK_WEBHOOK_SECRET is not configured; refusing the Clerk webhook');
         return reply(503, { error: 'Webhook secret not configured' });
       }
 
@@ -90,7 +90,7 @@ export function createClerkWebhookHandler(deps: WebhookDeps = defaultDeps) {
       try {
         event = await deps.verify(req.body, { 'svix-id': id, 'svix-timestamp': timestamp, 'svix-signature': signature }, secret);
       } catch (error) {
-        console.error('Webhook verification failed:', (error as Error).message);
+        log.error('Webhook verification failed:', (error as Error).message);
         return reply(400, { error: 'Webhook verification failed' });
       }
 
@@ -123,7 +123,7 @@ export function createClerkWebhookHandler(deps: WebhookDeps = defaultDeps) {
       log.info(`Clerk webhook ${type} for ${data.id}: ${outcome}`);
       return reply(200, { received: true, outcome });
     } catch (error) {
-      console.error('Clerk webhook error:', error);
+      log.error('Clerk webhook error:', error);
       return reply(500, { error: 'Internal server error' });
     }
   };

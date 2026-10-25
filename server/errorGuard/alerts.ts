@@ -11,6 +11,7 @@
  */
 import { isEmailConfigured, sendEmail } from '../emailService';
 import type { GroupSnapshot } from './store';
+import { log } from '../logger';
 
 const MIN_GAP_MS = Number(process.env.ERROR_GUARD_ALERT_MIN_GAP_MS) || 600_000;
 const MAX_PER_DAY = Number(process.env.ERROR_GUARD_ALERT_MAX_PER_DAY) || 8;
@@ -106,7 +107,7 @@ export async function notifyCriticalProblems(groups: GroupSnapshot[], now = Date
     }
   } catch (error) {
     // An alerting failure must never affect the app or the tracker.
-    console.warn(
+    log.warn(
       '[errorGuard] alert e-mail failed:',
       error instanceof Error ? error.message.slice(0, 160) : 'unknown',
     );

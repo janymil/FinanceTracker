@@ -6,6 +6,7 @@ import { db } from "./db";
 import { complaints } from "../shared/schema";
 import { sendEmail } from "./emailService";
 import { rateLimit } from "./middleware/rateLimit";
+import { log } from './logger';
 
 const SUPPORT_ADDRESS = "info@kaptia.app";
 const RESPONSE_DAYS = 30;
@@ -121,7 +122,7 @@ export function registerComplaintRoutes(app: Express) {
 
         return res.status(201).json({ success: true, code, copySent });
       } catch (error) {
-        console.error("Complaint registration failed:", error instanceof Error ? error.message : error);
+        log.error("Complaint registration failed:", error instanceof Error ? error.message : error);
         return res.status(500).json({ success: false, error: "Could not register the complaint" });
       }
     }

@@ -5,6 +5,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage, translateCategoryName } from "../categoryTranslations";
 import { cleanPositiveAmount, cleanDateValue, cleanId } from "@shared/trackingInput";
+import { log } from '../logger';
 
 const BUDGET_PERIODS = ['weekly', 'monthly', 'quarterly', 'yearly', 'custom'];
 
@@ -62,7 +63,7 @@ export function registerBudgetRoutes(app: Express) {
       notifyDataChange(userId, 'budget');
       return res.json(budget);
     } catch (error) {
-      console.error("Error creating budget:", error);
+      log.error("Error creating budget:", error);
       return res.status(400).json({ message: "Failed to create budget" });
     }
   });
@@ -130,7 +131,7 @@ export function registerBudgetRoutes(app: Express) {
       notifyDataChange(userId, 'budget');
       return res.json(budget);
     } catch (error) {
-      console.error("Error updating budget:", error);
+      log.error("Error updating budget:", error);
       return res.status(400).json({ message: "Failed to update budget" });
     }
   });
@@ -158,7 +159,7 @@ export function registerBudgetRoutes(app: Express) {
       notifyDataChange(userId, 'budget');
       return res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting budget:", error);
+      log.error("Error deleting budget:", error);
       return res.status(500).json({ message: "Failed to delete budget" });
     }
   });
@@ -191,7 +192,7 @@ export function registerBudgetRoutes(app: Express) {
 
       return res.json(translatedBudgets);
     } catch (error) {
-      console.error("Error fetching budgets:", error);
+      log.error("Error fetching budgets:", error);
       return res.status(500).json({ message: "Failed to fetch budgets" });
     }
   });

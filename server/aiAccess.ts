@@ -20,6 +20,7 @@ import {
   weightFor,
   type QuotaState,
 } from '../shared/aiQuota';
+import { log } from './logger';
 
 export type AiDenyCode = 'unauthenticated' | 'ai_disabled' | 'plan_required' | 'ai_quota_exceeded';
 
@@ -86,7 +87,7 @@ export async function getAiQuota(userId: string, plan: string): Promise<AiQuotaR
   try {
     rows = await storage.getAIQuotaUsage(userId, monthStart(now), dayStart(now));
   } catch (error) {
-    console.error('Failed to read AI quota usage:', error);
+    log.error('Failed to read AI quota usage:', error);
   }
 
   const monthlyUsed = actionsFor(rows);

@@ -56,7 +56,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 
     if (!mistralResponse.ok) {
       const errorText = await mistralResponse.text();
-      console.error('❌ Mistral transcription error:', errorText);
+      log.error('❌ Mistral transcription error:', errorText);
       throw new Error(`Mistral transcription failed: ${mistralResponse.statusText}`);
     }
 
@@ -103,7 +103,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
         finalCategory = newCategory.name;
         newCategoryId = newCategory.id;
       } catch (error) {
-        console.error('❌ Failed to create new category:', error);
+        log.error('❌ Failed to create new category:', error);
         finalCategory = parsedTransaction.category;
       }
     } else if (categoryMatchResult.matchedCategory) {
@@ -128,7 +128,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     });
     
   } catch (error) {
-    console.error('❌ Mistral voice processing failed:', error);
+    log.error('❌ Mistral voice processing failed:', error);
     res.status(500).json({ 
       error: 'Voice processing failed', 
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -162,7 +162,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
     res.json({ success: true, data: result });
     
   } catch (error) {
-    console.error('❌ Mistral text parsing failed:', error);
+    log.error('❌ Mistral text parsing failed:', error);
     res.status(500).json({ 
       error: 'Text parsing failed', 
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -192,7 +192,7 @@ router.post('/match-category', async (req: Request, res: Response) => {
     res.json(result);
     
   } catch (error) {
-    console.error('❌ Local category matching failed:', error);
+    log.error('❌ Local category matching failed:', error);
     res.status(500).json({ 
       error: 'Category matching failed', 
       details: error instanceof Error ? error.message : 'Unknown error'

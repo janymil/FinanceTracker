@@ -156,7 +156,7 @@ export function registerPDFRoutes(app: any) {
         budgets = await storage.getUserBudgets(userId);
         goals = await storage.getUserGoals(userId);
       } catch (error) {
-        console.warn(
+        log.warn(
           '[PDF] Could not load budgets/goals for the report:',
           error instanceof Error ? error.message : String(error)
         );
@@ -217,7 +217,7 @@ export function registerPDFRoutes(app: any) {
       return res.send(pdfBuffer);
 
     } catch (error) {
-      console.error('PDF generation error:', error);
+      log.error('PDF generation error:', error);
       if (error instanceof PdfProcessorError) {
         return res.status(error.statusCode).json({
           error: error.message,

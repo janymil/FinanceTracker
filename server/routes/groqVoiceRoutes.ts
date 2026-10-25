@@ -85,7 +85,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     });
     
   } catch (error) {
-    console.error('❌ Groq voice processing failed:', error);
+    log.error('❌ Groq voice processing failed:', error);
     res.status(500).json({ 
       error: 'Voice processing failed', 
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -109,7 +109,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
     res.json({ success: true, data: result });
     
   } catch (error) {
-    console.error('❌ Groq text parsing failed:', error);
+    log.error('❌ Groq text parsing failed:', error);
     res.status(500).json({ 
       error: 'Text parsing failed', 
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -139,7 +139,7 @@ router.post('/match-category', async (req: Request, res: Response) => {
     res.json(result);
     
   } catch (error) {
-    console.error('❌ Category matching failed:', error);
+    log.error('❌ Category matching failed:', error);
     res.status(500).json({ 
       error: 'Category matching failed', 
       details: error instanceof Error ? error.message : 'Unknown error'

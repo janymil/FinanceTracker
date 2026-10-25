@@ -61,7 +61,7 @@ export function registerLearningRoutes(app: Router) {
 
       res.json({ success: true });
     } catch (error) {
-      console.error("Learning record error:", error);
+      log.error("Learning record error:", error);
       res.status(500).json({ error: "Failed to record learning" });
     }
   });
@@ -77,7 +77,7 @@ export function registerLearningRoutes(app: Router) {
       
       res.json({ pattern });
     } catch (error) {
-      console.error("Get merchant pattern error:", error);
+      log.error("Get merchant pattern error:", error);
       res.status(500).json({ error: "Failed to get merchant pattern" });
     }
   });
@@ -92,7 +92,7 @@ export function registerLearningRoutes(app: Router) {
       
       res.json({ merchants });
     } catch (error) {
-      console.error("Get top merchants error:", error);
+      log.error("Get top merchants error:", error);
       res.status(500).json({ error: "Failed to get top merchants" });
     }
   });
@@ -104,7 +104,7 @@ export function registerLearningRoutes(app: Router) {
       
       res.json(analytics);
     } catch (error) {
-      console.error("Get learning analytics error:", error);
+      log.error("Get learning analytics error:", error);
       res.status(500).json({ error: "Failed to get learning analytics" });
     }
   });

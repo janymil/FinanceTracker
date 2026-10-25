@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { log } from './logger';
 
 const router = Router();
 
@@ -48,7 +49,7 @@ router.get('/api/demo-screenshots', async (req, res) => {
 
     res.json({ screenshots });
   } catch (error) {
-    console.error('Screenshot error:', error);
+    log.error('Screenshot error:', error);
     res.status(500).json({ error: 'Failed to get screenshots' });
   }
 });

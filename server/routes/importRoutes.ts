@@ -281,12 +281,12 @@ export function registerImportRoutes(app: Express) {
       
       // Handle errors
       req.on('error', (error) => {
-        console.error(`[PDF Progress] Request error for session ${sessionId}:`, error);
+        log.error(`[PDF Progress] Request error for session ${sessionId}:`, error);
         progressConnections.delete(sessionId);
       });
       
     } catch (error) {
-      console.error(`[PDF Progress] Error setting up SSE for session ${sessionId}:`, error);
+      log.error(`[PDF Progress] Error setting up SSE for session ${sessionId}:`, error);
       res.status(500).json({ error: 'Failed to establish progress connection' });
     }
   });
@@ -308,7 +308,7 @@ export function registerImportRoutes(app: Express) {
       
       return res.json(logs);
     } catch (error) {
-      console.error("Error fetching import logs:", error);
+      log.error("Error fetching import logs:", error);
       return res.status(500).json({ message: "Failed to fetch import logs" });
     }
   });
@@ -350,8 +350,8 @@ export function registerImportRoutes(app: Express) {
       // Validate the import data structure
       const validationResult = importDataSchema.safeParse(importData);
       if (!validationResult.success) {
-        console.error("Import data validation failed:", validationResult.error.issues);
-        console.error("Import data structure:", JSON.stringify(importData, null, 2));
+        log.error("Import data validation failed:", validationResult.error.issues);
+        log.error("Import data structure:", JSON.stringify(importData, null, 2));
         return res.status(400).json({ 
           message: "Invalid data structure", 
           errors: validationResult.error.issues 
@@ -551,7 +551,7 @@ export function registerImportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Error importing data:", error);
+      log.error("Error importing data:", error);
       
       // Log failed import
       try {
@@ -580,7 +580,7 @@ export function registerImportRoutes(app: Express) {
           );
         }
       } catch (logError) {
-        console.error("Failed to log import error:", logError);
+        log.error("Failed to log import error:", logError);
       }
       
       return res.status(500).json({ 
@@ -693,7 +693,7 @@ export function registerImportRoutes(app: Express) {
       return res.json(response);
 
     } catch (error) {
-      console.error('PDF processing error:', error);
+      log.error('PDF processing error:', error);
       
       return res.status(500).json({ 
         error: error instanceof Error ? error.message : 'Failed to process PDF bank statement',
@@ -759,7 +759,7 @@ export function registerImportRoutes(app: Express) {
           preview: true,
         });
       } catch (error) {
-        console.error('Statement preview error:', error instanceof Error ? error.message : error);
+        log.error('Statement preview error:', error instanceof Error ? error.message : error);
         return res.status(500).json({ error: 'Could not prepare the preview', success: false });
       }
     });
@@ -842,7 +842,7 @@ export function registerImportRoutes(app: Express) {
           });
           savedTransactions.push(savedTransaction);
         } catch (error) {
-          console.error('Failed to save an imported transaction:', error instanceof Error ? error.message : error);
+          log.error('Failed to save an imported transaction:', error instanceof Error ? error.message : error);
           errors.push(`Failed to save: ${String(transaction?.description ?? '').slice(0, 80)}`);
         }
       }
@@ -859,7 +859,7 @@ export function registerImportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error('Final import error:', error);
+      log.error('Final import error:', error);
       return res.status(500).json({ 
         error: error instanceof Error ? error.message : 'Failed to complete import',
         success: false

@@ -46,7 +46,7 @@ export class MistralClient {
   constructor() {
     this.apiKey = process.env.MISTRAL_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('⚠️ [Mistral] API key not found in environment variables');
+      log.warn('⚠️ [Mistral] API key not found in environment variables');
     }
   }
 
@@ -84,7 +84,7 @@ export class MistralClient {
       return transcription.trim();
 
     } catch (error) {
-      console.error('❌ [Mistral] Transcription failed:', error);
+      log.error('❌ [Mistral] Transcription failed:', error);
       throw new Error(`Mistral transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -126,7 +126,7 @@ export class MistralClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ [Mistral] API error:', {
+        log.error('❌ [Mistral] API error:', {
           status: response.status,
           statusText: response.statusText,
           error: errorText
@@ -146,7 +146,7 @@ export class MistralClient {
 
       return result;
     } catch (error) {
-      console.error('❌ [Mistral] Request failed:', error);
+      log.error('❌ [Mistral] Request failed:', error);
       throw error;
     }
   }

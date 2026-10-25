@@ -67,7 +67,7 @@ export function registerAIRoutes(app: Express) {
         costThisMonth: Number(quota.costThisMonth.toFixed(6)),
       });
     } catch (error) {
-      console.error("Error reading AI usage:", error);
+      log.error("Error reading AI usage:", error);
       return res.status(500).json({ message: "Failed to read AI usage" });
     }
   });
@@ -145,13 +145,13 @@ export function registerAIRoutes(app: Express) {
             transactionId: transaction.id
           });
         } catch (error) {
-          console.error(`Failed to categorize transaction ${transaction.id}:`, error);
+          log.error(`Failed to categorize transaction ${transaction.id}:`, error);
         }
       }
 
       return res.json({ suggestions });
     } catch (error) {
-      console.error("Error in auto-categorization:", error);
+      log.error("Error in auto-categorization:", error);
       return res.status(500).json({ message: "Failed to auto-categorize transactions" });
     }
   });
@@ -204,7 +204,7 @@ export function registerAIRoutes(app: Express) {
         reasoning: result.reasoning
       });
     } catch (error) {
-      console.error("Error categorizing expense:", error);
+      log.error("Error categorizing expense:", error);
       return res.status(500).json({ message: "Failed to categorize expense" });
     }
   });
@@ -298,7 +298,7 @@ export function registerAIRoutes(app: Express) {
         responseData = tipResults;
         log.info('TIP ENDPOINT: Using wrapped tips format');
       } else {
-        console.error('TIP ENDPOINT: Unexpected response format:', {
+        log.error('TIP ENDPOINT: Unexpected response format:', {
           type: typeof tipResults,
           isArray: Array.isArray(tipResults),
           keys: tipResults ? Object.keys(tipResults) : 'null',
@@ -311,7 +311,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(responseData);
     } catch (error) {
-      console.error("Error generating financial tip:", error);
+      log.error("Error generating financial tip:", error);
       return res.status(500).json({ message: "Failed to generate financial tip" });
     }
   });
@@ -365,7 +365,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(insights);
     } catch (error) {
-      console.error("Error generating spending insights:", error);
+      log.error("Error generating spending insights:", error);
       return res.status(500).json({ message: "Failed to generate spending insights" });
     }
   });
@@ -426,7 +426,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(aiScore);
     } catch (error) {
-      console.error("Error generating AI financial health score:", error);
+      log.error("Error generating AI financial health score:", error);
       return res.status(500).json({ message: "Failed to generate AI financial health score" });
     }
   });
@@ -488,7 +488,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(predictions);
     } catch (error) {
-      console.error("Error generating trend predictions:", error);
+      log.error("Error generating trend predictions:", error);
       return res.status(500).json({ message: "Failed to generate trend predictions" });
     }
   });
@@ -567,7 +567,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(annotateEmptyReason(recommendations, { transactionCount: transactions.length, totalIncome: summary?.totalIncome, totalExpenses: summary?.totalExpenses }));
     } catch (error) {
-      console.error("Error generating daily recommendations:", error);
+      log.error("Error generating daily recommendations:", error);
       return res.status(500).json({ message: "Failed to generate daily recommendations" });
     }
   });
@@ -708,7 +708,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(response);
     } catch (error) {
-      console.error("Error generating financial health score:", error);
+      log.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
     }
   });
@@ -807,7 +807,7 @@ export function registerAIRoutes(app: Express) {
       
       return res.json(mascot);
     } catch (error) {
-      console.error("Error fetching mascot:", error);
+      log.error("Error fetching mascot:", error);
       return res.status(500).json({ message: "Failed to fetch mascot" });
     }
   });
@@ -924,7 +924,7 @@ export function registerAIRoutes(app: Express) {
         permanentImageUrl = `${cdnBaseUrl}/${bunnyPath}`;
         log.info(`Mascot image stored permanently on CDN at: ${permanentImageUrl}`);
       } catch (storageError) {
-        console.error("Failed to store image on CDN, falling back to local storage:", storageError);
+        log.error("Failed to store image on CDN, falling back to local storage:", storageError);
         
         // Fallback to local storage
         try {
@@ -939,7 +939,7 @@ export function registerAIRoutes(app: Express) {
           permanentImageUrl = `/uploads/mascots/${filename}`;
           log.info(`Mascot image stored locally at: ${permanentImageUrl}`);
         } catch (localError) {
-          console.error("Failed to store image locally as well:", localError);
+          log.error("Failed to store image locally as well:", localError);
           // Last resort - use temporary URL
           permanentImageUrl = tempImageUrl;
         }
@@ -970,7 +970,7 @@ export function registerAIRoutes(app: Express) {
               log.info('Deleted previous local mascot file');
             }
           } catch (error) {
-            console.warn("Failed to delete old mascot image:", error);
+            log.warn("Failed to delete old mascot image:", error);
           }
         }
         
@@ -996,7 +996,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(mascot);
     } catch (error) {
-      console.error("Error generating mascot:", error);
+      log.error("Error generating mascot:", error);
       return res.status(500).json({ message: "Failed to generate mascot" });
     }
   });
@@ -1027,7 +1027,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(mascot);
     } catch (error) {
-      console.error("Error toggling mascot:", error);
+      log.error("Error toggling mascot:", error);
       return res.status(500).json({ message: "Failed to toggle mascot" });
     }
   });
@@ -1095,7 +1095,7 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(predictions);
     } catch (error) {
-      console.error("Error generating expense predictions:", error);
+      log.error("Error generating expense predictions:", error);
       return res.status(500).json({ message: "Failed to generate expense predictions" });
     }
   });
@@ -1162,7 +1162,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       return res.json({ response: assistantResponse });
     } catch (error) {
-      console.error("Error in help chat:", error);
+      log.error("Error in help chat:", error);
       return res.status(500).json({ message: "Failed to get help response" });
     }
   });
@@ -1173,7 +1173,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
       log.info('🎯 [CONTEXTUAL-TIPS] Starting request processing...');
       const userId = getUserId(req);
       if (!userId) {
-        console.error('🚨 [CONTEXTUAL-TIPS] No userId found');
+        log.error('🚨 [CONTEXTUAL-TIPS] No userId found');
         return res.status(401).json({ message: "Authentication required" });
       }
       log.info('✅ [CONTEXTUAL-TIPS] User authenticated:', userId.substring(0, 8) + '...');
@@ -1288,13 +1288,13 @@ Answer questions about features, subscription plans, how to use the app, trouble
         result = await runAI('contextual-tips', userId, aiPayload, user?.plan || 'free');
         log.info('✅ [CONTEXTUAL-TIPS] runAI completed successfully');
       } catch (aiError: any) {
-        console.error('🚨 [CONTEXTUAL-TIPS] AI failed:', aiError.message);
+        log.error('🚨 [CONTEXTUAL-TIPS] AI failed:', aiError.message);
         return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
       }
       
       // The model could not be reached: rule-based tips in the person's language, never cached.
       if (isAIFailure(result)) {
-        console.error('🚨 AI returned an error for contextual tips');
+        log.error('🚨 AI returned an error for contextual tips');
         return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
       }
 
@@ -1319,7 +1319,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       return res.json({ tips: aiTips });
     } catch (error: any) {
-      console.error("Error generating contextual financial tips:", {
+      log.error("Error generating contextual financial tips:", {
         error: error.message,
         stack: error.stack,
         name: error.name
@@ -1334,7 +1334,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
         log.info('🔄 Contextual tips - Returning fallback tips due to error');
         return res.json({ tips: fallbackTips });
       } catch (fallbackError) {
-        console.error("Error generating fallback tips:", fallbackError);
+        log.error("Error generating fallback tips:", fallbackError);
         // Return empty tips as last resort
         return res.json({ tips: [] });
       }

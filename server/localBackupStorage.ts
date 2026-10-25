@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { log } from './logger';
 
 interface StorageFileInfo {
   ObjectName: string;
@@ -32,7 +33,7 @@ export class LocalBackupStorage {
     try {
       await fs.mkdir(this.baseDir, { recursive: true });
     } catch (error) {
-      console.error('Failed to create backup directory:', error);
+      log.error('Failed to create backup directory:', error);
     }
   }
 
@@ -91,7 +92,7 @@ export class LocalBackupStorage {
 
       return fileInfos;
     } catch (error) {
-      console.error(`Failed to list files in ${dirPath}:`, error);
+      log.error(`Failed to list files in ${dirPath}:`, error);
       return [];
     }
   }
@@ -126,7 +127,7 @@ export class LocalBackupStorage {
           await this.deleteFile(`user-${userId}/${backup.ObjectName}`);
           deletedCount++;
         } catch (error) {
-          console.error(`Failed to delete old backup ${backup.ObjectName}:`, error);
+          log.error(`Failed to delete old backup ${backup.ObjectName}:`, error);
         }
       }
     }

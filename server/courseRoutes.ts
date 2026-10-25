@@ -3,6 +3,7 @@ import { storage } from "./storage.js";
 import { generateFinancialLiteracyCourse, generateAchievementBadges } from "./courseContentGenerator.js";
 import { isAuthenticated, getUserId } from "./clerkAuth.js";
 import { z } from "zod";
+import { log } from './logger';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ router.get("/content", async (req, res) => {
     const modules = await generateFinancialLiteracyCourse();
     res.json({ modules });
   } catch (error) {
-    console.error("Error generating course content:", error);
+    log.error("Error generating course content:", error);
     res.status(500).json({ error: "Failed to generate course content" });
   }
 });
@@ -23,7 +24,7 @@ router.get("/badges", async (req, res) => {
     const badges = await generateAchievementBadges();
     res.json({ badges });
   } catch (error) {
-    console.error("Error generating badges:", error);
+    log.error("Error generating badges:", error);
     res.status(500).json({ error: "Failed to generate badges" });
   }
 });
@@ -64,7 +65,7 @@ router.get("/progress", isAuthenticated, async (req: any, res) => {
       achievements: enrichedAchievements || []
     });
   } catch (error) {
-    console.error("Error fetching user progress:", error);
+    log.error("Error fetching user progress:", error);
     res.status(500).json({ error: "Failed to fetch course progress" });
   }
 });
@@ -112,7 +113,7 @@ router.post("/submit-exercise", isAuthenticated, async (req: any, res) => {
       newBadges: newBadges || []
     });
   } catch (error) {
-    console.error("Error submitting exercise:", error);
+    log.error("Error submitting exercise:", error);
     res.status(500).json({ error: "Failed to submit exercise" });
   }
 });
@@ -230,7 +231,7 @@ async function checkForNewAchievements(userId: string) {
     
     return newBadges;
   } catch (error) {
-    console.error("Error checking achievements:", error);
+    log.error("Error checking achievements:", error);
     return [];
   }
 }

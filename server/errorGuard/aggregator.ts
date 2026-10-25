@@ -15,6 +15,7 @@ import { assignSeverity, detectMoneyPath, isSelfReport } from '@shared/errorGuar
 import { scrubGuardEvent } from '@shared/errorGuard/scrub';
 import type { GuardEvent, GuardSeverity } from '@shared/errorGuard/types';
 import { writeBatch, type GroupSnapshot } from './store';
+import { log } from '../logger';
 
 const FLUSH_INTERVAL_MS = Number(process.env.ERROR_GUARD_FLUSH_MS) || 10_000;
 /** Hard cap on distinct problems held in memory; a fingerprint bug must not eat the heap. */
@@ -214,7 +215,7 @@ export async function flush(now: number = Date.now()): Promise<void> {
     consecutiveFailures += 1;
     breaker.recordFailure(now);
     lastError = error instanceof Error ? error.message.slice(0, 200) : 'unknown flush error';
-    console.error('[errorGuard] flush failed:', lastError);
+    log.error('[errorGuard] flush failed:', lastError);
     // After ten consecutive failures, stop holding memory hostage: drop the buffer and
     // count it. Losing diagnostics is acceptable; an OOM in the app is not.
     if (consecutiveFailures >= 10) {

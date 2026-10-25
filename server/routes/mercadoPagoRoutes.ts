@@ -114,7 +114,7 @@ export function registerMercadoPagoRoutes(app: Express) {
 
       return res.json({ init_point: created.initPoint, preapproval_id: created.id });
     } catch (error: any) {
-      console.error('[MercadoPago] Could not create preapproval:', error?.message || error);
+      log.error('[MercadoPago] Could not create preapproval:', error?.message || error);
       return res.status(502).json({ error: 'MercadoPago is unavailable. Please try again.' });
     }
   });
@@ -141,7 +141,7 @@ export function registerMercadoPagoRoutes(app: Express) {
 
       return res.json({ status: state.status, plan: state.plan, interval: state.interval });
     } catch (error: any) {
-      console.error('[MercadoPago] Status lookup failed:', error?.message || error);
+      log.error('[MercadoPago] Status lookup failed:', error?.message || error);
       return res.status(502).json({ error: 'MercadoPago is unavailable' });
     }
   });
@@ -159,7 +159,7 @@ export function registerMercadoPagoRoutes(app: Express) {
     try {
       await cancelPreapproval(user.mpPreapprovalId);
     } catch (error: any) {
-      console.error('[MercadoPago] Cancel failed:', error?.message || error);
+      log.error('[MercadoPago] Cancel failed:', error?.message || error);
       return res.status(502).json({ error: 'MercadoPago is unavailable' });
     }
 
@@ -187,7 +187,7 @@ export function registerMercadoPagoRoutes(app: Express) {
       secret: process.env.MERCADOPAGO_WEBHOOK_SECRET,
       now: Date.now(),
     })) {
-      console.warn('[MercadoPago] Rejected webhook with an invalid signature');
+      log.warn('[MercadoPago] Rejected webhook with an invalid signature');
       return res.status(401).json({ error: 'Invalid signature' });
     }
 

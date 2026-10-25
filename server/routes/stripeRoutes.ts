@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { regionForRequest } from "../billingRegion";
+import type { User } from "@shared/schema";
 import {
   PRICE_ENV_KEYS,
   readConfiguredReference,
@@ -96,7 +97,7 @@ async function resolvePriceId(reference: string | undefined): Promise<string | u
   if (reference.startsWith('price_')) return reference;
 
   if (!reference.startsWith('prod_') || !stripe) {
-    console.warn('[Billing] Unsupported price reference in env:', reference);
+    log.warn('[Billing] Unsupported price reference in env:', reference);
     return undefined;
   }
 
@@ -119,14 +120,14 @@ async function resolvePriceId(reference: string | undefined): Promise<string | u
     }
 
     if (!priceId) {
-      console.warn(`[Billing] Product ${reference} has no active price`);
+      log.warn(`[Billing] Product ${reference} has no active price`);
       return undefined;
     }
 
     resolvedPriceCache.set(reference, priceId);
     return priceId;
   } catch (error) {
-    console.warn(
+    log.warn(
       `[Billing] Could not resolve a price for ${reference}:`,
       error instanceof Error ? error.message : String(error)
     );
@@ -150,7 +151,7 @@ async function warnIfIntervalMismatch(plan: PlanKey, priceId: string, currency: 
     const actual = price.recurring?.interval;
     const expected = plan.endsWith('-yearly') ? 'year' : 'month';
     if (actual && actual !== expected) {
-      console.warn(
+      log.warn(
         `[Billing] ${plan} uses price ${priceId} with interval "${actual}" but "${expected}" is expected. ` +
         `Fix the price interval in Stripe or point ${PRICE_ENV_KEYS[currency][plan][0]} at a price_… id with the right interval.`
       );
@@ -169,14 +170,22 @@ async function getPlanPriceId(plan: string, currency: BillingCurrency): Promise<
 }
 
 // Handle subscription changes (upgrade/downgrade) with proper proration
-async function handleSubscriptionChange(user: any, newPlan: string, currency: BillingCurrency, res: Response) {
+async function handleSubscriptionChange(user: User, newPlan: string, currency: BillingCurrency, res: Response) {
   if (!stripe) {
     return res.status(503).json({ message: "Payment processing unavailable" });
   }
 
   try {
+    // A user row can exist without Stripe ids (a manual plan change, a failed checkout). Passing
+    // the null through used to surface as an opaque 500 from the SDK instead of an answer.
+    const subscriptionId = user.stripeSubscriptionId;
+    const customerId = user.stripeCustomerId;
+    if (!subscriptionId || !customerId) {
+      return res.status(400).json({ message: "No active subscription to change" });
+    }
+
     // Get current subscription
-    const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     
     // Resolve the target plan to a Stripe price id (env may hold prod_ or price_)
     const newPriceId = await getPlanPriceId(newPlan, currency);
@@ -196,7 +205,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, currency: Bi
     // This properly handles proration and billing
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      customer: user.stripeCustomerId,
+      customer: customerId,
       payment_method_types: ['card'],
       line_items: [{
         price: newPriceId,
@@ -207,7 +216,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, currency: Bi
           plan: newPlan,
           userId: user.id,
           isUpgrade: 'true',
-          existingSubscriptionId: user.stripeSubscriptionId
+          existingSubscriptionId: subscriptionId
         }
       },
       success_url: `${baseUrl}/api/subscription-success?plan=${newPlan}&session_id={CHECKOUT_SESSION_ID}`,
@@ -216,7 +225,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, currency: Bi
         plan: newPlan,
         userId: user.id,
         isUpgrade: 'true',
-        existingSubscriptionId: user.stripeSubscriptionId
+        existingSubscriptionId: subscriptionId
       }
     });
 
@@ -224,7 +233,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, currency: Bi
     return res.json({ url: session.url });
 
   } catch (error) {
-    console.error('Error updating subscription:', error);
+    log.error('Error updating subscription:', error);
     return res.status(500).json({ error: "Failed to update subscription" });
   }
 }
@@ -294,7 +303,7 @@ export function registerStripeRoutes(app: Express) {
             return res.json({ url: portalSession.url });
           }
         } catch (error) {
-          console.error('Error checking existing subscription:', error);
+          log.error('Error checking existing subscription:', error);
           // Continue to checkout if subscription check fails
         }
       }
@@ -343,7 +352,7 @@ export function registerStripeRoutes(app: Express) {
         log.info('Requested plan:', plan, 'Currency:', currency, '-> price:', priceId);
 
         if (!priceId) {
-          console.error('Invalid plan requested:', plan, 'Currency:', currency, 'Configured plans:', Object.keys(PRICE_ENV_KEYS[currency]));
+          log.error('Invalid plan requested:', plan, 'Currency:', currency, 'Configured plans:', Object.keys(PRICE_ENV_KEYS[currency]));
           return res.status(400).json({ error: "Invalid plan selected" });
         }
         
@@ -379,14 +388,14 @@ export function registerStripeRoutes(app: Express) {
       log.info('Session URL:', session.url);
       
       if (!session.url) {
-        console.error('No URL returned from Stripe session');
+        log.error('No URL returned from Stripe session');
         return res.status(500).json({ error: "No redirect URL received from Stripe" });
       }
 
       return res.json({ url: session.url });
 
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      log.error('Error creating checkout session:', error);
       return res.status(500).json({ error: "Failed to create checkout session" });
     }
   });
@@ -458,7 +467,7 @@ export function registerStripeRoutes(app: Express) {
           await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
           log.info(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
         } catch (cancelError) {
-          console.error('Error cancelling existing subscription:', cancelError);
+          log.error('Error cancelling existing subscription:', cancelError);
           // Continue with the process even if cancellation fails
         }
       }
@@ -482,12 +491,12 @@ export function registerStripeRoutes(app: Express) {
         return res.redirect(`/dashboard?upgrade=success&plan=${dbPlan}&interval=${billingInterval}`);
         
       } catch (dbError) {
-        console.error('Error updating user plan in database:', dbError);
+        log.error('Error updating user plan in database:', dbError);
         return res.redirect('/?error=plan_update_failed');
       }
 
     } catch (error) {
-      console.error('Error processing subscription success:', error);
+      log.error('Error processing subscription success:', error);
       return res.redirect('/?error=subscription_processing_failed');
     }
   });
@@ -574,7 +583,7 @@ export function registerStripeRoutes(app: Express) {
       }
 
     } catch (error: any) {
-      console.error('Error switching subscription plan:', error);
+      log.error('Error switching subscription plan:', error);
       return res.status(500).json({ success: false, error: error.message || "Failed to switch plan" });
     }
   });
@@ -630,7 +639,7 @@ export function registerStripeRoutes(app: Express) {
       return res.json({ hasSchedule: false });
 
     } catch (error: any) {
-      console.error('Error fetching subscription schedule:', error);
+      log.error('Error fetching subscription schedule:', error);
       return res.status(500).json({ error: "Failed to fetch subscription schedule" });
     }
   });
@@ -657,7 +666,7 @@ export function registerStripeRoutes(app: Express) {
       return await handleSubscriptionChange(user, plan, currencyForRequest(req), res);
 
     } catch (error) {
-      console.error('Error changing subscription:', error);
+      log.error('Error changing subscription:', error);
       return res.status(500).json({ error: "Failed to change subscription" });
     }
   });
@@ -675,7 +684,7 @@ export function registerStripeRoutes(app: Express) {
         try {
           await stripe.subscriptions.cancel(user.stripeSubscriptionId);
         } catch (stripeError) {
-          console.error('Error cancelling subscription in Stripe:', stripeError);
+          log.error('Error cancelling subscription in Stripe:', stripeError);
           return res.status(502).json({ error: "We could not cancel the subscription. Nothing was changed." });
         }
       }
@@ -686,7 +695,7 @@ export function registerStripeRoutes(app: Express) {
       return res.json({ success: true, message: "Subscription cancelled successfully" });
 
     } catch (error) {
-      console.error('Error cancelling subscription:', error);
+      log.error('Error cancelling subscription:', error);
       return res.status(500).json({ error: "Failed to cancel subscription" });
     }
   });
@@ -699,7 +708,7 @@ export function registerStripeRoutes(app: Express) {
 
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error('[Stripe] STRIPE_WEBHOOK_SECRET is not set; refusing to process webhooks.');
+      log.error('[Stripe] STRIPE_WEBHOOK_SECRET is not set; refusing to process webhooks.');
       return res.status(503).json({ message: "Webhook not configured" });
     }
 
@@ -712,7 +721,7 @@ export function registerStripeRoutes(app: Express) {
     try {
       event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
     } catch (err) {
-      console.warn('Stripe webhook signature verification failed:', err instanceof Error ? err.message : err);
+      log.warn('Stripe webhook signature verification failed:', err instanceof Error ? err.message : err);
       return res.status(400).send('Webhook signature verification failed');
     }
 
@@ -722,7 +731,7 @@ export function registerStripeRoutes(app: Express) {
     } catch (error) {
       // Without the claim we cannot know whether this event ran before, so refuse it and
       // let Stripe retry (5xx) instead of risking a second upgrade or downgrade.
-      console.error('Error recording webhook event:', error);
+      log.error('Error recording webhook event:', error);
       return res.status(500).json({ error: 'Webhook processing failed' });
     }
 
@@ -779,7 +788,7 @@ export function registerStripeRoutes(app: Express) {
         // is the safe direction: a plan is never granted twice, and the log says why.
         log.error('[Stripe] Could not free a failed webhook claim:', releaseError instanceof Error ? releaseError.message : releaseError);
       }
-      console.error('Error processing webhook:', error);
+      log.error('Error processing webhook:', error);
       return res.status(500).json({ error: 'Webhook processing failed' });
     }
 
@@ -791,7 +800,7 @@ export function registerStripeRoutes(app: Express) {
     try {
       return await storage.getUserByStripeCustomerId(customerId);
     } catch (error) {
-      console.error('Error finding user by Stripe customer ID:', error);
+      log.error('Error finding user by Stripe customer ID:', error);
       return null;
     }
   }
@@ -813,11 +822,32 @@ export function registerStripeRoutes(app: Express) {
       }
     }
 
-    console.warn(`[Billing] Unknown Stripe price ${priceId}; plan left unchanged`);
+    log.warn(`[Billing] Unknown Stripe price ${priceId}; plan left unchanged`);
     return null;
   }
 
   // Handle initial successful checkout
+  /**
+   * The webhook handlers below take `any` deliberately. That is a trade, not an oversight.
+   *
+   * The SDK's types describe the *latest* API version, while a webhook body is shaped by the API
+   * version the Stripe endpoint is pinned to. Typing these parameters as `Stripe.Invoice` /
+   * `Stripe.Subscription` would compile against the SDK and still be wrong for whatever the
+   * endpoint actually sends. In two places it would also force a behavioural change:
+   *
+   *   - `invoice.subscription` does not exist on `Stripe.Invoice` in v18 (it moved to
+   *     `invoice.parent.subscription_details.subscription`), but older payloads still carry the
+   *     old field. Both have to keep working across a version change.
+   *   - `invoice.last_payment_error` does not exist on `Stripe.Invoice` either — the nearest real
+   *     field is `last_finalization_error` — so the "Payment method declined" fallback below is
+   *     very likely what every failure e-mail has always used. Changing what a customer is told
+   *     is a product decision, not a typing fix.
+   *
+   * So instead of typing them: when the `stripe` package version moves, replay one real payload
+   * per event type from the dashboard and check these two fields first.
+   * `tests/unit/stripeWebhook.test.ts` proves the dispatch and de-duplication path; it cannot
+   * prove the payload shape.
+   */
   async function handleCheckoutSessionCompleted(session: any) {
     log.info('Checkout session completed:', session.id);
 
@@ -851,7 +881,7 @@ export function registerStripeRoutes(app: Express) {
         }
       }
     } catch (error) {
-      console.error('Error processing checkout session completed:', error);
+      log.error('Error processing checkout session completed:', error);
       throw error;
     }
   }
@@ -861,7 +891,7 @@ export function registerStripeRoutes(app: Express) {
     log.info('Invoice payment failed:', invoice.id, 'for customer:', invoice.customer);
 
     if (!stripe) {
-      console.error('Stripe not initialized');
+      log.error('Stripe not initialized');
       return;
     }
 
@@ -944,7 +974,7 @@ export function registerStripeRoutes(app: Express) {
       log.info(`User ${user.id} entered grace period until ${graceExpiresAt.toISOString()}`);
       
     } catch (error) {
-      console.error('Error handling payment failure:', error);
+      log.error('Error handling payment failure:', error);
       throw error;
     }
   }
@@ -954,7 +984,7 @@ export function registerStripeRoutes(app: Express) {
     log.info('Invoice payment succeeded:', invoice.id, 'for customer:', invoice.customer);
 
     if (!stripe) {
-      console.error('Stripe not initialized');
+      log.error('Stripe not initialized');
       return;
     }
 
@@ -1014,7 +1044,7 @@ export function registerStripeRoutes(app: Express) {
       log.info(`Grace period cleared for user: ${user.id}`);
       
     } catch (error) {
-      console.error('Error handling successful payment:', error);
+      log.error('Error handling successful payment:', error);
       throw error;
     }
   }
@@ -1065,7 +1095,7 @@ export function registerStripeRoutes(app: Express) {
       }
       
     } catch (error) {
-      console.error('Error handling subscription update:', error);
+      log.error('Error handling subscription update:', error);
       throw error;
     }
   }
@@ -1097,7 +1127,7 @@ export function registerStripeRoutes(app: Express) {
       log.info(`User ${user.id} subscription deleted, downgraded to free plan`);
       
     } catch (error) {
-      console.error('Error handling subscription deletion:', error);
+      log.error('Error handling subscription deletion:', error);
       throw error;
     }
   }
@@ -1126,7 +1156,7 @@ export function registerStripeRoutes(app: Express) {
       }
       
     } catch (error) {
-      console.error('Error handling subscription creation:', error);
+      log.error('Error handling subscription creation:', error);
       throw error;
     }
   }
@@ -1146,7 +1176,7 @@ export function registerStripeRoutes(app: Express) {
       log.info(`User ${user.id} needs to complete payment action for invoice ${invoice.id}`);
       
     } catch (error) {
-      console.error('Error handling payment action required:', error);
+      log.error('Error handling payment action required:', error);
     }
   }
 
@@ -1203,7 +1233,7 @@ export function registerStripeRoutes(app: Express) {
       );
       log.info(`User ${user.id} downgraded to free after a full refund`);
     } catch (error) {
-      console.error('Error handling refunded charge:', error);
+      log.error('Error handling refunded charge:', error);
       throw error;
     }
   }
@@ -1244,7 +1274,7 @@ export function registerStripeRoutes(app: Express) {
 
       return res.json({ url: portalSession.url });
     } catch (error) {
-      console.error('Error creating customer portal session:', error);
+      log.error('Error creating customer portal session:', error);
       return res.status(500).json({ message: "Failed to create portal session" });
     }
   });

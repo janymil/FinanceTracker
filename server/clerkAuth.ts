@@ -9,12 +9,12 @@ export const setupClerkAuth = (app: any) => {
   // Loud, actionable validation: a publishable key in CLERK_SECRET_KEY makes every
   // protected API request return 401, which users experience as "empty/broken dashboard".
   if (!secretKey) {
-    console.error(
+    log.error(
       '[AUTH] CLERK_SECRET_KEY is missing. Every authenticated API request will return 401.\n' +
       '       Fix: add CLERK_SECRET_KEY=sk_test_... (or sk_live_...) from Clerk Dashboard -> Configure -> API Keys.'
     );
   } else if (!secretKey.startsWith('sk_') || secretKey.includes('REPLACE_WITH')) {
-    console.error(
+    log.error(
       '[AUTH] CLERK_SECRET_KEY is INVALID - it must be a real secret key starting with "sk_test_" or "sk_live_" (current value: "' +
       'hidden").\n' +
       '       Fix: Clerk Dashboard -> Configure -> API Keys -> copy the Secret key into .env as CLERK_SECRET_KEY=sk_... .\n' +
@@ -22,7 +22,7 @@ export const setupClerkAuth = (app: any) => {
     );
   }
   if (publishableKey && !publishableKey.startsWith('pk_')) {
-    console.error('[AUTH] CLERK_PUBLISHABLE_KEY looks invalid - it must start with "pk_test_" or "pk_live_".');
+    log.error('[AUTH] CLERK_PUBLISHABLE_KEY looks invalid - it must start with "pk_test_" or "pk_live_".');
   }
 
   log.info('Setting up Clerk middleware:', {
@@ -70,7 +70,7 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
     
     next();
   } catch (error) {
-    console.error('Authentication error:', error);
+    log.error('Authentication error:', error);
     // If this is a user deletion scenario, return 401 instead of 500
     if ((error as Error).message?.includes('User not found') || (error as Error).message?.includes('deleted')) {
       return res.status(401).json({ message: 'User account no longer exists' });

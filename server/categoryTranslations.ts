@@ -371,7 +371,7 @@ export function getUserLanguage(req: any): string {
         return langFromAccept;
       }
     } catch (error) {
-      console.warn('[Lang Detection] Failed to parse Accept-Language header:', error);
+      log.warn('[Lang Detection] Failed to parse Accept-Language header:', error);
     }
   }
   

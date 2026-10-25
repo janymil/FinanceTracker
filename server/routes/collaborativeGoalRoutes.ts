@@ -3,6 +3,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage } from "../categoryTranslations";
 import { rateLimit } from "../middleware/rateLimit";
+import { log } from '../logger';
 
 // Multilingual server messages
 const serverMessages = {
@@ -86,7 +87,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const friendship = await storage.sendFriendRequest(userId, recipientEmail);
       return res.json(friendship);
     } catch (error) {
-      console.error("Error sending friend request:", error);
+      log.error("Error sending friend request:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -102,7 +103,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const friendship = await storage.acceptFriendRequest(friendshipId, userId);
       return res.json(friendship);
     } catch (error) {
-      console.error("Error accepting friend request:", error);
+      log.error("Error accepting friend request:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -118,7 +119,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       await storage.rejectFriendRequest(friendshipId, userId);
       res.status(204).send();
     } catch (error) {
-      console.error("Error rejecting friend request:", error);
+      log.error("Error rejecting friend request:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -132,7 +133,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const friends = await storage.getUserFriends(userId);
       return res.json(friends);
     } catch (error) {
-      console.error("Error fetching friends:", error);
+      log.error("Error fetching friends:", error);
       return res.status(500).json({ message: "Failed to fetch friends" });
     }
   });
@@ -146,7 +147,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const requests = await storage.getPendingFriendRequests(userId);
       return res.json(requests);
     } catch (error) {
-      console.error("Error fetching friend requests:", error);
+      log.error("Error fetching friend requests:", error);
       return res.status(500).json({ message: "Failed to fetch friend requests" });
     }
   });
@@ -167,7 +168,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const goal = await storage.createCollaborativeGoal(goalData);
       return res.json(goal);
     } catch (error) {
-      console.error("Error creating collaborative goal:", error);
+      log.error("Error creating collaborative goal:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -181,7 +182,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const goals = await storage.getUserCollaborativeGoals(userId);
       return res.json(goals);
     } catch (error) {
-      console.error("Error fetching collaborative goals:", error);
+      log.error("Error fetching collaborative goals:", error);
       return res.status(500).json({ message: "Failed to fetch collaborative goals" });
     }
   });
@@ -213,7 +214,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
 
       return res.json({ ...goal, isParticipant: true });
     } catch (error) {
-      console.error("Error fetching collaborative goal:", error);
+      log.error("Error fetching collaborative goal:", error);
       return res.status(500).json({ message: "Failed to fetch goal" });
     }
   });
@@ -233,7 +234,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const participant = await storage.joinCollaborativeGoalWithCode(goalId, userId, joinCode, personalTarget);
       return res.json(participant);
     } catch (error) {
-      console.error("Error joining collaborative goal:", error);
+      log.error("Error joining collaborative goal:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -249,7 +250,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       await storage.leaveCollaborativeGoal(goalId, userId);
       res.status(204).send();
     } catch (error) {
-      console.error("Error leaving collaborative goal:", error);
+      log.error("Error leaving collaborative goal:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -265,7 +266,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const goal = await storage.updateCollaborativeGoal(goalId, userId, req.body);
       return res.json(goal);
     } catch (error) {
-      console.error("Error updating collaborative goal:", error);
+      log.error("Error updating collaborative goal:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -281,7 +282,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       await storage.deleteCollaborativeGoal(goalId, userId);
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting collaborative goal:", error);
+      log.error("Error deleting collaborative goal:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -313,7 +314,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       });
       return res.json(contribution);
     } catch (error) {
-      console.error("Error adding contribution:", error);
+      log.error("Error adding contribution:", error);
       return res.status(400).json({ message: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -328,7 +329,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const contributions = await storage.getGoalContributions(goalId);
       return res.json(contributions);
     } catch (error) {
-      console.error("Error fetching contributions:", error);
+      log.error("Error fetching contributions:", error);
       return res.status(500).json({ message: "Failed to fetch contributions" });
     }
   });
@@ -343,7 +344,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const activities = await storage.getGoalActivities(goalId);
       return res.json(activities);
     } catch (error) {
-      console.error("Error fetching activities:", error);
+      log.error("Error fetching activities:", error);
       return res.status(500).json({ message: "Failed to fetch activities" });
     }
   });
@@ -443,7 +444,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         });
       }
     } catch (error: any) {
-      console.error("Error inviting user:", error);
+      log.error("Error inviting user:", error);
       const lang = getUserLanguage(req);
       return res.status(500).json({ message: getLocalizedMessage(lang, 'failedToSendEmail') });
     }
@@ -476,7 +477,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       });
       return res.json(contribution);
     } catch (error: any) {
-      console.error("Error adding contribution:", error);
+      log.error("Error adding contribution:", error);
       return res.status(400).json({ message: error?.message || "Failed to add contribution" });
     }
   });
@@ -490,7 +491,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const achievements = await storage.getUserAchievements(userId);
       return res.json(achievements);
     } catch (error) {
-      console.error("Error fetching achievements:", error);
+      log.error("Error fetching achievements:", error);
       return res.status(500).json({ message: "Failed to fetch achievements" });
     }
   });
@@ -516,7 +517,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const messages = await storage.getGoalMessages(goalId);
       return res.json(messages);
     } catch (error) {
-      console.error("Error fetching goal messages:", error);
+      log.error("Error fetching goal messages:", error);
       return res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
@@ -554,7 +555,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       
       return res.status(201).json(newMessage);
     } catch (error) {
-      console.error("Error creating goal message:", error);
+      log.error("Error creating goal message:", error);
       return res.status(500).json({ message: "Failed to create message" });
     }
   });
@@ -584,7 +585,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       
       return res.json(updatedMessage);
     } catch (error) {
-      console.error("Error updating goal message:", error);
+      log.error("Error updating goal message:", error);
       return res.status(500).json({ message: "Failed to update message" });
     }
   });
@@ -607,7 +608,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       
       return res.json({ message: "Message deleted successfully" });
     } catch (error) {
-      console.error("Error deleting goal message:", error);
+      log.error("Error deleting goal message:", error);
       return res.status(500).json({ message: "Failed to delete message" });
     }
   });

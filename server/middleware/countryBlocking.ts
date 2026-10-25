@@ -30,7 +30,7 @@ async function getBlockedCountries(): Promise<Set<string>> {
     blockedCountriesCache = new Set(blocked.map(b => b.countryCode.toUpperCase()));
     cacheExpiry = now + (5 * 60 * 1000); // 5 minutes
   } catch (error) {
-    console.error('Error fetching blocked countries:', error);
+    log.error('Error fetching blocked countries:', error);
     // Return empty set if database is not ready
     return new Set();
   }
@@ -92,7 +92,7 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
     const geoResponse = await fetch(`https://get.geojs.io/v1/ip/geo/${clientIP}.json`);
     
     if (!geoResponse.ok) {
-      console.error('GeoJS API error:', geoResponse.status);
+      log.error('GeoJS API error:', geoResponse.status);
       // Allow access if geo service fails
       return next();
     }
@@ -129,7 +129,7 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
 
     next();
   } catch (error) {
-    console.error('Country blocking middleware error:', error);
+    log.error('Country blocking middleware error:', error);
     // Allow access on error to prevent blocking legitimate users
     next();
   }

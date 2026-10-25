@@ -7,6 +7,7 @@ import { getUserLanguage, translateCategories } from "../categoryTranslations";
 import { rateLimit } from "../middleware/rateLimit";
 import { reportServerError } from "../errorGuard/report";
 import { cancelPreapproval } from "../mercadopago";
+import { log } from '../logger';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -151,7 +152,7 @@ export function registerUserRoutes(app: Express) {
       
       return res.json(translatedCategories);
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      log.error("Error fetching categories:", error);
       return res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
@@ -176,7 +177,7 @@ export function registerUserRoutes(app: Express) {
       const category = await storage.createCategory({ userId, name, icon, color, type });
       return res.json(category);
     } catch (error) {
-      console.error("Error creating category:", error);
+      log.error("Error creating category:", error);
       return res.status(400).json({ message: "Failed to create category" });
     }
   });
@@ -209,7 +210,7 @@ export function registerUserRoutes(app: Express) {
       const category = await storage.updateCategory(categoryId, userId, { name, icon, color, type });
       return res.json(category);
     } catch (error) {
-      console.error("Error updating category:", error);
+      log.error("Error updating category:", error);
       return res.status(400).json({ message: "Failed to update category" });
     }
   });
@@ -233,7 +234,7 @@ export function registerUserRoutes(app: Express) {
       await storage.deleteCategory(categoryId, userId);
       return res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting category:", error);
+      log.error("Error deleting category:", error);
       return res.status(500).json({ message: "Failed to delete category" });
     }
   });

@@ -164,7 +164,7 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
     return parsedTransaction;
 
   } catch (error) {
-    console.error('❌ Mistral parsing failed:', error);
+    log.error('❌ Mistral parsing failed:', error);
     throw new Error(`Mistral parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
@@ -235,7 +235,7 @@ Find the best match or suggest creating a new category.`;
     return result as any;
     
   } catch (error) {
-    console.error('❌ Mistral category matching failed:', error);
+    log.error('❌ Mistral category matching failed:', error);
     // Fallback: try to find simple matches
     const exactMatch = existingCategories.find(cat => 
       cat.name.toLowerCase() === suggestedCategory.toLowerCase()

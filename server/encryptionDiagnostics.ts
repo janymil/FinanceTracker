@@ -40,7 +40,7 @@ export async function checkEncryptionKey(): Promise<void> {
     }, 0);
 
     if (unreadable > 0) {
-      console.error(
+      log.error(
         `[ENCRYPTION] KEY MISMATCH - ${unreadable} encrypted field(s) in ${rows.length} sampled transactions cannot be ` +
         `decrypted with the configured ENCRYPTION_KEY (${process.env.ENCRYPTION_KEY?.length ?? 0} chars). ` +
         `Encrypted text will render as "${DataEncryption.UNREADABLE}". ` +
@@ -51,6 +51,6 @@ export async function checkEncryptionKey(): Promise<void> {
       log.info(`[ENCRYPTION] key verified against ${rows.length} encrypted transaction row(s)`);
     }
   } catch (error) {
-    console.warn('[ENCRYPTION] startup key check skipped:', (error as Error).message);
+    log.warn('[ENCRYPTION] startup key check skipped:', (error as Error).message);
   }
 }

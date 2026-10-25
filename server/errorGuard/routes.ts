@@ -32,6 +32,7 @@ import {
   recordJobRun,
   setStatus,
 } from './store';
+import { log } from '../logger';
 
 const MAX_BODY_BYTES = 48_000;
 const MAX_EVENTS_PER_REQUEST = 50;
@@ -112,7 +113,7 @@ export function handleIngest(req: Request, res: Response): void {
 
     enqueue(parsed.data.events);
   } catch (error) {
-    console.error('[errorGuard] ingest failed:', error instanceof Error ? error.message : error);
+    log.error('[errorGuard] ingest failed:', error instanceof Error ? error.message : error);
   }
   res.status(204).end();
 }
@@ -120,7 +121,7 @@ export function handleIngest(req: Request, res: Response): void {
 function asyncRoute(handler: (req: Request, res: Response) => Promise<void>) {
   return (req: Request, res: Response) => {
     handler(req, res).catch((error: unknown) => {
-      console.error('[errorGuard] admin route failed:', error instanceof Error ? error.message : error);
+      log.error('[errorGuard] admin route failed:', error instanceof Error ? error.message : error);
       if (!res.headersSent) res.status(500).json({ message: 'Watch is unavailable right now' });
     });
   };

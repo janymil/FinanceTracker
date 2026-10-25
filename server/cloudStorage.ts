@@ -73,7 +73,7 @@ export class CloudflareR2Storage implements CloudStorageService {
       this.isConfigured = true;
       log.info('✅ Cloudflare R2 Storage initialized for bucket:', this.bucket);
     } else {
-      console.warn('⚠️ Cloudflare R2 credentials not fully set in .env');
+      log.warn('⚠️ Cloudflare R2 credentials not fully set in .env');
     }
   }
 
@@ -221,7 +221,7 @@ export class CloudflareR2Storage implements CloudStorageService {
         (a, b) => new Date(b.DateCreated).getTime() - new Date(a.DateCreated).getTime()
       );
     } catch (error) {
-      console.warn(`Cloudflare R2: Error listing backups for user ${userId}:`, error);
+      log.warn(`Cloudflare R2: Error listing backups for user ${userId}:`, error);
       return [];
     }
   }
@@ -239,7 +239,7 @@ export class CloudflareR2Storage implements CloudStorageService {
           await this.deleteFile(`backups/user-${userId}/${backup.ObjectName}`);
           deletedCount++;
         } catch (error) {
-          console.error(`Cloudflare R2: Failed to delete old backup ${backup.ObjectName}:`, error);
+          log.error(`Cloudflare R2: Failed to delete old backup ${backup.ObjectName}:`, error);
         }
       }
     }

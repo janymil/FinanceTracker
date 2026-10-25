@@ -6,7 +6,7 @@ const hasSendGrid = Boolean(process.env.SENDGRID_API_KEY);
 const hasSmtp = Boolean(process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
 if (!hasSendGrid && !hasSmtp) {
-  console.warn("No email transport configured (SENDGRID_API_KEY or EMAIL_*). Email notifications will be disabled.");
+  log.warn("No email transport configured (SENDGRID_API_KEY or EMAIL_*). Email notifications will be disabled.");
 } else if (!hasSendGrid) {
   log.info("Email notifications use the SMTP transport (EMAIL_* configured).");
 }
@@ -105,7 +105,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       await mailService.send(message);
       return true;
     } catch (error) {
-      console.error('SendGrid email error:', error);
+      log.error('SendGrid email error:', error);
       if (!hasSmtp) return false;
     }
   }
@@ -120,7 +120,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     await transporter.sendMail(message);
     return true;
   } catch (error) {
-    console.error('SMTP email error:', error);
+    log.error('SMTP email error:', error);
     return false;
   }
 }

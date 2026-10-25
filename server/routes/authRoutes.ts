@@ -37,7 +37,7 @@ export async function getVerifiedClerkProfile(userId: string): Promise<Partial<C
       profileImageUrl: clerkUser?.imageUrl ?? null,
     };
   } catch (error) {
-    console.warn(`[AUTH] Could not load Clerk profile for ${userId}:`, (error as Error).message);
+    log.warn(`[AUTH] Could not load Clerk profile for ${userId}:`, (error as Error).message);
     return null;
   }
 }
@@ -86,7 +86,7 @@ export function registerAuthRoutes(app: Express) {
               user = await storage.adoptUserAccount(emailOwner.id, userId, profile);
               log.info(`[AUTH] Re-linked data from ${emailOwner.id} to ${userId} (${profile.email})`);
             } catch (adoptionError) {
-              console.error('[AUTH] Could not re-link existing account:', adoptionError);
+              log.error('[AUTH] Could not re-link existing account:', adoptionError);
             }
           }
         }
@@ -110,7 +110,7 @@ export function registerAuthRoutes(app: Express) {
             user = await storage.upsertUser(userData);
             log.info(`Created new user in database: ${userId}`);
           } catch (error) {
-            console.error('Error creating user in database:', error);
+            log.error('Error creating user in database:', error);
             return res.status(500).json({ 
               message: 'Failed to create user account'
             });
@@ -119,7 +119,7 @@ export function registerAuthRoutes(app: Express) {
           try {
             user = await storage.updateUser(userId, { email: profile.email });
           } catch (updateError) {
-            console.warn(`[AUTH] Could not backfill email for ${userId}:`, (updateError as Error).message);
+            log.warn(`[AUTH] Could not backfill email for ${userId}:`, (updateError as Error).message);
           }
         }
       }
@@ -130,14 +130,14 @@ export function registerAuthRoutes(app: Express) {
         try {
           user = await storage.updateUser(userId, { language: headerLanguage } as any);
         } catch (languageError) {
-          console.warn('[AUTH] Could not store the language preference:', (languageError as Error).message);
+          log.warn('[AUTH] Could not store the language preference:', (languageError as Error).message);
         }
       }
 
       return res.json(user);
     } catch (error) {
-      console.error("Error fetching user:", error);
-      console.error("Stack trace:", (error as Error).stack);
+      log.error("Error fetching user:", error);
+      log.error("Stack trace:", (error as Error).stack);
       return res.status(500).json({ message: "Failed to fetch user" });
     }
   });
@@ -195,8 +195,8 @@ export function registerAuthRoutes(app: Express) {
       
       return res.json(updatedUser);
     } catch (error) {
-      console.error("Error updating user:", error);
-      console.error("Stack trace:", (error as Error).stack);
+      log.error("Error updating user:", error);
+      log.error("Stack trace:", (error as Error).stack);
       return res.status(500).json({ message: "Failed to update user" });
     }
   });
