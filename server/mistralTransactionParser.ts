@@ -147,7 +147,7 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
     const correction = applyAmountCorrections(transcript, result.amount);
     const correctedAmount = correction.amount;
     if (correction.corrected) {
-      log.info(`🔧 Fixed Spanish amount: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+      log.debug('Spanish amount correction applied');
     }
     
     // Validate and sanitize result

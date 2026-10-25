@@ -11,7 +11,8 @@
     "scripts/benchmark-ocr.ts",
     "scripts/error-guard-smoke.ts",
     "scripts/error-guard-prune.ts",
-    "scripts/uptime-check.ts"
+    "scripts/uptime-check.ts",
+    "scripts/db-schema-drift.ts"
   ],
   "exclude": ["node_modules", "build", "dist"],
   "compilerOptions": {

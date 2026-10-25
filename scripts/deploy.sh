@@ -3,14 +3,22 @@
 # Safe production deploy for Kaptia.
 #
 # What it guarantees:
-#   - tests and typecheck run BEFORE the running app is touched;
+#   - typecheck, unit tests and the database checks run BEFORE the running app is touched;
+#   - the migration files are applied to a disposable database and the suite runs against it,
+#     so a release cannot pass while the real-database tests were silently skipped;
+#   - the production database must already contain every table and column the new code
+#     expects (drift check), so "deploy before migrating" fails here instead of in the app;
 #   - the previous build is kept, so a bad deploy is one command away from undone;
 #   - the app is reloaded with `--update-env`, so a changed .env actually takes effect;
 #   - the new build must pass a live health check, otherwise the old one is restored.
 #
-# What it deliberately does NOT do: migrate the database. Schema changes are a separate,
-# reviewed step (`npm run db:push` against DATABASE_URL_PROD) so an app deploy can never
-# rewrite the schema by accident.
+# What it deliberately does NOT do: change the production schema. Applying migrations to
+# production is a separate, reviewed step (`npm run db:migrate:prod`) so an app deploy can
+# never rewrite the schema by accident.
+#
+# Escape hatches (loud, for a real emergency only):
+#   SKIP_DB_TESTS=1   skip the disposable-database run
+#   SKIP_DB_DRIFT=1   skip the production drift check
 #
 # Usage: ./scripts/deploy.sh
 set -euo pipefail
@@ -23,27 +31,49 @@ KEEP_BACKUPS=3
 STAMP="$(date +%Y%m%d-%H%M%S)"
 PREVIOUS="dist.previous"
 
-echo "==> 1/6 typecheck"
+echo "==> 1/8 typecheck"
 npm run check
 
-echo "==> 2/6 unit tests (no database, no AI keys)"
-npm test
+if [ "${SKIP_DB_TESTS:-0}" = "1" ]; then
+  echo "==> 2/8 build the disposable test database — SKIPPED (SKIP_DB_TESTS=1)"
+else
+  echo "==> 2/8 build the disposable test database from the migration files"
+  npm run db:migrate:test
+fi
 
-echo "==> 3/6 regenerate sitemap from the route list"
+echo "==> 3/8 unit tests (no database, no AI keys)"
+npm run test:unit
+npm run test:ai
+
+if [ "${SKIP_DB_TESTS:-0}" = "1" ]; then
+  echo "==> 4/8 database integration tests — SKIPPED (SKIP_DB_TESTS=1): the database was NOT tested before this release"
+else
+  echo "==> 4/8 database integration tests (fails if they would be skipped)"
+  REQUIRE_DB_TESTS=1 npm run test:integration
+fi
+
+if [ "${SKIP_DB_DRIFT:-0}" = "1" ]; then
+  echo "==> 5/8 SKIPPED (SKIP_DB_DRIFT=1): production schema was NOT checked"
+else
+  echo "==> 5/8 production schema matches the code that is about to run"
+  npm run db:drift:prod
+fi
+
+echo "==> 6/8 regenerate sitemap from the route list"
 npm run sitemap:generate
 
-echo "==> 4/6 build"
+echo "==> 7/8 build"
 rm -rf "$PREVIOUS"
 if [ -d dist ]; then
   cp -a dist "$PREVIOUS"
 fi
 npm run build
 
-echo "==> 5/6 reload $APP_NAME with the current .env"
+echo "==> 8/8 reload $APP_NAME with the current .env"
 pm2 reload "$APP_NAME" --update-env >/dev/null
 pm2 save >/dev/null
 
-echo "==> 6/6 health gate ($HEALTH_URL)"
+echo "==> health gate ($HEALTH_URL)"
 healthy=0
 for attempt in $(seq 1 20); do
   if curl -fsS --max-time 5 "$HEALTH_URL" -o /tmp/kaptia-health.json 2>/dev/null; then

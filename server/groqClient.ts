@@ -33,7 +33,8 @@ export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<stri
       response_format: 'text'
     });
 
-    log.info('🎙️ Groq STT result:', transcription);
+    // The transcription is what the person said: log its shape, never its text.
+    log.debug('Groq STT finished', { characters: String(transcription || '').length });
     return String(transcription || '');
   } catch (error) {
     console.error('❌ Groq STT failed:', error);
@@ -173,14 +174,14 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
           // Direct fix
           if (correctedAmount === '580.00' || correctedAmount === '580') {
             correctedAmount = p.fix;
-            log.info(`🔧 Fixed Spanish number parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+            log.debug('Spanish number correction applied');
           }
         } else if (p.handler) {
           // Dynamic fix
           const expectedAmount = p.handler(match);
           if (correctedAmount !== expectedAmount) {
             correctedAmount = expectedAmount;
-            log.info(`🔧 Fixed currency parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+            log.debug('Currency correction applied');
           }
         }
         break;

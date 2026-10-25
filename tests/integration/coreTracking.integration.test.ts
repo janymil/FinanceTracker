@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { monthRange } from '../../shared/timezones';
+import { databaseTestUrl as testUrl, describeDb } from './dbTestEnv';
 
 /**
  * Core tracking against a REAL Postgres: time zones decide which month a purchase belongs to,
@@ -9,12 +10,6 @@ import { monthRange } from '../../shared/timezones';
  *
  * Skipped with a visible reason when the variable is not set. Never point it at production.
  */
-const testUrl = process.env.DATABASE_URL_TEST;
-const describeDb = testUrl ? describe : describe.skip;
-
-if (!testUrl) {
-  console.warn('[integration] DATABASE_URL_TEST is not set — core tracking integration tests skipped.');
-}
 
 describeDb('core tracking (real database)', () => {
   let storage: typeof import('../../server/storage')['storage'];

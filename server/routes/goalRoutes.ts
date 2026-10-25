@@ -4,6 +4,7 @@ import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { insertGoalSchema, insertExpenseReminderSchema } from "@shared/schema";
+import { parseValue, sendValidationError } from "../validation";
 import { cleanPositiveAmount, cleanNonNegativeAmount, cleanDateValue, cleanText, cleanId } from "@shared/trackingInput";
 
 export function registerGoalRoutes(app: Express) {
@@ -188,16 +189,20 @@ export function registerGoalRoutes(app: Express) {
         return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
       }
 
-      const validatedData = insertExpenseReminderSchema.parse({
+      const parsed = parseValue({
         ...req.body,
         userId,
         categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
         amount: req.body.amount ? req.body.amount.toString() : null,
         dueDate: new Date(req.body.dueDate),
         recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
-      });
+      }, insertExpenseReminderSchema);
+      if (!parsed.ok) {
+        // Answers 400 with the offending fields instead of the generic message below.
+        return sendValidationError(res, parsed.issues, "Failed to create expense reminder");
+      }
 
-      const reminder = await storage.createExpenseReminder(validatedData);
+      const reminder = await storage.createExpenseReminder(parsed.data);
       return res.json(reminder);
     } catch (error) {
       console.error("Error creating expense reminder:", error);

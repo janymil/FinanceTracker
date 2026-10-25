@@ -20,7 +20,7 @@ router.post('/parse', async (req, res) => {
     }
     const { transcript, userLanguage } = body.data;
 
-    log.info('🎤 Voice parse request:', { transcript, userLanguage });
+    log.debug('Voice parse request', { language: userLanguage, transcriptLength: transcript.length });
 
     // Parse voice input
     const parsed = parseVoiceInput(transcript, userLanguage, new Date());
@@ -31,7 +31,7 @@ router.post('/parse', async (req, res) => {
     const textToAnalyze = parsed.description || transcript;
     if (textToAnalyze) {
       try {
-        log.info('🏪 Looking up merchant for transcript:', transcript);
+        log.debug('Merchant lookup started', { language: userLanguage, hasText: textToAnalyze.length > 0 });
         
         // Get country code from user language
         const getCountryCode = (lang: string) => {
@@ -41,23 +41,23 @@ router.post('/parse', async (req, res) => {
         };
         
         const countryCode = getCountryCode(userLanguage);
-        log.info('🏪 Using country code:', countryCode);
+        log.debug('Merchant lookup country', { countryCode });
         
 
         
         const merchantResult = await lookupMerchant(transcript, countryCode, undefined, userLanguage);
-        log.info('🏪 Merchant lookup result:', JSON.stringify(merchantResult, null, 2));
+        log.debug('Merchant lookup finished', {
+          matched: Boolean(merchantResult?.matched_merchant),
+          businessType: merchantResult?.business_type ?? null,
+          categoryCount: merchantResult?.typical_categories?.length ?? 0,
+        });
         
         // Use the category from merchant lookup with proper language mapping
         if (merchantResult?.business_type) {
-          log.info('🏪 Found business_type:', merchantResult.business_type);
-          log.info('🏪 typical_categories:', merchantResult.typical_categories);
-          log.info('🏪 matched_merchant:', merchantResult.matched_merchant);
-          
           // Update description with proper merchant name if found
           if (merchantResult.matched_merchant) {
             parsed.description = merchantResult.matched_merchant.charAt(0).toUpperCase() + merchantResult.matched_merchant.slice(1);
-            log.info('🏪 Updated description to:', parsed.description);
+            log.debug('Merchant name applied to description');
           }
           
           // If it has typical_categories, use the appropriate language one
@@ -65,7 +65,7 @@ router.post('/parse', async (req, res) => {
             // Get the category based on user language: [English, Slovak, Spanish]
             const langIndex = userLanguage.startsWith('es') ? 2 : userLanguage.startsWith('sk') ? 1 : 0;
             category = merchantResult.typical_categories[langIndex] || merchantResult.typical_categories[0];
-            log.info('🏪 Selected category by language index', langIndex, ':', category);
+            log.debug('Category selected', { language: userLanguage, category });
           } else {
             // Fallback - use business_type as category (shouldn't happen with proper merchant data)
             category = merchantResult.business_type;
@@ -74,20 +74,25 @@ router.post('/parse', async (req, res) => {
           category = 'Uncategorized';
         }
         
-        log.info('🏪 Final category:', category);
+        log.debug('Merchant lookup final category', { category });
       } catch (error) {
-        log.info('🏪 Merchant lookup error:', error);
+        log.warn('Merchant lookup failed', { error });
         category = 'Uncategorized';
       }
     }
 
     const result = { ...parsed, category };
     
-    log.info('📤 Voice parsing result:', result);
+    // The parsed phrase itself is the person's own words: log the shape, never the text.
+    log.debug('Voice parsing finished', {
+      hasAmount: Boolean(parsed.amount),
+      hasDescription: Boolean(parsed.description),
+      category,
+    });
     res.json({ success: true, data: result });
 
   } catch (error) {
-    console.error('❌ Voice parsing error:', error instanceof Error ? error.message : String(error));
+    log.error('Voice parsing error', { error });
     res.status(400).json({
       success: false,
       error: error instanceof Error ? error.message : 'Voice parsing failed'

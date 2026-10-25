@@ -474,7 +474,8 @@ npm install
 npm run auth:check # validate Clerk dev keys (.env / .env.local) + show instance host
 npm run dev       # tsx server/index.ts (Vite middleware, hot reload)
 npm run check     # TypeScript validation — 0 errors as of 2026-10-21
-npm run db:push   # apply Drizzle schema
+npm run db:migrate # apply the reviewed SQL files in migrations/ (never db:push on production)
+npm run db:drift   # read-only: does the database have every table/column the code expects?
 npm run build     # Vite client bundle + esbuild server bundle
 npm run start     # production server (NODE_ENV=production node dist/index.js)
 ```

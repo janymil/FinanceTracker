@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { databaseTestUrl as testUrl, describeDb } from './dbTestEnv';
 
 /**
  * Integration module: `getUserFinancialSummary` against a REAL Postgres.
@@ -10,15 +11,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
  * The env is set BEFORE `server/storage` is imported, because `server/db.ts` reads
  * DATABASE_URL at module load.
  */
-
-const testUrl = process.env.DATABASE_URL_TEST;
-const describeDb = testUrl ? describe : describe.skip;
-
-if (!testUrl) {
-  console.warn(
-    '[integration] DATABASE_URL_TEST is not set — financial-summary integration tests skipped.',
-  );
-}
 
 describeDb('getUserFinancialSummary (real database)', () => {
   let storage: typeof import('../../server/storage')['storage'];

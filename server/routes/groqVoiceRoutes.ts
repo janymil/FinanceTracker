@@ -43,7 +43,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       return res.status(400).json({ error: 'No speech detected in audio' });
     }
     
-    log.info('🎙️ Transcription result:', transcript);
+    log.debug('Groq transcription finished', { characters: transcript.length });
     
     // Step 2: Groq LLaMA intelligent parsing with user preferences
     log.info('🧠 Step 2: Parsing transaction with Groq LLaMA...');
@@ -102,7 +102,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Transcript is required' });
     }
     
-    log.info('🧠 Testing Groq LLaMA text parsing:', transcript);
+    log.debug('Groq text parsing request', { characters: transcript.length, userLanguage });
     
     const result = await parseTransactionWithGroq(transcript, userLanguage, userCurrency);
     

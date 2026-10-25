@@ -62,7 +62,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 
     const mistralResult = await mistralResponse.json();
     const transcription = mistralResult.text;
-    log.info('🎙️ Mistral transcription result:', transcription);
+    log.debug('Mistral transcription finished', { characters: transcription.length });
 
     if (!transcription || transcription.trim().length < 2) {
       return res.status(400).json({ error: 'No valid transcription received' });
@@ -151,7 +151,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    log.info('🧠 Testing Mistral text parsing:', transcript);
+    log.debug('Mistral text parsing request', { characters: transcript.length, userLanguage });
     
     // Get user's existing categories
     const userCategories = await storage.getCategories(userId);

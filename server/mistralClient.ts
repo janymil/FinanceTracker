@@ -80,7 +80,7 @@ export class MistralClient {
 
       const result = (await response.json()) as { text?: string };
       const transcription = result.text ?? '';
-      log.info('🎙️ [Mistral] Transcription successful:', transcription.slice(0, 100));
+      log.debug('Mistral transcription finished', { characters: transcription.length });
       return transcription.trim();
 
     } catch (error) {

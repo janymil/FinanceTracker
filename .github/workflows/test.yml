@@ -66,6 +66,8 @@ jobs:
       PUPPETEER_SKIP_DOWNLOAD: 'true'
       DATABASE_URL: postgresql://ci:ci@localhost:5432/kaptia_test
       DATABASE_URL_TEST: postgresql://ci:ci@localhost:5432/kaptia_test
+      # A release must never pass because the database tests skipped themselves.
+      REQUIRE_DB_TESTS: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -73,8 +75,8 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci
-      - name: Create the schema
-        run: npx drizzle-kit push --force
+      - name: Create the schema from the migration files
+        run: npm run db:migrate
       - name: Integration tests
         run: npm run test:integration
 
@@ -114,8 +116,8 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci
-      - name: Create the schema
-        run: npx drizzle-kit push --force
+      - name: Create the schema from the migration files
+        run: npm run db:migrate
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run E2E

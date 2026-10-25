@@ -59,7 +59,12 @@ export function registerPDFRoutes(app: any) {
 
       const netBalance = totalIncome - totalExpenses;
 
-      log.info('Financial totals:', { totalIncome, totalExpenses, netBalance });
+      // The totals are the person's financial position: log that they were computed, not what they are.
+      log.debug('Financial totals computed', {
+        transactions: periodTransactions.length,
+        hasIncome: totalIncome > 0,
+        hasExpenses: totalExpenses > 0,
+      });
 
       // Get trends data for the last 6 months
       const trendsData = [];

@@ -6,6 +6,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage, translateCategoryName } from "../categoryTranslations";
 import { insertTransactionSchema } from "@shared/schema";
+import { parseValue, sendValidationError } from "../validation";
 import { autoCategorizeTransaction } from "../autoCategorize";
 import { batchProcessor } from "../batch-processor";
 import { monthRange, localParts, rangeStartFrom, rangeEndFrom } from "@shared/timezones";
@@ -107,7 +108,7 @@ export function registerTransactionRoutes(app: Express) {
         return res.status(400).json({ message: "Unknown category" });
       }
 
-      const validatedData = insertTransactionSchema.parse({
+      const parsed = parseValue({
         ...req.body,
         userId,
         description,
@@ -122,7 +123,12 @@ export function registerTransactionRoutes(app: Express) {
         ocrVendor: req.body.extracted?.vendor || null,
         ocrDetectedAmount: req.body.extracted?.amount ? req.body.extracted.amount.toString() : null,
         ocrDetectedDate: req.body.extracted?.date ? new Date(req.body.extracted.date) : null,
-      });
+      }, insertTransactionSchema);
+      if (!parsed.ok) {
+        // Answers 400 with the offending fields instead of the generic message below.
+        return sendValidationError(res, parsed.issues, "Failed to create transaction");
+      }
+      const validatedData = parsed.data;
 
       // Save transaction to database immediately
       const transaction = await storage.createTransaction(validatedData);

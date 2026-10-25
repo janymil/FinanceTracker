@@ -34,6 +34,7 @@ import { countryBlockingMiddleware } from "./middleware/countryBlocking.js";
 import { checkEncryptionKey } from "./encryptionDiagnostics.js";
 import { reportServerError } from './errorGuard/report.js';
 import { verifyEmailTransport } from './emailService.js';
+import { POOL_SETTINGS, sslFor, closePool } from './db.js';
 
 import "./batch-processor.js"; // Initialize batch processing system
 import { startRecurringScheduler } from "./recurringProcessor.js";
@@ -41,38 +42,17 @@ import { startReminderScheduler } from "./reminderNotifier.js";
 
 const app = express();
 
-// Global middleware to prevent header conflicts
-app.use((req, res, next) => {
-  // Override res.setHeader to prevent conflicts
-  const originalSetHeader = res.setHeader;
-  res.setHeader = function(name, value) {
-    if (!this.headersSent && !this.finished) {
-      try {
-        return originalSetHeader.call(this, name, value);
-      } catch (error: any) {
-        console.error(`Header conflict prevented for ${name}:`, error.message);
-        return this;
-      }
-    }
-    return this;
-  };
-  
-  // Override res.writeHead to prevent conflicts
-  const originalWriteHead = res.writeHead;
-  res.writeHead = function(statusCode, headers) {
-    if (!this.headersSent && !this.finished) {
-      try {
-        return originalWriteHead.call(this, statusCode, headers as any);
-      } catch (error: any) {
-        console.error(`WriteHead conflict prevented:`, error.message);
-        return this;
-      }
-    }
-    return this;
-  };
-  
-  next();
-});
+// Response headers are deliberately NOT patched here.
+//
+// This file used to wrap `res.setHeader` / `res.writeHead` to swallow "Cannot set headers after
+// they are sent". The wrapping made a real bug (a route setting a header after the body had gone
+// out) into a silently dropped header: the response looked fine and nothing was logged, because
+// the `headersSent` branch returned `this` without even a message. Node's throw is the diagnosis,
+// and a resulting 5xx is captured by the `res.on('finish')` listener in server/routes/index.ts and
+// reported through Error Guard — so patching only hid evidence.
+//
+// `tests/unit/responseHeaders.test.ts` fails if the patch comes back.
+
 
 // Register Clerk webhooks with raw body parser BEFORE any other middleware
 app.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
@@ -115,7 +95,10 @@ if (isProduction) {
     sessionStore = new PgSession({
       conObject: {
         connectionString: sessionConnectionString,
-        ssl: sessionConnectionString.includes('neon.tech') ? { rejectUnauthorized: false } : undefined,
+        ssl: sslFor(sessionConnectionString),
+        // The session store opens its own pool; without these limits it could hold
+        // connections forever and starve the main pool.
+        ...POOL_SETTINGS,
       },
       tableName: 'sessions',
       createTableIfMissing: true,
@@ -407,6 +390,27 @@ app.use((req, res, next) => {
     // E-mails bill reminders when their "remind me N days before" moment arrives.
     startReminderScheduler();
   });
+
+  // `pm2 reload` sends SIGTERM. Finish what is in flight, hand the database connections
+  // back, then exit — otherwise the old process is killed mid-query and its sockets linger
+  // until the database times them out.
+  // pm2 kills after `kill_timeout` (1.6 s by default); start the app with a longer one
+  // (`pm2 start ... --kill-timeout 12000`) if you want the pool closed every time.
+  let shuttingDown = false;
+  const shutdown = (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    log(`[shutdown] ${signal} received — closing server and database pool`);
+    const exit = () => { closePool().finally(() => process.exit(0)); };
+    server.close(exit);
+    // Keep-alive sockets are idle, not in-flight: releasing them now lets close() finish
+    // quickly instead of waiting for the client to give up.
+    (server as any).closeIdleConnections?.();
+    // A stuck socket must not keep the old process alive forever.
+    setTimeout(() => process.exit(1), 10_000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 })();
 
 process.on('uncaughtException', (err) => {
@@ -417,9 +421,5 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason) => {
   console.error('CRITICAL: Unhandled Rejection:', reason);
   reportServerError(reason, { where: 'process.unhandledRejection' });
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
