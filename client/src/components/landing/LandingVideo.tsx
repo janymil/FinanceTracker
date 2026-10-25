@@ -4,7 +4,7 @@ import { Volume2, VolumeX, Play, Pause } from "lucide-react";
 interface LandingVideoProps {
   name: string; // e.g. "kaptia-front", "1", "2", etc.
   className?: string;
-  aspectRatio?: "video" | "square" | "auto";
+  aspectRatio?: "video" | "square" | "portrait" | "auto";
   title?: string;
   autoPlay?: boolean;
 }
@@ -71,6 +71,8 @@ export function LandingVideo({
       ? "aspect-video"
       : aspectRatio === "square"
       ? "aspect-square"
+      : aspectRatio === "portrait"
+      ? "aspect-[9/16]"
       : "";
 
   return (

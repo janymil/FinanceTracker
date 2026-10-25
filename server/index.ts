@@ -87,6 +87,7 @@ app.use(cookieParser());
 // Behind Caddy + Cloudflare: without this, req.ip is the proxy's address (so rate
 // limits would hit everybody at once) and `secure` cookies are dropped.
 app.set('trust proxy', 1);
+app.disable('x-powered-by');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const sessionSecret = process.env.SESSION_SECRET;
@@ -191,17 +192,18 @@ app.use((req, res, next) => {
       res.setHeader('X-XSS-Protection', '0'); // legacy filter is itself an attack surface
       res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
       res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=(), payment=(self)');
-      // Report-only for now: watch the browser console on a staging pass, then rename to
-      // `Content-Security-Policy` to enforce. Lists every third party the app talks to.
-      res.setHeader('Content-Security-Policy-Report-Only', [
+      // Enforced. Lists every third party the app talks to; checked with a browser sweep of the
+      // public and signed-in pages in all three languages (no violations). A new third-party
+      // script, frame or API host must be added here or the browser will block it.
+      res.setHeader('Content-Security-Policy', [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.kaptia.app https://js.stripe.com https://www.googletagmanager.com https://challenges.cloudflare.com",
+        "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.kaptia.app https://js.stripe.com https://www.googletagmanager.com https://www.googleadservices.com https://challenges.cloudflare.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
         "img-src 'self' data: blob: https:",
         "media-src 'self' blob: https:",
-        "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.kaptia.app https://api.stripe.com https://www.google-analytics.com https://*.google-analytics.com https://*.mercadopago.com",
-        "frame-src https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.mercadopago.com",
+        "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.kaptia.app https://api.stripe.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com https://*.doubleclick.net https://*.mercadopago.com",
+        "frame-src https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://td.doubleclick.net https://*.mercadopago.com",
         "worker-src 'self' blob:",
         "object-src 'none'",
         "base-uri 'self'",

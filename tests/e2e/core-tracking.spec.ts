@@ -257,8 +257,10 @@ test.describe('export (Premium)', () => {
     expect((await past.json()).transactions.some((t: any) => t.description === description)).toBe(false);
 
     const wide = await page.request.get(
-      `/api/export?format=json&dateRange=custom&startDate=${calendarDay(-1)}&endDate=${calendarDay(0)}&includeTransactions=true`,
+      `/api/export?format=json&dateRange=custom&startDate=${calendarDay(-1)}&endDate=${calendarDay(1)}&includeTransactions=true`,
     );
+    // +1 day: calendarDay() is a UTC date, the app reads dates in the person's own time zone,
+    // and for a few hours every day those two disagree about what "today" is.
     expect((await wide.json()).transactions.some((t: any) => t.description === description)).toBe(true);
   });
 

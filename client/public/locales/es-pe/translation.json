@@ -3844,6 +3844,8 @@
   "Receipt scanned": "Recibo escaneado",
   "Coffee": "Café",
   "Added by voice": "Añadido por voz",
+  "Lost track of your money?": "¿Perdiste la pista de tu dinero?",
+  "Kaptia knows where it went. Watch the 30-second story.": "Kaptia sabe a dónde se fue. Mira la historia de 30 segundos.",
   "AI insight": "Insight de IA",
   "Dining out is up 18% this month": "Las comidas fuera subieron 18% este mes",
   "Compare plans": "Compara planes",
@@ -4068,7 +4070,8 @@
     "auto_renewal": "Tu suscripción se renueva automáticamente cada {{period}} por {{price}} hasta que la canceles. Puedes cancelarla en cualquier momento desde tu Perfil.",
     "period_monthly": "mes",
     "period_yearly": "año",
-    "auto_renewal_terms": "Términos de Servicio"
+    "auto_renewal_terms": "Términos de Servicio",
+    "refund_link": "Reembolsos"
   },
   "reclamaciones": {
     "seo": {
@@ -4111,7 +4114,8 @@
   },
   "footer": {
     "reclamaciones": "Libro de Reclamaciones",
-    "rights": "© {{year}} Kaptia. Todos los derechos reservados."
+    "rights": "© {{year}} Kaptia. Todos los derechos reservados.",
+    "refunds": "Política de reembolsos"
   },
   "notFound": {
     "title": "Página no encontrada",
@@ -4208,5 +4212,45 @@
     "filters": "Filtros",
     "send": "Enviar",
     "delete": "Eliminar"
+  },
+  "refund": {
+    "seo": {
+      "title": "Política de Cancelación y Reembolsos",
+      "description": "Cómo cancelar tu suscripción a Kaptia, qué pasa después y cuándo y cómo puedes pedir un reembolso."
+    },
+    "title": "Política de Cancelación y Reembolsos",
+    "last_updated": "Última actualización: 24 de octubre de 2026",
+    "summary_title": "En resumen",
+    "summary_text": "Puedes cancelar en cualquier momento desde tu Perfil y mantienes tus funciones de pago hasta el final del periodo que ya pagaste. No reembolsamos un periodo que ya empezó, salvo que se te haya cobrado por error o que la ley te dé derecho a un reembolso.",
+    "cancel_title": "1. Cómo cancelar",
+    "cancel_desc": "Entra a tu Perfil y elige la opción para administrar tu suscripción. Ahí puedes cancelar la renovación automática tú mismo, sin escribirnos. Si no la encuentras o no funciona, escribe a info@kaptia.app y la cancelamos por ti.",
+    "after_title": "2. Qué pasa después de cancelar",
+    "after_1": "No se te volverá a cobrar.",
+    "after_2": "Mantienes todas las funciones de tu plan hasta el último día del periodo que ya pagaste (el mes o el año).",
+    "after_3": "Después de ese día tu cuenta pasa al plan Gratis. Tus registros se quedan en tu cuenta y se aplican los límites del plan Gratis.",
+    "after_4": "Cancelar no elimina tu cuenta. Puedes eliminar tu cuenta y tus datos por separado en cualquier momento.",
+    "rules_title": "3. Cuándo reembolsamos",
+    "rules_desc": "El dinero de un periodo de cobro que ya empezó no se reembolsa, ni en planes mensuales ni anuales. Hacemos estas excepciones:",
+    "rules_yes_1": "Se te cobró dos veces el mismo periodo, o el monto es mayor que el precio que viste al suscribirte.",
+    "rules_yes_2": "Se te cobró después de cancelar a tiempo, o el cobro no lo hiciste tú.",
+    "rules_yes_3": "Un problema de nuestra parte te impidió usar las funciones de pago y no pudimos resolverlo.",
+    "rules_yes_4": "La ley peruana de protección al consumidor te da derecho a un reembolso en tu caso.",
+    "rules_window": "Escríbenos dentro de los 7 días siguientes al cobro. Si nos escribes después, igual leeremos tu solicitud y la revisaremos, pero no podemos prometer un reembolso.",
+    "rules_no_title": "No reembolsamos:",
+    "rules_no_1": "Un mes o un año que ya empezó y que simplemente no usaste.",
+    "rules_no_2": "Una renovación que olvidaste cancelar antes de la fecha de renovación, salvo que aplique uno de los casos anteriores.",
+    "yearly_title": "4. Planes anuales",
+    "yearly_desc": "Si cancelas un plan anual, no se renueva y mantienes tus funciones hasta el final del año que pagaste. Los meses restantes no se reembolsan, salvo que aplique uno de los casos de la sección 3.",
+    "how_title": "5. Cómo pedir un reembolso",
+    "how_desc": "Escribe a info@kaptia.app desde el correo de tu cuenta e indícanos:",
+    "how_1": "la fecha y el monto del cobro,",
+    "how_2": "cómo pagaste (Stripe o Mercado Pago),",
+    "how_3": "por qué pides el reembolso.",
+    "how_after": "Respondemos en un máximo de 5 días hábiles. Si lo aprobamos, devolvemos el dinero al mismo medio de pago que usaste. Según la empresa de pagos y tu tarjeta, puede tardar hasta 10 días hábiles en verse reflejado.",
+    "law_title": "6. Tus derechos como consumidor en Perú",
+    "law_desc": "Esta política no te quita ningún derecho que te da el Código de Protección y Defensa del Consumidor. Si no estás de acuerdo con nuestra respuesta, puedes presentar un reclamo en nuestro Libro de Reclamaciones o acudir al INDECOPI.",
+    "law_link": "Abrir el Libro de Reclamaciones",
+    "contact_title": "7. Contacto",
+    "contact_desc": "Preguntas sobre cancelaciones o reembolsos: info@kaptia.app."
   }
 }

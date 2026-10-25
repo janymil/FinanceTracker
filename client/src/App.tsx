@@ -51,6 +51,7 @@ import TermsOfService from "@/pages/terms-of-service";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import CookiePolicy from "@/pages/cookie-policy";
 import Reclamaciones from "@/pages/reclamaciones";
+import RefundPolicy from "@/pages/refund-policy";
 import Contact from "@/pages/contact";
 import Help from "@/pages/help";
 import NotFoundPage from "./pages/not-found";
@@ -146,6 +147,10 @@ function Router() {
         <Route path="/:lang/cookies" component={CookiePolicy} />
         <Route path="/:lang/cookie-policy" component={CookiePolicy} />
         <Route path="/:lang/reclamaciones" component={Reclamaciones} />
+
+        <Route path="/:lang/refund-policy" component={RefundPolicy} />
+
+        <Route path="/:lang/refunds" component={RefundPolicy} />
         <Route path="/:lang/contact" component={Contact} />
         <Route path="/:lang/help" component={Help} />
         <Route path="/:lang/auth" component={AuthPage} />
@@ -298,6 +303,10 @@ export function AuthenticatedApp() {
               <Route path="/:lang/cookies" component={CookiePolicy} />
               <Route path="/:lang/cookie-policy" component={CookiePolicy} />
               <Route path="/:lang/reclamaciones" component={Reclamaciones} />
+
+              <Route path="/:lang/refund-policy" component={RefundPolicy} />
+
+              <Route path="/:lang/refunds" component={RefundPolicy} />
               <Route path="/:lang/contact" component={Contact} />
               <Route path="/:lang/help" component={Help} />
               

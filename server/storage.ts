@@ -87,6 +87,7 @@ import { calendarDaysRange, resolveTimeZone } from "@shared/timezones";
 import { reportInvariant } from "./errorGuard/report.js";
 import { UNCATEGORIZED } from "@shared/calculations";
 import { isRecurrenceFrequency, occurrenceAt } from "@shared/recurrence";
+import { isUniqueViolation } from "./dbErrors";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, inArray } from "drizzle-orm";
 
 // Verified identity fields fetched from Clerk (see server/routes/authRoutes.ts)
@@ -455,7 +456,7 @@ export class DatabaseStorage implements IStorage {
       return newUser;
     } catch (error: any) {
       // If it's a constraint violation (user already exists), fetch and potentially update the existing user
-      if (error.code === '23505' || error.message?.includes('duplicate key')) {
+      if (isUniqueViolation(error)) {
         const [existingUser] = await db.select().from(users).where(eq(users.id, userData.id));
         if (existingUser) {
           // Update existing user if needed (e.g., if email is missing)

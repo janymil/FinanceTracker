@@ -242,4 +242,64 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://kaptia.app/es/cookie-policy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://kaptia.app/en/cookie-policy"/>
   </url>
+  <url>
+    <loc>https://kaptia.app/sk/reclamaciones</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="sk" href="https://kaptia.app/sk/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaptia.app/en/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://kaptia.app/es/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaptia.app/en/reclamaciones"/>
+  </url>
+  <url>
+    <loc>https://kaptia.app/en/reclamaciones</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="sk" href="https://kaptia.app/sk/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaptia.app/en/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://kaptia.app/es/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaptia.app/en/reclamaciones"/>
+  </url>
+  <url>
+    <loc>https://kaptia.app/es/reclamaciones</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="sk" href="https://kaptia.app/sk/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaptia.app/en/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://kaptia.app/es/reclamaciones"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaptia.app/en/reclamaciones"/>
+  </url>
+  <url>
+    <loc>https://kaptia.app/sk/refund-policy</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="sk" href="https://kaptia.app/sk/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaptia.app/en/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://kaptia.app/es/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaptia.app/en/refund-policy"/>
+  </url>
+  <url>
+    <loc>https://kaptia.app/en/refund-policy</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="sk" href="https://kaptia.app/sk/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaptia.app/en/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://kaptia.app/es/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaptia.app/en/refund-policy"/>
+  </url>
+  <url>
+    <loc>https://kaptia.app/es/refund-policy</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="sk" href="https://kaptia.app/sk/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kaptia.app/en/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://kaptia.app/es/refund-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kaptia.app/en/refund-policy"/>
+  </url>
 </urlset>

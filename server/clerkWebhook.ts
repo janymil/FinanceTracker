@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { syncCreatedClerkUser } from './clerkUsers';
+import { isUniqueViolation } from './dbErrors';
 
 /**
  * Clerk → database sync (user.created / user.updated / user.deleted).
@@ -22,7 +23,6 @@ export interface WebhookDeps {
   verify: (rawBody: Buffer | string, headers: Record<string, string>, secret: string) => Promise<any>;
 }
 
-const isUniqueViolation = (error: any) => error?.code === '23505' || /duplicate key/i.test(error?.message ?? '');
 
 const defaultDeps: WebhookDeps = {
   loadStorage: async () => (await import('./storage')).storage as unknown as WebhookStorage,
