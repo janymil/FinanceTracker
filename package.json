@@ -11,6 +11,7 @@
     "check:logging": "tsx scripts/check-logging.ts",
     "check:stripe-prices": "tsx scripts/check-stripe-prices.ts",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
@@ -41,7 +42,9 @@
     "db:audit-users": "node scripts/db-user-audit.mjs",
     "db:verify-globals": "node scripts/db-verify-globals.mjs",
     "db:clean-users": "node scripts/clean-user-data.mjs",
-    "db:clean-users:prod": "node scripts/clean-user-data.mjs --prod"
+    "db:clean-users:prod": "node scripts/clean-user-data.mjs --prod",
+    "dr:verify": "tsx scripts/restore-verify.ts",
+    "load:import": "tsx scripts/load-test-import.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1154.0",
@@ -175,6 +178,7 @@
     "@types/react-dom": "^18.3.1",
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "^4.3.2",
+    "@vitest/coverage-v8": "^3.2.7",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.1",
     "esbuild": "^0.25.0",

@@ -62,6 +62,14 @@
 **Čo sa vedome NEPRIDÁVA v kroku 1:** coverage thresholds, mutation testing, `jsdom`.
 Dôvod: nemáme čo pokrývať, kým neexistuje vrstva, ktorá je hodná coverage.
 
+> **Aktualizované 2026-10-25:** vrstva, ktorá je hodná coverage, medzitým existuje, takže brána
+> pribudla — ale **nie celorepo**. `vitest.config.ts` meria len štyri súbory, ktoré rozhodujú
+> o tom, čo číslo na obrazovke znamená (`shared/money.ts`, `shared/calculations.ts`,
+> `shared/trackingInput.ts`, `lib/aiProvider.ts`), a `npm run test:coverage` padne pod
+> 95 % statements / 85 % branches / 90 % functions / 95 % lines. Namerané hodnoty v deň
+> zavedenia boli 98,09 / 89,13 / 95,65 / 98,09, takže je to západka proti regresii, nie
+> cieľ. Celorepo percento by meralo hlavne to, koľko Reactu existuje.
+
 ---
 
 ## 3. Štyri zmluvy (Contracts)

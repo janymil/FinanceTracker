@@ -12,7 +12,9 @@
     "scripts/error-guard-smoke.ts",
     "scripts/error-guard-prune.ts",
     "scripts/uptime-check.ts",
-    "scripts/db-schema-drift.ts"
+    "scripts/db-schema-drift.ts",
+    "scripts/restore-verify.ts",
+    "scripts/load-test-import.ts"
   ],
   "exclude": ["node_modules", "build", "dist"],
   "compilerOptions": {

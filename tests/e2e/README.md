@@ -14,6 +14,27 @@ A real run needs all of this — none of it may point at production:
 | Running app | `npm run dev` or `E2E_MANAGED_SERVER=1` to let Playwright start it |
 | Country blocking off | `DISABLE_COUNTRY_BLOCKING=1`, otherwise the runner can get a 403 |
 
+## Turning it on in CI
+
+The `e2e` job in `.github/workflows/test.yml` is gated by `E2E_ENABLED`, and it builds everything it
+needs: a throwaway `postgres:16` service, the schema from `migrations/`, the app itself
+(`E2E_MANAGED_SERVER=1`) and a local PDF stub. **No staging site is required.** It needs four
+settings:
+
+| Kind | Name | Why |
+|---|---|---|
+| Repository variable | `E2E_ENABLED=true` | un-gates the job |
+| Repository secret | `E2E_CLERK_SECRET_KEY` | a **test** instance key, never production |
+| Repository variable | `E2E_CLERK_PUBLISHABLE_KEY` | the matching publishable key |
+| Repository secret | `ENCRYPTION_KEY` | 64 hex characters; a throwaway is fine, the database is deleted with the job |
+
+`E2E_BASE_URL` can stay unset: the job uses the server it starts. Set it only to point the suite at
+an already-running deployment — and then unset `E2E_MANAGED_SERVER`, or Playwright will wait for a
+local server that nobody is going to start.
+
+Do not enable this with production credentials. `auth.setup.ts` refuses a `neon.tech` database, but
+that guard covers the database only, not the Clerk instance.
+
 ## A real run (what the suite does)
 
 `auth.setup.ts` creates (once) a demo account in the Clerk **test** instance

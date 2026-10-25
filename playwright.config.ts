@@ -10,7 +10,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Why only a few flows: Clerk login + `/:lang/` prefixes (59 routes) + SSR
  * (`server/ssr.ts`) + `countryBlockingMiddleware` make each flow expensive and flaky.
  */
-const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:5000';
+const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:5000';
 const MANAGED_SERVER = process.env.E2E_MANAGED_SERVER === '1';
 const E2E_ENABLED = process.env.E2E_ENABLED === '1';
 const STORAGE_STATE = 'tests/e2e/.auth/user.json';
