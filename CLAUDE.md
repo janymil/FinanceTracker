@@ -11,23 +11,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run check` — TypeScript type checking + the server logging guard
 - `npm run db:migrate` — apply the reviewed SQL files in `migrations/` in order
 - `npm run db:drift` — read-only: does the database have every table and column the code expects?
+- `npm run dr:verify` — after a restore: is the copy populated, and can the current
+  `ENCRYPTION_KEY` actually decrypt it? Exit 1 means the copy or the key is wrong. Point it at a
+  restored copy (`RESTORE_DATABASE_URL` or `--url`); it refuses `DATABASE_URL_PROD`.
+  The procedure is in `docs/recovery-runbook.md`.
 
 ### Testing and Quality
 - `npm run check` — TypeScript across app, tests and scripts, then `scripts/check-logging.ts`
   (server code must log through `server/logger.ts`, never `console.log` directly)
 - `npm test` — Vitest unit + replay suites (no database, no AI keys, no network)
+- `npm run test:coverage` — the same suite with the coverage gate: only `shared/money.ts`,
+  `shared/calculations.ts`, `shared/trackingInput.ts` and `lib/aiProvider.ts` are measured, and a
+  drop below the thresholds in `vitest.config.ts` fails the run. This is what CI runs.
 - `npm run test:integration` — needs `DATABASE_URL_TEST` (read from `.env.test`); with
   `REQUIRE_DB_TESTS=1` a missing database fails instead of skipping
 - `npm run test:e2e` — Playwright; needs a staging URL + Clerk test instance
 - `npm run healthcheck -- --deep --url https://kaptia.app` — synthetic check, exit code 0/1 (the AI gateway shows as `degraded`, never as an error: calls fall back)
 - `npm run ai:chain-check` — free end-to-end check of app → gateway → fake provider (needs the gateway checked out at `./ai-processor` or `GATEWAY_DIR`)
 - `npm run uptime:check` — external probe; records a `job_runs` row and e-mails on failure
+- `npm run load:import -- --base-url http://127.0.0.1:4400 --preset import-data` — concurrency
+  probe for the import/OCR routes only (AI is excluded: it bills per call). Writes rows, so point
+  it at a disposable database; needs `LOAD_TEST_COOKIE` (a logged-in session) and a premium test
+  user. 429s are reported separately — that is the per-user rate limit working.
 - `./scripts/deploy.sh` — safe deploy: typecheck → migration files applied to a disposable
   database → unit tests → database integration tests → production drift check → live price
   check → sitemap → build → pm2 reload → health gate → automatic rollback
 
-Production timers live in `/etc/cron.d/kaptia` (uptime every 5 min, latency check hourly,
-error-data retention daily). Schema changes are **not** part of the deploy script and never
+Production timers are **systemd** units taken from `ops/kaptia-monitoring/` (uptime every 5 min,
+latency check hourly, error-data retention daily). There is no cron daemon on this host, and that
+is deliberate — do not install one; see `ops/kaptia-monitoring/README.md` for why. Schema changes
+are **not** part of the deploy script and never
 go through `db:push`: they are reviewed SQL files in `migrations/`, applied to production
 with `npm run db:migrate:prod` (see `migrations/README.md`).
 

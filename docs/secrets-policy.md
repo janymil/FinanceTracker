@@ -89,7 +89,9 @@ in this order of urgency: `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `GROQ_API_KEY`,
 **Never rotate `ENCRYPTION_KEY` casually**: every encrypted column was written with
 it, and a new key makes that data unreadable (`server/encryption.ts`,
 `server/encryptionDiagnostics.ts`). Rotating it means decrypt-with-old →
-re-encrypt-with-new, on purpose, with a backup.
+re-encrypt-with-new, on purpose, with a backup. The recovery side of this — where the
+copies live, what to do when one is lost, and how to prove a restore is readable — is
+`docs/recovery-runbook.md`.
 
 ## Housekeeping specific to this checkout
 
