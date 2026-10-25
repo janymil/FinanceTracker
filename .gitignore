@@ -13,6 +13,13 @@ service-account.json
 *-service-account.json
 google-cloud-credentials.json
 gcp-*.json
+# Private keys and certificates never belong in git either
+*.pem
+*.key
+*.p12
+*.pfx
+client/.env
+client/.env.*
 
 # Local data backups (may contain personal data)
 backups/

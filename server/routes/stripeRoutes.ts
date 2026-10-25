@@ -4,11 +4,17 @@ import Stripe from "stripe";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { regionForRequest } from "../billingRegion";
+import {
+  PRICE_ENV_KEYS,
+  readConfiguredReference,
+  type StripeBillingCurrency,
+  type StripePlanKey,
+} from "../../shared/stripePriceEnv";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
-type PlanKey = 'standard' | 'standard-yearly' | 'premium' | 'premium-yearly';
-type BillingCurrency = 'usd' | 'pen';
+type PlanKey = StripePlanKey;
+type BillingCurrency = StripeBillingCurrency;
 
 function resolveCurrency(value: unknown): BillingCurrency {
   return String(value ?? '').toLowerCase() === 'pen' ? 'pen' : 'usd';
@@ -48,38 +54,16 @@ function appBaseUrl(): string {
 const VALID_PLANS = new Set(['free', 'standard', 'standard-yearly', 'premium', 'premium-yearly']);
 
 /**
- * Two price lists: US dollars and Peruvian soles. The page language picks the currency
- * (es -> pen, everything else -> usd); the client also sends it explicitly at checkout.
+ * The env table itself lives in `shared/stripePriceEnv.ts`, so `npm run check:stripe-prices`
+ * validates exactly what this route reads. Two price lists: US dollars and Peruvian soles —
+ * the page language picks the currency (es -> pen, everything else -> usd); the client also
+ * sends it explicitly at checkout.
  *
  * Both entries may be a `price_…` id or a `prod_…` id. Products are resolved to their
  * default price through the API (see `resolvePriceId`), so a product reference keeps
  * working, but an explicit price id is preferred: it is the only way to be certain the
  * interval (month vs year) is the one the page promised.
  */
-const PRICE_ENV_KEYS: Record<BillingCurrency, Record<PlanKey, string[]>> = {
-  usd: {
-    'standard': ['STRIPE_STANDARD_MONTHLY_USD_PRICE_ID', 'STRIPE_STANDARD_MONTHLY_PRICE_ID'],
-    'standard-yearly': ['STRIPE_STANDARD_YEARLY_USD_PRICE_ID', 'STRIPE_STANDARD_YEARLY_PRICE_ID'],
-    'premium': ['STRIPE_PREMIUM_MONTHLY_USD_PRICE_ID', 'STRIPE_PREMIUM_MONTHLY_PRICE_ID'],
-    'premium-yearly': ['STRIPE_PREMIUM_YEARLY_USD_PRICE_ID', 'STRIPE_PREMIUM_YEARLY_PRICE_ID'],
-  },
-  pen: {
-    'standard': ['STRIPE_STANDARD_MONTHLY_PEN_PRICE_ID'],
-    'standard-yearly': ['STRIPE_STANDARD_YEARLY_PEN_PRICE_ID'],
-    'premium': ['STRIPE_PREMIUM_MONTHLY_PEN_PRICE_ID'],
-    'premium-yearly': ['STRIPE_PREMIUM_YEARLY_PEN_PRICE_ID'],
-  },
-};
-
-function readConfiguredReference(plan: PlanKey, currency: BillingCurrency): string | undefined {
-  for (const key of PRICE_ENV_KEYS[currency][plan]) {
-    const raw = process.env[key];
-    if (!raw) continue;
-    const value = raw.trim().replace(/^["']|["']$/g, '');
-    if (value) return value;
-  }
-  return undefined;
-}
 
 const resolvedPriceCache = new Map<string, string>();
 

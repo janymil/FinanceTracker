@@ -9,6 +9,7 @@
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc && tsx scripts/check-logging.ts",
     "check:logging": "tsx scripts/check-logging.ts",
+    "check:stripe-prices": "tsx scripts/check-stripe-prices.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run tests/unit",

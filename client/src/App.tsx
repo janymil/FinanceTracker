@@ -7,6 +7,7 @@ import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import LanguageGuard from "@/components/LanguageGuard";
 import { ErrorBoundary } from "react-error-boundary";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { BackToTopButton } from "@/components/back-to-top-button";
 import { useState, useEffect } from "react";
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -212,6 +213,7 @@ function AppContent() {
   return (
     <>
       <ScrollToTop />
+      <BackToTopButton />
       <ErrorBoundary
         FallbackComponent={AppErrorFallback}
         onError={(error, info) => console.error('Unhandled app error:', error, info)}
