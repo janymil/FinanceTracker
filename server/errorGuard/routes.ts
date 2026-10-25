@@ -55,7 +55,7 @@ const eventSchema = z.object({
   platform: z.string().max(64).optional(),
   moneyPath: z.boolean().optional(),
   severity: severityEnum.optional(),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
   breadcrumbs: z
     .array(
       z.object({
