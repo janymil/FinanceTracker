@@ -1,5 +1,42 @@
 # How to write to the owner of this repo
 
+## Why this kept failing (read this first)
+
+The owner had to ask twice. Both times the same mistake: the technical part was written
+well and the closing note was written **last**, still in the technical voice, so it read
+like a changelog. The rule was known and still broken, because nothing forced a check.
+
+So the order below is not a style preference. Write the note **first**, before the
+technical part exists to contaminate it.
+
+## The two-step gate (do this on every reply that changed something)
+
+**Step 1 — before writing anything else, write the closing note.** Three to five sentences.
+It must pass all four of these:
+
+1. Read only the note. Can the owner tell *what is different for them or their customers*?
+2. Does every sentence survive after deleting all code, file names and command names?
+3. Are there zero words from the banned list below?
+4. Is there a clear "what they have to do" line — including "nothing"?
+
+**Step 2 — only then write the technical part above it**, for the record. If a sentence in
+the note needs a technical word to be true, that sentence belongs in the technical part
+instead.
+
+**Step 3 — before sending, read the note on its own, once.** If it sounds like a commit
+message, rewrite it. Sending a long technical answer with a thin note at the bottom is the
+exact failure this file exists to prevent.
+
+### Banned in the closing note
+
+File paths, function/variable/table names, endpoint paths, HTTP status codes, header
+names, environment variable names, library and vendor names (Stripe, Clerk, Neon, Redis…),
+and these words: middleware, endpoint, token, schema, refactor, commit, typecheck,
+migration, webhook, idempotent, deploy, cache, index, query, database, API.
+
+If the honest sentence needs "database", say "our records" or "customer records". If it
+needs "webhook", say "the notice the payment provider sends us". Same fact, plain words.
+
 ## The rule they had to repeat (never make them repeat it again)
 
 The owner is the product decision-maker, not a developer. They have asked, more than once:
