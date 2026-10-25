@@ -13,6 +13,7 @@
   "Data Management": "Gestión de Datos",
   "Month": "Mes",
   "Year": "Año",
+  "Back to top": "Volver arriba",
   "Standard": "Estándar",
   "Premium": "Premium",
   "Subscription Successful!": "¡Suscripción Exitosa!",
@@ -2920,6 +2921,7 @@
           "Hasta 100 transacciones",
           "Escaneo OCR de recibos",
           "Categorización de gastos con IA",
+          "300 acciones de IA al mes",
           "Gestión de presupuestos",
           "Objetivos financieros",
           "Recordatorios de transacciones",
@@ -4004,6 +4006,7 @@
         "features": [
           "Todo lo del plan Standard",
           "Consejos y análisis con IA",
+          "1.000 acciones de IA al mes",
           "Análisis avanzado de tendencias",
           "Predicción de gastos",
           "Recomendaciones diarias personalizadas",
@@ -4252,5 +4255,17 @@
     "law_link": "Abrir el Libro de Reclamaciones",
     "contact_title": "7. Contacto",
     "contact_desc": "Preguntas sobre cancelaciones o reembolsos: info@kaptia.app."
+  },
+  "aiUsage": {
+    "title": "Acciones de IA",
+    "usedOf": "{{used}} de {{limit}} usadas",
+    "remaining": "Te quedan {{count}} este mes",
+    "resetsOn": "se renuevan el {{date}}",
+    "warning": "Has usado el 80% de las acciones de IA de este mes.",
+    "blocked": "Usaste todas tus acciones de IA. Vuelven el {{date}}.",
+    "upgrade": "Mejora tu plan para más acciones de IA",
+    "freeTitle": "Acciones de IA",
+    "freeBody": "Las funciones de IA están en los planes Standard y Premium.",
+    "whatIsAction": "Una acción = un resultado de IA. Escanear un recibo cuesta 3."
   }
 }

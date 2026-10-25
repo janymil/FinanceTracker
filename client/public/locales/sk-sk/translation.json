@@ -13,6 +13,7 @@
   "Data Management": "Správa Údajov",
   "Month": "Mesiac",
   "Year": "Rok",
+  "Back to top": "Späť nahor",
   "Standard": "Štandardný",
   "Premium": "Premium",
   "Subscription Successful!": "Predplatné bolo úspešné!",
@@ -2798,6 +2799,7 @@
           "Až 100 transakcií",
           "OCR skenovanie účteniek",
           "AI kategorizácia výdavkov",
+          "300 AI akcií za mesiac",
           "Správa rozpočtov",
           "Finančné ciele",
           "Pripomienky transakcií",
@@ -4071,6 +4073,7 @@
         "features": [
           "Všetko z plánu Standard",
           "AI tipy a postrehy",
+          "1 000 AI akcií za mesiac",
           "Pokročilá analýza trendov",
           "Predpoveď výdavkov",
           "Denné personalizované odporúčania",
@@ -4297,5 +4300,17 @@
     "law_link": "Otvoriť Knihu reklamácií",
     "contact_title": "7. Kontakt",
     "contact_desc": "Otázky o zrušení alebo vrátení peňazí: info@kaptia.app."
+  },
+  "aiUsage": {
+    "title": "AI akcie",
+    "usedOf": "{{used}} z {{limit}} použitých",
+    "remaining": "Tento mesiac zostáva {{count}}",
+    "resetsOn": "obnoví sa {{date}}",
+    "warning": "Využili ste 80 % AI akcií na tento mesiac.",
+    "blocked": "Využili ste všetky AI akcie. Vrátia sa {{date}}.",
+    "upgrade": "Pre viac AI akcií zmeňte plán",
+    "freeTitle": "AI akcie",
+    "freeBody": "AI funkcie sú súčasťou plánov Standard a Premium.",
+    "whatIsAction": "Jedna akcia = jeden výsledok AI. Naskenovanie bločku stojí 3."
   }
 }

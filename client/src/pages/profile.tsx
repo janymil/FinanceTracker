@@ -11,6 +11,7 @@ import { useToast } from "../hooks/use-toast";
 import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2, FileText, ShieldCheck, Sparkles } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { SubscriptionSchedule } from "../components/subscription-schedule";
+import { AiUsageMeter } from "../components/ai-usage-meter";
 import { Switch } from "../components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -398,6 +399,9 @@ export default function ProfilePage() {
             <CardContent className="space-y-6">
               {/* Subscription Schedule - Shows upcoming plan changes */}
               <SubscriptionSchedule />
+
+              {/* AI allowance for this month: the same numbers the server enforces */}
+              <AiUsageMeter />
 
               {/* Current Plan Status */}
               <div className="flex items-center justify-between p-4 border rounded-lg">

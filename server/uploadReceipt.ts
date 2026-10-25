@@ -40,7 +40,7 @@ const upload = multer({
 // pipeline and the tests.
 import { performOCR } from './ocr';
 export { performOCR };
-import { checkAiAccess, denyAi } from './aiAccess';
+import { checkAiAccess, denyAi, getAiQuota } from './aiAccess';
 import { anonymizeText } from '../shared/aiAnonymizer';
 
 import { cloudStorage } from './cloudStorage';
@@ -96,6 +96,13 @@ export const uploadReceiptHandler = [
       const userPlan = { plan: access.plan as 'free' | 'standard' | 'premium' };
       const canStore = userPlan.plan === 'standard' || userPlan.plan === 'premium';
 
+      // The same monthly allowance as every other AI feature, checked before the image is sent
+      // anywhere: a customer who is out of actions must not cost us an OCR call.
+      const quota = await getAiQuota(userId, access.plan);
+      if (quota.state.state === 'blocked') {
+        return denyAi(res, 'ai_quota_exceeded', quota.state);
+      }
+
       // Black out the identifying lines, then let the OCR model read the cleaned image.
       const user = await storage.getUser(userId);
       const extras = { names: [user?.firstName, user?.lastName], email: user?.email };
@@ -134,6 +141,21 @@ export const uploadReceiptHandler = [
 
       // Extract structured data using the AI model (text only, already anonymised)
       const extractedData = await extractStructuredData(recognizedText);
+
+      // Meter the scan: one receipt costs 3 actions (shared/aiQuota), so the priciest feature
+      // is also counted. Failure to write the row must never fail an upload the person paid for.
+      try {
+        await storage.recordAIUsage({
+          userId,
+          functionName: 'receipt-extraction',
+          model: 'gpt-6-luna',
+          plan: userPlan.plan,
+          status: 'success',
+          language: 'en-us',
+        });
+      } catch (error) {
+        console.warn('[Receipt] Could not record AI usage:', (error as Error).message);
+      }
 
       // Money invariant (blueprint 07 §18): a draft with a non-positive amount, a future
       // date or a paragraph-length vendor is a parsing bug, and it would silently reach the

@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, RefreshCw, Zap, Clock, Brain } from "lucide-react";
+import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, RefreshCw, Zap, Clock, Brain, Gauge } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -159,6 +159,14 @@ export default function AdminAnalytics() {
   const { data: aiGlobalStats, isLoading: aiGlobalStatsLoading, refetch: refetchGlobalStats } = useQuery({
     queryKey: ['admin-ai-functions-global'],
     queryFn: () => adminFetch('/api/admin-analytics/ai-functions/global'),
+    enabled: isAuthenticated,
+  });
+
+  // The monthly AI allowance: per-plan totals and the people closest to their cap.
+  // Read from the same shared/aiQuota rules the customer's meter uses.
+  const { data: aiQuota, isLoading: aiQuotaLoading, refetch: refetchAiQuota } = useQuery({
+    queryKey: ['admin-ai-functions-quota'],
+    queryFn: () => adminFetch('/api/admin-analytics/ai-functions/quota'),
     enabled: isAuthenticated,
   });
 
@@ -1765,6 +1773,116 @@ export default function AdminAnalytics() {
         </TabsContent>
 
         <TabsContent value="ai-functions" className="space-y-6">
+          {/* Monthly AI allowance — the cap the customer sees in the app */}
+          <Card>
+            <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Gauge className="h-5 w-5 text-purple-600" />
+                  AI Actions This Month
+                </CardTitle>
+                <CardDescription>
+                  The monthly allowance per plan and who is close to the limit.
+                  {aiQuota?.resetsAt
+                    ? ` Resets ${new Date(aiQuota.resetsAt).toLocaleDateString()}.`
+                    : ""}
+                </CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => refetchAiQuota()}>
+                <RefreshCw className="h-3 w-3 mr-1" /> Refresh
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {aiQuotaLoading ? (
+                <div className="text-center py-6 text-gray-500">Loading...</div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {(aiQuota?.plans ?? []).map((plan: any) => (
+                      <div key={plan.plan} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold capitalize">{plan.plan}</span>
+                          <Badge variant="outline">{plan.monthlyLimit} actions</Badge>
+                        </div>
+                        <div className="text-2xl font-bold">{plan.actions.toLocaleString()}</div>
+                        <div className="text-xs text-gray-500">
+                          actions used by {plan.users} user{plan.users === 1 ? "" : "s"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          avg {plan.avgActionsPerUser} per user · ${plan.cost.toFixed(4)} spent
+                        </div>
+                        <div className="flex gap-3 text-xs">
+                          <span className="text-amber-600">≥80%: {plan.usersAtWarning}</span>
+                          <span className="text-red-600">at limit: {plan.usersAtLimit}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Closest to the limit</h4>
+                    {(aiQuota?.topUsers ?? []).length === 0 ? (
+                      <div className="text-sm text-gray-500 py-3">No AI usage this month yet.</div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>User</TableHead>
+                            <TableHead>Plan</TableHead>
+                            <TableHead>Actions</TableHead>
+                            <TableHead>Used</TableHead>
+                            <TableHead>Cost</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(aiQuota?.topUsers ?? []).map((person: any) => (
+                            <TableRow key={person.userId}>
+                              <TableCell className="max-w-[220px] truncate">
+                                {person.email || person.userId}
+                              </TableCell>
+                              <TableCell className="capitalize">{person.plan}</TableCell>
+                              <TableCell>
+                                {person.actions} / {person.monthlyLimit}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-1.5 w-20 rounded-full bg-gray-200">
+                                    <div
+                                      className={cn(
+                                        "h-1.5 rounded-full",
+                                        person.percentUsed >= 100
+                                          ? "bg-red-500"
+                                          : person.percentUsed >= (aiQuota?.warningRatio ?? 0.8) * 100
+                                            ? "bg-amber-500"
+                                            : "bg-green-500",
+                                      )}
+                                      style={{ width: `${Math.min(100, person.percentUsed)}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs">{person.percentUsed}%</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>${person.cost.toFixed(4)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-500">
+                    Weighted actions:{" "}
+                    {aiQuota?.actionWeights && Object.keys(aiQuota.actionWeights).length > 0
+                      ? Object.entries(aiQuota.actionWeights)
+                          .map(([name, weight]) => `${name} = ${weight}`)
+                          .join(" · ")
+                      : "all functions = 1"}
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
           {/* AI Functions Usage Analytics */}
           <Card>
             <CardHeader>

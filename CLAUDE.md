@@ -41,6 +41,10 @@ the command above whenever `package-lock.json` changes, then `./scripts/deploy.s
 ### Money and pricing rules
 - Amounts live in `shared/pricing.ts` and mirror the live Stripe prices (usd + pen).
   Never hardcode a price in a component or a translation.
+- `npm run check:stripe-prices` verifies that every configured Stripe price id resolves to an
+  active price with the promised amount and interval (read-only; exit 1 on a mismatch).
+  Run it after touching Stripe prices or `.env` — `STRIPE_SECRET_KEY=rk_test_… npm run
+  check:stripe-prices` rehearses the same table against the sandbox catalog.
 - Currency follows the page language: `es` → PEN (soles), everything else → USD.
   The client sends the currency to `/api/create-checkout-session` so the charged price
   is the price that was shown.
@@ -111,6 +115,19 @@ Access is gated by `server/aiAccess.ts`: free plans never reach an AI provider, 
 function must sit behind `aiGuard()` or call `checkAiAccess()` — `tests/unit/aiRouteCoverage.test.ts` fails the build otherwise.
 There is no background AI job: AI runs only when a person opens a feature.
 
+### AI allowance (the monthly cap)
+
+`shared/aiQuota.ts` is the pricing promise: free 0, Standard 300 AI actions per month,
+Premium 1 000, with a daily net (50 / 100) so one account cannot spend the month's pool in a day.
+One action is one AI result; `receipt-extraction` and `parseBankStatement` cost 3 because they
+call several providers or send a lot of text. `aiGuard()` enforces the pool (deny code
+`ai_quota_exceeded` with `monthlyUsed` / `monthlyLimit` / `resetsAt`), `server/uploadReceipt.ts`
+enforces it before OCR, and `GET /api/ai/usage` feeds the meter
+(`client/src/components/ai-usage-meter.tsx`). The pool is counted from `ai_usage` rows with
+`status = 'success'`, so a failed call never eats a customer's allowance. Per-function caps in
+`ai_usage_limits` still work (admin screen) for one expensive feature; the pool is the plan-wide
+number the customer is told. Admin totals: `GET /api/admin-analytics/ai-functions/quota`.
+
 ## Language and Internationalization
 
 ### Multi-language Support
@@ -159,6 +176,17 @@ if (currentLang.startsWith('es')) {
 - **OCR Privacy**: Local Tesseract.js processing (no external transmission)
 - **AI Anonymization**: Personal data stripped before AI processing
 - **Session Security**: User data isolation between different logins
+
+### Secrets and .env
+- **Real values** live only in `.env` (gitignored). `.env.example` is the committed
+  contract: every variable the code reads, with dummy values. Read that, never `.env`.
+- **The block** is `.claude/settings.json` → `permissions.deny` (`Read(./.env)`,
+  `Read(./.env.*)`, `*.pem`, `*.key`, `service-account*.json`, `/etc/kaptia`,
+  `/run/secrets`). It gates the Read tool, not bash.
+- **Bash is gated only by the sandbox** (`sandbox.filesystem.denyRead`), which needs
+  `bubblewrap` on Linux and is currently `"enabled": false` on this box.
+- If a task needs a real value: ask the human to run the command. Never print, commit,
+  log, screenshot or copy a secret. Background: `docs/secrets-policy.md`.
 
 ### Authentication Flow
 - **Provider**: Clerk handles all authentication

@@ -12,8 +12,17 @@ import type { NextFunction, Request, Response } from 'express';
 import { storage } from './storage';
 import { getUserId } from './clerkAuth';
 import { rateLimit } from './middleware/rateLimit';
+import {
+  actionsFor,
+  dayStart,
+  monthStart,
+  quotaState,
+  weightFor,
+  type QuotaState,
+} from '../shared/aiQuota';
 
-export type AiDenyCode = 'unauthenticated' | 'ai_disabled' | 'plan_required';
+export type AiDenyCode = 'unauthenticated' | 'ai_disabled' | 'plan_required' | 'ai_quota_exceeded';
+
 
 export interface AiAccess {
   userId: string;
@@ -48,12 +57,50 @@ const MESSAGES: Record<AiDenyCode, string> = {
   unauthenticated: 'Authentication required',
   ai_disabled: 'AI features are switched off for this account.',
   plan_required: 'AI features require the Standard or Premium plan.',
+  ai_quota_exceeded: 'You have used all the AI actions included in this month. They reset on the 1st.',
 };
 
-export function denyAi(res: Response, code: AiDenyCode) {
+export function denyAi(res: Response, code: AiDenyCode, extra?: object) {
   const status = code === 'unauthenticated' ? 401 : 403;
-  return res.status(status).json({ error: MESSAGES[code], code });
+  return res.status(status).json({ error: MESSAGES[code], code, ...(extra ?? {}) });
 }
+
+export interface AiQuotaReport {
+  state: QuotaState;
+  /** Actions used per function this month, biggest first. Feed for the in-app breakdown. */
+  breakdown: Array<{ functionName: string; actions: number }>;
+  costThisMonth: number;
+}
+
+/**
+ * One read of a person's AI allowance: what they used this month, today, and what is left.
+ *
+ * A failed read must never lock a paying customer out of a feature they paid for, so an error
+ * is logged and treated as "no usage yet". The daily net and the monthly pool both come from
+ * the same rows, so the two numbers can never disagree.
+ */
+export async function getAiQuota(userId: string, plan: string): Promise<AiQuotaReport> {
+  const now = new Date();
+  let rows: Array<{ functionName: string; calls: number; todayCalls: number; cost: number }> = [];
+
+  try {
+    rows = await storage.getAIQuotaUsage(userId, monthStart(now), dayStart(now));
+  } catch (error) {
+    console.error('Failed to read AI quota usage:', error);
+  }
+
+  const monthlyUsed = actionsFor(rows);
+  const dailyUsed = actionsFor(rows.map((row) => ({ functionName: row.functionName, calls: row.todayCalls })));
+
+  return {
+    state: quotaState({ plan, monthlyUsed, dailyUsed, now }),
+    breakdown: rows
+      .map((row) => ({ functionName: row.functionName, actions: row.calls * weightFor(row.functionName) }))
+      .sort((a, b) => b.actions - a.actions),
+    costThisMonth: rows.reduce((total, row) => total + row.cost, 0),
+  };
+}
+
 
 /**
  * Every AI call costs real money, so the per-person ceiling lives in the same gate as the
@@ -86,6 +133,10 @@ const sustainedLimit = rateLimit({
 /**
  * Express middleware. Denied by default: unauthenticated, the account off-switch and the free
  * plan are all refused, then the request is counted against the person's AI limits.
+ *
+ * The monthly allowance is checked here rather than inside each AI function, so a new route
+ * inherits the cap without remembering to ask for it. A blocked call is refused before the
+ * rate limiter runs, which also keeps a blocked account from spending its hourly allowance.
  */
 export function aiGuard() {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -94,7 +145,13 @@ export function aiGuard() {
     if (!access || !access.allowed) {
       return denyAi(res, access?.code ?? 'unauthenticated');
     }
-    (req as any).aiUser = { id: access.userId, plan: access.plan };
+
+    const quota = await getAiQuota(access.userId, access.plan);
+    if (quota.state.state === 'blocked') {
+      return denyAi(res, 'ai_quota_exceeded', quota.state);
+    }
+
+    (req as any).aiUser = { id: access.userId, plan: access.plan, quota: quota.state };
     return burstLimit(req, res, () => sustainedLimit(req, res, next));
   };
 }

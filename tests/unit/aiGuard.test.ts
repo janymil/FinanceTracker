@@ -8,8 +8,9 @@ import type { Server } from 'http';
  * per-person ceiling on what AI may cost.
  */
 const getUser = vi.hoisted(() => vi.fn());
+const getAIQuotaUsage = vi.hoisted(() => vi.fn());
 
-vi.mock('../../server/storage', () => ({ storage: { getUser } }));
+vi.mock('../../server/storage', () => ({ storage: { getUser, getAIQuotaUsage } }));
 // The test names the caller in a header, so one server can play several people.
 vi.mock('../../server/clerkAuth', () => ({
   getUserId: (req: any) => req.headers['x-test-user'] || undefined,
@@ -39,6 +40,9 @@ afterAll(() => {
 
 beforeEach(async () => {
   getUser.mockReset();
+  getAIQuotaUsage.mockReset();
+  // Fresh month: nobody has used any AI yet unless a test says otherwise.
+  getAIQuotaUsage.mockResolvedValue([]);
   const { resetRateLimits } = await import('../../server/middleware/rateLimit');
   resetRateLimits();
 });
@@ -76,7 +80,46 @@ describe('aiGuard', () => {
     getUser.mockResolvedValue({ id: 'u1', plan: 'standard', aiEnabled: true });
     const { status, json } = await call('u1');
     expect(status).toBe(200);
-    expect(json.aiUser).toEqual({ id: 'u1', plan: 'standard' });
+    expect(json.aiUser).toMatchObject({ id: 'u1', plan: 'standard' });
+    expect(json.aiUser.quota.monthlyLimit).toBe(300);
+  });
+
+  it('refuses a paid account that used every AI action this month', async () => {
+    getUser.mockResolvedValue({ id: 'u1', plan: 'standard', aiEnabled: true });
+    getAIQuotaUsage.mockResolvedValue([
+      { functionName: 'financial-tips', calls: 300, todayCalls: 2, cost: 0.03 },
+    ]);
+
+    const { status, json } = await call('u1');
+    expect(status).toBe(403);
+    expect(json.code).toBe('ai_quota_exceeded');
+    expect(json.monthlyLimit).toBe(300);
+    expect(json.monthlyUsed).toBe(300);
+    // The interface needs the reset day to say "they come back on…".
+    expect(typeof json.resetsAt).toBe('string');
+  });
+
+  it('lets a paid account through while actions are left, and flags the warning state', async () => {
+    getUser.mockResolvedValue({ id: 'u1', plan: 'standard', aiEnabled: true });
+    getAIQuotaUsage.mockResolvedValue([
+      { functionName: 'financial-tips', calls: 245, todayCalls: 1, cost: 0.02 },
+    ]);
+
+    const { status, json } = await call('u1');
+    expect(status).toBe(200);
+    expect(json.aiUser.quota.state).toBe('warning');
+    expect(json.aiUser.quota.monthlyRemaining).toBe(55);
+  });
+
+  it('counts a receipt scan as three actions against the pool', async () => {
+    getUser.mockResolvedValue({ id: 'u1', plan: 'standard', aiEnabled: true });
+    getAIQuotaUsage.mockResolvedValue([
+      { functionName: 'receipt-extraction', calls: 100, todayCalls: 1, cost: 0.05 },
+    ]);
+
+    const { status, json } = await call('u1');
+    expect(status).toBe(403);
+    expect(json.code).toBe('ai_quota_exceeded');
   });
 
   it('stops a burst: the 4th call in a minute is a 429 with a stable code', async () => {

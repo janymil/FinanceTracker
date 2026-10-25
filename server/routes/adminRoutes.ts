@@ -5,6 +5,17 @@ import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
 import { rateLimit } from "../middleware/rateLimit";
 import { db } from "../db.js";
 import { blockedCountries } from "../../shared/schema.ts";
+import {
+  AI_ACTION_WEIGHTS,
+  AI_QUOTAS,
+  QUOTA_WARNING_RATIO,
+  monthStart,
+  nextResetAt,
+  quotaForPlan,
+  weightFor,
+  type QuotaPlan,
+} from "../../shared/aiQuota";
+
 import { eq } from "drizzle-orm";
 
 export function registerAdminRoutes(app: Express) {
@@ -526,6 +537,94 @@ export function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching global AI stats:", error);
       return res.status(500).json({ message: "Failed to fetch global AI statistics" });
+    }
+  });
+
+  // AI allowance for the month: per-plan totals, and the people closest to their cap.
+  // The limits come from shared/aiQuota — the same numbers the customer sees in the app, so
+  // this screen can never disagree with the meter.
+  app.get('/api/admin-analytics/ai-functions/quota', adminAuth, async (_req: any, res: Response) => {
+    try {
+      const now = new Date();
+      const rows = await storage.getAIQuotaUsageByUser(monthStart(now));
+
+      // One accumulator per person, so the pool is counted across all functions together.
+      const people = new Map<string, {
+        userId: string;
+        email: string | null;
+        plan: string;
+        calls: number;
+        actions: number;
+        cost: number;
+      }>();
+
+      for (const row of rows) {
+        const entry = people.get(row.userId) ?? {
+          userId: row.userId,
+          email: row.email,
+          plan: row.plan,
+          calls: 0,
+          actions: 0,
+          cost: 0,
+        };
+        entry.calls += row.calls;
+        entry.actions += row.calls * weightFor(row.functionName);
+        entry.cost += row.cost;
+        people.set(row.userId, entry);
+      }
+
+      const planOrder: QuotaPlan[] = ['free', 'standard', 'premium'];
+      const plans = planOrder.map((plan) => {
+        const monthlyLimit = quotaForPlan(plan).monthlyActions;
+        const members = Array.from(people.values()).filter((person) => person.plan === plan);
+        const actions = members.reduce((total, person) => total + person.actions, 0);
+        const cost = members.reduce((total, person) => total + person.cost, 0);
+
+        return {
+          plan,
+          monthlyLimit,
+          users: members.length,
+          calls: members.reduce((total, person) => total + person.calls, 0),
+          actions,
+          cost: Number(cost.toFixed(4)),
+          avgActionsPerUser: members.length ? Math.round(actions / members.length) : 0,
+          usersAtWarning: members.filter(
+            (person) => monthlyLimit > 0 && person.actions / monthlyLimit >= QUOTA_WARNING_RATIO,
+          ).length,
+          usersAtLimit: members.filter(
+            (person) => monthlyLimit > 0 && person.actions >= monthlyLimit,
+          ).length,
+        };
+      });
+
+      const topUsers = Array.from(people.values())
+        .map((person) => {
+          const monthlyLimit = quotaForPlan(person.plan).monthlyActions;
+          return {
+            ...person,
+            monthlyLimit,
+            remaining: Math.max(0, monthlyLimit - person.actions),
+            percentUsed: monthlyLimit > 0
+              ? Math.min(100, Math.round((person.actions / monthlyLimit) * 100))
+              : 100,
+            cost: Number(person.cost.toFixed(4)),
+          };
+        })
+        .sort((a, b) => b.actions - a.actions)
+        .slice(0, 15);
+
+      return res.json({
+        monthStart: monthStart(now).toISOString(),
+        resetsAt: nextResetAt(now).toISOString(),
+        warningRatio: QUOTA_WARNING_RATIO,
+        quotas: AI_QUOTAS,
+        actionWeights: AI_ACTION_WEIGHTS,
+        plans,
+        topUsers,
+      });
+    } catch (error) {
+      console.error("Error fetching AI quota stats:", error);
+      return res.status(500).json({ message: "Failed to fetch AI quota statistics" });
     }
   });
 

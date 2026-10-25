@@ -1,7 +1,7 @@
 import { log } from '../logger';
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
-import { aiGuard } from "../aiAccess";
+import { aiGuard, getAiQuota } from "../aiAccess";
 import { storage } from "../storage";
 import { rateLimit } from "../middleware/rateLimit";
 import { adminAuth } from "../adminAuth";
@@ -18,7 +18,7 @@ import { runAI } from "../../lib/aiProcessor";
 import { annotateEmptyReason } from "../../shared/dailyRecommendations";
 import { isAIFailure } from "../../shared/aiResults";
 import { contextualFallbackTips } from "../../shared/aiFallbacks";
-import { getAIProviderStatus } from "../../lib/aiProvider";
+import { AI_MODELS, getAIProviderStatus } from "../../lib/aiProvider";
 import { UnifiedAICache } from "../../lib/unifiedAICache";
 import { 
   transactions, 
@@ -45,6 +45,31 @@ export function registerAIRoutes(app: Express) {
         url: process.env.AI_PROCESSOR_URL || null,
       },
     });
+  });
+
+  // The person's own AI allowance, for the meter in the app (Profile, pricing).
+  // Login is required, but this is deliberately NOT behind aiGuard: a free account and a
+  // blocked account must still be able to see the number and the upgrade path.
+  app.get('/api/ai/usage', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      const plan = user?.plan ?? 'free';
+      const quota = await getAiQuota(userId, plan);
+
+      return res.json({
+        ...quota.state,
+        breakdown: quota.breakdown,
+        costThisMonth: Number(quota.costThisMonth.toFixed(6)),
+      });
+    } catch (error) {
+      console.error("Error reading AI usage:", error);
+      return res.status(500).json({ message: "Failed to read AI usage" });
+    }
   });
 
   // Auto-categorization endpoint for bulk processing
@@ -1095,7 +1120,10 @@ export function registerAIRoutes(app: Express) {
       const { openai } = await import('../openaiClient');
 
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        // Never pin a model literally: an id missing from MODEL_CATALOG is passed through to
+        // OpenAI verbatim (lib/aiProvider.resolveSpec), so a stale pin silently opts this route
+        // out of the gpt-6-luna default and its curated fallback chain.
+        model: AI_MODELS.generation,
         messages: [
           {
             role: "system",

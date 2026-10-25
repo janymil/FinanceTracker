@@ -3559,6 +3559,83 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
+   * Per-function AI usage for one person since `from`, with today's share (the daily safety net).
+   *
+   * Only `success` rows count: a call the customer did not benefit from must not eat their
+   * allowance. Weighting lives in shared/aiQuota; storage only counts rows.
+   */
+  async getAIQuotaUsage(
+    userId: string,
+    from: Date,
+    todayFrom: Date,
+  ): Promise<Array<{ functionName: string; calls: number; todayCalls: number; cost: number }>> {
+    const rows = await db
+      .select({
+        functionName: aiUsage.functionName,
+        calls: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        todayCalls: sql<number>`CAST(COUNT(CASE WHEN ${aiUsage.createdAt} >= ${todayFrom} THEN 1 END) AS INTEGER)`,
+        cost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`
+      })
+      .from(aiUsage)
+      .where(
+        and(
+          eq(aiUsage.userId, userId),
+          gte(aiUsage.createdAt, from),
+          eq(aiUsage.status, 'success')
+        )
+      )
+      .groupBy(aiUsage.functionName);
+
+    return rows.map((row) => ({
+      functionName: row.functionName,
+      calls: Number(row.calls) || 0,
+      todayCalls: Number(row.todayCalls) || 0,
+      cost: parseFloat(row.cost?.toString() || '0')
+    }));
+  }
+
+  /**
+   * The same counts grouped per person, for the admin quota screen. Aggregation (weighting,
+   * per-plan totals) happens in the route, so this stays a plain read.
+   */
+  async getAIQuotaUsageByUser(from: Date): Promise<Array<{
+    userId: string;
+    email: string | null;
+    plan: string;
+    functionName: string;
+    calls: number;
+    cost: number;
+  }>> {
+    const rows = await db
+      .select({
+        userId: aiUsage.userId,
+        email: users.email,
+        plan: users.plan,
+        functionName: aiUsage.functionName,
+        calls: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        cost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`
+      })
+      .from(aiUsage)
+      .leftJoin(users, eq(aiUsage.userId, users.id))
+      .where(
+        and(
+          gte(aiUsage.createdAt, from),
+          eq(aiUsage.status, 'success')
+        )
+      )
+      .groupBy(aiUsage.userId, users.email, users.plan, aiUsage.functionName);
+
+    return rows.map((row) => ({
+      userId: row.userId,
+      email: row.email ?? null,
+      plan: row.plan || 'free',
+      functionName: row.functionName,
+      calls: Number(row.calls) || 0,
+      cost: parseFloat(row.cost?.toString() || '0')
+    }));
+  }
+
+  /**
    * Create or update AI usage limit
    */
   async setAIUsageLimit(limit: InsertAiUsageLimit): Promise<AiUsageLimit> {
