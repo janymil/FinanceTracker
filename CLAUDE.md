@@ -255,10 +255,12 @@ if (currentLang.startsWith('es')) {
 ## User Preferences
 
 ### Communication Style
-- Simple, everyday language without technical jargon
-- No summaries after completing tasks (user explicitly requests this)
-- Focus on actions and results without repetitive explanations
-- Direct responses without unnecessary preambles
+- **Binding rule: `.clinerules/communication.md`.** Plain, everyday language in the closing
+  note, in the language of the user's last message (Spanish or English).
+- Short closing note: what changed and what they have to do next. No file paths, no function
+  names, no jargon, no repetition of the plan. Technical detail goes above it, and only when
+  it changes a decision.
+- Direct responses without unnecessary preambles.
 
 ### Development Approach
 - Check existing patterns before implementing new features
