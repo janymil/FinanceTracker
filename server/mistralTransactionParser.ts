@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { AI_MODELS, createRoutedClient } from '../lib/aiProvider';
 import { normalizeLanguageCode, getLanguageLabel } from '../lib/languageUtils';
 import { parseModelJson, validCategoryId } from '../shared/aiResults';
@@ -146,7 +147,7 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
     const correction = applyAmountCorrections(transcript, result.amount);
     const correctedAmount = correction.amount;
     if (correction.corrected) {
-      console.log(`🔧 Fixed Spanish amount: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+      log.info(`🔧 Fixed Spanish amount: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
     }
     
     // Validate and sanitize result
@@ -159,7 +160,7 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
       note: transcript
     };
 
-    console.log('🤖 Mistral parsed transaction:', parsedTransaction);
+    log.info('🤖 Mistral parsed transaction:', parsedTransaction);
     return parsedTransaction;
 
   } catch (error) {
@@ -209,7 +210,7 @@ ${existingCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n')}
 Find the best match or suggest creating a new category.`;
 
   try {
-    console.log('🧠 Starting intelligent category matching with Mistral...');
+    log.info('🧠 Starting intelligent category matching with Mistral...');
     
     const response = await mistralClient.createChatCompletion({
       messages: [

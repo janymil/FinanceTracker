@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Router, Request, Response } from "express";
 import { requireAuth } from "@clerk/express";
 import { getUserId } from "../clerkAuth";
@@ -36,7 +37,7 @@ export function registerLearningRoutes(app: Router) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      console.log('📚 [LearningAPI] Recording user correction:', {
+      log.info('📚 [LearningAPI] Recording user correction:', {
         merchant: data.merchantName,
         correctionType: data.correctionType,
         userId: userId.substring(0, 8) + '...'

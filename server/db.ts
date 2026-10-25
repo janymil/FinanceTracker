@@ -1,3 +1,4 @@
+import { log } from './logger';
 import 'dotenv/config';
 import { Pool as NeonPool, neonConfig } from '@neondatabase/serverless';
 import { drizzle as neonDrizzle } from 'drizzle-orm/neon-serverless';
@@ -34,7 +35,7 @@ if (isProduction) {
   pool = neonPool;
   db = neonDrizzle(neonPool, { schema });
   
-  console.log('✅ Connected to Neon production database');
+  log.info('✅ Connected to Neon production database');
 } else {
   // Development: Use standard PostgreSQL connection with SSL support for Neon
   pool = new PgPool({ 
@@ -43,7 +44,7 @@ if (isProduction) {
   });
   db = pgDrizzle(pool, { schema });
   
-  console.log('✅ Connected to Neon development database');
+  log.info('✅ Connected to Neon development database');
 }
 
 export { pool, db };

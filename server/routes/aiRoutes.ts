@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { aiGuard } from "../aiAccess";
@@ -262,15 +263,15 @@ export function registerAIRoutes(app: Express) {
       if (Array.isArray(tipResults) && tipResults.length > 0) {
         // AI processor returns array of tips directly
         responseData = { tips: tipResults };
-        console.log('TIP ENDPOINT: Using array format, tips count:', tipResults.length);
+        log.info('TIP ENDPOINT: Using array format, tips count:', tipResults.length);
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
         // Legacy single tip format
         responseData = { tip: tipResults.tip };
-        console.log('TIP ENDPOINT: Using legacy tip format');
+        log.info('TIP ENDPOINT: Using legacy tip format');
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tips) {
         // Wrapped tips format
         responseData = tipResults;
-        console.log('TIP ENDPOINT: Using wrapped tips format');
+        log.info('TIP ENDPOINT: Using wrapped tips format');
       } else {
         console.error('TIP ENDPOINT: Unexpected response format:', {
           type: typeof tipResults,
@@ -363,7 +364,7 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      console.log('AI financial health score: calling the AI processor');
+      log.info('AI financial health score: calling the AI processor');
       
       // Get user language from consistent header detection
       const language = getUserLanguage(req);
@@ -527,7 +528,7 @@ export function registerAIRoutes(app: Express) {
       // Try to get cached result using date-based key
       const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
-        console.log('Daily recommendations: Using cached result for date:', todayKey, 'language:', language);
+        log.info('Daily recommendations: Using cached result for date:', todayKey, 'language:', language);
         return res.json(annotateEmptyReason(cachedResult, { transactionCount: transactions.length, totalIncome: summary?.totalIncome, totalExpenses: summary?.totalExpenses }));
       }
 
@@ -537,7 +538,7 @@ export function registerAIRoutes(app: Express) {
 
       // Cache the result for 24 hours using date-based key with language
       await cache.set(cacheKey, recommendations, false, 24);
-      console.log('Daily recommendations: Cached new result for date:', todayKey, 'language:', language);
+      log.info('Daily recommendations: Cached new result for date:', todayKey, 'language:', language);
 
       return res.json(annotateEmptyReason(recommendations, { transactionCount: transactions.length, totalIncome: summary?.totalIncome, totalExpenses: summary?.totalExpenses }));
     } catch (error) {
@@ -896,7 +897,7 @@ export function registerAIRoutes(app: Express) {
         // Get the CDN URL
         const cdnBaseUrl = process.env.BUNNY_CDN_URL || `https://${process.env.BUNNY_STORAGE_ZONE}.b-cdn.net`;
         permanentImageUrl = `${cdnBaseUrl}/${bunnyPath}`;
-        console.log(`Mascot image stored permanently on CDN at: ${permanentImageUrl}`);
+        log.info(`Mascot image stored permanently on CDN at: ${permanentImageUrl}`);
       } catch (storageError) {
         console.error("Failed to store image on CDN, falling back to local storage:", storageError);
         
@@ -911,7 +912,7 @@ export function registerAIRoutes(app: Express) {
           await fs.writeFile(filePath, imageBuffer);
           
           permanentImageUrl = `/uploads/mascots/${filename}`;
-          console.log(`Mascot image stored locally at: ${permanentImageUrl}`);
+          log.info(`Mascot image stored locally at: ${permanentImageUrl}`);
         } catch (localError) {
           console.error("Failed to store image locally as well:", localError);
           // Last resort - use temporary URL
@@ -933,7 +934,7 @@ export function registerAIRoutes(app: Express) {
               const cdnPath = existingMascot.imageUrl.split('.net/')[1];
               if (cdnPath) {
                 await bunnyStorage.deleteFile(cdnPath);
-                console.log('Deleted previous mascot from CDN:', cdnPath);
+                log.info('Deleted previous mascot from CDN:', cdnPath);
               }
             } else if (existingMascot.imageUrl.startsWith('/uploads/mascots/')) {
               // Delete local file (fallback for old mascots)
@@ -941,7 +942,7 @@ export function registerAIRoutes(app: Express) {
               const path = await import('path');
               const oldFilePath = path.join(process.cwd(), existingMascot.imageUrl);
               await fs.unlink(oldFilePath);
-              console.log('Deleted previous local mascot file');
+              log.info('Deleted previous local mascot file');
             }
           } catch (error) {
             console.warn("Failed to delete old mascot image:", error);
@@ -1024,7 +1025,7 @@ export function registerAIRoutes(app: Express) {
       const { transactions } = req.body;
 
       // Always call the AI processor even with empty data for testing
-      console.log('EXPENSE PREDICTIONS: Processing with', transactions.length, 'transactions');
+      log.info('EXPENSE PREDICTIONS: Processing with', transactions.length, 'transactions');
 
       // Filter expense transactions for consistent cache hashing
       const expenseTransactions = transactions
@@ -1141,32 +1142,32 @@ Answer questions about features, subscription plans, how to use the app, trouble
   // Contextual Financial Tips endpoint (moved from contextualFinancialTipsRoutes.ts)
   app.post('/api/ai/contextual-financial-tips', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
-      console.log('🎯 [CONTEXTUAL-TIPS] Starting request processing...');
+      log.info('🎯 [CONTEXTUAL-TIPS] Starting request processing...');
       const userId = getUserId(req);
       if (!userId) {
         console.error('🚨 [CONTEXTUAL-TIPS] No userId found');
         return res.status(401).json({ message: "Authentication required" });
       }
-      console.log('✅ [CONTEXTUAL-TIPS] User authenticated:', userId.substring(0, 8) + '...');
+      log.info('✅ [CONTEXTUAL-TIPS] User authenticated:', userId.substring(0, 8) + '...');
 
       const { transactions, summary, budgets, goals, selectedMonth } = req.body;
       
       // First check user plan
-      console.log('📊 [CONTEXTUAL-TIPS] Getting user data...');
+      log.info('📊 [CONTEXTUAL-TIPS] Getting user data...');
       const user = await storage.getUser(userId);
-      console.log('👤 [CONTEXTUAL-TIPS] User data:', { userId: userId.substring(0, 8) + '...', plan: user?.plan, hasUser: !!user });
+      log.info('👤 [CONTEXTUAL-TIPS] User data:', { userId: userId.substring(0, 8) + '...', plan: user?.plan, hasUser: !!user });
       
       // Provide safe defaults for missing data
       const safeTransactions = transactions || [];
       const safeSummary = summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 };
       const safeBudgets = budgets || [];
-      console.log('💾 [CONTEXTUAL-TIPS] Data prepared:', { 
+      log.info('💾 [CONTEXTUAL-TIPS] Data prepared:', { 
         transactions: safeTransactions.length, 
         summary: !!safeSummary, 
         budgets: safeBudgets.length 
       });
       
-      console.log('🎯 Contextual tips - User check:', {
+      log.info('🎯 Contextual tips - User check:', {
         userId: userId?.substring(0, 8) + '...',
         userPlan: user?.plan || 'free',
         hasUser: !!user
@@ -1242,12 +1243,12 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       // Add user plan check for contextual tips
       if (!user || user?.plan === 'free') {
-        console.log('🚫 Contextual tips - Free plan, returning empty tips');
+        log.info('🚫 Contextual tips - Free plan, returning empty tips');
         return res.json({ tips: [] });
       }
       
       // Generate new AI response
-      console.log('🤖 Contextual tips - Calling AI processor with payload:', {
+      log.info('🤖 Contextual tips - Calling AI processor with payload:', {
         payloadKeys: Object.keys(aiPayload),
         language: aiPayload.language,
         transactionCount: aiPayload.transactions?.length || 0
@@ -1255,9 +1256,9 @@ Answer questions about features, subscription plans, how to use the app, trouble
       
       let result;
       try {
-        console.log('🤖 [CONTEXTUAL-TIPS] Calling runAI...');
+        log.info('🤖 [CONTEXTUAL-TIPS] Calling runAI...');
         result = await runAI('contextual-tips', userId, aiPayload, user?.plan || 'free');
-        console.log('✅ [CONTEXTUAL-TIPS] runAI completed successfully');
+        log.info('✅ [CONTEXTUAL-TIPS] runAI completed successfully');
       } catch (aiError: any) {
         console.error('🚨 [CONTEXTUAL-TIPS] AI failed:', aiError.message);
         return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
@@ -1302,7 +1303,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
         const fallbackTransactions = req.body?.transactions || [];
         const fallbackBudgets = req.body?.budgets || [];
         const fallbackTips = generateFallbackTips(fallbackSummary, fallbackTransactions, fallbackBudgets, getUserLanguage(req));
-        console.log('🔄 Contextual tips - Returning fallback tips due to error');
+        log.info('🔄 Contextual tips - Returning fallback tips due to error');
         return res.json({ tips: fallbackTips });
       } catch (fallbackError) {
         console.error("Error generating fallback tips:", fallbackError);

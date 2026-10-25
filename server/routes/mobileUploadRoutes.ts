@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Express } from "express";
 import multer from "multer";
 import crypto from "crypto";
@@ -95,7 +96,7 @@ export function registerMobileUploadRoutes(app: any) {
       const userId: string = existingSession.userId;
       existingSession.status = 'processing';
 
-      console.log('Processing mobile upload, file size:', file.buffer.length);
+      log.info('Processing mobile upload, file size:', file.buffer.length);
 
       // Validate file buffer
       if (!file.buffer || file.buffer.length === 0) {
@@ -121,7 +122,7 @@ export function registerMobileUploadRoutes(app: any) {
         category?: string;
       };
       try {
-        console.log('Processing OCR directly...');
+        log.info('Processing OCR directly...');
         
         // Import OCR processing functions
         const { extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
@@ -165,11 +166,11 @@ export function registerMobileUploadRoutes(app: any) {
 
         const rawText = await performOCR(safeImage);
         const recognizedText = anonymizeText(rawText, extras).text;
-        console.log('OCR completed successfully');
+        log.info('OCR completed successfully');
 
         // Extract structured data using the AI model (anonymised text only)
         const extractedData = await extractStructuredData(recognizedText);
-        console.log('Data extraction completed');
+        log.info('Data extraction completed');
 
         // AI Categorization for standard+ users
         let predictedCategory: string | undefined;
@@ -180,7 +181,7 @@ export function registerMobileUploadRoutes(app: any) {
             const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
             // A failed answer is "Other 0.1", which would look like a real suggestion
             if (!categorization.failed) predictedCategory = categorization.category;
-            console.log('AI categorization completed');
+            log.info('AI categorization completed');
           } catch (categoryError) {
             console.error('AI categorization failed:', categoryError);
           }
@@ -195,7 +196,7 @@ export function registerMobileUploadRoutes(app: any) {
           
           try {
             imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
-            console.log('Image upload to Bunny.net completed');
+            log.info('Image upload to Bunny.net completed');
           } catch (uploadError) {
             console.error('Upload to Bunny.net failed:', uploadError);
           }
@@ -215,7 +216,7 @@ export function registerMobileUploadRoutes(app: any) {
           ocrResult.category = predictedCategory;
         }
 
-        console.log('Direct OCR processing completed successfully');
+        log.info('Direct OCR processing completed successfully');
         
       } catch (error) {
         console.error('Direct OCR processing failed:', error);

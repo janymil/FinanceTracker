@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
@@ -162,7 +163,7 @@ export function registerExportRoutes(app: Express) {
       try {
         goals = await storage.getUserGoals(userId);
       } catch (error) {
-        console.log('Goals not available for user:', userId);
+        log.info('Goals not available for user:', userId);
       }
 
       // Filter transactions for the specified month
@@ -333,7 +334,7 @@ export function registerExportRoutes(app: Express) {
         try {
           exportData.budgets = await storage.getUserBudgets(userId);
         } catch (error) {
-          console.log('Budgets not available for user:', userId);
+          log.info('Budgets not available for user:', userId);
           exportData.budgets = [];
         }
       }
@@ -342,7 +343,7 @@ export function registerExportRoutes(app: Express) {
         try {
           exportData.goals = await storage.getUserGoals(userId);
         } catch (error) {
-          console.log('Goals not available for user:', userId);
+          log.info('Goals not available for user:', userId);
           exportData.goals = [];
         }
       }
@@ -507,9 +508,9 @@ export function registerExportRoutes(app: Express) {
       let goals: any[] = [];
       try {
         goals = await storage.getUserGoals(userId);
-        console.log(`Backup: Found ${goals.length} goals for user ${userId}`);
+        log.info(`Backup: Found ${goals.length} goals for user ${userId}`);
       } catch (error) {
-        console.log('Goals not available for user:', userId);
+        log.info('Goals not available for user:', userId);
       }
 
       const backupData = {
@@ -530,12 +531,12 @@ export function registerExportRoutes(app: Express) {
       };
 
       // Use the existing createBackup method from BunnyStorage
-      console.log('BACKUP DEBUG: Starting backup creation for user:', userId);
-      console.log('BACKUP DEBUG: Backup data size:', JSON.stringify(backupData).length, 'characters');
+      log.info('BACKUP DEBUG: Starting backup creation for user:', userId);
+      log.info('BACKUP DEBUG: Backup data size:', JSON.stringify(backupData).length, 'characters');
       
       const filename = await backupStorage.createBackup(userId, backupData);
       
-      console.log('BACKUP DEBUG: Backup created successfully with filename:', filename);
+      log.info('BACKUP DEBUG: Backup created successfully with filename:', filename);
 
       return res.json({ 
         success: true, 

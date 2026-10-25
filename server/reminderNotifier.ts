@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { and, eq, gte, isNull, lte, or, sql } from "drizzle-orm";
 import { db } from "./db";
 import { expenseReminders, users } from "../shared/schema";
@@ -173,7 +174,7 @@ const HOUR_MS = 60 * 60 * 1000;
 export function startReminderScheduler(): void {
   const run = () => void withJobRun("reminder-emails", async () => {
     const result = await sendDueReminderEmails();
-    if (result.sent > 0) console.log(`[reminders] sent ${result.sent} e-mail(s), skipped ${result.skipped}`);
+    if (result.sent > 0) log.info(`[reminders] sent ${result.sent} e-mail(s), skipped ${result.skipped}`);
   });
 
   setTimeout(run, 60_000);

@@ -1,3 +1,4 @@
+import { log } from './logger';
 /**
  * Local Category Matcher - 100% Accurate Category Matching
  * This ensures perfect categorization by using local logic instead of AI guessing
@@ -27,7 +28,7 @@ export function matchCategoryLocally(
   
   const suggested = aiSuggestedCategory.toLowerCase();
   
-  console.log('🎯 Local category matching:', {
+  log.info('🎯 Local category matching:', {
     suggested: aiSuggestedCategory,
     userCategoriesCount: userCategories.length,
     language
@@ -104,7 +105,7 @@ export function matchCategoryLocally(
   );
   
   if (exactMatch) {
-    console.log('✅ Exact match found:', exactMatch.name);
+    log.info('✅ Exact match found:', exactMatch.name);
     return {
       matchedCategory: exactMatch,
       createNew: false,
@@ -139,7 +140,7 @@ export function matchCategoryLocally(
       // If both match the same universal concept, boost similarity
       if (userCatSimilarity > 0.7 && aiSimilarity > 0.7) {
         similarity = Math.max(similarity, 0.95);
-        console.log(`🔗 Universal match: "${suggested}" and "${userCategory.name}" both relate to "${englishTerm}"`);
+        log.info(`🔗 Universal match: "${suggested}" and "${userCategory.name}" both relate to "${englishTerm}"`);
       }
     }
     
@@ -150,7 +151,7 @@ export function matchCategoryLocally(
   }
   
   if (bestMatch) {
-    console.log(`✅ Best match found: "${suggested}" → "${bestMatch.name}" (${(bestSimilarity * 100).toFixed(1)}% similarity)`);
+    log.info(`✅ Best match found: "${suggested}" → "${bestMatch.name}" (${(bestSimilarity * 100).toFixed(1)}% similarity)`);
     return {
       matchedCategory: bestMatch,
       createNew: false,
@@ -172,7 +173,7 @@ export function matchCategoryLocally(
              (aiType === 'income' && (catName.includes('general') || catName.includes('otro')));
     }) || sameTypeCategories[0]; // Fallback to first category of same type
     
-    console.log(`🔄 Type fallback: "${suggested}" → "${genericCategory.name}" (same ${aiType} type)`);
+    log.info(`🔄 Type fallback: "${suggested}" → "${genericCategory.name}" (same ${aiType} type)`);
     return {
       matchedCategory: genericCategory,
       createNew: false,
@@ -182,7 +183,7 @@ export function matchCategoryLocally(
   }
   
   // **STEP 4: Create new category**
-  console.log(`✨ No match found, suggesting new category: "${aiSuggestedCategory}"`);
+  log.info(`✨ No match found, suggesting new category: "${aiSuggestedCategory}"`);
   return {
     matchedCategory: null,
     createNew: true,

@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { checkAiAccess, denyAi } from "../aiAccess";
@@ -247,7 +248,7 @@ export function registerImportRoutes(app: Express) {
   app.get('/api/import/pdf-progress/:sessionId', isAuthenticated, (req, res) => {
     const { sessionId } = req.params;
     
-    console.log(`[PDF Progress] New SSE connection for session: ${sessionId}`);
+    log.info(`[PDF Progress] New SSE connection for session: ${sessionId}`);
     
     try {
       // Set headers for SSE
@@ -261,7 +262,7 @@ export function registerImportRoutes(app: Express) {
 
       // Store connection for this session
       progressConnections.set(sessionId, res);
-      console.log(`[PDF Progress] Connection stored for session: ${sessionId}`);
+      log.info(`[PDF Progress] Connection stored for session: ${sessionId}`);
 
       // Send initial connection confirmation
       const initialMessage = JSON.stringify({ 
@@ -270,11 +271,11 @@ export function registerImportRoutes(app: Express) {
         message: 'Connected to progress stream' 
       });
       res.write(`data: ${initialMessage}\n\n`);
-      console.log(`[PDF Progress] Initial message sent for session: ${sessionId}`);
+      log.info(`[PDF Progress] Initial message sent for session: ${sessionId}`);
 
       // Clean up on client disconnect
       req.on('close', () => {
-        console.log(`[PDF Progress] Client disconnected for session: ${sessionId}`);
+        log.info(`[PDF Progress] Client disconnected for session: ${sessionId}`);
         progressConnections.delete(sessionId);
       });
       
@@ -540,7 +541,7 @@ export function registerImportRoutes(app: Express) {
       // Clear all AI caches after successful import to trigger fresh AI insights
       // Cache system removed - direct AI calls only
       
-      console.log(`Cleared all AI caches for user ${userId} after data import`);
+      log.info(`Cleared all AI caches for user ${userId} after data import`);
 
       return res.json({
         success: true,
@@ -612,7 +613,7 @@ export function registerImportRoutes(app: Express) {
       const sessionId = req.headers['x-session-id'] as string || Date.now().toString();
       const language = req.headers['x-user-language'] as string || 'en-us';
 
-      console.log(`Processing PDF bank statement for user ${userId}, session ${sessionId}, file size: ${req.file.size} bytes`);
+      log.info(`Processing PDF bank statement for user ${userId}, session ${sessionId}, file size: ${req.file.size} bytes`);
 
       // Get existing transactions for duplicate detection (last 6 months)
       const sixMonthsAgo = new Date();
@@ -631,7 +632,7 @@ export function registerImportRoutes(app: Express) {
           type: tx.type as 'income' | 'expense'
         }));
 
-      console.log(`Found ${formattedExisting.length} existing transactions for duplicate detection`);
+      log.info(`Found ${formattedExisting.length} existing transactions for duplicate detection`);
 
       // Progress callback function
       const onProgress = (progress: any) => {
@@ -662,7 +663,7 @@ export function registerImportRoutes(app: Express) {
         preview: true // Indicates this is for preview, not final import
       };
 
-      console.log(`PDF processing completed: ${validationResult.valid.length} valid transactions extracted`);
+      log.info(`PDF processing completed: ${validationResult.valid.length} valid transactions extracted`);
 
       // Import invariants (blueprint 07 §18): zero-amount rows, unparseable dates and rows
       // lost between "parsed" and "imported + duplicate + invalid" are silent data bugs.

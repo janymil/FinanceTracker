@@ -1,3 +1,4 @@
+import { log as logger } from './logger';
 import './zodInspect';
 import { config } from "dotenv";
 import { clerkWebhookHandler } from "./clerkWebhook";
@@ -16,7 +17,7 @@ if (process.env.NODE_ENV !== 'production') {
     delete process.env.VITE_CLERK_PUBLISHABLE_KEY;
     delete process.env.CLERK_SECRET_KEY;
     config({ path: envLocalPath, override: true });
-    console.log('Development environment: Using .env.local overrides');
+    logger.info('Development environment: Using .env.local overrides');
   }
 }
 
@@ -119,7 +120,7 @@ if (isProduction) {
       tableName: 'sessions',
       createTableIfMissing: true,
     });
-    console.log('[SESSION] Using the PostgreSQL session store.');
+    logger.info('[SESSION] Using the PostgreSQL session store.');
   } else {
     console.error('[SESSION] No database URL available — sessions fall back to memory.');
   }

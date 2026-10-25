@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { MistralClient } from '../mistralClient.js';
@@ -23,8 +24,8 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     const userLanguage = req.headers['x-user-language'] as string || 'en-us';
     const userCurrency = req.headers['x-user-currency'] as string || '$';
     
-    console.log('🎤 Mistral voice transcription and parsing request');
-    console.log('🌍 User preferences:', { userLanguage, userCurrency });
+    log.info('🎤 Mistral voice transcription and parsing request');
+    log.info('🌍 User preferences:', { userLanguage, userCurrency });
 
     // Get user ID from authentication
     const userId = (req as any).auth?.userId;
@@ -33,7 +34,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     }
 
     // Step 1: Transcribe with Mistral Voxtral-mini-2507
-    console.log('🎙️ Step 1: Transcribing audio with Mistral Voxtral-mini-2507...');
+    log.info('🎙️ Step 1: Transcribing audio with Mistral Voxtral-mini-2507...');
     
     const formData = new FormData();
     formData.append('file', new Blob([req.file.buffer]), 'audio.webm');
@@ -61,24 +62,24 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 
     const mistralResult = await mistralResponse.json();
     const transcription = mistralResult.text;
-    console.log('🎙️ Mistral transcription result:', transcription);
+    log.info('🎙️ Mistral transcription result:', transcription);
 
     if (!transcription || transcription.trim().length < 2) {
       return res.status(400).json({ error: 'No valid transcription received' });
     }
 
     // Step 2: Get user's existing categories from database
-    console.log('📂 Step 2: Fetching user categories...');
+    log.info('📂 Step 2: Fetching user categories...');
     const userCategories = await storage.getCategories(userId);
-    console.log('📂 User has', userCategories.length, 'categories');
+    log.info('📂 User has', userCategories.length, 'categories');
 
     // Step 3: Parse with Mistral Small 2506 (with user categories)
-    console.log('🧠 Step 3: Parsing transaction with Mistral (with user categories)...');
+    log.info('🧠 Step 3: Parsing transaction with Mistral (with user categories)...');
     const parsedTransaction = await parseTransactionWithMistral(transcription, userLanguage, userCurrency, userCategories);
-    console.log('🧠 Mistral parsed transaction:', parsedTransaction);
+    log.info('🧠 Mistral parsed transaction:', parsedTransaction);
 
     // Step 4: Local category matching (100% accurate)
-    console.log('🎯 Step 4: Local intelligent category matching...');
+    log.info('🎯 Step 4: Local intelligent category matching...');
     const categoryMatchResult = matchCategoryLocally(
       parsedTransaction.category,
       userCategories,
@@ -90,7 +91,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
 
     if (categoryMatchResult.createNew) {
       // Create new category if AI suggests it
-      console.log('✨ Creating new category:', categoryMatchResult.newCategoryName);
+      log.info('✨ Creating new category:', categoryMatchResult.newCategoryName);
       try {
         const newCategory = await storage.createCategory({
           userId,
@@ -119,7 +120,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       categoryConfidence: categoryMatchResult.confidence
     };
     
-    console.log('✅ Final Mistral analysis result:', finalResult);
+    log.info('✅ Final Mistral analysis result:', finalResult);
     
     res.json({ 
       success: true, 
@@ -150,11 +151,11 @@ router.post('/parse-text', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    console.log('🧠 Testing Mistral text parsing:', transcript);
+    log.info('🧠 Testing Mistral text parsing:', transcript);
     
     // Get user's existing categories
     const userCategories = await storage.getCategories(userId);
-    console.log('📂 User has', userCategories.length, 'categories for text parsing');
+    log.info('📂 User has', userCategories.length, 'categories for text parsing');
     
     const result = await parseTransactionWithMistral(transcript, userLanguage, userCurrency, userCategories);
     
@@ -179,7 +180,7 @@ router.post('/match-category', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    console.log('🎯 Local category matching request:', {
+    log.info('🎯 Local category matching request:', {
       suggestedCategory,
       existingCount: existingCategories.length,
       language: userLanguage
@@ -187,7 +188,7 @@ router.post('/match-category', async (req: Request, res: Response) => {
 
     const result = matchCategoryLocally(suggestedCategory, existingCategories, userLanguage);
     
-    console.log('✅ Local category matching result:', result);
+    log.info('✅ Local category matching result:', result);
     res.json(result);
     
   } catch (error) {

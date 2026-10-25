@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Router, type Express } from "express";
 import { z } from "zod";
 import { lookupMerchant } from "../../lib/merchantLookup";
@@ -19,7 +20,7 @@ router.post('/parse', async (req, res) => {
     }
     const { transcript, userLanguage } = body.data;
 
-    console.log('🎤 Voice parse request:', { transcript, userLanguage });
+    log.info('🎤 Voice parse request:', { transcript, userLanguage });
 
     // Parse voice input
     const parsed = parseVoiceInput(transcript, userLanguage, new Date());
@@ -30,7 +31,7 @@ router.post('/parse', async (req, res) => {
     const textToAnalyze = parsed.description || transcript;
     if (textToAnalyze) {
       try {
-        console.log('🏪 Looking up merchant for transcript:', transcript);
+        log.info('🏪 Looking up merchant for transcript:', transcript);
         
         // Get country code from user language
         const getCountryCode = (lang: string) => {
@@ -40,23 +41,23 @@ router.post('/parse', async (req, res) => {
         };
         
         const countryCode = getCountryCode(userLanguage);
-        console.log('🏪 Using country code:', countryCode);
+        log.info('🏪 Using country code:', countryCode);
         
 
         
         const merchantResult = await lookupMerchant(transcript, countryCode, undefined, userLanguage);
-        console.log('🏪 Merchant lookup result:', JSON.stringify(merchantResult, null, 2));
+        log.info('🏪 Merchant lookup result:', JSON.stringify(merchantResult, null, 2));
         
         // Use the category from merchant lookup with proper language mapping
         if (merchantResult?.business_type) {
-          console.log('🏪 Found business_type:', merchantResult.business_type);
-          console.log('🏪 typical_categories:', merchantResult.typical_categories);
-          console.log('🏪 matched_merchant:', merchantResult.matched_merchant);
+          log.info('🏪 Found business_type:', merchantResult.business_type);
+          log.info('🏪 typical_categories:', merchantResult.typical_categories);
+          log.info('🏪 matched_merchant:', merchantResult.matched_merchant);
           
           // Update description with proper merchant name if found
           if (merchantResult.matched_merchant) {
             parsed.description = merchantResult.matched_merchant.charAt(0).toUpperCase() + merchantResult.matched_merchant.slice(1);
-            console.log('🏪 Updated description to:', parsed.description);
+            log.info('🏪 Updated description to:', parsed.description);
           }
           
           // If it has typical_categories, use the appropriate language one
@@ -64,7 +65,7 @@ router.post('/parse', async (req, res) => {
             // Get the category based on user language: [English, Slovak, Spanish]
             const langIndex = userLanguage.startsWith('es') ? 2 : userLanguage.startsWith('sk') ? 1 : 0;
             category = merchantResult.typical_categories[langIndex] || merchantResult.typical_categories[0];
-            console.log('🏪 Selected category by language index', langIndex, ':', category);
+            log.info('🏪 Selected category by language index', langIndex, ':', category);
           } else {
             // Fallback - use business_type as category (shouldn't happen with proper merchant data)
             category = merchantResult.business_type;
@@ -73,16 +74,16 @@ router.post('/parse', async (req, res) => {
           category = 'Uncategorized';
         }
         
-        console.log('🏪 Final category:', category);
+        log.info('🏪 Final category:', category);
       } catch (error) {
-        console.log('🏪 Merchant lookup error:', error);
+        log.info('🏪 Merchant lookup error:', error);
         category = 'Uncategorized';
       }
     }
 
     const result = { ...parsed, category };
     
-    console.log('📤 Voice parsing result:', result);
+    log.info('📤 Voice parsing result:', result);
     res.json({ success: true, data: result });
 
   } catch (error) {

@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import type { Express, Request, Response } from "express";
 import Stripe from "stripe";
 import { isAuthenticated, getUserId } from "../clerkAuth";
@@ -212,7 +213,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, currency: Bi
       }
     });
 
-    console.log('Subscription modification session created:', session.id);
+    log.info('Subscription modification session created:', session.id);
     return res.json({ url: session.url });
 
   } catch (error) {
@@ -260,7 +261,7 @@ export function registerStripeRoutes(app: Express) {
       }
       const currency: BillingCurrency = user.stripeSubscriptionId ? currencyForRequest(req) : 'usd';
 
-      console.log('Checkout session request - Plan:', plan, 'Currency:', currency, 'User ID:', userId);
+      log.info('Checkout session request - Plan:', plan, 'Currency:', currency, 'User ID:', userId);
 
       // Check if user has existing subscription - redirect to Customer Portal
       if (user.stripeSubscriptionId && user.stripeCustomerId && user.plan !== 'free') {
@@ -268,7 +269,7 @@ export function registerStripeRoutes(app: Express) {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           if (subscription.status === 'active') {
             // Existing paid subscriber - redirect directly to subscription update page
-            console.log('Creating portal session with subscription update flow for:', user.stripeSubscriptionId);
+            log.info('Creating portal session with subscription update flow for:', user.stripeSubscriptionId);
             
             const portalSession = await stripe.billingPortal.sessions.create({
               customer: user.stripeCustomerId,
@@ -281,8 +282,8 @@ export function registerStripeRoutes(app: Express) {
               }
             });
 
-            console.log('Portal session created with URL:', portalSession.url);
-            console.log('Flow data configured for subscription:', user.stripeSubscriptionId);
+            log.info('Portal session created with URL:', portalSession.url);
+            log.info('Flow data configured for subscription:', user.stripeSubscriptionId);
             return res.json({ url: portalSession.url });
           }
         } catch (error) {
@@ -303,7 +304,7 @@ export function registerStripeRoutes(app: Express) {
       const cancelUrl = `${baseUrl}/subscribe`;
 
       // Plan references come from the environment and are resolved to price ids.
-      console.log('Plan price references:', {
+      log.info('Plan price references:', {
         currency,
         standard: readConfiguredReference('standard', currency),
         'standard-yearly': readConfiguredReference('standard-yearly', currency),
@@ -332,7 +333,7 @@ export function registerStripeRoutes(app: Express) {
       } else {
         // For paid plans, create the subscription with the resolved price id.
         const priceId = await getPlanPriceId(plan, currency);
-        console.log('Requested plan:', plan, 'Currency:', currency, '-> price:', priceId);
+        log.info('Requested plan:', plan, 'Currency:', currency, '-> price:', priceId);
 
         if (!priceId) {
           console.error('Invalid plan requested:', plan, 'Currency:', currency, 'Configured plans:', Object.keys(PRICE_ENV_KEYS[currency]));
@@ -366,9 +367,9 @@ export function registerStripeRoutes(app: Express) {
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
       
-      console.log('Stripe session created successfully');
-      console.log('Session ID:', session.id);
-      console.log('Session URL:', session.url);
+      log.info('Stripe session created successfully');
+      log.info('Session ID:', session.id);
+      log.info('Session URL:', session.url);
       
       if (!session.url) {
         console.error('No URL returned from Stripe session');
@@ -448,7 +449,7 @@ export function registerStripeRoutes(app: Express) {
         try {
           // Cancel the existing subscription
           await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
-          console.log(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
+          log.info(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
         } catch (cancelError) {
           console.error('Error cancelling existing subscription:', cancelError);
           // Continue with the process even if cancellation fails
@@ -468,7 +469,7 @@ export function registerStripeRoutes(app: Express) {
           );
         }
         
-        console.log(`Successfully upgraded user ${userId} to ${dbPlan} plan (${billingInterval})`);
+        log.info(`Successfully upgraded user ${userId} to ${dbPlan} plan (${billingInterval})`);
         
         // Redirect to dashboard with success message
         return res.redirect(`/dashboard?upgrade=success&plan=${dbPlan}&interval=${billingInterval}`);
@@ -541,7 +542,7 @@ export function registerStripeRoutes(app: Express) {
           proration_behavior: 'create_prorations',
         });
 
-        console.log(`Subscription ${subscriptionId} upgraded immediately from weight ${currentWeight} to ${newWeight}`);
+        log.info(`Subscription ${subscriptionId} upgraded immediately from weight ${currentWeight} to ${newWeight}`);
         return res.json({ success: true, type: "upgrade" });
 
       } else {
@@ -561,7 +562,7 @@ export function registerStripeRoutes(app: Express) {
           phases: schedulePhases,
         });
 
-        console.log(`Subscription ${subscriptionId} scheduled to downgrade from weight ${currentWeight} to ${newWeight} at period end`);
+        log.info(`Subscription ${subscriptionId} scheduled to downgrade from weight ${currentWeight} to ${newWeight} at period end`);
         return res.json({ success: true, type: "downgrade" });
       }
 
@@ -712,7 +713,7 @@ export function registerStripeRoutes(app: Express) {
       return res.json({ received: true, duplicate: true });
     }
 
-    console.log(`Received webhook event: ${event.type}`);
+    log.info(`Received webhook event: ${event.type}`);
 
     try {
       switch (event.type) {
@@ -745,7 +746,7 @@ export function registerStripeRoutes(app: Express) {
           break;
         
         default:
-          console.log(`Unhandled webhook event type: ${event.type}`);
+          log.info(`Unhandled webhook event type: ${event.type}`);
       }
     } catch (error) {
       // Not kept as processed and answered with 500, so Stripe retries the event.
@@ -790,7 +791,7 @@ export function registerStripeRoutes(app: Express) {
 
   // Handle initial successful checkout
   async function handleCheckoutSessionCompleted(session: any) {
-    console.log('Checkout session completed:', session.id);
+    log.info('Checkout session completed:', session.id);
 
     try {
       // Extract plan from metadata
@@ -818,7 +819,7 @@ export function registerStripeRoutes(app: Express) {
             await storage.updateUserStripeInfo(userId, session.customer as string, session.subscription as string);
           }
           
-          console.log(`Updated user ${userId} to plan ${dbPlan} (${billingInterval})`);
+          log.info(`Updated user ${userId} to plan ${dbPlan} (${billingInterval})`);
         }
       }
     } catch (error) {
@@ -829,7 +830,7 @@ export function registerStripeRoutes(app: Express) {
 
   // Handle recurring payment failures with grace period
   async function handleInvoicePaymentFailed(invoice: any) {
-    console.log('Invoice payment failed:', invoice.id, 'for customer:', invoice.customer);
+    log.info('Invoice payment failed:', invoice.id, 'for customer:', invoice.customer);
 
     if (!stripe) {
       console.error('Stripe not initialized');
@@ -839,11 +840,11 @@ export function registerStripeRoutes(app: Express) {
     try {
       const user = await getUserByStripeCustomerId(invoice.customer);
       if (!user) {
-        console.log('No user found for customer:', invoice.customer);
+        log.info('No user found for customer:', invoice.customer);
         return;
       }
 
-      console.log(`Processing payment failure for user: ${user.id}`);
+      log.info(`Processing payment failure for user: ${user.id}`);
 
       // Get current failure count and increment
       const currentFailureCount = user.paymentFailureCount || 0;
@@ -879,14 +880,14 @@ export function registerStripeRoutes(app: Express) {
           );
 
           if (notificationSent) {
-            console.log(`Payment failure notification sent to: ${user.email}`);
+            log.info(`Payment failure notification sent to: ${user.email}`);
           }
         } catch (emailError) {
-          console.log('Email service not available, skipping notification');
+          log.info('Email service not available, skipping notification');
         }
       }
 
-      console.log(`User ${user.id} entered grace period until ${graceExpiresAt.toISOString()}`);
+      log.info(`User ${user.id} entered grace period until ${graceExpiresAt.toISOString()}`);
       
     } catch (error) {
       console.error('Error handling payment failure:', error);
@@ -896,7 +897,7 @@ export function registerStripeRoutes(app: Express) {
 
   // Handle successful recurring payments - clear grace period
   async function handleInvoicePaymentSucceeded(invoice: any) {
-    console.log('Invoice payment succeeded:', invoice.id, 'for customer:', invoice.customer);
+    log.info('Invoice payment succeeded:', invoice.id, 'for customer:', invoice.customer);
 
     if (!stripe) {
       console.error('Stripe not initialized');
@@ -906,11 +907,11 @@ export function registerStripeRoutes(app: Express) {
     try {
       const user = await getUserByStripeCustomerId(invoice.customer);
       if (!user) {
-        console.log('No user found for customer:', invoice.customer);
+        log.info('No user found for customer:', invoice.customer);
         return;
       }
 
-      console.log(`Payment success for user: ${user.id}`);
+      log.info(`Payment success for user: ${user.id}`);
 
       // Get subscription details to determine plan
       const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
@@ -922,7 +923,7 @@ export function registerStripeRoutes(app: Express) {
         // Ensure user has the correct plan (in case they were downgraded)
         if (planConfig) {
           await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
-          console.log(`Confirmed user ${user.id} on ${planConfig.plan} plan (${planConfig.interval})`);
+          log.info(`Confirmed user ${user.id} on ${planConfig.plan} plan (${planConfig.interval})`);
         }
       }
 
@@ -937,7 +938,7 @@ export function registerStripeRoutes(app: Express) {
         }
       }
 
-      console.log(`Grace period cleared for user: ${user.id}`);
+      log.info(`Grace period cleared for user: ${user.id}`);
       
     } catch (error) {
       console.error('Error handling successful payment:', error);
@@ -947,12 +948,12 @@ export function registerStripeRoutes(app: Express) {
 
   // Handle subscription status changes
   async function handleSubscriptionUpdated(subscription: any) {
-    console.log('Subscription updated:', subscription.id, 'status:', subscription.status);
+    log.info('Subscription updated:', subscription.id, 'status:', subscription.status);
 
     try {
       const user = await getUserByStripeCustomerId(subscription.customer);
       if (!user) {
-        console.log('No user found for customer:', subscription.customer);
+        log.info('No user found for customer:', subscription.customer);
         return;
       }
 
@@ -965,29 +966,29 @@ export function registerStripeRoutes(app: Express) {
             const planConfig = await mapStripePriceToPlan(priceId);
             if (planConfig) {
               await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
-              console.log(`User ${user.id} subscription active: ${planConfig.plan} (${planConfig.interval})`);
+              log.info(`User ${user.id} subscription active: ${planConfig.plan} (${planConfig.interval})`);
             }
           }
           break;
           
         case 'past_due':
           // Payment is overdue, but subscription still exists
-          console.log(`User ${user.id} subscription past due, keeping current plan for now`);
+          log.info(`User ${user.id} subscription past due, keeping current plan for now`);
           break;
           
         case 'canceled':
         case 'unpaid':
           if (user.stripeSubscriptionId && user.stripeSubscriptionId !== subscription.id) {
-            console.log(`Ignoring ${subscription.status} old subscription ${subscription.id} for user ${user.id}`);
+            log.info(`Ignoring ${subscription.status} old subscription ${subscription.id} for user ${user.id}`);
             break;
           }
           // Subscription cancelled or unpaid, downgrade to free
           await storage.updateUserPlan(user.id, 'free', 'monthly');
-          console.log(`User ${user.id} downgraded to free due to subscription status: ${subscription.status}`);
+          log.info(`User ${user.id} downgraded to free due to subscription status: ${subscription.status}`);
           break;
           
         default:
-          console.log(`Unhandled subscription status: ${subscription.status} for user ${user.id}`);
+          log.info(`Unhandled subscription status: ${subscription.status} for user ${user.id}`);
       }
       
     } catch (error) {
@@ -998,19 +999,19 @@ export function registerStripeRoutes(app: Express) {
 
   // Handle subscription deletion (cancellation)
   async function handleSubscriptionDeleted(subscription: any) {
-    console.log('Subscription deleted:', subscription.id);
+    log.info('Subscription deleted:', subscription.id);
 
     try {
       const user = await getUserByStripeCustomerId(subscription.customer);
       if (!user) {
-        console.log('No user found for customer:', subscription.customer);
+        log.info('No user found for customer:', subscription.customer);
         return;
       }
 
       // An upgrade cancels the old subscription on purpose. Only the subscription we have
       // stored for this person may end their plan.
       if (user.stripeSubscriptionId && user.stripeSubscriptionId !== subscription.id) {
-        console.log(`Ignoring deletion of old subscription ${subscription.id} for user ${user.id}`);
+        log.info(`Ignoring deletion of old subscription ${subscription.id} for user ${user.id}`);
         return;
       }
 
@@ -1020,7 +1021,7 @@ export function registerStripeRoutes(app: Express) {
       // Clear Stripe subscription ID
       await storage.updateUserStripeInfo(user.id, user.stripeCustomerId || '', '');
       
-      console.log(`User ${user.id} subscription deleted, downgraded to free plan`);
+      log.info(`User ${user.id} subscription deleted, downgraded to free plan`);
       
     } catch (error) {
       console.error('Error handling subscription deletion:', error);
@@ -1030,12 +1031,12 @@ export function registerStripeRoutes(app: Express) {
 
   // Handle new subscription creation
   async function handleSubscriptionCreated(subscription: any) {
-    console.log('Subscription created:', subscription.id);
+    log.info('Subscription created:', subscription.id);
 
     try {
       const user = await getUserByStripeCustomerId(subscription.customer);
       if (!user) {
-        console.log('No user found for customer:', subscription.customer);
+        log.info('No user found for customer:', subscription.customer);
         return;
       }
 
@@ -1047,7 +1048,7 @@ export function registerStripeRoutes(app: Express) {
         if (planConfig) {
           await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
           await storage.updateUserStripeInfo(user.id, subscription.customer, subscription.id);
-          console.log(`User ${user.id} new subscription: ${planConfig.plan} (${planConfig.interval})`);
+          log.info(`User ${user.id} new subscription: ${planConfig.plan} (${planConfig.interval})`);
         }
       }
       
@@ -1059,17 +1060,17 @@ export function registerStripeRoutes(app: Express) {
 
   // Handle payment requiring user action (3D Secure, etc.)
   async function handlePaymentActionRequired(invoice: any) {
-    console.log('Payment action required for invoice:', invoice.id);
+    log.info('Payment action required for invoice:', invoice.id);
 
     try {
       const user = await getUserByStripeCustomerId(invoice.customer);
       if (!user) {
-        console.log('No user found for customer:', invoice.customer);
+        log.info('No user found for customer:', invoice.customer);
         return;
       }
 
       // For now, just log it. In a full implementation, you'd send an email notification
-      console.log(`User ${user.id} needs to complete payment action for invoice ${invoice.id}`);
+      log.info(`User ${user.id} needs to complete payment action for invoice ${invoice.id}`);
       
     } catch (error) {
       console.error('Error handling payment action required:', error);
@@ -1084,21 +1085,21 @@ export function registerStripeRoutes(app: Express) {
 
     try {
       const userId = getUserId(req);
-      console.log("Customer portal: User ID from request:", userId);
+      log.info("Customer portal: User ID from request:", userId);
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
       const user = await storage.getUser(userId);
-      console.log("Customer portal: User found:", user ? "yes" : "no", user ? `plan: ${user.plan}` : "");
+      log.info("Customer portal: User found:", user ? "yes" : "no", user ? `plan: ${user.plan}` : "");
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       if (!user.stripeCustomerId) {
-        console.log("Customer portal: No Stripe customer ID found for user");
+        log.info("Customer portal: No Stripe customer ID found for user");
         return res.status(400).json({ message: "No active subscription found. Please subscribe first." });
       }
 

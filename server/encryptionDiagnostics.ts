@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { sql } from "drizzle-orm";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -11,7 +12,7 @@ export async function checkEncryptionKey(): Promise<void> {
   const { enabled, environment } = DataEncryption.getEncryptionStatus();
 
   if (!enabled) {
-    console.log(`[ENCRYPTION] disabled (NODE_ENV=${environment}) - sensitive fields are stored as plaintext`);
+    log.info(`[ENCRYPTION] disabled (NODE_ENV=${environment}) - sensitive fields are stored as plaintext`);
     return;
   }
 
@@ -28,7 +29,7 @@ export async function checkEncryptionKey(): Promise<void> {
     }>;
 
     if (rows.length === 0) {
-      console.log('[ENCRYPTION] enabled - no encrypted rows to verify yet');
+      log.info('[ENCRYPTION] enabled - no encrypted rows to verify yet');
       return;
     }
 
@@ -47,7 +48,7 @@ export async function checkEncryptionKey(): Promise<void> {
         'legacy rows and run "npx tsx scripts/relabel-legacy-encrypted.ts" (dry run first).'
       );
     } else {
-      console.log(`[ENCRYPTION] key verified against ${rows.length} encrypted transaction row(s)`);
+      log.info(`[ENCRYPTION] key verified against ${rows.length} encrypted transaction row(s)`);
     }
   } catch (error) {
     console.warn('[ENCRYPTION] startup key check skipped:', (error as Error).message);

@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
@@ -22,7 +23,7 @@ export async function generateVoiceGreetings() {
 
   for (const [lang, text] of Object.entries(greetings)) {
     try {
-      console.log(`🎙️ Generating ${lang} greeting audio...`);
+      log.info(`🎙️ Generating ${lang} greeting audio...`);
       
       const mp3 = await openai.audio.speech.create({
         model: "tts-1",
@@ -41,7 +42,7 @@ export async function generateVoiceGreetings() {
       }
       
       fs.writeFileSync(audioPath, buffer);
-      console.log(`✅ Generated ${lang} greeting: ${audioPath}`);
+      log.info(`✅ Generated ${lang} greeting: ${audioPath}`);
       
     } catch (error) {
       console.error(`❌ Failed to generate ${lang} greeting:`, error);
@@ -51,5 +52,5 @@ export async function generateVoiceGreetings() {
 
 // Call this once to generate all greeting files
 generateVoiceGreetings().then(() => {
-  console.log('🎉 All voice greetings generated!');
+  log.info('🎉 All voice greetings generated!');
 }).catch(console.error);

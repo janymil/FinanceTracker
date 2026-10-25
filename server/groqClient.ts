@@ -1,3 +1,4 @@
+import { log } from './logger';
 import Groq from 'groq-sdk';
 import { createRoutedClient } from '../lib/aiProvider';
 
@@ -24,7 +25,7 @@ async function createChat(params: any): Promise<any> {
 // Groq STT using Distil-Whisper
 export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<string> {
   try {
-    console.log('🎙️ Starting Groq STT with Distil-Whisper...');
+    log.info('🎙️ Starting Groq STT with Distil-Whisper...');
     
     const transcription = await groq.audio.transcriptions.create({
       file: new File([audioBuffer], 'audio.wav', { type: 'audio/wav' }),
@@ -32,7 +33,7 @@ export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<stri
       response_format: 'text'
     });
 
-    console.log('🎙️ Groq STT result:', transcription);
+    log.info('🎙️ Groq STT result:', transcription);
     return String(transcription || '');
   } catch (error) {
     console.error('❌ Groq STT failed:', error);
@@ -50,7 +51,7 @@ export async function parseTransactionWithGroq(transcript: string, userLanguage:
   note: string;
 }> {
   try {
-    console.log('🧠 Starting Groq LLaMA analysis...');
+    log.info('🧠 Starting Groq LLaMA analysis...');
     
     const languageMap: { [key: string]: string } = {
       'sk-sk': 'Slovak',
@@ -147,7 +148,7 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
     });
 
     const rawResponse = completion.choices[0].message.content || '{}';
-    console.log('🧠 Raw LLaMA response:', rawResponse);
+    log.info('🧠 Raw LLaMA response:', rawResponse);
     
     const result = JSON.parse(rawResponse);
     
@@ -172,14 +173,14 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
           // Direct fix
           if (correctedAmount === '580.00' || correctedAmount === '580') {
             correctedAmount = p.fix;
-            console.log(`🔧 Fixed Spanish number parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+            log.info(`🔧 Fixed Spanish number parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
           }
         } else if (p.handler) {
           // Dynamic fix
           const expectedAmount = p.handler(match);
           if (correctedAmount !== expectedAmount) {
             correctedAmount = expectedAmount;
-            console.log(`🔧 Fixed currency parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
+            log.info(`🔧 Fixed currency parsing: "${transcript}" → ${correctedAmount} (was ${result.amount})`);
           }
         }
         break;
@@ -196,7 +197,7 @@ For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
       note: transcript
     };
     
-    console.log('🧠 Groq LLaMA parsed transaction:', parsedTransaction);
+    log.info('🧠 Groq LLaMA parsed transaction:', parsedTransaction);
     return parsedTransaction;
     
   } catch (error) {
@@ -216,7 +217,7 @@ export async function matchCategoryIntelligently(
   newCategoryName?: string
 }> {
   try {
-    console.log('🧠 Starting intelligent category matching with Groq LLaMA...');
+    log.info('🧠 Starting intelligent category matching with Groq LLaMA...');
     
     const languageMap: { [key: string]: string } = {
       'en-us': 'English',
@@ -280,7 +281,7 @@ Find the best match or decide if new category should be created.`;
     }
 
     const result = JSON.parse(content.trim());
-    console.log('🧠 Groq category matching result:', result);
+    log.info('🧠 Groq category matching result:', result);
 
     return result;
 

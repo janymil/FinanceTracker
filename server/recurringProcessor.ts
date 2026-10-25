@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { and, eq, isNull, lt } from "drizzle-orm";
 import { db } from "./db";
 import { recurringTransactions, transactions, users } from "../shared/schema";
@@ -117,7 +118,7 @@ export function startRecurringScheduler(): void {
   const run = () => void withJobRun("recurring-processor", async () => {
     const result = await processRecurringTransactions();
     if (result.transactionsCreated > 0) {
-      console.log(`[recurring] created ${result.transactionsCreated} transaction(s) from ${result.rulesChecked} rule(s)`);
+      log.info(`[recurring] created ${result.transactionsCreated} transaction(s) from ${result.rulesChecked} rule(s)`);
     }
   });
 

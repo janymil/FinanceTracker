@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import type { Express } from "express";
 import { isValidTimeZone } from "@shared/timezones";
 import { setupClerkAuth, isAuthenticated, getUserId } from "../clerkAuth";
@@ -83,7 +84,7 @@ export function registerAuthRoutes(app: Express) {
           if (emailOwner && emailOwner.id !== userId) {
             try {
               user = await storage.adoptUserAccount(emailOwner.id, userId, profile);
-              console.log(`[AUTH] Re-linked data from ${emailOwner.id} to ${userId} (${profile.email})`);
+              log.info(`[AUTH] Re-linked data from ${emailOwner.id} to ${userId} (${profile.email})`);
             } catch (adoptionError) {
               console.error('[AUTH] Could not re-link existing account:', adoptionError);
             }
@@ -107,7 +108,7 @@ export function registerAuthRoutes(app: Express) {
               currency: null // Explicitly set to null to trigger currency setup modal
             };
             user = await storage.upsertUser(userData);
-            console.log(`Created new user in database: ${userId}`);
+            log.info(`Created new user in database: ${userId}`);
           } catch (error) {
             console.error('Error creating user in database:', error);
             return res.status(500).json({ 

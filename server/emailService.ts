@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { MailService } from '@sendgrid/mail';
 import nodemailer, { type Transporter } from 'nodemailer';
 
@@ -7,7 +8,7 @@ const hasSmtp = Boolean(process.env.EMAIL_HOST && process.env.EMAIL_USER && proc
 if (!hasSendGrid && !hasSmtp) {
   console.warn("No email transport configured (SENDGRID_API_KEY or EMAIL_*). Email notifications will be disabled.");
 } else if (!hasSendGrid) {
-  console.log("Email notifications use the SMTP transport (EMAIL_* configured).");
+  log.info("Email notifications use the SMTP transport (EMAIL_* configured).");
 }
 
 const mailService = new MailService();
@@ -111,7 +112,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
 
   const transporter = getSmtpTransporter();
   if (!transporter) {
-    console.log('Email transport not configured, skipping email:', params.subject);
+    log.info('Email transport not configured, skipping email:', params.subject);
     return false;
   }
 

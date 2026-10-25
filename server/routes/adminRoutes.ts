@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage.js";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
@@ -29,7 +30,7 @@ export function registerAdminRoutes(app: Express) {
   app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
       const usersWithPaymentData = await storage.getAdminUserPaymentDetails();
-      console.log(`Admin analytics - Fetched ${usersWithPaymentData.length} users with payment data`);
+      log.info(`Admin analytics - Fetched ${usersWithPaymentData.length} users with payment data`);
       return res.json(usersWithPaymentData);
     } catch (error) {
       console.error("Error fetching users with payment data for admin:", error);
@@ -88,7 +89,7 @@ export function registerAdminRoutes(app: Express) {
 
             await storage.updateUser(user.id, updatedUserData);
             updatedUsers.push(user.id);
-            console.log(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
+            log.info(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
           }
         } catch (userError: any) {
           console.error(`Failed to sync user ${user.id}:`, userError);
@@ -192,21 +193,21 @@ export function registerAdminRoutes(app: Express) {
   app.delete('/api/admin-analytics/users/:userId', adminAuth, async (req: any, res: Response) => {
     try {
       const { userId } = req.params;
-      console.log(`Admin attempting to delete user: ${userId}`);
+      log.info(`Admin attempting to delete user: ${userId}`);
       
       // Check if user exists first
       const user = await storage.getUser(userId);
       if (!user) {
-        console.log(`User ${userId} not found in database`);
+        log.info(`User ${userId} not found in database`);
         return res.status(404).json({ 
           success: false, 
           message: "User not found" 
         });
       }
       
-      console.log(`Deleting user: ${userId} (${user.email})`);
+      log.info(`Deleting user: ${userId} (${user.email})`);
       await storage.deleteUserCompletely(userId);
-      console.log(`Successfully deleted user: ${userId}`);
+      log.info(`Successfully deleted user: ${userId}`);
       
       return res.json({ 
         success: true, 
@@ -396,7 +397,7 @@ export function registerAdminRoutes(app: Express) {
       
       const deletedCount = await UnifiedAICache.clearFunctionCache(functionKey);
       
-      console.log(`Admin cleared ${deletedCount} cache entries for function: ${functionKey}`);
+      log.info(`Admin cleared ${deletedCount} cache entries for function: ${functionKey}`);
       return res.json({ 
         success: true, 
         deletedCount,
@@ -416,7 +417,7 @@ export function registerAdminRoutes(app: Express) {
       
       const deletedCount = await UnifiedAICache.clearUserCache(userId);
       
-      console.log(`Admin cleared ${deletedCount} cache entries for user: ${userId}`);
+      log.info(`Admin cleared ${deletedCount} cache entries for user: ${userId}`);
       return res.json({ 
         success: true, 
         deletedCount,
@@ -435,7 +436,7 @@ export function registerAdminRoutes(app: Express) {
       
       const deletedCount = await UnifiedAICache.cleanupExpired();
       
-      console.log(`Admin cleaned up ${deletedCount} expired cache entries`);
+      log.info(`Admin cleaned up ${deletedCount} expired cache entries`);
       return res.json({ 
         success: true, 
         deletedCount,

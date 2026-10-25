@@ -1,3 +1,4 @@
+import { log } from './logger';
 
 import multer from 'multer';
 import { Request, Response } from 'express';
@@ -104,7 +105,7 @@ export const uploadReceiptHandler = [
         const anonymized = await anonymizeImageForAI(req.file.buffer, extras);
         safeImage = anonymized.image;
         detectedWords = anonymized.detectedWords;
-        console.log(`[Receipt] OCR image prepared: ${anonymized.maskedLines}/${anonymized.detectedLines} identifying lines masked`);
+        log.info(`[Receipt] OCR image prepared: ${anonymized.maskedLines}/${anonymized.detectedLines} identifying lines masked`);
       } catch (error) {
         console.warn('[Receipt] Could not prepare the image for OCR:', (error as Error).message);
         return res.status(422).json({

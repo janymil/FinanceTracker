@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { storage } from './storage';
 import { sendGraceExpiryWarning, sendAccountDowngradedNotification } from './emailService';
 import { withJobRun } from './errorGuard/jobs.js';
@@ -8,22 +9,22 @@ class GraceProcessor {
   // Process users in grace period for warnings and downgrades
   async processGracePeriods(): Promise<void> {
     if (this.isRunning) {
-      console.log('Grace period processor already running, skipping...');
+      log.info('Grace period processor already running, skipping...');
       return;
     }
 
     try {
       this.isRunning = true;
-      console.log('Starting grace period processing...');
+      log.info('Starting grace period processing...');
 
       // Get users with expired grace periods for downgrade
       const expiredUsers = await storage.getUsersWithExpiredGrace();
-      console.log(`Found ${expiredUsers.length} users with expired grace periods`);
+      log.info(`Found ${expiredUsers.length} users with expired grace periods`);
 
       // Downgrade expired users
       for (const user of expiredUsers) {
         try {
-          console.log(`Downgrading user ${user.id} to free plan (grace period expired)`);
+          log.info(`Downgrading user ${user.id} to free plan (grace period expired)`);
           
           // Update user plan to free
           await storage.updateUser(user.id, {
@@ -39,10 +40,10 @@ class GraceProcessor {
               user.email,
               user.firstName || 'User'
             );
-            console.log(`Downgrade notification sent to ${user.email}: ${sent}`);
+            log.info(`Downgrade notification sent to ${user.email}: ${sent}`);
           }
 
-          console.log(`Successfully downgraded user ${user.id}`);
+          log.info(`Successfully downgraded user ${user.id}`);
         } catch (error) {
           console.error(`Error downgrading user ${user.id}:`, error);
         }
@@ -50,7 +51,7 @@ class GraceProcessor {
 
       // Get users still in grace period for warnings
       const graceUsers = await storage.getUsersInGracePeriod();
-      console.log(`Found ${graceUsers.length} users still in grace period`);
+      log.info(`Found ${graceUsers.length} users still in grace period`);
 
       // Send warnings to users approaching grace expiry
       for (const user of graceUsers) {
@@ -66,7 +67,7 @@ class GraceProcessor {
             (now.getTime() - user.lastPaymentFailureNotified.getTime()) < (6 * 60 * 60 * 1000); // 6 hours
 
           if (shouldWarn && !recentlyNotified) {
-            console.log(`Sending grace expiry warning to user ${user.id} (${hoursRemaining}h remaining)`);
+            log.info(`Sending grace expiry warning to user ${user.id} (${hoursRemaining}h remaining)`);
             
             const sent = await sendGraceExpiryWarning(
               user.email,
@@ -79,7 +80,7 @@ class GraceProcessor {
               await storage.updateUser(user.id, {
                 lastPaymentFailureNotified: now
               });
-              console.log(`Grace warning sent to ${user.email}`);
+              log.info(`Grace warning sent to ${user.email}`);
             }
           }
         } catch (error) {
@@ -87,7 +88,7 @@ class GraceProcessor {
         }
       }
 
-      console.log('Grace period processing completed');
+      log.info('Grace period processing completed');
     } catch (error) {
       console.error('Error in grace period processor:', error);
     } finally {
@@ -97,7 +98,7 @@ class GraceProcessor {
 
   // Start the grace period processor with interval
   start(): void {
-    console.log('Grace period processor initialized - running every 12 hours');
+    log.info('Grace period processor initialized - running every 12 hours');
     
     // Run immediately, then every 12 hours. Both are recorded as job runs.
     void withJobRun('grace-period', () => this.processGracePeriods());

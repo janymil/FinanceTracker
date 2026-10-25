@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Router, Request, Response } from "express";
 import { z } from "zod";
 import OpenAI from "openai";
@@ -31,7 +32,7 @@ export function registerTTSRoutes(app: Router) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      console.log('🔊 [TTS] Generating speech:', {
+      log.info('🔊 [TTS] Generating speech:', {
         userId: userId.substring(0, 8) + '...',
         text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
         voice,
@@ -53,7 +54,7 @@ export function registerTTSRoutes(app: Router) {
         }
       }
       
-      console.log('🎙️ [TTS] Using voice for language:', { language, selectedVoice });
+      log.info('🎙️ [TTS] Using voice for language:', { language, selectedVoice });
       
       const mp3 = await openai.audio.speech.create({
         model: "tts-1",
@@ -72,7 +73,7 @@ export function registerTTSRoutes(app: Router) {
         'Cache-Control': 'no-cache'
       });
 
-      console.log('✅ [TTS] Generated audio:', buffer.length, 'bytes');
+      log.info('✅ [TTS] Generated audio:', buffer.length, 'bytes');
       res.send(buffer);
 
     } catch (error) {

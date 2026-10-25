@@ -1,3 +1,4 @@
+import { log } from './logger';
 import fetch from 'node-fetch';
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils.js";
 import { anonymizeMessages } from "../shared/aiAnonymizer.js";
@@ -63,7 +64,7 @@ export class MistralClient {
       formData.append('model', 'voxtral-mini-transcribe-3');
       formData.append('temperature', '0.0');
 
-      console.log('🎙️ [Mistral] Transcribing audio with voxtral-mini-transcribe-3...');
+      log.info('🎙️ [Mistral] Transcribing audio with voxtral-mini-transcribe-3...');
 
       const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
         method: 'POST',
@@ -79,7 +80,7 @@ export class MistralClient {
 
       const result = (await response.json()) as { text?: string };
       const transcription = result.text ?? '';
-      console.log('🎙️ [Mistral] Transcription successful:', transcription.slice(0, 100));
+      log.info('🎙️ [Mistral] Transcription successful:', transcription.slice(0, 100));
       return transcription.trim();
 
     } catch (error) {
@@ -106,7 +107,7 @@ export class MistralClient {
       ...request.response_format && { response_format: request.response_format }
     };
 
-    console.log('🤖 [Mistral] Creating chat completion:', {
+    log.info('🤖 [Mistral] Creating chat completion:', {
       model: payload.model,
       messages: payload.messages.length,
       temperature: payload.temperature,
@@ -135,7 +136,7 @@ export class MistralClient {
 
       const result = await response.json() as MistralResponse;
       
-      console.log('✅ [Mistral] Completion successful:', {
+      log.info('✅ [Mistral] Completion successful:', {
         model: result.model,
         promptTokens: result.usage?.prompt_tokens || 0,
         completionTokens: result.usage?.completion_tokens || 0,

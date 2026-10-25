@@ -1,3 +1,4 @@
+import { log } from './logger';
 import fetch from 'node-fetch';
 
 interface BunnyStorageConfig {
@@ -162,18 +163,18 @@ export class BunnyStorage {
             }
           }
         } catch (pathError: any) {
-          console.log(`Path ${tryPath} failed: ${pathError.message}`);
+          log.info(`Path ${tryPath} failed: ${pathError.message}`);
           continue;
         }
       }
       
       return [];
     } catch (error: any) {
-      console.log(`Bunny.net request failed for all path variations of ${path}: ${error}`);
+      log.info(`Bunny.net request failed for all path variations of ${path}: ${error}`);
       
       // 404 errors are expected when directory doesn't exist yet
       if (error.message && (error.message.includes('404') || error.message.includes('Object Not Found'))) {
-        console.log(`Directory ${path} doesn't exist yet - this is normal for new users`);
+        log.info(`Directory ${path} doesn't exist yet - this is normal for new users`);
         return [];
       }
       console.error(`Failed to list files in ${path}:`, error);
@@ -190,7 +191,7 @@ export class BunnyStorage {
     
     try {
       await this.uploadFile(filePath, backupContent, 'application/json');
-      console.log(`Backup created successfully: ${filePath}`);
+      log.info(`Backup created successfully: ${filePath}`);
     } catch (error) {
       console.error(`Failed to create backup ${filePath}:`, error);
       throw error;
@@ -212,9 +213,9 @@ export class BunnyStorage {
     ];
     
     for (const userFolder of folderVariations) {
-      console.log(`Checking backup folder: ${userFolder}`);
+      log.info(`Checking backup folder: ${userFolder}`);
       const files = await this.listFiles(userFolder);
-      console.log(`Found ${files.length} files in ${userFolder}`);
+      log.info(`Found ${files.length} files in ${userFolder}`);
       
       if (files.length > 0) {
         // Filter out directories and only return actual backup files
@@ -223,10 +224,10 @@ export class BunnyStorage {
           (file.ObjectName.includes('backup') || file.ObjectName.includes('.json') || file.ObjectName.endsWith('.json'))
         );
         
-        console.log(`Filtered to ${backupFiles.length} backup files in ${userFolder}`);
+        log.info(`Filtered to ${backupFiles.length} backup files in ${userFolder}`);
         
         if (backupFiles.length > 0) {
-          console.log(`Returning ${backupFiles.length} backup files from ${userFolder}`);
+          log.info(`Returning ${backupFiles.length} backup files from ${userFolder}`);
           return backupFiles.sort((a, b) => new Date(b.DateCreated).getTime() - new Date(a.DateCreated).getTime());
         }
       }
@@ -282,10 +283,10 @@ export class BunnyStorage {
     newestBackup: string | null;
   }> {
     const backups = await this.getUserBackups(userId);
-    console.log(`Calculating backup info for ${backups.length} backups for user ${userId}`);
+    log.info(`Calculating backup info for ${backups.length} backups for user ${userId}`);
     
     if (backups.length === 0) {
-      console.log(`No backups found for user ${userId}, returning zero values`);
+      log.info(`No backups found for user ${userId}, returning zero values`);
       return {
         totalBackups: 0,
         totalSize: 0,
@@ -297,11 +298,11 @@ export class BunnyStorage {
     // Use Length field from Bunny.net instead of Size, with better fallback
     const totalSize = backups.reduce((sum, backup) => {
       const size = backup.Length || backup.Size || 0;
-      console.log(`Backup ${backup.ObjectName}: ${size} bytes (Length: ${backup.Length}, Size: ${backup.Size})`);
+      log.info(`Backup ${backup.ObjectName}: ${size} bytes (Length: ${backup.Length}, Size: ${backup.Size})`);
       return sum + size;
     }, 0);
     
-    console.log(`Total size calculated: ${totalSize} bytes for ${backups.length} backups`);
+    log.info(`Total size calculated: ${totalSize} bytes for ${backups.length} backups`);
     
     const sortedBackups = backups.sort((a, b) => 
       new Date(a.DateCreated).getTime() - new Date(b.DateCreated).getTime()
@@ -314,7 +315,7 @@ export class BunnyStorage {
       newestBackup: sortedBackups[sortedBackups.length - 1]?.DateCreated || null,
     };
     
-    console.log(`Final backup info for user ${userId}:`, result);
+    log.info(`Final backup info for user ${userId}:`, result);
     return result;
   }
 }

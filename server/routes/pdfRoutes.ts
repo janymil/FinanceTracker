@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Request, Response } from 'express';
 import { isAuthenticated, getUserId } from '../clerkAuth';
 import { storage } from '../storage';
@@ -20,7 +21,7 @@ export function registerPDFRoutes(app: any) {
       // Check user plan - PDF export requires premium plan
       const user = await storage.getUser(userId);
       if (!user || user.plan !== 'premium') {
-        console.log(`PDF export blocked - User plan: ${user?.plan}`);
+        log.info(`PDF export blocked - User plan: ${user?.plan}`);
         return res.status(403).json({ 
           error: 'PDF export requires Premium subscription',
           plan: user?.plan || 'free'
@@ -30,7 +31,7 @@ export function registerPDFRoutes(app: any) {
       const { period, currency: requestedCurrency } = req.body;
       const language = getUserLanguage(req);
 
-      console.log('Generating PDF for premium user:', userId, 'Period:', period, 'Language:', language);
+      log.info('Generating PDF for premium user:', userId, 'Period:', period, 'Language:', language);
 
       const userData = {
         name: user.firstName || 'User',
@@ -42,7 +43,7 @@ export function registerPDFRoutes(app: any) {
       const startDate = new Date(year, month - 1, 1);
       const endDate = new Date(year, month, 0);
 
-      console.log('Collecting transaction data for period:', startDate, 'to', endDate);
+      log.info('Collecting transaction data for period:', startDate, 'to', endDate);
 
       // Get all transactions for the period
       const periodTransactions = await storage.getTransactionsByDateRange(userId, startDate, endDate);
@@ -58,7 +59,7 @@ export function registerPDFRoutes(app: any) {
 
       const netBalance = totalIncome - totalExpenses;
 
-      console.log('Financial totals:', { totalIncome, totalExpenses, netBalance });
+      log.info('Financial totals:', { totalIncome, totalExpenses, netBalance });
 
       // Get trends data for the last 6 months
       const trendsData = [];
@@ -84,7 +85,7 @@ export function registerPDFRoutes(app: any) {
         });
       }
 
-      console.log('Trends data collected:', trendsData.length, 'months');
+      log.info('Trends data collected:', trendsData.length, 'months');
 
       // Get category breakdown
       const categoryBreakdown = [];
@@ -141,7 +142,7 @@ export function registerPDFRoutes(app: any) {
         }
       }
 
-      console.log('Category breakdown:', categoryBreakdown.length, 'categories');
+      log.info('Category breakdown:', categoryBreakdown.length, 'categories');
 
       // Budgets and goals add extra sections to the processor report.
       let budgets: any[] = [];
@@ -157,7 +158,7 @@ export function registerPDFRoutes(app: any) {
       }
 
       const reportCurrency = requestedCurrency || user.currency || '$';
-      console.log('[PDF] Generating report. Currency:', reportCurrency, '| period:', period);
+      log.info('[PDF] Generating report. Currency:', reportCurrency, '| period:', period);
 
       // Hand the report to the independent PDF processor. The payload matches
       // the processor's contract (see server/pdfProcessorClient.ts).
@@ -190,7 +191,7 @@ export function registerPDFRoutes(app: any) {
 
       const pdfBuffer = await requestPdf(payload);
 
-      console.log('PDF generated successfully:', pdfBuffer.length, 'bytes');
+      log.info('PDF generated successfully:', pdfBuffer.length, 'bytes');
 
       // Export invariant (blueprint 07 §18): a PDF that is not a PDF, or is suspiciously
       // small, means the user downloads a broken file and nobody notices.

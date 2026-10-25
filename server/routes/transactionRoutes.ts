@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { notifyDataChange } from "../realtime";
 
 import type { Express } from "express";
@@ -161,7 +162,7 @@ export function registerTransactionRoutes(app: Express) {
                 transactionId: transaction.id
               });
               
-              console.log('📚 Voice learning recorded for transaction:', transaction.id);
+              log.info('📚 Voice learning recorded for transaction:', transaction.id);
             } catch (error) {
               console.error('Voice learning error:', error);
             }
@@ -171,7 +172,7 @@ export function registerTransactionRoutes(app: Express) {
           try {
             const outcome = await autoCategorizeTransaction(transaction, userId, getUserLanguage(req));
             if (outcome.applied) {
-              console.log(`Auto-categorized transaction ${transaction.id} (confidence ${outcome.confidence.toFixed(2)})`);
+              log.info(`Auto-categorized transaction ${transaction.id} (confidence ${outcome.confidence.toFixed(2)})`);
             }
           } catch (error) {
             console.error('Auto-categorization error:', error);
@@ -180,7 +181,7 @@ export function registerTransactionRoutes(app: Express) {
           // Schedule this user for batch processing
           batchProcessor.scheduleUser(userId);
 
-          console.log('Background processing completed for transaction:', transaction.id);
+          log.info('Background processing completed for transaction:', transaction.id);
         } catch (error) {
           console.error('Background processing error:', error);
           // Don't affect the user experience even if background processing fails

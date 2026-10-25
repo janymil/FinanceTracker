@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { normalizeLanguageCode } from '../lib/languageUtils';
 
 // Category translation mappings for predefined categories
@@ -327,7 +328,7 @@ export function getUserLanguage(req: any): string {
   const userLanguage = req.headers['x-user-language'];
   if (userLanguage && typeof userLanguage === 'string') {
     const normalized = normalizeLanguageCode(userLanguage);
-    console.log(`[Lang Detection] Using x-user-language header: ${userLanguage} -> ${normalized}`);
+    log.info(`[Lang Detection] Using x-user-language header: ${userLanguage} -> ${normalized}`);
     return normalized;
   }
   
@@ -336,7 +337,7 @@ export function getUserLanguage(req: any): string {
   const urlMatch = urlPath.match(/^\/(en|es|sk)\b/);
   if (urlMatch) {
     const langFromUrl = normalizeLanguageCode(urlMatch[1]);
-    console.log(`[Lang Detection] Using URL path: ${urlMatch[1]} -> ${langFromUrl}`);
+    log.info(`[Lang Detection] Using URL path: ${urlMatch[1]} -> ${langFromUrl}`);
     return langFromUrl;
   }
   
@@ -346,7 +347,7 @@ export function getUserLanguage(req: any): string {
     const refererMatch = referer.match(/\/(en|es|sk)(?:\/|$)/);
     if (refererMatch) {
       const langFromReferer = normalizeLanguageCode(refererMatch[1]);
-      console.log(`[Lang Detection] Using referer: ${refererMatch[1]} -> ${langFromReferer}`);
+      log.info(`[Lang Detection] Using referer: ${refererMatch[1]} -> ${langFromReferer}`);
       return langFromReferer;
     }
   }
@@ -366,7 +367,7 @@ export function getUserLanguage(req: any): string {
       const primaryLang = languages[0]?.code;
       if (primaryLang) {
         const langFromAccept = normalizeLanguageCode(primaryLang);
-        console.log(`[Lang Detection] Using Accept-Language: ${primaryLang} -> ${langFromAccept}`);
+        log.info(`[Lang Detection] Using Accept-Language: ${primaryLang} -> ${langFromAccept}`);
         return langFromAccept;
       }
     } catch (error) {
@@ -374,7 +375,7 @@ export function getUserLanguage(req: any): string {
     }
   }
   
-  console.log('[Lang Detection] Using default fallback: en-us');
+  log.info('[Lang Detection] Using default fallback: en-us');
   return 'en-us'; // Default fallback
 }
 

@@ -1,3 +1,4 @@
+import { log } from './logger';
 import {
   S3Client,
   PutObjectCommand,
@@ -70,7 +71,7 @@ export class CloudflareR2Storage implements CloudStorageService {
         },
       });
       this.isConfigured = true;
-      console.log('✅ Cloudflare R2 Storage initialized for bucket:', this.bucket);
+      log.info('✅ Cloudflare R2 Storage initialized for bucket:', this.bucket);
     } else {
       console.warn('⚠️ Cloudflare R2 credentials not fully set in .env');
     }
@@ -205,7 +206,7 @@ export class CloudflareR2Storage implements CloudStorageService {
     const backupContent = JSON.stringify(backupData, null, 2);
 
     await this.uploadFile(filePath, backupContent, 'application/json');
-    console.log(`Cloudflare R2: Backup created successfully at ${filePath}`);
+    log.info(`Cloudflare R2: Backup created successfully at ${filePath}`);
     return filename;
   }
 

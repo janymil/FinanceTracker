@@ -1,3 +1,4 @@
+import { log } from './logger';
 import type { Request, Response } from 'express';
 import { syncCreatedClerkUser } from './clerkUsers';
 import { isUniqueViolation } from './dbErrors';
@@ -119,7 +120,7 @@ export function createClerkWebhookHandler(deps: WebhookDeps = defaultDeps) {
           outcome = 'unhandled-type';
       }
 
-      console.log(`Clerk webhook ${type} for ${data.id}: ${outcome}`);
+      log.info(`Clerk webhook ${type} for ${data.id}: ${outcome}`);
       return reply(200, { received: true, outcome });
     } catch (error) {
       console.error('Clerk webhook error:', error);

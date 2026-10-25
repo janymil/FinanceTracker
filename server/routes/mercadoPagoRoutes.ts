@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import type { Express, Request, Response } from 'express';
 import { isAuthenticated, getUserId } from '../clerkAuth';
 import { storage } from '../storage';
@@ -27,7 +28,7 @@ async function activatePlan(userId: string, plan: PlanId, interval: BillingInter
   if (current?.stripeSubscriptionId && current.plan !== 'free') return;
   await storage.updateUserPlan(userId, plan, interval);
   await storage.updateUser(userId, { mpPreapprovalId: preapprovalId });
-  console.log(`[MercadoPago] ${userId} activated ${plan} (${interval}) via preapproval ${preapprovalId}`);
+  log.info(`[MercadoPago] ${userId} activated ${plan} (${interval}) via preapproval ${preapprovalId}`);
 }
 
 async function deactivatePlan(userId: string, preapprovalId: string) {
@@ -39,7 +40,7 @@ async function deactivatePlan(userId: string, preapprovalId: string) {
   if (user.stripeSubscriptionId) return;
   await storage.updateUserPlan(userId, 'free', 'monthly');
   await storage.updateUser(userId, { mpPreapprovalId: null });
-  console.log(`[MercadoPago] ${userId} downgraded to free (preapproval ${preapprovalId} is no longer active)`);
+  log.info(`[MercadoPago] ${userId} downgraded to free (preapproval ${preapprovalId} is no longer active)`);
 }
 
 

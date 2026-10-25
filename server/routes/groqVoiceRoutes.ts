@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Router, type Request, type Response } from "express";
 import multer from "multer";
 import { z } from "zod";
@@ -23,7 +24,7 @@ const upload = multer({
 // Groq voice transcription and parsing endpoint
 router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request, res: Response) => {
   try {
-    console.log('🎤 Groq voice transcription and parsing request');
+    log.info('🎤 Groq voice transcription and parsing request');
     
     if (!req.file) {
       return res.status(400).json({ error: 'No audio file uploaded' });
@@ -32,20 +33,20 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     const userLanguage = req.headers['x-user-language'] as string || 'en-us';
     const userCurrency = req.headers['x-user-currency'] as string || '$';
     
-    console.log('🌍 User preferences:', { userLanguage, userCurrency });
+    log.info('🌍 User preferences:', { userLanguage, userCurrency });
     
     // Step 1: Groq STT with Distil-Whisper
-    console.log('🎙️ Step 1: Transcribing audio with Groq Distil-Whisper...');
+    log.info('🎙️ Step 1: Transcribing audio with Groq Distil-Whisper...');
     const transcript = await transcribeAudioWithGroq(req.file.buffer);
     
     if (!transcript.trim()) {
       return res.status(400).json({ error: 'No speech detected in audio' });
     }
     
-    console.log('🎙️ Transcription result:', transcript);
+    log.info('🎙️ Transcription result:', transcript);
     
     // Step 2: Groq LLaMA intelligent parsing with user preferences
-    console.log('🧠 Step 2: Parsing transaction with Groq LLaMA...');
+    log.info('🧠 Step 2: Parsing transaction with Groq LLaMA...');
     const parsedTransaction = await parseTransactionWithGroq(transcript, userLanguage, userCurrency);
     
     // Step 3: Enhanced category matching with merchant lookup (optional enhancement)
@@ -56,17 +57,17 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
         const countryCode = userLanguage === 'sk-sk' ? 'sk' : 
                           userLanguage === 'es-pe' ? 'pe' : 'us';
         
-        console.log('🏪 Step 3: Enhancing category with merchant lookup...');
+        log.info('🏪 Step 3: Enhancing category with merchant lookup...');
         const merchantResult = await lookupMerchant(transcript, countryCode);
         
         if (merchantResult && merchantResult.typical_categories) {
           const languageIndex = userLanguage === 'sk-sk' ? 1 : 
                                userLanguage === 'es-pe' ? 2 : 0;
           enhancedCategory = merchantResult.typical_categories[languageIndex] || parsedTransaction.category;
-          console.log('🏪 Enhanced category from merchant lookup:', enhancedCategory);
+          log.info('🏪 Enhanced category from merchant lookup:', enhancedCategory);
         }
       } catch (merchantError) {
-        console.log('🏪 Merchant lookup failed, using LLaMA category:', merchantError instanceof Error ? merchantError.message : 'Unknown error');
+        log.info('🏪 Merchant lookup failed, using LLaMA category:', merchantError instanceof Error ? merchantError.message : 'Unknown error');
       }
     }
     
@@ -76,7 +77,7 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       transcript: transcript // Include original transcript
     };
     
-    console.log('✅ Final Groq analysis result:', finalResult);
+    log.info('✅ Final Groq analysis result:', finalResult);
     
     res.json({ 
       success: true, 
@@ -101,7 +102,7 @@ router.post('/parse-text', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Transcript is required' });
     }
     
-    console.log('🧠 Testing Groq LLaMA text parsing:', transcript);
+    log.info('🧠 Testing Groq LLaMA text parsing:', transcript);
     
     const result = await parseTransactionWithGroq(transcript, userLanguage, userCurrency);
     
@@ -126,7 +127,7 @@ router.post('/match-category', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    console.log('🎯 Intelligent category matching request:', {
+    log.info('🎯 Intelligent category matching request:', {
       suggestedCategory,
       existingCount: existingCategories.length,
       language: userLanguage
@@ -134,7 +135,7 @@ router.post('/match-category', async (req: Request, res: Response) => {
 
     const result = await matchCategoryIntelligently(suggestedCategory, existingCategories, userLanguage);
     
-    console.log('✅ Category matching result:', result);
+    log.info('✅ Category matching result:', result);
     res.json(result);
     
   } catch (error) {

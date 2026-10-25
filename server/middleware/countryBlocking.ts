@@ -1,3 +1,4 @@
+import { log } from '../logger';
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../db.js';
 import { blockedCountries } from '../../shared/schema.ts';
@@ -109,7 +110,7 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
     
     if (blockedSet.has(countryCode)) {
       // Log blocked access attempt
-      console.log(`Blocked access from ${countryCode} (${geoData.country}) - IP: ${clientIP}`);
+      log.info(`Blocked access from ${countryCode} (${geoData.country}) - IP: ${clientIP}`);
       
       return res.status(403).json({
         error: 'Access denied',

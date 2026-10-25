@@ -1,3 +1,4 @@
+import { log } from './logger';
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -24,7 +25,7 @@ export const setupClerkAuth = (app: any) => {
     console.error('[AUTH] CLERK_PUBLISHABLE_KEY looks invalid - it must start with "pk_test_" or "pk_live_".');
   }
 
-  console.log('Setting up Clerk middleware:', {
+  log.info('Setting up Clerk middleware:', {
     publishableKeyPresent: Boolean(publishableKey),
     secretKeyPresent: Boolean(secretKey),
   });
