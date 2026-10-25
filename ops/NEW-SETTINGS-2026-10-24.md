@@ -31,5 +31,5 @@ Every statement is `IF NOT EXISTS`, so running it twice is harmless.
 - Stripe: send a test event from the dashboard to `/api/stripe-webhook`; it must return 200 (400 means the signing secret is wrong).
 - Open `/es/reclamaciones`, register a test entry, and confirm the e-mail copy arrives.
 - Repeating transactions and bill-reminder e-mails run on timers (hourly). `job_runs` records `recurring-processor` and `reminder-emails`.
-- The `Content-Security-Policy-Report-Only` header is on. Browse the app once with the browser console open; when no violations are reported, rename the header to `Content-Security-Policy` in `server/index.ts` to enforce it.
+- The `Content-Security-Policy` header is **enforced** (it was report-only until 2026-10-25, when a browser sweep of all pages found no violations). After deploying, open the app once with the browser console open; any "Refused to ..." line means a new third-party host has to be added to the list in `server/index.ts`.
 - Rotate `ADMIN_PASSWORD` and `SESSION_SECRET` if the admin session cookie mentioned in `.gitignore` was ever committed (`git log --all -- "cookies*.txt" admin_cookies.txt`).
