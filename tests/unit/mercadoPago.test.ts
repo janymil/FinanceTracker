@@ -1,7 +1,9 @@
 import crypto from 'crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  MercadoPagoError,
   createPreapproval,
+  getPreapproval,
   isMercadoPagoConfigured,
   verifyWebhookSignature,
 } from '../../server/mercadopago';
@@ -141,6 +143,32 @@ describe('MercadoPago preapproval', () => {
       payerEmail: 'payer@example.com',
       backUrl: 'https://kaptia.app/es/profile?mp=return',
     })).rejects.toThrow('invalid_token');
+  });
+});
+
+describe('MercadoPago errors', () => {
+  it('keeps the HTTP status so the webhook can tell "unknown id" from an outage', async () => {
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: false,
+      status: 404,
+      text: async () => JSON.stringify({ message: 'Preapproval not found for ID: 123456' }),
+    })));
+
+    const failure = getPreapproval('123456');
+    await expect(failure).rejects.toBeInstanceOf(MercadoPagoError);
+    await expect(failure).rejects.toMatchObject({ status: 404 });
+  });
+
+  it('keeps a 5xx status so a real outage still fails loudly', async () => {
+    process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: false,
+      status: 503,
+      text: async () => JSON.stringify({ message: 'service unavailable' }),
+    })));
+
+    await expect(getPreapproval('pre-1')).rejects.toMatchObject({ status: 503 });
   });
 });
 

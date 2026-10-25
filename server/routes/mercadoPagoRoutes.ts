@@ -3,6 +3,7 @@ import type { Express, Request, Response } from 'express';
 import { isAuthenticated, getUserId } from '../clerkAuth';
 import { storage } from '../storage';
 import {
+  MercadoPagoError,
   cancelPreapproval,
   createPreapproval,
   findPreapprovalForUser,
@@ -207,7 +208,15 @@ export function registerMercadoPagoRoutes(app: Express) {
       // `subscription_authorized_payment` events only confirm a recurring charge; the plan
       // is already active, so nothing needs to change.
     } catch (error: any) {
-      console.error('[MercadoPago] Webhook handling failed:', error?.message || error);
+      // The dashboard's "test notification" button sends a fixed payload with data.id
+      // "123456", and a preapproval deleted before its last event can 404 as well. Neither
+      // is a server fault: acknowledge with 200 so MercadoPago stops retrying and the URL
+      // validates. A real outage (401, 5xx, network) still answers 500 and is retried.
+      if (error instanceof MercadoPagoError && error.status === 404) {
+        log.info(`[MercadoPago] Ignored notification for unknown preapproval ${dataId}`);
+        return res.status(200).json({ received: true, ignored: true });
+      }
+      log.error('[MercadoPago] Webhook handling failed:', error?.message || error);
       return res.status(500).json({ error: 'Webhook handling failed' });
     }
 

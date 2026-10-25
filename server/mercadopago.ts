@@ -23,6 +23,19 @@ function accessToken(): string {
   return token;
 }
 
+/** An error returned by the MercadoPago API. The HTTP status is kept so callers can decide
+ * whether a failure is worth retrying (5xx/network) or is simply about a resource that does
+ * not exist (404, e.g. the dashboard's simulated notification for id `123456`). */
+export class MercadoPagoError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'MercadoPagoError';
+    this.status = status;
+  }
+}
+
 async function mpFetch(path: string, init: RequestInit = {}): Promise<any> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
@@ -38,7 +51,7 @@ async function mpFetch(path: string, init: RequestInit = {}): Promise<any> {
 
   if (!response.ok) {
     const message = data?.message || data?.error || `MercadoPago ${response.status}`;
-    throw new Error(message);
+    throw new MercadoPagoError(String(message), response.status);
   }
   return data;
 }
