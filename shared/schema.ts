@@ -11,7 +11,9 @@ import {
   boolean,
   integer,
   uniqueIndex,
+  primaryKey,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -62,20 +64,61 @@ export const users = pgTable("users", {
   timezone: varchar("timezone", { length: 64 }),
 });
 
+/**
+ * One row per payment-provider notification we have already handled.
+ *
+ * Both gateways retry: the card provider resends for up to three days, and this app is
+ * restarted regularly (a memory-only list of seen ids loses everything on restart).
+ * The primary key is what makes a repeat delivery cheap to recognise *and* safe across
+ * restarts, because the database, not the process, remembers it.
+ *
+ * `event_key` is the provider's own event id for cards. For MercadoPago it is
+ * `<preapproval id>:<state>` — keying on the preapproval id alone would swallow the later
+ * "cancelled" notice for a subscription that was already "authorized", and the customer
+ * would keep a paid plan they stopped paying for.
+ *
+ * Rows are pruned after 30 days (see `pruneWebhookEvents`), far longer than any provider
+ * retry window.
+ */
+export const webhookEvents = pgTable(
+  "webhook_events",
+  {
+    source: varchar("source", { length: 16 }).notNull(), // 'stripe' | 'mercadopago'
+    eventKey: varchar("event_key", { length: 160 }).notNull(),
+    eventType: varchar("event_type", { length: 64 }),
+    receivedAt: timestamp("received_at").notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.source, table.eventKey] }),
+    index("IDX_webhook_events_received").on(table.receivedAt),
+  ],
+);
+
 // Payment failure log table for tracking payment issues
-export const paymentFailures = pgTable("payment_failures", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  stripeInvoiceId: varchar("stripe_invoice_id"),
-  stripeCustomerId: varchar("stripe_customer_id"),
-  failureReason: text("failure_reason"),
-  attemptCount: integer("attempt_count").default(1),
-  failedAt: timestamp("failed_at").defaultNow(),
-  notificationSent: boolean("notification_sent").default(false),
-  lastNotified: timestamp("last_notified"),
-  resolved: boolean("resolved").default(false),
-  resolvedAt: timestamp("resolved_at"),
-});
+export const paymentFailures = pgTable(
+  "payment_failures",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id").notNull().references(() => users.id),
+    stripeInvoiceId: varchar("stripe_invoice_id"),
+    stripeCustomerId: varchar("stripe_customer_id"),
+    failureReason: text("failure_reason"),
+    attemptCount: integer("attempt_count").default(1),
+    failedAt: timestamp("failed_at").defaultNow(),
+    notificationSent: boolean("notification_sent").default(false),
+    lastNotified: timestamp("last_notified"),
+    resolved: boolean("resolved").default(false),
+    resolvedAt: timestamp("resolved_at"),
+  },
+  // One row per Stripe invoice. A repeated delivery of the same invoice can then never
+  // create a second row, a second "your card failed" e-mail or a doubled failure count.
+  // Partial, so the rows written before this column was filled in are left alone.
+  (table) => [
+    uniqueIndex("UQ_payment_failures_invoice")
+      .on(table.stripeInvoiceId)
+      .where(sql`${table.stripeInvoiceId} is not null`),
+  ],
+);
 
 // Categories for transactions, budgets, and goals
 export const categories = pgTable("categories", {

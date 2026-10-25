@@ -6,6 +6,16 @@ Goal: prove the price wiring end-to-end in **test mode** before touching the liv
 The verification tool is `npm run check:stripe-prices` (`scripts/check-stripe-prices.ts`), read-only,
 exit code 1 when a plan would fail at `/api/create-checkout-session`.
 
+## Status (last run: 2026-10-25)
+
+| phase | what it proves | result |
+|---|---|---|
+| 1 | the monthly-interval bug is real | reproduced: 2 of 8 plans bill monthly where the page says yearly |
+| 2 | explicit `price_…` ids fix it | 8 of 8 ok in test mode |
+| 3 | the browser sends the right session | **not automated** — see the note in the phase; there is no `tests/e2e/subscribe-sandbox.spec.ts` |
+| 4 | the notification path grants and removes the plan | verified end to end, including a repeated delivery and a full refund |
+| 5 | live `.env` points at the right prices | done: `npm run check:stripe-prices` → live key, 8 of 8 ok |
+
 ## Sandbox catalog (mirrors live, created 2026-10-25 through the Stripe MCP)
 
 8 products / 10 prices. The two `Anual` products intentionally keep the *monthly* price as
@@ -35,9 +45,17 @@ A sandbox Checkout Session created against `price_1UUJsSFlf8efPaoOfLRw5C8L` char
 - **Database:** `.env` only has `DATABASE_URL` and `DATABASE_URL_PROD`, and **both hold the
   same value** — there is one shared database, so a local `NODE_ENV=development` run writes
   production data (`server/db.ts:10-13` picks the variable by `NODE_ENV`, but the values match).
-  Create a scratch Neon branch and `export DATABASE_URL=<scratch>` for the rehearsal, or accept
-  that only the Clerk e2e account `kaptia.e2e+clerk_test@example.com` may be touched (reset its
-  `plan` / `stripeCustomerId` / `stripeSubscriptionId` afterwards).
+  Use the scratch database instead:
+
+  ```bash
+  export DATABASE_URL="$(node scripts/rehearsal-scratch-db.mjs)"   # empty database, same server
+  node scripts/db-migrate.mjs --url "$DATABASE_URL"                # 0000 + 0001
+  # … rehearsal …
+  REHEARSAL_DROP=1 node scripts/rehearsal-scratch-db.mjs           # delete it when finished
+  ```
+
+  `scripts/rehearsal-scratch-db.mjs` only runs `CREATE DATABASE` / `DROP DATABASE` for
+  `kaptia_rehearsal`; it never prints credentials and never touches existing rows.
 - **Background jobs:** `startRecurringScheduler()` and `startReminderScheduler()` run
   unconditionally on listen (`server/index.ts:406-408`). A second instance therefore processes
   recurring rules and sends bill reminders for whatever database it points at. Recurring writes
@@ -58,7 +76,9 @@ STRIPE_PREMIUM_YEARLY_PEN_PRICE_ID=prod_VVKX8AWjHbxxmd \
 npx tsx scripts/check-stripe-prices.ts
 ```
 
-Expected: **6 of 8 fail** — four `no-env` (USD) and two `wrong-interval` (PEN yearly).
+Expected: **2 of 8 fail** — both PEN yearly plans resolve through their product's default price,
+which bills monthly. (The USD ids are already in `.env.stripe-sandbox`, so there are no
+`no-env` rows in this run; a machine without them would also show four `no-env` failures.)
 
 ## Phase 2 — prove the fix (explicit `price_` ids)
 
@@ -70,7 +90,21 @@ set -a; . ./.env.stripe-sandbox; set +a
 npx tsx scripts/check-stripe-prices.ts     # expect: All 8 plan prices match shared/pricing.ts
 ```
 
+Result: all 8 ok in test mode, which is what the two `price_…` ids in the table above fix.
+
 ## Phase 3 — app-level checkout on a scratch instance
+
+**Not automated.** This phase used to point at `tests/e2e/subscribe-sandbox.spec.ts`, which
+does not exist in this repository. The rest of the e2e suite signs in through Clerk, so
+writing that spec is a separate piece of work; until then this phase is manual:
+
+1. Start the scratch instance (Phase 4 shows how) and open `http://localhost:5066/es/profile`.
+2. Choose the Pen/Yearly plan and click subscribe.
+3. Expect the browser to land on `checkout.stripe.com` with `S/ 99.90` and a **yearly** line item.
+
+## Phase 4 — the notification path
+
+Start a scratch instance (prod `pm2` is untouched, and e-mail is disabled):
 
 ```bash
 cd /var/www/kaptia
@@ -78,27 +112,37 @@ set -a; . ./.env.stripe-sandbox; set +a
 export STRIPE_WEBHOOK_SECRET=whsec_rehearsal_local   # only used to verify signatures locally
 export PORT=5066 NODE_ENV=development DISABLE_COUNTRY_BLOCKING=1
 export SENDGRID_API_KEY= EMAIL_HOST= EMAIL_USER= EMAIL_PASSWORD=   # no real e-mails
-[ -n "$DATABASE_URL_SCRATCH" ] && export DATABASE_URL="$DATABASE_URL_SCRATCH"
+export DATABASE_URL="$(node scripts/rehearsal-scratch-db.mjs)"      # empty database, same server
+node scripts/db-migrate.mjs --url "$DATABASE_URL"
 npx tsx server/index.ts                     # foreground; prod pm2 is untouched
 ```
 
-Then drive the real UI with the existing e2e harness (it creates the Clerk test user itself):
+In a second shell, with the same environment exported, send the signed notifications:
 
 ```bash
-E2E_ENABLED=1 E2E_BASE_URL=http://localhost:5066 npm run test:e2e -- tests/e2e/subscribe-sandbox.spec.ts
+node scripts/rehearsal-stripe-webhook.mjs
 ```
 
-Expected: clicking subscribe on the Pen/Yearly plan redirects to `checkout.stripe.com` with
-`S/ 99.90` and a yearly interval in the line item.
+Observed on 2026-10-25:
 
-## Phase 4 — webhook path
+```
+checkout, first delivery : { status: 200, body: { received: true } }
+checkout, same event again: { status: 200, body: { received: true, duplicate: true } }
+after checkout            : { plan: 'standard', billing_interval: 'yearly',
+                             stripe_customer_id: 'cus_rehearsal', stripe_subscription_id: 'sub_rehearsal' }
+full refund               : { status: 200, body: { received: true } }
+after refund              : { plan: 'free', billing_interval: 'monthly', stripe_subscription_id: '' }
+recorded notifications    : one row per event id
+```
 
-POST a signed `checkout.session.completed` to `http://127.0.0.1:5066/api/stripe/webhook`, with
-`metadata.userId` = the e2e Clerk user id and the sandbox price id in the session. Expect
-`200` and, in the scratch DB, `plan` flipped to `standard-yearly` plus the sandbox
-`stripeCustomerId`/`stripeSubscriptionId` stored.
+A full refund cancels the subscription first, so it cannot bill again and then put the
+customer back on the plan. `sub_rehearsal` does not exist in the sandbox, so the log shows
+`Could not cancel … No such subscription` and the downgrade still happens — that is the
+intended order: the money went back, so the access goes back.
 
-## Phase 5 — the live fix (only after 1–4 pass)
+Finish with `REHEARSAL_DROP=1 node scripts/rehearsal-scratch-db.mjs`.
+
+## Phase 5 — the live fix (done)
 
 Six lines in `.env` (4 USD ids + the 2 corrected PEN yearly `price_…` ids), then:
 
@@ -107,3 +151,8 @@ npm run check:stripe-prices                  # live key from .env → expect 8/8
 pm2 reload kaptia --update-env
 npm run check:stripe-prices                  # same result through the restarted process env
 ```
+
+Done on 2026-10-25: live reports `All 8 plan prices match shared/pricing.ts`. Since the same
+check is now step 6 of `scripts/deploy.sh`, a future `.env` edit that breaks a price stops the
+release instead of reaching a customer.
+

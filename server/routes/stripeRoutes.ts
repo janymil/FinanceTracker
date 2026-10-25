@@ -28,23 +28,46 @@ function currencyForRequest(req: Request): BillingCurrency {
   return language.toLowerCase().startsWith('es') ? 'pen' : 'usd';
 }
 
-const processedEvents = new Map<string, number>();
-const EVENT_TTL_MS = 24 * 60 * 60 * 1000;
+const WEBHOOK_SOURCE = 'stripe';
+const EVENT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+const PRUNE_EVERY_MS = 60 * 60 * 1000;
+let lastPruneAt = 0;
 
-/** True if this Stripe event id was already handled; otherwise records it. */
-function alreadyProcessed(eventId: string): boolean {
-  const now = Date.now();
-  Array.from(processedEvents.entries()).forEach(([id, at]) => {
-    if (now - at > EVENT_TTL_MS) processedEvents.delete(id);
-  });
-  if (processedEvents.has(eventId)) return true;
-  processedEvents.set(eventId, now);
-  return false;
+/**
+ * Records the event before it is handled, and says whether this delivery is the first one.
+ *
+ * The claim lives in the database (primary key on source + event id), not in this process:
+ * a restart mid-delivery, a reply lost on the way back to Stripe, or a manual resend days
+ * later can no longer apply the same event twice. The old memory-only map lost everything
+ * on every restart, and `invoice.payment_failed` is not safe to run twice.
+ */
+async function claimEvent(eventId: string, type: string): Promise<boolean> {
+  const claimed = await storage.claimWebhookEvent({ source: WEBHOOK_SOURCE, key: eventId, type });
+  if (claimed && Date.now() - lastPruneAt > PRUNE_EVERY_MS) {
+    lastPruneAt = Date.now();
+    // Fire and forget: housekeeping must never delay or fail a payment notification.
+    storage.pruneWebhookEvents(new Date(Date.now() - EVENT_RETENTION_MS)).catch((error) => {
+      log.info('[Stripe] Could not prune old webhook events:', error instanceof Error ? error.message : String(error));
+    });
+  }
+  return claimed;
 }
 
-function forgetEvent(eventId: string): void {
-  processedEvents.delete(eventId);
+/** Frees the claim so Stripe's retry is applied instead of being answered as a duplicate. */
+async function releaseEvent(eventId: string): Promise<void> {
+  await storage.releaseWebhookEvent(WEBHOOK_SOURCE, eventId);
 }
+
+/**
+ * The one place the refund handler reaches out to Stripe. Exported so tests can replace it:
+ * a unit test must never perform a real API call, and this is the only write in the handler.
+ */
+export const stripeGateway = {
+  async cancelSubscription(subscriptionId: string): Promise<void> {
+    if (!stripe) throw new Error('Stripe is not configured');
+    await stripe.subscriptions.cancel(subscriptionId);
+  },
+};
 
 /** Customers are only ever sent back to our own site, never to a caller-supplied origin. */
 function appBaseUrl(): string {
@@ -693,7 +716,18 @@ export function registerStripeRoutes(app: Express) {
       return res.status(400).send('Webhook signature verification failed');
     }
 
-    if (alreadyProcessed(event.id)) {
+    let claimed: boolean;
+    try {
+      claimed = await claimEvent(event.id, event.type);
+    } catch (error) {
+      // Without the claim we cannot know whether this event ran before, so refuse it and
+      // let Stripe retry (5xx) instead of risking a second upgrade or downgrade.
+      console.error('Error recording webhook event:', error);
+      return res.status(500).json({ error: 'Webhook processing failed' });
+    }
+
+    if (!claimed) {
+      log.info(`Duplicate webhook event ignored: ${event.type} ${event.id}`);
       return res.json({ received: true, duplicate: true });
     }
 
@@ -728,13 +762,23 @@ export function registerStripeRoutes(app: Express) {
         case 'invoice.payment_action_required':
           await handlePaymentActionRequired(event.data.object);
           break;
-        
+
+        case 'charge.refunded':
+          await handleChargeRefunded(event.data.object);
+          break;
+
         default:
           log.info(`Unhandled webhook event type: ${event.type}`);
       }
     } catch (error) {
-      // Not kept as processed and answered with 500, so Stripe retries the event.
-      forgetEvent(event.id);
+      // Free the claim and answer 500 so Stripe retries; a retry must still be processed.
+      try {
+        await releaseEvent(event.id);
+      } catch (releaseError) {
+        // If even this fails, the event stays claimed and Stripe's retry is ignored. That
+        // is the safe direction: a plan is never granted twice, and the log says why.
+        log.error('[Stripe] Could not free a failed webhook claim:', releaseError instanceof Error ? releaseError.message : releaseError);
+      }
       console.error('Error processing webhook:', error);
       return res.status(500).json({ error: 'Webhook processing failed' });
     }
@@ -830,27 +874,53 @@ export function registerStripeRoutes(app: Express) {
 
       log.info(`Processing payment failure for user: ${user.id}`);
 
-      // Get current failure count and increment
-      const currentFailureCount = user.paymentFailureCount || 0;
-      const newFailureCount = currentFailureCount + 1;
+      // Stripe's own attempt counter is the truth: it stays the same when one notice is
+      // delivered twice, and only grows when Stripe really retries the charge.
+      const attemptCount = Math.max(Number(invoice.attempt_count) || 1, 1);
+      const failureReason = invoice.last_payment_error?.message || "Payment failed";
+      const existing = invoice.id ? await storage.getPaymentFailureByInvoice(invoice.id) : null;
 
-      // Calculate grace period expiry (7 days from now)
+      // Grace period expiry (7 days from now)
       const graceExpiresAt = new Date();
       graceExpiresAt.setDate(graceExpiresAt.getDate() + 7);
+
+      if (existing && attemptCount <= (existing.attemptCount ?? 1)) {
+        // Same invoice, same attempt: this is a repeat delivery of a notice we already
+        // handled. No second row, no second e-mail, no doubled failure count.
+        log.info(`[Billing] Repeat delivery for invoice ${invoice.id}; nothing to do`);
+        return;
+      }
+
+      if (existing) {
+        // Stripe retried the charge and it failed again: count the attempt and push the
+        // grace period out, but do not repeat the e-mail the customer already received.
+        await storage.updatePaymentFailureAttempt(existing.id, attemptCount, failureReason);
+        await storage.setUserGracePeriod(
+          user.id,
+          graceExpiresAt,
+          Math.max(user.paymentFailureCount || 0, attemptCount),
+        );
+        log.info(`[Billing] Invoice ${invoice.id} failed again (attempt ${attemptCount})`);
+        return;
+      }
 
       // Create payment failure record
       await storage.createPaymentFailure({
         userId: user.id,
         stripeInvoiceId: invoice.id,
         stripeCustomerId: invoice.customer,
-        failureReason: invoice.last_payment_error?.message || "Payment failed",
-        attemptCount: invoice.attempt_count || 1,
+        failureReason,
+        attemptCount,
         notificationSent: false,
         resolved: false
       });
 
       // Set user grace period instead of immediate downgrade
-      await storage.setUserGracePeriod(user.id, graceExpiresAt, newFailureCount);
+      await storage.setUserGracePeriod(
+        user.id,
+        graceExpiresAt,
+        Math.max(user.paymentFailureCount || 0, attemptCount),
+      );
 
       // Send email notification if email service is available
       if (user.email) {
@@ -897,8 +967,27 @@ export function registerStripeRoutes(app: Express) {
 
       log.info(`Payment success for user: ${user.id}`);
 
+      // Invoices that do not belong to a subscription (one-off charges) have nothing to
+      // confirm here. Without this guard the retrieve below throws, the route answers 500
+      // and Stripe keeps retrying an event that can never succeed.
+      if (!invoice.subscription) {
+        log.info(`Invoice ${invoice.id} is not tied to a subscription; plan left unchanged`);
+        await storage.clearUserGracePeriod(user.id);
+        return;
+      }
+
       // Get subscription details to determine plan
       const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+
+      // A cancelled subscription must not be brought back to life by a replayed old
+      // invoice: the refund handler cancels the subscription before it downgrades.
+      if (!['active', 'trialing', 'past_due'].includes(subscription.status)) {
+        log.info(
+          `[Billing] Invoice ${invoice.id} belongs to a ${subscription.status} subscription; plan left unchanged`,
+        );
+        return;
+      }
+
       const priceId = subscription.items.data[0]?.price.id;
       
       if (priceId) {
@@ -1058,6 +1147,64 @@ export function registerStripeRoutes(app: Express) {
       
     } catch (error) {
       console.error('Error handling payment action required:', error);
+    }
+  }
+
+  /**
+   * A fully refunded payment ends the plan. Money back means access back.
+   *
+   * The subscription is cancelled in Stripe first, on purpose: a refund does not cancel a
+   * subscription by itself, so without this the next invoice would charge the customer
+   * again and `invoice.payment_succeeded` would put them back on a paid plan.
+   *
+   * A partial refund is a price correction, not an exit, so the plan stays.
+   */
+  async function handleChargeRefunded(charge: any) {
+    const amount = Number(charge.amount ?? 0);
+    const refundedAmount = Number(charge.amount_refunded ?? 0);
+    const fullyRefunded = charge.refunded === true || (amount > 0 && refundedAmount >= amount);
+
+    if (!fullyRefunded) {
+      log.info(
+        `[Billing] Partial refund ${refundedAmount}/${amount} on charge ${charge.id}; plan left unchanged`,
+      );
+      return;
+    }
+
+    log.info(`Refunded charge ${charge.id} (${refundedAmount}/${amount})`);
+
+    try {
+      const user = await getUserByStripeCustomerId(charge.customer);
+      if (!user) {
+        log.info(`[Billing] Refunded charge ${charge.id} matches no user; nothing to downgrade`);
+        return;
+      }
+
+      if (user.stripeSubscriptionId) {
+        try {
+          await stripeGateway.cancelSubscription(user.stripeSubscriptionId);
+          log.info(`[Billing] Cancelled ${user.stripeSubscriptionId} after refunding charge ${charge.id}`);
+        } catch (error) {
+          // Already cancelled, or the API refused. The refund is final either way, so the
+          // downgrade still happens — but say so, because a subscription that keeps billing
+          // would undo the refund on the next invoice.
+          log.error(
+            `[Billing] Could not cancel ${user.stripeSubscriptionId} after a refund:`,
+            error instanceof Error ? error.message : error,
+          );
+        }
+      }
+
+      await storage.updateUserPlan(user.id, 'free', 'monthly');
+      await storage.updateUserStripeInfo(
+        user.id,
+        user.stripeCustomerId || String(charge.customer || ''),
+        '',
+      );
+      log.info(`User ${user.id} downgraded to free after a full refund`);
+    } catch (error) {
+      console.error('Error handling refunded charge:', error);
+      throw error;
     }
   }
 

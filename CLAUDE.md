@@ -23,8 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run ai:chain-check` — free end-to-end check of app → gateway → fake provider (needs the gateway checked out at `./ai-processor` or `GATEWAY_DIR`)
 - `npm run uptime:check` — external probe; records a `job_runs` row and e-mails on failure
 - `./scripts/deploy.sh` — safe deploy: typecheck → migration files applied to a disposable
-  database → unit tests → database integration tests → production drift check → sitemap →
-  build → pm2 reload → health gate → automatic rollback
+  database → unit tests → database integration tests → production drift check → live price
+  check → sitemap → build → pm2 reload → health gate → automatic rollback
 
 Production timers live in `/etc/cron.d/kaptia` (uptime every 5 min, latency check hourly,
 error-data retention daily). Schema changes are **not** part of the deploy script and never
@@ -42,6 +42,19 @@ npm ci --allow-remote=all --no-audit --no-fund
 The blocked install scripts are not needed: `esbuild`, `sharp` and `bcrypt` resolve their
 prebuilt binaries from their own optional packages. The deploy script never installs — run
 the command above whenever `package-lock.json` changes, then `./scripts/deploy.sh`.
+
+### Billing notifications (keep these rules when touching `stripeRoutes` / `mercadoPagoRoutes`)
+
+- De-duplication lives in the database (`webhook_events`), never in memory: the process is
+  restarted regularly and the provider keeps retrying. An event is claimed before it runs and
+  the claim is released only when the handler throws, so a retry is still processed.
+- Being the first delivery of an event is not enough. Handlers must also be safe to run twice
+  for the same *object*: the payment-failure log is unique per Stripe invoice id and the
+  attempt count comes from Stripe's `attempt_count`, not from `count + 1`.
+- MercadoPago is keyed on `<preapproval id>:<state>` — keying on the id alone drops the later
+  "cancelled" notice and leaves the customer on a paid plan.
+- A full refund ends the plan and cancels the subscription, in that order (a refund does not
+  cancel a subscription by itself). A partial refund leaves the plan alone.
 
 ### Money and pricing rules
 - Amounts live in `shared/pricing.ts` and mirror the live Stripe prices (usd + pen).

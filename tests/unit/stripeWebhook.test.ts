@@ -11,12 +11,54 @@ import Stripe from 'stripe';
  */
 const SECRET = 'whsec_test_secret_for_unit_tests';
 
-const storage = vi.hoisted(() => ({
-  updateUserPlan: vi.fn(async () => ({})),
-  updateUserStripeInfo: vi.fn(async () => ({})),
-  getUser: vi.fn(async () => ({})),
-  getUserByStripeCustomerId: vi.fn(async () => null),
-}));
+/**
+ * The storage mock is stateful on purpose: the webhook's de-duplication and its payment
+ * failure log now live in the database, so a mock that always answers "first time" would
+ * hide exactly the bug these tests exist to catch.
+ */
+const mocks = vi.hoisted(() => {
+  const claimed = new Set<string>();
+  const failures: Array<Record<string, any>> = [];
+  return {
+    claimed,
+    failures,
+    storage: {
+      updateUserPlan: vi.fn(async () => ({})),
+      updateUserStripeInfo: vi.fn(async () => ({})),
+      getUser: vi.fn(async () => ({})),
+      getUserByStripeCustomerId: vi.fn(async () => null),
+      // de-duplication
+      claimWebhookEvent: vi.fn(async (event: { key: string }) => {
+        if (claimed.has(event.key)) return false;
+        claimed.add(event.key);
+        return true;
+      }),
+      releaseWebhookEvent: vi.fn(async (_source: string, key: string) => {
+        claimed.delete(key);
+      }),
+      pruneWebhookEvents: vi.fn(async () => undefined),
+      // payment failures
+      getPaymentFailureByInvoice: vi.fn(async (invoiceId: string) => {
+        return failures.find((row) => row.stripeInvoiceId === invoiceId) ?? null;
+      }),
+      createPaymentFailure: vi.fn(async (failure: Record<string, any>) => {
+        const row = { id: failures.length + 1, ...failure };
+        failures.push(row);
+        return row;
+      }),
+      updatePaymentFailureAttempt: vi.fn(async (id: number, attemptCount: number) => {
+        const row = failures.find((entry) => entry.id === id);
+        if (row) row.attemptCount = attemptCount;
+      }),
+      setUserGracePeriod: vi.fn(async () => ({})),
+      clearUserGracePeriod: vi.fn(async () => ({})),
+      getPaymentFailures: vi.fn(async () => []),
+      resolvePaymentFailure: vi.fn(async () => undefined),
+    },
+  };
+});
+
+const storage = mocks.storage;
 
 vi.mock('../../server/storage', () => ({ storage }));
 vi.mock('../../server/clerkAuth', () => ({
@@ -29,10 +71,16 @@ vi.mock('../../server/billingRegion', () => ({
 
 let server: Server;
 let baseUrl: string;
+let stripeGateway: { cancelSubscription: (subscriptionId: string) => Promise<void> };
 const signer = new Stripe('sk_test_unit');
 
 function signedHeader(payload: string): string {
   return signer.webhooks.generateTestHeaderString({ payload, secret: SECRET });
+}
+
+/** Any event shape; only the fields the handler under test reads are filled in. */
+function eventOf(id: string, type: string, object: Record<string, unknown>): string {
+  return JSON.stringify({ id, object: 'event', type, data: { object } });
 }
 
 function checkoutEvent(id: string, overrides: Record<string, unknown> = {}) {
@@ -67,12 +115,13 @@ beforeAll(async () => {
   process.env.STRIPE_SECRET_KEY = 'sk_test_unit';
   process.env.STRIPE_WEBHOOK_SECRET = SECRET;
 
-  const { registerStripeRoutes } = await import('../../server/routes/stripeRoutes');
+  const routes = await import('../../server/routes/stripeRoutes');
+  stripeGateway = routes.stripeGateway;
   const app = express();
   // Same order as server/index.ts: the raw body first, JSON for everything else.
   app.use('/api/stripe-webhook', express.raw({ type: 'application/json' }));
   app.use(express.json());
-  registerStripeRoutes(app);
+  routes.registerStripeRoutes(app);
 
   await new Promise<void>((resolve) => {
     server = app.listen(0, () => resolve());
@@ -86,6 +135,8 @@ afterAll(async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.claimed.clear();
+  mocks.failures.length = 0;
 });
 
 describe('POST /api/stripe-webhook', () => {
@@ -148,5 +199,188 @@ describe('POST /api/stripe-webhook', () => {
     const retry = await post(payload, signedHeader(payload));
     expect(retry.status).toBe(200);
     expect(storage.updateUserPlan).toHaveBeenCalledTimes(2);
+  });
+
+  describe('a failed payment', () => {
+    const failureEvent = (eventId: string, invoiceId: string, attemptCount = 1) =>
+      eventOf(eventId, 'invoice.payment_failed', {
+        id: invoiceId,
+        object: 'invoice',
+        customer: 'cus_1',
+        attempt_count: attemptCount,
+        last_payment_error: { message: 'card declined' },
+      });
+
+    beforeEach(() => {
+      // No e-mail address on purpose: the notification must never be attempted in a test.
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_7',
+        email: null,
+        paymentFailureCount: 0,
+      } as any);
+    });
+
+    it('gives a grace period instead of downgrading straight away', async () => {
+      const payload = failureEvent('evt_f1', 'in_1');
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(storage.createPaymentFailure).toHaveBeenCalledTimes(1);
+      expect(storage.setUserGracePeriod).toHaveBeenCalledWith('user_7', expect.any(Date), 1);
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
+
+    it('counts one invoice once, even when it arrives as two different events', async () => {
+      const first = failureEvent('evt_f2a', 'in_2');
+      await post(first, signedHeader(first));
+
+      // A resend with a different event id: the de-duplication cannot catch this one, so
+      // the invoice id is what must keep the failure count honest.
+      const second = failureEvent('evt_f2b', 'in_2');
+      const result = await post(second, signedHeader(second));
+
+      expect(result.status).toBe(200);
+      expect(storage.createPaymentFailure).toHaveBeenCalledTimes(1);
+      expect(storage.setUserGracePeriod).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts a real retry of the charge as a new attempt, without a second notice', async () => {
+      const first = failureEvent('evt_f3a', 'in_3', 1);
+      await post(first, signedHeader(first));
+
+      const retry = failureEvent('evt_f3b', 'in_3', 2);
+      const result = await post(retry, signedHeader(retry));
+
+      expect(result.status).toBe(200);
+      expect(storage.createPaymentFailure).toHaveBeenCalledTimes(1);
+      expect(storage.updatePaymentFailureAttempt).toHaveBeenCalledWith(1, 2, 'card declined');
+      expect(storage.setUserGracePeriod).toHaveBeenLastCalledWith('user_7', expect.any(Date), 2);
+    });
+  });
+
+  describe('a subscription that ends', () => {
+    it('downgrades to free and forgets the subscription id', async () => {
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_8',
+        stripeCustomerId: 'cus_1',
+        stripeSubscriptionId: 'sub_1',
+        plan: 'standard',
+      } as any);
+
+      const payload = eventOf('evt_d1', 'customer.subscription.deleted', {
+        id: 'sub_1',
+        object: 'subscription',
+        customer: 'cus_1',
+        status: 'canceled',
+      });
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(storage.updateUserPlan).toHaveBeenCalledWith('user_8', 'free', 'monthly');
+      expect(storage.updateUserStripeInfo).toHaveBeenCalledWith('user_8', 'cus_1', '');
+    });
+
+    it('does not downgrade when an old subscription is deleted after an upgrade', async () => {
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_8',
+        stripeCustomerId: 'cus_1',
+        stripeSubscriptionId: 'sub_new',
+        plan: 'premium',
+      } as any);
+
+      const payload = eventOf('evt_d2', 'customer.subscription.deleted', {
+        id: 'sub_old',
+        object: 'subscription',
+        customer: 'cus_1',
+        status: 'canceled',
+      });
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
+
+    it('ignores a paid invoice that is not tied to a subscription instead of failing', async () => {
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_8',
+        stripeCustomerId: 'cus_1',
+      } as any);
+
+      const payload = eventOf('evt_p1', 'invoice.payment_succeeded', {
+        id: 'in_9',
+        object: 'invoice',
+        customer: 'cus_1',
+        subscription: null,
+      });
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a refund', () => {
+    const refundEvent = (eventId: string, fields: Record<string, unknown> = {}) =>
+      eventOf(eventId, 'charge.refunded', {
+        id: 'ch_1',
+        object: 'charge',
+        customer: 'cus_1',
+        amount: 4990,
+        amount_refunded: 4990,
+        refunded: true,
+        ...fields,
+      });
+
+    it('cancels the subscription and returns the account to free', async () => {
+      const cancel = vi.spyOn(stripeGateway, 'cancelSubscription').mockResolvedValue(undefined);
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_9',
+        stripeCustomerId: 'cus_1',
+        stripeSubscriptionId: 'sub_9',
+        plan: 'standard',
+      } as any);
+
+      const payload = refundEvent('evt_r1');
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(cancel).toHaveBeenCalledWith('sub_9');
+      expect(storage.updateUserPlan).toHaveBeenCalledWith('user_9', 'free', 'monthly');
+      expect(storage.updateUserStripeInfo).toHaveBeenCalledWith('user_9', 'cus_1', '');
+    });
+
+    it('still ends the plan when the subscription cannot be cancelled', async () => {
+      vi.spyOn(stripeGateway, 'cancelSubscription').mockRejectedValue(new Error('already canceled'));
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_9',
+        stripeCustomerId: 'cus_1',
+        stripeSubscriptionId: 'sub_9',
+        plan: 'standard',
+      } as any);
+
+      const payload = refundEvent('evt_r2');
+      const result = await post(payload, signedHeader(payload));
+
+      // The money went back, so the access goes back — even if Stripe refused the cancel.
+      expect(result.status).toBe(200);
+      expect(storage.updateUserPlan).toHaveBeenCalledWith('user_9', 'free', 'monthly');
+    });
+
+    it('leaves the plan alone for a partial refund', async () => {
+      const cancel = vi.spyOn(stripeGateway, 'cancelSubscription').mockResolvedValue(undefined);
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_9',
+        stripeCustomerId: 'cus_1',
+        stripeSubscriptionId: 'sub_9',
+        plan: 'standard',
+      } as any);
+
+      const payload = refundEvent('evt_r3', { amount_refunded: 1000, refunded: false });
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(cancel).not.toHaveBeenCalled();
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
   });
 });

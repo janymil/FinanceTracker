@@ -19,6 +19,12 @@
 # Escape hatches (loud, for a real emergency only):
 #   SKIP_DB_TESTS=1   skip the disposable-database run
 #   SKIP_DB_DRIFT=1   skip the production drift check
+#   SKIP_STRIPE_PRICES=1  ship without checking that the live prices still match the page
+#
+# Step 6 is the one that catches money bugs: it asks the payment provider what each plan
+# actually costs today. It fails the deploy when a price id is missing, points at an
+# inactive price, or bills monthly where the page promises yearly — so a wrong price can
+# never reach a customer through a routine release.
 #
 # Usage: ./scripts/deploy.sh
 set -euo pipefail
@@ -31,47 +37,59 @@ KEEP_BACKUPS=3
 STAMP="$(date +%Y%m%d-%H%M%S)"
 PREVIOUS="dist.previous"
 
-echo "==> 1/8 typecheck"
+echo "==> 1/9 typecheck"
 npm run check
 
 if [ "${SKIP_DB_TESTS:-0}" = "1" ]; then
-  echo "==> 2/8 build the disposable test database — SKIPPED (SKIP_DB_TESTS=1)"
+  echo "==> 2/9 build the disposable test database — SKIPPED (SKIP_DB_TESTS=1)"
 else
-  echo "==> 2/8 build the disposable test database from the migration files"
+  echo "==> 2/9 build the disposable test database from the migration files"
   npm run db:migrate:test
 fi
 
-echo "==> 3/8 unit tests (no database, no AI keys)"
+echo "==> 3/9 unit tests (no database, no AI keys)"
 npm run test:unit
 npm run test:ai
 
 if [ "${SKIP_DB_TESTS:-0}" = "1" ]; then
-  echo "==> 4/8 database integration tests — SKIPPED (SKIP_DB_TESTS=1): the database was NOT tested before this release"
+  echo "==> 4/9 database integration tests — SKIPPED (SKIP_DB_TESTS=1): the database was NOT tested before this release"
 else
-  echo "==> 4/8 database integration tests (fails if they would be skipped)"
+  echo "==> 4/9 database integration tests (fails if they would be skipped)"
   REQUIRE_DB_TESTS=1 npm run test:integration
 fi
 
 if [ "${SKIP_DB_DRIFT:-0}" = "1" ]; then
-  echo "==> 5/8 SKIPPED (SKIP_DB_DRIFT=1): production schema was NOT checked"
+  echo "==> 5/9 SKIPPED (SKIP_DB_DRIFT=1): production schema was NOT checked"
 else
-  echo "==> 5/8 production schema matches the code that is about to run"
+  echo "==> 5/9 production schema matches the code that is about to run"
   npm run db:drift:prod
 fi
 
-echo "==> 6/8 regenerate sitemap from the route list"
+if [ "${SKIP_STRIPE_PRICES:-0}" = "1" ]; then
+  echo "==> 6/9 SKIPPED (SKIP_STRIPE_PRICES=1): the live prices were NOT checked"
+else
+  echo "==> 6/9 every plan still costs what the page promises"
+  npm run check:stripe-prices
+fi
+
+echo "==> 7/9 regenerate sitemap from the route list"
 npm run sitemap:generate
 
-echo "==> 7/8 build"
+echo "==> 8/9 build"
 rm -rf "$PREVIOUS"
 if [ -d dist ]; then
   cp -a dist "$PREVIOUS"
 fi
 npm run build
 
-echo "==> 8/8 reload $APP_NAME with the current .env"
-pm2 reload "$APP_NAME" --update-env >/dev/null
-pm2 save >/dev/null
+echo "==> 9/9 reload $APP_NAME with the current .env"
+# `--update-env` copies this shell's variables into the running app. Run it with a minimal
+# environment so a variable exported for a local test — PORT, DATABASE_URL, a sandbox
+# payment key — can never be pushed into production by a routine deploy. This actually
+# happened once: a rehearsal shell exported PORT=5066 and DATABASE_URL=<scratch>, the reload
+# carried both into pm2, and the site answered 502 until the process was started again.
+env -i PATH="$PATH" HOME="$HOME" pm2 reload "$APP_NAME" --update-env >/dev/null
+env -i PATH="$PATH" HOME="$HOME" pm2 save >/dev/null
 
 echo "==> health gate ($HEALTH_URL)"
 healthy=0
@@ -91,7 +109,7 @@ if [ "$healthy" -ne 1 ]; then
   if [ -d "$PREVIOUS" ]; then
     rm -rf dist
     mv "$PREVIOUS" dist
-    pm2 restart "$APP_NAME" --update-env >/dev/null
+    env -i PATH="$PATH" HOME="$HOME" pm2 restart "$APP_NAME" --update-env >/dev/null
     echo "Rolled back. Inspect: pm2 logs $APP_NAME --lines 100"
   else
     echo "No previous build to restore. Manual attention needed."

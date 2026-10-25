@@ -25,6 +25,7 @@ import {
   aiUsageLimits,
   aiUserOverrides,
   paymentFailures,
+  webhookEvents,
   courseProgress,
   userAchievements, 
   learningStats,
@@ -89,7 +90,7 @@ import { reportInvariant } from "./errorGuard/report.js";
 import { UNCATEGORIZED } from "@shared/calculations";
 import { isRecurrenceFrequency, occurrenceAt } from "@shared/recurrence";
 import { isUniqueViolation } from "./dbErrors";
-import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, inArray } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, lt, inArray } from "drizzle-orm";
 
 // Verified identity fields fetched from Clerk (see server/routes/authRoutes.ts)
 export interface ClerkProfile {
@@ -238,12 +239,19 @@ export interface IStorage {
   // Payment failure operations for grace period handling
   createPaymentFailure(failure: InsertPaymentFailure): Promise<PaymentFailure>;
   getPaymentFailures(userId: string): Promise<PaymentFailure[]>;
+  getPaymentFailureByInvoice(stripeInvoiceId: string): Promise<PaymentFailure | null>;
+  updatePaymentFailureAttempt(failureId: number, attemptCount: number, failureReason?: string | null): Promise<void>;
   updatePaymentFailureNotification(failureId: number, notificationSent: boolean): Promise<void>;
   resolvePaymentFailure(failureId: number): Promise<void>;
   setUserGracePeriod(userId: string, graceExpiresAt: Date, failureCount: number): Promise<User>;
   clearUserGracePeriod(userId: string): Promise<User>;
   getUsersInGracePeriod(): Promise<User[]>;
   getUsersWithExpiredGrace(): Promise<User[]>;
+
+  // Gateway notification de-duplication (survives restarts, shared by both gateways)
+  claimWebhookEvent(event: { source: string; key: string; type?: string | null }): Promise<boolean>;
+  releaseWebhookEvent(source: string, key: string): Promise<void>;
+  pruneWebhookEvents(olderThan: Date): Promise<void>;
 
   // Course-related operations
   getUserCourseProgress(userId: string): Promise<CourseProgress[]>;
@@ -2805,8 +2813,40 @@ export class DatabaseStorage implements IStorage {
 
   // Payment failure operations for grace period handling
   async createPaymentFailure(failure: InsertPaymentFailure): Promise<PaymentFailure> {
-    const [result] = await db.insert(paymentFailures).values(failure).returning();
-    return result;
+    // The unique index on stripe_invoice_id is the real guard: a repeated delivery of the
+    // same invoice cannot add a second row even if two requests race each other.
+    const [result] = await db
+      .insert(paymentFailures)
+      .values(failure)
+      .onConflictDoNothing()
+      .returning();
+    if (result) return result;
+
+    const existing = failure.stripeInvoiceId
+      ? await this.getPaymentFailureByInvoice(failure.stripeInvoiceId)
+      : null;
+    if (existing) return existing;
+    throw new Error('Payment failure could not be recorded');
+  }
+
+  async getPaymentFailureByInvoice(stripeInvoiceId: string): Promise<PaymentFailure | null> {
+    const [result] = await db
+      .select()
+      .from(paymentFailures)
+      .where(eq(paymentFailures.stripeInvoiceId, stripeInvoiceId))
+      .limit(1);
+    return result ?? null;
+  }
+
+  async updatePaymentFailureAttempt(
+    failureId: number,
+    attemptCount: number,
+    failureReason?: string | null,
+  ): Promise<void> {
+    await db
+      .update(paymentFailures)
+      .set({ attemptCount, ...(failureReason ? { failureReason } : {}) })
+      .where(eq(paymentFailures.id, failureId));
   }
 
   async getPaymentFailures(userId: string): Promise<PaymentFailure[]> {
@@ -2856,6 +2896,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return result;
+  }
+
+  // Gateway notification de-duplication. The insert is the claim: the composite primary
+  // key rejects a second delivery of the same event, so no read-then-write race exists.
+  async claimWebhookEvent(event: { source: string; key: string; type?: string | null }): Promise<boolean> {
+    const inserted = await db
+      .insert(webhookEvents)
+      .values({ source: event.source, eventKey: event.key, eventType: event.type ?? null })
+      .onConflictDoNothing()
+      .returning({ eventKey: webhookEvents.eventKey });
+    return inserted.length > 0;
+  }
+
+  async releaseWebhookEvent(source: string, key: string): Promise<void> {
+    await db
+      .delete(webhookEvents)
+      .where(and(eq(webhookEvents.source, source), eq(webhookEvents.eventKey, key)));
+  }
+
+  async pruneWebhookEvents(olderThan: Date): Promise<void> {
+    await db.delete(webhookEvents).where(lt(webhookEvents.receivedAt, olderThan));
   }
 
   async getUsersInGracePeriod(): Promise<User[]> {

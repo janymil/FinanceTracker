@@ -196,13 +196,36 @@ export function registerMercadoPagoRoutes(app: Express) {
     try {
       if (type === 'subscription_preapproval' || type === 'preapproval') {
         const state = await getPreapproval(dataId);
+
+        // Deduplicated on "<id>:<state>", not on the id alone. MercadoPago sends the same
+        // resource id for every state of the same subscription, so a key of just the id
+        // would swallow the later "cancelled" notice and leave the customer on a paid plan
+        // they no longer pay for.
+        const eventKey = `${state.id}:${state.status}`;
+        const firstDelivery = await storage.claimWebhookEvent({
+          source: 'mercadopago',
+          key: eventKey,
+          type,
+        });
+        if (!firstDelivery) {
+          log.info(`[MercadoPago] Repeat notification ignored for ${eventKey}`);
+          return res.status(200).json({ received: true, duplicate: true });
+        }
+
         const userId = state.externalReference;
-        if (userId) {
-          if (state.status === 'authorized') {
-            await activatePlan(userId, state.plan, state.interval, state.id);
-          } else if (state.status === 'cancelled' || state.status === 'paused') {
-            await deactivatePlan(userId, state.id);
+        try {
+          if (userId) {
+            if (state.status === 'authorized') {
+              await activatePlan(userId, state.plan, state.interval, state.id);
+            } else if (state.status === 'cancelled' || state.status === 'paused') {
+              await deactivatePlan(userId, state.id);
+            }
           }
+        } catch (error) {
+          // Free the claim, otherwise MercadoPago's retry would be answered as a duplicate
+          // and the plan would never activate.
+          await storage.releaseWebhookEvent('mercadopago', eventKey).catch(() => undefined);
+          throw error;
         }
       }
       // `subscription_authorized_payment` events only confirm a recurring charge; the plan
