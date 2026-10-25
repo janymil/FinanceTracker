@@ -168,6 +168,9 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
     const pollInterval = setInterval(async () => {
       try {
         const token = await getToken();
+        // The server now requires the signed-in owner to read a session; "Bearer null" is
+        // just a 401 every five seconds until the next token arrives.
+        if (!token) return;
         const response = await fetch(`/api/mobile-upload/status/${sessionId}?t=${Date.now()}`, {
           headers: {
             'Authorization': `Bearer ${token}`,

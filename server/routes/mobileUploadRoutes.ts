@@ -223,7 +223,9 @@ export function registerMobileUploadRoutes(app: any) {
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
-          error: 'OCR processing failed: ' + (error as Error).message,
+          // Generic text: this string is shown to the person, and used to carry the raw
+          // exception (database/host details) out to whoever held the session id.
+          error: 'We could not process this receipt. Please try again or enter the details manually.',
           createdAt: new Date()
         });
         return res.status(500).json({ error: 'OCR processing failed' });
@@ -255,23 +257,41 @@ export function registerMobileUploadRoutes(app: any) {
   });
 
   // Check upload status
-  app.get('/api/mobile-upload/status/:sessionId', async (req: any, res: any) => {
-    try {
-      const { sessionId } = req.params;
-      const session = mobileUploadSessions.get(sessionId);
-      
-      if (!session) {
-        return res.status(404).json({ error: 'Session not found' });
+  //
+  // Only the signed-in desktop app polls this, so it is authenticated and bound to the
+  // session owner — the QR code's id alone is no longer enough to read a receipt. The
+  // phone never calls this route: it only POSTs the photo above.
+  app.get(
+    '/api/mobile-upload/status/:sessionId',
+    isAuthenticated,
+    rateLimit({ windowMs: 60_000, max: 60, keyPrefix: 'mobile-status', perUser: true }),
+    async (req: any, res: any) => {
+      try {
+        const { sessionId } = req.params;
+        const session = mobileUploadSessions.get(sessionId);
+
+        // Same 1-hour TTL the upload path enforces; without this an expired receipt stayed
+        // readable until some user happened to create a new session.
+        if (!session || Date.now() - session.createdAt.getTime() > SESSION_TTL_MS) {
+          mobileUploadSessions.delete(sessionId);
+          return res.status(404).json({ error: 'Session not found' });
+        }
+
+        // 404 rather than 403: do not confirm that someone else's session exists.
+        if (session.userId !== getUserId(req)) {
+          return res.status(404).json({ error: 'Session not found' });
+        }
+
+        res.setHeader('Cache-Control', 'no-store');
+        return res.json({
+          status: session.status,
+          data: session.data || null,
+          error: session.error || null,
+        });
+      } catch (error) {
+        console.error('Status check error:', error);
+        return res.status(500).json({ error: 'Status check failed' });
       }
-      
-      return res.json({
-        status: session.status,
-        data: session.data || null,
-        error: session.error || null
-      });
-    } catch (error) {
-      console.error('Status check error:', error);
-      return res.status(500).json({ error: 'Status check failed' });
     }
-  });
+  );
 }

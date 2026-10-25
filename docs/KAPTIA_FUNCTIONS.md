@@ -38,7 +38,7 @@ Status verified on **2026-10-21** against the running application: `npm run chec
 | Billing & subscriptions | ![partial](https://img.shields.io/badge/partial-8b949e?style=flat-square) | Stripe (keys + price IDs) |
 | Redeem codes | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) | Database |
 | Courses / learning | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) | Database |
-| Admin analytics | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | `ADMIN_PASSWORD` |
+| Admin analytics | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) | Clerk role `publicMetadata.role="admin"` (preferred, MFA-capable) or legacy `ADMIN_PASSWORD` |
 | Transactional email | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | SMTP `EMAIL_*` (SendGrid optional) |
 | i18n (EN / ES / SK), theme, currency | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) | — |
 | Analytics & SEO (SSR for crawlers) | ![partial](https://img.shields.io/badge/partial-8b949e?style=flat-square) | Google Analytics (optional) |
@@ -439,7 +439,7 @@ Page: `pages/admin-analytics.tsx`. Backend: `routes/adminRoutes.ts`, `server/adm
 | Billing | `STRIPE_SECRET_KEY`, `STRIPE_STANDARD_MONTHLY_PRICE_ID`, `STRIPE_STANDARD_YEARLY_PRICE_ID`, `STRIPE_PREMIUM_MONTHLY_PRICE_ID`, `STRIPE_PREMIUM_YEARLY_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`; webhook endpoint `/api/stripe-webhook` |
 | Clerk → DB sync | `CLERK_WEBHOOK_SECRET`; endpoint `/api/clerk-webhooks` |
 | Google Analytics | `VITE_GA_MEASUREMENT_ID` (client) |
-| Admin panel | `ADMIN_PASSWORD` (server) |
+| Admin panel | Clerk admin role via `publicMetadata.role="admin"` (server/adminAuth.ts); legacy `ADMIN_PASSWORD` still accepted |
 | Encryption at rest | `ENCRYPTION_ENABLED=true` + stable `ENCRYPTION_KEY` (never rotate without re-encrypting existing rows) |
 | Groq / Mistral voice pipelines | `GROQ_API_KEY` / `MISTRAL_API_KEY` **and** register the routers in `server/routes/index.ts` (currently not mounted) |
 
@@ -463,7 +463,7 @@ Page: `pages/admin-analytics.tsx`. Backend: `routes/adminRoutes.ts`, `server/adm
 | `R2_*` / `BUNNY_*` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | file storage |
 | `STRIPE_SECRET_KEY`, `STRIPE_*_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | billing |
 | `ENCRYPTION_ENABLED`, `ENCRYPTION_KEY` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | field encryption |
-| `ADMIN_PASSWORD` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | admin panel |
+| `ADMIN_PASSWORD` | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) | legacy admin panel — prefer the Clerk admin role |
 | `VITE_GA_MEASUREMENT_ID` | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) optional | analytics |
 | `BASE_URL` | optional | absolute links in emails |
 
