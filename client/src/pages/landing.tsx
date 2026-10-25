@@ -508,6 +508,27 @@ export default function Landing() {
           ))}
         </div>
       </section>
+
+      {/* ============ PROMO VIDEO ============ */}
+      <section id="promo" className="py-20 scroll-mt-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-10 items-center">
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{t("Lost track of your money?")}</h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">{t("Kaptia knows where it went. Watch the 30-second story.")}</p>
+          </div>
+          <div className="mx-auto w-full max-w-[300px]">
+            {/* Vertical video: it only starts loading when it scrolls into view. */}
+            <LandingVideo
+              name="promo-detective-es"
+              title={t("Lost track of your money?")}
+              aspectRatio="portrait"
+              autoPlay={false}
+              className="rounded-3xl"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ============ HOW IT WORKS ============ */}
       <section id="how-it-works" className="py-24 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
