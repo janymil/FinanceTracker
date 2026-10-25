@@ -44,6 +44,15 @@ are **not** part of the deploy script and never
 go through `db:push`: they are reviewed SQL files in `migrations/`, applied to production
 with `npm run db:migrate:prod` (see `migrations/README.md`).
 
+### Pushing from this host
+`GIT_ASKPASS` is set in the environment and is what supplies the credential for `git push` over
+HTTPS. **Never override it** to stop a prompt — `GIT_ASKPASS=/bin/true git push` turns the
+credential into an empty one and fails with `remote: No anonymous write access`, which reads
+exactly like "this machine has no credentials". If a push must not hang, set
+`GIT_TERMINAL_PROMPT=0` instead; that only disables the *terminal* prompt and leaves askpass alone.
+There is no `.git-credentials`, no credential helper and no GitHub SSH key here, so hunting for one
+is a dead end.
+
 ### Installing dependencies on this host
 npm 12 refuses remote tarballs and install scripts by default, and `xlsx` is pinned to
 SheetJS' CDN tarball in `package-lock.json`, so a plain `npm ci` aborts with `EALLOWREMOTE`:
