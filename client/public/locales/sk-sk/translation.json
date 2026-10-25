@@ -3912,6 +3912,8 @@
   "Receipt scanned": "Účtenka naskenovaná",
   "Coffee": "Káva",
   "Added by voice": "Pridané hlasom",
+  "Lost track of your money?": "Stratili ste prehľad o svojich peniazoch?",
+  "Kaptia knows where it went. Watch the 30-second story.": "Kaptia vie, kam sa podeli. Pozrite si 30-sekundový príbeh.",
   "AI insight": "AI prehľad",
   "Dining out is up 18% this month": "Stravovanie vonku je tento mesiac hore o 18 %",
   "Compare plans": "Porovnajte plány",
@@ -4130,7 +4132,8 @@
     "auto_renewal": "Vaše predplatné sa automaticky obnovuje každý {{period}} za {{price}}, kým ho nezrušíte. Zrušiť ho môžete kedykoľvek vo svojom Profile.",
     "period_monthly": "mesiac",
     "period_yearly": "rok",
-    "auto_renewal_terms": "Podmienky používania"
+    "auto_renewal_terms": "Podmienky používania",
+    "refund_link": "Vrátenie peňazí"
   },
   "reclamaciones": {
     "seo": {
@@ -4173,7 +4176,8 @@
   },
   "footer": {
     "reclamaciones": "Kniha reklamácií (Peru)",
-    "rights": "© {{year}} Kaptia. Všetky práva vyhradené."
+    "rights": "© {{year}} Kaptia. Všetky práva vyhradené.",
+    "refunds": "Zásady vrátenia peňazí"
   },
   "notFound": {
     "title": "Stránka sa nenašla",
@@ -4253,5 +4257,45 @@
     "filters": "Filtre",
     "send": "Odoslať",
     "delete": "Odstrániť"
+  },
+  "refund": {
+    "seo": {
+      "title": "Zásady zrušenia a vrátenia peňazí",
+      "description": "Ako zrušiť predplatné Kaptie, čo sa stane potom a kedy a ako môžete požiadať o vrátenie peňazí."
+    },
+    "title": "Zásady zrušenia a vrátenia peňazí",
+    "last_updated": "Posledná aktualizácia: 24. októbra 2026",
+    "summary_title": "Stručne",
+    "summary_text": "Predplatné môžete kedykoľvek zrušiť vo svojom Profile a platené funkcie si ponecháte do konca obdobia, ktoré ste už zaplatili. Obdobie, ktoré už začalo, nevraciame, okrem prípadov, keď vám bolo omylom strhnuté alebo keď vám právo na vrátenie peňazí dáva zákon.",
+    "cancel_title": "1. Ako zrušiť predplatné",
+    "cancel_desc": "Otvorte svoj Profil a vyberte možnosť správy predplatného. Tam si môžete automatické obnovovanie zrušiť sami, bez písania nám. Ak ju nenájdete alebo nefunguje, napíšte na info@kaptia.app a zrušíme ho za vás.",
+    "after_title": "2. Čo sa stane po zrušení",
+    "after_1": "Už vám nebudeme nič strhávať.",
+    "after_2": "Všetky funkcie svojho plánu si ponecháte do posledného dňa obdobia, ktoré ste už zaplatili (mesiac alebo rok).",
+    "after_3": "Po tomto dni sa váš účet presunie na plán Zadarmo. Vaše záznamy zostanú v účte a platia limity plánu Zadarmo.",
+    "after_4": "Zrušenie predplatného neodstráni váš účet. Účet a údaje môžete kedykoľvek odstrániť samostatne.",
+    "rules_title": "3. Kedy peniaze vraciame",
+    "rules_desc": "Peniaze za platobné obdobie, ktoré už začalo, nevraciame, a to ani pri mesačných, ani pri ročných plánoch. Robíme tieto výnimky:",
+    "rules_yes_1": "Za to isté obdobie vám bolo strhnuté dvakrát alebo suma je vyššia ako cena, ktorú ste videli pri objednaní.",
+    "rules_yes_2": "Platba bola strhnutá po tom, čo ste včas zrušili predplatné, alebo ju nevykonali vy.",
+    "rules_yes_3": "Problém na našej strane vám zabránil používať platené funkcie a nevedeli sme ho odstrániť.",
+    "rules_yes_4": "Peruánske spotrebiteľské právo vám v danom prípade dáva nárok na vrátenie peňazí.",
+    "rules_window": "Napíšte nám do 7 dní od platby. Ak napíšete neskôr, vašu žiadosť si aj tak prečítame a posúdime ju, ale vrátenie peňazí nemôžeme sľúbiť.",
+    "rules_no_title": "Nevraciame:",
+    "rules_no_1": "Mesiac alebo rok, ktorý už začal a len ste ho nevyužili.",
+    "rules_no_2": "Obnovenie, ktoré ste zabudli zrušiť pred dňom obnovenia, ak sa nevzťahuje niektorý z vyššie uvedených prípadov.",
+    "yearly_title": "4. Ročné plány",
+    "yearly_desc": "Ak zrušíte ročný plán, neobnoví sa a funkcie si ponecháte do konca roka, ktorý ste zaplatili. Zvyšné mesiace sa nevracajú, ak sa nevzťahuje niektorý z prípadov v bode 3.",
+    "how_title": "5. Ako požiadať o vrátenie peňazí",
+    "how_desc": "Napíšte na info@kaptia.app z e-mailu svojho účtu a uveďte:",
+    "how_1": "dátum a sumu platby,",
+    "how_2": "ako ste platili (Stripe alebo Mercado Pago),",
+    "how_3": "prečo o vrátenie žiadate.",
+    "how_after": "Odpovieme do 5 pracovných dní. Ak žiadosť schválime, peniaze vrátime tým istým spôsobom platby, aký ste použili. V závislosti od platobnej spoločnosti a vašej karty sa môžu zobraziť až do 10 pracovných dní.",
+    "law_title": "6. Vaše spotrebiteľské práva v Peru",
+    "law_desc": "Tieto zásady vám neberú žiadne právo, ktoré vám dáva peruánsky zákon o ochrane spotrebiteľa. Ak s našou odpoveďou nesúhlasíte, môžete podať reklamáciu v našej Knihe reklamácií alebo sa obrátiť na INDECOPI.",
+    "law_link": "Otvoriť Knihu reklamácií",
+    "contact_title": "7. Kontakt",
+    "contact_desc": "Otázky o zrušení alebo vrátení peňazí: info@kaptia.app."
   }
 }

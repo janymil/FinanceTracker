@@ -29,6 +29,7 @@ const PAGES = [
   ['/terms-of-service', 'yearly', '0.3'],
   ['/cookie-policy', 'yearly', '0.2'],
   ['/reclamaciones', 'yearly', '0.3'],
+  ['/refund-policy', 'yearly', '0.3'],
 ];
 
 const today = new Date().toISOString().slice(0, 10);

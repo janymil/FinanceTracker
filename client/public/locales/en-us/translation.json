@@ -3796,6 +3796,8 @@
   "Receipt scanned": "Receipt scanned",
   "Coffee": "Coffee",
   "Added by voice": "Added by voice",
+  "Lost track of your money?": "Lost track of your money?",
+  "Kaptia knows where it went. Watch the 30-second story.": "Kaptia knows where it went. Watch the 30-second story.",
   "AI insight": "AI insight",
   "Dining out is up 18% this month": "Dining out is up 18% this month",
   "Compare plans": "Compare plans",
@@ -4005,7 +4007,8 @@
     "auto_renewal": "Your subscription renews automatically every {{period}} at {{price}} until you cancel. You can cancel at any time in your Profile.",
     "period_monthly": "month",
     "period_yearly": "year",
-    "auto_renewal_terms": "Terms of Service"
+    "auto_renewal_terms": "Terms of Service",
+    "refund_link": "Refunds"
   },
   "reclamaciones": {
     "seo": {
@@ -4048,7 +4051,8 @@
   },
   "footer": {
     "reclamaciones": "Complaints Book (Peru)",
-    "rights": "© {{year}} Kaptia. All rights reserved."
+    "rights": "© {{year}} Kaptia. All rights reserved.",
+    "refunds": "Refund Policy"
   },
   "notFound": {
     "title": "Page not found",
@@ -4145,5 +4149,45 @@
     "filters": "Filters",
     "send": "Send",
     "delete": "Delete"
+  },
+  "refund": {
+    "seo": {
+      "title": "Refund and Cancellation Policy",
+      "description": "How to cancel your Kaptia subscription, what happens afterwards, and when and how you can ask for a refund."
+    },
+    "title": "Refund and Cancellation Policy",
+    "last_updated": "Last updated: October 24, 2026",
+    "summary_title": "In short",
+    "summary_text": "You can cancel at any time in your Profile and you keep your paid features until the end of the period you already paid for. We do not refund a period that has already started, except when you were charged by mistake or the law gives you a right to a refund.",
+    "cancel_title": "1. How to cancel",
+    "cancel_desc": "Open your Profile and choose the option to manage your subscription. There you can cancel the automatic renewal yourself, without writing to us. If you cannot find it or it does not work, write to info@kaptia.app and we will cancel it for you.",
+    "after_title": "2. What happens after you cancel",
+    "after_1": "You will not be charged again.",
+    "after_2": "You keep all the features of your plan until the last day of the period you already paid for (the month or the year).",
+    "after_3": "After that day your account moves to the Free plan. Your records stay in your account, and the limits of the Free plan apply.",
+    "after_4": "Cancelling does not delete your account. You can delete your account and data separately at any time.",
+    "rules_title": "3. When we refund",
+    "rules_desc": "The money for a billing period that has already started is not refunded, for monthly and yearly plans alike. We make these exceptions:",
+    "rules_yes_1": "You were charged twice for the same period, or the amount is higher than the price shown when you subscribed.",
+    "rules_yes_2": "You were charged after you cancelled on time, or the charge was not made by you.",
+    "rules_yes_3": "A problem on our side kept you from using the paid features and we could not fix it.",
+    "rules_yes_4": "Peruvian consumer law gives you the right to a refund in your case.",
+    "rules_window": "Please write to us within 7 days of the charge. If you write later, we will still read your request and review it, but we cannot promise a refund.",
+    "rules_no_title": "We do not refund:",
+    "rules_no_1": "A month or a year that you have already started and simply did not use.",
+    "rules_no_2": "A renewal you forgot to cancel before the renewal date, unless one of the cases above applies.",
+    "yearly_title": "4. Yearly plans",
+    "yearly_desc": "If you cancel a yearly plan, it does not renew and you keep your features until the end of the year you paid for. The remaining months are not refunded, unless one of the cases in section 3 applies.",
+    "how_title": "5. How to ask for a refund",
+    "how_desc": "Write to info@kaptia.app from the email of your account and tell us:",
+    "how_1": "the date and the amount of the charge,",
+    "how_2": "how you paid (Stripe or Mercado Pago),",
+    "how_3": "why you are asking for the refund.",
+    "how_after": "We answer within 5 business days. If we approve it, we return the money to the same payment method you used. Depending on the payment company and your card, it can take up to 10 business days to appear.",
+    "law_title": "6. Your consumer rights in Peru",
+    "law_desc": "This policy does not take away any right that the Peruvian Consumer Protection and Defense Code gives you. If you do not agree with our answer, you can file a claim in our Complaints Book, or go to INDECOPI.",
+    "law_link": "Open the Libro de Reclamaciones",
+    "contact_title": "7. Contact",
+    "contact_desc": "Questions about cancelling or refunds: info@kaptia.app."
   }
 }

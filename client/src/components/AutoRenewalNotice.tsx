@@ -30,6 +30,9 @@ export function AutoRenewalNotice({ plan, interval, currency, lang }: AutoRenewa
       {t("checkout.auto_renewal", { price, period })}{" "}
       <Link href={`/${lang}/terms-of-service`} className="underline">
         {t("checkout.auto_renewal_terms")}
+      </Link>{" · "}
+      <Link href={`/${lang}/refund-policy`} className="underline">
+        {t("checkout.refund_link")}
       </Link>
     </p>
   );

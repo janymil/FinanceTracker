@@ -107,6 +107,9 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
             <Link href={`/${currentLang}/cookie-policy`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("Cookie Policy")}
             </Link>
+            <Link href={`/${currentLang}/refund-policy`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
+              {t("footer.refunds")}
+            </Link>
             <Link href={`/${currentLang}/reclamaciones`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("footer.reclamaciones")}
             </Link>
