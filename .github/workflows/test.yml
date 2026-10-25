@@ -45,14 +45,27 @@ jobs:
   # A live AI benchmark is NEVER part of this workflow.
 
   integration:
-    name: integration (Neon branch)
+    name: integration (throwaway Postgres)
     runs-on: ubuntu-latest
-    # Runs only when the repository provides DATABASE_URL_TEST as a secret.
-    if: ${{ secrets.DATABASE_URL_TEST != '' }}
+    # A disposable database inside the job: nothing to configure, nothing shared, nothing to clean up.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: kaptia_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       PUPPETEER_SKIP_DOWNLOAD: 'true'
-      DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
-      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/kaptia_test
+      DATABASE_URL_TEST: postgresql://ci:ci@localhost:5432/kaptia_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,7 +73,9 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci
-      - name: Integration tests (skipped without DATABASE_URL_TEST)
+      - name: Create the schema
+        run: npx drizzle-kit push --force
+      - name: Integration tests
         run: npm run test:integration
 
   e2e:
@@ -68,13 +83,27 @@ jobs:
     runs-on: ubuntu-latest
     # Opt-in: set the repository variable E2E_ENABLED=true and provide a staging URL.
     if: ${{ vars.E2E_ENABLED == 'true' }}
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: kaptia_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       PUPPETEER_SKIP_DOWNLOAD: 'true'
       E2E_ENABLED: '1'
       E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
       E2E_LOCALE: ${{ vars.E2E_LOCALE || 'sk' }}
       E2E_MANAGED_SERVER: '1'
-      DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/kaptia_e2e
       ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
       CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
       VITE_CLERK_PUBLISHABLE_KEY: ${{ vars.E2E_CLERK_PUBLISHABLE_KEY }}
@@ -85,6 +114,8 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci
+      - name: Create the schema
+        run: npx drizzle-kit push --force
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run E2E

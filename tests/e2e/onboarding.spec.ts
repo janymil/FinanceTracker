@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createClerkClient } from '@clerk/backend';
 import { Webhook } from 'svix';
-import { E2E_ENABLED, SKIP_REASON, path } from './support/env';
+import { E2E_ENABLED, LOCALE, SKIP_REASON, path } from './support/env';
 
 /**
  * Login and a brand-new person's first minutes, with a real Clerk test user:
@@ -103,9 +103,9 @@ test.describe('a brand-new account, start to finish', () => {
 
   test('a deep link while signed out goes to sign-in and returns there afterwards', async () => {
     await page.goto(path('/budget'));
-    await page.waitForURL(/\/sk\/auth\?redirect=%2Fsk%2Fbudget/, { timeout: 30_000 });
+    await page.waitForURL(new RegExp(`/${LOCALE}/auth\\?redirect=%2F${LOCALE}%2Fbudget`), { timeout: 30_000 });
     await signInThroughTheForm(page);
-    await page.waitForURL(/\/sk\/budget/, { timeout: 45_000 });
+    await page.waitForURL(new RegExp(`/${LOCALE}/budget`), { timeout: 45_000 });
   });
 
   test('the first thing asked is the currency, with a suggestion from where they live', async () => {
@@ -125,7 +125,7 @@ test.describe('a brand-new account, start to finish', () => {
   test('the time zone was saved automatically and the welcome shows it', async () => {
     const welcome = page.getByTestId('first-run-welcome');
     await expect(welcome).toBeVisible({ timeout: 20_000 });
-    await expect(welcome.getByTestId('timezone-setting')).toContainText(/stredoeurópsky|central european/i);
+    await expect(welcome.getByTestId('timezone-setting')).toContainText(/stredoeurópsky|central european|europa central/i);
     await expect.poll(async () => (await (await page.request.get('/api/auth/user')).json()).timezone, { timeout: 15_000 }).toBe('Europe/Bratislava');
   });
 
@@ -286,7 +286,7 @@ test.describe('when the network misbehaves during the first minute', () => {
     await page.locator('#identifier-field').fill(email);
     await page.locator('#password-field').fill(PASSWORD);
     await page.getByRole('button', { name: /continue|pokračovať|continuar/i }).first().click();
-    await page.waitForURL(/\/sk\/dashboard/, { timeout: 45_000 });
+    await page.waitForURL(new RegExp(`/${LOCALE}/dashboard`), { timeout: 45_000 });
 
     await expect(page.getByTestId('account-load-failed')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('currency-suggestion')).toHaveCount(0); // never asks over a currency it could not read
