@@ -72,8 +72,11 @@ put on the Standard plan for the PDF test, and that must never happen in product
 
 ### Known coverage gap
 
-Country blocking and Stripe checkout are not covered: the first needs a real geo setup, the
-second a test-mode Stripe account with webhooks. Both are listed in `05-e2e-critical-flows.md`.
+Country blocking is not covered: it needs a real geo setup. Checkout covers the handoff the
+app owns (`subscribe.spec.ts`): the plan and currency it asks for, following the returned URL
+and what happens when the provider refuses. What is still not covered is the provider's side —
+a test-mode Stripe account, a real payment, and the webhook that flips the plan afterwards.
+Both are listed in `05-e2e-critical-flows.md`.
 
 
 ## What is covered
@@ -82,7 +85,7 @@ second a test-mode Stripe account with webhooks. Both are listed in `05-e2e-crit
 |---|---|---|
 | `add-expense.spec.ts` | browser | add 50.00 € → row visible, total text changed, **`totalExpensesInCents` delta = 5000**; double-click creates exactly one row |
 | `voice-parse.api.spec.ts` | HTTP | `/api/voice/parse` returns cents, type and `needsReview`; empty transcript → 400 |
-| `export-pdf.spec.ts` | — | `fixme`: outbound PDF service cannot be stubbed with `page.route()` (see file) |
+| `export-pdf.spec.ts` | browser | the real server → stubbed PDF service → a `%PDF-` body (`support/pdf-stub-server.ts`, started by `global-setup.ts`) |
 
 Rules the specs follow:
 
@@ -115,6 +118,9 @@ Then follow the steps above with `DATABASE_URL=postgresql://e2e:e2e@127.0.0.1:55
 | `core-tracking.spec.ts` | income, expense create/edit/delete, budgets, goals, reports, every export format (CSV/JSON/Excel/PDF) and the Export button, time-zone month boundary |
 | `onboarding.spec.ts` | anonymous API access, JSON 404, sign-in deep link, currency suggestion, welcome + first transaction, Free-plan checklist, currency lock, signed Clerk webhook, failing-network recovery |
 | `ai-consent.spec.ts` | Free plan and the AI switch really stop every AI route |
+| `import-bank-file.spec.ts` | a bank CSV is previewed, confirmed, and moves `totalExpensesInCents` by exactly its amount; a file the parser cannot read imports nothing |
+| `subscribe.spec.ts` | choosing a plan asks for a session with that plan and the currency the page displayed, follows the returned URL; a refused checkout keeps the person on the page with the button usable again; the current plan cannot be bought twice |
+| `a11y.spec.ts` | axe (WCAG 2.1 A/AA) on the dashboard, the expenses page and its add dialog, export, subscribe, profile and the landing page — fails on `critical` and `serious` |
 | `human-flow.spec.ts`, `add-expense.spec.ts` | a person adding an expense, desktop and mobile |
 
 `onboarding.spec.ts` creates throw-away users in the Clerk **test** instance and deletes them

@@ -242,6 +242,7 @@ export default function Subscribe() {
                     </div>
                     <Button 
                       onClick={() => !isCurrentPlan('standard', 'monthly') && handleSubscribe('standard', 'month')}
+                      data-testid="subscribe-standard-monthly"
                       disabled={loading || isCurrentPlan('standard', 'monthly')}
                       className={`w-full py-6 text-lg ${
                         isCurrentPlan('standard', 'monthly') 
@@ -309,6 +310,7 @@ export default function Subscribe() {
                     </div>
                     <Button 
                       onClick={() => !isCurrentPlan('premium', 'monthly') && handleSubscribe('premium', 'month')}
+                      data-testid="subscribe-premium-monthly"
                       disabled={loading || isCurrentPlan('premium', 'monthly')}
                       className={`w-full py-6 text-lg ${
                         isCurrentPlan('premium', 'monthly') 
@@ -372,6 +374,7 @@ export default function Subscribe() {
                     </div>
                     <Button 
                       onClick={() => !isCurrentPlan('standard', 'yearly') && handleSubscribe('standard', 'year')}
+                      data-testid="subscribe-standard-yearly"
                       disabled={loading || isCurrentPlan('standard', 'yearly')}
                       className={`w-full py-6 text-lg ${
                         isCurrentPlan('standard', 'yearly') 
@@ -444,6 +447,7 @@ export default function Subscribe() {
                     </div>
                     <Button 
                       onClick={() => !isCurrentPlan('premium', 'yearly') && handleSubscribe('premium', 'year')}
+                      data-testid="subscribe-premium-yearly"
                       disabled={loading || isCurrentPlan('premium', 'yearly')}
                       className={`w-full py-6 text-lg ${
                         isCurrentPlan('premium', 'yearly') 

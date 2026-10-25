@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { CountryBlockingPanel } from "@/components/admin/CountryBlockingPanel";
+import { EditLimitDialog, UserOverrideDialog } from "@/components/admin/AiUsageDialogs";
 
 interface User {
   id: string;
@@ -2341,202 +2342,23 @@ export default function AdminAnalytics() {
             </CardContent>
           </Card>
 
-          {/* Edit Limit Dialog */}
-          <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Edit Usage Limit</DialogTitle>
-                <DialogDescription>
-                  Configure usage limits for {editingLimit?.plan} plan - {editingLimit?.functionName}
-                </DialogDescription>
-              </DialogHeader>
-              {editingLimit && (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="monthlyRequests">Monthly Request Limit</Label>
-                    <Input
-                      id="monthlyRequests"
-                      type="number"
-                      value={editingLimit.monthlyRequestLimit}
-                      onChange={(e) => setEditingLimit({
-                        ...editingLimit,
-                        monthlyRequestLimit: parseInt(e.target.value) || 0
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="monthlyCost">Monthly Cost Limit ($)</Label>
-                    <Input
-                      id="monthlyCost"
-                      type="number"
-                      step="0.01"
-                      value={editingLimit.monthlyCostLimit}
-                      onChange={(e) => setEditingLimit({
-                        ...editingLimit,
-                        monthlyCostLimit: e.target.value
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="dailyRequests">Daily Request Limit</Label>
-                    <Input
-                      id="dailyRequests"
-                      type="number"
-                      value={editingLimit.dailyRequestLimit}
-                      onChange={(e) => setEditingLimit({
-                        ...editingLimit,
-                        dailyRequestLimit: parseInt(e.target.value) || 0
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cooldown">Cooldown (seconds)</Label>
-                    <Input
-                      id="cooldown"
-                      type="number"
-                      value={editingLimit.cooldownSeconds}
-                      onChange={(e) => setEditingLimit({
-                        ...editingLimit,
-                        cooldownSeconds: parseInt(e.target.value) || 0
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Input
-                      id="description"
-                      value={editingLimit.description}
-                      onChange={(e) => setEditingLimit({
-                        ...editingLimit,
-                        description: e.target.value
-                      })}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={saveLimitChanges} disabled={isSavingLimit} className="flex-1">
-                      {isSavingLimit ? "Saving..." : "Save Changes"}
-                    </Button>
-                    <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+          <EditLimitDialog
+            open={showLimitDialog}
+            onOpenChange={setShowLimitDialog}
+            draft={editingLimit}
+            onDraftChange={setEditingLimit}
+            onSave={saveLimitChanges}
+            isSaving={isSavingLimit}
+          />
 
-          {/* Add/Edit User Override Dialog */}
-          <Dialog open={showUserOverrideDialog} onOpenChange={setShowUserOverrideDialog}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>User Override</DialogTitle>
-                <DialogDescription>
-                  Set custom AI usage limits for a specific user
-                </DialogDescription>
-              </DialogHeader>
-              {editingUserOverride && (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="userId">User ID</Label>
-                    <Input
-                      id="userId"
-                      value={editingUserOverride.userId}
-                      onChange={(e) => setEditingUserOverride({
-                        ...editingUserOverride,
-                        userId: e.target.value
-                      })}
-                      placeholder="Enter Clerk user ID"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="functionNameOverride">Function Name</Label>
-                    <Select 
-                      value={editingUserOverride.functionName} 
-                      onValueChange={(value) => setEditingUserOverride({
-                        ...editingUserOverride,
-                        functionName: value
-                      })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select function" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="categorizeExpense">Expense Categorization</SelectItem>
-                        <SelectItem value="generateFinancialTips">Financial Tips</SelectItem>
-                        <SelectItem value="generateContextualFinancialTips">Contextual Tips</SelectItem>
-                        <SelectItem value="generateDailyRecommendations">Daily Recommendations</SelectItem>
-                        <SelectItem value="generateSpendingInsights">Spending Insights</SelectItem>
-                        <SelectItem value="generateAIFinancialHealthScore">Health Score</SelectItem>
-                        <SelectItem value="generateTrendPredictions">Trend Predictions</SelectItem>
-                        <SelectItem value="generateExpensePredictions">Expense Predictions</SelectItem>
-                        <SelectItem value="parseBankStatement">Bank Statement Parser</SelectItem>
-                        <SelectItem value="generateFinancialMascot">DALL-E Mascot</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="monthlyRequestsOverride">Monthly Request Limit (optional)</Label>
-                    <Input
-                      id="monthlyRequestsOverride"
-                      type="number"
-                      value={editingUserOverride.monthlyRequestLimit || ''}
-                      onChange={(e) => setEditingUserOverride({
-                        ...editingUserOverride,
-                        monthlyRequestLimit: e.target.value ? parseInt(e.target.value) : null
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="monthlyCostOverride">Monthly Cost Limit ($, optional)</Label>
-                    <Input
-                      id="monthlyCostOverride"
-                      type="number"
-                      step="0.01"
-                      value={editingUserOverride.monthlyCostLimit || ''}
-                      onChange={(e) => setEditingUserOverride({
-                        ...editingUserOverride,
-                        monthlyCostLimit: e.target.value || null
-                      })}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="isBlocked"
-                      checked={editingUserOverride.isBlocked}
-                      onChange={(e) => setEditingUserOverride({
-                        ...editingUserOverride,
-                        isBlocked: e.target.checked
-                      })}
-                    />
-                    <Label htmlFor="isBlocked">Block user from this function</Label>
-                  </div>
-                  {editingUserOverride.isBlocked && (
-                    <div>
-                      <Label htmlFor="reason">Reason for blocking</Label>
-                      <Input
-                        id="reason"
-                        value={editingUserOverride.reason}
-                        onChange={(e) => setEditingUserOverride({
-                          ...editingUserOverride,
-                          reason: e.target.value
-                        })}
-                        placeholder="Enter reason for blocking"
-                      />
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Button onClick={saveUserOverrideChanges} disabled={isSavingUserOverride} className="flex-1">
-                      {isSavingUserOverride ? "Saving..." : "Save Override"}
-                    </Button>
-                    <Button variant="outline" onClick={() => setShowUserOverrideDialog(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+          <UserOverrideDialog
+            open={showUserOverrideDialog}
+            onOpenChange={setShowUserOverrideDialog}
+            draft={editingUserOverride}
+            onDraftChange={setEditingUserOverride}
+            onSave={saveUserOverrideChanges}
+            isSaving={isSavingUserOverride}
+          />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">

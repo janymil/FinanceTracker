@@ -8,7 +8,7 @@ import LanguageGuard from "@/components/LanguageGuard";
 import { ErrorBoundary } from "react-error-boundary";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { BackToTopButton } from "@/components/back-to-top-button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
@@ -25,44 +25,50 @@ import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
 import { FinancialMascot } from "@/components/financial-mascot";
 
+// The two pages that must paint immediately: an anonymous visitor lands here, and every
+// signed-in session starts on the dashboard.
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 
-// Other components loaded on demand
-import AuthPage from "@/pages/auth-page";
 import { signInUrl } from "@/lib/authRedirect";
 import { useAutoTimeZone } from "@/hooks/useAutoTimeZone";
 import { FirstRunWelcome } from "@/components/FirstRunWelcome";
-import TransactionsPage from "@/pages/transactions";
-import IncomePage from "@/pages/income";
-import ExpensesPage from "@/pages/expenses";
-import BudgetPage from "@/pages/budget";
-import CategoriesPage from "@/pages/categories";
-import GoalsPage from "@/pages/goals";
-import CollaborativeGoalsPage from "@/pages/collaborative-goals";
-import CollaborativeGoalDetailPage from "./pages/collaborative-goal-detail";
-import TrendsPage from "@/pages/trends";
-import CalendarPage from "@/pages/calendar";
-import ReportsPage from "@/pages/reports";
-import ExportPage from "@/pages/export";
-import CoursesPage from "@/pages/Courses";
-import SubscribePage from "@/pages/subscribe";
-import Pricing from "@/pages/pricing";
-import TermsOfService from "@/pages/terms-of-service";
-import PrivacyPolicy from "@/pages/privacy-policy";
-import CookiePolicy from "@/pages/cookie-policy";
-import Reclamaciones from "@/pages/reclamaciones";
-import RefundPolicy from "@/pages/refund-policy";
-import Contact from "@/pages/contact";
-import Help from "@/pages/help";
-import NotFoundPage from "./pages/not-found";
-import ProfilePage from "./pages/profile";
-import AdminAnalytics from "@/pages/admin-analytics";
-import AdminWatch from "@/pages/admin-watch";
-import MobileUpload from "@/pages/mobile-upload/sessionId";
-import RedeemPage from "@/pages/redeem";
-import FeaturesPage from "@/pages/features";
 
+// Everything else is its own chunk, fetched the first time its route is opened. Before
+// this every visitor downloaded all 31 pages (admin screens included) in one ~850 kB
+// entry before seeing anything, and the chart library was preloaded on the landing page.
+// See `Route` below: each of these is rendered inside the Suspense boundaries in `Router`
+// and `AuthenticatedApp`, so the header/sidebar stay put while a page chunk arrives.
+const AuthPage = lazy(() => import("@/pages/auth-page"));
+const TransactionsPage = lazy(() => import("@/pages/transactions"));
+const IncomePage = lazy(() => import("@/pages/income"));
+const ExpensesPage = lazy(() => import("@/pages/expenses"));
+const BudgetPage = lazy(() => import("@/pages/budget"));
+const CategoriesPage = lazy(() => import("@/pages/categories"));
+const GoalsPage = lazy(() => import("@/pages/goals"));
+const CollaborativeGoalsPage = lazy(() => import("@/pages/collaborative-goals"));
+const CollaborativeGoalDetailPage = lazy(() => import("./pages/collaborative-goal-detail"));
+const TrendsPage = lazy(() => import("@/pages/trends"));
+const CalendarPage = lazy(() => import("@/pages/calendar"));
+const ReportsPage = lazy(() => import("@/pages/reports"));
+const ExportPage = lazy(() => import("@/pages/export"));
+const CoursesPage = lazy(() => import("@/pages/Courses"));
+const SubscribePage = lazy(() => import("@/pages/subscribe"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const TermsOfService = lazy(() => import("@/pages/terms-of-service"));
+const PrivacyPolicy = lazy(() => import("@/pages/privacy-policy"));
+const CookiePolicy = lazy(() => import("@/pages/cookie-policy"));
+const Reclamaciones = lazy(() => import("@/pages/reclamaciones"));
+const RefundPolicy = lazy(() => import("@/pages/refund-policy"));
+const Contact = lazy(() => import("@/pages/contact"));
+const Help = lazy(() => import("@/pages/help"));
+const NotFoundPage = lazy(() => import("./pages/not-found"));
+const ProfilePage = lazy(() => import("./pages/profile"));
+const AdminAnalytics = lazy(() => import("@/pages/admin-analytics"));
+const AdminWatch = lazy(() => import("@/pages/admin-watch"));
+const MobileUpload = lazy(() => import("@/pages/mobile-upload/sessionId"));
+const RedeemPage = lazy(() => import("@/pages/redeem"));
+const FeaturesPage = lazy(() => import("@/pages/features"));
 
 // Optimized loading state
 const AppLoader = () => (
@@ -71,6 +77,14 @@ const AppLoader = () => (
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
       <p className="text-gray-600 dark:text-gray-300">Loading Kaptia...</p>
     </div>
+  </div>
+);
+
+// Page-level fallback: when a route chunk is still arriving the shell (header, sidebar) is
+// already on screen, so only the content area shows a spinner instead of the whole viewport.
+const PageLoader = () => (
+  <div className="min-h-[50vh] flex items-center justify-center" data-testid="page-loader">
+    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
   </div>
 );
 
@@ -116,85 +130,87 @@ function Router() {
   
   return (
     <LanguageGuard>
-      <Switch>
-        {/* Language-prefixed routes */}
-        <Route path="/:lang/dashboard" component={AuthenticatedApp} />
-        <Route path="/:lang/transactions" component={AuthenticatedApp} />
-        <Route path="/:lang/income" component={AuthenticatedApp} />
-        <Route path="/:lang/expenses" component={AuthenticatedApp} />
-        <Route path="/:lang/budget" component={AuthenticatedApp} />
-        <Route path="/:lang/categories" component={AuthenticatedApp} />
-        <Route path="/:lang/goals" component={AuthenticatedApp} />
-        <Route path="/:lang/collaborative-goals" component={AuthenticatedApp} />
-        <Route path="/:lang/collaborative-goals/:id" component={AuthenticatedApp} />
-        <Route path="/:lang/trends" component={AuthenticatedApp} />
-        <Route path="/:lang/calendar" component={AuthenticatedApp} />
-        <Route path="/:lang/reports" component={AuthenticatedApp} />
-        <Route path="/:lang/export" component={AuthenticatedApp} />
-        <Route path="/:lang/courses" component={AuthenticatedApp} />
-        <Route path="/:lang/profile" component={AuthenticatedApp} />
-        <Route path="/:lang/subscribe" component={AuthenticatedApp} />
-        <Route path="/:lang/redeem" component={AuthenticatedApp} />
-        <Route path="/:lang/admin-analytics" component={AuthenticatedApp} />
-        <Route path="/:lang/admin-watch" component={AuthenticatedApp} />
-        
-        {/* Public pages with language prefix */}
-        <Route path="/:lang/features" component={FeaturesPage} />
-        <Route path="/:lang/pricing" component={Pricing} />
-        <Route path="/:lang/terms" component={TermsOfService} />
-        <Route path="/:lang/terms-of-service" component={TermsOfService} />
-        <Route path="/:lang/privacy" component={PrivacyPolicy} />
-        <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
-        <Route path="/:lang/cookies" component={CookiePolicy} />
-        <Route path="/:lang/cookie-policy" component={CookiePolicy} />
-        <Route path="/:lang/reclamaciones" component={Reclamaciones} />
+      <Suspense fallback={<AppLoader />}>
+        <Switch>
+          {/* Language-prefixed routes */}
+          <Route path="/:lang/dashboard" component={AuthenticatedApp} />
+          <Route path="/:lang/transactions" component={AuthenticatedApp} />
+          <Route path="/:lang/income" component={AuthenticatedApp} />
+          <Route path="/:lang/expenses" component={AuthenticatedApp} />
+          <Route path="/:lang/budget" component={AuthenticatedApp} />
+          <Route path="/:lang/categories" component={AuthenticatedApp} />
+          <Route path="/:lang/goals" component={AuthenticatedApp} />
+          <Route path="/:lang/collaborative-goals" component={AuthenticatedApp} />
+          <Route path="/:lang/collaborative-goals/:id" component={AuthenticatedApp} />
+          <Route path="/:lang/trends" component={AuthenticatedApp} />
+          <Route path="/:lang/calendar" component={AuthenticatedApp} />
+          <Route path="/:lang/reports" component={AuthenticatedApp} />
+          <Route path="/:lang/export" component={AuthenticatedApp} />
+          <Route path="/:lang/courses" component={AuthenticatedApp} />
+          <Route path="/:lang/profile" component={AuthenticatedApp} />
+          <Route path="/:lang/subscribe" component={AuthenticatedApp} />
+          <Route path="/:lang/redeem" component={AuthenticatedApp} />
+          <Route path="/:lang/admin-analytics" component={AuthenticatedApp} />
+          <Route path="/:lang/admin-watch" component={AuthenticatedApp} />
 
-        <Route path="/:lang/refund-policy" component={RefundPolicy} />
+          {/* Public pages with language prefix */}
+          <Route path="/:lang/features" component={FeaturesPage} />
+          <Route path="/:lang/pricing" component={Pricing} />
+          <Route path="/:lang/terms" component={TermsOfService} />
+          <Route path="/:lang/terms-of-service" component={TermsOfService} />
+          <Route path="/:lang/privacy" component={PrivacyPolicy} />
+          <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/:lang/cookies" component={CookiePolicy} />
+          <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+          <Route path="/:lang/reclamaciones" component={Reclamaciones} />
 
-        <Route path="/:lang/refunds" component={RefundPolicy} />
-        <Route path="/:lang/contact" component={Contact} />
-        <Route path="/:lang/help" component={Help} />
-        <Route path="/:lang/auth" component={AuthPage} />
-        <Route path="/:lang" component={Landing} />
-        
-        {/* Default route - redirect to user's language */}
-        <Route path="/" component={() => { 
-          const [, setLocation] = useLocation();
-          const { isSignedIn } = useUser();
-          
-          React.useEffect(() => {
-            // Get saved language or use browser language
-            const savedLang = localStorage.getItem('preferredLanguage');
-            const browserLang = navigator.language.toLowerCase().split('-')[0];
-            const supportedLangs = ['en', 'es', 'sk'];
-            
-            const targetLang = savedLang && supportedLangs.includes(savedLang) 
-              ? savedLang 
-              : supportedLangs.includes(browserLang) 
-                ? browserLang 
-                : 'en';
-            
-            console.log('Root route redirect:', { isSignedIn, targetLang });
-            
-            // Redirect to appropriate page based on auth status
-            if (isSignedIn) {
-              console.log('Redirecting signed-in user to dashboard');
-              setLocation(`/${targetLang}/dashboard`);
-            } else {
-              console.log('Redirecting unsigned user to landing');
-              setLocation(`/${targetLang}`);
-            }
-          }, [setLocation, isSignedIn]);
-          
-          return <AppLoader />; 
-        }} />
-        
-        {/* Mobile upload - special case without language prefix */}
-        <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-        
-        {/* 404 page */}
-        <Route path="*" component={NotFoundPage} />
-      </Switch>
+          <Route path="/:lang/refund-policy" component={RefundPolicy} />
+
+          <Route path="/:lang/refunds" component={RefundPolicy} />
+          <Route path="/:lang/contact" component={Contact} />
+          <Route path="/:lang/help" component={Help} />
+          <Route path="/:lang/auth" component={AuthPage} />
+          <Route path="/:lang" component={Landing} />
+
+          {/* Default route - redirect to user's language */}
+          <Route path="/" component={() => {
+            const [, setLocation] = useLocation();
+            const { isSignedIn } = useUser();
+
+            React.useEffect(() => {
+              // Get saved language or use browser language
+              const savedLang = localStorage.getItem('preferredLanguage');
+              const browserLang = navigator.language.toLowerCase().split('-')[0];
+              const supportedLangs = ['en', 'es', 'sk'];
+
+              const targetLang = savedLang && supportedLangs.includes(savedLang)
+                ? savedLang
+                : supportedLangs.includes(browserLang)
+                  ? browserLang
+                  : 'en';
+
+              console.log('Root route redirect:', { isSignedIn, targetLang });
+
+              // Redirect to appropriate page based on auth status
+              if (isSignedIn) {
+                console.log('Redirecting signed-in user to dashboard');
+                setLocation(`/${targetLang}/dashboard`);
+              } else {
+                console.log('Redirecting unsigned user to landing');
+                setLocation(`/${targetLang}`);
+              }
+            }, [setLocation, isSignedIn]);
+
+            return <AppLoader />;
+          }} />
+
+          {/* Mobile upload - special case without language prefix */}
+          <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
+
+          {/* 404 page */}
+          <Route path="*" component={NotFoundPage} />
+        </Switch>
+      </Suspense>
     </LanguageGuard>
   );
 }
@@ -273,50 +289,52 @@ export function AuthenticatedApp() {
           sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
-            <Switch>
-              {/* Language-prefixed routes */}
-              <Route path="/:lang/dashboard" component={Dashboard} />
-              <Route path="/:lang/transactions" component={TransactionsPage} />
-              <Route path="/:lang/income" component={IncomePage} />
-              <Route path="/:lang/expenses" component={ExpensesPage} />
-              <Route path="/:lang/budget" component={BudgetPage} />
-              <Route path="/:lang/categories" component={CategoriesPage} />
-              <Route path="/:lang/goals" component={GoalsPage} />
-              <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
-              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
-              <Route path="/:lang/calendar" component={CalendarPage} />
-              <Route path="/:lang/trends" component={TrendsPage} />
-              <Route path="/:lang/reports" component={ReportsPage} />
-              <Route path="/:lang/export" component={ExportPage} />
-              <Route path="/:lang/courses" component={CoursesPage} />
-              <Route path="/:lang/subscribe" component={SubscribePage} />
-              <Route path="/:lang/redeem" component={RedeemPage} />
-              <Route path="/:lang/profile" component={ProfilePage} />
-              <Route path="/:lang/admin-analytics" component={AdminAnalytics} />
-              <Route path="/:lang/admin-watch" component={AdminWatch} />
-              
-              {/* Public pages with language prefix for authenticated users */}
-              <Route path="/:lang/features" component={FeaturesPage} />
-              <Route path="/:lang/pricing" component={Pricing} />
-              <Route path="/:lang/terms" component={TermsOfService} />
-              <Route path="/:lang/terms-of-service" component={TermsOfService} />
-              <Route path="/:lang/privacy" component={PrivacyPolicy} />
-              <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
-              <Route path="/:lang/cookies" component={CookiePolicy} />
-              <Route path="/:lang/cookie-policy" component={CookiePolicy} />
-              <Route path="/:lang/reclamaciones" component={Reclamaciones} />
+            <Suspense fallback={<PageLoader />}>
+              <Switch>
+                {/* Language-prefixed routes */}
+                <Route path="/:lang/dashboard" component={Dashboard} />
+                <Route path="/:lang/transactions" component={TransactionsPage} />
+                <Route path="/:lang/income" component={IncomePage} />
+                <Route path="/:lang/expenses" component={ExpensesPage} />
+                <Route path="/:lang/budget" component={BudgetPage} />
+                <Route path="/:lang/categories" component={CategoriesPage} />
+                <Route path="/:lang/goals" component={GoalsPage} />
+                <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
+                <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+                <Route path="/:lang/calendar" component={CalendarPage} />
+                <Route path="/:lang/trends" component={TrendsPage} />
+                <Route path="/:lang/reports" component={ReportsPage} />
+                <Route path="/:lang/export" component={ExportPage} />
+                <Route path="/:lang/courses" component={CoursesPage} />
+                <Route path="/:lang/subscribe" component={SubscribePage} />
+                <Route path="/:lang/redeem" component={RedeemPage} />
+                <Route path="/:lang/profile" component={ProfilePage} />
+                <Route path="/:lang/admin-analytics" component={AdminAnalytics} />
+                <Route path="/:lang/admin-watch" component={AdminWatch} />
 
-              <Route path="/:lang/refund-policy" component={RefundPolicy} />
+                {/* Public pages with language prefix for authenticated users */}
+                <Route path="/:lang/features" component={FeaturesPage} />
+                <Route path="/:lang/pricing" component={Pricing} />
+                <Route path="/:lang/terms" component={TermsOfService} />
+                <Route path="/:lang/terms-of-service" component={TermsOfService} />
+                <Route path="/:lang/privacy" component={PrivacyPolicy} />
+                <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
+                <Route path="/:lang/cookies" component={CookiePolicy} />
+                <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+                <Route path="/:lang/reclamaciones" component={Reclamaciones} />
 
-              <Route path="/:lang/refunds" component={RefundPolicy} />
-              <Route path="/:lang/contact" component={Contact} />
-              <Route path="/:lang/help" component={Help} />
-              
-              {/* Default route */}
-              <Route path="/" component={Dashboard} />
+                <Route path="/:lang/refund-policy" component={RefundPolicy} />
 
-              <Route component={NotFoundPage} />
-            </Switch>
+                <Route path="/:lang/refunds" component={RefundPolicy} />
+                <Route path="/:lang/contact" component={Contact} />
+                <Route path="/:lang/help" component={Help} />
+
+                {/* Default route */}
+                <Route path="/" component={Dashboard} />
+
+                <Route component={NotFoundPage} />
+              </Switch>
+            </Suspense>
           </div>
         </main>
       </div>

@@ -1513,6 +1513,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           <input
                             ref={fileInputRef}
                             type="file"
+                            data-testid="import-file-input"
                             accept={importOptions.source === 'pdf-statement' ? '.pdf' : importOptions.source === 'bank-file' ? '.csv,.txt,.xlsx,.xls' : '.csv,.json'}
                             onChange={importOptions.source === 'pdf-statement' ? handlePDFUpload : importOptions.source === 'bank-file' ? handleBankFileChange : handleFileSelect}
                             className="hidden"
@@ -2009,7 +2010,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
         {/* Enhanced PDF Transaction Preview Modal */}
         <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
-          <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
+          <DialogContent className="max-w-6xl h-[90vh] flex flex-col" data-testid="import-preview">
             <DialogHeader className="flex-shrink-0">
               <DialogTitle>Review and Edit Extracted Transactions</DialogTitle>
               <DialogDescription>
@@ -2089,6 +2090,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
               <Button
                 onClick={handleImportSelectedTransactions}
                 disabled={selectedTransactions.size === 0 || isImportingFromPreview}
+                data-testid="confirm-import"
               >
                 {isImportingFromPreview ? (
                   <>
