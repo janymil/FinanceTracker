@@ -1,3 +1,4 @@
+import { isUniqueViolation } from './dbErrors';
 /**
  * Clerk "user.created" handling.
  *
@@ -11,7 +12,6 @@ interface UserStore {
   createUser(user: any): Promise<unknown>;
 }
 
-const isUniqueViolation = (error: any) => error?.code === '23505' || /duplicate key/i.test(error?.message ?? '');
 
 export type CreatedUserOutcome = 'created' | 'already-exists' | 'email-belongs-to-another-account';
 
