@@ -1,5 +1,5 @@
 // Test if Mistral API is working
-import { MistralClient } from './server/mistralClient.js';
+import { MistralClient } from '../../server/mistralClient.js';
 
 async function testMistral() {
   console.log('🧪 Testing Mistral API connection...');

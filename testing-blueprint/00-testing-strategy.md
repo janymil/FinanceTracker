@@ -31,7 +31,7 @@
 | 0 testovacích súborov v aplikácii | `find` na `*.test.*` / `*.spec.*` nájde len `external-services/*/node_modules` |
 | Testy vylúčené z typechecku | pôvodný `tsconfig.json`: `"exclude": [..., "**/*.test.ts"]` |
 | Žiadne CI | chýba `.github/` |
-| Deploy bez brány | `deploy-prod.sh` → `drizzle-kit push` na produkciu + `NODE_ENV=production npm run dev` |
+| Deploy bez brány | `scripts/legacy/deploy-prod.sh` → `drizzle-kit push` na produkciu + `NODE_ENV=production npm run dev` |
 | Peniaze ako `decimal(12,2)` → v JS **string** | `shared/schema.ts:84` (`transactions.amount`), `scripts/audit-flows.ts` porovnáva `'100.50'` |
 | Sumy sa sčítavajú cez `parseFloat` | `client/src/pages/expenses.tsx:267`, `transactions.tsx:393`, `calendar.tsx:127`, `trends.tsx:274`, `budget.tsx:297`, `ai-insights.tsx:87`, `quick-financial-snapshot.tsx:57` … |
 | Agregácia na serveri je zlepená s DB | `server/storage.ts:972` `getUserFinancialSummary()` — SQL `sum()` + `Number()` |
@@ -343,7 +343,7 @@ E2E (krok 5) ako tretí job s Playwright image.
 
 **Live AI benchmark sa do CI nepridáva nikdy.** Maximálne scheduled workflow s `continue-on-error`.
 
-`deploy-prod.sh` dnes spúšťa `NODE_ENV=production npm run dev` — kým sa to nezmení na
+`scripts/legacy/deploy-prod.sh` dnes spúšťa `NODE_ENV=production npm run dev` — kým sa to nezmení na
 `npm run build && npm start`, žiadna testovacia brána reálne nechráni produkciu.
 
 ---
@@ -384,7 +384,7 @@ E2E (krok 5) ako tretí job s Playwright image.
 | `server/observability.ts` | server Sentry (dynamický import, `dataCollection` off, scrubované hooky) |
 | `client/src/lib/observability.ts` | klientsky Sentry (gated na `VITE_SENTRY_DSN`) |
 | `scripts/healthcheck.ts` | `npm run healthcheck` — cron monitor, exit 0/1, `--json` |
-| `deploy-prod.sh` | prepísaný deploy gate (testy a build pred migráciou) |
+| `scripts/legacy/deploy-prod.sh` | prepísaný deploy gate (testy a build pred migráciou) |
 | `tests/unit/piiScrubber.test.ts` | 20 testov |
 | `tests/unit/healthcheck.test.ts` | 11 testov |
 | `shared/duplicateDetection.ts` | pure detekcia duplikátov (extrahované z `lib/pdfProcessor.ts`) |
@@ -485,7 +485,7 @@ grep -rn "+ parseFloat(\|reduce((sum.*parseFloat" client/src   # 0 zásahov
 - [x] `server/index.ts` — init pred routami, Sentry handler pred vlastným, **odstránené `throw err` po odpovedi**
 - [x] `GET /api/health/deep` — `SELECT 1`, 503 bez úniku detailov
 - [x] `shared/healthcheck.ts` + `scripts/healthcheck.ts` + 11 testov, `npm run healthcheck`
-- [x] `deploy-prod.sh` prepísaný: `--yes` guard, testy a build **pred** migráciou, voliteľný `pg_dump`
+- [x] `scripts/legacy/deploy-prod.sh` prepísaný: `--yes` guard, testy a build **pred** migráciou, voliteľný `pg_dump`
 - [x] `DISABLE_COUNTRY_BLOCKING` reálne implementovaný (v produkcii ignorovaný)
 - [ ] Sentry **DSN** + projekt (nedá sa vytvoriť z kódu)
 - [ ] cron/systemd timer pre `npm run healthcheck -- --deep` (beží na serveri, nie tu)
@@ -520,7 +520,7 @@ grep -rn "+ parseFloat(\|reduce((sum.*parseFloat" client/src   # 0 zásahov
 | E2E harness (krok 5) | ✅ 9 testov listovaných, **E2E-1/2/3 implementované** (E2E-3 so stub serverom) | Clerk test instancia + seeded DB na beh |
 | Observability (krok 6) | ✅ kód + 31 testov, PII scrubber | Sentry DSN + projekt |
 | Syntetický monitoring | ✅ skript + `/api/health/deep` | cron/systemd na serveri |
-| Deploy gate | ✅ `deploy-prod.sh` prepísaný | spustenie na serveri |
+| Deploy gate | ✅ `scripts/legacy/deploy-prod.sh` prepísaný | spustenie na serveri |
 | Integračné testy (Neon branch) | ✅ harness hotový, bez `DATABASE_URL_TEST` skipuje s hláškou | Neon branch + `DATABASE_URL_TEST` |
 | Equivalence (krok 2) | ✅ stará `parseFloat` vs nová cesta na tom istom fixtures | — |
 

@@ -24,7 +24,7 @@
 | `server/routes/index.ts` | `GET /api/health` (shallow) + `GET /api/health/deep` (SELECT 1) |
 | `shared/healthcheck.ts` | pure health evaluation rules |
 | `scripts/healthcheck.ts` | cron/systemd synthetic check, exit 0/1, `--json` |
-| `deploy-prod.sh` | test → build → migrate → start gate |
+| `scripts/legacy/deploy-prod.sh` | test → build → migrate → start gate |
 | `.env.example` | `SENTRY_*`, `VITE_SENTRY_*`, `HEALTHCHECK_*`, `DISABLE_COUNTRY_BLOCKING` |
 
 **Out of scope:** dashboards, alert routing rules inside Sentry, log aggregation, Stripe
@@ -134,14 +134,14 @@ npm run healthcheck -- --url https://kaptia.app --deep --max-latency 3000 --json
 | `client/src/lib/observability.ts` | 40 | same, gated on `VITE_SENTRY_DSN` |
 | `server/routes/index.ts` | +26 | `/api/health/deep` with `SELECT 1`, 503 without leaking details |
 | `scripts/healthcheck.ts` | 105 | `--url --deep --max-latency --timeout --json`, exit 0/1 |
-| `deploy-prod.sh` | rewritten | `set -euo pipefail`, `--yes` guard, tests before migrate, optional `pg_dump` |
+| `scripts/legacy/deploy-prod.sh` | rewritten | `set -euo pipefail`, `--yes` guard, tests before migrate, optional `pg_dump` |
 | `.env.example` | +20 | observability + monitor + `DISABLE_COUNTRY_BLOCKING` |
 | `tests/unit/piiScrubber.test.ts` | 20 tests | |
 | `tests/unit/healthcheck.test.ts` | 11 tests | |
 
 **Holes found and fixed while doing this step:**
 
-1. `deploy-prod.sh` ran `NODE_ENV=production npm run dev` — the production "deploy" started
+1. `scripts/legacy/deploy-prod.sh` ran `NODE_ENV=production npm run dev` — the production "deploy" started
    a tsx dev process with hot reload, no build artefact and no test gate.
 2. The Express error handler ended with `throw err` **after** responding, turning a single
    failed request into an unhandled exception.
