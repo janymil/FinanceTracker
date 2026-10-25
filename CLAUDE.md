@@ -8,11 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build production bundle (frontend + backend)
 - `npm run start` - Start production server
-- `npm run check` - TypeScript type checking
+- `npm run check` — TypeScript type checking + the server logging guard
 - `npm run db:push` - Push database schema changes via Drizzle
 
 ### Testing and Quality
-- `npm run check` — TypeScript across app, tests and scripts
+- `npm run check` — TypeScript across app, tests and scripts, then `scripts/check-logging.ts`
+  (server code must log through `server/logger.ts`, never `console.log` directly)
 - `npm test` — Vitest unit + replay suites (no database, no AI keys, no network)
 - `npm run test:integration` — needs `DATABASE_URL_TEST` (skips loudly without it)
 - `npm run test:e2e` — Playwright; needs a staging URL + Clerk test instance
@@ -24,6 +25,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Production timers live in `/etc/cron.d/kaptia` (uptime every 5 min, latency check hourly,
 error-data retention daily). Schema changes are **not** part of the deploy script: run
 `npm run db:push` against `DATABASE_URL_PROD` deliberately.
+
+### Installing dependencies on this host
+npm 12 refuses remote tarballs and install scripts by default, and `xlsx` is pinned to
+SheetJS' CDN tarball in `package-lock.json`, so a plain `npm ci` aborts with `EALLOWREMOTE`:
+
+```bash
+npm ci --allow-remote=all --no-audit --no-fund
+```
+
+The blocked install scripts are not needed: `esbuild`, `sharp` and `bcrypt` resolve their
+prebuilt binaries from their own optional packages. The deploy script never installs — run
+the command above whenever `package-lock.json` changes, then `./scripts/deploy.sh`.
 
 ### Money and pricing rules
 - Amounts live in `shared/pricing.ts` and mirror the live Stripe prices (usd + pen).
