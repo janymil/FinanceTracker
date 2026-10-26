@@ -21,6 +21,23 @@ const getEncryptionKey = (): Buffer => {
 };
 
 const ENCRYPTION_KEY = getEncryptionKey();
+
+/**
+ * Version prefix for the authenticated scheme (AES-256-GCM). A value that does not start with
+ * it is legacy AES-256-CBC, `iv:ciphertext`. Both are read; only the new one is written.
+ */
+const SCHEME_GCM = 'v2';
+const GCM_IV_BYTES = 12;
+
+/**
+ * True when `ENCRYPTION_KEY` came from the environment as 64 hex characters, rather than being
+ * the per-process throwaway key generated above for development. A key that changes on restart
+ * must never *write* ciphertext: the rows would be unreadable as soon as the process bounced.
+ */
+const KEY_IS_STABLE = Boolean(
+  process.env.ENCRYPTION_KEY && /^[0-9a-fA-F]{64}$/.test(process.env.ENCRYPTION_KEY),
+);
+
 const DECRYPTION_WARNING_INTERVAL_MS = 60_000;
 
 let lastDecryptionWarning = 0;
@@ -35,9 +52,22 @@ export class DataEncryption {
    */
   static readonly UNREADABLE = '[unreadable: encrypted with a different key]';
 
+  /**
+   * Encryption is on in production, when asked for explicitly, and whenever a real key is
+   * present.
+   *
+   * That third clause closes a gap that used to exist: a development machine pointed at a
+   * database holding real customer rows wrote them in plain text, because only
+   * `NODE_ENV=production` switched the cipher on. With the throwaway key (no valid
+   * `ENCRYPTION_KEY`) it stays off deliberately — writing rows with a key that is regenerated
+   * on every restart would lose them just as surely as writing them in clear.
+   */
   private static isEncryptionEnabled(): boolean {
-    // Enable encryption in production or when explicitly enabled
-    return process.env.NODE_ENV === 'production' || process.env.ENCRYPTION_ENABLED === 'true';
+    return (
+      process.env.NODE_ENV === 'production' ||
+      process.env.ENCRYPTION_ENABLED === 'true' ||
+      KEY_IS_STABLE
+    );
   }
 
   static encrypt(text: string): string {
@@ -46,14 +76,19 @@ export class DataEncryption {
     }
 
     try {
-      const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
-      
+      // AES-256-GCM, not CBC: the tag is an integrity check. A CBC value that is altered
+      // either fails to decrypt or decrypts into plausible-looking garbage — and with no tag
+      // there is no way to tell the two apart, so tampering is silent. The old format is still
+      // readable below; nothing has to be re-encrypted to switch scheme.
+      const iv = crypto.randomBytes(GCM_IV_BYTES);
+      const cipher = crypto.createCipheriv('aes-256-gcm', ENCRYPTION_KEY, iv);
+
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
-      // Return format: iv:encrypted
-      return iv.toString('hex') + ':' + encrypted;
+
+      // Return format: v2:iv:tag:ciphertext (all hex). The prefix is the discriminator that
+      // lets tryDecrypt read rows written by either scheme.
+      return [SCHEME_GCM, iv.toString('hex'), cipher.getAuthTag().toString('hex'), encrypted].join(':');
     } catch (error) {
       // Never fall back to storing the plain text of something that should be encrypted.
       log.error('Encryption error:', error);
@@ -68,6 +103,10 @@ export class DataEncryption {
   static tryDecrypt(encryptedData: string): string | null {
     if (!this.isEncryptionEnabled() || !encryptedData) {
       return encryptedData;
+    }
+
+    if (encryptedData.startsWith(`${SCHEME_GCM}:`)) {
+      return this.decryptGcm(encryptedData);
     }
 
     if (!encryptedData.includes(':')) {
@@ -97,6 +136,31 @@ export class DataEncryption {
       } catch {
         return null;
       }
+    }
+  }
+
+  /**
+   * `v2:iv:tag:ciphertext`. Returns null for a wrong key *and* for altered ciphertext, because
+   * the authentication tag cannot tell us which it was — and both mean "this value is not
+   * usable", which is what the caller acts on.
+   */
+  private static decryptGcm(value: string): string | null {
+    const [, ivHex, tagHex, ciphertext] = value.split(':');
+    if (!ivHex || !tagHex || !ciphertext) return null;
+
+    try {
+      const decipher = crypto.createDecipheriv(
+        'aes-256-gcm',
+        ENCRYPTION_KEY,
+        Buffer.from(ivHex, 'hex'),
+      );
+      decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
+
+      let decrypted = decipher.update(ciphertext, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      return decrypted;
+    } catch {
+      return null;
     }
   }
 
@@ -144,7 +208,14 @@ export class DataEncryption {
 
   // Utility method to check if data appears to be encrypted
   static isEncrypted(data: string): boolean {
-    return Boolean(data && data.includes(':') && data.split(':').length === 2);
+    if (!data) return false;
+    if (data.startsWith(`${SCHEME_GCM}:`)) return data.split(':').length === 4;
+    return data.includes(':') && data.split(':').length === 2;
+  }
+
+  /** The scheme new writes use, and the one `tryDecrypt` prefers. Reported for diagnostics. */
+  static getScheme(): 'aes-256-gcm' {
+    return 'aes-256-gcm';
   }
 
   // Method to get encryption status
