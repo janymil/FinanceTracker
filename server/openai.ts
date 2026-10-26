@@ -44,6 +44,7 @@ export const PROSE_RULES = `HOUSE RULES (always apply):
 - Kaptia is a personal budgeting tool, not a licensed financial service. Never present yourself as an advisor or adviser.
 - Do not recommend investments, loans, credit products or banks, and do not use the words bank, loan, credit, invest or advisor (or their Spanish or Slovak equivalents).
 - Amounts are in the person's own currency. Never add a currency symbol or name unless one appears in the data.
+- Every percentage is computed from the data. If the data cannot support a comparison, do not make one.
 - Only describe what the data shows. Never invent amounts, merchants or dates.`;
 
 /** Adds the house rules to the system message (or creates one). Pure, so it can be tested. */
@@ -60,6 +61,91 @@ export function withProseRules<T extends { messages?: any[] }>(params: T): T {
 
 function generateProse(params: any) {
   return openai.chat.completions.create(withProseRules(params));
+}
+
+/**
+ * The four factors a health score is made of, with fixed maxima.
+ *
+ * The prompt used to leave the factor names, their maxima and the total to the model, so the
+ * same month could produce different factors and a total that jumped for no visible reason.
+ * The rubric now lives here: the model fills in each factor's value and one sentence, and this
+ * file does the arithmetic. That also removes the "score: 85" example, which pulled answers
+ * towards 85.
+ */
+const HEALTH_FACTORS = [
+  { name: 'Spending control', max: 30, measures: 'expenses against income, and how steady they are' },
+  { name: 'Buffer and saving', max: 30, measures: 'what is left at the end of the period' },
+  { name: 'Budget discipline', max: 20, measures: 'budgets kept to, or "not set" when the person has none' },
+  { name: 'Tracking completeness', max: 20, measures: 'how much of the money is actually categorised' },
+] as const;
+
+export const HEALTH_SCORE_PROMPT_VERSION = 'health-score@2';
+
+/** System prompt for every health-score call. Pure, so both entry points ask the same question. */
+export function healthScoreSystemPrompt(languageLabel: string): string {
+  const factors = HEALTH_FACTORS.map((factor) => `- ${factor.name} / max ${factor.max} / ${factor.measures}`).join('\n');
+
+  return `CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''} ALL text content (factor insights, risk assessment, recommendations) must be in ${languageLabel}.
+
+You score one person's financial health for the period shown.
+
+The scale is fixed: four factors, fixed maxima, 100 points in total. You give each factor a value
+between 0 and its maximum and one sentence explaining it. Do not add factors, rename them or change
+the maxima, and do not return a total - the app adds the values up.
+
+FACTORS (name / max / what it measures):
+${factors}
+
+RULES:
+- Use only the data in this message. Never assume income, savings or budgets that are not shown.
+- A factor that cannot be measured from this data (for example budgets when none are set) gets
+  half of its maximum, and its sentence says why instead of inventing a reason.
+- Each factor sentence is one sentence of at most 20 words and names the figure it rests on.
+- Amounts are written the way they appear in the data: no currency symbol, no currency name.
+- Do not describe the person as a customer of a financial service and do not recommend products.
+
+Respond with JSON in this exact format:
+{
+  "factors": [
+    { "name": "Spending control", "score": 0, "max": 30, "insight": "One sentence naming the figure." }
+  ],
+  "riskAssessment": "One sentence about the main risk, or the main strength when there is no risk.",
+  "recommendations": [
+    { "action": "One thing to do", "impact": "What it changes", "priority": "high|medium|low" }
+  ],
+  "confidence": 0.0
+}`;
+}
+
+/**
+ * Sums the model's factor values into the 0-100 score, or `null` when the reply has no usable
+ * factors (then the caller falls back to a whole score, if the model sent one).
+ * Scaled to 100 so a model that returns only two factors is not scored out of 50.
+ */
+export function scoreFromFactors(factors: unknown): number | null {
+  if (!Array.isArray(factors)) return null;
+
+  const usable = factors.filter((factor: any) =>
+    factor && Number.isFinite(Number(factor.score)) && Number.isFinite(Number(factor.max)) && Number(factor.max) > 0,
+  );
+  if (usable.length < 2) return null;
+
+  const earned = usable.reduce(
+    (sum: number, factor: any) => sum + Math.max(0, Math.min(Number(factor.max), Number(factor.score))),
+    0,
+  );
+  const possible = usable.reduce((sum: number, factor: any) => sum + Number(factor.max), 0);
+  if (possible <= 0) return null;
+
+  return Math.round((earned / possible) * 100);
+}
+
+/** The key the interface shows as a colour band; it is a key, not a translated label. */
+function healthCategory(score: number): 'excellent' | 'good' | 'fair' | 'poor' {
+  if (score >= 90) return 'excellent';
+  if (score >= 70) return 'good';
+  if (score >= 40) return 'fair';
+  return 'poor';
 }
 
 const DEFAULT_FORECAST: FinancialForecast = {
@@ -233,54 +319,47 @@ export async function categorizeIncomeWithUserCategories(
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial categorization system for INCOME transactions. Your job is to provide CONSISTENT categorization for money coming into accounts.
+You place ONE incoming payment into ONE of the person's existing income categories.
 
 USER'S EXISTING INCOME CATEGORIES:
 ${userCategoryList}
 
-INCOME PATTERN RECOGNITION:
-💰 SALARY/WAGES: Regular employment income, payroll deposits
-💼 FREELANCE/BUSINESS: Client payments, business income, consulting fees
-🎯 INVESTMENTS: Dividends, interest payments, capital gains
-🎁 TRANSFERS: Money transfers from other accounts, family transfers  
-📱 TOP-UP DEPOSITS: Mobile account recharges, wallet deposits (incoming money)
-🏦 REFUNDS: Store refunds, service refunds, tax refunds
-💸 OTHER INCOME: Miscellaneous income sources
+WHAT TO LOOK FOR (decide the source first, then the category):
+- An employer or a recurring payroll line = salary/wages.
+- A client or a business name paying an invoice = freelance/business income.
+- Interest, dividends, capital gains = investment income.
+- A transfer from the person's own other account, or money from family = transfer/deposit.
+- A store, service or tax refund = refund.
+- A cash deposit or a wallet/mobile top-up that arrives in the account = transfer/deposit.
 
-INCOME CATEGORIZATION LOGIC:
-1. Analyze the source/description of the incoming money
-2. Match to appropriate income category based on source type
-3. "Top-Up by *6612" = someone adding money to your account = Income/Transfer
-4. Regular employer names = Salary/Wages
-5. Client/business names = Freelance/Business income
-6. Bank interest/dividends = Investment income
+RULES:
+- This call is about money ARRIVING. A "Top-Up" line that paid for mobile credit is an expense and
+  does not belong here; only treat it as income when the description shows the money coming in.
+- A category id you return must be copied from the list above. Never invent one.
+- Use either "categoryId" or "suggestedCategory", never both.
+- "reasoning" is one short sentence about the source, with no amounts and no dates.
 
 Respond with JSON in this exact format:
 {
-  "categoryId": 123,  // Use this if transaction matches an existing category
-  "suggestedCategory": "Income Category Name",  // Use this only if no existing category fits
+  "categoryId": 123,  // one id from the list above, when it fits
+  "suggestedCategory": "Income category name",  // only when nothing fits
   "confidence": 0.95,
-  "reasoning": "Brief explanation of income source analysis"
-}
-
-IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
+  "reasoning": "one short sentence"
+}`
         },
         {
           role: "user",
           content: `Income Description: "${description}"
 Amount: +${amount}
 
-INCOME ANALYSIS:
-1. This is money COMING INTO the account (positive income)
-2. Identify the source of this income
-3. Match to appropriate income category
+This movement is money arriving in the account. Identify the source, then choose the category:
+- An amount with the person's own name or their other account = transfer between own accounts.
+- A company name paid on a regular day of the month = salary.
+- A one-off company name with an invoice reference = client payment.
+- A short line containing "interest", "dividend" or "refund" = follow that word.
 
-Examples:
-- "Top-Up by *6612" = Someone depositing money → Transfer/Deposit income
-- "ACME CORP PAYROLL" = Employer payment → Salary/Wages
-- "FREELANCE CLIENT ABC" = Client payment → Freelance/Business income
-
-Analyze this income transaction:`
+Only answer from the description. If the source cannot be identified, use the closest existing
+category and lower the confidence instead of guessing a specific one.`
         }
       ],
       response_format: { type: "json_object" },
@@ -316,92 +395,45 @@ export async function categorizeExpenseWithUserCategories(
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial categorization system with comprehensive merchant database knowledge. Your job is to provide CONSISTENT, INTELLIGENT categorization by analyzing merchant patterns and business types.
+You place ONE card transaction into ONE of the person's existing categories.
 
 USER'S EXISTING CATEGORIES:
 ${userCategoryList}
 
-CONSISTENCY RULES - CRITICAL:
-- ALWAYS categorize the same merchant the same way (Luigi Acampora should ALWAYS get the same category)
-- Analyze the merchant name first, then context clues
-- Use business pattern recognition for consistency
+HOW TO DECIDE (in this order):
+1. Merchant first. Read the merchant name in the description and decide what the business is: a supermarket chain is groceries, a fuel station is transport, a streaming service is entertainment, a phone or internet bill is bills/utilities, an ATM line is cash.
+2. Then pick ONE category from the list above whose meaning fits that business type. Prefer the more specific category over a general one.
+3. Be consistent: the same merchant must always land in the same category. If the merchant name suggests a person (a surname), decide from the context words around it rather than assuming a restaurant.
+4. Only when nothing above fits, suggest ONE new short category name (1-2 words, same language) in "suggestedCategory".
 
-MERCHANT PATTERN RECOGNITION:
-🍕 RESTAURANTS & DINING: 
-- Personal names (Luigi Acampora, Mario's, Giuseppe's) = Restaurant/Dining
-- Chain restaurants (McDonald's, Starbucks, KFC, Burger King)
-- Words: "Restaurant", "Cafe", "Pizza", "Bar", "Bistro"
-
-🛒 GROCERY & FOOD STORES:
-- Migros, Coop, ALDI, Lidl, Walmart, Target, Kroger, Whole Foods
-- Words: "Market", "Supermarket", "Grocery", "Food"
-
-🚗 TRANSPORTATION:
-- Gas stations: Shell, BP, Exxon, Chevron, Mobil
-- Transport: Uber, Lyft, taxi, parking, metro, bus
-- Words: "Gas", "Fuel", "Transport", "Parking"
-
-💻 BUSINESS/PROFESSIONAL:
-- Tech services: Replit, OpenAI, Hostinger, Bunny.net, GitHub
-- Office supplies, professional services, software subscriptions
-
-🎯 RETAIL/SHOPPING:
-- Department stores: Amazon, Casa Ideas, Plaza Norte, Target (non-food)
-- Clothing, electronics, general retail
-
-📱 BILLS & UTILITIES:
-- Internet, phone, electricity, water, gas bills
-- yallo.ch (Swiss mobile), Swisscom, utility companies
-
-🎬 ENTERTAINMENT:
-- Streaming: Netflix, Spotify, SoundCloud, Apple Music
-- Gaming, movies, concerts, entertainment venues
-
-💳 CASH/ATM:
-- ATM withdrawals, cash transactions
-- Keywords: "Cash withdrawal", "ATM", "Withdrawal"
-
-SMART CATEGORIZATION LOGIC:
-1. Extract merchant name from description
-2. Check if merchant fits known patterns
-3. Match business type to user's existing categories
-4. If multiple categories could fit, choose the most specific/appropriate one
-5. Suggest new category only if no existing category makes sense
-
-CONSISTENCY EXAMPLES:
-- "Luigi Acampora" → ALWAYS Restaurant (personal name pattern)
-- "Migros" → ALWAYS Grocery/Food (known Swiss grocery chain)
-- "Replit" → ALWAYS Business/Professional (development platform)
-- "Cash withdrawal" → ALWAYS Cash/ATM category
+RULES:
+- A category id you return must be copied from the list above. Never invent one.
+- Use either "categoryId" or "suggestedCategory", never both.
+- Keep the merchant name as it is printed; only the category name follows the app language.
+- "reasoning" is one short sentence about the business type, with no amounts and no dates.
 
 Respond with JSON in this exact format:
 {
-  "categoryId": 123,  // Use this if transaction matches an existing category
-  "suggestedCategory": "New Category Name",  // Use this only if no existing category fits
+  "categoryId": 123,  // one id from the list above, when it fits
+  "suggestedCategory": "New category name",  // only when nothing fits
   "confidence": 0.95,
-  "reasoning": "Brief explanation of merchant analysis and category choice"
-}
-
-IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
+  "reasoning": "one short sentence"
+}`
         },
         {
           role: "user",
           content: `Transaction Description: "${description}"
 Amount: ${amount}
 
-DETAILED ANALYSIS REQUIRED:
-1. Extract the merchant name from the description
-2. Identify the business type using pattern recognition
-3. Find the best matching existing category
-4. Ensure consistency - same merchant = same category always
+Decide in three steps:
+1. What business is behind this merchant name?
+2. Which of the categories above means that business?
+3. If none of them does, what is one short name for the missing category?
 
-Merchant Analysis Examples:
-- "Luigi Acampora" = Personal name → Restaurant business
-- "Migros" = Swiss grocery chain → Food/Grocery business  
-- "Top-Up by *6612" = Mobile top-up → Telecommunications/Bills business
-- "Replit" = Development platform → Business/Professional service
-
-Analyze this transaction and provide consistent categorization:`
+Some merchants are ambiguous, so use the words around the name, not just the name:
+- a surname alone is not automatically a restaurant (it can be a repairman, a doctor, a landlord);
+- "Top-Up" can be a mobile credit purchase (a bill) or money added to an account (a transfer) -
+  read the rest of the description to tell which.`
         }
       ],
       response_format: { type: "json_object" },
@@ -506,30 +538,15 @@ Respond with JSON:
 Description: "${description}"
 Amount: ${amount}
 
-REQUIRED ANALYSIS STEPS:
+Answer in four short steps, one line each:
+1. What business is behind this merchant name?
+2. Is this merchant already in the person's merchant patterns above? If yes, the same category must be used.
+3. Which existing category fits best? If none fits, what is one short name for a new one?
+4. How confident are you, and what in the description would change your mind?
 
-1. USER DATA SEARCH: Search through my transaction history. Have I used this merchant before?
-   - If YES: What category did I assign? How many times? Be specific.
-   - If NO: State "No previous transactions found for this merchant"
-
-2. MERCHANT RESEARCH: Research this merchant using your knowledge base:
-   - What is the full business name and what do they do?
-   - What industry/sector do they operate in?
-   - What products or services do they provide?
-   - Are there multiple businesses with similar names?
-
-3. CATEGORY ANALYSIS: Based on your research:
-   - Does this merchant logically fit into any of my existing categories?
-   - Consider semantic similarity (Food/Groceries, Tech/Software, etc.)
-   - If no good fit exists, what new category would be most appropriate?
-
-4. CONFIDENCE RATING: Rate your confidence and explain why
-
-Provide detailed analysis for each step - this is for premium users who expect thorough research.
-3. Which category best matches their business nature?
-4. Have I used similar merchants before? (check patterns above)
-
-Use your intelligence to categorize correctly.`
+The merchant patterns above are the only history available in this conversation. Do not claim to
+have looked at transactions that are not listed, and do not state how many times a merchant was
+used unless it appears there.`
         }
       ],
       response_format: { type: "json_object" },
@@ -625,7 +642,7 @@ Transaction Pattern Analysis:
 - Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
 - Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
 
-Generate 4 independent box analyses with exact mathematical calculations.`;
+Write the one analysis card for this data.`;
 
     // One prompt, one copy: lib/aiProvider sends it to the gateway first, then direct.
     const response = await generateProse({
@@ -635,37 +652,31 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (analysis, insights, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+You write ONE short analysis card for a dashboard.
 
-1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
-2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
-3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
-4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+Choose the single most useful focus for the data you are given. When two focuses are equally
+useful, choose the one with the larger amount at stake, so the same data always produces the
+same card.
 
-ANALYSIS REQUIREMENTS:
-- Use their EXACT transaction amounts and categories 
-- Calculate precise percentages and ratios from their data
-- Identify the highest-impact optimization opportunities
-- Provide specific dollar amounts for recommendations
-- Include mathematical analysis (savings rate, expense ratios, etc.)
-- Compare their spending to optimal financial benchmarks
+THE CARD MUST:
+- use the person's own numbers: every amount and percentage must be in the data below or computed from it;
+- name the figure it is built on (for example "600 of your 2,100 in expenses"), so it can be checked;
+- keep the title to 8 words and the body to 4 sentences;
+- end with one action the person can take this week.
 
-GENERATE VARIED RESPONSES by focusing on different analytical angles:
-- Detailed category spending analysis with optimization targets
-- Income-to-expense ratio analysis with improvement strategies  
-- Cash flow optimization with timing recommendations
-- Risk assessment with protection strategies
-- Long-term saving habits analysis
-- Efficiency analysis identifying wasteful spending patterns
+DO NOT:
+- write a second analysis or list several focuses;
+- describe the data back to the person ("you gave me 12 transactions");
+- quote a number that is not in the data, or round an amount into something else.
 
-Return comprehensive analysis in JSON:
+Return JSON:
 {
-  "title": "Advanced Financial Analysis: [Specific Focus Area]",
-  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
-  "category": "spending|saving|budgeting|income|education", 
+  "title": "Short title naming the focus",
+  "description": "What the numbers show, which figure it rests on, and the one action.",
+  "category": "spending|saving|budgeting|income|education",
   "priority": "high|medium|low",
   "actionable": true,
-  "estimatedSaving": [realistic_amount],
+  "estimatedSaving": 0,
   "educational": false
 }`
         },
@@ -675,7 +686,9 @@ Return comprehensive analysis in JSON:
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.9
+      // 0.9 was the highest in the app, on text that quotes exact figures: it is where invented
+      // percentages came from. One focus per call needs far less freedom than six did.
+      temperature: 0.5
     });
 
     const result = parseModelJson(response.choices[0].message.content);
@@ -765,51 +778,54 @@ export async function generateSpendingInsights(
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (title, description, category, recommendation) must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+You write short insight cards about one person's spending.
 
-Generate 2-4 insights focusing on:
-- Unusual spending patterns
-- Budget optimization opportunities  
-- Positive financial behaviors
-- Spending trends and recommendations
+Write 2 to 4 insights. Each one must be true of the transactions listed in this message:
+- every amount and percentage is computed from those rows, never estimated and never taken from a
+  typical month;
+- a comparison ("up 40 % this month") is only allowed when both sides of it are in the rows you
+  were given. If they are not, describe what is there instead;
+- when the rows are only a sample of a longer list, say so in the insight rather than implying it
+  is everything.
 
-Each insight should have:
-- Unique ID
-- Type: warning, suggestion, achievement, or trend
-- Clear title and description
-- Impact level: high, medium, low
-- Category if relevant
-- Amount if relevant
-- Actionable recommendation
-- Whether it's actionable (boolean)
+Each insight has:
+- a unique id
+- type: warning, suggestion, achievement or trend
+- a title of at most 8 words and a body of at most 3 sentences
+- impact: high, medium or low
+- the category and the amount it is about, when that makes it clearer
+- one recommendation the person can act on, and whether it is actionable
 
-Respond with JSON array format:
-[
-  {
-    "id": "insight_1",
-    "type": "warning",
-    "title": "High dining expenses",
-    "description": "Your restaurant spending increased 40% this month",
-    "impact": "high",
-    "category": "Food & Dining",
-    "amount": 450,
-    "recommendation": "Consider meal planning to reduce dining out",
-    "actionable": true
-  }
-]`
+Return ONE JSON object that contains an "insights" array (never a bare array, never prose):
+{
+  "insights": [
+    {
+      "id": "insight_1",
+      "type": "warning",
+      "title": "Short title",
+      "description": "What the rows show, naming the figure it rests on.",
+      "impact": "high",
+      "category": "Category name from the rows",
+      "amount": 0,
+      "recommendation": "One action",
+      "actionable": true
+    }
+  ]
+}`
         },
         {
           role: "user",
-          content: `Analyze these expense transactions:
+          content: `Expense rows${expenseTransactions.length > 20
+            ? ` (these are the 20 most recent of ${expenseTransactions.length}; the others are not in this message)`
+            : ` (all ${expenseTransactions.length} of them)`}:
 
 ${expenseTransactions.slice(0, 20).map(t => 
   `- ${t.description}: ${t.amount} (${t.categoryName || 'Uncategorized'}) on ${t.date}`
 ).join('\n')}
 
-Total transactions: ${expenseTransactions.length}
-Date range: ${expenseTransactions[expenseTransactions.length - 1]?.date} to ${expenseTransactions[0]?.date}
+Date range of the rows above: ${expenseTransactions[Math.min(20, expenseTransactions.length) - 1]?.date} to ${expenseTransactions[0]?.date}
 
-Generate financial insights based on this spending data.`
+Write the insights from these rows only.`
         }
       ],
       response_format: { type: "json_object" },
@@ -866,6 +882,8 @@ export async function generateAIFinancialHealthScore(financialData: {
   score: number;
   status: string;
   color: string;
+  /** Derived from `score` in this file, never from the model's status word. */
+  category: 'excellent' | 'good' | 'fair' | 'poor';
   factors: Array<{
     name: string;
     score: number;
@@ -898,46 +916,11 @@ export async function generateAIFinancialHealthScore(financialData: {
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (status, factors, aiInsight, recommendations) must be in ${getLanguageLabel(language)}.
-
-You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
-
-Your analysis should consider:
-- Spending patterns and volatility
-- Seasonal trends in expenses
-- Category distribution and priorities
-- Financial behavior consistency
-- Risk factors and resilience
-- Personalized weight adjustments based on user's situation
-
-Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
-
-Respond with JSON in this format:
-{
-  "score": 85,
-  "status": "Good",
-  "color": "blue",
-  "factors": [
-    {
-      "name": "Adaptive Spending Control",
-      "score": 25,
-      "max": 30,
-      "status": "good",
-      "aiInsight": "Your spending shows good consistency with minor seasonal variations"
-    }
-  ],
-  "icon": "TrendingUp",
-  "aiAnalysis": {
-    "personalizedFactors": ["Custom factor explanations"],
-    "riskAssessment": "Overall risk level and factors",
-    "recommendations": ["Personalized recommendations"],
-    "confidence": 0.87
-  }
-}`
+          content: healthScoreSystemPrompt(getLanguageLabel(language))
         },
         {
           role: "user",
-          content: `Analyze this financial data for a personalized health score:
+          content: `Score this person's financial health for the current period:
 
 Financial Summary:
 - Income: ${summary.totalIncome}
@@ -949,10 +932,11 @@ ${transactions.slice(0, 20).map(t =>
   `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 
-Budgets: ${budgets.length} active budgets
-Advanced Analysis: ${useAdvancedFactors ? 'Enabled' : 'Standard'}
+Budgets: ${budgets.length > 0
+  ? budgets.slice(0, 8).map((b: any) => `- ${b.categoryName || b.name || 'Uncategorized'}: ${b.spent ?? 0} of ${b.amount}`).join('\n')
+  : 'none set - treat budget discipline as not measurable'}
 
-Provide an AI-powered financial health score that adapts to this user's specific situation and spending patterns.`
+Analysis depth: ${useAdvancedFactors ? 'standard' : 'basic'}`
         }
       ],
       response_format: { type: "json_object" },
@@ -960,44 +944,55 @@ Provide an AI-powered financial health score that adapts to this user's specific
     });
 
     const result = parseModelJson(response.choices[0].message.content);
-    // A reply with no score is a failed reply, not a score of 50.
-    if (!Number.isFinite(Number(result.score))) {
+
+    /*
+     * The score now comes from the fixed rubric: the model fills in each factor's value, this
+     * file adds them up (scoreFromFactors). A whole "score" is still accepted, because a model
+     * (or the gateway) may answer in the older shape. A reply with neither is a failed reply,
+     * not a score of 50.
+     */
+    const fromFactors = scoreFromFactors(result.factors);
+    const wholeScore = Number(result.score);
+    const rawScore = fromFactors ?? (Number.isFinite(wholeScore) ? wholeScore : null);
+    if (rawScore === null) {
       throw new AIResponseError('The health score reply had no score');
     }
 
-    // Ensure score is properly bounded
-    const score = Math.max(0, Math.min(100, Number(result.score)));
-    
-    // Determine category based on score (this ensures consistency)
-    let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
-    if (score >= 90) {
-      category = 'excellent';
-    } else if (score >= 70) {
-      category = 'good';
-    } else if (score >= 40) {
-      category = 'fair';
-    } else {
-      category = 'poor';
-    }
-    
+    const score = Math.max(0, Math.min(100, rawScore));
+
+    // The interface reads `aiAnalysis`; the rubric prompt answers at the top level, so both
+    // shapes are accepted here rather than silently returning empty sections.
+    const analysis = result.aiAnalysis && typeof result.aiAnalysis === 'object' ? result.aiAnalysis : {};
+    const recommendations = Array.isArray(analysis.recommendations)
+      ? analysis.recommendations
+      : Array.isArray(result.recommendations)
+        ? result.recommendations
+        : [];
+
     const processedResult = {
       score,
       status: result.status || 'Fair',
       color: result.color || 'yellow',
-      category, // Add the calculated category
-      factors: result.factors || [],
+      // Derived from the number, never from a status word: the same score cannot be "good" in
+      // one reply and "fair" in the next.
+      category: healthCategory(score),
+      factors: Array.isArray(result.factors) ? result.factors : [],
       icon: result.icon || 'Shield',
       aiAnalysis: {
-        personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
-        riskAssessment: result.aiAnalysis?.riskAssessment || '',
-        recommendations: Array.isArray(result.aiAnalysis?.recommendations)
-          ? result.aiAnalysis.recommendations.map((rec: any) => ({
-              action: rec.action || rec.title || '',
-              impact: rec.impact || rec.description || '',
-              priority: rec.priority || 'medium'
-            }))
-          : [],
-        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
+        personalizedFactors: Array.isArray(analysis.personalizedFactors)
+          ? analysis.personalizedFactors
+          : Array.isArray(result.factors)
+            ? result.factors.map((factor: any) => factor?.insight).filter(Boolean)
+            : [],
+        riskAssessment: analysis.riskAssessment || result.riskAssessment || '',
+        recommendations: recommendations.map((rec: any) => typeof rec === 'string'
+          ? { action: rec, impact: '', priority: 'medium' }
+          : {
+              action: rec?.action || rec?.title || '',
+              impact: rec?.impact || rec?.description || '',
+              priority: rec?.priority || 'medium'
+            }),
+        confidence: Math.max(0, Math.min(1, Number(analysis.confidence ?? result.confidence ?? 0.7)))
       }
     };
 
@@ -1126,14 +1121,17 @@ Please provide detailed predictions in this JSON format:
   }
 }
 
-Analysis Requirements:
-- Use historical patterns to predict future spending
-- Identify seasonal trends and cyclical behaviors
-- Calculate confidence based on data consistency
-- Consider economic factors and spending volatility
-- Provide actionable financial recommendations
-- Include next 3 months forecast for each category
-- Analyze budget adherence and variance predictions`;
+Analysis requirements:
+- Predict only from the monthly rows in the data: the person's own averages, their own trend and
+  their own repeated (recurring) expenses.
+- If the data covers fewer than three months, do not invent a trend: return an empty
+  categoryPredictions list and say in keyInsights that more months are needed.
+- At most the five largest categories by amount. Do not flatten a one-off purchase into a monthly
+  trend, but do not drop it from the totals either.
+- Confidence reflects how much history is behind the number, not how sure the wording sounds.
+- Do not mention inflation, interest rates, the economy or world events: none of that is in the
+  data, and a personal budget cannot act on it.
+- Every amount in the answer is a number from the data, or a value computed from it.`;
 
     const response = await generateProse({
       model: AI_MODELS.default,
@@ -1150,7 +1148,9 @@ You are an advanced financial forecasting AI that analyzes spending patterns and
         }
       ],
       response_format: { type: "json_object" },
-      max_tokens: 2000,
+      // A 3-month forecast per category does not fit in 2000 tokens once there are several
+      // categories; the reply used to be cut mid-string and the card came back empty.
+      max_tokens: 3000,
       temperature: 0.3 // Lower temperature for more consistent predictions
     });
 
@@ -1345,11 +1345,12 @@ ANALYSIS GUIDELINES:
 - Use actual spending patterns to predict future amounts
 - Factor in recurring expenses for higher confidence
 - Consider trend direction (increasing/decreasing/stable)
-- Provide realistic confidence levels (0.6-0.95 range)
-- Include next 3-6 months in monthly predictions
+- Confidence must match the amount of history: one month of data is 0.5 at best, three months can
+  reach 0.75, six months or more can reach 0.9. Never claim more than 0.95.
+- Include the next 3 months in monthly predictions
 - Always include "factors" array for each category prediction
-- Explain prediction factors clearly
-- Account for seasonal variations if detectable
+- Explain prediction factors clearly, using the person's own amounts
+- Do not claim a seasonal pattern from less than a year of data
 - Ensure all numeric values are provided (no null/undefined)`;
 
     const response = await generateProse({
@@ -1374,6 +1375,11 @@ You are an advanced financial forecasting AI specializing in expense prediction 
     const aiResponse = parseModelJson(response.choices[0].message.content);
     
     // Ensure all required fields are present with proper data types
+    // Confidence cannot exceed what the history supports: the prompt asks for that, and this cap
+    // enforces it, so a single month of data never looks like a 0.9 prediction.
+    const monthsOfHistory = monthlyData.size;
+    const confidenceCap = monthsOfHistory >= 6 ? 0.95 : monthsOfHistory >= 3 ? 0.8 : 0.6;
+
     const categoryPredictions = Array.isArray(aiResponse.categoryPredictions) 
       ? aiResponse.categoryPredictions
       .filter((pred: any) => pred && typeof pred.category === 'string' && pred.category.trim())
@@ -1381,7 +1387,7 @@ You are an advanced financial forecasting AI specializing in expense prediction 
           category: pred.category,
           currentMonth: Number(pred.currentMonth) || 0,
           predictedNext: Number(pred.predictedNext) || 0,
-          confidence: Number(pred.confidence) || 0.5,
+          confidence: Math.min(Number(pred.confidence) || 0.5, confidenceCap),
           trend: pred.trend || 'stable',
           factors: Array.isArray(pred.factors) ? pred.factors : []
         }))
@@ -1393,7 +1399,7 @@ You are an advanced financial forecasting AI specializing in expense prediction 
       .map((month: any) => ({
           month: month.month,
           predicted: Number(month.predicted) || 0,
-          confidence: Number(month.confidence) || 0.5,
+          confidence: Math.min(Number(month.confidence) || 0.5, confidenceCap),
           breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
         }))
       : [];
@@ -1517,10 +1523,10 @@ Return your response in this exact JSON format:
       "id": "rec-1",
       "type": "budget_review",
       "priority": "high",
-      "title": "Review Budget Allocation",
-      "description": "Your spending in dining exceeded budget by 20% this week",
-      "action": "Reduce dining expenses for the next 3 days",
-      "impact": "Save $50-75 this week",
+      "title": "Short title naming the action",
+      "description": "What the data shows, naming the figure it rests on",
+      "action": "The one thing to do next",
+      "impact": "What changes, in the person's own amounts",
       "timeToComplete": "5 minutes"
     }
   ],
@@ -1551,7 +1557,7 @@ Only provide recommendations and insights based on the actual financial data pro
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (recommendations, insights, descriptions) must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.`
+You are an expert personal budgeting coach who provides personalized, actionable recommendations based on real user data. Always return valid JSON.`
         },
         {
           role: "user",
@@ -1701,8 +1707,18 @@ export async function generateContextualFinancialTips(
       return !category || category === 'Uncategorized';
     }).length;
     
+    /*
+     * "Top spending" means money going OUT. The old filter was `amount > 0`, and income is stored
+     * as a positive amount too, so a salary could appear as the biggest spending category and
+     * every percentage printed under it was wrong.
+     */
+    const isIncomeRow = (t: { type?: 'income' | 'expense'; amount: number }) =>
+      t.type === 'income' || (t.type === undefined && t.amount < 0);
+    const isExpenseRow = (t: { type?: 'income' | 'expense'; amount: number }) =>
+      !isIncomeRow(t) && t.amount > 0;
+
     transactions.forEach(t => {
-      if (t.amount > 0) {
+      if (isExpenseRow(t)) {
         const category = t.category || t.categoryName || 'Uncategorized';
         const current = categorySpending.get(category) || 0;
         categorySpending.set(category, current + t.amount);
@@ -1713,9 +1729,14 @@ export async function generateContextualFinancialTips(
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
 
-    // Detailed transaction analysis
-    const incomeTransactions = transactions.filter(t => t.type === 'income' || t.amount < 0);
-    const expenseTransactions = transactions.filter(t => t.type === 'expense' || t.amount > 0);
+    // A share of zero expenses is 0 %, not Infinity.
+    const expenseBase = summary.totalExpenses > 0 ? summary.totalExpenses : 0;
+    const shareOfExpenses = (amount: number) => (expenseBase > 0 ? (amount / expenseBase) * 100 : 0);
+
+    // Detailed transaction analysis. The two lists must not overlap: an income row used to be
+    // counted as an expense as well, which doubled its weight in the averages.
+    const incomeTransactions = transactions.filter(isIncomeRow);
+    const expenseTransactions = transactions.filter(isExpenseRow);
     const recurringTransactions = transactions.filter(t => t.recurring);
     
     // Calculate transaction patterns
@@ -1729,91 +1750,101 @@ export async function generateContextualFinancialTips(
       transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
     });
 
-    // Analyze specific financial scenarios for contextual insights
-    const scenarios = [];
-    
+    // Analyze specific financial scenarios for contextual insights.
+    // No emoji prefixes: the model copied them into the answer, and a coloured square in a tip
+    // title is not something the person asked for. The sentence itself says what it is.
+    const scenarios: string[] = [];
+
     // Check categorization status
     if (uncategorizedCount > 0 && transactions.length > 0) {
       const uncategorizedPercent = (uncategorizedCount / transactions.length) * 100;
-      scenarios.push(`🟨 Transaction categorization: ${uncategorizedCount} of ${transactions.length} transactions (${uncategorizedPercent.toFixed(0)}%) are uncategorized. Better categorization improves spending insights.`);
+      scenarios.push(`Categorization: ${uncategorizedCount} of ${transactions.length} transactions (${uncategorizedPercent.toFixed(0)}%) are uncategorized. Better categorization improves spending insights.`);
     } else if (categorizedCount === transactions.length && transactions.length > 0) {
-      scenarios.push(`🟩 Well organized: All ${transactions.length} transactions are properly categorized, enabling detailed spending analysis.`);
+      scenarios.push(`Well organized: all ${transactions.length} transactions are properly categorized, enabling detailed spending analysis.`);
     }
-    
+
     // Check for budget overruns with detailed analysis ONLY if budgets exist
     if (budgets && Array.isArray(budgets) && budgets.length > 0) {
       budgets.forEach(budget => {
         const budgetCatName = budget.categoryName || budget.category || 'Uncategorized';
+        const budgetAmount = Number(budget.budgetAmount) || 0;
+        // A budget of zero has no percentage to report, and dividing by it printed Infinity.
+        if (budgetAmount <= 0) return;
+
         if (budget.remaining < 0) {
-          const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-          const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budgetCatName);
-          const avgTransactionInCategory = categoryTransactions.length > 0 ? 
-            categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
-          
-          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budgetCatName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: ${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
-        } else if (budget.remaining < budget.budgetAmount * 0.1) {
+          const overrunPercent = Math.abs((budget.remaining / budgetAmount) * 100);
+          const categoryTransactions = expenseTransactions.filter(t => (t.categoryName || t.category) === budgetCatName);
+          const avgTransactionInCategory = categoryTransactions.length > 0
+            ? categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length
+            : 0;
+
+          scenarios.push(`Budget overrun: the ${budgetCatName} budget is exceeded by ${overrunPercent.toFixed(0)}% this month. Average transaction: ${avgTransactionInCategory.toFixed(2)} across ${categoryTransactions.length} transactions.`);
+        } else if (budget.remaining < budgetAmount * 0.1) {
           // Budget almost exhausted
-          scenarios.push(`🟨 Budget warning: Only ${budget.remaining.toFixed(2)} remaining in your ${budgetCatName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+          scenarios.push(`Budget warning: only ${budget.remaining.toFixed(2)} left in the ${budgetCatName} budget (${((budget.remaining / budgetAmount) * 100).toFixed(0)}% remaining).`);
         }
       });
     }
-    
+
     // Check savings rate scenarios with goal analysis
     if (savingsRate < 5 && summary.totalIncome > 0) {
-      scenarios.push(`🟨 Low savings rate: Your savings rate is ${savingsRate.toFixed(1)}%. Consider revisiting your financial goals.`);
+      scenarios.push(`Low savings rate: the savings rate is ${savingsRate.toFixed(1)}%. Consider revisiting the financial goals.`);
     } else if (savingsRate > 20) {
-      scenarios.push(`🟩 Excellent savings: Great job! You're saving ${savingsRate.toFixed(1)}% of your income this month.`);
+      scenarios.push(`Excellent savings: ${savingsRate.toFixed(1)}% of income was kept this month.`);
     }
-    
+
     // Analyze goals progress ONLY if goals exist
     if (goals && Array.isArray(goals) && goals.length > 0) {
       goals.forEach(goal => {
-        const progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
+        const target = Number(goal.targetAmount) || 0;
+        if (target <= 0) return;
+
+        const progressPercent = (Number(goal.currentAmount) / target) * 100;
         const daysToTarget = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-        const monthlyNeeded = daysToTarget > 0 ? (goal.targetAmount - goal.currentAmount) / (daysToTarget / 30) : 0;
-        
+        const monthlyNeeded = daysToTarget > 0 ? (target - Number(goal.currentAmount)) / (daysToTarget / 30) : 0;
+
         if (progressPercent >= 90) {
-          scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only ${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
+          scenarios.push(`Goal achievement: ${progressPercent.toFixed(0)}% of the ${goal.name} goal is done, with ${(target - Number(goal.currentAmount)).toFixed(2)} remaining.`);
         } else if (monthlyNeeded > netBalance) {
-          scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs ${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is ${netBalance.toFixed(2)}.`);
+          scenarios.push(`Goal at risk: the ${goal.name} goal needs ${monthlyNeeded.toFixed(2)} per month, but the current monthly surplus is ${netBalance.toFixed(2)}.`);
         }
       });
     }
-    
+
     // Check for irregular income patterns
     if (incomeTransactions.length > 0) {
       const incomeAmounts = incomeTransactions.map(t => Math.abs(t.amount));
       const avgIncome = incomeAmounts.reduce((sum, amt) => sum + amt, 0) / incomeAmounts.length;
-      const incomeVariability = incomeAmounts.some(amt => Math.abs(amt - avgIncome) / avgIncome > 0.3);
-      
+      const incomeVariability = avgIncome > 0 && incomeAmounts.some(amt => Math.abs(amt - avgIncome) / avgIncome > 0.3);
+
       if (incomeVariability && incomeTransactions.length > 1) {
-        scenarios.push(`🟦 Income variability: Your income shows fluctuation. Largest: ${Math.max(...incomeAmounts).toFixed(2)}, Smallest: ${Math.min(...incomeAmounts).toFixed(2)}. Consider setting aside a buffer.`);
+        scenarios.push(`Income variability: income fluctuates. Largest: ${Math.max(...incomeAmounts).toFixed(2)}, smallest: ${Math.min(...incomeAmounts).toFixed(2)}. Consider a buffer.`);
       }
     }
-    
+
     // Check for spending concentration and patterns
     topSpendingCategories.forEach(([category, amount]) => {
-      const categoryPercent = (amount / summary.totalExpenses) * 100;
+      const categoryPercent = shareOfExpenses(amount);
       const categoryFreq = transactionFrequency.get(category) || 0;
-      
+
       if (categoryPercent > 40) {
-        scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of expenses (${amount.toFixed(2)} across ${categoryFreq} transactions).`);
+        scenarios.push(`High category spending: ${category} is ${categoryPercent.toFixed(0)}% of expenses (${amount.toFixed(2)} across ${categoryFreq} transactions).`);
       }
     });
-    
+
     // Check for positive spending improvements
     if (expenseTransactions.length > 0) {
-      const avgTransactionAmount = summary.totalExpenses / expenseTransactions.length;
+      const avgTransactionAmount = expenseBase / expenseTransactions.length;
       if (avgTransactionAmount < 30 && expenseTransactions.length > 15) {
-        scenarios.push(`🟩 Controlled spending: Great job! You're averaging ${avgTransactionAmount.toFixed(2)} per transaction, showing mindful spending habits.`);
+        scenarios.push(`Controlled spending: the average transaction is ${avgTransactionAmount.toFixed(2)} across ${expenseTransactions.length} purchases.`);
       }
     }
-    
+
     // Check recurring transaction efficiency
     if (recurringTransactions.length > 0) {
       const recurringTotal = recurringTransactions.reduce((sum, t) => sum + t.amount, 0);
-      const recurringPercent = (recurringTotal / summary.totalExpenses) * 100;
-      scenarios.push(`🟦 Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring (${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
+      const recurringPercent = shareOfExpenses(recurringTotal);
+      scenarios.push(`Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring (${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
     }
 
     // Build detailed prompt with scenario analysis
@@ -1827,7 +1858,7 @@ FINANCIAL OVERVIEW:
 - Number of Transactions: ${summary.transactionCount}
 
 TOP SPENDING CATEGORIES:
-${topSpendingCategories.map(([cat, amount]) => `- ${cat}: ${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
+${topSpendingCategories.map(([cat, amount]) => `- ${cat}: ${amount.toLocaleString()} (${shareOfExpenses(amount).toFixed(1)}%)`).join('\n')}
 
 BUDGET STATUS:
 ${budgets.length > 0 ? budgets.map((b: any) => `- ${b.categoryName || b.category || 'Uncategorized'}: ${b.spent.toLocaleString()}/${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by ${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
@@ -1884,7 +1915,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (tips, titles, descriptions) must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
+You are an expert personal budgeting coach who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
         },
         {
           role: "user",
@@ -2036,46 +2067,11 @@ export async function generateFinancialHealthScore(
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (status, factors, aiInsight, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
-
-You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
-
-Your analysis should consider:
-- Spending patterns and volatility
-- Seasonal trends in expenses
-- Category distribution and priorities
-- Financial behavior consistency
-- Risk factors and resilience
-- Personalized weight adjustments based on user's situation
-
-Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
-
-Respond with JSON in this format:
-{
-  "score": 85,
-  "status": "Good",
-  "color": "blue",
-  "factors": [
-    {
-      "name": "Adaptive Spending Control",
-      "score": 25,
-      "max": 30,
-      "status": "good",
-      "aiInsight": "Your spending shows good consistency with minor seasonal variations"
-    }
-  ],
-  "icon": "TrendingUp",
-  "aiAnalysis": {
-    "personalizedFactors": ["Custom factor explanations"],
-    "riskAssessment": "Overall risk level and factors",
-    "recommendations": ["Personalized recommendations"],
-    "confidence": 0.87
-  }
-}`
+          content: healthScoreSystemPrompt(getLanguageLabel(normalizedLanguage))
         },
         {
           role: "user",
-          content: `Analyze this financial data for a personalized health score:
+          content: `Score this person's financial health for the current period:
 
 Financial Summary:
 - Income: ${summary.totalIncome}
@@ -2087,9 +2083,12 @@ ${recentTransactions.slice(0, 20).map(t =>
   `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 
-Budgets: ${budgets.length} active budgets
+Budgets: ${budgets.length > 0
+  ? budgets.slice(0, 8).map((b: any) => `- ${b.categoryName || b.name || 'Uncategorized'}: ${b.spent ?? 0} of ${b.amount}`).join('\n')
+  : 'none set - treat budget discipline as not measurable'}
 
-Provide an AI-powered financial health score that adapts to this user's specific situation and spending patterns.`
+Spending by category (expenses only):
+${Array.from(categorySpending.entries()).slice(0, 10).map(([name, amount]) => `- ${name}: ${amount}`).join('\n') || '- no expenses recorded'}`
         }
       ],
       response_format: { type: "json_object" },
@@ -2097,35 +2096,54 @@ Provide an AI-powered financial health score that adapts to this user's specific
     });
 
     const result = parseModelJson(response.choices[0].message.content);
-    // A reply with no score is a failed reply, not a score of 50.
-    if (!Number.isFinite(Number(result.score))) {
+
+    // Same rubric as generateAIFinancialHealthScore: factors first, a whole score second.
+    const fromFactors = scoreFromFactors(result.factors);
+    const wholeScore = Number(result.score);
+    const rawScore = fromFactors ?? (Number.isFinite(wholeScore) ? wholeScore : null);
+    if (rawScore === null) {
       throw new AIResponseError('The health score reply had no score');
     }
+    const score = Math.max(0, Math.min(100, rawScore));
+
+    const analysis = result.aiAnalysis && typeof result.aiAnalysis === 'object' ? result.aiAnalysis : {};
+    const factors = Array.isArray(result.factors) ? result.factors : [];
 
     const processedResult = {
-      score: Math.max(0, Math.min(100, Number(result.score))),
+      score,
       status: result.status || 'Fair',
       color: result.color || 'yellow',
-      factors: result.factors || [],
+      factors,
       icon: result.icon || 'Shield',
       aiAnalysis: {
-        personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
-        riskAssessment: result.aiAnalysis?.riskAssessment || '',
-        recommendations: result.aiAnalysis?.recommendations || [],
-        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
+        personalizedFactors: Array.isArray(analysis.personalizedFactors)
+          ? analysis.personalizedFactors
+          : factors.map((factor: any) => factor?.insight).filter(Boolean),
+        riskAssessment: analysis.riskAssessment || result.riskAssessment || '',
+        recommendations: Array.isArray(analysis.recommendations)
+          ? analysis.recommendations
+          : Array.isArray(result.recommendations)
+            ? result.recommendations
+            : [],
+        confidence: Math.max(0, Math.min(1, Number(analysis.confidence ?? result.confidence ?? 0.7)))
       }
     };
 
-    // Convert to frontend-expected format
+    // Convert to frontend-expected format. The category comes from the number, so a status word
+    // written by the model can never contradict the score next to it.
     const healthData: FinancialHealthData = {
       score: processedResult.score,
       trend: 'stable', // Default trend
-      category: processedResult.status.toLowerCase() === 'excellent' ? 'excellent' :
-                processedResult.status.toLowerCase() === 'good' ? 'good' :
-                processedResult.status.toLowerCase() === 'fair' ? 'fair' : 'poor',
-      insights: Array.isArray(processedResult.aiAnalysis?.personalizedFactors) ? processedResult.aiAnalysis.personalizedFactors : [],
-      achievements: Array.isArray(processedResult.factors) ? processedResult.factors.filter((f: any) => f.status === 'good').map((f: any) => f.aiInsight).filter(Boolean) : [],
-      warnings: Array.isArray(processedResult.aiAnalysis?.recommendations) ? processedResult.aiAnalysis.recommendations : []
+      category: healthCategory(processedResult.score),
+      insights: processedResult.aiAnalysis.personalizedFactors,
+      // A factor is an achievement when it earned at least 70 % of its own maximum.
+      achievements: factors
+        .filter((factor: any) => Number(factor?.max) > 0 && Number(factor.score) / Number(factor.max) >= 0.7)
+        .map((factor: any) => factor.insight || factor.aiInsight)
+        .filter(Boolean),
+      warnings: Array.isArray(processedResult.aiAnalysis.recommendations)
+        ? processedResult.aiAnalysis.recommendations.map((rec: any) => (typeof rec === 'string' ? rec : rec?.action || rec?.title || '')).filter(Boolean)
+        : []
     };
 
     // Cache the result with 24 hours TTL
@@ -2218,42 +2236,81 @@ export async function parseBankStatement(text: string, language: string = 'en-us
   try {
     // SECURITY: Never cache bank statement data - process fresh every time
 
-    const bankStatementPrompt = `You are an expert financial data extraction system specialized in bank statement analysis. 
+    /*
+     * The one prompt that turns a person's real bank history into rows in the app.
+     *
+     * What the old version got wrong, and this one fixes:
+     *  - it asked for descriptions "in <app language>", so a Slovak user saw translated
+     *    merchant names and the same shop appeared under two names in reports;
+     *  - it never mentioned the things every real statement has: an entry split over two
+     *    lines, separate debit/credit columns, a running balance column that is not a
+     *    movement, repeated page headers, and minus signs written at the end ("12,50-");
+     *  - "extract 100 % and miss nothing" is a wish the model cannot check, so it now has
+     *    to count its own rows and report the count (below), which the caller verifies.
+     */
+    const bankStatementPrompt = `You are an expert financial data extraction system for bank statements.
+Your job: turn the statement text into one row per real money movement.
 
-CRITICAL MISSION: Extract ALL transactions with 100% accuracy from bank statement text.
-CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''}
+APP LANGUAGE: ${languageLabel}. This is the language of the app the rows are shown in. It must NOT change
+the wording of descriptions: a merchant is copied as it is printed on the statement, in whatever
+language the statement uses.
 
 MANDATORY JSON OUTPUT FORMAT:
 {
+  "count": 0,
   "transactions": [
     {
       "date": "YYYY-MM-DD",
-      "description": "Transaction description in ${languageLabel}",
+      "description": "Payee or merchant exactly as printed",
       "amount": 123.45,
       "type": "income" or "expense",
       "confidence": 0.95,
-      "rawText": "Original text from statement",
-      "detectedFormat": "Format type detected"
+      "rawText": "Original text from statement"
     }
   ]
 }
 
-EXTRACTION RULES:
-1. Date Formats: Support DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, and text dates
-2. Amount Detection: Handle various currency symbols (€, $, £, Kč) and number formats
-3. Transaction Types: income (deposits, transfers in, salary) vs expense (payments, transfers out, fees)
-4. Description: Clean merchant/payee names, remove bank codes
-5. Confidence: 0.9+ for clear transactions, 0.7-0.9 for moderate clarity, <0.7 for unclear
-6. Skip: Header/footer text, account summaries, balance information
+WHAT IS A TRANSACTION:
+- Money actually moving in or out: card payments, transfers, standing orders, direct debits,
+  cash withdrawals, deposits, salary, fees, interest charged or paid.
+- A fee, a charge or interest IS a movement and must be included.
 
-CRITICAL QUALITY STANDARDS:
-- Zero missed transactions
-- 100% accurate date parsing
-- Correct positive/negative amount handling
-- Clean, readable descriptions in ${languageLabel}
-- High confidence scores for clear data
+WHAT IS NOT A TRANSACTION (never emit a row for it):
+- Opening balance, closing balance, "balance brought forward", "balance carried forward".
+- The running balance column next to each row.
+- Repeated page headers, column titles, page numbers, account holder name and address.
+- Monthly totals, sums, "total debits/credits", interest summaries and footers.
 
-Respond ONLY with valid JSON. No explanations or additional text.`;
+READING RULES:
+1. One entry split over two or more lines (payee on one line, amount on the next, or a note
+   underneath) is ONE transaction. Join it, do not create two rows.
+2. Debit/credit columns: put the amount as a POSITIVE number and let "type" carry the direction.
+   "expense" = money left the account (debit, payment, withdrawal, fee, transfer out).
+   "income" = money arrived (credit, deposit, salary, transfer in, refund received).
+3. Sign conventions to recognise: a trailing minus ("12,50-"), parentheses ("(12,50)"), CR/DR,
+   "+"/"-" in front, or a "D"/"C" column. All of them describe direction, nothing else.
+4. Amounts: digits only with a dot as the decimal separator and no thousands separator
+   ("1.234,56" -> 1234.56). Never include a currency symbol or code in the amount.
+5. Dates: accept DD/MM/YYYY, MM/DD/YYYY (only when the numbers force it), YYYY-MM-DD, dots,
+   dashes, and two-digit years (25 -> 2025). Output YYYY-MM-DD always.
+   If a row's date is unreadable, use the last readable date above it and set confidence below 0.6.
+   Never use today's date as a substitute.
+6. Descriptions: copy the payee/merchant text as printed. You may drop trailing reference
+   numbers, bank codes and card masks, but never translate, shorten to a category, or "clean up"
+   the name into something nicer.
+7. Do not invent a row to make a total match, and do not merge two different days into one row.
+
+CONFIDENCE:
+- 0.9 and above: date, amount and direction are all unambiguous.
+- 0.7 to 0.9: readable but one field needed a judgement (a two-line entry, an unusual date).
+- below 0.7: something is genuinely unclear. Include the row anyway rather than dropping it.
+
+SELF-CHECK BEFORE ANSWERING:
+- Set "count" to the number of objects you are returning in "transactions".
+- Re-read the statement and confirm that every money movement you can see is in the list.
+- A line you skipped because it is not a movement does not go in the list and does not count.
+
+Respond ONLY with valid JSON. No explanations and no text outside the JSON object.`;
 
     const response = await openai.chat.completions.create({
       model: AI_MODELS.default,
@@ -2264,7 +2321,7 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
         },
         {
           role: "user",
-          content: `Please analyze this bank statement text and extract all transactions:\n\n${text}`
+          content: `Extract every money movement from this bank statement text:\n\n${text}`
         }
       ],
       response_format: { type: "json_object" },
@@ -2286,6 +2343,18 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
           category: null // Will be filled by categorization
         }))
       };
+
+      /*
+       * The model's own row count is the cheapest check we have that a statement was not
+       * silently halved (a truncated reply, a page it skipped). Counts only: the rows
+       * themselves never reach a log line.
+       */
+      const claimed = Number(result.count);
+      if (Number.isFinite(claimed) && claimed > 0 && claimed !== formattedResult.transactions.length) {
+        log.warn(
+          `[AI] statement parse returned ${formattedResult.transactions.length} rows but counted ${claimed}; the reply may be incomplete`,
+        );
+      }
 
       // SECURITY: Never cache bank statement results - return immediately
       return formattedResult;

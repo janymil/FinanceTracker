@@ -183,7 +183,11 @@ async function runOpenAiVision(imageBuffer: Buffer, deps: OcrDeps): Promise<stri
             type: 'text',
             text:
               'Transcribe every readable line of this receipt or invoice. ' +
-              'Return plain text only, keep the original line order, do not summarise, do not add comments.',
+              'Return plain text only, keep the original line order, do not summarise, do not add comments. ' +
+              // The next step reads a total out of this text, so the numbers must survive
+              // unchanged: "fixing" a separator or a stray comma is what turns 12,50 into 1250.
+              'Keep every digit, decimal and thousands separator, currency mark and total exactly as printed; ' +
+              'do not correct, complete or reformat numbers, and do not merge two lines into one.',
           },
           { type: 'image_url', image_url: { url: dataUrl } },
         ] as any,

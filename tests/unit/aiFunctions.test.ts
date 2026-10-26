@@ -39,6 +39,7 @@ import {
   generateTrendPredictions,
   normalizeForecast,
   parseBankStatement,
+  scoreFromFactors,
   toCategoryChoice,
   voiceExtraction,
   withProseRules,
@@ -282,6 +283,18 @@ describe('generateSpendingInsights', () => {
     expect(userOf()).not.toMatch(/\$\d/);
   });
 
+  it('says out loud when the model is only shown a sample of the rows', async () => {
+    const many = Array.from({ length: 30 }, (_, index) => ({
+      description: `Shop ${index}`, amount: 10, date: daysAgo(index + 1), categoryName: 'Food', type: 'expense',
+    }));
+    create.mockResolvedValueOnce(reply({ insights: [] }));
+
+    await generateSpendingInsights('u', many, 'en-us');
+
+    // "Your spending rose 40 %" cannot be computed from a sample that is not labelled as one.
+    expect(userOf()).toContain('20 most recent of 30');
+  });
+
   it('accepts a bare array and drops items with no title or no description, with no English placeholder', async () => {
     create.mockResolvedValueOnce(reply([
       { id: 'a', type: 'trend', title: 'Good', description: 'Fine', impact: 'low' },
@@ -410,6 +423,19 @@ describe('generateExpensePredictions', () => {
     expect(JSON.stringify(result)).not.toContain('No specific factors');
   });
 
+  it('does not let one month of history look like a confident prediction', async () => {
+    create.mockResolvedValueOnce(reply({
+      categoryPredictions: [{ category: 'Food', currentMonth: 100, predictedNext: 110, confidence: 0.95, trend: 'increasing', factors: [] }],
+      monthlyPredictions: [{ month: '2026-11', predicted: 300, confidence: 0.95, breakdown: [] }],
+    }));
+
+    // txs() spans six days: one month of history, so the cap is 0.6 whatever the model claims.
+    const result = await generateExpensePredictions('u', txs(), 'en-us');
+
+    expect(result.categoryPredictions[0].confidence).toBe(0.6);
+    expect(result.monthlyPredictions[0].confidence).toBe(0.6);
+  });
+
   it('keys the cache on the language and asks in it', async () => {
     create.mockResolvedValueOnce(reply({ categoryPredictions: [], monthlyPredictions: [] }));
     await generateExpensePredictions('u', txs(), 'sk-sk');
@@ -483,6 +509,26 @@ describe('generateAIFinancialHealthScore', () => {
     expect(result.aiAnalysis.recommendations[0].action).toBe('Keep going');
   });
 
+  it('scores from the fixed factors and ignores a status word that contradicts the number', async () => {
+    create.mockResolvedValueOnce(reply({
+      // The rubric prompt returns factors, not a total; the app adds them up.
+      status: 'Excellent',
+      factors: [
+        { name: 'Spending control', score: 30, max: 30, insight: 'a' },
+        { name: 'Buffer and saving', score: 15, max: 30, insight: 'b' },
+        { name: 'Budget discipline', score: 10, max: 20, insight: 'c' },
+        { name: 'Tracking completeness', score: 16, max: 20, insight: 'd' },
+      ],
+    }));
+
+    const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
+
+    expect(result.score).toBe(71);
+    // 71 is "good"; the reply said "Excellent" and the number wins.
+    expect(result.category).toBe('good');
+    expect(result.aiAnalysis.personalizedFactors).toEqual(['a', 'b', 'c', 'd']);
+  });
+
   it('throws when the reply has no score, instead of inventing 50', async () => {
     create.mockResolvedValueOnce(reply({ status: 'Good' }));
     await expect(generateAIFinancialHealthScore(healthInput(), 'en-us')).rejects.toThrow(/no score/);
@@ -492,6 +538,28 @@ describe('generateAIFinancialHealthScore', () => {
     if (bad instanceof Error) create.mockRejectedValueOnce(bad);
     else create.mockResolvedValueOnce(reply(bad));
     await expect(generateAIFinancialHealthScore(healthInput(), 'en-us')).rejects.toBeTruthy();
+  });
+});
+
+describe('scoreFromFactors', () => {
+  it('adds the factor values into a 0-100 score', () => {
+    expect(scoreFromFactors([
+      { score: 30, max: 30 }, { score: 30, max: 30 }, { score: 20, max: 20 }, { score: 20, max: 20 },
+    ])).toBe(100);
+  });
+
+  it('scales to 100 when the model only fills part of the rubric', () => {
+    expect(scoreFromFactors([{ score: 30, max: 30 }, { score: 15, max: 30 }])).toBe(75);
+  });
+
+  it('clamps a factor above its own maximum and skips unusable entries', () => {
+    expect(scoreFromFactors([{ score: 99, max: 30 }, { score: 15, max: 30 }, { score: 'x', max: 20 }, null])).toBe(75);
+  });
+
+  it('returns null when there is nothing to add', () => {
+    expect(scoreFromFactors(undefined)).toBeNull();
+    expect(scoreFromFactors([])).toBeNull();
+    expect(scoreFromFactors([{ score: 10, max: 30 }])).toBeNull();
   });
 });
 
@@ -559,6 +627,25 @@ describe('generateContextualFinancialTips', () => {
     const result = await generateContextualFinancialTips('u', emptyData(), language);
     expect(result.tips[0].title).toBe(title);
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it('never lists income among the top spending categories', async () => {
+    create.mockResolvedValueOnce(reply({ tips: [{ title: 'T', description: 'D', category: 'spending', priority: 'high', actionable: true }] }));
+
+    await generateContextualFinancialTips('u', {
+      summary: { totalIncome: 3000, totalExpenses: 500, netBalance: 2500, transactionCount: 2 },
+      transactions: [
+        { description: 'Salary', amount: 3000, category: 'Salary', date: daysAgo(2), type: 'income' as const },
+        { description: 'Migros', amount: 500, category: 'Food', date: daysAgo(1), type: 'expense' as const },
+      ],
+      budgets: [],
+      selectedMonth: 'October 2026',
+    }, 'en-us');
+
+    // The spending section runs until the budget section; a salary must not appear in it.
+    const spendingSection = userOf().split('BUDGET STATUS')[0];
+    expect(spendingSection).toContain('Food');
+    expect(spendingSection).not.toContain('Salary');
   });
 
   it('on a provider failure answers with the localised progress tip and stores it as a failure', async () => {

@@ -1,6 +1,16 @@
 import { log } from './logger';
 import Groq from 'groq-sdk';
 import { createRoutedClient } from '../lib/aiProvider';
+import { getLanguageLabel, normalizeLanguageCode } from '../lib/languageUtils';
+import { validCategoryId } from '../shared/aiResults';
+import { matchCategoryLocally } from './categoryMatcher';
+import { parseTransactionWithMistral } from './mistralTransactionParser';
+
+/**
+ * A local name match at least this close needs no second, paid opinion:
+ * 1.0 is the same name, 0.95 is the same concept in another language.
+ */
+const LOCAL_MATCH_THRESHOLD = 0.9;
 
 if (!process.env.GROQ_API_KEY) {
   log.warn('GROQ_API_KEY not set in environment variables - Groq voice features will be unavailable until configured.');
@@ -42,8 +52,21 @@ export async function transcribeAudioWithGroq(audioBuffer: Buffer): Promise<stri
   }
 }
 
-// Groq LLaMA for intelligent transaction parsing
-export async function parseTransactionWithGroq(transcript: string, userLanguage: string, userCurrency: string = '$'): Promise<{
+// Speech to text stays on Groq; the parsing prompt is shared with the other voice route.
+/**
+ * Voice parsing, second entry point (the Groq voice route).
+ *
+ * This used to be a thinner copy of the prompt in `mistralTransactionParser.ts`: fewer rules, a
+ * language table keyed to exactly "sk-sk" / "es-pe" / "en-us" (any other code silently produced
+ * English instructions), and a model name that the router replaced anyway. Two copies of the same
+ * prompt mean a fix lands in one and the other stays broken, so this one now delegates to the
+ * single prompt. What is genuinely Groq-specific - speech to text - stays above.
+ */
+export async function parseTransactionWithGroq(
+  transcript: string,
+  userLanguage: string,
+  userCurrency: string = '$',
+): Promise<{
   amount: string;
   description: string;
   type: 'income' | 'expense';
@@ -51,169 +74,25 @@ export async function parseTransactionWithGroq(transcript: string, userLanguage:
   category: string;
   note: string;
 }> {
-  try {
-    log.info('🧠 Starting Groq LLaMA analysis...');
+  const parsed = await parseTransactionWithMistral(transcript, userLanguage, userCurrency);
 
-    // A date written into a prompt is copied by the model: this instruction used to say
-    // 2025-07-21, so an entry made today could be saved months in the past. Built from the
-    // clock instead. (UTC is the reference the bank day is normalised to elsewhere.)
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-    
-    const languageMap: { [key: string]: string } = {
-      'sk-sk': 'Slovak',
-      'es-pe': 'Spanish',
-      'en-us': 'English'
-    };
-    
-    const language = languageMap[userLanguage] || 'English';
-    
-    const systemPrompt = `You are an expert at parsing financial transactions from natural speech. Parse the user's speech into structured transaction data.
-
-USER PREFERENCES:
-- Language: ${language}
-- Currency: ${userCurrency}
-
-RESPOND ONLY WITH VALID JSON:
-{
-  "amount": "135.80",
-  "description": "Merchant or expense description", 
-  "type": "expense",
-  "date": "${today}",
-  "category": "Category name",
-  "note": "original transcript"
+  return {
+    amount: parsed.amount,
+    description: parsed.description,
+    type: parsed.type,
+    date: parsed.date,
+    category: parsed.category,
+    note: parsed.note,
+  };
 }
 
-EXACT PARSING EXAMPLE:
-Input: "coolbox audífonos ayer 135 soles 80"
-Output: {
-  "amount": "135.80",
-  "description": "coolbox audífonos",
-  "type": "expense",
-  "date": "${yesterday}",
-  "category": "Compras",
-  "note": "coolbox audífonos ayer 135 soles 80"
-}
-
-PARSING INSTRUCTIONS:
-- AMOUNT: Extract numeric value PRECISELY. For currency with decimals like "135 soles 80" → "135.80", "twenty dollars fifty" → "20.50"
-- DESCRIPTION: Extract merchant name, store name, or what the money was spent on
-- TYPE: "expense" for spending money, "income" for receiving money  
-- CATEGORY: Choose appropriate category in ${language}
-- DATE: Use today's date (${today}) unless another date is clearly mentioned
-
-CATEGORIES FOR ${language}:
-${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servicios, Salud, Ingresos, Otros' : 
-  language === 'Slovak' ? 'Potraviny, Doprava, Nakupovanie, Zábava, Účty, Zdravie, Príjmy, Ostatné' :
-  'Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other'}
-
-CRITICAL AMOUNT PARSING EXAMPLES:
-- "135 soles 80" → "135.80" (135 soles and 80 cents = 135.80, NOT 215.80!)
-- "dos soles treinta" → "2.30" (2 soles and 30 cents = 2.30)
-- "twenty dollars fifty cents" → "20.50" (20 dollars and 50 cents = 20.50)
-- "päťdesiat eur dvadsať" → "50.20" (50 euros and 20 cents = 50.20)
-
-MATHEMATICAL RULE FOR CURRENCY:
-When you see "[NUMBER] [CURRENCY] [NUMBER]", it means:
-- First number = main units (soles, dollars, euros)  
-- Second number = cents/centavos (always after decimal point)
-- Formula: FIRST.SECOND (e.g., 135 soles 80 = 135.80)
-
-CRITICAL: DO NOT ADD NUMBERS TOGETHER! 135 + 80 ≠ 215. Use 135.80!
-
-IMPORTANT: 
-- Use decimal point format for currency amounts
-- Major currency unit + minor currency unit = decimal format
-- Use your knowledge of GLOBAL merchants and businesses to categorize correctly
-- Examples: Migros = grocery store = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}, McDonald's = restaurant = ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'}
-- CRITICAL: Grocery stores, supermarkets, food stores → ${language === 'Spanish' ? 'Comida' : language === 'Slovak' ? 'Potraviny' : 'Food'} (NOT Shopping/Compras)
-- Be intelligent about merchant types regardless of country
-- Extract amounts with mathematical precision`;
-
-    // Create specific user prompt with currency parsing guidance
-    const userPrompt = transcript.includes('soles') && /\d+\s+soles\s+\d+/.test(transcript) 
-      ? `Parse this transaction: "${transcript}"
-
-IMPORTANT: This transcript contains "X soles Y" format. This means X.Y, not X+Y.
-For example: "135 soles 80" = 135.80 (one hundred thirty-five point eighty)`
-      : `Parse this transaction: "${transcript}"`;
-
-    const completion = await createChat({
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: userPrompt
-        }
-      ],
-      model: 'llama-3.3-70b-versatile',
-      temperature: 0.1,
-      response_format: { type: 'json_object' }
-    });
-
-    const rawResponse = completion.choices[0].message.content || '{}';
-    log.info('🧠 Raw LLaMA response:', rawResponse);
-    
-    const result = JSON.parse(rawResponse);
-    
-    // Fix amount parsing errors - LLaMA has issues with currency formats
-    let correctedAmount = String(result.amount || '');
-    
-    // Fix Spanish number parsing patterns
-    const spanishNumberPatterns: Array<
-      | { pattern: RegExp; fix: string; handler?: undefined }
-      | { pattern: RegExp; handler: (match: RegExpMatchArray) => string; fix?: undefined }
-    > = [
-      // "cinco ochenta" pattern - LLaMA thinks it's 580 instead of 5.80
-      { pattern: /cinco\s+ochenta/i, fix: '5.80' },
-      // "X soles Y" pattern
-      { pattern: /(\d+)\s+soles?\s+(\d+)/i, handler: (match: RegExpMatchArray) => `${match[1]}.${match[2].padStart(2, '0')}` }
-    ];
-    
-    for (const p of spanishNumberPatterns) {
-      const match = transcript.match(p.pattern);
-      if (match) {
-        if (p.fix !== undefined) {
-          // Direct fix
-          if (correctedAmount === '580.00' || correctedAmount === '580') {
-            correctedAmount = p.fix;
-            log.debug('Spanish number correction applied');
-          }
-        } else if (p.handler) {
-          // Dynamic fix
-          const expectedAmount = p.handler(match);
-          if (correctedAmount !== expectedAmount) {
-            correctedAmount = expectedAmount;
-            log.debug('Currency correction applied');
-          }
-        }
-        break;
-      }
-    }
-    
-    // Validate and sanitize result
-    const parsedTransaction = {
-      amount: correctedAmount,
-      description: String(result.description || ''),
-      type: (result.type === 'income' ? 'income' : 'expense') as 'income' | 'expense',
-      date: result.date || new Date().toISOString().split('T')[0],
-      category: String(result.category || ''),
-      note: transcript
-    };
-    
-    log.info('🧠 Groq LLaMA parsed transaction:', parsedTransaction);
-    return parsedTransaction;
-    
-  } catch (error) {
-    log.error('❌ Groq LLaMA parsing failed:', error);
-    throw new Error(`Transaction parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
-
-// Intelligent category matching using Groq LLaMA
+/**
+ * Category matching for the Groq route.
+ *
+ * Local first: an exact name, a containment or a small edit distance is free, instant and gives
+ * the same answer on every run. The model is only worth paying for when the local answer is weak,
+ * and if the model fails (or returns an id that is not the person's), the local answer is used.
+ */
 export async function matchCategoryIntelligently(
   suggestedCategory: string,
   existingCategories: Array<{id: number, name: string, type: string}>,
@@ -223,60 +102,67 @@ export async function matchCategoryIntelligently(
   createNew?: boolean,
   newCategoryName?: string
 }> {
-  try {
-    log.info('🧠 Starting intelligent category matching with Groq LLaMA...');
-    
-    const languageMap: { [key: string]: string } = {
-      'en-us': 'English',
-      'es-pe': 'Spanish', 
-      'sk-sk': 'Slovak'
-    };
-    
-    const language = languageMap[userLanguage] || 'English';
-    
-    const systemPrompt = `You are an expert at matching financial categories intelligently. Your task is to find the best logical match between a suggested category and existing user categories.
+  const local = matchCategoryLocally(suggestedCategory, existingCategories, userLanguage);
 
-USER PREFERENCES:
-- Language: ${language}
+  const localAnswer = local.matchedCategory
+    ? {
+        matchedCategory: { id: local.matchedCategory.id, name: local.matchedCategory.name },
+        createNew: false,
+        newCategoryName: '',
+      }
+    : {
+        createNew: true,
+        newCategoryName: local.newCategoryName || suggestedCategory,
+      };
+
+  // A near-certain local match does not need a paid second opinion.
+  if (local.matchedCategory && local.confidence >= LOCAL_MATCH_THRESHOLD) {
+    return localAnswer;
+  }
+
+  try {
+    log.info('🧠 Starting intelligent category matching with the model...');
+
+    const language = getLanguageLabel(normalizeLanguageCode(userLanguage));
+
+    const systemPrompt = `You match one suggested category to a person's existing categories.
+
+APP LANGUAGE: ${language}
 
 RESPOND ONLY WITH VALID JSON:
 {
-  "matchedCategory": {"id": 123, "name": "Matched Category Name"},
+  "matchedCategory": {"id": 123, "name": "Matched category name"},
   "createNew": false,
   "newCategoryName": ""
 }
 
-MATCHING RULES:
-1. EXACT MATCH: If suggested category matches exactly (case-insensitive), return that category
-2. LOGICAL MATCH: Find the closest logical meaning match:
-   - "Food" matches "Jedlo", "Comida", "Alimentación", "Groceries", "Restaurant" 
-   - "Transport" matches "Doprava", "Transporte", "Car", "Gas", "Uber"
-   - "Shopping" matches "Nákupy", "Compras", "Retail", "Clothes", "Electronics"
-   - "Entertainment" matches "Zábava", "Entretenimiento", "Movies", "Games"
-   - "Bills" matches "Účty", "Servicios", "Utilities", "Internet", "Phone"
-   - "Healthcare" matches "Zdravie", "Salud", "Medical", "Pharmacy", "Doctor"
-3. SEMANTIC SIMILARITY: Consider synonyms and related concepts
-4. CREATE NEW: Only if no logical match exists at all
+MATCHING RULES, in order:
+1. EXACT: the same name, ignoring case and surrounding spaces.
+2. LOGICAL: the same meaning in another language or a synonym:
+   - Food matches Jedlo, Comida, Alimentación, Groceries
+   - Transport matches Doprava, Transporte, Car, Fuel
+   - Shopping matches Nákupy, Compras, Retail, Clothes
+   - Entertainment matches Zábava, Entretenimiento, Movies
+   - Bills matches Účty, Servicios, Utilities, Internet
+   - Health matches Zdravie, Salud, Medical, Pharmacy
+3. NEW: only when nothing above fits, in which case give one short name in ${language}.
 
-IMPORTANT:
-- Prioritize logical meaning over exact words
-- Consider multilingual equivalents
-- Return the existing category that makes most sense
-- Only create new category if truly no match exists`;
+RULES:
+- "id" must be copied from the list in the next message. Never invent one.
+- When you match, "createNew" is false and "newCategoryName" is empty.`;
 
     const userPrompt = `SUGGESTED CATEGORY: "${suggestedCategory}"
 
 EXISTING CATEGORIES:
 ${existingCategories.map(cat => `- ${cat.name} (ID: ${cat.id}, Type: ${cat.type})`).join('\n')}
 
-Find the best match or decide if new category should be created.`;
+Find the best match, or decide that a new category is needed.`;
 
     const response = await createChat({
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'llama-3.3-70b-versatile',
       temperature: 0.1,
       max_tokens: 200,
       response_format: { type: "json_object" }
@@ -284,16 +170,21 @@ Find the best match or decide if new category should be created.`;
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('No response from Groq LLaMA');
+      throw new Error('No response from the matching model');
     }
 
     const result = JSON.parse(content.trim());
-    log.info('🧠 Groq category matching result:', result);
+
+    // An id the model made up is not a match. The local answer knows the real ids, so it wins.
+    if (result?.matchedCategory && validCategoryId(result.matchedCategory.id, existingCategories) === undefined) {
+      log.warn('Category matching returned an id that is not the person\'s; using the local answer');
+      return localAnswer;
+    }
 
     return result;
 
   } catch (error) {
-    log.error('❌ Groq category matching failed:', error);
-    throw new Error(`Category matching failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    log.error('Category matching failed, using the local answer:', error);
+    return localAnswer;
   }
 }

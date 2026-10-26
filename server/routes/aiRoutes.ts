@@ -875,7 +875,13 @@ export function registerAIRoutes(app: Express) {
       const uniqueTrait = uniqueTraits[stableIndexFromId(userId, uniqueTraits.length)];
       const colorScheme = colorSchemes[stableIndexFromId(userId, colorSchemes.length)];
       
-      const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood as keyof typeof personalityTraits]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes, ${uniqueTrait}, in ${colorScheme} colors. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, cartoon-like but polished.`;
+      /*
+       * One stable character, varied only in mood, accessory and palette: the picture is
+       * regenerated as the health score changes, and without a fixed description the same person
+       * got a different creature every time. "Advisor" is also gone - the rest of the app is
+       * careful never to call itself that.
+       */
+      const prompt = `A cute, friendly money-helper mascot: a small round creature with short ears, a simple friendly face and stubby arms - always the same character, shown here feeling ${mood}: ${personalityTraits[mood as keyof typeof personalityTraits]}. It is ${uniqueTrait} and the palette is ${colorScheme}. Modern, clean, approachable cartoon style, polished flat background, no text, no logos.`;
 
       // Hero image, metered: image generation is the most expensive single call in the app,
       // so it must use up allowance like the text features do. The model list and the
@@ -1102,33 +1108,44 @@ export function registerAIRoutes(app: Express) {
       const { openai } = await import('../openaiClient');
 
       const response = await openai.chat.completions.create({
-        // Never pin a model literally: an id missing from MODEL_CATALOG is passed through to
-        // OpenAI verbatim (lib/aiProvider.resolveSpec), so a stale pin silently opts this route
-        // out of the gpt-6-luna default and its curated fallback chain.
+        // Deliberately NOT with the shared house rules: those forbid the word "bank", and the
+        // help screen has to be able to say "import a bank statement". The rules that matter
+        // here (no advice, no invented figures, no vendor names, no prices) are in the prompt.
         model: AI_MODELS.generation,
         messages: [
           {
             role: "system",
-            content: `You are a helpful assistant for Kaptia, a personal finance management application. 
+            content: `You are the in-app help assistant for Kaptia, a personal budgeting application.
 
-Kaptia offers three subscription tiers:
-- Free Plan: Basic transaction tracking (up to 100 transactions)
-- Standard Plan (${formatMoney(PLAN_PRICES.standard.usd.monthly, 'usd')}/month or ${formatMoney(PLAN_PRICES.standard.usd.yearly, 'usd')}/year; in Peru ${formatMoney(PLAN_PRICES.standard.pen.monthly, 'pen')}/month): Enhanced features including budgeting, goals, transaction reminders, AI categorization, receipt OCR processing
-- Premium Plan (${formatMoney(PLAN_PRICES.premium.usd.monthly, 'usd')}/month or ${formatMoney(PLAN_PRICES.premium.usd.yearly, 'usd')}/year; in Peru ${formatMoney(PLAN_PRICES.premium.pen.monthly, 'pen')}/month): Unlimited transactions, advanced analytics, AI insights, data export/import, cloud backup, predictions, recommendations
+WHAT KAPTIA DOES:
+- Tracking income and expenses: typed by hand, or read from a photo of a receipt
+- Budgets and savings goals
+- Sorting spending into categories, automatically as well
+- A financial health score, spending insights, spending forecasts and daily suggestions
+- Export and import of the person's own data, and a backup
 
-Key features include:
-- Transaction tracking (manual entry and receipt OCR scanning)
-- Budget management and goal setting  
-- AI-powered expense categorization
-- Receipt OCR with Google Cloud Vision
-- Financial health analysis and AI insights
-- Cloud backup and data export/import
-- Collaborative financial planning
-- Mobile-responsive design
+PLANS:
+- Free Plan: basic transaction tracking (up to 100 transactions)
+- Standard Plan (${formatMoney(PLAN_PRICES.standard.usd.monthly, 'usd')}/month or ${formatMoney(PLAN_PRICES.standard.usd.yearly, 'usd')}/year; in Peru ${formatMoney(PLAN_PRICES.standard.pen.monthly, 'pen')}/month): budgets, goals, transaction reminders, automatic categorisation, receipt scanning
+- Premium Plan (${formatMoney(PLAN_PRICES.premium.usd.monthly, 'usd')}/month or ${formatMoney(PLAN_PRICES.premium.usd.yearly, 'usd')}/year; in Peru ${formatMoney(PLAN_PRICES.premium.pen.monthly, 'pen')}/month): unlimited transactions, deeper analytics, insights, forecasts, data export and import, cloud backup
 
-Authentication is handled through Clerk. Payment processing uses Stripe.
+HOW TO ANSWER:
+- Answer about the app, its plans and how to use it. For a general money question, give one
+  practical budgeting sentence and point to the screen in the app; do not give financial advice.
+- You cannot see the person's account, their transactions or their plan. Never claim that you can
+  and never invent a figure from their data: say which screen shows the number instead.
+- If something is not working, name the first two things to check (the plan in Profile, the AI
+  switch in Profile, a login that needs renewing) and point to the help page.
+- Be brief: three sentences, unless the question is a step-by-step "how do I".
+- Answer in the language the person wrote in.
 
-Answer questions about features, subscription plans, how to use the app, troubleshooting, and general financial management tips. Be helpful, friendly, and concise.`
+NEVER:
+- promise a refund, a discount, a feature that does not exist, or a date when something will ship;
+- name the companies that provide login, payments or document processing;
+- quote a price that is not in the two lists above.
+
+It is fine to say "bank statement" when describing the import feature. Do not otherwise recommend
+a bank, a loan, a card or an investment.`
           },
           {
             role: "user",
@@ -1136,7 +1153,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
             content: anonymizeText(message).text
           }
         ],
-        temperature: 0.7,
+        // A help answer is short and factual; 0.7 produced wandering replies about general finance.
+        temperature: 0.4,
         max_tokens: 500
       });
 

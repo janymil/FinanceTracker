@@ -46,6 +46,7 @@ const IMPLEMENTATION = new Set([
   'server/aiAccess.ts',          // the gate
   'server/autoCategorize.ts',    // calls checkAiAccess itself (tested separately)
   'server/mistralTransactionParser.ts', // implementation, called only from the gated voice routes
+  'server/groqClient.ts',        // implementation (speech-to-text + shared voice prompt), same mount
   'server/errorGuard/triage.ts', // admin error reports: metadata only, no user data, own budget
   'server/errorGuard/triagePrompt.ts',
 ]);

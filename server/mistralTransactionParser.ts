@@ -3,6 +3,7 @@ import { AI_MODELS, createRoutedClient } from '../lib/aiProvider';
 import { normalizeLanguageCode, getLanguageLabel } from '../lib/languageUtils';
 import { parseModelJson, validCategoryId } from '../shared/aiResults';
 import { applyAmountCorrections, findAmountCorrection } from '../shared/voiceCorrections';
+import { matchCategoryLocally } from './categoryMatcher';
 
 interface ParsedTransaction {
   amount: string;
@@ -68,8 +69,8 @@ DESCRIPTION FORMAT RULES:
 - Examples: "Metro - detergente", "McDonald's - almuerzo", "Shell - gasolina"
 - Format: "[STORE] - [PRODUCT]" or "[STORE] [PRODUCT]"
 
-USER'S ACTUAL CATEGORIES (REAL DATA FROM DATABASE):
-${userCategories.length > 0 ? userCategories.map(cat => `- "${cat.name}" (${cat.type})`).join('\n') : 'No existing categories - will suggest new category'}
+USER'S ACTUAL CATEGORIES (these are the only categories that exist):
+${userCategories.length > 0 ? userCategories.map(cat => `- ${cat.name} (ID: ${cat.id}, ${cat.type})`).join('\n') : 'No categories yet - suggest one short new name'}
 
 CRITICAL AMOUNT PARSING:
 - "cinco ochenta" = 5.80 (NOT 580!)
@@ -85,51 +86,51 @@ For "[NUMBER] [CURRENCY] [NUMBER]" format:
 
 CURRENCY FORMAT:
 User's preferred currency: ${userCurrency}
-Format amounts as: ${userCurrency}XX.XX (e.g., ${userCurrency}35.80)
+Write the amount as a plain number with a dot and two decimals: 35.80.
+Never put a currency symbol or code inside the amount - the app adds it from the user's settings.
 
-INTELLIGENT CATEGORIZATION LOGIC:
+HOW TO CHOOSE THE CATEGORY:
 
-STEP 1: ANALYZE WHAT WAS PURCHASED (PRODUCT INTELLIGENCE)
-- DETERGENTE/CLEANING = Household/Home products → Look for: Housing, Casa, Hogar, Home, Limpieza, Household
-- MEDICINA/FARMACIA = Healthcare products → Look for: Healthcare, Salud, Zdravie, Medical
-- COMIDA/FOOD = Food products → Look for: Food, Comida, Potraviny, Groceries, Alimentación
-- GASOLINA/FUEL = Transport → Look for: Transport, Transporte, Doprava, Gas, Combustible
-- ROPA/CLOTHES = General shopping → Look for: Shopping, Compras, Nakupovanie, Clothes
+STEP 1: WHAT WAS BOUGHT?
+Decide the product type from the words in the sentence, in any language:
+- cleaning or household supplies (detergente, čistiaci prostriedok, cleaner) = household
+- medicine or pharmacy (medicina, lieky, farmacia) = health
+- food, groceries, a restaurant (comida, potraviny, lunch) = food
+- fuel or transport (gasolina, benzín, taxi, parking) = transport
+- clothes, electronics, general retail (ropa, oblečenie) = shopping
+- a subscription, a phone or internet bill = bills
 
-STEP 2: INTELLIGENT CATEGORY MATCHING
-Scan user's categories for SEMANTIC matches based on product type:
-- If user has "Housing" and product is "detergente" → USE "Housing" (perfect match)
-- If user has "Casa" and product is "detergente" → USE "Casa" (perfect match)
-- If user has "Shopping" and product is "detergente" → DON'T use "Shopping" (wrong match)
+STEP 2: WHICH OF THE PERSON'S CATEGORIES COVERS IT?
+- Use the category's EXACT name as written in the list above. The app matches the name
+  character for character, so a translated or reworded name is a miss and the tip is lost.
+- One product type can only land in one category; choose the most specific one.
 
-STEP 3: IF NO LOGICAL MATCH EXISTS
-Suggest NEW category name appropriate for product type in user's language:
-- For cleaning products → suggest "Hogar" (Spanish), "Dom" (Slovak), "Household" (English)
-- For healthcare → suggest "Salud" (Spanish), "Zdravie" (Slovak), "Healthcare" (English)
+STEP 3: ONLY WHEN NOTHING FITS
+- Suggest ONE short new name (1-2 words) in the person's language, and keep it generic
+  ("Household", "Health"), not the product itself ("Detergent").
 
-CRITICAL INTELLIGENCE RULES:
-- DETERGENTE is NOT Shopping - it's household/cleaning
-- MEDICINA is NOT Shopping - it's healthcare  
-- GASOLINA is NOT Shopping - it's transport
-- Use LOGIC, not just keyword matching`;
+A cleaning product is not "shopping", medicine is not "shopping" and fuel is not "shopping":
+those three are the mistakes this rule exists to stop. Decide from the product, not from the
+shop's name.`
 
   // Spanish spoken-number patterns live in shared/voiceCorrections.ts (pure, tested).
   const amountHint = findAmountCorrection(transcript);
 
   let userPrompt = `Parse this transaction: "${transcript}"
 
-PRODUCT INTELLIGENCE ANALYSIS:
-1. What specific PRODUCT/SERVICE is mentioned in the transcript?
-2. What TYPE of product is it? (cleaning/healthcare/food/transport/entertainment)
-3. Which of user's categories logically fits this product type?
+Decide the product type first, then the category:
+1. What product or service is actually mentioned?
+2. What type is it - household, health, food, transport, shopping, entertainment, bills?
+3. Which of the person's categories (names exactly as listed) covers that type?
 
-CRITICAL EXAMPLES FOR PROPER CATEGORIZATION:
-- "detergente" = cleaning product → Housing/Casa/Hogar (NOT Shopping!)
-- "medicina" = healthcare product → Healthcare/Salud (NOT Shopping!)  
-- "gasolina" = fuel → Transport/Transporte (NOT Shopping!)
-- "comida" = food product → Food/Comida (correct)
+The words can come in any language; the logic is the same:
+- a cleaning product (detergente, čistiaci prostriedok) is household, not shopping
+- medicine (medicina, lieky) is health, not shopping
+- fuel (gasolina, benzín) is transport, not shopping
+- food (comida, potraviny) is food
 
-ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user's list.`;
+If one of the categories matches, return its exact name. Only if none matches, propose one short
+new name that describes the type, not the product.`;
   
   // Add specific guidance for known Spanish patterns
   if (amountHint) {
@@ -142,7 +143,8 @@ ANALYZE THE PRODUCT TYPE FIRST, then choose the most logical category from user'
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'mistral-small-latest',
+      // The model is pinned by lib/aiProvider (AI_MODELS.voice); naming one here would only
+      // look like it decides something.
       temperature: 0.1,
       response_format: { type: 'json_object' }
     });
@@ -181,7 +183,22 @@ export async function matchCategoryIntelligentlyMistral(
   existingCategories: Array<{id: number, name: string, type: string}>,
   userLanguage: string = 'en-us'
 ): Promise<{matchedCategory?: {id: number, name: string}, createNew: boolean, newCategoryName: string}> {
-  
+  /*
+   * Local first, model second. Nothing calls this today (the voice route uses the local matcher
+   * directly), but it is exported, so it must not be a second, weaker implementation of
+   * server/categoryMatcher.ts: an exact or near-exact name never needs a paid call.
+   */
+  const local = matchCategoryLocally(suggestedCategory, existingCategories, userLanguage);
+  const localAnswer = local.matchedCategory
+    ? {
+        matchedCategory: { id: local.matchedCategory.id, name: local.matchedCategory.name },
+        createNew: false,
+        newCategoryName: '',
+      }
+    : { createNew: true, newCategoryName: local.newCategoryName || suggestedCategory };
+
+  if (local.matchedCategory && local.confidence >= 0.9) return localAnswer;
+
   const normalizedLanguage = normalizeLanguageCode(userLanguage);
   const language = getLanguageLabel(normalizedLanguage);
 
@@ -224,7 +241,6 @@ Find the best match or suggest creating a new category.`;
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'mistral-small-latest',
       temperature: 0.1,
       response_format: { type: 'json_object' }
     });
@@ -242,23 +258,8 @@ Find the best match or suggest creating a new category.`;
     return result as any;
     
   } catch (error) {
-    log.error('❌ Mistral category matching failed:', error);
-    // Fallback: try to find simple matches
-    const exactMatch = existingCategories.find(cat => 
-      cat.name.toLowerCase() === suggestedCategory.toLowerCase()
-    );
-    
-    if (exactMatch) {
-      return {
-        matchedCategory: { id: exactMatch.id, name: exactMatch.name },
-        createNew: false,
-        newCategoryName: ''
-      };
-    }
-    
-    return {
-      createNew: true,
-      newCategoryName: suggestedCategory
-    };
+    log.error('Category matching failed, using the local answer:', error);
+    // The local answer cannot fail and needs no network, so it is the fallback.
+    return localAnswer;
   }
 }
