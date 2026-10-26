@@ -100,6 +100,11 @@ other is a file you hold — so both paths need proving. The dump path:
 
 # 2. Restore it into an EMPTY database, never over production.
 createdb kaptia_restore
+# `pg_restore` must be 17 or newer: the dump is written by the PostgreSQL 17 image, and a 16
+# client refuses it with "unsupported version (1.16) in file header". Verified on 2026-10-26.
+# Without a 17 client on the host:
+#   docker run --rm -i postgres:17-alpine pg_restore --dbname="$RESTORE_DATABASE_URL" \
+#     --no-owner --no-privileges < kaptia-<timestamp>.dump
 pg_restore --dbname="postgres://…/kaptia_restore" --no-owner --no-privileges kaptia-<timestamp>.dump
 
 # 3. Then exactly as above: the ORIGINAL key, dr:verify, the drift check.

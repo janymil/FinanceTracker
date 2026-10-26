@@ -262,10 +262,19 @@ if (currentLang.startsWith('es')) {
 - **Hot Reload**: Vite development server
 
 ### Production Environment
-- **Platform**: one Linux VPS, the app under **pm2** (`APP_NAME` in `scripts/deploy.sh`), Cloudflare in front
+- **Platform**: one Linux VPS; Caddy terminates TLS on the host and proxies `kaptia.app` to
+  `127.0.0.1:5000`, with Cloudflare in front of that
+- **Process**: **pm2 for the unprivileged account `svc-kaptia`**, defined in `ecosystem.config.cjs`
+  and started at boot by `pm2-svc-kaptia.service`. Root has no pm2 daemon any more: a `pm2` command
+  run as root sees nothing, and `scripts/deploy.sh` drops to the service account for the reload.
+- **Bind address**: `HOST=127.0.0.1` from the ecosystem file; port 5000 is not open in the firewall.
+  A bare `npm start` on this host binds every interface again — start it from the ecosystem file.
 - **Database**: Neon serverless PostgreSQL (nowhere else: see `docs/recovery-runbook.md`)
-- **Environment**: `.env` on the server, readable only by the service user; secrets are never in git
-- **SSL**: terminated at Cloudflare; `server/index.ts` redirects non-HTTPS requests
+- **Environment**: `.env` on the server, mode 600 owned by `svc-kaptia`; the other service accounts on
+  the machine (micita, ai-processor, pdf-processor, backup) cannot read it
+- **SSL**: Cloudflare in front, Caddy on the host; `server/index.ts` redirects non-HTTPS requests
+- **SSH**: key-only from every address except the owner's current one — see
+  `docs/production-readiness-2026-10-26.md` before changing `Match` blocks in `sshd_config`
 
 ### Database Migration Process
 1. Edit `shared/schema.ts`.

@@ -372,13 +372,18 @@ app.use((req, res, next) => {
 
   // Defaults to 5000 (the port Replit exposes); override with PORT locally
   const port = Number(process.env.PORT) || 5000;
+  // Bind address. Defaults to every interface, which is what a host that publishes the port
+  // itself (Replit) needs. This machine sets HOST=127.0.0.1: the reverse proxy is the only
+  // intended way in, so a public bind here would expose the app on the host's own address the
+  // moment a firewall rule changed. See `ecosystem.config.cjs`.
+  const host = process.env.HOST || "0.0.0.0";
   server.listen({
     port,
-    host: "0.0.0.0",
+    host,
     // reusePort is not supported on Windows (fails with ENOTSUP)
     ...(process.platform === "win32" ? {} : { reusePort: true }),
   }, () => {
-    log(`serving on port ${port}`);
+    log(`serving on ${host}:${port}`);
     // Warm the blocked-country list at boot. The first request should not be the thing that
     // discovers the database is not answering yet — and because the middleware no longer skips
     // itself for the first five seconds, a cold start would otherwise answer 503 while it waits.

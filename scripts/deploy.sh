@@ -9,7 +9,8 @@
 #   - the production database must already contain every table and column the new code
 #     expects (drift check), so "deploy before migrating" fails here instead of in the app;
 #   - the previous build is kept, so a bad deploy is one command away from undone;
-#   - the app is reloaded with `--update-env`, so a changed .env actually takes effect;
+#   - the app is reloaded from `ecosystem.config.cjs` as the service user, so a changed .env
+#     takes effect and the bind address cannot drift;
 #   - the new build must pass a live health check, otherwise the old one is restored.
 #
 # What it deliberately does NOT do: change the production schema. Applying migrations to
@@ -26,12 +27,18 @@
 # inactive price, or bills monthly where the page promises yearly — so a wrong price can
 # never reach a customer through a routine release.
 #
-# Usage: ./scripts/deploy.sh
+# Usage: sudo ./scripts/deploy.sh   (root is required; the pm2 steps drop to $SERVICE_USER)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 APP_NAME="kaptia"
+# The app runs as an unprivileged account: root's pm2 no longer owns it (see
+# ecosystem.config.cjs). Every pm2 call below goes through that account — otherwise the
+# deploy would start a second, root-owned copy that cannot bind the port, and the health
+# gate below would roll back a release that was actually fine.
+SERVICE_USER="svc-kaptia"
+SERVICE_HOME="/home/svc-kaptia"
 HEALTH_URL="${HEALTH_URL:-https://kaptia.app/api/health/deep}"
 KEEP_BACKUPS=3
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -82,14 +89,18 @@ if [ -d dist ]; then
 fi
 npm run build
 
-echo "==> 9/9 reload $APP_NAME with the current .env"
-# `--update-env` copies this shell's variables into the running app. Run it with a minimal
-# environment so a variable exported for a local test — PORT, DATABASE_URL, a sandbox
-# payment key — can never be pushed into production by a routine deploy. This actually
-# happened once: a rehearsal shell exported PORT=5066 and DATABASE_URL=<scratch>, the reload
-# carried both into pm2, and the site answered 502 until the process was started again.
-env -i PATH="$PATH" HOME="$HOME" pm2 reload "$APP_NAME" --update-env >/dev/null
-env -i PATH="$PATH" HOME="$HOME" pm2 save >/dev/null
+echo "==> 9/9 reload $APP_NAME from ecosystem.config.cjs"
+# The ecosystem file, not this shell, supplies the environment: NODE_ENV=production and
+# HOST=127.0.0.1 come from there, so a variable exported for a local test — PORT,
+# DATABASE_URL, a sandbox payment key — can never be pushed into production by a routine
+# deploy. This actually happened once: a rehearsal shell exported PORT=5066 and
+# DATABASE_URL=<scratch>, the reload carried both into pm2, and the site answered 502
+# until the process was started again. `--update-env` is deliberately not used: under a
+# scrubbed environment it would clear HOST and the app would bind every interface again.
+chown -R "$SERVICE_USER:$SERVICE_USER" dist 2>/dev/null || true
+runuser -u "$SERVICE_USER" -- env -i PATH="$PATH" HOME="$SERVICE_HOME" \
+  pm2 startOrReload ecosystem.config.cjs >/dev/null
+runuser -u "$SERVICE_USER" -- env -i PATH="$PATH" HOME="$SERVICE_HOME" pm2 save >/dev/null
 
 echo "==> health gate ($HEALTH_URL)"
 healthy=0
@@ -109,8 +120,9 @@ if [ "$healthy" -ne 1 ]; then
   if [ -d "$PREVIOUS" ]; then
     rm -rf dist
     mv "$PREVIOUS" dist
-    env -i PATH="$PATH" HOME="$HOME" pm2 restart "$APP_NAME" --update-env >/dev/null
-    echo "Rolled back. Inspect: pm2 logs $APP_NAME --lines 100"
+    runuser -u "$SERVICE_USER" -- env -i PATH="$PATH" HOME="$SERVICE_HOME" \
+      pm2 restart "$APP_NAME" >/dev/null
+    echo "Rolled back. Inspect: runuser -u $SERVICE_USER -- pm2 logs $APP_NAME --lines 100"
   else
     echo "No previous build to restore. Manual attention needed."
   fi
