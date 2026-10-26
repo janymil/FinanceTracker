@@ -176,6 +176,18 @@ export const transactions = pgTable("transactions", {
 }, (table) => [
   index("IDX_transactions_user_date").on(table.userId, table.date),
   index("IDX_transactions_category").on(table.categoryId),
+  /**
+   * Every budget's spending figure is `sum(amount) where user, category, type, date between …`,
+   * and the dashboard asks for one per budget — up to ten range scans per load. Without this the
+   * planner has to choose between the user index and the category index and then filter; with it
+   * each sum is one contiguous range.
+   */
+  index("IDX_transactions_user_category_date").on(
+    table.userId,
+    table.categoryId,
+    table.type,
+    table.date,
+  ),
   uniqueIndex("UQ_transactions_request_id")
     .on(table.userId, table.clientRequestId)
     .where(sql`${table.clientRequestId} is not null`),

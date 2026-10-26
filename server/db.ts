@@ -29,8 +29,13 @@ if (!databaseUrl) {
  * These settings turn "the app is stuck" into "that one request failed, try again".
  */
 export const POOL_SETTINGS = {
-  /** One Node process serves every request; ten sockets is plenty and keeps Neon happy. */
-  max: 10,
+  /**
+   * One Node process serves every request. Ten sockets is the default because Neon's plan sizes
+   * connections per branch and a single process with async I/O rarely needs more — but a bulk
+   * import or a burst of dashboard loads can queue behind them, and the right number depends on
+   * the plan, so it is a variable instead of a constant.
+   */
+  max: Number(process.env.DB_POOL_MAX) || 10,
   /** Waiting this long for a free connection is already a failure. Answer instead of hanging. */
   connectionTimeoutMillis: 10_000,
   /** Let an idle socket go instead of keeping it open until the network drops it. */

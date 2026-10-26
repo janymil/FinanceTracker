@@ -101,7 +101,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { data: databaseUser } = useQuery({
     queryKey: ["auth-user", user?.id],
     enabled: !!user?.id,
-    staleTime: 0,
+    // AI output is cached server-side too; asking for it again on every mount paid twice.
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/auth/user");
       return response.json();

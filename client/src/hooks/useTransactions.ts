@@ -12,9 +12,12 @@ export function useTransactions() {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
+    // This overrode the shared defaults with `0`/`0`, so every screen that lists money refetched
+    // the whole history on every mount. Adding a transaction, editing one, deleting one and the
+    // live-update stream all invalidate this key already, so the only thing a cache adds is not
+    // repeating a request that nobody changed.
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
     refetchOnWindowFocus: true,
     retry: (failureCount, error: any) => {
       if (error?.status === 401 && !isReady) return false;

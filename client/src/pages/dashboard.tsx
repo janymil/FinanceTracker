@@ -205,7 +205,8 @@ export default function Dashboard() {
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     enabled: isReady,
-    staleTime: 0, // Always fresh for immediate updates
+    // Thirty seconds: mutations invalidate this key, so the cache only covers time passing.
+    staleTime: 30_000,
     retry: (failureCount, error: any) => {
       if (error?.status === 401 && !isReady) return false;
       return failureCount < 3;
@@ -229,7 +230,8 @@ export default function Dashboard() {
       return response.json();
     },
     enabled: isReady, // Load immediately when authenticated
-    staleTime: 0, // Always fresh for immediate updates
+    // Thirty seconds: mutations invalidate this key, so the cache only covers time passing.
+    staleTime: 30_000,
     retry: (failureCount, error: any) => {
       if (error?.status === 401 && !isReady) return false;
       return failureCount < 3;

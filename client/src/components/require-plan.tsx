@@ -129,7 +129,8 @@ export default function RequirePlan({ plan, children, feature, description, bene
   const { data: databaseUser, isLoading } = useQuery({
     queryKey: ["auth-user", user?.id],
     enabled: isReady && !!user?.id,
-    staleTime: 0, // Always fresh for immediate updates
+    // A minute: this changes only when an action changes it, and that action invalidates the key.
+    staleTime: 60_000,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/auth/user");
       return response.json();

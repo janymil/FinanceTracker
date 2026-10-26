@@ -29,6 +29,13 @@
       "when": 1793037061802,
       "tag": "0003_transaction_request_id",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793048086222,
+      "tag": "0004_transactions_budget_index",
+      "breakpoints": true
     }
   ]
 }

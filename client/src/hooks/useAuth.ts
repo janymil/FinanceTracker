@@ -29,7 +29,14 @@ export function useAuth() {
       }
       return failureCount < 3;
     },
-    staleTime: 0,
+    // This was `staleTime: 0` with a refetch on every focus. That is the endpoint the production
+    // access log showed being called five times inside twenty seconds for one person, and every
+    // call costs a database round-trip plus a token verification.
+    //
+    // Thirty seconds is short enough that a plan change or a profile edit is visible almost at
+    // once — and every one of those edits already invalidates this key explicitly, so the only
+    // thing the interval covers is time passing.
+    staleTime: 30_000,
     refetchOnWindowFocus: true,
     refetchInterval: false,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),

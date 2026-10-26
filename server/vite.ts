@@ -68,6 +68,24 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+/**
+ * What the browser is told to do with a file from the build.
+ *
+ * Three rules, and getting one wrong is expensive in a way that is hard to notice:
+ *   - hashed build output never changes, so it can be kept for a year (`immutable`);
+ *   - the shell names those hashed files, so it must never be cached — a stale copy points at
+ *     assets the new release does not serve;
+ *   - the service worker and the translation files belong to the running release, so they
+ *     revalidate every time.
+ */
+export function cacheControlFor(filePath: string): string | null {
+  if (filePath.endsWith('sw.js')) return 'no-cache';
+  if (filePath.includes(`${path.sep}locales${path.sep}`)) return 'no-cache, must-revalidate';
+  if (filePath.includes(`${path.sep}assets${path.sep}`)) return 'public, max-age=31536000, immutable';
+  if (filePath.endsWith('.html')) return 'no-cache';
+  return null;
+}
+
 export function serveStatic(app: Express) {
   const distPath = path.resolve(import.meta.dirname, "public");
 
@@ -79,18 +97,15 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath, {
     setHeaders: (res, filePath) => {
-      // The service worker must be re-checked on every visit or an update never arrives.
-      if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
-      // Translation files belong to the build that rendered the page. A cached copy from the
-      // previous release shows missing keys as raw English words after a deploy.
-      if (filePath.includes(`${path.sep}locales${path.sep}`)) {
-        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
-      }
+      const cacheControl = cacheControlFor(filePath);
+      if (cacheControl) res.setHeader('Cache-Control', cacheControl);
     },
   }));
 
   // fall through to index.html if the file doesn't exist
+  const indexHtml = path.resolve(distPath, "index.html");
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile(indexHtml);
   });
 }

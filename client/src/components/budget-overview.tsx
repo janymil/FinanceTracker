@@ -93,7 +93,8 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
   const { data: budgets = [], isLoading: budgetsLoading } = useQuery<Budget[]>({
     queryKey: ['budgets', user?.id],
     enabled: isReady && !isLimited && !!user?.id,
-    staleTime: 0,
+    // Thirty seconds: mutations invalidate this key, so the cache only covers time passing.
+    staleTime: 30_000,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/budgets");
       return response.json();
@@ -104,7 +105,8 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
   const { data: transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
     queryKey: ['transactions', user?.id],
     enabled: isReady && !isLimited && !!user?.id,
-    staleTime: 0,
+    // Thirty seconds: mutations invalidate this key, so the cache only covers time passing.
+    staleTime: 30_000,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();

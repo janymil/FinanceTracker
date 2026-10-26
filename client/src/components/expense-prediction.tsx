@@ -45,7 +45,8 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const { data: databaseUser, isLoading } = useQuery({
     queryKey: ['auth-user', user?.id],
     enabled: isReady,
-    staleTime: 0,
+    // AI output is cached server-side too; asking for it again on every mount paid twice.
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/auth/user');
       return response.json();

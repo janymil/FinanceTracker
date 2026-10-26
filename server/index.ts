@@ -113,6 +113,14 @@ app.use((req, res, next) => {
 });
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+/**
+ * What counts as "slow". A dashboard request on a good connection answers in tens of milliseconds,
+ * so a second is already worth a line in the log; AI and OCR routes are exempt by nature and are
+ * measured separately.
+ */
+const SLOW_REQUEST_MS = Number(process.env.SLOW_REQUEST_MS) || 1000;
+
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
   if (isProduction) {
@@ -357,7 +365,16 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms [req ${(req as any).requestId ?? '-'}]`);
+      const requestId = (req as any).requestId ?? '-';
+      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms [req ${requestId}]`);
+      // A request that took a second is the first evidence of a scaling problem, and it is the
+      // line somebody will search for when a customer says "the dashboard is slow". One warning
+      // per slow request, so the access log stays readable and this stays greppable.
+      if (duration >= SLOW_REQUEST_MS) {
+        logger.warn(
+          `[slow] ${req.method} ${path} ${res.statusCode} took ${duration}ms [req ${requestId}]`,
+        );
+      }
     }
   });
 

@@ -1,0 +1,1 @@
+CREATE INDEX "IDX_transactions_user_category_date" ON "transactions" USING btree ("user_id","category_id","type","date");

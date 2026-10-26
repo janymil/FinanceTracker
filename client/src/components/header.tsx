@@ -134,7 +134,9 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       return response.json();
     },
     enabled: isReady && !!user?.id,
-    staleTime: 0,
+    // Category names and colours change only on the categories screen, which invalidates this key.
+    // Refetching them on every mount of the header was pure waste.
+    staleTime: 5 * 60_000,
   });
 
   const queryClient = useQueryClient();

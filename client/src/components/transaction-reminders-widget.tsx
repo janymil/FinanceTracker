@@ -117,7 +117,8 @@ export default function TransactionRemindersWidget() {
       return response.json();
     },
     enabled: isUserReady,
-    staleTime: 0,
+    // A minute: this changes only when an action changes it, and that action invalidates the key.
+    staleTime: 60_000,
     retry: 2,
   });
 
@@ -129,7 +130,8 @@ export default function TransactionRemindersWidget() {
       return response.json();
     },
     enabled: isUserReady,
-    staleTime: 0,
+    // A minute: this changes only when an action changes it, and that action invalidates the key.
+    staleTime: 60_000,
     retry: 2,
   });
 
@@ -141,7 +143,8 @@ export default function TransactionRemindersWidget() {
       return response.json();
     },
     enabled: isUserReady,
-    staleTime: 0,
+    // A minute: this changes only when an action changes it, and that action invalidates the key.
+    staleTime: 60_000,
     retry: 2,
   });
 

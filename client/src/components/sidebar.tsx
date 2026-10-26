@@ -47,7 +47,10 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
   const { data: databaseUser } = useQuery({
     queryKey: ["auth-user", user?.id],
     enabled: !!user?.id,
-    staleTime: 0, // Always fetch fresh data for plan info
+    // Plan info: a minute is enough for an upgrade to show up, and every path that changes the
+    // plan either reloads the page or invalidates this key. `0` meant a request per mount, on
+    // every screen, because the sidebar is on all of them.
+    staleTime: 60_000,
     queryFn: async () => {
       const response = await fetch("/api/auth/user", {
         credentials: 'include'
