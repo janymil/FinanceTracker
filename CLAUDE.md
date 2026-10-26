@@ -127,7 +127,7 @@ the command above whenever `package-lock.json` changes, then `./scripts/deploy.s
 ```
 
 ### Database Architecture
-- **Primary Database**: PostgreSQL (Replit dev, Neon production)
+- **Primary Database**: PostgreSQL (Neon serverless in production; a local Postgres for development)
 - **ORM**: Drizzle with full TypeScript support
 - **Schema Management**: Version-controlled migrations in `migrations/`
 - **Key Tables**: users, transactions, budgets, goals, categories, ai_cache
@@ -256,16 +256,16 @@ if (currentLang.startsWith('es')) {
 ## Deployment
 
 ### Development Environment
-- **Platform**: Replit with Node.js 20
-- **Database**: Replit PostgreSQL
-- **Environment**: `.env.local` for development keys
+- **Platform**: any machine with Node.js 22; the app runs from source with `tsx`
+- **Database**: a local PostgreSQL, or a Neon branch — never the production project
+- **Environment**: `.env` for development keys (see `.env.example`; it is the contract)
 - **Hot Reload**: Vite development server
 
 ### Production Environment
-- **Platform**: Replit Autoscale
-- **Database**: Neon serverless PostgreSQL
-- **Environment**: Replit Secrets for production keys
-- **SSL**: Automatic HTTPS with custom domain
+- **Platform**: one Linux VPS, the app under **pm2** (`APP_NAME` in `scripts/deploy.sh`), Cloudflare in front
+- **Database**: Neon serverless PostgreSQL (nowhere else: see `docs/recovery-runbook.md`)
+- **Environment**: `.env` on the server, readable only by the service user; secrets are never in git
+- **SSL**: terminated at Cloudflare; `server/index.ts` redirects non-HTTPS requests
 
 ### Database Migration Process
 1. Edit `shared/schema.ts`.
