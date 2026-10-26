@@ -30,7 +30,7 @@ import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 import { cookieConsentMiddleware } from "./cookieMiddleware.js";
 import { renderPageForCrawler } from './ssr.js';
-import { countryBlockingMiddleware } from "./middleware/countryBlocking.js";
+import { countryBlockingMiddleware, loadBlockedCountries } from "./middleware/countryBlocking.js";
 import { checkEncryptionKey } from "./encryptionDiagnostics.js";
 import { reportServerError } from './errorGuard/report.js';
 import { verifyEmailTransport } from './emailService.js';
@@ -379,6 +379,14 @@ app.use((req, res, next) => {
     ...(process.platform === "win32" ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
+    // Warm the blocked-country list at boot. The first request should not be the thing that
+    // discovers the database is not answering yet — and because the middleware no longer skips
+    // itself for the first five seconds, a cold start would otherwise answer 503 while it waits.
+    void loadBlockedCountries().catch((error) => {
+      logger.warn('Blocked-country list not available at boot; requests will refuse until it is', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
     // Creates the repeats that recurring transactions owe (hourly, idempotent).
     startRecurringScheduler();
     // E-mails bill reminders when their "remind me N days before" moment arrives.
