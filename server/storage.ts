@@ -208,7 +208,7 @@ export interface IStorage {
   createCollaborativeGoal(goal: InsertCollaborativeGoal): Promise<CollaborativeGoal>;
   getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: CollaborativeGoalParticipant[], creator: User }>>;
   getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: Array<GoalContribution & { user: User }>, activities: ChallengeActivity[] }) | undefined>;
-  getCollaborativeGoalPreview(goalId: number): Promise<(CollaborativeGoal & { creator: User; participantCount: number }) | undefined>;
+  getCollaborativeGoalPreview(goalId: number, joinCode?: string): Promise<(CollaborativeGoal & { creator: User; participantCount: number }) | undefined>;
   getGoalParticipant(goalId: number, userId: string): Promise<CollaborativeGoalParticipant | undefined>;
   joinCollaborativeGoal(goalId: number, userId: string, personalTarget?: number): Promise<CollaborativeGoalParticipant>;
   leaveCollaborativeGoal(goalId: number, userId: string): Promise<void>;
@@ -2114,8 +2114,13 @@ export class DatabaseStorage implements IStorage {
   /**
    * Minimal, non-member view of a collaborative goal so an invite link can
    * render a "Join" action instead of a 404.
+   *
+   * A preview is only returned when the goal is marked public, or when the caller presents the
+   * goal's join code (which is what the invitation link carries). Without that check, any
+   * signed-in person could read every goal's name, amounts, description and creator by
+   * counting up the id.
    */
-  async getCollaborativeGoalPreview(goalId: number): Promise<(CollaborativeGoal & { creator: User; participantCount: number }) | undefined> {
+  async getCollaborativeGoalPreview(goalId: number, joinCode?: string): Promise<(CollaborativeGoal & { creator: User; participantCount: number }) | undefined> {
     const [row] = await db
       .select({ goal: collaborativeGoals, creator: users })
       .from(collaborativeGoals)
@@ -2123,6 +2128,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(collaborativeGoals.id, goalId));
 
     if (!row) return undefined;
+
+    const suppliedCode = (joinCode ?? '').trim();
+    const codeMatches =
+      Boolean(row.goal.joinCode) && suppliedCode === row.goal.joinCode;
+    if (!row.goal.isPublic && !codeMatches) return undefined;
 
     const participants = await db
       .select({ id: collaborativeGoalParticipants.id })

@@ -2442,6 +2442,7 @@
       "invitation_failed": "Failed to send invitation. Please try again.",
       "user_added_to_goal": "User has been added to the goal successfully.",
       "invitation_email_sent": "An invitation email has been sent.",
+      "already_participant": "That person is already in this goal.",
       "invalid_amount": "Invalid Amount",
       "invalid_amount_description": "Please enter a valid contribution amount.",
       "participant_required": "Contributor Required",

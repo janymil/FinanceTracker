@@ -2634,6 +2634,7 @@
       "contribution_added_description": "Tu aporte se registró correctamente.",
       "user_added_to_goal": "El usuario se agregó a la meta correctamente.",
       "invitation_email_sent": "Se envió un correo de invitación.",
+      "already_participant": "Esa persona ya está en esta meta.",
       "joined": "Te uniste a la meta",
       "joined_description": "Ahora puedes aportar a esta meta."
     },

@@ -29,20 +29,33 @@ export interface RateLimitOptions {
   keyFn?: (req: Request) => string | null | undefined;
   /** Stable machine-readable code returned next to the message, so the UI can translate it. */
   code?: string;
+  /**
+   * Keep this bucket when the map is full. Use it for security limits (the admin login lockout):
+   * otherwise the oldest keys are deleted to make room, and a lockout is the oldest key there is.
+   */
+  protectFromEviction?: boolean;
 }
 
 const buckets = new Map<string, Bucket>();
-const MAX_KEYS = 10_000;
+/** Buckets eviction may never delete (see `protectFromEviction`). */
+const protectedKeys = new Set<string>();
+let MAX_KEYS = 10_000;
 
 function prune(now: number): void {
   if (buckets.size < MAX_KEYS) return;
   Array.from(buckets.entries()).forEach(([key, bucket]) => {
-    if (bucket.resetAt <= now) buckets.delete(key);
+    if (bucket.resetAt <= now) {
+      buckets.delete(key);
+      protectedKeys.delete(key);
+    }
   });
-  // Still full of live buckets: drop the oldest third so memory cannot grow forever.
+  // Still full of live buckets: drop the oldest third so memory cannot grow forever — but never
+  // a protected one. Before this, a flood of unrelated keys deleted the global admin-login
+  // bucket and the lockout reset itself.
   if (buckets.size >= MAX_KEYS) {
     let removed = 0;
     for (const key of Array.from(buckets.keys())) {
+      if (protectedKeys.has(key)) continue;
       buckets.delete(key);
       if (++removed >= Math.floor(MAX_KEYS / 3)) break;
     }
@@ -85,6 +98,7 @@ export function rateLimit(options: RateLimitOptions) {
       prune(now);
 
       const key = `${keyPrefix}:${clientKey(req, options)}`;
+      if (options.protectFromEviction) protectedKeys.add(key);
       const existing = buckets.get(key);
 
       if (!existing || existing.resetAt <= now) {
@@ -120,4 +134,14 @@ export function rateLimit(options: RateLimitOptions) {
 /** Test helper: clears all buckets so unit tests start from a clean state. */
 export function resetRateLimits(): void {
   buckets.clear();
+  protectedKeys.clear();
+  MAX_KEYS = 10_000;
+}
+
+/**
+ * Test helper: shrink the map so eviction can be exercised without creating 10 000 keys.
+ * Production never calls this.
+ */
+export function setRateLimitCapacityForTests(capacity: number): void {
+  MAX_KEYS = Math.max(1, Math.trunc(capacity));
 }

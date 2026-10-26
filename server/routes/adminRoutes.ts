@@ -26,10 +26,14 @@ export function registerAdminRoutes(app: Express) {
   //   - per client IP: 5 tries / 15 min, stops one attacker;
   //   - one global bucket: 50 tries / hour, caps a distributed attempt that rotates IPs
   //     (and header values, since the IP key comes from CF-Connecting-IP).
+  //
+  // Both buckets are `protectFromEviction`: the limiter deletes the oldest keys when its map is
+  // full, and a lockout is always the oldest key — so a flood of unrelated traffic used to
+  // reset the lockout.
   app.post(
     '/api/admin-analytics/login',
-    rateLimit({ windowMs: 15 * 60 * 1000, max: 5, keyPrefix: 'admin-login', message: 'Too many login attempts. Try again in 15 minutes.' }),
-    rateLimit({ windowMs: 60 * 60 * 1000, max: 50, keyPrefix: 'admin-login-global', keyFn: () => 'global', message: 'Admin login is temporarily locked. Try again later.' }),
+    rateLimit({ windowMs: 15 * 60 * 1000, max: 5, keyPrefix: 'admin-login', message: 'Too many login attempts. Try again in 15 minutes.', protectFromEviction: true }),
+    rateLimit({ windowMs: 60 * 60 * 1000, max: 50, keyPrefix: 'admin-login-global', keyFn: () => 'global', message: 'Admin login is temporarily locked. Try again later.', protectFromEviction: true }),
     adminLogin
   );
 

@@ -70,15 +70,15 @@ export const uploadReceiptHandler = [
   upload.single('receipt'),
   async (req: Request, res: Response) => {
     try {
-      // Check for internal authentication from mobile uploads
-      let userId: string | undefined = req.headers['x-internal-auth'] as string | undefined;
-      
-      // If no internal auth, use standard Clerk authentication
+      // The caller's identity comes from the verified session and nowhere else.
+      //
+      // This handler used to accept `x-internal-auth: <user id>` as the identity, for a
+      // mobile flow that called it over HTTP. That flow now calls the processing functions
+      // directly, so nothing legitimately sends the header — and anyone signed in could
+      // send someone else's id to spend that account's plan and AI allowance.
+      const userId = getUserId(req) ?? undefined;
       if (!userId) {
-        userId = getUserId(req) ?? undefined;
-        if (!userId) {
-          return res.status(401).json({ error: 'Authentication required' });
-        }
+        return res.status(401).json({ error: 'Authentication required' });
       }
 
       if (!req.file) {

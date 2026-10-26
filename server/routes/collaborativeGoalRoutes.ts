@@ -159,12 +159,31 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      // Allow-list, never a spread. A goal's `currentAmount` is progress that participants
+      // trust, and `coverImage`/`joinCode` are shown to or gate everyone else — none of them
+      // may be set by the request body.
+      if (
+        typeof req.body.name !== 'string' || !req.body.name.trim() ||
+        req.body.targetAmount === undefined || req.body.targetAmount === null ||
+        !req.body.targetDate ||
+        typeof req.body.category !== 'string' || !req.body.category
+      ) {
+        return res.status(400).json({ message: 'Name, category, target amount and target date are required' });
+      }
+
       const goalData = {
-        ...req.body,
+        name: req.body.name.trim(),
+        description: typeof req.body.description === 'string' ? req.body.description : null,
+        targetAmount: String(req.body.targetAmount),
+        targetDate: new Date(req.body.targetDate),
+        category: req.body.category,
+        challengeType: typeof req.body.challengeType === 'string' && req.body.challengeType
+          ? req.body.challengeType
+          : 'collaborative',
+        isPublic: req.body.isPublic === true,
         createdBy: userId,
-        targetDate: new Date(req.body.targetDate), // Convert string back to Date object
       };
-      
+
       const goal = await storage.createCollaborativeGoal(goalData);
       return res.json(goal);
     } catch (error) {
@@ -198,8 +217,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const goal = await storage.getCollaborativeGoal(goalId, userId);
       if (!goal) {
         // Not a member yet: return a minimal preview so the invite link can
-        // offer a "Join" action (previously this was a hard 404).
-        const preview = await storage.getCollaborativeGoalPreview(goalId);
+        // offer a "Join" action (previously this was a hard 404). The preview is only
+        // available for a public goal or when the link carries the join code.
+        const inviteCode = typeof req.query.code === 'string' ? req.query.code : undefined;
+        const preview = await storage.getCollaborativeGoalPreview(goalId, inviteCode);
         if (!preview) {
           return res.status(404).json({ message: "Goal not found" });
         }
@@ -263,7 +284,26 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       }
       const goalId = parseInt(req.params.id);
       
-      const goal = await storage.updateCollaborativeGoal(goalId, userId, req.body);
+      // Same allow-list as creation: `currentAmount` is progress, not an editable field, and
+      // an outside `coverImage` URL would be a beacon on a page every participant opens.
+      const editable: Record<string, any> = {};
+      if (typeof req.body.name === 'string' && req.body.name.trim()) editable.name = req.body.name.trim();
+      if (req.body.description === null || typeof req.body.description === 'string') {
+        editable.description = req.body.description;
+      }
+      if (req.body.targetAmount !== undefined) editable.targetAmount = String(req.body.targetAmount);
+      if (req.body.targetDate !== undefined) editable.targetDate = new Date(req.body.targetDate);
+      if (typeof req.body.category === 'string' && req.body.category) editable.category = req.body.category;
+      if (typeof req.body.isPublic === 'boolean') editable.isPublic = req.body.isPublic;
+      if (typeof req.body.status === 'string' && ['active', 'completed', 'cancelled'].includes(req.body.status)) {
+        editable.status = req.body.status;
+      }
+
+      if (Object.keys(editable).length === 0) {
+        return res.status(400).json({ message: "No supported fields to update" });
+      }
+
+      const goal = await storage.updateCollaborativeGoal(goalId, userId, editable);
       return res.json(goal);
     } catch (error) {
       log.error("Error updating collaborative goal:", error);
@@ -380,69 +420,43 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(404).json({ message: "Inviter not found" });
       }
 
-      // Check if user with this email already exists
+      // One response shape for every invite, whatever the address turns out to be.
+      //
+      // This route used to answer `existingUser: true` and add that account to the goal on the
+      // spot. Both were wrong: the answer told the inviter whether an address has a Kaptia
+      // account (an account-existence oracle), and the goal gained a member who never agreed.
+      // An invitation now only sends the link with the join code; joining is the recipient's
+      // decision.
       const existingUser = await storage.getUserByEmail(email);
-      
+
       if (existingUser) {
-        // User exists - check if they're already a participant
         const existingParticipant = await storage.getGoalParticipant(goalId, existingUser.id);
         if (existingParticipant) {
-          return res.status(400).json({ message: "User is already a participant in this goal" });
+          // The creator can see the participant list already, so this reveals nothing new, and
+          // a second invitation would only add noise to the recipient's inbox.
+          return res.json({ success: true, emailSent: false });
         }
-        
-        // User exists but not in this goal - add them directly to the goal
-        try {
-          const participant = await storage.joinCollaborativeGoal(goalId, existingUser.id);
-          
-          // Send notification email to existing user
-          const { sendGoalInvitationEmail } = await import('../emailService');
-          const goalUrl = `${process.env.APP_URL || 'https://kaptia.app'}/collaborative-goals/${goalId}?code=${encodeURIComponent(goal.joinCode ?? "")}`;
-          
-          const emailSent = await sendGoalInvitationEmail({
-            recipientEmail: email,
-            recipientName: `${existingUser.firstName} ${existingUser.lastName}`,
-            inviterName: `${inviter.firstName} ${inviter.lastName}`,
-            goalName: goal.name,
-            goalDescription: goal.description || '',
-            targetAmount: goal.targetAmount,
-            targetDate: goal.targetDate,
-            goalUrl,
-            isExistingUser: true
-          });
-          
-          return res.json({ 
-            existingUser: true, 
-            email: email,
-            participant,
-            emailSent
-          });
-        } catch (error) {
-          return res.status(400).json({ message: getLocalizedMessage(userLanguage, 'userAlreadyPartOfGoal') });
-        }
-      } else {
-        // User doesn't exist - send invitation email
-        const { sendGoalInvitationEmail } = await import('../emailService');
-        const goalUrl = `${process.env.APP_URL || 'https://kaptia.app'}/collaborative-goals/${goalId}?code=${encodeURIComponent(goal.joinCode ?? "")}`;
-        
-        const emailSent = await sendGoalInvitationEmail({
-          recipientEmail: email,
-          recipientName: 'there', // Generic greeting for new users
-          inviterName: `${inviter.firstName} ${inviter.lastName}`,
-          goalName: goal.name,
-          goalDescription: goal.description || '',
-          targetAmount: goal.targetAmount,
-          targetDate: goal.targetDate,
-          goalUrl,
-          isExistingUser: false
-        });
-        
-        return res.json({ 
-          existingUser: false, 
-          email: email,
-          message: getLocalizedMessage(userLanguage, 'invitationEmailSent'),
-          emailSent
-        });
       }
+
+      const { sendGoalInvitationEmail } = await import('../emailService');
+      const goalUrl = `${process.env.APP_URL || 'https://kaptia.app'}/collaborative-goals/${goalId}?code=${encodeURIComponent(goal.joinCode ?? "")}`;
+
+      const emailSent = await sendGoalInvitationEmail({
+        recipientEmail: email,
+        // The name only greets the recipient in their own copy of the mail.
+        recipientName: existingUser
+          ? `${existingUser.firstName ?? ''} ${existingUser.lastName ?? ''}`.trim() || 'there'
+          : 'there',
+        inviterName: `${inviter.firstName} ${inviter.lastName}`,
+        goalName: goal.name,
+        goalDescription: goal.description || '',
+        targetAmount: goal.targetAmount,
+        targetDate: goal.targetDate,
+        goalUrl,
+        isExistingUser: Boolean(existingUser)
+      });
+
+      return res.json({ success: true, emailSent });
     } catch (error: any) {
       log.error("Error inviting user:", error);
       const lang = getUserLanguage(req);

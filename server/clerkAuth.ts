@@ -37,7 +37,7 @@ export const setupClerkAuth = (app: any) => {
   });
 
   // Add Clerk middleware only for routes that need authentication
-  app.use((req: any, res: any, next: any) => {
+  app.use(function clerkAuthGate(req: any, res: any, next: any) {
     // Skip Clerk middleware for Vite internal requests, static assets, webhooks, and public SEO routes
     if (
       req.path.startsWith('/@') ||
@@ -46,7 +46,7 @@ export const setupClerkAuth = (app: any) => {
       req.path.startsWith('/uploads/') ||
       req.path.startsWith('/api/clerk-webhooks') ||
       req.path.startsWith('/api/stripe-webhook') ||
-      req.path.includes('.') || // Static files (css, js, images, etc.)
+      isStaticAssetPath(req.path) ||
       req.path === '/robots.txt' ||
       req.path === '/sitemap.xml'
     ) {
@@ -57,9 +57,33 @@ export const setupClerkAuth = (app: any) => {
   });
 };
 
+/**
+ * A path is a static file only when its last segment ends in an asset extension.
+ *
+ * This used to be `req.path.includes('.')`, which also skipped every route whose path carried
+ * a dotted value — `/api/learning/merchant/amazon.com` arrived with no `req.auth` and a
+ * signed-in caller was answered 401. A merchant name is not a stylesheet.
+ */
+const STATIC_FILE_EXTENSION =
+  /\.(?:css|js|mjs|cjs|map|json|webmanifest|png|jpe?g|gif|svg|webp|avif|ico|bmp|woff2?|ttf|otf|eot|txt|xml|php|html?)$/i;
+
+export const isStaticAssetPath = (requestPath: string): boolean =>
+  STATIC_FILE_EXTENSION.test(requestPath);
+
 // Middleware to require authentication
 export const isAuthenticated = (req: any, res: Response, next: NextFunction) => {
   try {
+    // `req.auth` missing means Clerk was never mounted ahead of this route. That is a wiring
+    // bug, not an anonymous visitor: answering 401 turns a whole feature into "sign in again"
+    // and hides the real cause (the QR upload lived like that in production).
+    if (typeof req.auth !== 'function') {
+      log.error(
+        '[AUTH] Clerk middleware is not mounted before this route, so no request can be authenticated. ' +
+          'Mount setupClerkAuth(app) before registering routes.'
+      );
+      return res.status(503).json({ message: 'Authentication is not available', code: 'auth_not_mounted' });
+    }
+
     // Use req.auth() as a function (new Clerk API)
     const auth = req.auth();
     

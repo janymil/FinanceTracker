@@ -273,18 +273,43 @@ export function registerGoalRoutes(app: Express) {
         return res.status(403).json({ message: "Expense reminder not found or access denied" });
       }
 
-      const updateData = {
-        ...req.body,
-        categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
-        amount: req.body.amount ? req.body.amount.toString() : null,
-        dueDate: req.body.dueDate ? new Date(req.body.dueDate) : undefined,
-        recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : undefined,
-      };
+      // Explicit allow-list, and the verified id travels with the update.
+      //
+      // Two bugs lived here: the id was missing from the object, so storage compared
+      // `undefined !== ownerId` and threw on *every* edit (the dashboard's "mark done" always
+      // failed); and spreading the body meant a payload that mentioned only `isCompleted`
+      // also wrote `categoryId: null` and `amount: null` over the stored values.
+      const updateData: any = { userId };
 
-      // Remove undefined values
-      Object.keys(updateData).forEach(key => 
-        updateData[key] === undefined && delete updateData[key]
-      );
+      if (typeof req.body.title === 'string' && req.body.title.trim()) updateData.title = req.body.title.trim();
+      if (req.body.description === null || typeof req.body.description === 'string') {
+        updateData.description = req.body.description;
+      }
+      if (req.body.amount !== undefined) {
+        updateData.amount = req.body.amount === null || req.body.amount === '' ? null : String(req.body.amount);
+      }
+      if (req.body.dueDate !== undefined) updateData.dueDate = new Date(req.body.dueDate);
+      if (typeof req.body.isRecurring === 'boolean') updateData.isRecurring = req.body.isRecurring;
+      if (req.body.recurringFrequency !== undefined) updateData.recurringFrequency = req.body.recurringFrequency;
+      if (req.body.recurringEndDate !== undefined) {
+        updateData.recurringEndDate = req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null;
+      }
+      if (req.body.reminderDaysBefore !== undefined) {
+        const days = Number(req.body.reminderDaysBefore);
+        if (Number.isFinite(days) && days >= 0) updateData.reminderDaysBefore = Math.trunc(days);
+      }
+      if (typeof req.body.isActive === 'boolean') updateData.isActive = req.body.isActive;
+      if (typeof req.body.isCompleted === 'boolean') updateData.isCompleted = req.body.isCompleted;
+      if (req.body.categoryId !== undefined) {
+        updateData.categoryId = req.body.categoryId ? parseInt(req.body.categoryId) : null;
+      }
+      if (req.body.paymentUrl !== undefined) updateData.paymentUrl = req.body.paymentUrl || null;
+      if (req.body.referenceNote !== undefined) updateData.referenceNote = req.body.referenceNote || null;
+
+      // `userId` is always present, so it cannot be what makes an edit "supported".
+      if (Object.keys(updateData).filter((key) => key !== 'userId').length === 0) {
+        return res.status(400).json({ message: "No supported fields to update" });
+      }
 
       const reminder = await storage.updateExpenseReminder(id, updateData);
       return res.json(reminder);

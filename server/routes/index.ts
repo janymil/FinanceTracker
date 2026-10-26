@@ -29,7 +29,7 @@ import demoRoutes from "../demoRoutes.js";
 import courseRoutes from "../courseRoutes.js";
 import { DataEncryption } from "../encryption.js";
 import { getEmailTransportStatus } from "../emailService.js";
-import { isAuthenticated } from "../clerkAuth.js";
+import { isAuthenticated, setupClerkAuth } from "../clerkAuth.js";
 import { aiGuard } from "../aiAccess.js";
 import { checkAiGateway } from "../aiGatewayHealth";
 import { rateLimit } from "../middleware/rateLimit.js";
@@ -37,7 +37,6 @@ import { db } from "../db.js";
 import { sql } from "drizzle-orm";
 
 import { registerTTSRoutes } from "./ttsRoutes.js";
-import { registerLearningRoutes } from "./learningRoutes.js";
 import { registerVoiceRoutes } from "./voiceRoutes.js";
 import groqVoiceRoutes from "./groqVoiceRoutes.js";
 import mistralVoiceRoutes from "./mistralVoiceRoutes.js";
@@ -45,6 +44,12 @@ import { log } from '../logger';
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Clerk must be mounted before any route module registers, so `req.auth` exists in every
+  // handler that asks for it. It used to be mounted inside registerAuthRoutes, which runs
+  // *after* registerMobileUploadRoutes — so the QR upload answered 401 on every request and
+  // a unit test that mocked this module hid it. `tests/unit/authMountOrder.test.ts` guards it.
+  setupClerkAuth(app);
+
   // Server-side HTTP outcome capture (blueprint 07 §17.2): a 5xx that no `catch` reported
   // still reaches this listener, so API-only callers are not invisible. Registered before
   // any route, because `finish` only fires for responses that went through here.
@@ -145,7 +150,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerPDFRoutes(app);
 
   registerTTSRoutes(app);
-  registerLearningRoutes(app);
   registerVoiceRoutes(app);
   
   // Groq voice processing routes — paid per request and previously open to anyone.

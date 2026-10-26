@@ -239,15 +239,25 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
   return result;
 }
 
-// Store active SSE connections for progress updates
+// Store active SSE connections for progress updates.
+//
+// The key includes the account. The session id is chosen by the client, so two people can
+// legitimately pick the same one; keyed on the id alone, whoever connected second took the
+// stream over and the first person silently stopped receiving updates.
 const progressConnections = new Map<string, any>();
+const progressKey = (userId: string, sessionId: string) => `${userId}:${sessionId}`;
 
 export function registerImportRoutes(app: Express) {
   
   // SSE endpoint for PDF processing progress
-  app.get('/api/import/pdf-progress/:sessionId', isAuthenticated, (req, res) => {
+  app.get('/api/import/pdf-progress/:sessionId', isAuthenticated, (req: any, res) => {
     const { sessionId } = req.params;
-    
+    const userId = getUserId(req);
+    if (!userId || typeof sessionId !== 'string' || !sessionId || sessionId.length > 128) {
+      return res.status(400).json({ error: 'Invalid progress session' });
+    }
+    const key = progressKey(userId, sessionId);
+
     log.info(`[PDF Progress] New SSE connection for session: ${sessionId}`);
     
     try {
@@ -256,12 +266,10 @@ export function registerImportRoutes(app: Express) {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Cache-Control'
       });
 
       // Store connection for this session
-      progressConnections.set(sessionId, res);
+      progressConnections.set(key, res);
       log.info(`[PDF Progress] Connection stored for session: ${sessionId}`);
 
       // Send initial connection confirmation
@@ -276,13 +284,13 @@ export function registerImportRoutes(app: Express) {
       // Clean up on client disconnect
       req.on('close', () => {
         log.info(`[PDF Progress] Client disconnected for session: ${sessionId}`);
-        progressConnections.delete(sessionId);
+        progressConnections.delete(key);
       });
       
       // Handle errors
-      req.on('error', (error) => {
+      req.on('error', (error: any) => {
         log.error(`[PDF Progress] Request error for session ${sessionId}:`, error);
-        progressConnections.delete(sessionId);
+        progressConnections.delete(key);
       });
       
     } catch (error) {
@@ -610,7 +618,9 @@ export function registerImportRoutes(app: Express) {
       }
 
       // Get session ID for progress tracking
-      const sessionId = req.headers['x-session-id'] as string || Date.now().toString();
+      const rawSessionId = req.headers['x-session-id'] as string || Date.now().toString();
+      // Same 128-character ceiling the progress stream enforces, so a stream can always match.
+      const sessionId = rawSessionId.length <= 128 ? rawSessionId : Date.now().toString();
       const language = req.headers['x-user-language'] as string || 'en-us';
 
       log.info(`Processing PDF bank statement for user ${userId}, session ${sessionId}, file size: ${req.file.size} bytes`);
@@ -636,7 +646,7 @@ export function registerImportRoutes(app: Express) {
 
       // Progress callback function
       const onProgress = (progress: any) => {
-        const connection = progressConnections.get(sessionId);
+        const connection = progressConnections.get(progressKey(userId, sessionId));
         if (connection) {
           connection.write(`data: ${JSON.stringify(progress)}\n\n`);
         }

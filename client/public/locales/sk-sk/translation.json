@@ -2512,6 +2512,7 @@
       "contribution_added_description": "Váš príspevok bol zaznamenaný.",
       "user_added_to_goal": "Používateľ bol úspešne pridaný k cieľu.",
       "invitation_email_sent": "Pozvánka bola odoslaná e-mailom.",
+      "already_participant": "Táto osoba je už v tomto cieli.",
       "joined": "Pripojili ste sa k cieľu",
       "joined_description": "Teraz môžete prispievať k tomuto cieľu."
     },

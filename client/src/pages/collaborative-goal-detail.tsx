@@ -132,7 +132,13 @@ export default function CollaborativeGoalDetailPage() {
     try {
       setIsLoading(true);
       const headers = await getAuthHeaders();
-      const response = await fetch(`/api/collaborative-goals/${id}`, { headers });
+      // An invitation link carries ?code=…; the preview for a non-member is only returned when
+      // the goal is public or that code is presented.
+      const inviteCode = new URLSearchParams(window.location.search).get('code');
+      const goalUrl = inviteCode
+        ? `/api/collaborative-goals/${id}?code=${encodeURIComponent(inviteCode)}`
+        : `/api/collaborative-goals/${id}`;
+      const response = await fetch(goalUrl, { headers });
       if (response.ok) {
         const data = await response.json();
         setGoal(data);
@@ -254,15 +260,14 @@ export default function CollaborativeGoalDetailPage() {
         const result = await response.json();
         toast({
           title: t('collaborative_goal_detail.messages.invitation_sent'),
-          description: result.existingUser 
-            ? t('collaborative_goal_detail.messages.user_added_to_goal') 
-            : t('collaborative_goal_detail.messages.invitation_email_sent')
+          // The answer is the same whether or not the address has an account, so this form
+          // cannot be used to check who is a customer.
+          description: result.emailSent
+            ? t('collaborative_goal_detail.messages.invitation_email_sent')
+            : t('collaborative_goal_detail.messages.already_participant', 'That person is already in this goal.')
         });
         setInviteEmail("");
         setShowInviteFriends(false);
-        if (result.existingUser) {
-          fetchGoal(); // Refresh to show new participant
-        }
       } else {
         // Handle error response from server
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));

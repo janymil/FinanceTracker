@@ -1,6 +1,6 @@
 import { db } from '../server/db';
 import { merchantLearning, merchantPatterns, categories } from '../shared/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, isNull } from 'drizzle-orm';
 
 export interface MerchantLearningData {
   userId: string;
@@ -68,10 +68,13 @@ export async function recordMerchantLearning(data: MerchantLearningData): Promis
 async function updateMerchantPattern(data: MerchantLearningData): Promise<void> {
   try {
     // Get the category name
+    // Only a *system* category may become a shared pattern. A category row with a user_id is
+    // someone's private label ("Mum's hospital bills"), and copying its name into
+    // merchant_patterns published it to every account in the country.
     const category = await db
       .select({ name: categories.name })
       .from(categories)
-      .where(eq(categories.id, data.correctedCategoryId))
+      .where(and(eq(categories.id, data.correctedCategoryId), isNull(categories.userId)))
       .limit(1);
 
     if (!category[0]) {

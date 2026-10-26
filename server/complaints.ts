@@ -9,6 +9,16 @@ import { rateLimit } from "./middleware/rateLimit";
 import { log } from './logger';
 
 const SUPPORT_ADDRESS = "info@kaptia.app";
+/**
+ * The consumer's copy goes out from a no-reply address, never from the support mailbox.
+ *
+ * The submission form is public and the `email` field is whatever the sender typed, so using
+ * `info@kaptia.app` as the sender let anyone mail their own text to any address under our
+ * support identity (a phishing gift). The address still receives the copy it is legally owed;
+ * replies simply do not come back to the support inbox.
+ */
+const NO_REPLY_ADDRESS =
+  process.env.EMAIL_NO_REPLY || process.env.EMAIL_FROM || "no-reply@kaptia.app";
 const RESPONSE_DAYS = 30;
 
 const trimmed = (max: number) => z.string().trim().min(1).max(max);
@@ -116,7 +126,7 @@ export function registerComplaintRoutes(app: Express) {
         // The consumer must get a copy; the team must get the record. Neither failure
         // loses the complaint, which is already stored.
         const [copySent] = await Promise.all([
-          sendEmail({ to: data.email, from: SUPPORT_ADDRESS, subject, text }),
+          sendEmail({ to: data.email, from: NO_REPLY_ADDRESS, subject, text }),
           sendEmail({ to: process.env.EMAIL_TO || SUPPORT_ADDRESS, from: SUPPORT_ADDRESS, subject, text }),
         ]);
 

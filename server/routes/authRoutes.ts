@@ -1,7 +1,7 @@
 import { log } from '../logger';
 import type { Express } from "express";
 import { isValidTimeZone } from "@shared/timezones";
-import { setupClerkAuth, isAuthenticated, getUserId } from "../clerkAuth";
+import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage, type ClerkProfile } from "../storage";
 import { resolveStoredCurrency } from "../../shared/currencies";
 
@@ -43,8 +43,9 @@ export async function getVerifiedClerkProfile(userId: string): Promise<Partial<C
 }
 
 export function registerAuthRoutes(app: Express) {
-  // Auth middleware
-  setupClerkAuth(app);
+  // Clerk itself is mounted by registerRoutes() before any route module, so every handler that
+  // needs `req.auth` is guaranteed to have it. Do not mount it here: this function runs after
+  // registerMobileUploadRoutes, which is exactly how the QR upload came to be unreachable.
 
   // Explicitly block old auth endpoints that no longer exist
   app.get('/api/login', (req, res) => {

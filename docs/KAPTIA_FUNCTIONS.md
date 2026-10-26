@@ -172,7 +172,7 @@ Pages: `pages/budget.tsx`, `pages/categories.tsx`. Backend: `routes/budgetRoutes
 | Custom category create / rename / delete / recolor | `POST/PUT/DELETE /api/categories` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Seed default categories for a new user | `POST /api/init-categories` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Category name localization (EN/ES/SK) | `server/categoryTranslations.ts` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
-| AI category matching for imported/voice data | `server/categoryMatcher.ts`, `routes/learningRoutes.ts` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
+| AI category matching for imported/voice data | `server/categoryMatcher.ts`, `lib/merchantLookup.ts` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 
 ## 6. Goals (personal & shared)
 
@@ -236,7 +236,6 @@ All AI wrappers live in `server/openai.ts` (with `openaiClient.ts`, `mistralClie
 | 9 | Mascot & help chat | Chat assistant ("help-chat"), mascot messages & toggle | `POST /api/help-chat`, `POST /api/mascot/generate`, `POST /api/mascot/toggle` | OpenAI | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) |
 | — | Voice extraction | Turns a spoken sentence into `{amount, description, category, date, type}` | `POST /api/voice/parse`, `POST /api/transcribe-and-parse` | Mistral → OpenAI fallback | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) |
 | — | Bank statement parsing | Extracts transactions from statement text | called by `/api/import/pdf-statement` | OpenAI or Mistral | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) |
-| — | Transaction learning | Learns merchant → category mapping per user | `/record`, `/merchant/:name`, `/merchants/:country`, `/analytics` (`learningRoutes.ts`) | DB only | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | — | Text-to-speech | Reads AI tips aloud | `POST /api/tts/speak` | OpenAI `tts-1` (ElevenLabs only for demo videos) | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) |
 | — | Receipt OCR | Reads a receipt image and extracts vendor/amount/date/line items | `POST /api/upload-receipt` | Mistral OCR → Google Vision | ![configured](https://img.shields.io/badge/configured-1f883d?style=flat-square) |
 | — | AI processor microservice | Optional standalone service used by #3 | `GET /health`, `POST /execute-gpt-task`, `/generate-financial-tip`, `/generate-daily-recommendation`, `/api/ai/voice-extract` | OpenAI / Mistral / DeepSeek keys | ![partial](https://img.shields.io/badge/partial-8b949e?style=flat-square) optional, disabled by default — see §18.1 |
@@ -271,14 +270,20 @@ Pages: `pages/pricing.tsx`, `pages/subscribe.tsx`, `pages/redeem.tsx`. Backend: 
 
 ## 12. Courses / learning content
 
-Page: `pages/Courses.tsx`. Backend: `routes/learningRoutes.ts`, `server/courseRoutes.ts`, `server/courseContentGenerator.ts`.
+Page: `pages/Courses.tsx`. Backend: `server/courseRoutes.ts` (progress and exercise completion, both authenticated).
 
 | Function | Details | Status |
 |---|---|---|
 | Course catalog & lessons | DB-backed | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Progress tracking | DB-backed | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
-| Content generation helpers | `courseContentGenerator.ts` | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) needs OpenAI |
-| Transaction-merchant learning | `learningRoutes.ts` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
+
+**Removed 2026-10-26:** `GET /api/courses/content` and `GET /api/courses/badges` generated their
+content with an AI call on every request, with no sign-in, no rate limit and no cache, and no page
+called either one. The generator module was deleted with them. The same commit removed
+`routes/learningRoutes.ts`: its endpoints answered any signed-in caller with every account's
+merchant→category corrections, and one account could write a pattern for a whole country.
+Merchant lookup still reads the built-in merchant data, and only a system category (no owner) can
+become a shared pattern.
 
 ## 13. Admin analytics
 
