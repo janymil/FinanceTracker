@@ -179,6 +179,26 @@ export function FinancialMascot() {
 
 
   // Generate new mascot
+  /**
+   * Why the picture was not created, in the person's language. The server answers with a
+   * stable code for a switched-off account, a free plan, a spent allowance or a rate limit,
+   * so those no longer look like the same broken button.
+   */
+  const generateFailureDescription = (code?: string) => {
+    switch (code) {
+      case "plan_required":
+        return t("mascot.plan_required");
+      case "ai_disabled":
+        return t("mascot.ai_disabled");
+      case "ai_quota_exceeded":
+        return t("mascot.quota_exceeded");
+      case "ai_rate_limited":
+        return t("mascot.rate_limited");
+      default:
+        return t("mascot.try_again");
+    }
+  };
+
   const generateMascot = async () => {
     try {
       const token = await window.Clerk?.session?.getToken();
@@ -192,16 +212,32 @@ export function FinancialMascot() {
         body: JSON.stringify({})
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setMascot(data);
-        localStorage.setItem(`mascot_${user?.id}`, JSON.stringify(data));
-        toast({ title: t("mascot.new_generated") });
-      } else {
-        throw new Error("Failed to generate mascot");
+      if (!response.ok) {
+        let code: string | undefined;
+        try {
+          code = (await response.json())?.code;
+        } catch {
+          // A body that is not JSON tells us nothing extra; the generic wording is honest.
+        }
+        toast({
+          title: t("mascot.generate_failed"),
+          description: generateFailureDescription(code),
+          variant: "destructive"
+        });
+        return;
       }
-    } catch (error: any) {
-      toast({ title: t("mascot.generate_failed"), variant: "destructive" });
+
+      const data = await response.json();
+      setMascot(data);
+      localStorage.setItem(`mascot_${user?.id}`, JSON.stringify(data));
+      toast({ title: t("mascot.new_generated") });
+    } catch (error) {
+      // The connection dropped, so the mascot may or may not exist: ask them to try again.
+      toast({
+        title: t("mascot.generate_failed"),
+        description: generateFailureDescription(undefined),
+        variant: "destructive"
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -300,7 +336,14 @@ export function FinancialMascot() {
   };
 
   const currentMood = financialHealth ? getMascotMood(financialHealth.score) : "neutral";
-  const shouldRegenerateMascot = mascot && Math.abs(mascot.healthScore - (financialHealth?.score || 0)) > 20;
+  // Only a mascot that was really generated can be out of date. A new account gets the
+  // default state (no image, score 50), which used to show the warning before any mascot
+  // existed at all.
+  const shouldRegenerateMascot = Boolean(
+    mascot?.lastGenerated &&
+      financialHealth &&
+      Math.abs(mascot.healthScore - financialHealth.score) > 20
+  );
 
   // If mascot is disabled, show a small restore button
   if (mascot && mascot.isEnabled === false) {

@@ -13,6 +13,7 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI, runMeteredAI } from "../../lib/aiProcessor";
+import { generateMascotImage, stableIndexFromId } from "../mascotImage";
 import { annotateEmptyReason } from "../../shared/dailyRecommendations";
 import { isAIFailure, isDegraded } from "../../shared/aiResults";
 import { contextualFallbackTips } from "../../shared/aiFallbacks";
@@ -861,7 +862,6 @@ export function registerAIRoutes(app: Express) {
       };
 
       // Create unique characteristics based on user ID for personalization
-      const userIdNumber = parseInt(userId.slice(-4), 10); // Use last 4 digits of user ID
       const uniqueTraits = [
         "wearing glasses", "with a bow tie", "holding a tiny calculator", "with a small hat",
         "wearing a vest", "with a monocle", "holding coins", "with a briefcase",
@@ -872,42 +872,24 @@ export function registerAIRoutes(app: Express) {
         "red and gold", "teal and cream", "pink and gray", "navy and yellow"
       ];
       
-      const uniqueTrait = uniqueTraits[userIdNumber % uniqueTraits.length];
-      const colorScheme = colorSchemes[userIdNumber % colorSchemes.length];
+      const uniqueTrait = uniqueTraits[stableIndexFromId(userId, uniqueTraits.length)];
+      const colorScheme = colorSchemes[stableIndexFromId(userId, colorSchemes.length)];
       
       const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood as keyof typeof personalityTraits]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes, ${uniqueTrait}, in ${colorScheme} colors. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, cartoon-like but polished.`;
 
-      // Generate image using DALL-E 3. Metered: image generation is the most expensive single
-      // call in the app, so it must use up allowance like the text features do.
-      const OpenAI = (await import('openai')).default;
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-      const response = await runMeteredAI('mascot-image', userId, user.plan || 'free', () =>
-        openai.images.generate({
-          model: "dall-e-3",
-          prompt: prompt,
-          n: 1,
-          size: "1024x1024",
-          quality: "standard",
-        })
+      // Hero image, metered: image generation is the most expensive single call in the app,
+      // so it must use up allowance like the text features do. The model list and the
+      // "bytes or URL" handling live in server/mascotImage.ts.
+      const generated = await runMeteredAI('mascot-image', userId, user.plan || 'free', () =>
+        generateMascotImage(prompt)
       );
 
-      const tempImageUrl = response.data?.[0]?.url;
-      if (!tempImageUrl) {
-        throw new Error("Failed to generate mascot image - no URL returned from DALL-E 3");
-      }
-
-      // Download the image from DALL-E and store it permanently in Bunny CDN
-      const fetch = (await import('node-fetch')).default;
-      const { bunnyStorage } = await import('../bunnyStorage');
-      
-      const imageResponse = await fetch(tempImageUrl, { signal: AbortSignal.timeout(30_000) });
-      if (!imageResponse.ok) {
-        throw new Error("Failed to download generated image");
-      }
-      
-      const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+      const imageBuffer = generated.bytes;
       const filename = `mascot-${userId}-${Date.now()}.png`;
+      log.info(`Mascot image generated with ${generated.model} (${imageBuffer.length} bytes)`);
+
+      // Store it permanently in Bunny CDN
+      const { bunnyStorage } = await import('../bunnyStorage');
       
       let permanentImageUrl: string;
       
@@ -937,8 +919,11 @@ export function registerAIRoutes(app: Express) {
           log.info(`Mascot image stored locally at: ${permanentImageUrl}`);
         } catch (localError) {
           log.error("Failed to store image locally as well:", localError);
-          // Last resort - use temporary URL
-          permanentImageUrl = tempImageUrl;
+          if (!generated.temporaryUrl) {
+            throw new Error("The generated mascot image could not be stored");
+          }
+          // Last resort - use the provider URL (it expires in about an hour)
+          permanentImageUrl = generated.temporaryUrl;
         }
       }
 
@@ -994,7 +979,7 @@ export function registerAIRoutes(app: Express) {
       return res.json(mascot);
     } catch (error) {
       log.error("Error generating mascot:", error);
-      return res.status(500).json({ message: "Failed to generate mascot" });
+      return res.status(500).json({ message: "Failed to generate mascot", code: "mascot_generation_failed" });
     }
   });
 

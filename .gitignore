@@ -1,5 +1,9 @@
 node_modules
 dist
+# Written by scripts/deploy.sh: the rollback copy of the previous build and the release stamp.
+dist.backup-*
+dist.previous
+.release
 .DS_Store
 server/public
 vite.config.ts.*

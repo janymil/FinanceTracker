@@ -747,6 +747,11 @@
     "generate_prompt": "Click to generate your financial mascot",
     "new_generated": "New mascot generated!",
     "generate_failed": "Failed to generate mascot",
+    "plan_required": "Generating a mascot is included in the Standard and Premium plans.",
+    "ai_disabled": "AI is switched off for this account. Turn it on in Profile to generate a mascot.",
+    "quota_exceeded": "You have used all the AI actions included this month. They reset on the 1st.",
+    "rate_limited": "Several requests arrived at once. Wait a moment and try again.",
+    "try_again": "The mascot could not be created right now. Please try again in a moment.",
     "toggle_failed": "Failed to toggle mascot",
     "show": "Show Mascot",
     "tabs": {

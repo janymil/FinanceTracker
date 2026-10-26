@@ -765,6 +765,11 @@
     "generate_prompt": "Kliknite pre vygenerovanie vášho finančného maskota",
     "new_generated": "Nový maskot vygenerovaný!",
     "generate_failed": "Nepodarilo sa vygenerovať maskota",
+    "plan_required": "Vytvorenie maskota je súčasťou plánov Standard a Premium.",
+    "ai_disabled": "AI je pre tento účet vypnutá. Zapnite ju v profile a maskota vygenerujete.",
+    "quota_exceeded": "Využili ste všetky AI akcie zahrnuté v tomto mesiaci. Obnovia sa 1. dňa.",
+    "rate_limited": "Naraz prišlo viacero požiadaviek. Chvíľu počkajte a skúste to znova.",
+    "try_again": "Maskota sa teraz nepodarilo vytvoriť. Skúste to o chvíľu znova.",
     "toggle_failed": "Nepodarilo sa prepnúť maskota",
     "show": "Zobraziť maskota",
     "tabs": {

@@ -736,6 +736,11 @@
     "generate_prompt": "Haz clic para generar tu mascota financiera",
     "new_generated": "¡Nueva mascota generada!",
     "generate_failed": "Falló al generar mascota",
+    "plan_required": "Generar tu mascota está incluido en los planes Standard y Premium.",
+    "ai_disabled": "La IA está desactivada en esta cuenta. Actívala en tu perfil para generar la mascota.",
+    "quota_exceeded": "Ya usaste todas las acciones de IA incluidas este mes. Se renuevan el día 1.",
+    "rate_limited": "Llegaron varias solicitudes a la vez. Espera un momento y vuelve a intentarlo.",
+    "try_again": "No pudimos crear la mascota en este momento. Vuelve a intentarlo en un momento.",
     "toggle_failed": "Falló al alternar mascota",
     "show": "Mostrar Mascota",
     "tabs": {
