@@ -108,4 +108,59 @@ password, the console is closed until an admin signs in through Clerk with a sec
 If that account is not ready, `ALLOW_LEGACY_ADMIN_PASSWORD=1` in `/var/www/kaptia/.env` and a
 `pm2 reload` re-opens the old door — deliberately, and logged as such.
 
+## Second wave — the same day, after "do everything possible"
+
+Four items that were described as "still open, needs a human" turned out to be things I could do
+here. All four are done, deployed and pushed.
+
+| Item | What was actually wrong | What it is now |
+|---|---|---|
+| Backups | The timer was not installed — **and the job could never have worked**: `pg_dump` was absent, and the script put the whole connection string in `PGDATABASE`, which libpq reads as a database *name*, so it tried the local socket. | Client 17 installed (server is 17, the distribution ships 16), `libpqEnv()` decomposes the URL, the unit runs daily at 03:15, first archive taken and verified. |
+| Restore | Never attempted. | Performed into a throwaway PostgreSQL 17 cluster, `dr:verify` PASS, logged in `docs/dr-drill-log.md` with the exact commands. |
+| Key rotation | Impossible: no key id in the ciphertext, so rotation meant one risky window. | `ENCRYPTION_KEY_PREVIOUS` lets the old key read while the new one writes; rotation is three watchable steps. 7 tests. |
+| Duplicate money writes | The interface blocked a double tap; a retry did not. | `Idempotency-Key` + partial unique index; a replay returns the original row. Wired into quick add; the other four creation paths are listed below. |
+
+Also: **request ids**. Every request now carries one (reused from the edge when present), on the
+response and in every log line and error record — `GET /api/health 200 in 3ms [req …-EWR]`. Before
+this, a support report could not be traced to a request at all.
+
+### What the drill found about production itself
+
+2 users, 16 categories, **0 transactions, 0 budgets**. What has real volume is billing metadata, the
+error records and AI usage (1360 job runs, 1011 redeem codes, 32 AI calls). Two consequences:
+
+- every bug fixed in the earlier passes had a blast radius of two accounts;
+- the restore proved the *procedure*, not a customer's history. The first drill after real
+  customers arrive is the one that proves their data can be read.
+
+### Revised score: 74 → 81
+
+| Category | Weight | Was | Now | Why it moved |
+|---|---|---|---|---|
+| Security & access | 20 % | 85 | 86 | rotation is now possible without downtime |
+| Money correctness | 20 % | 82 | 84 | duplicate guard on the main create path |
+| Data integrity & privacy | 15 % | 85 | 88 | idempotent create, key rotation, atomic contributions |
+| Reliability & recovery | 20 % | 55 | 82 | the job runs, a restore is proven, and it is written down |
+| Testing & release safety | 10 % | 75 | 75 | +13 tests, but the browser suite still does not run |
+| Performance & scale | 10 % | 60 | 60 | unchanged — the history screens still download everything |
+| Observability | 5 % | 65 | 78 | request ids; still no metrics and one alert address |
+
+Recovery is 82 and not higher because the only copy of the records is a file **on this host**: a
+disk or host loss takes the originals and the copies together, and Neon's point-in-time window is
+still an unconfirmed setting. That is a credential and a destination, not a code change.
+
+### What is left, in the order it should be done
+
+1. **Move the copies off this host** — `BACKUP_S3_BUCKET` (+ endpoint and keys) in `.env`, no code
+   change, then one run and one restore from the bucket. This is the last item in the "would
+   survive a disaster" row. *Needs credentials.*
+2. **Two sealed copies of `ENCRYPTION_KEY`** — now that rotation works, custody is the only gap.
+   *Owner decision.*
+3. **Browser suite on** (`E2E_ENABLED=true` + a Clerk test instance). Every remaining front-end
+   change — pagination above all — should wait behind it. *Needs a test instance.*
+4. **Pagination** on `/api/transactions`, after (3).
+5. **Wire the idempotency key into the other four creation paths**: `UploadReceipt.tsx`,
+   `UploadReceiptModal.tsx`, `simple-voice-input.tsx`, `FirstRunWelcome.tsx`. Same one-line header.
+6. **Exports in memory**, **CSP nonces**, **metrics**, a second alert address, and a named owner.
+
 
