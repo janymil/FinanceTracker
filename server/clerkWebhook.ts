@@ -21,6 +21,8 @@ interface WebhookStorage {
   createUser(user: any): Promise<unknown>;
   updateUser(id: string, data: any): Promise<unknown>;
   deleteUserCompletely(id: string): Promise<unknown>;
+  /** Stored objects (receipts, mascots, backups). Optional so a test can stub the row delete. */
+  deleteFiles?: (id: string) => Promise<unknown>;
 }
 
 export interface WebhookDeps {
@@ -36,7 +38,19 @@ export interface WebhookDeps {
 
 
 const defaultDeps: WebhookDeps = {
-  loadStorage: async () => (await import('./storage')).storage as unknown as WebhookStorage,
+  // Explicit methods, not a spread: the storage object is a class instance, so its methods live
+  // on the prototype and a spread would hand the webhook an object with none of them.
+  loadStorage: async () => {
+    const { storage } = await import('./storage');
+    const { deleteUserFiles } = await import('./userFiles');
+    return {
+      getUser: (id: string) => storage.getUser(id),
+      createUser: (user: unknown) => storage.createUser(user as never),
+      updateUser: (id: string, data: unknown) => storage.updateUser(id, data as never),
+      deleteUserCompletely: (id: string) => storage.deleteUserCompletely(id),
+      deleteFiles: deleteUserFiles,
+    };
+  },
   verify: async (rawBody, headers, secret) => {
     const { Webhook } = await import('svix');
     return new Webhook(secret).verify(rawBody, headers);
@@ -140,6 +154,15 @@ export function createClerkWebhookHandler(deps: WebhookDeps = defaultDeps) {
             return reply(500, { error: 'Could not stop the subscription; nothing was deleted' });
           }
           await storage.deleteUserCompletely(data.id);
+          // Same reason as the in-app button: the rows are erased here, so this is the last
+          // moment anything still knows which photos and backups belonged to this person.
+          if (storage.deleteFiles) {
+            try {
+              await storage.deleteFiles(data.id);
+            } catch (error) {
+              log.error(`Clerk user.deleted for ${data.id}: stored files could not be removed`, error);
+            }
+          }
           outcome = 'deleted';
           break;
         }

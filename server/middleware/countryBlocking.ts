@@ -159,7 +159,11 @@ async function lookupCountry(ip: string): Promise<GeoInfo | null> {
   if (cached.hit) return cached.info;
 
   try {
-    const geoResponse = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
+    const geoResponse = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`, {
+      // A geo service that never answers must not hold the request open: the guard fails closed
+      // after three seconds instead, which is the documented behaviour for "cannot tell".
+      signal: AbortSignal.timeout(3_000),
+    });
     if (!geoResponse.ok) {
       log.warn('GeoJS lookup failed', { status: geoResponse.status });
       writeGeoCache(ip, null);
@@ -188,6 +192,20 @@ async function lookupCountry(ip: string): Promise<GeoInfo | null> {
     writeGeoCache(ip, null);
     return null;
   }
+}
+
+/**
+ * The two-letter country Cloudflare computed for this request, or `null`.
+ *
+ * `XX` means "the edge could not tell" and `T1` means Tor, so neither is a country to compare
+ * against the list. Anything that is not two letters (a test harness, a hand-written request) is
+ * treated as absent rather than as a value to trust.
+ */
+export function readEdgeCountry(req: Request): string | null {
+  const raw = String(req.headers['cf-ipcountry'] || '').trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(raw)) return null;
+  if (raw === 'XX' || raw === 'T1') return null;
+  return raw;
 }
 
 function refuseForLocation(res: Response) {
@@ -221,31 +239,47 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
     return next();
   }
 
-  // Get client IP
-  const forwarded =
-    (req.headers['x-forwarded-for'] as string) || (req.headers['x-real-ip'] as string) || '';
+  // The visitor's country comes from the edge.
+  //
+  // Cloudflare adds `cf-ipcountry` to every request it proxies, computed where the request
+  // really arrived. This used to be ignored: the code asked a third-party geo service about an
+  // address read from `x-forwarded-for`, which behind this host's proxy is the address of the
+  // *proxy*, so the log recorded "blocked from India" for requests that never came from India
+  // — and a caller who can set that header could choose their own country. The header wins; the
+  // lookup stays only as the fallback for traffic that did not arrive through the edge (local
+  // monitoring, a direct origin call), where no header exists to trust.
+  const edgeCountry = readEdgeCountry(req);
 
-  // Extract first IP if multiple (proxy chain)
-  const clientIP = forwarded.split(',')[0].trim() || req.socket.remoteAddress || '';
+  let countryCode: string | null = edgeCountry;
+  let countryLabel = edgeCountry ?? '';
+  let clientIP = '';
 
-  // Skip for localhost and private ranges: there is no country to look up, and the synthetic
-  // checks come from there.
-  if (
-    !clientIP ||
-    clientIP === '127.0.0.1' ||
-    clientIP === '::1' ||
-    clientIP === 'localhost' ||
-    clientIP.startsWith('::ffff:127.0.0.1') ||
-    clientIP.startsWith('192.168.') ||
-    clientIP.startsWith('10.') ||
-    clientIP.startsWith('172.16.')
-  ) {
-    return next();
-  }
+  if (!countryCode) {
+    // No edge header: fall back to the address we can see. `cf-connecting-ip` is written by the
+    // edge and cannot be forged by the client; `x-forwarded-for` is only a last resort.
+    clientIP =
+      String(req.headers['cf-connecting-ip'] || '').trim() ||
+      String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+      String(req.headers['x-real-ip'] || '').trim() ||
+      req.socket.remoteAddress ||
+      '';
 
-  try {
+    // Skip for localhost and private ranges: there is no country to look up, and the synthetic
+    // checks come from there.
+    if (
+      !clientIP ||
+      clientIP === '127.0.0.1' ||
+      clientIP === '::1' ||
+      clientIP === 'localhost' ||
+      clientIP.startsWith('::ffff:127.0.0.1') ||
+      clientIP.startsWith('192.168.') ||
+      clientIP.startsWith('10.') ||
+      clientIP.startsWith('172.16.')
+    ) {
+      return next();
+    }
+
     const geo = await lookupCountry(clientIP);
-
     if (!geo) {
       if (geoFailClosed()) {
         log.warn('Country could not be determined — refusing the request', { ip: clientIP });
@@ -254,7 +288,12 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
       log.warn('Country could not be determined — allowing the request', { ip: clientIP });
       return next();
     }
+    countryCode = geo.countryCode;
+    countryLabel = geo.country;
+    (req as Request & { geoInfo?: GeoInfo }).geoInfo = geo;
+  }
 
+  try {
     // "We do not know who is blocked" is not the same as "nobody is blocked". A request that
     // arrives while the list is being loaded waits for it here rather than being let through.
     let blockedSet: Set<string>;
@@ -269,18 +308,25 @@ export async function countryBlockingMiddleware(req: Request, res: Response, nex
       return refuseForLocation(res);
     }
 
-    if (blockedSet.has(geo.countryCode)) {
-      log.info(`Blocked access from ${geo.countryCode} (${geo.country}) - IP: ${clientIP}`);
+    if (blockedSet.has(countryCode)) {
+      log.info(`Blocked access from ${countryCode}${clientIP ? ` - IP: ${clientIP}` : ''}`);
 
       return res.status(403).json({
         error: 'Access denied',
         message: 'Access from your country is not available',
-        country: geo.country,
+        country: countryLabel,
       });
     }
 
-    // Add country info to request for analytics
-    (req as Request & { geoInfo?: GeoInfo }).geoInfo = geo;
+    // Add country info to request for analytics.
+    if (!(req as Request & { geoInfo?: GeoInfo }).geoInfo) {
+      (req as Request & { geoInfo?: GeoInfo }).geoInfo = {
+        countryCode,
+        country: countryLabel,
+        city: '',
+        ip: clientIP,
+      };
+    }
     return next();
   } catch (error) {
     // A throw we did not anticipate. Refuse unless the operator asked to fail open: this is a

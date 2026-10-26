@@ -3,6 +3,7 @@ import type { Express } from "express";
 import { isValidTimeZone } from "@shared/timezones";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage, type ClerkProfile } from "../storage";
+import { isUniqueViolation } from "../dbErrors";
 import { resolveStoredCurrency } from "../../shared/currencies";
 
 let clerkClientPromise: Promise<any> | null = null;
@@ -83,11 +84,32 @@ export function registerAuthRoutes(app: Express) {
         if (profile?.email) {
           const emailOwner = await storage.getUserByEmail(profile.email);
           if (emailOwner && emailOwner.id !== userId) {
-            try {
-              user = await storage.adoptUserAccount(emailOwner.id, userId, profile);
-              log.info(`[AUTH] Re-linked data from ${emailOwner.id} to ${userId} (${profile.email})`);
-            } catch (adoptionError) {
-              log.error('[AUTH] Could not re-link existing account:', adoptionError);
+            /*
+             * The address is already on another row, and that row is not ours.
+             *
+             * This used to re-home the whole account onto the new login, by e-mail alone. A
+             * verified address only proves that whoever signs in now controls it — not that they
+             * are the same person. If an address is released (someone changes or loses a domain,
+             * fixes a typo in their profile) and the notice from the sign-in service is lost,
+             * the address stays on the old row; whoever registers it next would inherit the
+             * previous owner's history and paid plan.
+             *
+             * `ALLOW_EMAIL_ACCOUNT_ADOPTION=1` keeps the old behaviour for the one case it was
+             * written for — a database seeded from another instance, where the ids are known to
+             * belong to the same people. It is off by default and must be a deliberate act.
+             */
+            if (process.env.ALLOW_EMAIL_ACCOUNT_ADOPTION === '1') {
+              try {
+                user = await storage.adoptUserAccount(emailOwner.id, userId, profile);
+                log.info(`[AUTH] Re-linked data from ${emailOwner.id} to ${userId} (${profile.email})`);
+              } catch (adoptionError) {
+                log.error('[AUTH] Could not re-link existing account:', adoptionError);
+              }
+            } else {
+              log.warn(
+                `[AUTH] Address ${profile.email} belongs to account ${emailOwner.id}; refusing to ` +
+                  `re-home it onto ${userId}. Support can merge deliberately if this is the same person.`,
+              );
             }
           }
         }
@@ -111,10 +133,40 @@ export function registerAuthRoutes(app: Express) {
             user = await storage.upsertUser(userData);
             log.info(`Created new user in database: ${userId}`);
           } catch (error) {
-            log.error('Error creating user in database:', error);
-            return res.status(500).json({ 
-              message: 'Failed to create user account'
-            });
+            /*
+             * The address is taken by a row we refused to re-home. Refusing to sign in would be
+             * worse than a second account: the person would be locked out of a brand-new login.
+             * The account is created with the placeholder identity instead (the same form rows
+             * created before the webhook existed carry), so nothing of the old account is
+             * exposed, and the warning above tells support what to merge if that is correct.
+             */
+            if (isUniqueViolation(error) && profile?.email) {
+              try {
+                user = await storage.upsertUser({
+                  id: userId,
+                  email: `${userId}@clerk.user`,
+                  firstName: profile.firstName ?? null,
+                  lastName: profile.lastName ?? null,
+                  profileImageUrl: profile.profileImageUrl ?? null,
+                  plan: 'free',
+                  stripeCustomerId: null,
+                  stripeSubscriptionId: null,
+                  settings: null,
+                  currency: null,
+                });
+                log.warn(
+                  `[AUTH] Created ${userId} with a placeholder address: ${profile.email} is held by another account`,
+                );
+              } catch (fallbackError) {
+                log.error('Error creating user with a placeholder address:', fallbackError);
+                return res.status(500).json({ message: 'Failed to create user account' });
+              }
+            } else {
+              log.error('Error creating user in database:', error);
+              return res.status(500).json({
+                message: 'Failed to create user account'
+              });
+            }
           }
         } else if (profile?.email && user.email !== profile.email) {
           try {

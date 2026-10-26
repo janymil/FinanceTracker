@@ -39,6 +39,9 @@ import { POOL_SETTINGS, sslFor, closePool } from './db.js';
 import "./batch-processor.js"; // Initialize batch processing system
 import { startRecurringScheduler } from "./recurringProcessor.js";
 import { startReminderScheduler } from "./reminderNotifier.js";
+// Imported for its side effect only in the past: the singleton existed, the settings screen read
+// "automatic backups: on", and nothing ever created one because this module was never loaded.
+import { backupScheduler } from "./backupScheduler.js";
 
 const app = express();
 
@@ -61,8 +64,22 @@ app.use('/api/stripe-webhook', express.raw({ type: 'application/json' }));
 // Signature-checked in every environment; see server/clerkWebhook.ts.
 app.post('/api/clerk-webhooks', clerkWebhookHandler);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: false, limit: '5mb' }));
+
+// A body larger than the limit is answered as JSON with a sentence a person can act on.
+// Express answered with its own HTML page, so a big import showed a raw English parser error.
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err?.type === 'entity.too.large' || err?.status === 413) {
+    logger.warn('[body] Request body over the limit', { path: req.path, limit: '5mb' });
+    return res.status(413).json({
+      error: 'The file is too large to send in one request',
+      message: 'Split the file into smaller parts and try again.',
+      code: 'payload_too_large',
+    });
+  }
+  return next(err);
+});
 app.use(cookieParser());
 
 // Behind Caddy + Cloudflare: without this, req.ip is the proxy's address (so rate
@@ -396,6 +413,11 @@ app.use((req, res, next) => {
     startRecurringScheduler();
     // E-mails bill reminders when their "remind me N days before" moment arrives.
     startReminderScheduler();
+    // Automatic backups. The scheduler starts in its constructor and this reference keeps the
+    // import from being "unused": that is what happened before — the module was never loaded,
+    // so the switch in the app was on and no backup was ever written.
+    backupScheduler.getScheduledBackups();
+    log('[backup] automatic backup scheduler started');
   });
 
   // `pm2 reload` sends SIGTERM. Finish what is in flight, hand the database connections
@@ -423,6 +445,10 @@ app.use((req, res, next) => {
 process.on('uncaughtException', (err) => {
   logger.error('CRITICAL: Uncaught Exception:', err);
   reportServerError(err, { where: 'process.uncaughtException' });
+  // A process that swallows an uncaught exception keeps serving from an unknown state: a request
+  // half-finished, a transaction left open, a response object nobody owns. pm2 restarts it in two
+  // seconds, which is a known state; staying up is not. The 250 ms gives the report time to leave.
+  setTimeout(() => process.exit(1), 250).unref();
 });
 
 process.on('unhandledRejection', (reason) => {

@@ -1,6 +1,6 @@
 import { db } from '../server/db';
 import { merchantLearning, merchantPatterns, categories } from '../shared/schema';
-import { eq, and, desc, sql, isNull } from 'drizzle-orm';
+import { eq, and, desc, sql, isNull, gte } from 'drizzle-orm';
 
 export interface MerchantLearningData {
   userId: string;
@@ -25,6 +25,16 @@ export interface LearnedMerchantPattern {
   userCount: number;
   source: string;
 }
+
+/**
+ * How many different accounts must make the same correction before it is offered to anyone else.
+ *
+ * A shared pattern used to be created by the first person who corrected a merchant, at 0.7
+ * confidence, and read back for the whole country. One mistyped purchase could therefore hand
+ * everybody else the wrong category, and a single account could quietly teach the app something
+ * false. Below this count the correction stays private to the person who made it.
+ */
+export const PATTERN_MIN_CONFIRMATIONS = 3;
 
 /**
  * Record a user correction for learning
@@ -107,6 +117,7 @@ async function updateMerchantPattern(data: MerchantLearningData): Promise<void> 
         .set({
           userCount: newUserCount,
           confidence: newConfidence.toString(),
+          isUserGenerated: newUserCount < PATTERN_MIN_CONFIRMATIONS,
           lastUpdated: new Date()
         })
         .where(eq(merchantPatterns.id, existingPattern[0].id));
@@ -127,6 +138,8 @@ async function updateMerchantPattern(data: MerchantLearningData): Promise<void> 
         language: data.language,
         userCount: 1,
         confidence: '0.7', // Starting confidence for user-generated patterns
+        // Private until other accounts independently agree (see PATTERN_MIN_CONFIRMATIONS):
+        // one person's correction must not change what everybody else is offered.
         isUserGenerated: true,
         source: 'user_feedback'
       });
@@ -169,7 +182,9 @@ export async function getLearnedMerchantPattern(
       .where(
         and(
           eq(merchantPatterns.merchantName, merchantName.toLowerCase()),
-          eq(merchantPatterns.countryCode, countryCode)
+          eq(merchantPatterns.countryCode, countryCode),
+          // Only patterns several accounts independently arrived at are shared.
+          gte(merchantPatterns.userCount, PATTERN_MIN_CONFIRMATIONS)
         )
       )
       .orderBy(desc(merchantPatterns.userCount), desc(merchantPatterns.confidence))

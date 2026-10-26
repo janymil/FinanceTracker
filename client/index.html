@@ -29,10 +29,11 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     
-    <!-- Typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Typography
+         The web fonts are a third-party request, so they are loaded only after the visitor
+         allows functional cookies (client/src/lib/consent.ts). Loading them here made three
+         external requests before the banner had been answered. -->
+
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -77,11 +78,6 @@
         "price": "0",
         "priceCurrency": "USD",
         "category": "Free"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "150"
       },
       "author": {
         "@type": "Organization",

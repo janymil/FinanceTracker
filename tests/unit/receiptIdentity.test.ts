@@ -80,8 +80,9 @@ describe('POST /api/upload-receipt identity', () => {
     expect(checkAiAccess).toHaveBeenCalledWith('session_user');
     expect(checkAiAccess).not.toHaveBeenCalledWith('victim_user');
     expect(recordAIUsage.mock.calls[0][0]).toMatchObject({ userId: 'session_user' });
-    // The stored object is named after the owner, so a wrong id is a data-integrity bug too.
-    expect(uploadFile.mock.calls[0][0]).toContain('receipt-session_user-');
+    // The object is stored under the owner's folder with a random name, and the read goes through
+    // an owner-only route — a wrong id here is both a data-integrity bug and a privacy one.
+    expect(uploadFile.mock.calls[0][0]).toContain('receipts/session_user/');
   });
 
   it('takes the same identity when no extra header is sent', async () => {

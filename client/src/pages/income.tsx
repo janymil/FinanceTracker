@@ -42,6 +42,7 @@ import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/d
 import TransactionFilters from "@/components/TransactionFilters";
 import { RecurringRulesCard } from "@/components/RecurringRulesCard";
 import SimpleVoiceButton from "@/components/simple-voice-button";
+import { todayLocalISO } from '@/lib/dateUtils';
 
 
 // Helper functions for category localization
@@ -121,7 +122,7 @@ export default function Income() {
   const [newIncome, setNewIncome] = useState({
     amount: "",
     description: "",
-    date: new Date().toISOString().split('T')[0],
+    date: todayLocalISO(),
     type: "income" as "income" | "expense",
     categoryId: "",
     isRecurring: false,
@@ -148,7 +149,7 @@ export default function Income() {
       setNewIncome({
         amount: "",
         description: "",
-        date: new Date().toISOString().split('T')[0],
+        date: todayLocalISO(),
         type: "income" as "income" | "expense",
         categoryId: "",
         isRecurring: false,
@@ -354,7 +355,7 @@ export default function Income() {
     setNewIncome({
       amount: data.amount || "",
       description: data.description || "",
-      date: data.date || new Date().toISOString().split('T')[0],
+      date: data.date || todayLocalISO(),
       type: "income" as "income" | "expense",
       categoryId: data.categoryId || "",
       isRecurring: false,

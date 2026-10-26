@@ -1,6 +1,21 @@
 // Dynamic configuration for AI help assistant
 // This ensures the AI always has current information about the app
 
+import { PLAN_PRICES } from '../shared/pricing';
+
+/**
+ * Prices in the help text come from the one price list.
+ *
+ * They were typed out here as `$9.99/month` while the plan actually costs `$9.90`, so the
+ * assistant — and the help page — quoted a price nobody is charged. `shared/pricing` mirrors the
+ * live amounts, so this can no longer drift.
+ */
+const usd = (amount: number) => `$${amount.toFixed(2)}`;
+const monthlyUsd = (plan: 'standard' | 'premium') => PLAN_PRICES[plan].usd.monthly;
+const yearlyUsd = (plan: 'standard' | 'premium') => PLAN_PRICES[plan].usd.yearly;
+const yearlySaving = (plan: 'standard' | 'premium') =>
+  usd(monthlyUsd(plan) * 12 - yearlyUsd(plan));
+
 export interface AppConfiguration {
   features: FeatureConfig;
   pricing: PricingConfig;
@@ -72,13 +87,13 @@ export function getCurrentAppConfig(): AppConfiguration {
         features: "Perfect for trying out Kaptia with basic expense tracking"
       },
       standard: {
-        monthly: "$4.99/month",
-        yearly: "$49.90/year (save $9.98)",
+        monthly: `${usd(monthlyUsd('standard'))}/month`,
+        yearly: `${usd(yearlyUsd('standard'))}/year (save ${yearlySaving('standard')})`,
         features: "Great for individuals who want comprehensive financial management"
       },
       premium: {
-        monthly: "$9.99/month", 
-        yearly: "$99.90/year (save $19.98)",
+        monthly: `${usd(monthlyUsd('premium'))}/month`, 
+        yearly: `${usd(yearlyUsd('premium'))}/year (save ${yearlySaving('premium')})`,
         features: "Best for power users who need advanced analytics and cloud features"
       }
     },

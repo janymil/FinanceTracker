@@ -172,6 +172,28 @@ export function registerMobileUploadRoutes(app: any) {
         const extractedData = await extractStructuredData(recognizedText);
         log.info('Data extraction completed');
 
+        /*
+         * Meter the phone scan.
+         *
+         * The web upload has always written this row; the QR path did not, so a paying customer
+         * could reach their monthly limit and keep scanning from their phone — the gate above
+         * only asked "is AI allowed on this plan", never "is anything left". Same unit as the web
+         * upload (one receipt = 3 actions, see `shared/aiQuota`), and writing the row must never
+         * fail a scan the person already paid for.
+         */
+        try {
+          await storage.recordAIUsage({
+            userId,
+            functionName: 'receipt-extraction',
+            model: 'gpt-6-luna',
+            plan: userPlan,
+            status: 'success',
+            language: 'en-us',
+          });
+        } catch (usageError) {
+          log.warn('[mobile-upload] Could not record AI usage:', (usageError as Error).message);
+        }
+
         // AI Categorization for standard+ users
         let predictedCategory: string | undefined;
         if (userPlan === 'standard' || userPlan === 'premium') {
@@ -191,11 +213,12 @@ export function registerMobileUploadRoutes(app: any) {
 
         // Upload to Bunny.net if user has appropriate plan
         if (canStore) {
-          const timestamp = Date.now();
-          const fileName = `receipt-${userId}-${timestamp}.${extension}`;
+          const extension = file.mimetype.split('/')[1] || 'jpg';
+          // Random name, and the read goes through the owner-only route (see uploadReceipt).
+          const fileName = `${crypto.randomUUID()}.${extension}`;
           
           try {
-            imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
+            imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype, userId);
             log.info('Image upload to Bunny.net completed');
           } catch (uploadError) {
             log.error('Upload to Bunny.net failed:', uploadError);

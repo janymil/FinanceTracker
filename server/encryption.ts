@@ -190,8 +190,30 @@ export class DataEncryption {
     return plaintext;
   }
 
-  static encryptAmount(amount: string): string {
-    return this.encrypt(amount);
+  /**
+   * Decrypt only what is actually ciphertext.
+   *
+   * New columns are encrypted from the first write, but rows written before that are still
+   * plaintext, and `decrypt()` turns anything it cannot read into `UNREADABLE`. Worse, the old
+   * `isEncrypted()` treated *any* value with exactly one colon as ciphertext, so a plaintext
+   * "Lunch: pizza" would have been destroyed on read. The two schemes are recognisable on their
+   * own: `v2:iv:tag:ciphertext`, or the legacy `hexIv:hexCiphertext`.
+   */
+  static decryptIfEncrypted(value: string | null | undefined): string | null | undefined {
+    if (value === null || value === undefined || value === '') return value;
+    if (!this.isEncryptionEnabled()) return value;
+
+    if (value.startsWith(`${SCHEME_GCM}:`)) return this.decrypt(value);
+    if (/^[0-9a-f]{16,}:[0-9a-f]{2,}$/i.test(value)) return this.decrypt(value);
+    return value;
+  }
+
+  /** Encrypt unless the value is already ciphertext (a re-save must not double-encrypt). */
+  static encryptIfNeeded(value: string | null | undefined): string | null | undefined {
+    if (value === null || value === undefined || value === '') return value;
+    if (value.startsWith(`${SCHEME_GCM}:`)) return value;
+    if (/^[0-9a-f]{16,}:[0-9a-f]{2,}$/i.test(value)) return value;
+    return this.encrypt(value);
   }
 
   static decryptAmount(encryptedAmount: string): string {

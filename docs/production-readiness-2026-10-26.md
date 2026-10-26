@@ -169,6 +169,76 @@ next to the command, or the drill will fail on the day it matters.
 | 24 | No restore has ever been run into a live PostgreSQL and queried | Files restore byte-identically and the dumps open, but "the data is really there" has not been demonstrated. The runbook now pins `pg_restore` 17+ for the Neon dumps; the step itself is still unperformed | A Neon branch or a scratch database, plus the sealed key (item 1) |
 | 25 | The rebuild script and the credentials that open the backup exist **only on the machine being backed up** | `bootstrap.sh` is served from `backup.formatika.dev` — this host — and `R2_*` plus `RESTIC_PASSWORD` live in `/var/www/backup/.env`, which is inside the snapshot. If the disk dies, the one-command rebuild has nothing to download and nothing to authenticate with. The backup is recoverable; the *key to the backup* is not | Owner: put `bootstrap.sh`, the R2 keys and the restic password somewhere offline — password manager or paper, not this machine |
 
+## Second pass — the external review's findings (2026-10-26, later the same day)
+
+An external reviewer produced ~50 findings grouped A–G (security, billing, wrong numbers, privacy,
+AI cost, stability, frontend). Each was re-verified against the code rather than taken on trust;
+the ones already closed stayed closed. What follows is the disposition and the guard that holds it.
+
+### Closed in this pass
+
+| Finding (short) | What changed | Guard |
+|---|---|---|
+| A3 receipts publicly readable | New photos go to `receipts/<userId>/<random>` and are read through `GET /api/receipts/:ownerId/:file` (owner only, 404 otherwise, `private` caching). `cloudStorage.downloadBuffer` exists because the old reader decoded to UTF-8 and corrupts a JPEG. | `tests/unit/readinessRegressions.test.ts` |
+| A4 merchant learning leaks across accounts | A shared pattern needs 3 independent accounts; a private category label can never be published. | `lib/merchantLearning.ts` |
+| A6 invitation e-mails execute user text | `escapeHtml`/`safeSubject`/`safeLinkUrl`; headers stripped, links restricted to http(s). | `readinessRegressions` |
+| A7 takeover through e-mail re-linking | Silent re-homing is off by default (`ALLOW_EMAIL_ACCOUNT_ADOPTION`); a taken address produces a fresh account plus a log line for support. | `server/routes/authRoutes.ts`, `.env.example` |
+| A8 country block read the wrong address | Country comes from `cf-ipcountry`; the geo lookup is a fallback only, prefers `cf-connecting-ip`, and times out in 3 s. | `readinessRegressions` |
+| B7 help text quoted `$9.99` for a `$9.90` plan | Prices derive from `shared/pricing`. | `server/helpConfig.ts` |
+| C1 account deletion failed on custom categories | Reminders and repeating rules are deleted before the categories they reference. | `server/storage.ts` |
+| C2 dates one day early in Peru | `cleanDateValue` stores a plain day at noon UTC; every form default uses `todayLocalISO()`. | `tests/unit/trackingInput.test.ts` |
+| C3 negative balance shown positive | `formatCurrency(amount, { signed })` for the balance. | `financial-cards.tsx` |
+| C4 trends PDF concatenated decimal strings | Totals are summed in integer cents. | `server/routes/pdfRoutes.ts` |
+| C5 money pages showed 0 on failure | Dashboard shows a "could not load your data" banner with retry. | `dashboard.tsx` |
+| C6 `1,234.56` imported as 1 | CSV import uses `shared/money` and a quote-aware line splitter. | `importRoutes.ts` |
+| C7 restore duplicated history / lied about keeping data | Rows are validated before anything is deleted, the "kept" sentence is only sent when the rollback succeeded, and only the newest occurrence keeps the rule. | `exportRoutes.ts` |
+| C8 double-click on money actions | Quick add and goal contributions are blocked while in flight. | `dashboard.tsx`, `collaborative-goal-detail.tsx` |
+| C10 duplicate reminders, decrypted text in logs | Only parent rows are rules, identical lines are de-duplicated, and the description is no longer logged. | `storage.ts` |
+| D1 deletion left photos and backups | `server/userFiles.ts` removes receipts (both naming schemes), mascots and backups, from the app and from the sign-in service's delete. | `userRoutes.ts`, `clerkWebhook.ts` |
+| D2 export was a third of the data | `server/userExport.ts` collects 20+ tables; JSON export is available to every plan (the generated PDF stays Premium). | `tests/unit/trackingRoutes.test.ts` |
+| D3 only two transaction fields were encrypted | `decryptIfEncrypted`/`encryptIfNeeded` + `server/fieldCrypto.ts`: receipt text, recurring descriptions, reminder titles/notes/references, goal names and AI cache payloads are encrypted on write, decrypted on read. | `scripts/backfill-field-encryption.ts` |
+| D5 fonts before consent, analytics pre-ticked, no withdrawal | Fonts load only after functional consent, nothing optional is pre-ticked, and the footer re-opens the banner. | `client/src/lib/consent.ts`, `cookie-banner.tsx` |
+| D6 "personalised financial advice" | Reworded in all three languages. | `client/public/locales/*` |
+| D7 invented 4.8★ rating | Removed from the structured data. | `client/index.html` |
+| E1 phone scans were free | The QR path writes a usage row; `aiGuard` also caps two requests in flight per account. | `mobileUploadRoutes.ts`, `aiAccess.ts` |
+| E2 statement import unbounded | 40-page ceiling (400, not "0 transactions"), one categorisation call per distinct merchant capped at 40. | `lib/pdfProcessor.ts` |
+| F1 no way to tell which build was live | `/api/health` reports `release` and `startedAt`; the deploy writes `.release`. | `server/release.ts`, `scripts/deploy.sh` |
+| F3 imports over ~800 rows refused | 5 MB body limit with a JSON 413 message. | `server/index.ts` |
+| F4 open tabs crashed after a deploy | The deploy copies vanished asset files back into the new build. | `scripts/deploy.sh` |
+| F5 automatic backups never ran | The scheduler module is imported and started. | `server/index.ts` |
+| F6 import preview froze the server | Duplicate detection buckets by amount and skips rows outside the date window before comparing strings. | `shared/duplicateDetection.ts` |
+| G wrong brand, no language switcher, English crash screen, dollar-only calculators | Brand fixed, footer switcher added, crash/loading copy translated without depending on the translation system, calculators translated and priced in the visitor's currency. | `App.tsx`, `footer.tsx`, `Calculator.tsx` |
+
+### Two maintenance scripts added for the leftovers
+
+```bash
+# Encrypt rows written before a column was covered. Dry run first; idempotent; refuses to write
+# with a key that cannot read what the app already encrypted.
+npm run db:encrypt:backfill            # counts only
+npm run db:encrypt:backfill -- --apply # rewrite
+
+# Move receipt photos out of the old predictable public layout. Dry run first. It deletes the old
+# object only after the row that referenced it points at the copy, so it must run against the
+# environment whose rows it rewrites.
+NODE_ENV=production npx tsx scripts/receipts-to-private.ts            # counts only
+NODE_ENV=production npx tsx scripts/receipts-to-private.ts --apply    # move
+```
+
+Verified against the development database: 21 cache rows encrypted, the second run reports 0
+(idempotent), and reading one back through `decryptJsonField` returns the original object. The
+receipt migration's dry run found 2 legacy objects; it was **not** applied here, because the bucket
+is shared with production and the row rewrite has to happen in production at the same time.
+
+### Still open after this pass
+
+1. Run `db:receipts:private --apply` with `NODE_ENV=production`, then stop public access to the
+   bucket — that console setting is the owner's.
+2. Run `db:encrypt:backfill --apply` against production.
+3. Restore is pre-validated and rolled back, but is still not one database transaction.
+4. About 70 candidate hardcoded strings remain, nearly all on `/admin/*`. The debt and income
+   calculators are wrapped for translation, but only the expense one has Spanish and Slovak copy.
+5. The AI concurrency cap is per process, not per cluster (item 9 above still stands).
+
 ## Ordered list for the next working session
 
 1. Install the PostgreSQL client, choose the dump destination, install the timer, and watch one run

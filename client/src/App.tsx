@@ -71,11 +71,53 @@ const RedeemPage = lazy(() => import("@/pages/redeem"));
 const FeaturesPage = lazy(() => import("@/pages/features"));
 
 // Optimized loading state
+//
+// The crash screen and this loader are the two places that must work when everything else is
+// broken, so they do not call `useTranslation`: a failure inside the translation provider would
+// leave a blank page with no sentence at all. They read the language from the URL (or the stored
+// choice) and use their own three short lines.
+const BOOT_COPY = {
+  en: {
+    loading: 'Loading Kaptia…',
+    title: 'Something went wrong',
+    body: 'The page hit an unexpected error. Your data is safe — try again or reload the page.',
+    retry: 'Try again',
+    reload: 'Reload',
+  },
+  es: {
+    loading: 'Cargando Kaptia…',
+    title: 'Algo ha salido mal',
+    body: 'La página ha encontrado un error inesperado. Tus datos están a salvo: inténtalo de nuevo o recarga la página.',
+    retry: 'Reintentar',
+    reload: 'Recargar',
+  },
+  sk: {
+    loading: 'Načítava sa Kaptia…',
+    title: 'Niečo sa pokazilo',
+    body: 'Stránka narazila na neočakávanú chybu. Tvoje údaje sú v bezpečí — skús to znova alebo obnov stránku.',
+    retry: 'Skúsiť znova',
+    reload: 'Obnoviť',
+  },
+} as const;
+
+function bootCopy() {
+  let language = 'en';
+  try {
+    language =
+      window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] ||
+      localStorage.getItem('preferredLanguage') ||
+      'en';
+  } catch {
+    /* storage can be blocked; English is the fallback */
+  }
+  return BOOT_COPY[(language as keyof typeof BOOT_COPY) in BOOT_COPY ? (language as keyof typeof BOOT_COPY) : 'en'];
+}
+
 const AppLoader = () => (
   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-gray-600 dark:text-gray-300">Loading Kaptia...</p>
+      <p className="text-gray-600 dark:text-gray-300">{bootCopy().loading}</p>
     </div>
   </div>
 );
@@ -90,28 +132,29 @@ const PageLoader = () => (
 
 // Last-resort fallback so a single broken component never blanks the whole app
 function AppErrorFallback({ error, resetErrorBoundary }: { error: any; resetErrorBoundary: () => void }) {
+  const copy = bootCopy();
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-md w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 text-center shadow-xl">
         <div className="mx-auto h-12 w-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
           <span className="text-2xl" role="img" aria-label="Warning">!</span>
         </div>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Something went wrong</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{copy.title}</h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-          The page hit an unexpected error. Your data is safe - try again or reload the page.
+          {copy.body}
         </p>
         <div className="flex gap-3 justify-center">
           <button
             onClick={resetErrorBoundary}
             className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
           >
-            Try again
+            {copy.retry}
           </button>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            Reload
+            {copy.reload}
           </button>
         </div>
         {import.meta.env.DEV && error ? (

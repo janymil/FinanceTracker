@@ -53,3 +53,41 @@ export function saveConsent(preferences: CookiePreferences): CookiePreferences {
 export function hasAnalyticsConsent(): boolean {
   return readConsent()?.analytics === true;
 }
+
+export const COOKIE_SETTINGS_EVENT = 'kaptia:cookie-settings';
+
+/**
+ * The web fonts are a third-party request (`fonts.googleapis.com`), so they are not made until
+ * the visitor allows functional cookies. Before this, three font requests left the page on load,
+ * before the banner had even been answered.
+ */
+const FONT_STYLESHEET_ID = 'kaptia-consented-fonts';
+const FONT_HREF =
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap';
+
+export function loadConsentedFonts(preferences: CookiePreferences | null = readConsent()): void {
+  if (!preferences?.functional) return;
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(FONT_STYLESHEET_ID)) return;
+
+  for (const href of ['https://fonts.googleapis.com', 'https://fonts.gstatic.com']) {
+    if (!document.querySelector(`link[rel="preconnect"][href="${href}"]`)) {
+      const preconnect = document.createElement('link');
+      preconnect.rel = 'preconnect';
+      preconnect.href = href;
+      if (href.includes('gstatic')) preconnect.crossOrigin = 'anonymous';
+      document.head.appendChild(preconnect);
+    }
+  }
+
+  const stylesheet = document.createElement('link');
+  stylesheet.id = FONT_STYLESHEET_ID;
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = FONT_HREF;
+  document.head.appendChild(stylesheet);
+}
+
+/** Re-open the banner so a stored decision can be changed or withdrawn. */
+export function openCookieSettings(): void {
+  window.dispatchEvent(new Event(COOKIE_SETTINGS_EVENT));
+}

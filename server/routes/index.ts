@@ -30,6 +30,8 @@ import courseRoutes from "../courseRoutes.js";
 import { DataEncryption } from "../encryption.js";
 import { getEmailTransportStatus } from "../emailService.js";
 import { isAuthenticated, setupClerkAuth } from "../clerkAuth.js";
+import { getUserId as currentUserId } from "../clerkAuth.js";
+import { cloudStorage } from "../cloudStorage.js";
 import { aiGuard } from "../aiAccess.js";
 import { checkAiGateway } from "../aiGatewayHealth";
 import { rateLimit } from "../middleware/rateLimit.js";
@@ -41,6 +43,7 @@ import { registerVoiceRoutes } from "./voiceRoutes.js";
 import groqVoiceRoutes from "./groqVoiceRoutes.js";
 import mistralVoiceRoutes from "./mistralVoiceRoutes.js";
 import { log } from '../logger';
+import { RELEASE_ID, PROCESS_STARTED_AT } from '../release';
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -84,7 +87,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // System status endpoints
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    // `release` answers "is the thing I deployed the thing that is running?" — the question the
+    // old response could not answer. It is a build stamp, not a secret.
+    res.json({
+      status: 'ok',
+      release: RELEASE_ID,
+      startedAt: PROCESS_STARTED_AT,
+      timestamp: new Date().toISOString(),
+    });
   });
 
   // Deep health check for synthetic monitoring: also verifies the database round-trip.
@@ -100,6 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ai = await checkAiGateway();
       res.json({
         status: 'ok',
+        release: RELEASE_ID,
+        startedAt: PROCESS_STARTED_AT,
         timestamp: new Date().toISOString(),
         checks: {
           database: { status: 'ok', latencyMs: Date.now() - startedAt },
@@ -143,6 +155,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     rateLimit({ windowMs: 60 * 60 * 1000, max: 60, keyPrefix: 'receipt', perUser: true }),
     uploadReceiptHandler
   );
+  // Receipt photos, owner only.
+  //
+  // New uploads live under `receipts/<userId>/<random>.<ext>` and are returned as this path
+  // instead of the bucket's permanent public link. The owner check is the session, not the path:
+  // another account's id in the URL answers 404, and the file name is validated so it cannot walk
+  // out of its folder. Rows stored before this change keep their old public link and still render.
+  app.get('/api/receipts/:ownerId/:file', isAuthenticated, async (req: any, res) => {
+    const viewerId = currentUserId(req);
+    const { ownerId, file } = req.params;
+    if (!viewerId || ownerId !== viewerId) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    if (!/^[A-Za-z0-9_-]{1,80}\.[A-Za-z0-9]{1,8}$/.test(String(file))) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    try {
+      const { data, contentType } = await cloudStorage.downloadBuffer(`receipts/${ownerId}/${file}`);
+      res.set({
+        'Content-Type': contentType || 'image/jpeg',
+        'Content-Length': String(data.length),
+        // Private: a shared browser or an intermediary must not keep someone's receipt.
+        'Cache-Control': 'private, max-age=300',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      return res.send(data);
+    } catch (error) {
+      // A missing object and a storage outage look the same to the caller on purpose.
+      log.info('[receipts] Stored image could not be read', {
+        owner: String(ownerId).slice(0, 12),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return res.status(404).json({ error: 'Not found' });
+    }
+  });
+
   registerAIRoutes(app);
   registerAdminRoutes(app);
   // Error Guard: public ingest + /api/admin/watch/* (blueprint 07).

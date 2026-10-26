@@ -40,6 +40,7 @@ import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { parseCsvText, parseStatementTable } from '@shared/statementImport';
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface ExportOptions {
   format: "pdf" | "csv" | "excel" | "json";
@@ -1087,7 +1088,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = downloadUrl;
-        link.download = serverName || `financial-export-${new Date().toISOString().split('T')[0]}.${extension}`;
+        link.download = serverName || `financial-export-${todayLocalISO()}.${extension}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

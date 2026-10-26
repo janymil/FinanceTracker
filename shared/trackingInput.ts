@@ -28,7 +28,23 @@ export function cleanNonNegativeAmount(value: unknown): string | null {
 export function cleanDateValue(value: unknown): Date | null {
   if (value === undefined || value === null || value === '') return null;
   if (typeof value !== 'string' && typeof value !== 'number' && !(value instanceof Date)) return null;
-  const date = new Date(value as string);
+
+  const text = typeof value === 'string' ? value.trim() : '';
+
+  /*
+   * A plain day (`2026-10-01`, what an `<input type="date">` sends) is a calendar date, not an
+   * instant. `new Date("2026-10-01")` parses it as midnight UTC, which is 30 September, 19:00 in
+   * Lima: a salary dated the 1st then counted in the previous month's totals and budgets. Noon
+   * UTC is the same day in every timezone the app serves (±12 h), so the day survives the round
+   * trip. The import path learned this first (`lib/importHelpers.toCalendarDate`); this is the
+   * same rule for manual entry and quick add, which is where it was still wrong.
+   */
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    const noonUtc = new Date(`${text}T12:00:00Z`);
+    return Number.isNaN(noonUtc.getTime()) ? null : noonUtc;
+  }
+
+  const date = new Date(value as string | number | Date);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 

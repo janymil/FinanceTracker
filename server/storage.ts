@@ -86,6 +86,7 @@ import {
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
 import { centsToNumber, parseAmountToCents } from "@shared/money";
+import { decryptField, encryptField, decryptJsonField, encryptJsonField } from './fieldCrypto';
 import { checkSummary } from "@shared/invariants";
 import { calendarDaysRange, resolveTimeZone } from "@shared/timezones";
 import { reportInvariant } from "./errorGuard/report.js";
@@ -559,7 +560,10 @@ export class DatabaseStorage implements IStorage {
       ...transaction,
       // amount stays as string/numeric - NOT encrypted to maintain database compatibility
       description: DataEncryption.encryptDescription(transaction.description),
-      referenceNote: transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null
+      referenceNote: transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null,
+      // The receipt text is a page of someone's shopping: it holds the shop, the items and often
+      // the last four digits of a card. It is encrypted like the description.
+      ocrText: encryptField(transaction.ocrText ?? null)
     };
 
     const [newTransaction] = await db.insert(transactions).values(encryptedTransaction).returning();
@@ -572,7 +576,9 @@ export class DatabaseStorage implements IStorage {
         await db.insert(recurringTransactions).values({
           userId: transaction.userId,
           categoryId: transaction.categoryId,
-          description: transaction.description, // Use original unencrypted description
+          // The rule carries the same merchant text as the transaction, so it is encrypted the
+          // same way. Reads go through `getUserRecurringTransactions`, which decrypts.
+          description: encryptField(transaction.description) as string,
           amount: transaction.amount, // Use original unencrypted amount
           type: transaction.type,
           frequency: transaction.recurringFrequency,
@@ -634,7 +640,8 @@ export class DatabaseStorage implements IStorage {
       ...transaction,
       // amount stays as-is since it's not encrypted
       description: DataEncryption.decryptDescription(transaction.description),
-      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
+      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null,
+      ocrText: (decryptField(transaction.ocrText ?? null) ?? null) as string | null
     }));
   }
 
@@ -678,7 +685,8 @@ export class DatabaseStorage implements IStorage {
     return userTransactions.map(transaction => ({
       ...transaction,
       description: DataEncryption.decryptDescription(transaction.description),
-      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
+      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null,
+      ocrText: (decryptField(transaction.ocrText ?? null) ?? null) as string | null
     }));
   }
 
@@ -716,6 +724,9 @@ export class DatabaseStorage implements IStorage {
         }
         if (transaction.paymentUrl !== undefined) {
             updateFields.paymentUrl = transaction.paymentUrl;
+        }
+        if (transaction.ocrText !== undefined) {
+            updateFields.ocrText = encryptField(transaction.ocrText ?? null);
         }
 
         // Nothing writable left (e.g. the client only echoed the undecryptable marker):
@@ -974,17 +985,32 @@ export class DatabaseStorage implements IStorage {
   async createGoal(goal: InsertGoal): Promise<Goal> {
     const [newGoal] = await db
       .insert(goals)
-      .values(goal)
+      .values({
+        ...goal,
+        name: encryptField(goal.name) as string,
+        description: encryptField(goal.description ?? null),
+      })
       .returning();
-    return newGoal;
+    return this.decryptGoal(newGoal);
+  }
+
+  /** A goal's name and description are the person's own words; they are stored encrypted. */
+  private decryptGoal<T extends { name?: string | null; description?: string | null } | undefined>(goal: T): T {
+    if (!goal) return goal;
+    return {
+      ...goal,
+      name: decryptField(goal.name) as string,
+      description: decryptField(goal.description ?? null),
+    } as T;
   }
 
   async getUserGoals(userId: string): Promise<Goal[]> {
-    return await db
+    const rows = await db
       .select()
       .from(goals)
       .where(eq(goals.userId, userId))
       .orderBy(desc(goals.createdAt));
+    return rows.map((goal) => this.decryptGoal(goal));
   }
 
   async getGoal(id: number, userId: string): Promise<Goal | undefined> {
@@ -994,7 +1020,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(goals.id, id), eq(goals.userId, userId)))
       .limit(1);
 
-    return result[0];
+    return this.decryptGoal(result[0]);
   }
 
   async updateGoal(id: number, userId: string, goal: Partial<InsertGoal>): Promise<Goal> {
@@ -1011,10 +1037,14 @@ export class DatabaseStorage implements IStorage {
 
     const [updatedGoal] = await db
       .update(goals)
-      .set(goal)
+      .set({
+        ...goal,
+        ...(goal.name !== undefined ? { name: encryptField(goal.name) as string } : {}),
+        ...(goal.description !== undefined ? { description: encryptField(goal.description) } : {}),
+      })
       .where(and(eq(goals.id, id), eq(goals.userId, userId)))
       .returning();
-    return updatedGoal;
+    return this.decryptGoal(updatedGoal);
   }
 
   async deleteGoal(id: number, userId: string): Promise<boolean> {
@@ -1229,9 +1259,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Expense reminder operations
+  /**
+   * Bill titles, notes and account references are the person's own words (and often a bank
+   * account number), so they are stored encrypted like a transaction description.
+   */
+  private encryptReminderFields<T extends Partial<InsertExpenseReminder>>(reminder: T): T {
+    const next: any = { ...reminder };
+    if (next.title !== undefined) next.title = encryptField(next.title as string);
+    if (next.description !== undefined) next.description = encryptField(next.description);
+    if (next.referenceNote !== undefined) next.referenceNote = encryptField(next.referenceNote);
+    return next;
+  }
+
+  private decryptReminder<T extends { title?: string | null; description?: string | null; referenceNote?: string | null }>(reminder: T): T {
+    if (!reminder) return reminder;
+    return {
+      ...reminder,
+      title: decryptField(reminder.title ?? null) as string,
+      description: decryptField(reminder.description ?? null),
+      referenceNote: decryptField(reminder.referenceNote ?? null),
+    } as T;
+  }
+
   async createExpenseReminder(reminder: InsertExpenseReminder): Promise<ExpenseReminder> {
-    const [result] = await db.insert(expenseReminders).values(reminder).returning();
-    return result;
+    const [result] = await db.insert(expenseReminders).values(this.encryptReminderFields(reminder)).returning();
+    return this.decryptReminder(result);
   }
 
   async getUserExpenseReminders(userId: string): Promise<ExpenseReminder[]> {
@@ -1240,7 +1292,7 @@ export class DatabaseStorage implements IStorage {
       .from(expenseReminders)
       .where(eq(expenseReminders.userId, userId))
       .orderBy(expenseReminders.dueDate);
-    return results;
+    return results.map((reminder) => this.decryptReminder(reminder));
   }
 
   async getUpcomingExpenseReminders(userId: string, daysBefore: number = 7): Promise<ExpenseReminder[]> {
@@ -1262,7 +1314,7 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(expenseReminders.dueDate);
 
-    return results;
+    return results.map((reminder) => this.decryptReminder(reminder));
   }
 
   async getUserRecurringTransactions(userId: string): Promise<RecurringRuleWithCategory[]> {
@@ -1295,7 +1347,11 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(recurringTransactions.createdAt));
 
-    return results;
+    // The rule's description is the merchant text the person typed; stored encrypted.
+    return results.map((rule) => ({
+      ...rule,
+      description: decryptField(rule.description) as string,
+    }));
   }
 
   async getUpcomingTransactionReminders(userId: string, daysAhead: number = 7): Promise<Array<{
@@ -1363,6 +1419,11 @@ export class DatabaseStorage implements IStorage {
     });
 
     // Get active recurring transactions from main transactions table
+    //
+    // Only the *parent* row is a rule. The repeats the job creates carry `parentTransactionId` and
+    // also have `isRecurring: true`, so every child used to produce its own "upcoming" line —
+    // one monthly bill appeared once for each month already generated, which is why the list
+    // looked like the same payment repeated many times.
     const activeRecurringTransactions = await db
       .select({
         id: transactions.id,
@@ -1380,6 +1441,7 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(transactions.userId, userId),
           eq(transactions.isRecurring, true),
+          isNull(transactions.parentTransactionId),
           or(
             isNull(transactions.recurringEndDate),
             gte(transactions.recurringEndDate, now)
@@ -1412,12 +1474,24 @@ export class DatabaseStorage implements IStorage {
           isRecurring: true,
           source: 'recurring_transaction' as 'future_transaction' | 'recurring_transaction'
         };
-        log.info(`Adding reminder: ${JSON.stringify(reminder)}`);
+        // Never log the reminder itself: it contains the decrypted merchant text, and pm2 keeps
+        // log lines for days. The id and the date are enough to follow the flow.
+        log.info(`Adding reminder for recurring transaction ${recurring.id} due ${nextOccurrence.toISOString()}`);
         reminders.push(reminder);
       }
     });
 
-    return reminders.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+    // One line per (payment, date): two rows describing the same money on the same day are the
+    // same reminder, whichever query produced them.
+    const seen = new Set<string>();
+    const deduped = reminders.filter((reminder) => {
+      const key = `${reminder.title}|${reminder.amount}|${reminder.dueDate.toISOString().slice(0, 10)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return deduped.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   }
 
   private calculateNextOccurrence(lastDate: Date, frequency: string, endDate: Date | null): Date | null {
@@ -1502,10 +1576,10 @@ export class DatabaseStorage implements IStorage {
 
     const [result] = await db
       .update(expenseReminders)
-      .set({ ...reminder, updatedAt: new Date() })
+      .set({ ...this.encryptReminderFields(reminder), updatedAt: new Date() })
       .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, reminder.userId!)))
       .returning();
-    return result;
+    return this.decryptReminder(result);
   }
 
   async deleteExpenseReminder(id: number, userId: string): Promise<void> {
@@ -1741,6 +1815,18 @@ export class DatabaseStorage implements IStorage {
       // Chat the person wrote in other people's goals, before their participation goes
       await db.delete(goalMessages).where(eq(goalMessages.userId, userId));
 
+      // Tables that point at a category must go before the categories they reference: Postgres
+      // refuses to delete a parent that still has children, and `expense_reminders` and
+      // `recurring_transactions` point at `categories` with `ON DELETE no action`. Deleting the
+      // categories first meant every account that had put its own category on a reminder or a
+      // repeating payment failed to delete at all — the subscription was cancelled before this
+      // transaction and the data was never erased.
+      const deletedExpenseReminders = await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId)).execute();
+      log.info(`Deleted expense reminders for user: ${userId}`);
+
+      const deletedRecurringTransactions = await db.delete(recurringTransactions).where(eq(recurringTransactions.userId, userId)).execute();
+      log.info(`Deleted recurring transactions for user: ${userId}`);
+
       // Delete all user transactions first
       const deletedTransactions = await db.delete(transactions).where(eq(transactions.userId, userId)).execute();
       log.info(`Deleted transactions for user: ${userId}`);
@@ -1756,10 +1842,6 @@ export class DatabaseStorage implements IStorage {
       // Delete all user goals
       const deletedGoals = await db.delete(goals).where(eq(goals.userId, userId)).execute();
       log.info(`Deleted goals for user: ${userId}`);
-
-      // Delete all expense reminders
-      const deletedExpenseReminders = await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId)).execute();
-      log.info(`Deleted expense reminders for user: ${userId}`);
 
       // Delete all collaborative goal participants
       const deletedCollaborativeGoalParticipants = await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.userId, userId)).execute();
@@ -1802,7 +1884,7 @@ export class DatabaseStorage implements IStorage {
       await db.delete(importLogs).where(eq(importLogs.userId, userId)).execute();
       await db.delete(aiCache).where(eq(aiCache.userId, userId)).execute();
       await db.delete(paymentFailures).where(eq(paymentFailures.userId, userId)).execute();
-      await db.delete(recurringTransactions).where(eq(recurringTransactions.userId, userId)).execute();
+      // `recurring_transactions` was deleted above, before the categories it references.
 
       // Finally delete the user record
       const deletedUser = await db.delete(users).where(eq(users.id, userId)).execute();
@@ -2769,7 +2851,13 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(aiCache.id, results[0].id));
     
-    return results[0];
+    // The cached prompt and answer are the person's financial history in clear text, so both are
+    // stored encrypted (see `fieldCrypto`). Older rows come back as objects and pass through.
+    return {
+      ...results[0],
+      inputJson: decryptJsonField(results[0].inputJson),
+      outputJson: decryptJsonField(results[0].outputJson),
+    } as AiCache;
   }
 
   async setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError: boolean = false, ttlHours?: number): Promise<void> {
@@ -2801,8 +2889,8 @@ export class DatabaseStorage implements IStorage {
         userId,
         functionKey,
         inputHash,
-        inputJson: input,
-        outputJson: output,
+        inputJson: encryptJsonField(input) as never,
+        outputJson: encryptJsonField(output) as never,
         month,
         isError,
         hitCount: 0,
@@ -2830,7 +2918,12 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(aiCache.lastAccessed))
       .limit(1);
 
-    return entry[0] || null;
+    if (!entry[0]) return null;
+    return {
+      ...entry[0],
+      inputJson: decryptJsonField(entry[0].inputJson),
+      outputJson: decryptJsonField(entry[0].outputJson),
+    };
   }
 
   // Get all AI cache entries (admin function)

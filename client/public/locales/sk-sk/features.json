@@ -19,7 +19,7 @@
   "features.categorization.benefits.custom.title": "Vlastné kategórie",
   "features.categorization.benefits.custom.desc": "Prispôsobuje sa vašim jedinečným vzorom výdavkov a kategóriám",
   "features.contextual.title": "Kontextové finančné tipy",
-  "features.contextual.description": "Dostávajte personalizované finančné poradenstvo založené na vašich špecifických vzoroch transakcií a správaní výdavkov",
+  "features.contextual.description": "Dostávajte personalizované finančné tipy založené na vašich špecifických vzoroch transakcií a správaní výdavkov",
   "features.contextual.badge": "Štandard+",
   "features.contextual.benefits.realtime.title": "Analýza v reálnom čase",
   "features.contextual.benefits.realtime.desc": "Okamžité poznatky založené na vašej aktuálnej finančnej aktivite",
@@ -252,7 +252,7 @@
     },
     "contextual": {
       "title": "Kontextové finančné tipy",
-      "description": "Dostávajte personalizované finančné poradenstvo založené na vašich špecifických vzoroch transakcií a správaní výdavkov",
+      "description": "Dostávajte personalizované finančné tipy založené na vašich špecifických vzoroch transakcií a správaní výdavkov",
       "badge": "Štandard+",
       "benefits": {
         "realtime": {

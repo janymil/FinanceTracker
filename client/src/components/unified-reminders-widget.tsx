@@ -33,6 +33,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";
 import RequirePlan from "@/components/require-plan";
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface TransactionReminder {
   id: string;
@@ -115,7 +116,7 @@ export default function UnifiedRemindersWidget() {
     title: "",
     description: "",
     amount: "",
-    dueDate: new Date().toISOString().split('T')[0],
+    dueDate: todayLocalISO(),
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
     recurringEndDate: "",
@@ -273,7 +274,7 @@ export default function UnifiedRemindersWidget() {
       title: "",
       description: "",
       amount: "",
-      dueDate: new Date().toISOString().split('T')[0],
+      dueDate: todayLocalISO(),
       isRecurring: false,
       recurringFrequency: "monthly",
       recurringEndDate: "",

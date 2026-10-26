@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest, getAuthToken } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface SimpleVoiceInputProps {
   onClose: () => void;
@@ -32,7 +33,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     amount: '',
     description: '',
     type: 'expense' as 'expense' | 'income',
-    date: new Date().toISOString().split('T')[0], // Default to today
+    date: todayLocalISO(), // Default to today
     category: '',
     categoryId: null as number | null,
     note: ''
@@ -302,7 +303,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
             amount: '',
             description: '',
             type: 'expense',
-            date: new Date().toISOString().split('T')[0],
+            date: todayLocalISO(),
             category: '',
             categoryId: null,
             note: ''
@@ -425,7 +426,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           amount: result.data.amount || '',
           description: result.data.description || '',
           type: result.data.type || 'expense',
-          date: result.data.date || new Date().toISOString().split('T')[0],
+          date: result.data.date || todayLocalISO(),
           category: finalCategory.name,
           categoryId: finalCategory.id || '',
           note: transcript
@@ -535,7 +536,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
           amount: cleanAmount,
           description: result.data.description || '',
           type: result.data.type || 'expense',
-          date: result.data.date || new Date().toISOString().split('T')[0],
+          date: result.data.date || todayLocalISO(),
           category: finalCategory.name,
           categoryId: finalCategory.id || '',
           note: transcript // Store transcript as note
@@ -666,7 +667,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         amount: '',
         description: '',
         type: 'expense',
-        date: new Date().toISOString().split('T')[0],
+        date: todayLocalISO(),
         category: '',
         categoryId: null,
         note: ''
@@ -783,7 +784,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
         amount: parseFloat(accumulatedData.amount),
         description: accumulatedData.description,
         type: accumulatedData.type,
-        date: accumulatedData.date || new Date().toISOString().split('T')[0],
+        date: accumulatedData.date || todayLocalISO(),
         categoryId,
         referenceNote: accumulatedData.note || transcript || ''
       });
@@ -1095,7 +1096,7 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
                 type="date"
                 value={accumulatedData.date}
                 onChange={(e) => setAccumulatedData(prev => ({ ...prev, date: e.target.value }))}
-                className={accumulatedData.date && accumulatedData.date !== new Date().toISOString().split('T')[0] ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
+                className={accumulatedData.date && accumulatedData.date !== todayLocalISO() ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               />
             </div>
           </div>

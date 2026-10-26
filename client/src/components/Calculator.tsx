@@ -3,8 +3,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 import { Calculator as CalculatorIcon, TrendingUp, TrendingDown, DollarSign, Trash2, Plus, Target, Zap } from 'lucide-react';
 // import { Calculator as CalculatorType } from '@/data/courseContent';
+
+/**
+ * The money symbol these calculators print.
+ *
+ * They were hardcoded to `$` in every sentence, so a Peruvian visitor read dollars next to the
+ * soles they actually spend — the same rule the pricing pages already follow (`shared/pricing`):
+ * a Spanish page quotes soles, everything else dollars.
+ */
+function symbolForLanguage(language: string | undefined): string {
+  return String(language ?? '').toLowerCase().startsWith('es') ? 'S/' : '$';
+}
 
 interface CalculatorProps {
   calculator?: any; // CalculatorType;
@@ -27,6 +39,8 @@ interface Debt {
 }
 
 export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEstimationProps) {
+  const { t, i18n } = useTranslation();
+  const money = symbolForLanguage(i18n.language);
   const [income, setIncome] = useState('');
   const [expenses, setExpenses] = useState('');
   const [desiredPurchase, setDesiredPurchase] = useState('');
@@ -44,7 +58,7 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
     const purchaseAmount = parseFloat(desiredPurchase) || 0;
     
     if (monthlyIncome <= 0 || purchaseAmount <= 0) {
-      setResults({ message: 'Please enter valid amounts for income and desired purchase.' });
+      setResults({ message: t('calc.expense.needValid', 'Please enter valid amounts for income and desired purchase.') });
       return;
     }
 
@@ -56,11 +70,16 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
 
     let message = '';
     if (canAfford) {
-      message = `✅ Great news! You can afford this purchase. You'll have $${(availableCash - purchaseAmount).toFixed(2)} left over this month.`;
+      message = t('calc.expense.canAfford', '✅ Great news! You can afford this purchase. You will have {{left}} left over this month.', {
+        left: `${money}${(availableCash - purchaseAmount).toFixed(2)}`,
+      });
     } else if (availableCash > 0) {
-      message = `💡 You'll need to save for ${monthsToSave} months. Consider setting aside $${(purchaseAmount / monthsToSave).toFixed(2)} monthly to reach your goal.`;
+      message = t('calc.expense.saveMonths', '💡 You need to save for {{months}} months. Setting aside {{monthly}} a month would get you there.', {
+        months: monthsToSave,
+        monthly: `${money}${(purchaseAmount / monthsToSave).toFixed(2)}`,
+      });
     } else {
-      message = `⚠️ Your expenses exceed your income. Focus on reducing expenses or increasing income before making this purchase.`;
+      message = t('calc.expense.overBudget', '⚠️ Your expenses exceed your income. Reduce expenses or increase income before making this purchase.');
     }
 
     setResults({ canAfford, monthsToSave, suggestedSavings, affordabilityScore, message });
@@ -71,16 +90,16 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
       <CardHeader>
         <div className="flex items-center gap-2">
           <CalculatorIcon className="h-5 w-5 text-green-600" />
-          <CardTitle className="text-lg">Expense Estimation Calculator</CardTitle>
+          <CardTitle className="text-lg">{t('calc.expense.title', 'Expense Estimation Calculator')}</CardTitle>
         </div>
-        <CardDescription>Quick "Can I afford this?" analysis - no account required!</CardDescription>
+        <CardDescription>{t('calc.expense.subtitle', 'Quick "Can I afford this?" analysis — no account required.')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Input Fields */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="monthly-income">
-              Monthly Income
+              {t('calc.expense.income', 'Monthly Income')}
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
@@ -95,7 +114,7 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
           </div>
           <div className="space-y-2">
             <Label htmlFor="monthly-expenses">
-              Monthly Expenses
+              {t('calc.expense.expenses', 'Monthly Expenses')}
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
@@ -110,7 +129,7 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
           </div>
           <div className="space-y-2">
             <Label htmlFor="desired-purchase">
-              Desired Purchase
+              {t('calc.expense.purchase', 'Desired Purchase')}
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
@@ -132,7 +151,7 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
           disabled={!income || !expenses || !desiredPurchase}
         >
           <CalculatorIcon className="h-4 w-4 mr-2" />
-          Can I Afford This?
+          {t('calc.expense.cta', 'Can I Afford This?')}
         </Button>
 
         {/* Results */}
@@ -151,13 +170,13 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
                 ) : (
                   <TrendingDown className="h-5 w-5 text-red-600" />
                 )}
-                <h4 className="font-semibold">Affordability Analysis:</h4>
+                <h4 className="font-semibold">{t('calc.expense.analysis', 'Affordability Analysis')}</h4>
               </div>
               
               {results.affordabilityScore !== undefined && (
                 <div className="mb-3">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Affordability Score</span>
+                    <span>{t('calc.expense.score', 'Affordability Score')}</span>
                     <span className="font-semibold">{Math.round(results.affordabilityScore)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -177,8 +196,12 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
               {!results.canAfford && results.monthsToSave && (
                 <div className="mt-3 p-3 bg-blue-50 rounded border">
                   <p className="text-sm text-blue-800">
-                    💡 <strong>Pro tip:</strong> Want to track your actual spending and optimize your budget? 
-                    <span className="underline cursor-pointer text-blue-600">Sign up for free</span> to see where your money really goes!
+                    💡 <strong>{t('calc.expense.proTip', 'Pro tip')}:</strong>{' '}
+                    {t('calc.expense.proTipBody', 'Want to track your actual spending and optimize your budget?')}{' '}
+                    <a href="#" onClick={(event) => { event.preventDefault(); window.location.assign('/' + (i18n.language?.slice(0, 2) || 'en') + '/auth#sign-up'); }} className="underline cursor-pointer text-blue-600">
+                      {t('calc.expense.signUp', 'Sign up for free')}
+                    </a>{' '}
+                    {t('calc.expense.proTipTail', 'to see where your money really goes.')}
                   </p>
                 </div>
               )}
@@ -191,6 +214,8 @@ export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEst
 }
 
 export function DebtPayoffVisualizer({ isStandalone = false }: DebtPayoffVisualizerProps) {
+  const { t, i18n } = useTranslation();
+  const money = symbolForLanguage(i18n.language);
   const [debts, setDebts] = useState<Debt[]>([
     { id: '1', name: 'Credit Card 1', balance: 5000, minPayment: 150, interestRate: 18.5 },
     { id: '2', name: 'Credit Card 2', balance: 3200, minPayment: 95, interestRate: 22.9 },
@@ -357,7 +382,7 @@ export function DebtPayoffVisualizer({ isStandalone = false }: DebtPayoffVisuali
                     />
                   </div>
                   <div>
-                    <Label htmlFor={`balance-${debt.id}`}>Balance ($)</Label>
+                    <Label htmlFor={`balance-${debt.id}`}>Balance (${money})</Label>
                     <Input
                       id={`balance-${debt.id}`}
                       type="number"
@@ -369,7 +394,7 @@ export function DebtPayoffVisualizer({ isStandalone = false }: DebtPayoffVisuali
                     />
                   </div>
                   <div>
-                    <Label htmlFor={`minPayment-${debt.id}`}>Min Payment ($)</Label>
+                    <Label htmlFor={`minPayment-${debt.id}`}>Min Payment (${money})</Label>
                     <Input
                       id={`minPayment-${debt.id}`}
                       type="number"
@@ -414,7 +439,7 @@ export function DebtPayoffVisualizer({ isStandalone = false }: DebtPayoffVisuali
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="extra-payment">
-              Extra Monthly Payment ($)
+              Extra Monthly Payment ({money})
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
@@ -573,6 +598,8 @@ export function DebtPayoffVisualizer({ isStandalone = false }: DebtPayoffVisuali
 }
 
 export function Calculator({ calculator }: CalculatorProps) {
+  const { t, i18n } = useTranslation();
+  const money = symbolForLanguage(i18n.language);
   const [values, setValues] = useState<Record<string, number>>({});
   const [results, setResults] = useState<{
     total?: number;
@@ -597,7 +624,7 @@ export function Calculator({ calculator }: CalculatorProps) {
         const total = Object.values(values).reduce((sum, val) => sum + (val || 0), 0);
         setResults({
           total,
-          message: `Your total monthly income is $${total.toLocaleString()}. ${
+          message: `Your total monthly income is ${money}${total.toLocaleString()}. ${
             total >= 5000 ? 'Great income diversification!' : 
             total >= 3000 ? 'Good foundation - consider adding income sources.' :
             'Consider exploring additional income streams.'
@@ -611,7 +638,7 @@ export function Calculator({ calculator }: CalculatorProps) {
         const nonEssentials = total - essentials;
         setResults({
           total,
-          message: `Total monthly expenses: $${total.toLocaleString()}. Essentials: $${essentials.toLocaleString()} (${Math.round((essentials/total)*100)}%), Non-essentials: $${nonEssentials.toLocaleString()} (${Math.round((nonEssentials/total)*100)}%)`
+          message: `Total monthly expenses: ${money}${total.toLocaleString()}. Essentials: ${money}${essentials.toLocaleString()} (${Math.round((essentials/total)*100)}%), Non-essentials: ${money}${nonEssentials.toLocaleString()} (${Math.round((nonEssentials/total)*100)}%)`
         });
         break;
       }
@@ -627,13 +654,13 @@ export function Calculator({ calculator }: CalculatorProps) {
         
         if (cashFlow > 0) {
           status = 'positive';
-          message = `Excellent! You have $${cashFlow.toLocaleString()} positive cash flow monthly. That's $${(cashFlow * 12).toLocaleString()} per year for savings and goals!`;
+          message = `Excellent! You have ${money}${cashFlow.toLocaleString()} positive cash flow monthly. That's ${money}${(cashFlow * 12).toLocaleString()} per year for savings and goals!`;
         } else if (cashFlow === 0) {
           status = 'neutral';
           message = 'You\'re breaking even. Consider reducing variable expenses to create positive cash flow for savings.';
         } else {
           status = 'negative';
-          message = `Warning: Negative cash flow of $${Math.abs(cashFlow).toLocaleString()} monthly. Focus on increasing income or reducing expenses.`;
+          message = `Warning: Negative cash flow of ${money}${Math.abs(cashFlow).toLocaleString()} monthly. Focus on increasing income or reducing expenses.`;
         }
         
         setResults({ cashFlow, status, message });

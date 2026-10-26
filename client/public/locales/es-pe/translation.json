@@ -267,7 +267,7 @@
   "Standard+ Users": "Usuarios Standard+",
   "AI-powered analysis with detailed recommendations and improvement suggestions": "Análisis impulsado por IA con recomendaciones detalladas y sugerencias de mejora",
   "AI Financial Tips (Premium)": "Consejos Financieros IA (Premium)",
-  "Personalized financial advice based on spending patterns": "Consejos financieros personalizados basados en patrones de gasto",
+  "Personalized financial tips based on spending patterns": "Consejos financieros personalizados basados en patrones de gasto",
   "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "Consejos generados por IA, análisis de tendencias, recomendaciones accionables, persistentes entre sesiones",
   "Basic expense tracking": "Seguimiento básico de gastos",
   "Transaction history": "Historial de transacciones",
@@ -4268,5 +4268,25 @@
     "freeTitle": "Acciones de IA",
     "freeBody": "Las funciones de IA están en los planes Standard y Premium.",
     "whatIsAction": "Una acción = un resultado de IA. Escanear un recibo cuesta 3."
+  },
+  "calc": {
+    "expense": {
+      "title": "Calculadora de gastos",
+      "subtitle": "Análisis rápido de ¿puedo permitírmelo? — sin cuenta.",
+      "needValid": "Introduce importes válidos de ingresos y de la compra deseada.",
+      "canAfford": "✅ ¡Buenas noticias! Puedes permitírtelo. Te quedarán {{left}} este mes.",
+      "saveMonths": "💡 Necesitas ahorrar durante {{months}} meses. Apartar {{monthly}} al mes te llevaría a la meta.",
+      "overBudget": "⚠️ Tus gastos superan tus ingresos. Reduce gastos o aumenta ingresos antes de hacer esta compra.",
+      "income": "Ingresos mensuales",
+      "expenses": "Gastos mensuales",
+      "purchase": "Compra deseada",
+      "cta": "¿Puedo permitírmelo?",
+      "analysis": "Análisis de asequibilidad",
+      "score": "Nivel de asequibilidad",
+      "proTip": "Consejo",
+      "proTipBody": "¿Quieres controlar tu gasto real y optimizar tu presupuesto?",
+      "signUp": "Crea una cuenta gratis",
+      "proTipTail": "para ver a dónde va tu dinero."
+    }
   }
 }

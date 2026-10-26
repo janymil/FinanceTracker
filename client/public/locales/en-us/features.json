@@ -39,7 +39,7 @@
     },
     "contextual": {
       "title": "Contextual Financial Tips",
-      "description": "Receive personalized financial advice based on your specific transaction patterns and spending behavior",
+      "description": "Receive personalized financial tips based on your specific transaction patterns and spending behavior",
       "badge": "Standard+",
       "benefits": {
         "realtime": {

@@ -3,6 +3,7 @@ import { and, eq, isNull, lt } from "drizzle-orm";
 import { db } from "./db";
 import { recurringTransactions, transactions, users } from "../shared/schema";
 import { DataEncryption } from "./encryption";
+import { decryptField } from "./fieldCrypto";
 import { dueOccurrences, isRecurrenceFrequency } from "../shared/recurrence";
 import { withJobRun } from "./errorGuard/jobs.js";
 import { notifyDataChange } from "./realtime";
@@ -63,12 +64,16 @@ export async function processRecurringTransactions(now: Date = new Date()): Prom
     if (claimed.length === 0) continue; // another run took it
 
     try {
+      // The rule's description is stored encrypted (see `fieldCrypto`); decrypt it once here
+      // because the insert below encrypts again, and double-encrypting would leave the repeat
+      // unreadable in the list.
+      const description = decryptField(rule.description) as string;
       await db.insert(transactions).values(
         due.map((date) => ({
           userId: rule.userId,
           categoryId: rule.categoryId,
           amount: rule.amount,
-          description: DataEncryption.encryptDescription(rule.description),
+          description: DataEncryption.encryptDescription(description),
           type: rule.type,
           date,
           isRecurring: true,

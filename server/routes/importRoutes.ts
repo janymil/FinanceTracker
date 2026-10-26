@@ -4,6 +4,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { aiGuard } from "../aiAccess";
 import { storage } from "../storage";
 import { checkImport } from "@shared/invariants";
+import { parseAmountToCents, centsToNumber } from "@shared/money";
 import { reportInvariant } from "../errorGuard/report.js";
 import { z } from "zod";
 import { 
@@ -24,7 +25,7 @@ import {
   determineImportStatus 
 } from "../../lib/saveImportLog";
 import multer from "multer";
-import { processBankStatementPDF, validateTransactions } from "../../lib/pdfProcessor";
+import { processBankStatementPDF, validateTransactions, MAX_PDF_PAGES } from "../../lib/pdfProcessor";
 import { detectDuplicateTransactions } from "../../shared/duplicateDetection";
 import { rateLimit } from "../middleware/rateLimit";
 import { notifyDataChange } from "../realtime";
@@ -102,6 +103,49 @@ const importDataSchema = z.object({
 });
 
 // CSV parsing utility with auto-delimiter detection
+/** Split one CSV line on the delimiter, respecting quoted fields ("1,234.56" stays one value). */
+function splitCsvLine(line: string, delimiter: string): string[] {
+  const out: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (char === delimiter && !inQuotes) {
+      out.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += char;
+  }
+  out.push(current.trim());
+  return out;
+}
+
+/**
+ * A money cell from a spreadsheet, read with the app's one parser.
+ *
+ * `parseFloat("1,234.56")` is 1, so a US-formatted import turned every amount above a thousand
+ * into a single unit. `/shared/money` understands both conventions ("1,234.56" and "1.234,56"),
+ * so the import uses it instead of a second, weaker reader.
+ */
+function readAmountCell(value: unknown): number | null {
+  if (value === null || value === undefined || String(value).trim() === '') return null;
+  try {
+    return centsToNumber(Math.abs(parseAmountToCents(value as string | number)));
+  } catch {
+    return null;
+  }
+}
+
 function parseCSV(csvContent: string): Record<string, any>[] {
   const lines = csvContent.trim().split('\n');
   if (lines.length < 2) return [];
@@ -112,11 +156,11 @@ function parseCSV(csvContent: string): Record<string, any>[] {
   const semicolonCount = (headerLine.match(/;/g) || []).length;
   const delimiter = semicolonCount > commaCount ? ';' : ',';
   
-  const headers = headerLine.split(delimiter).map(h => h.trim().replace(/"/g, ''));
+  const headers = splitCsvLine(headerLine, delimiter).map(h => h.replace(/"/g, ''));
   const rows = [];
   
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(delimiter).map(v => v.trim().replace(/"/g, ''));
+    const values = splitCsvLine(lines[i], delimiter).map(v => v.replace(/"/g, ''));
     if (values.length === headers.length) {
       const row: Record<string, any> = {};
       headers.forEach((header, index) => {
@@ -156,7 +200,7 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
       // Process transactions
       if (dataType === 'transaction') {
         // Validate transaction fields
-        if (!row.amount || isNaN(parseFloat(row.amount))) {
+        if (readAmountCell(row.amount) === null) {
           errors.push(`Row ${index + 2}: amount is required and must be a valid number`);
           return;
         }
@@ -200,7 +244,7 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
         }
         
         // Check if budgetAmount exists
-        if (!row.budgetAmount || isNaN(parseFloat(row.budgetAmount))) {
+        if (row.budgetAmount !== undefined && row.budgetAmount !== '' && readAmountCell(row.budgetAmount) === null) {
           errors.push(`Row ${index + 2}: budgetAmount is required and must be a valid number`);
           return;
         }
@@ -664,6 +708,17 @@ export function registerImportRoutes(app: Express) {
       // Process the PDF using our hybrid approach with duplicate detection and progress tracking
       const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting, onProgress, userId, plan);
 
+      // A file that broke a rule (too many pages) is a refusal, not an empty statement: answering
+      // 200 with zero rows looked like "your statement has no movements".
+      if (processingResult.totalPages > MAX_PDF_PAGES) {
+        return res.status(400).json({
+          success: false,
+          error: 'This PDF is too large to import in one go',
+          message: `The limit is ${MAX_PDF_PAGES} pages. Split the file and import the parts.`,
+          code: 'pdf_too_many_pages',
+        });
+      }
+
       // Validate extracted transactions
       const validationResult = validateTransactions(processingResult.transactions);
 
@@ -833,7 +888,7 @@ export function registerImportRoutes(app: Express) {
 
       for (const transaction of transactions) {
         try {
-          const amount = Math.abs(parseFloat(transaction.amount));
+          const amount = readAmountCell(transaction.amount);
           // yyyy-MM-dd from a bank file is a calendar day, not an instant: parsed as noon UTC
           // it shows the same date in Lima (midnight UTC showed the previous evening).
           const date = toCalendarDate(transaction.date);
@@ -844,7 +899,7 @@ export function registerImportRoutes(app: Express) {
           const description = String(transaction.description ?? '').trim();
           const type: 'income' | 'expense' = transaction.type === 'income' ? 'income' : 'expense';
 
-          if (!Number.isFinite(amount) || amount <= 0 || Number.isNaN(date.getTime()) || !description) {
+          if (amount === null || !Number.isFinite(amount) || amount <= 0 || Number.isNaN(date.getTime()) || !description) {
             errors.push(`Skipped an invalid row: ${description || '(no description)'}`);
             continue;
           }

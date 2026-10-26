@@ -1,4 +1,5 @@
 import { log } from './logger';
+import crypto from 'crypto';
 
 import multer from 'multer';
 import { Request, Response } from 'express';
@@ -50,9 +51,21 @@ interface UserPlan {
 }
 
 // Upload receipt file to Cloud Storage (Cloudflare R2 or fallback)
-export async function uploadReceiptFile(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
-  const filePath = `receipts/${fileName}`;
-  return await cloudStorage.uploadFile(filePath, fileBuffer, mimeType);
+//
+// The returned value is a *path on this server*, not the bucket's public URL. The bucket is
+// served by a permanent public link, and the key used to be predictable (`receipt-<userId>-<time>`),
+// so anyone who saw one link — or guessed one — could read a stranger's receipt. The photo now
+// lives under `receipts/<userId>/` with a random name and is streamed by `/api/receipts/...`,
+// which only answers the owner. Rows written before this keep their old public URL and still work.
+export async function uploadReceiptFile(
+  fileName: string,
+  fileBuffer: Buffer,
+  mimeType: string,
+  ownerId?: string,
+): Promise<string> {
+  const key = ownerId ? `receipts/${ownerId}/${fileName}` : `receipts/${fileName}`;
+  await cloudStorage.uploadFile(key, fileBuffer, mimeType);
+  return ownerId ? `/api/receipts/${ownerId}/${fileName}` : `receipts/${fileName}`;
 }
 
 /**
@@ -199,12 +212,12 @@ export const uploadReceiptHandler = [
 
       // Upload to Cloud Storage if user has appropriate plan
       if (canStore) {
-        const timestamp = Date.now();
         const extension = req.file.mimetype.split('/')[1] || 'jpg';
-        const fileName = `receipt-${userId}-${timestamp}.${extension}`;
+        // Random name: the key is what a leaked link would reveal, so it must not be derivable.
+        const fileName = `${crypto.randomUUID()}.${extension}`;
         
         try {
-          imageUrl = await uploadReceiptFile(fileName, req.file.buffer, req.file.mimetype);
+          imageUrl = await uploadReceiptFile(fileName, req.file.buffer, req.file.mimetype, userId);
         } catch (uploadError) {
           reportSwallowed(uploadError, {
             where: 'uploadReceipt.storeImage',

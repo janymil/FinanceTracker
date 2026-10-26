@@ -5,22 +5,40 @@ import { X, Cookie, Settings } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from 'react-i18next';
 import { getLocalizedPath } from './LanguageGuard';
-import { readConsent, saveConsent, type CookiePreferences } from '@/lib/consent';
+import { readConsent, saveConsent, loadConsentedFonts, COOKIE_SETTINGS_EVENT, type CookiePreferences } from '@/lib/consent';
 import { enableAnalytics } from '@/lib/analytics';
 
 export function CookieBanner() {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  // Nothing optional is pre-ticked: a switch that starts on is not a choice. The visitor has to
+  // turn analytics on deliberately, which is what "consent" means under the rules we follow.
   const [preferences, setPreferences] = useState<CookiePreferences>({
     essential: true, // Always required
-    functional: true,
-    analytics: true,
+    functional: false,
+    analytics: false,
   });
 
   useEffect(() => {
     // Only ask once; a stored decision (accept, select or reject) hides the banner.
     setIsVisible(readConsent() === null);
+    // A stored decision may already allow the fonts, and they must not wait for a re-render.
+    loadConsentedFonts();
+
+    // Withdrawal: the footer's "Cookie settings" re-opens the banner with the current answer.
+    const reopen = () => {
+      const stored = readConsent();
+      setPreferences({
+        essential: true,
+        functional: Boolean(stored?.functional),
+        analytics: Boolean(stored?.analytics),
+      });
+      setShowSettings(true);
+      setIsVisible(true);
+    };
+    window.addEventListener(COOKIE_SETTINGS_EVENT, reopen);
+    return () => window.removeEventListener(COOKIE_SETTINGS_EVENT, reopen);
   }, []);
 
   const sendConsentToServer = async (consent: CookiePreferences & { timestamp: string }) => {
@@ -40,8 +58,9 @@ export function CookieBanner() {
 
   const applyConsent = async (next: CookiePreferences) => {
     const saved = saveConsent(next);
-    // Analytics starts only here — never before this click.
+    // Analytics and the web fonts start only here — never before this click.
     if (saved.analytics) enableAnalytics();
+    loadConsentedFonts(saved);
     await sendConsentToServer(saved as CookiePreferences & { timestamp: string });
     setIsVisible(false);
   };

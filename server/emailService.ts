@@ -16,6 +16,39 @@ if (process.env.SENDGRID_API_KEY) {
   mailService.setApiKey(process.env.SENDGRID_API_KEY);
 }
 
+/**
+ * Any value that reaches an HTML body is escaped here.
+ *
+ * These templates interpolated the inviter's name, the goal name and its description straight
+ * into HTML, so a goal named `<a href="https://evil.example">Confirm your password</a>` was
+ * delivered from noreply@kaptia.app — a phishing message sent by us, to people who had just
+ * received a real invitation. The text body keeps the plain value; only the HTML is escaped.
+ */
+export function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** A subject is a mail header: a newline in it would let the caller add their own. */
+export function safeSubject(value: string): string {
+  return String(value ?? '').replace(/[\r\n]+/g, ' ').slice(0, 200);
+}
+
+/** A recipient in a link: only http(s), never `javascript:` or a data URL. */
+export function safeLinkUrl(value: string): string {
+  try {
+    const url = new URL(String(value));
+    if (url.protocol === 'https:' || url.protocol === 'http:') return escapeHtml(url.toString());
+  } catch {
+    // Not a URL at all: fall through to the site root rather than emit something arbitrary.
+  }
+  return 'https://kaptia.app';
+}
+
 let smtpTransporter: Transporter | null = null;
 
 function getSmtpTransporter(): Transporter | null {
@@ -91,10 +124,12 @@ interface EmailParams {
 }
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
+  // Headers are stripped of newlines at the last moment every template goes through, so a value
+  // built from user text can never add a `Bcc:` line or a second message.
   const message = {
-    to: params.to,
-    from: params.from,
-    subject: params.subject,
+    to: String(params.to ?? '').replace(/[\r\n]+/g, ''),
+    from: String(params.from ?? '').replace(/[\r\n]+/g, ''),
+    subject: safeSubject(params.subject),
     text: params.text ?? '',
     html: params.html,
   };
@@ -159,12 +194,12 @@ The Kaptia Team
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
   <h2>Payment Failed - Action Required</h2>
   
-  <p>Hi ${userName},</p>
+  <p>Hi ${escapeHtml(userName)},</p>
   
   <p>We were unable to process your payment for your Kaptia subscription.</p>
   
   <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
-    <strong>Failure reason:</strong> ${failureReason}
+    <strong>Failure reason:</strong> ${escapeHtml(failureReason)}
   </div>
   
   <p>Don't worry - your account will remain active until <strong>${graceExpiry}</strong>. Please update your payment method to continue enjoying all features.</p>
@@ -222,7 +257,7 @@ The Kaptia Team
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
   <h2 style="color: #dc3545;">Account Access Expires Soon</h2>
   
-  <p>Hi ${userName},</p>
+  <p>Hi ${escapeHtml(userName)},</p>
   
   <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 20px 0;">
     <strong>Your Kaptia account access will expire in ${hoursRemaining} hours due to a failed payment.</strong>
@@ -283,7 +318,7 @@ The Kaptia Team
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
   <h2>Account Downgraded to Free Plan</h2>
   
-  <p>Hi ${userName},</p>
+  <p>Hi ${escapeHtml(userName)},</p>
   
   <p>Your Kaptia account has been downgraded to the Free plan due to payment issues.</p>
   
@@ -344,6 +379,16 @@ export async function sendGoalInvitationEmail(params: GoalInvitationParams): Pro
 
   const formattedAmount = `$${parseFloat(targetAmount).toLocaleString()}`;
   const formattedDate = new Date(targetDate).toLocaleDateString();
+
+  // HTML-safe copies. The text bodies below keep the plain values; only markup is escaped, and
+  // the link is checked rather than escaped because it goes into an `href`.
+  const safeRecipientName = escapeHtml(recipientName);
+  const safeInviterName = escapeHtml(inviterName);
+  const safeGoalName = escapeHtml(goalName);
+  const safeGoalDescription = escapeHtml(goalDescription);
+  const safeFormattedAmount = escapeHtml(formattedAmount);
+  const safeFormattedDate = escapeHtml(formattedDate);
+  const safeGoalUrl = safeLinkUrl(goalUrl);
   
   if (isExistingUser) {
     // Email for existing users
@@ -377,19 +422,19 @@ The Kaptia Team
   </div>
   
   <div style="padding: 30px; background: white;">
-    <p style="font-size: 16px; color: #333;">Hi ${recipientName},</p>
+    <p style="font-size: 16px; color: #333;">Hi ${safeRecipientName},</p>
     
     <p style="font-size: 16px; color: #333;">
-      <strong>${inviterName}</strong> has invited you to join their collaborative savings goal 
-      <strong style="color: #667eea;">"${goalName}"</strong>!
+      <strong>${safeInviterName}</strong> has invited you to join their collaborative savings goal 
+      <strong style="color: #667eea;">"${safeGoalName}"</strong>!
     </p>
     
     <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0;">
       <h3 style="margin: 0 0 15px 0; color: #333;">🎯 Goal Details</h3>
       <ul style="margin: 0; padding-left: 20px; color: #555;">
-        <li><strong>Target Amount:</strong> ${formattedAmount}</li>
-        <li><strong>Target Date:</strong> ${formattedDate}</li>
-        <li><strong>Description:</strong> ${goalDescription}</li>
+        <li><strong>Target Amount:</strong> ${safeFormattedAmount}</li>
+        <li><strong>Target Date:</strong> ${safeFormattedDate}</li>
+        <li><strong>Description:</strong> ${safeGoalDescription}</li>
       </ul>
     </div>
     
@@ -399,7 +444,7 @@ The Kaptia Team
     </p>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${goalUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+      <a href="${safeGoalUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
         🚀 View & Join Goal
       </a>
     </div>
@@ -468,16 +513,16 @@ The Kaptia Team
     <p style="font-size: 16px; color: #333;">Hi there,</p>
     
     <p style="font-size: 16px; color: #333;">
-      <strong>${inviterName}</strong> has invited you to join <strong style="color: #667eea;">Kaptia</strong> 
-      and participate in their collaborative savings goal <strong>"${goalName}"</strong>!
+      <strong>${safeInviterName}</strong> has invited you to join <strong style="color: #667eea;">Kaptia</strong> 
+      and participate in their collaborative savings goal <strong>"${safeGoalName}"</strong>!
     </p>
     
     <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0;">
       <h3 style="margin: 0 0 15px 0; color: #333;">🎯 Goal Details</h3>
       <ul style="margin: 0; padding-left: 20px; color: #555;">
-        <li><strong>Target Amount:</strong> ${formattedAmount}</li>
-        <li><strong>Target Date:</strong> ${formattedDate}</li>
-        <li><strong>Description:</strong> ${goalDescription}</li>
+        <li><strong>Target Amount:</strong> ${safeFormattedAmount}</li>
+        <li><strong>Target Date:</strong> ${safeFormattedDate}</li>
+        <li><strong>Description:</strong> ${safeGoalDescription}</li>
       </ul>
     </div>
     
@@ -493,7 +538,7 @@ The Kaptia Team
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${goalUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
+      <a href="${safeGoalUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
         🚀 Join for FREE & Start Saving
       </a>
     </div>

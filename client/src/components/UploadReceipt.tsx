@@ -9,6 +9,7 @@ import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from 'react-i18next';
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface UploadReceiptProps {
   onReceiptProcessed?: (receiptData: any) => void;
@@ -52,7 +53,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const [formData, setFormData] = useState<FormData>({
     amount: '',
     description: '',
-    date: new Date().toISOString().split('T')[0],
+    date: todayLocalISO(),
     categoryId: ''
   });
 
@@ -102,7 +103,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
         setFormData({
           amount: result.extracted.amount?.toString() || '',
           description: result.extracted.vendor || '',
-          date: result.extracted.date || new Date().toISOString().split('T')[0],
+          date: result.extracted.date || todayLocalISO(),
           categoryId: result.category ? categories.find(cat => cat.name.toLowerCase() === result.category.toLowerCase())?.id?.toString() || '' : ''
         });
       }
@@ -145,7 +146,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
     setFormData({
       amount: '',
       description: '',
-      date: new Date().toISOString().split('T')[0],
+      date: todayLocalISO(),
       categoryId: ''
     });
     if (fileInputRef.current) {

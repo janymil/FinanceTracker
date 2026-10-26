@@ -81,6 +81,11 @@ export function serveStatic(app: Express) {
     setHeaders: (res, filePath) => {
       // The service worker must be re-checked on every visit or an update never arrives.
       if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
+      // Translation files belong to the build that rendered the page. A cached copy from the
+      // previous release shows missing keys as raw English words after a deploy.
+      if (filePath.includes(`${path.sep}locales${path.sep}`)) {
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+      }
     },
   }));
 

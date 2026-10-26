@@ -164,9 +164,12 @@ describe('export', () => {
     expect(response.json.transactions.map((t: any) => t.id).sort()).toEqual([3, 4]);
   });
 
-  it('refuses free plans, a bad range and unknown formats', async () => {
+  it('gives every plan its own data, and still refuses the paid report', async () => {
+    // A copy of your own data is a legal right, not a paid feature: CSV/JSON/Excel are available
+    // to a free account. The generated PDF report remains Premium.
     storage.getUser.mockResolvedValue({ ...premiumLima, plan: 'free' });
-    expect((await call('GET', '/api/export?format=csv&includeTransactions=true')).status).toBe(403);
+    expect((await call('GET', '/api/export?format=csv&includeTransactions=true')).status).toBe(200);
+    expect((await call('GET', '/api/export?format=pdf&includeTransactions=true')).status).toBe(403);
     storage.getUser.mockResolvedValue(premiumLima);
     expect((await call('GET', '/api/export?format=csv&dateRange=custom&startDate=2026-10-31&endDate=2026-10-01&includeTransactions=true')).status).toBe(400);
     expect((await call('GET', '/api/export?format=docx&includeTransactions=true')).status).toBe(400);

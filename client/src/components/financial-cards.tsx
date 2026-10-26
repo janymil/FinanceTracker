@@ -37,9 +37,14 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     balance: 0
   });
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, options: { signed?: boolean } = {}) => {
     const displayCurrency = currency || '$';
-    return `${displayCurrency}${Math.abs(amount).toFixed(2)}`;
+    // A negative balance used to be printed as a positive amount: someone S/500 in the red read
+    // "S/500.00". Income and spending are magnitudes, so they keep the absolute value; the
+    // balance is a position and keeps its sign.
+    const value = options.signed ? amount : Math.abs(amount);
+    const sign = value < 0 ? '-' : '';
+    return `${sign}${displayCurrency}${Math.abs(value).toFixed(2)}`;
   };
 
   // Animate values when summary changes
@@ -237,7 +242,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {t('dashboard.net_balance')}
               </p>
               <p className="text-2xl font-bold text-blue-800 dark:text-blue-200 transition-all duration-300 ease-out">
-                {formatCurrency(animatedValues.balance)}
+                {formatCurrency(animatedValues.balance, { signed: true })}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                 {summary?.totalTransactionCount || 0} {t('total')} {(summary?.totalTransactionCount || 0) === 1 ? t('transaction') : t('transactionPlural')}

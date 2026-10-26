@@ -267,7 +267,7 @@
   "Standard+ Users": "Standard+ Users",
   "AI-powered analysis with detailed recommendations and improvement suggestions": "AI-powered analysis with detailed recommendations and improvement suggestions",
   "AI Financial Tips (Premium)": "AI Financial Tips (Premium)",
-  "Personalized financial advice based on spending patterns": "Personalized financial advice based on spending patterns",
+  "Personalized financial tips based on spending patterns": "Personalized financial tips based on spending patterns",
   "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions",
   "Basic expense tracking": "Basic expense tracking",
   "Transaction history": "Transaction history",
@@ -657,13 +657,13 @@
   "loadingFinancialInsights": "Loading financial insights...",
   "viewAllTransactions": "View All Transactions",
   "aiFinancialTips": "AI Financial Tips",
-  "getPersonalizedFinancialAdvice": "Get personalized financial advice based on your spending patterns",
+  "getPersonalizedFinancialAdvice": "Get personalized financial tips based on your spending patterns",
   "personalizedAIAnalysis": "Personalized AI Analysis",
   "generateInsightsBasedOnSpendingData": "Generate insights based on your monthly spending data",
   "getAITip": "Get AI Tip",
   "generating": "Generating...",
   "aiTipGenerated": "AI Tip Generated",
-  "newFinancialAdviceGenerated": "New financial advice based on your spending data",
+  "newFinancialAdviceGenerated": "New financial tips based on your spending data",
   "error": "Error",
   "failedToGenerateAITip": "Failed to generate AI tip. Please try again.",
   "noFinancialData": "No Financial Data",
@@ -672,7 +672,7 @@
   "spendingPatternAnalysis": "Spending pattern analysis",
   "personalizedSavingRecommendations": "Personalized saving recommendations",
   "budgetOptimizationSuggestions": "Budget optimization suggestions",
-  "contextAwareFinancialAdvice": "Context-aware financial advice",
+  "contextAwareFinancialAdvice": "Context-aware financial tips",
   "spendingPatternAnalysisTitle": "📊 Spending Pattern Analysis",
   "personalizedSavingRecommendationsTitle": "💡 Personalized Saving Recommendations",
   "budgetOptimizationSuggestionsTitle": "📋 Budget Optimization Suggestions",
@@ -3719,7 +3719,7 @@
     "contextual": {
       "title": "Smart Money Tips",
       "badge": "Standard+",
-      "description": "Intelligent financial advice that adapts to your current month's spending, budget status, and goal progress to provide the most relevant guidance when you need it.",
+      "description": "Intelligent financial tips that adapts to your current month's spending, budget status, and goal progress to provide the most relevant guidance when you need it.",
       "benefits": {
         "realtime": {
           "title": "Real-time Context",
@@ -4205,5 +4205,25 @@
     "freeTitle": "AI actions",
     "freeBody": "AI features are part of the Standard and Premium plans.",
     "whatIsAction": "One action = one AI result. A receipt scan costs 3."
+  },
+  "calc": {
+    "expense": {
+      "title": "Expense Estimation Calculator",
+      "subtitle": "Quick \"Can I afford this?\" analysis — no account required.",
+      "needValid": "Please enter valid amounts for income and desired purchase.",
+      "canAfford": "✅ Great news! You can afford this purchase. You will have {{left}} left over this month.",
+      "saveMonths": "💡 You need to save for {{months}} months. Setting aside {{monthly}} a month would get you there.",
+      "overBudget": "⚠️ Your expenses exceed your income. Reduce expenses or increase income before making this purchase.",
+      "income": "Monthly Income",
+      "expenses": "Monthly Expenses",
+      "purchase": "Desired Purchase",
+      "cta": "Can I Afford This?",
+      "analysis": "Affordability Analysis",
+      "score": "Affordability Score",
+      "proTip": "Pro tip",
+      "proTipBody": "Want to track your actual spending and optimize your budget?",
+      "signUp": "Sign up for free",
+      "proTipTail": "to see where your money really goes."
+    }
   }
 }

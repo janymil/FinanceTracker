@@ -89,6 +89,28 @@ if [ -d dist ]; then
 fi
 npm run build
 
+# Open tabs keep running the JavaScript they loaded. The build writes new hashed file names and
+# leaves the old ones out, so a tab that asks for `/assets/index-abc123.js` after the release gets
+# a 404 and its next page change crashes. Any file the previous build had and this one does not is
+# copied back: they are content-addressed, so a stale copy can never be served to a new page.
+if [ -d "$PREVIOUS/public/assets" ] && [ -d dist/public/assets ]; then
+  restored=0
+  while IFS= read -r -d '' asset; do
+    name="$(basename "$asset")"
+    if [ ! -f "dist/public/assets/$name" ]; then
+      cp "$asset" "dist/public/assets/$name"
+      restored=$((restored + 1))
+    fi
+  done < <(find "$PREVIOUS/public/assets" -type f -maxdepth 1 -print0)
+  echo "    kept $restored previous asset file(s) so open tabs keep working"
+fi
+
+# The stamp the running process reports from /api/health. Without it, "is the fix live?" could
+# only be answered by guessing from process start times.
+RELEASE_ID="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)-$STAMP"
+printf '%s\n' "$RELEASE_ID" > .release
+echo "    release $RELEASE_ID"
+
 echo "==> 9/9 reload $APP_NAME from ecosystem.config.cjs"
 # The ecosystem file, not this shell, supplies the environment: NODE_ENV=production and
 # HOST=127.0.0.1 come from there, so a variable exported for a local test — PORT,
@@ -129,11 +151,19 @@ if [ "$healthy" -ne 1 ]; then
   exit 1
 fi
 
-rm -rf "$PREVIOUS"
+# A rollback copy is kept after a successful run too. It used to be deleted, which meant the
+# "undo is one command away" claim was only true for the two minutes before the health check
+# passed: a bug the health check cannot see (a wrong number, a broken button) had no way back.
+# The next deploy overwrites it, and the timestamped copies below are pruned to $KEEP_BACKUPS.
+if [ -d "$PREVIOUS" ]; then
+  BACKUP="dist.backup-$(date +%Y%m%d-%H%M%S)"
+  mv "$PREVIOUS" "$BACKUP"
+  echo "    rollback copy kept at $BACKUP"
+fi
 
 # Keep a few timestamped copies for archaeology, drop the rest.
 # `|| true`: when there are no backups yet, `ls` exits non-zero and `set -e` would abort
 # the deploy after it has already succeeded.
 ls -dt dist.backup-* 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -rf || true
 
-echo "==> Deployed at $STAMP. Health: ok"
+echo "==> Deployed at $STAMP. Health: ok (release $RELEASE_ID)"

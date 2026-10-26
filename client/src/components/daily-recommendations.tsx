@@ -27,6 +27,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useCurrency } from '@/context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface DailyRecommendationsProps {
   summary?: any;
@@ -107,7 +108,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
   
   // Create stable date-based cache key that matches backend 24-hour TTL
-  const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const todayKey = todayLocalISO(); // YYYY-MM-DD format
   
   // Fetch AI recommendations from backend
   const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError, refetch } = useQuery({

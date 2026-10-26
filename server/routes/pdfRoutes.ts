@@ -8,6 +8,21 @@ import { translateCategoryName, getUserLanguage } from '../categoryTranslations'
 import { buildTrendsPayload, requestPdf, PdfProcessorError } from '../pdfProcessorClient';
 import { checkPdf } from '@shared/invariants';
 import { reportInvariant } from '../errorGuard/report.js';
+import { centsToNumber, parseAmountToCents } from '@shared/money';
+
+/**
+ * Sum a list of money values.
+ *
+ * `transactions.amount` is a `DECIMAL`, and node-postgres hands a DECIMAL back as a *string*.
+ * `sum + t.amount` therefore concatenated ("0" + "120.50" + "8.00" = "0120.508.00") — the Premium
+ * trends PDF either failed or printed a total that was not a number. Summing in integer cents is
+ * also what every other money path in the app does, so the PDF agrees with the screen to the cent.
+ */
+function sumAmounts(rows: Array<{ amount: unknown }>): number {
+  return centsToNumber(
+    rows.reduce((cents, row) => cents + parseAmountToCents(row.amount as string | number), 0),
+  );
+}
 
 export function registerPDFRoutes(app: any) {
   // Generate PDF report for trends data - Premium plan required
@@ -49,15 +64,13 @@ export function registerPDFRoutes(app: any) {
       const periodTransactions = await storage.getTransactionsByDateRange(userId, startDate, endDate);
 
       // Calculate totals
-      const totalIncome = periodTransactions
-        .filter((t: any) => t.type === 'income')
-        .reduce((sum: number, t: any) => sum + t.amount, 0);
+      const totalIncome = sumAmounts(periodTransactions.filter((t: any) => t.type === 'income'));
 
-      const totalExpenses = periodTransactions
-        .filter((t: any) => t.type === 'expense')
-        .reduce((sum: number, t: any) => sum + t.amount, 0);
+      const totalExpenses = sumAmounts(periodTransactions.filter((t: any) => t.type === 'expense'));
 
-      const netBalance = totalIncome - totalExpenses;
+      const netBalance = centsToNumber(
+        Math.round(totalIncome * 100) - Math.round(totalExpenses * 100),
+      );
 
       // The totals are the person's financial position: log that they were computed, not what they are.
       log.debug('Financial totals computed', {
@@ -74,19 +87,15 @@ export function registerPDFRoutes(app: any) {
         
         const monthTransactions = await storage.getTransactionsByDateRange(userId, trendDate, trendEndDate);
 
-        const monthIncome = monthTransactions
-          .filter((t: any) => t.type === 'income')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
+        const monthIncome = sumAmounts(monthTransactions.filter((t: any) => t.type === 'income'));
 
-        const monthExpenses = monthTransactions
-          .filter((t: any) => t.type === 'expense')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
+        const monthExpenses = sumAmounts(monthTransactions.filter((t: any) => t.type === 'expense'));
 
         trendsData.push({
           period: trendDate.toISOString().slice(0, 7),
           income: monthIncome,
           expenses: monthExpenses,
-          netBalance: monthIncome - monthExpenses
+          netBalance: centsToNumber(Math.round(monthIncome * 100) - Math.round(monthExpenses * 100))
         });
       }
 

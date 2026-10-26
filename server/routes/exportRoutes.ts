@@ -12,6 +12,8 @@ import {
   neutralizeSpreadsheetCell,
 } from "@shared/trackingInput";
 import { localParts, monthRange, presetRange, rangeEndFrom, rangeStartFrom, resolveTimeZone } from "@shared/timezones";
+import { collectUserData } from "../userExport";
+import { reportServerError } from "../errorGuard/report";
 
 const MONTH_NAMES = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -281,14 +283,20 @@ export function registerExportRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-      if (!user || user.plan !== 'premium') {
+      const format = String((req.method === 'GET' ? req.query : req.body)?.format || '');
+      // A copy of your own data is a legal right, not a paid feature: the JSON/CSV/Excel export is
+      // available to every account. The generated PDF report stays Premium, because it is a
+      // designed document rather than the raw data.
+      if (user?.plan !== 'premium' && format === 'pdf') {
         return res.status(403).json({ message: "Data export requires Premium subscription" });
       }
 
       // The export page sends a GET with query parameters; scripts may POST a JSON body.
       const input = req.method === 'GET' ? req.query : req.body;
-      const format = String(input.format || '');
       const dateRange = String(input.dateRange || 'all');
       const startDate = input.startDate;
       const endDate = input.endDate;
@@ -353,6 +361,9 @@ export function registerExportRoutes(app: Express) {
       exportData.userName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
 
       if (format === 'json') {
+        // The whole account, not just the three sections the screen offers: an access request is
+        // "everything you hold about me", and the previous answer was about a third of it.
+        exportData.account = await collectUserData(userId);
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Content-Disposition', 'attachment; filename="kaptia-export.json"');
         return res.json(exportData);
@@ -502,24 +513,18 @@ export function registerExportRoutes(app: Express) {
         return res.status(503).json({ message: "Cloud backup service unavailable" });
       }
 
-      // Get all user data
-      const transactions = await storage.getUserTransactions(userId);
-      const budgets = await storage.getUserBudgets(userId);
-      let goals: any[] = [];
-      try {
-        goals = await storage.getUserGoals(userId);
-        log.info(`Backup: Found ${goals.length} goals for user ${userId}`);
-      } catch (error) {
-        log.info('Goals not available for user:', userId);
-      }
+      // Everything the account holds, so restoring after a lost device is not a partial history.
+      // The three arrays the restore path understands stay exactly where they were.
+      const account = await collectUserData(userId);
 
       const backupData = {
         userId,
         timestamp: new Date().toISOString(),
         data: {
-          transactions,
-          budgets,
-          goals,
+          transactions: account.transactions,
+          budgets: account.budgets,
+          goals: account.goals,
+          account,
           user: {
             id: user.id,
             email: user.email,
@@ -721,12 +726,38 @@ export function registerExportRoutes(app: Express) {
       const rows = (value: unknown): any[] => (Array.isArray(value) ? value : []);
 
       const backupData = parsedData.data ?? {};
+      /*
+       * Restoring a history must not re-create the history.
+       *
+       * `createTransaction` starts a repeating rule for every row flagged `isRecurring`, with
+       * `lastProcessed` set to that row's date. A backup holds one row per past month, so a
+       * restore created one rule per month and the job then filled in every month between each of
+       * them — the same payment, many times over. Only the newest occurrence of each rule keeps
+       * the flag, so the rule resumes from today instead of re-creating the past.
+       */
+      const newestRecurringDate = new Map<string, number>();
+      for (const t of rows(backupData.transactions)) {
+        if (!t?.isRecurring || !t?.recurringFrequency) continue;
+        const key = `${String(t.description ?? '').toLowerCase()}|${String(t.amount ?? '')}|${t.recurringFrequency}`;
+        const stamp = new Date(t.date).getTime();
+        if (!Number.isNaN(stamp) && stamp > (newestRecurringDate.get(key) ?? -Infinity)) {
+          newestRecurringDate.set(key, stamp);
+        }
+      }
+
       const newTransactions = rows(backupData.transactions).map((t) => {
         const { id, categoryName, categoryIcon, categoryColor, ...rest } = t;
+        const date = toDate(t.date, 'a transaction');
+        let isRecurring: boolean | undefined = t.isRecurring;
+        if (t.isRecurring && t.recurringFrequency) {
+          const key = `${String(t.description ?? '').toLowerCase()}|${String(t.amount ?? '')}|${t.recurringFrequency}`;
+          isRecurring = date.getTime() === newestRecurringDate.get(key);
+        }
         return {
           ...rest,
+          isRecurring,
           userId,
-          date: toDate(t.date, 'a transaction'),
+          date,
           createdAt: toDate(t.createdAt ?? t.date, 'a transaction'),
           updatedAt: toDate(t.updatedAt ?? t.date, 'a transaction'),
         };
@@ -787,10 +818,26 @@ export function registerExportRoutes(app: Express) {
           for (const row of oldTransactions) await storage.createTransaction(stripForReinsert(row));
           for (const row of oldBudgets) await storage.createBudget(stripForReinsert(row));
           for (const row of oldGoals) await storage.createGoal(stripForReinsert(row));
+          // Only this branch can honestly say the old data is back: it re-inserted it and every
+          // step above succeeded. If the rollback itself failed, the message says so below.
+          return res.status(500).json({
+            message: "Failed to restore backup. Your previous data was kept.",
+            restoredData,
+          });
         } catch (rollbackError) {
           log.error('RESTORE ROLLBACK FAILED:', rollbackError);
+          reportServerError(rollbackError instanceof Error ? rollbackError : new Error(String(rollbackError)), {
+            where: 'backup.restore.rollback',
+            route: '/api/restore',
+            moneyPath: true,
+          });
+          // Never claim the data was kept when it could not be put back.
+          return res.status(500).json({
+            message:
+              "The restore failed and the previous data could not be put back automatically. Please contact support; your backup file is still stored.",
+            code: 'restore_rollback_failed',
+          });
         }
-        return res.status(500).json({ message: "Failed to restore backup. Your previous data was kept." });
       }
 
       return res.json({

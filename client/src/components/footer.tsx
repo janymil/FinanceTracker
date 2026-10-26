@@ -3,6 +3,13 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useTranslation } from 'react-i18next';
 import { KaptiaLogo } from "@/components/KaptiaLogo";
+import { openCookieSettings } from "@/lib/consent";
+
+const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+  { code: 'sk', name: 'Slovenčina' },
+] as const;
 
 interface FooterProps {
   sidebarCollapsed?: boolean;
@@ -12,6 +19,22 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
   const { t } = useTranslation();
   const [location] = useLocation();
   const currentLang = location.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] || localStorage.getItem('preferredLanguage') || 'en';
+
+  /**
+   * Switches language in place: same page, same query, only the language segment changes. The
+   * choice is remembered, so the next visit starts in it instead of resetting to English.
+   */
+  const switchLanguage = (language: string) => {
+    const rest = location.replace(/^\/[a-z]{2}(?=\/|$)/, '');
+    const target = `/${language}${rest}`;
+    try {
+      localStorage.setItem('preferredLanguage', language);
+      localStorage.setItem('i18nextLng', language);
+    } catch {
+      /* storage can be blocked; the URL still changes */
+    }
+    window.location.assign(target);
+  };
 
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -107,6 +130,14 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
             <Link href={`/${currentLang}/cookie-policy`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("Cookie Policy")}
             </Link>
+            {/* Withdrawal: a stored decision must be changeable, not just given once. */}
+            <button
+              type="button"
+              onClick={() => openCookieSettings()}
+              className="hover:text-gray-900 dark:hover:text-white transition-colors underline-offset-2 hover:underline"
+            >
+              {t("Cookie settings", "Cookie settings")}
+            </button>
             <Link href={`/${currentLang}/refund-policy`} onClick={handleLinkClick} className="hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("footer.refunds")}
             </Link>
@@ -114,6 +145,29 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
               {t("footer.reclamaciones")}
             </Link>
           </div>
+        </div>
+
+        {/* Language switcher. The app had none: the language came from the URL and reset on sign
+            out, so a Spanish speaker had to edit the address by hand. */}
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <span className="sr-only">{t("Language", "Language")}</span>
+          {LANGUAGES.map((language) => (
+            <button
+              key={language.code}
+              type="button"
+              onClick={() => switchLanguage(language.code)}
+              aria-label={`${t("Language", "Language")}: ${language.name}`}
+              aria-current={currentLang === language.code ? 'true' : undefined}
+              className={cn(
+                'px-2 py-1 rounded transition-colors uppercase tracking-wide',
+                currentLang === language.code
+                  ? 'text-indigo-600 dark:text-white font-semibold'
+                  : 'hover:text-indigo-600 dark:hover:text-white',
+              )}
+            >
+              {language.code}
+            </button>
+          ))}
         </div>
       </div>
     </footer>

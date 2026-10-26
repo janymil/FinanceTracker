@@ -109,6 +109,13 @@ export function calculateTransactionSimilarity(
 /**
  * Rows whose best match scores >= 0.7 are reported with the matching existing rows and the
  * reasons. Nothing is dropped here — the user confirms in the UI.
+ *
+ * Candidates are narrowed before scoring. The old version compared every extracted row with every
+ * stored row, and each comparison ran a Levenshtein distance: a 500-row statement against two
+ * years of history was ~1.8 million string comparisons on the request thread, which is what made
+ * the preview freeze for everyone else while it ran. Only rows within the 5 % amount tolerance and
+ * the 3-day window can reach the 0.7 threshold anyway, so everything else is skipped without
+ * touching the strings.
  */
 export function detectDuplicateTransactions<
   TExtracted extends MatchableTransaction,
@@ -119,12 +126,41 @@ export function detectDuplicateTransactions<
 ): Array<DuplicateMatch<TExtracted, TExisting>> {
   const duplicates: Array<DuplicateMatch<TExtracted, TExisting>> = [];
 
+  // Bucket by whole currency unit: a 5 % tolerance never crosses more than a few buckets, and a
+  // lookup is O(1) instead of a scan.
+  const buckets = new Map<number, TExisting[]>();
+  for (const existing of existingTransactions) {
+    const bucket = Math.round(Math.abs(Number(existing.amount) || 0));
+    const list = buckets.get(bucket);
+    if (list) list.push(existing);
+    else buckets.set(bucket, [existing]);
+  }
+
+  const candidateWindow = (amount: number): TExisting[] => {
+    const magnitude = Math.abs(Number(amount) || 0);
+    const centre = Math.round(magnitude);
+    // 5 % of the amount, at least one unit: a 100.00 row looks in 95…105.
+    const span = Math.max(1, Math.ceil(magnitude * 0.05));
+    const candidates: TExisting[] = [];
+    for (let bucket = centre - span; bucket <= centre + span; bucket += 1) {
+      const list = buckets.get(bucket);
+      if (list) candidates.push(...list);
+    }
+    return candidates;
+  };
+
   for (const extracted of extractedTransactions) {
     const matches: TExisting[] = [];
     const matchReasons: string[] = [];
     let highestSimilarity = 0;
 
-    for (const existing of existingTransactions) {
+    const pool = existingTransactions.length <= 50 ? existingTransactions : candidateWindow(extracted.amount);
+
+    for (const existing of pool) {
+      // Date is 40 % of the score: outside the tolerance the row cannot reach 0.7, so skip the
+      // expensive string comparison.
+      if (calculateDateSimilarity(extracted.date, existing.date) === 0) continue;
+
       const similarity = calculateTransactionSimilarity(extracted, existing);
       if (similarity < DUPLICATE_THRESHOLD) continue;
 

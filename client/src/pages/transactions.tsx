@@ -41,6 +41,7 @@ import TransactionFilters from "@/components/TransactionFilters";
 import { useDateFormat } from "@/hooks/useDateFormat";
 import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 import SimpleVoiceButton from "@/components/simple-voice-button";
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface Transaction {
   id: number;
@@ -104,7 +105,7 @@ export default function Transactions() {
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
-    date: new Date().toISOString().split('T')[0],
+    date: todayLocalISO(),
     type: "expense" as "income" | "expense",
     categoryId: "",
     isRecurring: false,
@@ -316,7 +317,7 @@ export default function Transactions() {
       setNewTransaction({
         amount: "",
         description: "",
-        date: new Date().toISOString().split('T')[0],
+        date: todayLocalISO(),
         type: "expense",
         categoryId: "",
         isRecurring: false,
@@ -346,7 +347,7 @@ export default function Transactions() {
       setNewTransaction({
         amount: "",
         description: "",
-        date: new Date().toISOString().split('T')[0],
+        date: todayLocalISO(),
         type: "expense",
         categoryId: "",
         isRecurring: false,
@@ -440,7 +441,7 @@ export default function Transactions() {
                       setNewTransaction({
                         amount: "",
                         description: "",
-                        date: new Date().toISOString().split('T')[0],
+                        date: todayLocalISO(),
                         type: "expense",
                         categoryId: "",
                         isRecurring: false,

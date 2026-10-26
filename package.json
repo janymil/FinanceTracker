@@ -40,6 +40,8 @@
     "db:drift": "tsx scripts/db-schema-drift.ts",
     "db:drift:prod": "tsx scripts/db-schema-drift.ts --prod",
     "db:dump": "tsx scripts/db-dump.ts",
+    "db:encrypt:backfill": "tsx scripts/backfill-field-encryption.ts",
+    "db:receipts:private": "tsx scripts/receipts-to-private.ts",
     "db:audit-users": "node scripts/db-user-audit.mjs",
     "db:verify-globals": "node scripts/db-verify-globals.mjs",
     "db:clean-users": "node scripts/clean-user-data.mjs",

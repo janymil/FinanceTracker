@@ -308,6 +308,10 @@ class PDFSecurityManager {
 /**
  * Main PDF processing pipeline with enhanced security and progress tracking
  */
+export const MAX_PDF_PAGES = 40;
+/** Most AI categorization calls a single import may make, however many rows it has. */
+export const MAX_CATEGORIZATION_CALLS = 40;
+
 export async function processBankStatementPDF(
   pdfBuffer: Buffer,
   language: string = 'en-us',
@@ -359,6 +363,26 @@ export async function processBankStatementPDF(
     }
     const pdfData = await pdf(pdfBuffer);
     result.totalPages = pdfData.numpages;
+
+    /*
+     * A page ceiling.
+     *
+     * The route had no limit at all: every page is rendered and read by OCR and then sent to the
+     * AI, so one 400-page PDF costs the same as dozens of imports and takes minutes. The ceiling
+     * is generous for a personal statement (a year of monthly statements is ~24 pages) and is
+     * refused *before* the expensive steps rather than after they have been paid for.
+     */
+    if (pdfData.numpages > MAX_PDF_PAGES) {
+      result.errors.push(
+        `This PDF has ${pdfData.numpages} pages; the limit is ${MAX_PDF_PAGES}. Split it into smaller files.`,
+      );
+      onProgress?.({
+        stage: 'complete',
+        percentage: 100,
+        message: result.errors[result.errors.length - 1],
+      });
+      return result;
+    }
 
     let extractedText = pdfData.text;
     let textQuality = assessTextQuality(extractedText);
@@ -729,57 +753,82 @@ async function addAICategorization(
     
     console.log(`Intelligent AI categorization: Found ${userCategories.length} categories and ${userTransactions.length} historical transactions`);
     
-    const categorizedTransactions: ExtractedTransaction[] = [];
-    const totalTransactions = transactions.length;
-    
-    for (let i = 0; i < transactions.length; i++) {
-      const transaction = transactions[i];
+    /*
+     * One AI call per row meant a 200-row statement made 200 calls: minutes of waiting, and 200
+     * actions off the person's monthly allowance for what is usually the same twenty shops
+     * repeated. The work is now per *distinct description*, most frequent first, capped at
+     * `MAX_CATEGORIZATION_CALLS`; anything beyond the cap reuses the answer for the same
+     * merchant or falls back to a local decision.
+     */
+    const keyOf = (description: string) => String(description || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+    const frequency = new Map<string, { description: string; count: number; amount: number }>();
+    for (const transaction of transactions) {
+      const description = String(transaction.description || '').trim();
+      if (!description || transaction.amount === 0) continue;
+      const key = keyOf(description);
+      const entry = frequency.get(key);
+      if (entry) entry.count += 1;
+      else frequency.set(key, { description, count: 1, amount: Math.abs(transaction.amount) });
+    }
+
+    const ranked = Array.from(frequency.entries())
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, MAX_CATEGORIZATION_CALLS);
+
+    const categoryByDescription = new Map<string, string>();
+
+    for (const [key, info] of ranked) {
       try {
-        if (transaction.description && transaction.amount !== 0) {
-          // Use intelligent AI categorization with user transaction history
-          const categorizationResult = await runAI('categorizeExpense', userId, {
-            description: transaction.description,
-            amount: Math.abs(transaction.amount),
-            language: language,
-            userTransactions: userTransactions.map(tx => ({
-              description: tx.description,
-              category: (tx as any).categoryName || 'Uncategorized',
-              amount: tx.amount,
-              type: tx.type,
-              date: tx.date
-            })),
-            userCategories: userCategories.map(cat => ({
-              id: cat.id,
-              name: cat.name,
-              type: cat.type
-            }))
-          }, user?.plan || 'free');
-          
-          transaction.category = categorizationResult.category || 'Other';
-          console.log(`Intelligent AI categorized "${transaction.description}" as "${transaction.category}"`);
-        }
+        const categorizationResult = await runAI('categorizeExpense', userId, {
+          description: info.description,
+          amount: info.amount,
+          language: language,
+          userTransactions: userTransactions.map(tx => ({
+            description: tx.description,
+            category: (tx as any).categoryName || 'Uncategorized',
+            amount: tx.amount,
+            type: tx.type,
+            date: tx.date
+          })),
+          userCategories: userCategories.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            type: cat.type
+          }))
+        }, user?.plan || 'free');
+
+        categoryByDescription.set(key, categorizationResult.category || 'Other');
       } catch (error) {
-        console.error(`Intelligent categorization failed for "${transaction.description}":`, error);
-        transaction.category = transaction.type === 'income' ? 'Income' : 'Other';
+        console.error(`Intelligent categorization failed for "${info.description}":`, error);
+        // Left unset on purpose: the loop below uses the local fallback for this merchant.
       }
-      
-      categorizedTransactions.push(transaction);
-      
+    }
+
+    const totalTransactions = transactions.length;
+
+    transactions.forEach((transaction, i) => {
+      if (transaction.description && transaction.amount !== 0) {
+        const key = keyOf(transaction.description);
+        transaction.category =
+          categoryByDescription.get(key) || (transaction.type === 'income' ? 'Income' : 'Other');
+      }
+
       // Update progress: from 75% to 95% based on categorization progress
-      const categorizationProgress = (i + 1) / totalTransactions;
+      const categorizationProgress = (i + 1) / Math.max(1, totalTransactions);
       const overallProgress = 75 + (categorizationProgress * 20); // 75% + 20% for categorization
-      
+
       onProgress?.({
         stage: 'categorization',
         percentage: Math.round(categorizationProgress * 100),
         overallProgress: Math.round(overallProgress),
-        message: `AI categorizing transaction ${i + 1} of ${totalTransactions}...`,
+        message: `Categorizing transaction ${i + 1} of ${totalTransactions}...`,
         transactionsProcessed: i + 1,
         totalTransactions: totalTransactions
       });
-    }
+    });
 
-    return categorizedTransactions;
+    return transactions;
   } catch (error) {
     console.error('AI categorization failed, returning transactions without categories:', error);
     return transactions;

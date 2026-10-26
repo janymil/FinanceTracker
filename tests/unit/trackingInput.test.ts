@@ -35,7 +35,9 @@ describe('cleanNonNegativeAmount', () => {
 
 describe('cleanDateValue', () => {
   it('parses real dates and refuses everything else', () => {
-    expect(cleanDateValue('2026-10-31')?.toISOString()).toBe('2026-10-31T00:00:00.000Z');
+    // A plain day is stored at noon UTC so it stays the same date in Lima (UTC-5) and in Madrid
+    // (UTC+2). Midnight UTC made "1 October" show as 30 September in Peru.
+    expect(cleanDateValue('2026-10-31')?.toISOString()).toBe('2026-10-31T12:00:00.000Z');
     expect(cleanDateValue('not a date')).toBeNull();
     expect(cleanDateValue('')).toBeNull();
     expect(cleanDateValue(undefined)).toBeNull();

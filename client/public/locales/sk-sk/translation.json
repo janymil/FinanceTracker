@@ -267,7 +267,7 @@
   "Standard+ Users": "Standard+ Používatelia",
   "AI-powered analysis with detailed recommendations and improvement suggestions": "AI analýza s podrobnými odporúčaniami a návrhmi na zlepšenie",
   "AI Financial Tips (Premium)": "AI Finančné Tipy (Premium)",
-  "Personalized financial advice based on spending patterns": "Personalizované finančné poradenstvo založené na vzoroch utrácania",
+  "Personalized financial tips based on spending patterns": "Personalizované finančné tipy založené na vzoroch utrácania",
   "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "AI generované tipy, analýza trendov, uskutočniteľné odporúčania, perzistentné medzi sedeniami",
   "Basic expense tracking": "Základné sledovanie výdavkov",
   "Transaction history": "História transakcií",
@@ -720,13 +720,13 @@
   "yourFinancialAssistantIsWakingUp": "Váš finančný asistent sa prebúdza...",
   "addTransactionsToSeeMascot": "Pridajte niektoré transakcie, aby ste videli svojho maskota finančného zdravia!",
   "aiFinancialTips": "AI Finančné Tipy",
-  "getPersonalizedFinancialAdvice": "Získajte personalizované finančné poradenstvo na základe vašich vzorcov výdavkov",
+  "getPersonalizedFinancialAdvice": "Získajte personalizované finančné tipy na základe vašich vzorcov výdavkov",
   "personalizedAIAnalysis": "Personalizovaná AI Analýza",
   "generateInsightsBasedOnSpendingData": "Generujte poznatky na základe vašich mesačných údajov o výdavkoch",
   "getAITip": "Získať AI Tip",
   "generating": "Generujem...",
   "aiTipGenerated": "AI Tip Vygenerovaný",
-  "newFinancialAdviceGenerated": "Nové finančné poradenstvo na základe vašich údajov o výdavkoch",
+  "newFinancialAdviceGenerated": "Nové finančné tipy na základe vašich údajov o výdavkoch",
   "error": "Chyba",
   "failedToGenerateAITip": "Nepodarilo sa vygenerovať AI tip. Skúste to znova.",
   "noFinancialData": "Žiadne Finančné Údaje",
@@ -735,7 +735,7 @@
   "spendingPatternAnalysis": "Analýza vzorcov výdavkov",
   "personalizedSavingRecommendations": "Personalizované odporúčania na sporenie",
   "budgetOptimizationSuggestions": "Návrhy na optimalizáciu rozpočtu",
-  "contextAwareFinancialAdvice": "Kontextové finančné poradenstvo",
+  "contextAwareFinancialAdvice": "Kontextové finančné tipy",
   "spendingPatternAnalysisTitle": "📊 Analýza Vzorcov Výdavkov",
   "personalizedSavingRecommendationsTitle": "💡 Personalizované Odporúčania na Sporenie",
   "budgetOptimizationSuggestionsTitle": "📋 Návrhy na Optimalizáciu Rozpočtu",
@@ -3829,7 +3829,7 @@
     "contextual": {
       "title": "Inteligentné tipy pre peniaze",
       "badge": "Štandard+",
-      "description": "Inteligentné finančné poradenstvo, ktoré sa prispôsobuje vašim aktuálnym mesačným výdavkom, stavu rozpočtu a pokroku cieľov na poskytnutie najrelevantnejšieho vedenia keď ho potrebujete.",
+      "description": "Inteligentné finančné tipy, ktoré sa prispôsobuje vašim aktuálnym mesačným výdavkom, stavu rozpočtu a pokroku cieľov na poskytnutie najrelevantnejšieho vedenia keď ho potrebujete.",
       "benefits": {
         "realtime": {
           "title": "Kontext v reálnom čase",
@@ -4313,5 +4313,25 @@
     "freeTitle": "AI akcie",
     "freeBody": "AI funkcie sú súčasťou plánov Standard a Premium.",
     "whatIsAction": "Jedna akcia = jeden výsledok AI. Naskenovanie bločku stojí 3."
+  },
+  "calc": {
+    "expense": {
+      "title": "Kalkulačka výdavkov",
+      "subtitle": "Rýchla analýza „Môžem si to dovoliť?“ — bez účtu.",
+      "needValid": "Zadaj platné sumy príjmu a želanej kúpy.",
+      "canAfford": "✅ Dobrá správa! Môžeš si to dovoliť. Tento mesiac ti zostane {{left}}.",
+      "saveMonths": "💡 Potrebuješ sporiť {{months}} mesiacov. Ak si odložíš {{monthly}} mesačne, cieľ dosiahneš.",
+      "overBudget": "⚠️ Výdavky prevyšujú príjmy. Pred kúpou zníž výdavky alebo zvýš príjem.",
+      "income": "Mesačný príjem",
+      "expenses": "Mesačné výdavky",
+      "purchase": "Želaná kúpa",
+      "cta": "Môžem si to dovoliť?",
+      "analysis": "Analýza dostupnosti",
+      "score": "Miera dostupnosti",
+      "proTip": "Tip",
+      "proTipBody": "Chceš sledovať svoje skutočné výdavky a vylepšiť rozpočet?",
+      "signUp": "Vytvor si účet zadarmo",
+      "proTipTail": "a uvidíš, kam ide tvojich peniaze."
+    }
   }
 }

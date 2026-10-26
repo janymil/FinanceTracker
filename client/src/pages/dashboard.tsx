@@ -75,6 +75,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import SimpleVoiceButton from "@/components/simple-voice-button";
+import { todayLocalISO } from '@/lib/dateUtils';
 
 
 interface Category {
@@ -169,7 +170,7 @@ export default function Dashboard() {
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
-    date: new Date().toISOString().split('T')[0],
+    date: todayLocalISO(),
     type: "expense" as "income" | "expense",
     categoryId: "",
     isRecurring: false,
@@ -217,7 +218,7 @@ export default function Dashboard() {
   });
 
   // Load financial summary immediately alongside transactions
-  const { data: financialSummary, isLoading: summaryLoading } = useQuery({
+  const { data: financialSummary, isLoading: summaryLoading, error: summaryError } = useQuery({
     queryKey: ['financial-summary', user?.id, startDate.toISOString(), endDate.toISOString()],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -309,7 +310,7 @@ export default function Dashboard() {
       setNewTransaction({
         amount: "",
         description: "",
-        date: new Date().toISOString().split('T')[0],
+        date: todayLocalISO(),
         type: "expense",
         categoryId: "",
         isRecurring: false,
@@ -408,15 +409,18 @@ export default function Dashboard() {
 
   const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) return;
+    // A second click while the first request is in flight used to add the same expense twice.
+    // The button is also disabled while pending; this is the guard for the keyboard path.
+    if (createTransactionMutation.isPending) return;
     createTransactionMutation.mutate(newTransaction);
   };
 
   return <>
     <SEO 
-      title="Dashboard - Financial Overview | FinanzerPro"
+      title="Dashboard - Financial Overview | Kaptia"
       description="View your complete financial picture with real-time expense tracking, budget insights, and AI-powered recommendations. Manage transactions and monitor your financial health."
       keywords="personal finance dashboard, expense tracking, budget overview, financial insights, money management, transaction history"
-      canonical="https://finanzerpro.com/dashboard"
+      canonical="https://kaptia.app/dashboard"
     />
       <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -476,7 +480,7 @@ export default function Dashboard() {
                         setNewTransaction({
                           amount: "",
                           description: "",
-                          date: new Date().toISOString().split('T')[0],
+                          date: todayLocalISO(),
                           type: "expense",
                           categoryId: "",
                           isRecurring: false,
@@ -673,9 +677,9 @@ export default function Dashboard() {
                       </Button>
                       <Button 
                         onClick={handleSubmit}
-                        disabled={!newTransaction.amount || !newTransaction.description}
+                        disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
                       >
-                        {t("Add")}
+                        {createTransactionMutation.isPending ? t("Saving…", "Saving…") : t("Add")}
                       </Button>
                     </div>
                   </div>
@@ -694,6 +698,34 @@ export default function Dashboard() {
             incomeCount={Array.isArray(transactions) ? transactions.filter((tx: any) => tx.type === 'income').length : 0}
             budgetsCount={Array.isArray(budgets) ? budgets.length : 0}
           />
+        )}
+
+        {/* A failed load is said out loud. Before this the cards showed zeros and the recent
+            list showed "no transactions", which reads as real data — someone could look at an
+            empty dashboard while their history was simply unreachable. */}
+        {(transactionsError || summaryError) && (
+          <div
+            role="alert"
+            className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100"
+          >
+            <p className="font-medium">{t('We could not load your data', 'We could not load your data')}</p>
+            <p className="mt-1 text-amber-800 dark:text-amber-200">
+              {t(
+                'The numbers below may be out of date. Please check your connection and reload the page.',
+                'The numbers below may be out of date. Please check your connection and reload the page.',
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+                queryClient.invalidateQueries({ queryKey: ['financial-summary', user?.id] });
+              }}
+              className="mt-2 font-medium underline underline-offset-2"
+            >
+              {t('Try again', 'Try again')}
+            </button>
+          </div>
         )}
 
         {/* Financial Overview Cards */}

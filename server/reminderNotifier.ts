@@ -5,6 +5,7 @@ import { expenseReminders, users } from "../shared/schema";
 import { sendEmail } from "./emailService";
 import { withJobRun } from "./errorGuard/jobs.js";
 import { formatCurrencyAmount, resolveStoredCurrency } from "../shared/currencies";
+import { decryptField } from "./fieldCrypto";
 
 type Language = "en" | "es" | "sk";
 
@@ -148,7 +149,8 @@ export async function sendDueReminderEmails(now: Date = new Date()): Promise<Rem
     const { subject, text } = buildReminderEmail({
       language: row.language,
       firstName: row.firstName,
-      title: row.reminder.title,
+      // The reminder row is stored encrypted; the e-mail is the one place it must be readable.
+      title: decryptField(row.reminder.title) as string,
       dueDate: row.reminder.dueDate,
       amount: row.reminder.amount,
       currencySymbol: row.currency,

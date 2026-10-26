@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { queryClient } from "@/lib/queryClient";
 import { useAiAccess } from "@/hooks/useAiAccess";
 import QRCode from "qrcode";
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface UploadReceiptModalProps {
   onReceiptProcessed?: (receiptData: any) => void;
@@ -83,7 +84,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
   const [formData, setFormData] = useState<FormData>({
     amount: '',
     description: '',
-    date: new Date().toISOString().split('T')[0],
+    date: todayLocalISO(),
     categoryId: ''
   });
 
@@ -281,7 +282,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
       const newFormData = {
         amount: result.data.extracted.amount?.toString() || '',
         description: result.data.extracted.vendor || '',
-        date: result.data.extracted.date || new Date().toISOString().split('T')[0],
+        date: result.data.extracted.date || todayLocalISO(),
         categoryId: matchedCategoryId
       };
 
@@ -390,7 +391,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
         const newFormData = {
           amount: result.extracted.amount?.toString() || '',
           description: result.extracted.vendor || '',
-          date: result.extracted.date || new Date().toISOString().split('T')[0],
+          date: result.extracted.date || todayLocalISO(),
           categoryId: matchedCategoryId
         };
 
@@ -435,7 +436,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
     setFormData({
       amount: '',
       description: '',
-      date: new Date().toISOString().split('T')[0],
+      date: todayLocalISO(),
       categoryId: ''
     });
     if (fileInputRef.current) {

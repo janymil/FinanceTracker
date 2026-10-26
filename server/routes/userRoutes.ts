@@ -6,6 +6,7 @@ import { getUserLanguage, translateCategories } from "../categoryTranslations";
 import { rateLimit } from "../middleware/rateLimit";
 import { reportServerError } from "../errorGuard/report";
 import { cancelBilling } from "../cancelBilling";
+import { deleteUserFiles } from "../userFiles";
 import { log } from '../logger';
 
 export function registerUserRoutes(app: Express) {
@@ -105,6 +106,21 @@ export function registerUserRoutes(app: Express) {
         }
 
         await storage.deleteUserCompletely(userId);
+
+        // Rows are gone; the photos and backups are not. Best-effort, and reported rather than
+        // silent: a leftover object is a privacy issue, but blocking the deletion here would be
+        // worse — the records are already erased.
+        try {
+          const files = await deleteUserFiles(userId);
+          if (files.failed > 0) {
+            reportServerError(
+              new Error(`${files.failed} stored file(s) could not be deleted`),
+              { where: 'account.delete.files', route: '/api/account/delete' },
+            );
+          }
+        } catch (cleanupError) {
+          reportServerError(cleanupError, { where: 'account.delete.files', route: '/api/account/delete' });
+        }
 
         try {
           await clerkClient.users.deleteUser(userId);

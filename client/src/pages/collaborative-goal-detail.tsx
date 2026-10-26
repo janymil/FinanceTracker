@@ -121,6 +121,9 @@ export default function CollaborativeGoalDetailPage() {
   const [contributionParticipant, setContributionParticipant] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
+  // Guards a second tap on "Add": the request takes a moment and a repeat added the same money
+  // twice to the goal. `isInviting` above is the same idea for invitations.
+  const [isAddingContribution, setIsAddingContribution] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [isJoining, setIsJoining] = useState(false);
@@ -179,6 +182,9 @@ export default function CollaborativeGoalDetailPage() {
 
   // Handle contribution submission
   const handleAddContribution = async () => {
+    // Already sending: a second tap would send the same money twice.
+    if (isAddingContribution) return;
+
     if (!contributionAmount || parseFloat(contributionAmount) <= 0) {
       toast({
         title: t('collaborative_goal_detail.messages.invalid_amount'),
@@ -198,6 +204,7 @@ export default function CollaborativeGoalDetailPage() {
     }
 
     try {
+      setIsAddingContribution(true);
       const headers = await getAuthHeaders();
       const response = await fetch(`/api/collaborative-goals/${id}/contributions`, {
         method: 'POST',
@@ -230,6 +237,8 @@ export default function CollaborativeGoalDetailPage() {
         description: "Failed to add contribution",
         variant: "destructive"
       });
+    } finally {
+      setIsAddingContribution(false);
     }
   };
 
@@ -670,7 +679,7 @@ export default function CollaborativeGoalDetailPage() {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button onClick={handleAddContribution} className="flex-1">
+                      <Button onClick={handleAddContribution} className="flex-1" disabled={isAddingContribution}>
                         {t('collaborative_goal_detail.forms.add_contribution')}
                       </Button>
                       <Button variant="outline" onClick={() => setShowAddContribution(false)}>

@@ -40,6 +40,7 @@ import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/d
 import TransactionFilters from "@/components/TransactionFilters";
 import { RecurringRulesCard } from "@/components/RecurringRulesCard";
 import SimpleVoiceButton from "@/components/simple-voice-button";
+import { todayLocalISO } from '@/lib/dateUtils';
 
 
 // Helper functions for category localization
@@ -98,7 +99,7 @@ export default function Expenses() {
   const [newExpense, setNewExpense] = useState({
     amount: "",
     description: "",
-    date: new Date().toISOString().split('T')[0],
+    date: todayLocalISO(),
     categoryId: "",
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
@@ -140,7 +141,7 @@ export default function Expenses() {
       setNewExpense({
         amount: "",
         description: "",
-        date: new Date().toISOString().split('T')[0],
+        date: todayLocalISO(),
         categoryId: "",
         isRecurring: false,
         recurringFrequency: "monthly",
@@ -388,7 +389,7 @@ export default function Expenses() {
                       setNewExpense({
                         amount: "",
                         description: "",
-                        date: new Date().toISOString().split('T')[0],
+                        date: todayLocalISO(),
                         categoryId: "",
                         isRecurring: false,
                         recurringFrequency: "monthly",

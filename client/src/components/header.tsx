@@ -56,6 +56,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest, clearUserSession } from "@/lib/queryClient";
 import { useTheme } from "@/context/ThemeContext";
+import { todayLocalISO } from '@/lib/dateUtils';
 
 interface Category {
   id: number;
@@ -115,7 +116,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
-    date: new Date().toISOString().split('T')[0],
+    date: todayLocalISO(),
     type: "expense" as "income" | "expense",
     categoryId: "",
     isRecurring: false,
@@ -161,7 +162,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       setNewTransaction({
         amount: "",
         description: "",
-        date: new Date().toISOString().split('T')[0],
+        date: todayLocalISO(),
         type: "expense",
         categoryId: "",
         isRecurring: false,
@@ -238,7 +239,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                   setNewTransaction({
                     amount: "",
                     description: "",
-                    date: new Date().toISOString().split('T')[0],
+                    date: todayLocalISO(),
                     type: "expense",
                     categoryId: "",
                     isRecurring: false,

@@ -4,6 +4,20 @@ import { getCurrentLanguageForAPI } from '../../../lib/languageUtils';
  * Get the correct locale for date formatting based on current language
  * Returns locale codes compatible with toLocaleDateString()
  */
+/**
+ * Today as `yyyy-mm-dd` in the browser's own timezone.
+ *
+ * `new Date().toISOString().split('T')[0]` is the UTC day, which after 19:00 in Lima is already
+ * tomorrow — the form opened on a date the person had not reached yet. The date input wants a
+ * local calendar day, so it is built from the local parts.
+ */
+export function todayLocalISO(now: Date = new Date()): string {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function getDateLocale(): string {
   // Get current language from browser or localStorage
   let currentLang = 'en-us';

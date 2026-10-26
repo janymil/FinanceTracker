@@ -138,7 +138,21 @@ const sustainedLimit = rateLimit({
  * The monthly allowance is checked here rather than inside each AI function, so a new route
  * inherits the cap without remembering to ask for it. A blocked call is refused before the
  * rate limiter runs, which also keeps a blocked account from spending its hourly allowance.
+ *
+ * Requests already in flight are counted too. The allowance is spent when a call *finishes*, so a
+ * page that fires six AI widgets at once passed the same check six times and could go over the
+ * monthly limit by up to five calls. Two at a time is plenty for a person and impossible for a
+ * script that opens requests in parallel.
  */
+const MAX_CONCURRENT_AI_REQUESTS = 2;
+const inFlightByUser = new Map<string, number>();
+
+function releaseInFlight(userId: string): void {
+  const current = inFlightByUser.get(userId) ?? 0;
+  if (current <= 1) inFlightByUser.delete(userId);
+  else inFlightByUser.set(userId, current - 1);
+}
+
 export function aiGuard() {
   return async (req: Request, res: Response, next: NextFunction) => {
     const userId = getUserId(req as any);
@@ -151,6 +165,22 @@ export function aiGuard() {
     if (quota.state.state === 'blocked') {
       return denyAi(res, 'ai_quota_exceeded', quota.state);
     }
+
+    const inFlight = inFlightByUser.get(access.userId) ?? 0;
+    if (inFlight >= MAX_CONCURRENT_AI_REQUESTS) {
+      // Same shape the rate limiter answers with: this is a temporary "too many at once", not a
+      // quota refusal, and the app already knows how to show it.
+      return res.status(429).json({
+        error: 'Too many AI requests in flight',
+        message: 'Please wait for the current answer before starting another.',
+        code: 'ai_rate_limited',
+      });
+    }
+
+    inFlightByUser.set(access.userId, inFlight + 1);
+    // Released however the response ends — success, refusal, error or a dropped connection.
+    res.on('finish', () => releaseInFlight(access.userId));
+    res.on('close', () => releaseInFlight(access.userId));
 
     (req as any).aiUser = { id: access.userId, plan: access.plan, quota: quota.state };
     return burstLimit(req, res, () => sustainedLimit(req, res, next));

@@ -105,8 +105,12 @@ describe('rate-limit eviction', () => {
   it('lets a protected bucket expire normally', async () => {
     setRateLimitCapacityForTests(10);
 
+    // 1 ms was the old window, and the two calls below are not guaranteed to land inside it: on a
+    // busy machine the bucket expired between them and the test failed for a reason that had
+    // nothing to do with eviction. 200 ms is short enough to keep the test fast and long enough to
+    // be a decision rather than a race.
     const lockout = rateLimit({
-      windowMs: 1,
+      windowMs: 200,
       max: 1,
       keyPrefix: 'admin-login-global',
       keyFn: () => 'global',
@@ -117,7 +121,7 @@ describe('rate-limit eviction', () => {
     expect((await run(lockout, login)).passed).toBe(true);
     expect((await run(lockout, login)).passed).toBe(false);
 
-    await new Promise((resolve) => setTimeout(resolve, 5));
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
     // Protection is against eviction, not against the window ending.
     expect((await run(lockout, login)).passed).toBe(true);

@@ -30,6 +30,8 @@ export interface StorageFileInfo {
 export interface CloudStorageService {
   uploadFile(filePath: string, data: string | Buffer, contentType?: string): Promise<string>;
   downloadFile(filePath: string): Promise<string>;
+  /** Raw bytes, for anything that is not text (a receipt photo). */
+  downloadBuffer(filePath: string): Promise<{ data: Buffer; contentType: string | null }>;
   deleteFile(filePath: string): Promise<void>;
   listFiles(prefix?: string): Promise<StorageFileInfo[]>;
   createBackup(userId: string | number, backupData: any): Promise<string>;
@@ -157,6 +159,41 @@ export class CloudflareR2Storage implements CloudStorageService {
         Key: cleanKey,
       })
     );
+  }
+
+  /**
+   * The object as bytes. `downloadFile` decodes to UTF-8, which is right for a backup and
+   * corrupts a JPEG, so anything binary comes through here.
+   */
+  async downloadBuffer(filePath: string): Promise<{ data: Buffer; contentType: string | null }> {
+    const client = this.ensureConfigured();
+    const cleanKey = filePath.replace(/^\/+/, '');
+
+    const response = await client.send(
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: cleanKey,
+      })
+    );
+
+    if (!response.Body) {
+      throw new Error(`Empty response body from R2 for ${filePath}`);
+    }
+
+    const contentType = (response as any).ContentType ?? null;
+
+    if (response.Body instanceof Readable) {
+      const data = await new Promise<Buffer>((resolve, reject) => {
+        const chunks: Buffer[] = [];
+        (response.Body as Readable).on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        (response.Body as Readable).on('error', (err) => reject(err));
+        (response.Body as Readable).on('end', () => resolve(Buffer.concat(chunks)));
+      });
+      return { data, contentType };
+    }
+
+    const byteArray = await (response.Body as any).transformToByteArray();
+    return { data: Buffer.from(byteArray), contentType };
   }
 
   async listFiles(prefix = ''): Promise<StorageFileInfo[]> {
@@ -354,6 +391,23 @@ export class BunnyStorage implements CloudStorageService {
 
   async deleteFile(filePath: string): Promise<void> {
     await this.makeRequest('DELETE', `/${filePath.replace(/^\/+/, '')}`);
+  }
+
+  /** Raw bytes for anything binary (a receipt photo); `downloadFile` decodes UTF-8. */
+  async downloadBuffer(filePath: string): Promise<{ data: Buffer; contentType: string | null }> {
+    if (!this.configured) throw new Error('Bunny.net credentials not configured');
+    const fetchModule = await import('node-fetch');
+    const fetchFn = (fetchModule.default || fetchModule) as any;
+    const response = await fetchFn(`${this.baseUrl}/${filePath.replace(/^\/+/, '')}`, {
+      method: 'GET',
+      headers: { AccessKey: this.config.storagePassword },
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
+    return {
+      data: Buffer.from(arrayBuffer),
+      contentType: response.headers.get('content-type'),
+    };
   }
 
   async listFiles(path = ''): Promise<StorageFileInfo[]> {
