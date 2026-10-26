@@ -3,6 +3,27 @@ import { getUserId } from "../server/clerkAuth";
 import type { Request } from "express";
 
 /**
+ * A bank file's `2026-01-15` is a calendar day, not an instant.
+ *
+ * `new Date("2026-01-15")` is midnight UTC, which is still 14 January in Lima (UTC-5): the
+ * imported movement appeared one day early. Noon UTC shows the same day everywhere the app
+ * is sold, and anything that already carries a time is passed through untouched.
+ */
+export function toCalendarDate(value: unknown): Date | null {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const noonUtc = new Date(`${raw}T12:00:00Z`);
+    return Number.isNaN(noonUtc.getTime()) ? null : noonUtc;
+  }
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+
+/**
  * Ensures a category exists for the user. If not, creates it with default icon and color.
  * @param name - Category name
  * @param type - Category type (expense or income)

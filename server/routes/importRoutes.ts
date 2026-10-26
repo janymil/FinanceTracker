@@ -1,7 +1,7 @@
 import { log } from '../logger';
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
-import { checkAiAccess, denyAi } from "../aiAccess";
+import { aiGuard } from "../aiAccess";
 import { storage } from "../storage";
 import { checkImport } from "@shared/invariants";
 import { reportInvariant } from "../errorGuard/report.js";
@@ -12,6 +12,7 @@ import {
   formatBudget, 
   formatGoal,
   getUserFromRequest,
+  toCalendarDate,
   validateRequiredFields,
   validateDataSecurity
 } from "../../lib/importHelpers";
@@ -246,6 +247,16 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
 // stream over and the first person silently stopped receiving updates.
 const progressConnections = new Map<string, any>();
 const progressKey = (userId: string, sessionId: string) => `${userId}:${sessionId}`;
+
+/**
+ * Same calendar day, amount and description — what a repeated confirm sends again.
+ * Comparing the day (not the exact instant) is what makes noon-UTC storage irrelevant here.
+ */
+function importRowKey(date: Date, amount: number, description: string): string {
+  const day = Number.isNaN(date.getTime()) ? 'invalid' : date.toISOString().slice(0, 10);
+  const value = Number.isFinite(amount) ? Math.abs(amount) : 0;
+  return `${day}|${value.toFixed(2)}|${description.trim().toLowerCase()}`;
+}
 
 export function registerImportRoutes(app: Express) {
   
@@ -599,19 +610,17 @@ export function registerImportRoutes(app: Express) {
   });
 
   // PDF Bank Statement Upload Route
-  app.post("/api/import/pdf-statement", isAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 10, keyPrefix: 'pdf-statement', perUser: true }), upload.single('pdf'), async (req, res) => {
+  app.post("/api/import/pdf-statement", isAuthenticated, aiGuard(), rateLimit({ windowMs: 10 * 60 * 1000, max: 10, keyPrefix: 'pdf-statement', perUser: true }), upload.single('pdf'), async (req, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      // Reading a PDF statement means AI parsing, so the same gate applies as every other
-      // AI feature: paid plan + the account switch on.
-      const access = await checkAiAccess(userId);
-      if (!access?.allowed) {
-        return denyAi(res, access?.code ?? 'unauthenticated');
-      }
+      // Reading a PDF statement means AI parsing, so the same gate applies as every other AI
+      // feature. `aiGuard` refused an account without AI, a free plan and an exhausted
+      // allowance before the file was ever buffered.
+      const plan = (req as any).aiUser?.plan || 'free';
 
       if (!req.file) {
         return res.status(400).json({ error: 'No PDF file uploaded' });
@@ -653,7 +662,7 @@ export function registerImportRoutes(app: Express) {
       };
 
       // Process the PDF using our hybrid approach with duplicate detection and progress tracking
-      const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting, onProgress, userId);
+      const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting, onProgress, userId, plan);
 
       // Validate extracted transactions
       const validationResult = validateTransactions(processingResult.transactions);
@@ -807,18 +816,43 @@ export function registerImportRoutes(app: Express) {
       const savedTransactions = [];
       const errors: string[] = [];
 
+      // A double-tap on "Confirm" used to save every row twice. A row identical to one this
+      // person saved in the last few minutes is treated as a repeat of the same import; a
+      // deliberate second import of another file an hour later is still allowed.
+      const DOUBLE_SUBMIT_WINDOW_MS = 10 * 60 * 1000;
+      const recentCutoff = new Date(Date.now() - DOUBLE_SUBMIT_WINDOW_MS);
+      const recentlySaved = await storage.getUserTransactions(userId, 500);
+      const savedKeys = new Set(
+        recentlySaved
+          .filter((existing: any) => new Date(existing.createdAt ?? 0) >= recentCutoff)
+          .map((existing: any) =>
+            importRowKey(new Date(existing.date), Number(existing.amount), String(existing.description ?? '')),
+          ),
+      );
+      let skippedDuplicates = 0;
+
       for (const transaction of transactions) {
         try {
           const amount = Math.abs(parseFloat(transaction.amount));
-          // yyyy-MM-dd means a calendar day: noon UTC shows the same day in every timezone
-          // (midnight UTC would display as the previous evening in Lima).
-          const rawDate = String(transaction.date ?? '');
-          const date = /^d{4}-d{2}-d{2}$/.test(rawDate) ? new Date(`${rawDate}T12:00:00Z`) : new Date(transaction.date);
+          // yyyy-MM-dd from a bank file is a calendar day, not an instant: parsed as noon UTC
+          // it shows the same date in Lima (midnight UTC showed the previous evening).
+          const date = toCalendarDate(transaction.date);
+          if (!date) {
+            errors.push(`Skipped a row with an unreadable date: ${String(transaction.description ?? '').slice(0, 80)}`);
+            continue;
+          }
           const description = String(transaction.description ?? '').trim();
           const type: 'income' | 'expense' = transaction.type === 'income' ? 'income' : 'expense';
 
           if (!Number.isFinite(amount) || amount <= 0 || Number.isNaN(date.getTime()) || !description) {
             errors.push(`Skipped an invalid row: ${description || '(no description)'}`);
+            continue;
+          }
+
+          // Same day, amount and description as a row saved moments ago: already imported.
+          const rowKey = importRowKey(date, amount, description);
+          if (savedKeys.has(rowKey)) {
+            skippedDuplicates++;
             continue;
           }
 
@@ -851,6 +885,7 @@ export function registerImportRoutes(app: Express) {
             imageUrl: null,
           });
           savedTransactions.push(savedTransaction);
+          savedKeys.add(rowKey);
         } catch (error) {
           log.error('Failed to save an imported transaction:', error instanceof Error ? error.message : error);
           errors.push(`Failed to save: ${String(transaction?.description ?? '').slice(0, 80)}`);
@@ -865,6 +900,7 @@ export function registerImportRoutes(app: Express) {
         success: true,
         savedTransactions: savedTransactions.length,
         createdCategories,
+        skippedDuplicates,
         errors
       });
 

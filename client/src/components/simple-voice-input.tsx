@@ -713,6 +713,36 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     }
   };
 
+  /**
+   * The category id to save with: the matched one, an existing category with the same name,
+   * or a new one created now. Nothing is written while the entry is only a suggestion.
+   */
+  const resolveCategoryForSave = async (): Promise<number | null> => {
+    if (accumulatedData.categoryId) return accumulatedData.categoryId;
+
+    const name = String(accumulatedData.category || '').trim();
+    if (!name) return null;
+
+    const existing = (allCategories || []).find(
+      (cat: any) => cat.type === accumulatedData.type && cat.name.toLowerCase() === name.toLowerCase()
+    );
+    if (existing) return existing.id;
+
+    try {
+      const created = await apiRequest('POST', '/api/categories', {
+        name,
+        type: accumulatedData.type,
+        icon: 'Tag',
+        color: '#6366f1',
+      });
+      const createdCategory = await created.json();
+      return createdCategory?.id ?? null;
+    } catch {
+      // The entry is still saved, just uncategorised; the screen already reports the failure.
+      return null;
+    }
+  };
+
   // Save transaction using accumulated data
   const handleSave = async () => {
     // Check for missing critical information
@@ -744,13 +774,17 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
     try {
       console.log('💾 Saving transaction:', accumulatedData);
 
+      // Created on save, not on suggestion: a category the person discards must not be left
+      // behind in their list.
+      const categoryId = await resolveCategoryForSave();
+
       // Create transaction using the main API
       const response = await apiRequest('POST', '/api/transactions', {
         amount: parseFloat(accumulatedData.amount),
         description: accumulatedData.description,
         type: accumulatedData.type,
         date: accumulatedData.date || new Date().toISOString().split('T')[0],
-        categoryId: accumulatedData.categoryId || null, // Use matched category ID if available
+        categoryId,
         referenceNote: accumulatedData.note || transcript || ''
       });
 

@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { anonymizeMessages } from '../shared/aiAnonymizer';
+import { anonymizeMessages, type AnonymizeExtras } from '../shared/aiAnonymizer';
 
 /**
  * Central AI routing layer.
@@ -172,6 +172,18 @@ export async function collectAIUsage<T>(fn: () => Promise<T>): Promise<{ result:
 
 function recordUsage(record: AIUsageRecord): void {
   usageStorage.getStore()?.push(record);
+}
+
+/**
+ * The signed-in person's own name and e-mail, carried alongside a call so the single
+ * anonymising choke point can remove them. `runAI` sets this; a call from anywhere else
+ * simply runs without it. AsyncLocalStorage keeps it per-request, so two customers running
+ * at once can never see each other's name.
+ */
+const personalDataStorage = new AsyncLocalStorage<AnonymizeExtras | undefined>();
+
+export function withPersonalData<T>(extras: AnonymizeExtras | undefined, fn: () => Promise<T>): Promise<T> {
+  return personalDataStorage.run(extras, fn);
 }
 
 const clients = new Map<AIProvider, OpenAI>();
@@ -361,7 +373,7 @@ export async function routeChat(params: any): Promise<any> {
   // Single choke point: nothing reaches a provider with an e-mail, IBAN, card, phone,
   // address, account number or the user's own name inside the prompt.
   if (Array.isArray(params?.messages)) {
-    params = { ...params, messages: anonymizeMessages(params.messages) };
+    params = { ...params, messages: anonymizeMessages(params.messages, personalDataStorage.getStore()) };
   }
 
   const primaryName = String(params?.model || AI_MODELS.default);

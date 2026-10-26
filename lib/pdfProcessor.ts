@@ -9,6 +9,7 @@
 import { getCurrentLanguageForAPI } from './languageUtils';
 import { DataEncryption } from '../server/encryption';
 import { runAI } from './aiProcessor';
+import { isAIFailure } from '../shared/aiResults';
 import crypto from 'crypto';
 import {
   calculateAmountSimilarity,
@@ -312,7 +313,8 @@ export async function processBankStatementPDF(
   language: string = 'en-us',
   existingTransactions: ExistingTransaction[] = [],
   onProgress?: (progress: ProcessingProgress) => void,
-  userId?: string
+  userId?: string,
+  userPlan: string = 'free'
 ): Promise<PDFProcessingResult> {
   const result: PDFProcessingResult = {
     transactions: [],
@@ -423,7 +425,7 @@ export async function processBankStatementPDF(
         message: 'Parsing transactions with AI...'
       });
       
-      const transactions = await parseTransactionsWithAI(extractedText, language, userId);
+      const transactions = await parseTransactionsWithAI(extractedText, language, userId, userPlan);
       
       onProgress?.({
         stage: 'categorization',
@@ -790,16 +792,24 @@ async function addAICategorization(
 async function parseTransactionsWithAI(
   text: string, 
   language: string,
-  userId?: string
+  userId?: string,
+  userPlan: string = 'free'
 ): Promise<ExtractedTransaction[]> {
   
   try {
-    // Use centralized AI system for bank statement processing
-    const result = await runAI('parseBankStatement', 'system', {
+    // Use centralized AI system for bank statement processing. Metered for the person who
+    // uploaded the file: it used to be written for a placeholder "system" id, so no
+    // customer's monthly allowance ever saw a statement import.
+    const result = await runAI('parseBankStatement', userId || '', {
       text: text,
       language: language
-    }, 'free');
-    
+    }, userPlan);
+    // A failed parse is an error, not an empty statement: "0 transactions" reads like a file
+    // with no movements and hides the outage from the person who paid for the import.
+    if (isAIFailure(result)) {
+      throw new Error('Failed to parse transactions with AI');
+    }
+
     if (result.transactions && Array.isArray(result.transactions)) {
       const parsedTransactions = result.transactions.map((tx: any) => ({
         date: tx.date || '',
@@ -816,7 +826,7 @@ async function parseTransactionsWithAI(
       return parsedTransactions;
     }
 
-    return [];
+    throw new Error('Failed to parse transactions with AI');
 
   } catch (error) {
     console.error('AI parsing error:', error);

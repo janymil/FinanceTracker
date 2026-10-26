@@ -44,6 +44,8 @@ async function mpFetch(path: string, init: RequestInit = {}): Promise<any> {
       'Content-Type': 'application/json',
       ...(init.headers ?? {}),
     },
+    // Billing must fail fast instead of waiting on a provider that never answers.
+    signal: init.signal ?? AbortSignal.timeout(20_000),
   });
 
   const text = await response.text();

@@ -53,6 +53,12 @@ export async function parseTransactionWithGroq(transcript: string, userLanguage:
 }> {
   try {
     log.info('🧠 Starting Groq LLaMA analysis...');
+
+    // A date written into a prompt is copied by the model: this instruction used to say
+    // 2025-07-21, so an entry made today could be saved months in the past. Built from the
+    // clock instead. (UTC is the reference the bank day is normalised to elsewhere.)
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
     
     const languageMap: { [key: string]: string } = {
       'sk-sk': 'Slovak',
@@ -73,7 +79,7 @@ RESPOND ONLY WITH VALID JSON:
   "amount": "135.80",
   "description": "Merchant or expense description", 
   "type": "expense",
-  "date": "2025-07-21",
+  "date": "${today}",
   "category": "Category name",
   "note": "original transcript"
 }
@@ -84,7 +90,7 @@ Output: {
   "amount": "135.80",
   "description": "coolbox audífonos",
   "type": "expense",
-  "date": "2025-07-20",
+  "date": "${yesterday}",
   "category": "Compras",
   "note": "coolbox audífonos ayer 135 soles 80"
 }
@@ -94,7 +100,7 @@ PARSING INSTRUCTIONS:
 - DESCRIPTION: Extract merchant name, store name, or what the money was spent on
 - TYPE: "expense" for spending money, "income" for receiving money  
 - CATEGORY: Choose appropriate category in ${language}
-- DATE: Use today's date (2025-07-21) unless another date is clearly mentioned
+- DATE: Use today's date (${today}) unless another date is clearly mentioned
 
 CATEGORIES FOR ${language}:
 ${language === 'Spanish' ? 'Comida, Transporte, Compras, Entretenimiento, Servicios, Salud, Ingresos, Otros' : 

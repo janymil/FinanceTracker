@@ -71,7 +71,9 @@ export class MistralClient {
         headers: {
           'x-api-key': this.apiKey
         },
-        body: formData
+        body: formData,
+        // A provider that hangs must not hold the request (and its worker) forever.
+        signal: AbortSignal.timeout(60_000),
       });
 
       if (!response.ok) {
@@ -121,7 +123,8 @@ export class MistralClient {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(60_000),
       });
 
       if (!response.ok) {

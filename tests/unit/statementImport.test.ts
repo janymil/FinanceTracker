@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  detectDateOrder,
   parseCsvText,
   parseStatementAmount,
   parseStatementDate,
@@ -143,5 +144,40 @@ describe('parseStatementTable: headers seen in real exports', () => {
       ['02/11/2026', 'Devolución', '20.00', 'Te yapearon'],
     ]);
     expect(result.transactions.map((t) => t.type)).toEqual(['expense', 'income']);
+  });
+});
+
+describe('detectDateOrder', () => {
+  it('reads a file as day-first unless a row can only be month-first', () => {
+    expect(detectDateOrder(['05/11/2026', '06/11/2026'])).toBe('day-first');
+    expect(detectDateOrder(['05/11/2026', '03/15/2026'])).toBe('month-first');
+    expect(detectDateOrder(['25/11/2026', '03/04/2026'])).toBe('day-first');
+    // A file that shows both is not trustworthy: the local default stays.
+    expect(detectDateOrder(['13/01/2026', '01/13/2026'])).toBe('day-first');
+  });
+
+  it('ignores serial numbers, real dates and words', () => {
+    expect(detectDateOrder([46331, new Date('2026-11-05'), 'SALDO INICIAL', '2026-11-05'])).toBe('day-first');
+  });
+});
+
+describe('parseStatementTable date order', () => {
+  it('reads a month-first file the same way on every row', () => {
+    const result = parseStatementTable([
+      ['Date', 'Description', 'Amount'],
+      ['03/04/2026', 'Coffee', '5.00'],
+      ['03/15/2026', 'Rent', '500.00'],
+    ]);
+    // Both rows are March: 4 March and 15 March. Row-by-row reading made the first 3 April.
+    expect(result.transactions.map((t) => t.date)).toEqual(['2026-03-04', '2026-03-15']);
+  });
+
+  it('keeps the Latin American reading when the file is ambiguous', () => {
+    const result = parseStatementTable([
+      ['Fecha', 'Detalle', 'Monto'],
+      ['05/11/2026', 'Almuerzo', '15.00'],
+      ['06/11/2026', 'Taxi', '8.00'],
+    ]);
+    expect(result.transactions.map((t) => t.date)).toEqual(['2026-11-05', '2026-11-06']);
   });
 });

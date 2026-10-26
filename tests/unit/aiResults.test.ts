@@ -4,6 +4,7 @@ import {
   clampConfidence,
   finiteNumber,
   isAIFailure,
+  isDegraded,
   parseModelJson,
   validCategoryId,
 } from '../../shared/aiResults';
@@ -87,5 +88,20 @@ describe('isAIFailure', () => {
     expect(isAIFailure({ tips: [] })).toBe(false);
     expect(isAIFailure({ error: '' })).toBe(false);
     expect(isAIFailure({ score: 80 })).toBe(false);
+  });
+});
+
+describe('isDegraded', () => {
+  it('recognises a fixed stand-in on an object and on any item of a list', () => {
+    expect(isDegraded({ title: 'Track Your Expenses', degraded: true })).toBe(true);
+    expect(isDegraded([{ title: 'Track Your Expenses', degraded: true }])).toBe(true);
+    expect(isDegraded([{ title: 'real tip' }, { title: 'stand-in', degraded: true }])).toBe(true);
+  });
+
+  it('does not flag a real answer', () => {
+    expect(isDegraded([{ title: 'real tip' }])).toBe(false);
+    expect(isDegraded({ degraded: false })).toBe(false);
+    expect(isDegraded(null)).toBe(false);
+    expect(isDegraded('degraded')).toBe(false);
   });
 });

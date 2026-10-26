@@ -85,6 +85,34 @@ describe('anonymizeText', () => {
   });
 });
 
+/**
+ * Gaps found in the privacy review: these values used to reach the model untouched.
+ */
+describe('anonymizeText: identifiers that used to slip through', () => {
+  it('removes local-format mobiles written without a country code', () => {
+    expect(anonymizeText('llamame al 0912 345 678').text).toBe('llamame al [phone]');
+    expect(anonymizeText('tel 0903 123 456').text).toBe('tel [phone]');
+  });
+
+  it('removes Peruvian account numbers written in groups but keeps dates and invoices', () => {
+    expect(anonymizeText('cuenta 0011-0810-0100123456').text).toBe('cuenta [account]');
+    expect(anonymizeText('cuenta 193-1234567-0-12').text).toBe('cuenta [account]');
+    // A date and a non-card invoice number must survive: the model needs both.
+    expect(anonymizeText('movimiento 2026-01-15').text).toBe('movimiento 2026-01-15');
+    expect(anonymizeText('invoice 1234 5678 9012 3456').text).toBe('invoice 1234 5678 9012 3456');
+  });
+
+  it('removes a third party named in a transfer description', () => {
+    expect(anonymizeText('transferencia a nombre de Juan Pérez').text).toBe(
+      'transferencia a nombre de [person]',
+    );
+    expect(anonymizeText('sent to Ana Ruiz').text).toBe('sent to [person]');
+    expect(anonymizeText('beneficiario: Ana Ruiz Gómez').text).toBe('beneficiario: [person]');
+    // An ordinary phrase is not a person and stays readable.
+    expect(anonymizeText('transferencia de alimentos').text).toBe('transferencia de alimentos');
+  });
+});
+
 describe('anonymizeDeep', () => {
   it('scrubs strings, drops account identifiers and keeps amounts as they are', () => {
     const { value } = anonymizeDeep({

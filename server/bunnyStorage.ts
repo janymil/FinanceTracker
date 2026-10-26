@@ -76,6 +76,7 @@ export class BunnyStorage {
         method,
         headers,
         body: data,
+        signal: AbortSignal.timeout(30_000),
       });
 
       if (!response.ok) {
@@ -114,6 +115,7 @@ export class BunnyStorage {
         headers: {
           'AccessKey': this.config.storagePassword,
         },
+        signal: AbortSignal.timeout(30_000),
       });
 
       if (!response.ok) {

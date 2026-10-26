@@ -9,8 +9,9 @@
  *   anonymizeDeep()  -> the same for a whole request payload
  *
  * Removed: e-mails, IBANs, card numbers (Luhn-checked so amounts are never touched),
- * national IDs (SK birth number, ES DNI/NIE, PE RUC, US SSN), phones, postal addresses,
- * URLs, bank account numbers, and the signed-in user's own name/e-mail.
+ * national IDs (SK birth number, ES DNI/NIE, PE RUC, US SSN), phones (including local
+ * 09xx mobiles), postal addresses, URLs, bank account numbers (plain and grouped),
+ * names of third parties in transfer descriptions, and the signed-in user's own name/e-mail.
  *
  * Kept on purpose: merchant names, amounts, dates, categories and identifier-free text —
  * the model needs those to be useful.
@@ -88,6 +89,22 @@ const RULES: Rule[] = [
     replacement: '$1[person]',
   },
   {
+    // A transfer names a third party: "a nombre de Juan Pérez", "beneficiario: Ana Ruiz".
+    // Only the name is replaced; the transfer words stay, so the entry still makes sense.
+    name: 'person',
+    pattern:
+      /\b((?:a\s+nombre\s+de|de\s+parte\s+de|beneficiario|beneficiary)[\s:]+)([A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,}(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,}){0,3})/g,
+    replacement: '$1[person]',
+  },
+  {
+    // The same with a verb: "transferencia a Juan Pérez", "sent to Ana Ruiz". Two name parts
+    // are required here, so an ordinary phrase ("transferencia de alimentos") is left alone.
+    name: 'person',
+    pattern:
+      /\b((?:transferencia\s+(?:a|para|de)|transfer(?:red)?\s+(?:to|from)|sent\s+to|received\s+from|enviado\s+a|recibido\s+de)[\s:]+)([A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,}\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,}(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,})?)/g,
+    replacement: '$1[person]',
+  },
+  {
     // Peruvian/Spanish document numbers: "DNI: 12345678", "C.E. 001234567".
     name: 'labelled_document',
     pattern: /\b((?:DNI|C\.?E\.?|documento|doc\.?)[^\S\n]*[:#]?[^\S\n]*)\d{6,9}[A-Za-z]?\b/gi,
@@ -120,10 +137,29 @@ const RULES: Rule[] = [
     replacement: '[national-id]',
   },
   {
+    // Bank accounts printed in groups: "0011-0810-0100123456", "193-1234567-0-12". A long
+    // group is what tells an account from a spaced invoice number (1234 5678 9012 3456) or a
+    // date (2026-01-15), both of which must survive. Runs before the phone rule, which would
+    // otherwise redact the tail of an account as a phone number.
+    name: 'account_number',
+    pattern: /\b\d{2,4}(?:[- ]\d{1,12}){2,3}\b/g,
+    replacement: '[account]',
+    accept: (match) => match.replace(/\D/g, '').length >= 12 && /(?:^|[- ])\d{5,}/.test(match),
+  },
+  {
     // International phone numbers: require a leading + or at least 9 digits, and never
     // match inside a longer digit run (that is an account number, handled below).
     name: 'phone',
     pattern: /(?<!\d)(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)[\s.-]?)?\d{3}[\s.-]?\d{3}[\s.-]?\d{3,4}(?!\d)/g,
+    replacement: '[phone]',
+    accept: (match) => match.replace(/\D/g, '').length >= 9,
+  },
+  {
+    // Local-format mobiles with no country code: Slovak "0912 345 678", Czech "0903 123 456".
+    // The rule above needs the digits to start without a leading 0 group, so these slipped
+    // through and reached the model untouched.
+    name: 'phone',
+    pattern: /(?<!\d)0\d{2,3}[\s.-]?\d{3}[\s.-]?\d{3,4}(?!\d)/g,
     replacement: '[phone]',
     accept: (match) => match.replace(/\D/g, '').length >= 9,
   },

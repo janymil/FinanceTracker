@@ -94,6 +94,16 @@ import { isRecurrenceFrequency, occurrenceAt } from "@shared/recurrence";
 import { isUniqueViolation } from "./dbErrors";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, lt, inArray } from "drizzle-orm";
 
+/**
+ * Which usage rows count against an allowance.
+ *
+ * A `fallback` row is a real answer served by a backup model: the person got what they asked
+ * for and the provider was paid, so it must count. Only a failed call (`error`, `limited`) is
+ * free. Counting `success` alone made every answer served during a provider outage invisible,
+ * so the meter stayed at zero while the bills kept coming.
+ */
+const BILLABLE_AI_STATUSES = ['success', 'fallback'];
+
 // Verified identity fields fetched from Clerk (see server/routes/authRoutes.ts)
 export interface ClerkProfile {
   email: string | null;
@@ -3347,7 +3357,7 @@ export class DatabaseStorage implements IStorage {
           eq(aiUsage.userId, userId),
           eq(aiUsage.functionName, functionName),
           gte(aiUsage.createdAt, startOfMonth),
-          eq(aiUsage.status, 'success')
+          inArray(aiUsage.status, BILLABLE_AI_STATUSES)
         )
       );
 
@@ -3375,7 +3385,7 @@ export class DatabaseStorage implements IStorage {
           eq(aiUsage.userId, userId),
           eq(aiUsage.functionName, functionName),
           gte(aiUsage.createdAt, startOfDay),
-          eq(aiUsage.status, 'success')
+          inArray(aiUsage.status, BILLABLE_AI_STATUSES)
         )
       );
 
@@ -3683,7 +3693,7 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(aiUsage.userId, userId),
           gte(aiUsage.createdAt, from),
-          eq(aiUsage.status, 'success')
+          inArray(aiUsage.status, BILLABLE_AI_STATUSES)
         )
       )
       .groupBy(aiUsage.functionName);
@@ -3722,7 +3732,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           gte(aiUsage.createdAt, from),
-          eq(aiUsage.status, 'success')
+          inArray(aiUsage.status, BILLABLE_AI_STATUSES)
         )
       )
       .groupBy(aiUsage.userId, users.email, users.plan, aiUsage.functionName);

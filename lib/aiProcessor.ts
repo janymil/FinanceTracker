@@ -2,10 +2,13 @@
 import crypto from 'crypto';
 import { storage } from '../server/storage.js';
 import { reportSwallowed } from '../server/errorGuard/report.js';
-import { collectAIUsage, type AIUsageRecord } from './aiProvider';
-import { isAIFailure } from '../shared/aiResults';
+import { collectAIUsage, withPersonalData, type AIUsageRecord } from './aiProvider';
+import { isAIFailure, isDegraded } from '../shared/aiResults';
+import type { AnonymizeExtras } from '../shared/aiAnonymizer';
 import {
   categorizeExpense,
+  categorizeExpenseWithUserCategories,
+  categorizeIncomeWithUserCategories,
   voiceExtraction,
   generateContextualFinancialTips,
   generateFinancialTips,
@@ -23,7 +26,37 @@ function hashObject(obj: any): string {
 }
 
 /**
+ * The person's own name and e-mail, so the anonymiser can remove them from every prompt.
+ * Cached briefly: without it every AI call reads the same user row again.
+ */
+const PERSONAL_DATA_TTL_MS = 5 * 60 * 1000;
+const personalDataCache = new Map<string, { value: AnonymizeExtras; expires: number }>();
+
+async function personalDataFor(userId: string): Promise<AnonymizeExtras | undefined> {
+  if (!userId) return undefined;
+
+  const cached = personalDataCache.get(userId);
+  if (cached && cached.expires > Date.now()) return cached.value;
+
+  try {
+    const user = await storage.getUser(userId);
+    if (!user) return undefined;
+    const value: AnonymizeExtras = { names: [user.firstName, user.lastName], email: user.email };
+    if (personalDataCache.size > 500) personalDataCache.clear();
+    personalDataCache.set(userId, { value, expires: Date.now() + PERSONAL_DATA_TTL_MS });
+    return value;
+  } catch {
+    // A failed read must never block an AI call: the generic rules still run.
+    return undefined;
+  }
+}
+
+/**
  * AI usage tracking wrapper
+ *
+ * The row is what the monthly allowance counts, so it must belong to the person who asked.
+ * A call with no known owner writes nothing at all — a placeholder id is worse than no row,
+ * because it looks like metering while the real customer keeps a full allowance.
  */
 async function trackAIUsage(
   userId: string, 
@@ -39,13 +72,18 @@ async function trackAIUsage(
 
   try {
     // Check usage limits before processing
-    const accessCheck = await storage.canUseAIFunction(userId, functionName, userPlan);
-    if (!accessCheck.allowed) {
-      throw new Error(accessCheck.reason || 'Usage limit exceeded');
+    if (userId) {
+      const accessCheck = await storage.canUseAIFunction(userId, functionName, userPlan);
+      if (!accessCheck.allowed) {
+        throw new Error(accessCheck.reason || 'Usage limit exceeded');
+      }
     }
 
+    // The customer's own name and e-mail are removed from whatever prompt is built below.
+    const extras = await personalDataFor(userId);
+
     // Execute the AI function and capture real provider usage
-    const collected = await collectAIUsage(fn);
+    const collected = await collectAIUsage(() => withPersonalData(extras, fn));
     result = collected.result;
     usageRecords = collected.records;
 
@@ -56,6 +94,10 @@ async function trackAIUsage(
     if (isAIFailure(result)) {
       status = 'error';
       errorMessage = String((result as any)?.error ?? 'AI failure');
+    } else if (isDegraded(result)) {
+      // A fixed stand-in cost no provider call and is not the answer that was asked for.
+      status = 'error';
+      errorMessage = 'local fallback answer';
     }
 
     return result;
@@ -64,35 +106,37 @@ async function trackAIUsage(
     errorMessage = error.message;
     throw error;
   } finally {
-    const executionTime = Date.now() - startTime;
-    
-    // Log usage data with real token counts and cost
-    const promptTokens = usageRecords.reduce((total, record) => total + record.inputTokens, 0);
-    const completionTokens = usageRecords.reduce((total, record) => total + record.outputTokens, 0);
-    const totalCost = usageRecords.reduce((total, record) => total + record.costUsd, 0);
-    try {
-      await storage.recordAIUsage({
-        userId,
-        functionName,
-        model: usageRecords[0]?.model ?? 'none',
-        cost: totalCost.toFixed(6),
-        tokensUsed: promptTokens + completionTokens,
-        promptTokens,
-        completionTokens,
-        executionTime,
-        language: 'en-us',
-        plan: userPlan,
-        status,
-        errorMessage,
-        cached: false,
-        requestSize: 0,
-        responseSize: result ? JSON.stringify(result).length : 0,
-        ipAddress: null,
-        userAgent: null
-      });
-    } catch (logError) {
-      reportSwallowed(logError, { where: 'runAI.recordUsage', fallback: 'usage not recorded' });
-      console.error('Failed to log AI usage:', logError);
+    if (userId) {
+      const executionTime = Date.now() - startTime;
+
+      // Log usage data with real token counts and cost
+      const promptTokens = usageRecords.reduce((total, record) => total + record.inputTokens, 0);
+      const completionTokens = usageRecords.reduce((total, record) => total + record.outputTokens, 0);
+      const totalCost = usageRecords.reduce((total, record) => total + record.costUsd, 0);
+      try {
+        await storage.recordAIUsage({
+          userId,
+          functionName,
+          model: usageRecords[0]?.model ?? 'none',
+          cost: totalCost.toFixed(6),
+          tokensUsed: promptTokens + completionTokens,
+          promptTokens,
+          completionTokens,
+          executionTime,
+          language: 'en-us',
+          plan: userPlan,
+          status,
+          errorMessage,
+          cached: false,
+          requestSize: 0,
+          responseSize: result ? JSON.stringify(result).length : 0,
+          ipAddress: null,
+          userAgent: null
+        });
+      } catch (logError) {
+        reportSwallowed(logError, { where: 'runAI.recordUsage', fallback: 'usage not recorded' });
+        console.error('Failed to log AI usage:', logError);
+      }
     }
   }
 }
@@ -126,11 +170,40 @@ async function runDirect(task: string, userId: string, payload: Record<string, a
         payload.userTransactions || [],
         payload.userCategories || [],
       );
+    case 'categorizeExpenseWithCategories':
+      return categorizeExpenseWithUserCategories(
+        payload.description,
+        payload.amount,
+        payload.userCategories || [],
+        language,
+      );
+    case 'categorizeIncomeWithCategories':
+      return categorizeIncomeWithUserCategories(
+        payload.description,
+        payload.amount,
+        payload.userCategories || [],
+        language,
+      );
     case 'parseBankStatement':
       return parseBankStatement(payload.text, language);
     default:
       throw new Error(`No direct provider path for task: ${task}`);
   }
+}
+
+/**
+ * Meters a feature that calls a provider itself instead of going through `runDirect`
+ * (speech synthesis, image generation, speech-to-text). Same rules as `runAI`: the person's
+ * own plan limit is checked first, and one row is written with the real owner — so the
+ * monthly allowance sees the feature like any other AI call.
+ */
+export async function runMeteredAI<T>(
+  task: string,
+  userId: string,
+  userPlan: string = 'free',
+  fn: () => Promise<T>,
+): Promise<T> {
+  return trackAIUsage(userId, task, userPlan, async () => fn());
 }
 
 /**

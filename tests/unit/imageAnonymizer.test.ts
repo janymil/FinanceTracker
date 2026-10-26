@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import sharp from 'sharp';
-import { maskBoxes, shouldMaskLine } from '../../server/imageAnonymizer';
+import { maskBoxes, resolveOcrLanguages, shouldMaskLine } from '../../server/imageAnonymizer';
 
 /**
  * The privacy promise for images is now: "identifying lines are blacked out before the
@@ -84,5 +84,19 @@ describe('maskBoxes', () => {
 
     const result = await maskBoxes(image, [], {});
     expect(result).toBe(image);
+  });
+});
+
+describe('resolveOcrLanguages', () => {
+  it('falls back to English when the data folder cannot be read', () => {
+    expect(resolveOcrLanguages('/nonexistent-reader-dir')).toBe('eng');
+  });
+
+  it('uses the languages whose data actually ships with the app', () => {
+    // The repository ships eng.traineddata; the answer must never name a language whose
+    // data is missing, because tesseract would then try to download it during a request.
+    const languages = resolveOcrLanguages().split('+');
+    expect(languages).toContain('eng');
+    expect(languages.every((language) => ['eng', 'spa', 'slk'].includes(language))).toBe(true);
   });
 });

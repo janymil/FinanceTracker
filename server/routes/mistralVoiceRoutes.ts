@@ -5,6 +5,7 @@ import { MistralClient } from '../mistralClient.js';
 import { parseTransactionWithMistral } from '../mistralTransactionParser.js';
 import { storage } from '../storage.js';
 import { matchCategoryLocally } from '../categoryMatcher.js';
+import { runMeteredAI } from '../../lib/aiProcessor.js';
 
 const router = Router();
 const upload = multer({
@@ -51,7 +52,9 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       headers: {
         'x-api-key': process.env.MISTRAL_API_KEY!
       },
-      body: formData
+      body: formData,
+      // No signal meant one stuck provider call held the request (and its worker) forever.
+      signal: AbortSignal.timeout(60_000),
     });
 
     if (!mistralResponse.ok) {
@@ -73,12 +76,22 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     const userCategories = await storage.getCategories(userId);
     log.info('📂 User has', userCategories.length, 'categories');
 
-    // Step 3: Parse with Mistral Small 2506 (with user categories)
+    // Step 3: Parse with Mistral Small 2506 (with user categories). Metered: a voice entry is
+    // a paid call like any other, and the row belongs to the person who spoke.
     log.info('🧠 Step 3: Parsing transaction with Mistral (with user categories)...');
-    const parsedTransaction = await parseTransactionWithMistral(transcription, userLanguage, userCurrency, userCategories);
-    log.info('🧠 Mistral parsed transaction:', parsedTransaction);
+    const plan = (req as any).aiUser?.plan || 'free';
+    const parsedTransaction = await runMeteredAI('voice-entry', userId, plan, () =>
+      parseTransactionWithMistral(transcription, userLanguage, userCurrency, userCategories)
+    );
+    log.info('🧠 Mistral parsed transaction', {
+      hasAmount: Boolean(parsedTransaction.amount),
+      type: parsedTransaction.type,
+      category: parsedTransaction.category,
+    });
 
-    // Step 4: Local category matching (100% accurate)
+    // Step 4: Local category matching. Nothing is written here: a category used to be created
+    // the moment the model suggested it, before the person confirmed the entry. The screen now
+    // creates it when the entry is saved.
     log.info('🎯 Step 4: Local intelligent category matching...');
     const categoryMatchResult = matchCategoryLocally(
       parsedTransaction.category,
@@ -86,41 +99,25 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       userLanguage
     );
 
-    let finalCategory = parsedTransaction.category;
-    let newCategoryId = null;
+    const finalCategory = categoryMatchResult.matchedCategory?.name || parsedTransaction.category;
+    const newCategoryId = categoryMatchResult.matchedCategory?.id ?? null;
 
-    if (categoryMatchResult.createNew) {
-      // Create new category if AI suggests it
-      log.info('✨ Creating new category:', categoryMatchResult.newCategoryName);
-      try {
-        const newCategory = await storage.createCategory({
-          userId,
-          name: categoryMatchResult.newCategoryName,
-          type: parsedTransaction.type,
-          icon: 'other',
-          color: '#6B7280'
-        });
-        finalCategory = newCategory.name;
-        newCategoryId = newCategory.id;
-      } catch (error) {
-        log.error('❌ Failed to create new category:', error);
-        finalCategory = parsedTransaction.category;
-      }
-    } else if (categoryMatchResult.matchedCategory) {
-      // Use matched existing category
-      finalCategory = categoryMatchResult.matchedCategory.name;
-      newCategoryId = categoryMatchResult.matchedCategory.id;
-    }
-    
     const finalResult = {
       ...parsedTransaction,
       category: finalCategory,
       categoryId: newCategoryId,
+      // Offered to the screen; created only if the person keeps it.
+      suggestedNewCategory: categoryMatchResult.createNew ? categoryMatchResult.newCategoryName : null,
       transcript: transcription,
       categoryConfidence: categoryMatchResult.confidence
     };
-    
-    log.info('✅ Final Mistral analysis result:', finalResult);
+
+    // Never the transcript itself: its shape is enough to debug the flow.
+    log.info('✅ Final Mistral analysis result', {
+      hasAmount: Boolean(finalResult.amount),
+      categoryMatched: Boolean(newCategoryId),
+      hasSuggestedNewCategory: Boolean(finalResult.suggestedNewCategory),
+    });
     
     res.json({ 
       success: true, 

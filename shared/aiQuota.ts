@@ -27,12 +27,15 @@ export const AI_QUOTAS: Record<QuotaPlan, PlanQuota> = {
 };
 
 /**
- * What one call to a function costs in actions. Unknown functions cost 1, so a new feature is
- * always metered, never free by accident.
+ * AI actions per function. Unknown names cost 1, so a new feature is metered from its first
+ * call; these are the ones that cost a provider more than a single short answer.
  */
 export const AI_ACTION_WEIGHTS: Record<string, number> = {
   'receipt-extraction': 3, // photo OCR: Mistral -> Google Vision -> gpt-6-luna
   parseBankStatement: 3, // a whole statement in one call
+  'mascot-image': 3, // DALL·E renders one image per call
+  'voice-entry': 2, // speech-to-text plus the parsing call
+  tts: 1, // reading a short text aloud
 };
 
 export const DEFAULT_ACTION_WEIGHT = 1;

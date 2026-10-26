@@ -4,6 +4,7 @@ import multer from "multer";
 import { z } from "zod";
 import { transcribeAudioWithGroq, parseTransactionWithGroq, matchCategoryIntelligently } from "../groqClient";
 import { lookupMerchant } from "../../lib/merchantLookup";
+import { runMeteredAI } from "../../lib/aiProcessor";
 
 const router = Router();
 
@@ -45,9 +46,16 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
     
     log.debug('Groq transcription finished', { characters: transcript.length });
     
-    // Step 2: Groq LLaMA intelligent parsing with user preferences
+    // Step 2: Groq LLaMA intelligent parsing with user preferences. Metered: the row belongs
+    // to the person who spoke, so a voice entry uses up allowance like any other AI call.
     log.info('🧠 Step 2: Parsing transaction with Groq LLaMA...');
-    const parsedTransaction = await parseTransactionWithGroq(transcript, userLanguage, userCurrency);
+    const owner = (req as any).aiUser;
+    const parsedTransaction = await runMeteredAI(
+      'voice-entry',
+      owner?.id || '',
+      owner?.plan || 'free',
+      () => parseTransactionWithGroq(transcript, userLanguage, userCurrency),
+    );
     
     // Step 3: Enhanced category matching with merchant lookup (optional enhancement)
     let enhancedCategory = parsedTransaction.category;
@@ -77,7 +85,13 @@ router.post('/transcribe-and-parse', upload.single('audio'), async (req: Request
       transcript: transcript // Include original transcript
     };
     
-    log.info('✅ Final Groq analysis result:', finalResult);
+    // Never the transcript itself: its shape is enough to debug the flow.
+    log.info('✅ Final Groq analysis result', {
+      hasAmount: Boolean(finalResult.amount),
+      type: finalResult.type,
+      category: finalResult.category,
+      transcriptCharacters: transcript.length,
+    });
     
     res.json({ 
       success: true, 

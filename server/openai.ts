@@ -23,6 +23,20 @@ import { log } from './logger';
 const openai = createRoutedClient();
 
 /**
+ * A yyyy-MM label, `offset` months from today, for the JSON examples inside prompts.
+ *
+ * The examples used to name fixed months (2025-01, 2025-07): a model copying the shape can
+ * copy the year too, and a forecast for a year that has already passed is worse than no
+ * forecast. The examples now always show the months the answer should cover.
+ */
+function monthLabel(offset: number): string {
+  const date = new Date();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() + offset);
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
  * House rules for every answer a person reads (tips, insights, scores, forecasts).
  * Not applied to extraction or categorisation, where a merchant may really be a bank.
  */
@@ -105,7 +119,9 @@ export interface UserCategoryChoice {
   suggestedCategory?: string;
   confidence: number;
   reasoning: string;
-  /** True when no real answer was produced; callers must not treat the rest as a result. */
+  /**
+   * True when no real answer was produced; callers must not treat the rest as a result.
+   */
   failed?: boolean;
 }
 
@@ -117,6 +133,8 @@ export interface FinancialTip {
   actionable: boolean;
   estimatedSaving?: number;
   educational?: boolean;
+  /** Fixed text used because the model failed: shown, but never charged or cached. */
+  degraded?: boolean;
 }
 
 export interface TrendPrediction {
@@ -675,7 +693,7 @@ Return comprehensive analysis in JSON:
       actionable: Boolean(result.actionable),
       estimatedSaving: result.estimatedSaving || undefined,
       educational: Boolean(result.educational)
-    }] : [financialTipsFallback(normalizedLanguage)];
+    }] : [{ ...financialTipsFallback(normalizedLanguage), degraded: true }];
 
     const processedTips: FinancialTip[] = rawTips.map((tip) => {
       const inLanguage = isTextInLanguage(`${tip.title} ${tip.description}`, normalizedLanguage);
@@ -684,7 +702,7 @@ Return comprehensive analysis in JSON:
           `[AI] Replacing tips written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
         );
         cacheable = false;
-        return financialTipsFallback(normalizedLanguage);
+        return { ...financialTipsFallback(normalizedLanguage), degraded: true };
       }
       return tip;
     });
@@ -696,7 +714,8 @@ Return comprehensive analysis in JSON:
   } catch (error) {
     log.error('Error generating financial tips:', error);
     // Deterministic fallback, in the caller's language — never English on a Slovak screen.
-    return [financialTipsFallback(normalizedLanguage)];
+    // Marked degraded: it is shown to the person but is not charged or kept for a week.
+    return [{ ...financialTipsFallback(normalizedLanguage), degraded: true }];
   }
 }
 
@@ -1092,7 +1111,7 @@ Please provide detailed predictions in this JSON format:
       "trend": "increasing|decreasing|stable",
       "reasoning": "explanation of prediction logic",
       "monthlyForecast": [
-        {"month": "2025-01", "predicted": 0, "confidence": 0.9}
+        {"month": "${monthLabel(0)}", "predicted": 0, "confidence": 0.9}
       ]
     }
   ],
@@ -1293,7 +1312,7 @@ RESPONSE FORMAT (JSON):
   ],
   "monthlyPredictions": [
     {
-      "month": "2025-07",
+      "month": "${monthLabel(1)}",
       "predicted": 2150.00,
       "confidence": 0.80,
       "breakdown": [
@@ -1302,7 +1321,7 @@ RESPONSE FORMAT (JSON):
       ]
     },
     {
-      "month": "2025-08",
+      "month": "${monthLabel(2)}",
       "predicted": 2200.00,
       "confidence": 0.75,
       "breakdown": [
@@ -1311,7 +1330,7 @@ RESPONSE FORMAT (JSON):
       ]
     },
     {
-      "month": "2025-09",
+      "month": "${monthLabel(3)}",
       "predicted": 2100.00,
       "confidence": 0.70,
       "breakdown": [

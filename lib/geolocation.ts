@@ -40,6 +40,8 @@ export async function detectUserLocation(): Promise<LocationInfo> {
       headers: {
         'Accept': 'application/json',
       },
+      // Only a hint for currency and billing: never let it hold a page load.
+      signal: AbortSignal.timeout(3_000),
     });
 
     if (response.ok) {
@@ -50,6 +52,7 @@ export async function detectUserLocation(): Promise<LocationInfo> {
     // Fallback to ip-api.com
     const fallbackResponse = await fetch('http://ip-api.com/json/?fields=status,country,countryCode,region,regionName', {
       method: 'GET',
+      signal: AbortSignal.timeout(3_000),
     });
 
     if (fallbackResponse.ok) {

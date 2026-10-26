@@ -38,6 +38,10 @@ export async function parseTransactionWithMistral(
   const normalizedLanguage = normalizeLanguageCode(userLanguage);
   const language = getLanguageLabel(normalizedLanguage);
 
+  // The date comes from the clock, never from the prompt text: a fixed date in the example
+  // was copied by the model and saved entries months in the past.
+  const today = new Date().toISOString().slice(0, 10);
+
   const systemPrompt = `You are a financial expert specializing in transaction categorization. Parse the user's speech into structured transaction data.
 
 CRITICAL: You MUST respond exclusively in ${language} language. All categories, descriptions, and text MUST be in ${language}.
@@ -51,10 +55,13 @@ RESPOND ONLY WITH VALID JSON (all text fields in ${language}):
   "amount": "5.80",
   "description": "Store/Merchant + Product/Service in ${language}", 
   "type": "expense",
-  "date": "2025-07-21",
+  "date": "${today}",
   "category": "Category name in ${language}",
   "note": "original transcript"
 }
+
+DATE RULE:
+- Use today's date (${today}) unless the person clearly said another date ("ayer", "včera", "yesterday", "on Monday").
 
 DESCRIPTION FORMAT RULES:
 - ALWAYS include store/merchant name + product/service

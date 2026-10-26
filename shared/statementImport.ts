@@ -82,11 +82,45 @@ function fromExcelSerial(serial: number): string | null {
   return validYmd(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
 }
 
+export type DateOrder = "day-first" | "month-first";
+
+/**
+ * Which way one file writes dd/mm/yyyy, decided once for the whole file.
+ *
+ * Reading each row on its own made a mixed file: 03/04 became 3 April (day-first, the Latin
+ * American rule) while 03/15 became 15 March one row later. A single row that can only be
+ * month-first fixes the convention for every row, and one that can only be day-first fixes it
+ * the other way. A file that shows both is not trustworthy, so the local default stays.
+ */
+export function detectDateOrder(values: Cell[]): DateOrder {
+  let dayFirst = false;
+  let monthFirst = false;
+
+  for (const value of values) {
+    // Serial numbers and real dates carry no day/month ambiguity.
+    if (value instanceof Date || typeof value === "number") continue;
+
+    const text = String(value ?? "").trim();
+    if (!text || /^\d{5}(\.\d+)?$/.test(text)) continue;
+
+    const match = text.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4}|\d{2})(?:[ T].*)?$/);
+    if (!match) continue;
+
+    const first = +match[1];
+    const second = +match[2];
+    if (first > 12 && second <= 12) dayFirst = true;
+    else if (second > 12 && first <= 12) monthFirst = true;
+  }
+
+  return monthFirst && !dayFirst ? "month-first" : "day-first";
+}
+
 /**
  * Day-first is the rule in Peru and the rest of Latin America (05/11/2026 = 5 November),
- * which is why a US-style month-first reading is only used when day-first is impossible.
+ * which is why a US-style month-first reading is only used when day-first is impossible —
+ * or when the whole file has shown it is month-first (see `detectDateOrder`).
  */
-export function parseStatementDate(value: Cell): string | null {
+export function parseStatementDate(value: Cell, order: DateOrder = "day-first"): string | null {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     return validYmd(value.getFullYear(), value.getMonth() + 1, value.getDate());
   }
@@ -105,7 +139,9 @@ export function parseStatementDate(value: Cell): string | null {
     const a = +match[1];
     const b = +match[2];
     const year = match[3].length === 2 ? 2000 + +match[3] : +match[3];
-    return validYmd(year, b, a) ?? validYmd(year, a, b);
+    return order === "month-first"
+      ? validYmd(year, a, b) ?? validYmd(year, b, a)
+      : validYmd(year, b, a) ?? validYmd(year, a, b);
   }
 
   // "05 Nov 2026", "5-nov-26", "5 de noviembre de 2026"
@@ -225,8 +261,12 @@ export function parseStatementTable(rows: Cell[][]): StatementParseResult {
   const transactions: ParsedMovement[] = [];
   let skipped = 0;
 
-  for (const row of cleaned.slice(columns.headerRow + 1)) {
-    const date = parseStatementDate(row[columns.date]);
+  // Decided once for the file, never per row: see detectDateOrder.
+  const dataRows = cleaned.slice(columns.headerRow + 1);
+  const dateOrder = detectDateOrder(dataRows.map((row) => row[columns.date]));
+
+  for (const row of dataRows) {
+    const date = parseStatementDate(row[columns.date], dateOrder);
     const description = String(row[columns.description] ?? "").replace(/\s+/g, " ").trim();
     if (!date || !description) {
       skipped++;

@@ -33,7 +33,7 @@ vi.mock('../../server/clerkAuth', () => ({
 vi.mock('../../server/aiAccess', () => ({ aiGuard: () => (_req: unknown, _res: unknown, next: () => void) => next() }));
 vi.mock('../../server/adminAuth', () => ({ adminAuth: (_req: unknown, _res: unknown, next: () => void) => next() }));
 vi.mock('../../server/openai', () => openai);
-vi.mock('../../lib/aiProcessor', () => ({ runAI }));
+vi.mock('../../lib/aiProcessor', () => ({ runAI, runMeteredAI: vi.fn() }));
 vi.mock('../../lib/aiProvider', () => ({ getAIProviderStatus: () => ({}) }));
 vi.mock('../../lib/unifiedAICache', () => ({
   UnifiedAICache: class {
@@ -136,7 +136,7 @@ describe('a failed AI answer is a 503 and is never cached', () => {
   });
 
   it('POST /api/ai/categorize answers 503 for a failed categorisation, not "Other"', async () => {
-    openai.categorizeExpenseWithUserCategories.mockResolvedValueOnce({ suggestedCategory: 'Other', confidence: 0.1, reasoning: 'x', failed: true });
+    runAI.mockResolvedValueOnce({ suggestedCategory: 'Other', confidence: 0.1, reasoning: 'x', failed: true });
     const { status, json } = await call('POST', '/api/ai/categorize', { description: 'Migros', amount: 4 });
     expect(status).toBe(503);
     expect(json.code).toBe('ai_unavailable');
@@ -167,11 +167,19 @@ describe('a real AI answer is returned and cached', () => {
     expect(runAI.mock.calls[0][2].language).toBe('sk-sk');
   });
 
-  it('categorize returns the person\'s category', async () => {
-    openai.categorizeExpenseWithUserCategories.mockResolvedValueOnce({ categoryId: 1, confidence: 0.9, reasoning: 'ok' });
+  it('categorize returns the person\'s category and is metered through runAI', async () => {
+    runAI.mockResolvedValueOnce({ categoryId: 1, confidence: 0.9, reasoning: 'ok' });
     const { status, json } = await call('POST', '/api/ai/categorize', { description: 'Migros', amount: 4 });
     expect(status).toBe(200);
     expect(json).toMatchObject({ categoryId: 1, confidence: 0.9 });
+
+    // Owned and metered: the row is written for this person, so the allowance sees the call.
+    expect(runAI).toHaveBeenCalledWith(
+      'categorizeExpenseWithCategories',
+      'user_1',
+      expect.objectContaining({ description: 'Migros', amount: 4 }),
+      expect.any(String),
+    );
   });
 });
 

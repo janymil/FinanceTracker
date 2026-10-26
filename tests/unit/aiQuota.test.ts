@@ -19,6 +19,10 @@ describe('AI quota rules', () => {
     expect(weightFor('categorizeExpense')).toBe(1);
     expect(weightFor('receipt-extraction')).toBe(3);
     expect(weightFor('a feature nobody has written yet')).toBe(1);
+    expect(weightFor('tts')).toBe(1);
+    expect(weightFor('voice-entry')).toBe(2);
+    expect(weightFor('mascot-image')).toBe(3);
+    expect(weightFor('parseBankStatement')).toBe(3);
 
     expect(
       actionsFor([

@@ -10,13 +10,11 @@ import { PLAN_PRICES, formatMoney } from "../../shared/pricing";
 import { getUserLanguage } from "../categoryTranslations";
 import { 
   categorizeExpense,
-  categorizeExpenseWithUserCategories,
-  categorizeIncomeWithUserCategories,
   type ExpenseCategorizationResult 
 } from "../openai";
-import { runAI } from "../../lib/aiProcessor";
+import { runAI, runMeteredAI } from "../../lib/aiProcessor";
 import { annotateEmptyReason } from "../../shared/dailyRecommendations";
-import { isAIFailure } from "../../shared/aiResults";
+import { isAIFailure, isDegraded } from "../../shared/aiResults";
 import { contextualFallbackTips } from "../../shared/aiFallbacks";
 import { AI_MODELS, getAIProviderStatus } from "../../lib/aiProvider";
 import { UnifiedAICache } from "../../lib/unifiedAICache";
@@ -112,26 +110,20 @@ export function registerAIRoutes(app: Express) {
           // Get user language from consistent header detection
           const language = getUserLanguage(req);
           
-          // Use the correct categorization function based on transaction type
-          let result;
-          if (transaction.type === 'income') {
-            result = await categorizeIncomeWithUserCategories(
-              transaction.description, 
-              parseFloat(transaction.amount), 
-              categoryList, 
-              language
-            );
-          } else {
-            result = await categorizeExpenseWithUserCategories(
-              transaction.description, 
-              parseFloat(transaction.amount), 
-              categoryList, 
-              language
-            );
-          }
+          // Use the correct categorization task based on transaction type. It goes through
+          // runAI so the call is metered against this person like every other AI feature.
+          const task = transaction.type === 'income'
+            ? 'categorizeIncomeWithCategories'
+            : 'categorizeExpenseWithCategories';
+          const result = await runAI(task, userId, {
+            description: transaction.description,
+            amount: parseFloat(transaction.amount),
+            language,
+            userCategories: categoryList,
+          }, user.plan || 'free');
 
           // A failed answer is not a suggestion
-          if (result.failed) continue;
+          if (isAIFailure(result) || result?.failed) continue;
 
           suggestions.push({
             id: `suggestion-${transaction.id}`,
@@ -187,15 +179,16 @@ export function registerAIRoutes(app: Express) {
       // Get user language from consistent header detection
       const language = getUserLanguage(req);
       
-      // Use the correct categorization function based on transaction type
-      let result;
-      if (type === 'income') {
-        result = await categorizeIncomeWithUserCategories(description, amount || 0, categoryList, language);
-      } else {
-        result = await categorizeExpenseWithUserCategories(description, amount || 0, categoryList, language);
-      }
+      // Metered like every other AI call: runAI writes the usage row for this person.
+      const task = type === 'income' ? 'categorizeIncomeWithCategories' : 'categorizeExpenseWithCategories';
+      const result = await runAI(task, userId, {
+        description,
+        amount: amount || 0,
+        language,
+        userCategories: categoryList,
+      }, user.plan || 'free');
       
-      if (result.failed) return aiUnavailable(res);
+      if (isAIFailure(result) || result?.failed) return aiUnavailable(res);
 
       return res.json({
         category: result.suggestedCategory || `Category ID: ${result.categoryId}`,
@@ -306,8 +299,9 @@ export function registerAIRoutes(app: Express) {
         return res.status(500).json({ message: "Failed to generate financial tip" });
       }
 
-      // Cache the successful result for 168 hours (7 days)
-      await cache.set(aiPayload, responseData, false, 168);
+      // Cache the successful result for 168 hours (7 days). A fixed stand-in is rebuilt every
+      // time instead: keeping it for a week would show old text as if it were today's advice.
+      if (!isDegraded(tipResults)) await cache.set(aiPayload, responseData, false, 168);
 
       return res.json(responseData);
     } catch (error) {
@@ -883,17 +877,20 @@ export function registerAIRoutes(app: Express) {
       
       const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood as keyof typeof personalityTraits]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes, ${uniqueTrait}, in ${colorScheme} colors. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, cartoon-like but polished.`;
 
-      // Generate image using DALL-E 3
+      // Generate image using DALL-E 3. Metered: image generation is the most expensive single
+      // call in the app, so it must use up allowance like the text features do.
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const response = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-      });
+      const response = await runMeteredAI('mascot-image', userId, user.plan || 'free', () =>
+        openai.images.generate({
+          model: "dall-e-3",
+          prompt: prompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        })
+      );
 
       const tempImageUrl = response.data?.[0]?.url;
       if (!tempImageUrl) {
@@ -904,7 +901,7 @@ export function registerAIRoutes(app: Express) {
       const fetch = (await import('node-fetch')).default;
       const { bunnyStorage } = await import('../bunnyStorage');
       
-      const imageResponse = await fetch(tempImageUrl);
+      const imageResponse = await fetch(tempImageUrl, { signal: AbortSignal.timeout(30_000) });
       if (!imageResponse.ok) {
         throw new Error("Failed to download generated image");
       }

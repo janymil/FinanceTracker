@@ -15,6 +15,7 @@
  *   4. the masked image is what leaves the server.
  */
 import sharp from 'sharp';
+import { readdirSync } from 'fs';
 import { anonymizeText, type AnonymizeExtras } from '../shared/aiAnonymizer';
 
 export interface Box {
@@ -155,9 +156,42 @@ export async function maskBoxes(
     .toBuffer();
 }
 
+/**
+ * Which languages the masking reader uses.
+ *
+ * The reader is what finds identifying lines on a receipt before anything is sent to an AI
+ * provider. Only English data ships with the app, and asking tesseract for a language whose
+ * data is missing makes it download one at request time — so extra languages are used only
+ * when their data file is already next to the process: drop `spa.traineddata` or
+ * `slk.traineddata` in and Spanish/Slovak receipts are read, and masked, much more reliably.
+ *
+ * The name rules themselves are already language-aware (Cliente, titular, majiteľ účtu), so
+ * this is about reading the photo, not about understanding the words.
+ */
+let cachedLanguages: string | null = null;
+
+export function resolveOcrLanguages(dir: string = process.cwd()): string {
+  if (cachedLanguages && dir === process.cwd()) return cachedLanguages;
+
+  const wanted = ['eng', 'spa', 'slk'];
+  let available: string[] = [];
+  try {
+    available = readdirSync(dir)
+      .filter((name) => name.endsWith('.traineddata'))
+      .map((name) => name.replace(/\.traineddata$/, ''));
+  } catch {
+    return 'eng';
+  }
+
+  const chosen = wanted.filter((language) => available.includes(language));
+  const resolved = chosen.length > 0 ? chosen.join('+') : 'eng';
+  if (dir === process.cwd()) cachedLanguages = resolved;
+  return resolved;
+}
+
 async function detectLines(image: Buffer): Promise<{ lines: TextLine[]; words: number }> {
   const { createWorker } = await import('tesseract.js');
-  const worker = await createWorker('eng', 1, { logger: () => {} });
+  const worker = await createWorker(resolveOcrLanguages(), 1, { logger: () => {} });
   try {
     const { data } = await worker.recognize(image, {}, { text: true, blocks: true });
     const lines: TextLine[] = [];
