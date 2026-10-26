@@ -12,8 +12,10 @@ import {
   neutralizeSpreadsheetCell,
 } from "@shared/trackingInput";
 import { localParts, monthRange, presetRange, rangeEndFrom, rangeStartFrom, resolveTimeZone } from "@shared/timezones";
+import { centsToNumber, parseAmountToCents } from "@shared/money";
 import { collectUserData } from "../userExport";
 import { reportServerError } from "../errorGuard/report";
+import { rateLimit } from "../middleware/rateLimit";
 
 const MONTH_NAMES = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -24,7 +26,7 @@ export function registerExportRoutes(app: Express) {
 
 
   // Data Import/Export endpoints (Premium only)
-  app.post('/api/import/transactions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/import/transactions', isAuthenticated, rateLimit({ windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'import-rows', perUser: true }), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -126,8 +128,10 @@ export function registerExportRoutes(app: Express) {
     }
   });
 
-  // Dedicated PDF export endpoint
-  app.post('/api/export-pdf', isAuthenticated, async (req: any, res) => {
+  // Dedicated PDF export endpoint.
+  // Rendering runs in the separate pdf-processor service and costs CPU there, so a person may
+  // ask for one every few minutes, not in a loop.
+  app.post('/api/export-pdf', isAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 10, keyPrefix: 'export-pdf', perUser: true }), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -174,23 +178,36 @@ export function registerExportRoutes(app: Express) {
         return transactionDate >= start && transactionDate <= end;
       });
 
-      // Calculate financial summary
-      const income = monthlyTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-      
-      const expenses = monthlyTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      // Calculate financial summary.
+      //
+      // `amount` is a DECIMAL and node-postgres hands it back as a *string*; summing with
+      // `parseFloat` accumulates binary-fraction error, which is how totals on this report and the
+      // screen could disagree by a cent. Every other money path in the app sums integer cents
+      // (`shared/money`), so this one does too.
+      const income = centsToNumber(
+        monthlyTransactions
+          .filter(t => t.type === 'income')
+          .reduce((cents, t) => cents + parseAmountToCents(t.amount), 0),
+      );
 
-      // Calculate category breakdown
-      const categoryBreakdown: { [key: string]: number } = {};
+      const expenses = centsToNumber(
+        monthlyTransactions
+          .filter(t => t.type === 'expense')
+          .reduce((cents, t) => cents + parseAmountToCents(t.amount), 0),
+      );
+
+      // Calculate category breakdown (in cents, converted once at the end)
+      const categoryBreakdownCents: { [key: string]: number } = {};
       monthlyTransactions
         .filter(t => t.type === 'expense')
         .forEach(t => {
           const category = t.categoryId?.toString() || 'Other';
-          categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
+          categoryBreakdownCents[category] =
+            (categoryBreakdownCents[category] || 0) + parseAmountToCents(t.amount);
         });
+      const categoryBreakdown: { [key: string]: number } = Object.fromEntries(
+        Object.entries(categoryBreakdownCents).map(([key, cents]) => [key, centsToNumber(cents)]),
+      );
 
       // Map category ids to readable names for the report
       const categoryNames = new Map<number, string>();
@@ -431,22 +448,30 @@ export function registerExportRoutes(app: Express) {
       } else if (format === 'pdf') {
         // PDF rendering belongs to the independent processor (see pdfProcessorClient).
         const rows: any[] = exportData.transactions ?? [];
-        const totals = rows.reduce(
+        // Integer cents, like every other money path (see the note above `income`).
+        const totalCents = rows.reduce(
           (acc: { income: number; expenses: number }, t: any) => {
-            const amount = Number(t.amount) || 0;
-            if (t.type === 'income') acc.income += amount;
-            else acc.expenses += amount;
+            const cents = parseAmountToCents(t.amount);
+            if (t.type === 'income') acc.income += cents;
+            else acc.expenses += cents;
             return acc;
           },
           { income: 0, expenses: 0 }
         );
+        const totals = {
+          income: centsToNumber(totalCents.income),
+          expenses: centsToNumber(totalCents.expenses),
+        };
 
-        const byCategory = new Map<string, number>();
+        const byCategoryCents = new Map<string, number>();
         for (const t of rows) {
           if (t.type !== 'expense') continue;
           const name = t.categoryName || 'Uncategorized';
-          byCategory.set(name, (byCategory.get(name) || 0) + (Number(t.amount) || 0));
+          byCategoryCents.set(name, (byCategoryCents.get(name) || 0) + parseAmountToCents(t.amount));
         }
+        const byCategory = new Map<string, number>(
+          Array.from(byCategoryCents.entries()).map(([name, cents]) => [name, centsToNumber(cents)]),
+        );
 
         const dayLabel = (instant: Date) => {
           const day = localParts(instant, timeZone);
@@ -497,7 +522,10 @@ export function registerExportRoutes(app: Express) {
   const backupStorage = cloudStorage;
 
   // Create backup endpoint
-  app.post('/api/backup', isAuthenticated, async (req: any, res) => {
+  // Each call writes a full copy of the account to object storage. Premium does not mean
+  // unlimited: without a cap one account can fill the bucket, and the retention rule prunes by
+  // age, so a hundred backups made this morning all survive.
+  app.post('/api/backup', isAuthenticated, rateLimit({ windowMs: 60 * 60 * 1000, max: 10, keyPrefix: 'backup-create', perUser: true }), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -536,23 +564,24 @@ export function registerExportRoutes(app: Express) {
       };
 
       // Use the existing createBackup method from BunnyStorage
-      log.info('BACKUP DEBUG: Starting backup creation for user:', userId);
-      log.info('BACKUP DEBUG: Backup data size:', JSON.stringify(backupData).length, 'characters');
+      log.info('Creating a backup for user', userId);
       
       const filename = await backupStorage.createBackup(userId, backupData);
       
-      log.info('BACKUP DEBUG: Backup created successfully with filename:', filename);
+      log.info('Backup written for user', userId, `(${filename})`);
 
       return res.json({ 
         success: true, 
         message: "Backup created successfully",
         filename 
       });
-
     } catch (error: any) {
-      log.error("BACKUP ERROR: Error creating backup:", error);
-      log.error("BACKUP ERROR: Error details:", error.message);
-      return res.status(500).json({ message: "Failed to create backup", error: error.message });
+
+
+      // Logged, not returned: a storage or database message names internals, and `index.ts`
+      // promises the browser never sees one.
+      log.error('Failed to create backup:', error);
+      return res.status(500).json({ message: "Failed to create backup" });
     }
   });
 
@@ -685,7 +714,9 @@ export function registerExportRoutes(app: Express) {
   });
 
   // Restore backup endpoint
-  app.post('/api/restore-backup', isAuthenticated, async (req: any, res) => {
+  // Restore deletes and rewrites the person's history, so it is the last route that should run
+  // in a tight loop.
+  app.post('/api/restore-backup', isAuthenticated, rateLimit({ windowMs: 60 * 60 * 1000, max: 5, keyPrefix: 'backup-restore', perUser: true }), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {

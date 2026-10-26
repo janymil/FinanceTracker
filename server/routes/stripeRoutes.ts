@@ -74,6 +74,43 @@ export const stripeGateway = {
     if (!stripe) throw new Error('Stripe is not configured');
     await stripe.subscriptions.cancel(subscriptionId);
   },
+  /**
+   * Stop the renewal and keep the paid period.
+   *
+   * `cancelSubscription` above is immediate and belongs to account deletion (the customer is
+   * going away, so nothing is owed). This is the customer-facing cancellation: they paid to the
+   * end of the period, so they keep the plan until it ends and the `deleted` notice downgrades
+   * them. Returns the subscription so the caller can say when access ends.
+   */
+  async endSubscriptionAtPeriodEnd(subscriptionId: string): Promise<any> {
+    if (!stripe) throw new Error('Stripe is not configured');
+    return stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+  },
+  /** Applies a higher plan now and invoices the difference for the rest of the period. */
+  async upgradeSubscription(subscriptionId: string, itemId: string, priceId: string): Promise<any> {
+    if (!stripe) throw new Error('Stripe is not configured');
+    return stripe.subscriptions.update(subscriptionId, {
+      items: [{ id: itemId, price: priceId }],
+      proration_behavior: 'always_invoice',
+      cancel_at_period_end: false,
+    });
+  },
+  /** Keeps the current price until `periodEnd`, then switches. No charge and no credit now. */
+  async scheduleDowngrade(
+    subscriptionId: string,
+    currentPriceId: string,
+    newPriceId: string,
+    periodEnd: number,
+  ): Promise<any> {
+    if (!stripe) throw new Error('Stripe is not configured');
+    return stripe.subscriptionSchedules.create({
+      from_subscription: subscriptionId,
+      phases: [
+        { items: [{ price: currentPriceId, quantity: 1 }], end_date: periodEnd },
+        { items: [{ price: newPriceId, quantity: 1 }] },
+      ],
+    });
+  },
   /** The subscription as it is *now*, which is the only thing that proves a plan is paid for. */
   async retrieveSubscription(subscriptionId: string): Promise<any> {
     if (!stripe) throw new Error('Stripe is not configured');
@@ -191,10 +228,57 @@ async function getPlanPriceId(plan: string, currency: BillingCurrency): Promise<
   return priceId;
 }
 
-// Handle subscription changes (upgrade/downgrade) with proper proration
+/** Plan order, cheapest first. Turns "is this an upgrade?" into a comparison of what the account
+ * is recorded as paying for — no price lookup, and no dependency on which currency list the
+ * existing subscription was sold from. */
+const PLAN_KEY_ORDER: PlanKey[] = ['standard', 'standard-yearly', 'premium', 'premium-yearly'];
+
+function planKeyFor(user: User): PlanKey {
+  const interval = user.billingInterval === 'yearly' ? '-yearly' : '';
+  return `${user.plan}${interval}` as PlanKey;
+}
+
+/**
+ * Which way a plan change goes, decided from what the account is recorded as paying for.
+ *
+ * Exported because it is the branch that decides whether money is charged now: getting it
+ * backwards turns a downgrade into an immediate second charge. No Stripe call is needed to
+ * answer it, so it is tested on its own.
+ */
+export function planChangeDirection(user: User, newPlan: string): 'upgrade' | 'downgrade' | 'same' | 'unknown' {
+  if (!PLAN_KEY_ORDER.includes(newPlan as PlanKey)) return 'unknown';
+  const currentWeight = PLAN_KEY_ORDER.indexOf(planKeyFor(user)) + 1;
+  // `indexOf` is -1 for a plan the list does not know (a manually granted plan, 'free'), which
+  // makes any recognised plan an upgrade — the safe direction, since it grants immediately
+  // rather than ending something already paid for.
+  const newWeight = PLAN_KEY_ORDER.indexOf(newPlan as PlanKey) + 1;
+  if (newWeight === currentWeight) return 'same';
+  return newWeight > currentWeight ? 'upgrade' : 'downgrade';
+}
+
+/**
+ * Change an existing subscription in place.
+ *
+ * This used to open a *second* Checkout subscription and cancel the first one afterwards, which
+ * meant: an upgrade charged a full period twice for the same days, and a downgrade charged a
+ * new period immediately while throwing away the unused remainder of the higher plan. Both are
+ * money the customer did not agree to. Stripe can change the price of a subscription it already
+ * has, so nothing is created and nothing is double-billed:
+ *
+ *   - upgrade: applied now, the difference is invoiced (`always_invoice`);
+ *   - downgrade: scheduled to start when the paid period ends. No credit, no charge now, and the
+ *     customer keeps what they paid for. `customer.subscription.updated` moves the plan when the
+ *     new phase begins.
+ *
+ * `/api/switch-plan` is the price-id variant of the same two operations; keep them in step.
+ */
 async function handleSubscriptionChange(user: User, newPlan: string, currency: BillingCurrency, res: Response) {
   if (!stripe) {
     return res.status(503).json({ message: "Payment processing unavailable" });
+  }
+
+  if (!PLAN_KEY_ORDER.includes(newPlan as PlanKey)) {
+    return res.status(400).json({ error: "Invalid plan selected" });
   }
 
   try {
@@ -206,53 +290,63 @@ async function handleSubscriptionChange(user: User, newPlan: string, currency: B
       return res.status(400).json({ message: "No active subscription to change" });
     }
 
-    // Get current subscription
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    
+    const subscription = await stripeGateway.retrieveSubscription(subscriptionId);
+    const item = subscription.items.data[0];
+    if (!item?.price?.id) {
+      return res.status(400).json({ error: "The subscription has no price to change" });
+    }
+
     // Resolve the target plan to a Stripe price id (env may hold prod_ or price_)
     const newPriceId = await getPlanPriceId(newPlan, currency);
     if (!newPriceId) {
       return res.status(400).json({ error: "Invalid plan selected" });
     }
-
-    // Check if user is trying to switch to the same plan
-    const currentPriceId = subscription.items.data[0]?.price.id;
-    if (currentPriceId === newPriceId) {
+    if (item.price.id === newPriceId) {
       return res.status(400).json({ error: "You are already subscribed to this plan" });
     }
 
-    const baseUrl = appBaseUrl();
+    const direction = planChangeDirection(user, newPlan);
+    if (direction === 'unknown') {
+      return res.status(400).json({ error: "Invalid plan selected" });
+    }
+    if (direction === 'same') {
+      return res.status(400).json({ error: "You are already subscribed to this plan" });
+    }
 
-    // For subscription modifications, create a checkout session that will update the existing subscription
-    // This properly handles proration and billing
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      customer: customerId,
-      payment_method_types: ['card'],
-      line_items: [{
-        price: newPriceId,
-        quantity: 1,
-      }],
-      subscription_data: {
-        metadata: {
-          plan: newPlan,
-          userId: user.id,
-          isUpgrade: 'true',
-          existingSubscriptionId: subscriptionId
-        }
-      },
-      success_url: `${baseUrl}/api/subscription-success?plan=${newPlan}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/subscribe`,
-      metadata: {
-        plan: newPlan,
-        userId: user.id,
-        isUpgrade: 'true',
-        existingSubscriptionId: subscriptionId
-      }
+    if (direction === 'upgrade') {
+      await stripeGateway.upgradeSubscription(subscriptionId, item.id, newPriceId);
+
+      const [plan, interval] = newPlan.split('-') as ['standard' | 'premium', 'yearly' | undefined];
+      await storage.updateUserPlan(user.id, plan, interval === 'yearly' ? 'yearly' : 'monthly');
+
+      log.info(`[Billing] ${subscriptionId} upgraded to ${newPlan} now, with proration`);
+      return res.json({ success: true, type: "upgrade" });
+    }
+
+    // Downgrade: the paid period is not refunded, so it is not shortened either.
+    const periodEnd = (subscription as any).current_period_end;
+    if (typeof periodEnd !== 'number' || !Number.isFinite(periodEnd)) {
+      return res.status(502).json({ error: "Could not read the end of the current period" });
+    }
+
+    try {
+      await stripeGateway.scheduleDowngrade(subscriptionId, item.price.id, newPriceId, periodEnd);
+    } catch (scheduleError) {
+      // A subscription can only carry one schedule. Say so instead of leaving the customer
+      // believing the downgrade was applied.
+      log.error('Could not schedule the downgrade:', scheduleError);
+      return res.status(409).json({
+        error: "A plan change is already scheduled for this subscription",
+        code: 'schedule_exists',
+      });
+    }
+
+    log.info(`[Billing] ${subscriptionId} will downgrade to ${newPlan} at the end of the paid period`);
+    return res.json({
+      success: true,
+      type: "downgrade",
+      appliesAt: new Date(periodEnd * 1000).toISOString(),
     });
-
-    log.info('Subscription modification session created:', session.id);
-    return res.json({ url: session.url });
 
   } catch (error) {
     log.error('Error updating subscription:', error);
@@ -387,6 +481,10 @@ export function registerStripeRoutes(app: Express) {
           }],
           success_url: successUrl,
           cancel_url: cancelUrl,
+          // A paying customer gets a document for their money. Without this the app never asked
+          // Stripe to send one, so whether anybody ever received a receipt depended on a
+          // dashboard setting nobody in this repository can see.
+          receipt_email: userEmail || user.email || undefined,
           metadata: {
             plan: plan,
             userId: userId,
@@ -506,18 +604,14 @@ export function registerStripeRoutes(app: Express) {
         }
       }
 
-      // Handle existing subscription if this is an upgrade (the id was written by our
-      // own checkout code, and the new subscription is never the one cancelled).
-      if (session.metadata?.existingSubscriptionId && session.metadata.existingSubscriptionId !== subscriptionId) {
-        try {
-          // Cancel the existing subscription
-          await stripeGateway.cancelSubscription(session.metadata.existingSubscriptionId);
-          log.info(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
-        } catch (cancelError) {
-          log.error('Error cancelling existing subscription:', cancelError);
-          // Continue with the process even if cancellation fails
-        }
-      }
+      // A replaced subscription is no longer cancelled from here.
+      //
+      // This block used to cancel `metadata.existingSubscriptionId` whenever a second Checkout
+      // subscription had been created. A plan change now updates the subscription the customer
+      // already has (`handleSubscriptionChange`), so no second one exists — and this URL stays
+      // valid forever, so it must not be a way to cancel somebody's subscription by replaying it.
+      // Older sessions that still carry the id are left alone: they describe a migration that has
+      // already happened, and their subscription ends by its own schedule.
 
       // Update user's plan in database
       try {
@@ -721,6 +815,13 @@ export function registerStripeRoutes(app: Express) {
   });
 
   // Cancel Subscription
+  //
+  // CANCELLING ENDS THE RENEWAL, NOT THE SERVICE. The customer has paid for the period they
+  // are in; taking the plan away the moment they click makes Kaptia keep money for time it did
+  // not serve, which is a refund request, a chargeback and — in Peru — an INDECOPI complaint.
+  // `cancel_at_period_end` stops the next charge and leaves the plan alone; Stripe then sends
+  // `customer.subscription.deleted` when the paid period runs out, and that webhook (already
+  // tested) moves the account to free.
   app.post("/api/cancel-subscription", isAuthenticated, async (req: any, res: Response) => {
     try {
       const userId = getUserId(req);
@@ -729,19 +830,36 @@ export function registerStripeRoutes(app: Express) {
       }
 
       const user = await storage.getUser(userId);
-      if (user?.stripeSubscriptionId && stripe) {
-        try {
-          await stripe.subscriptions.cancel(user.stripeSubscriptionId);
-        } catch (stripeError) {
-          log.error('Error cancelling subscription in Stripe:', stripeError);
-          return res.status(502).json({ error: "We could not cancel the subscription. Nothing was changed." });
-        }
+      if (!user?.stripeSubscriptionId) {
+        // Soles subscriptions are cancelled through their own route; answering success here
+        // would have told a MercadoPago customer they were cancelled while still being charged.
+        return res.status(400).json({
+          error: "No card subscription found",
+          code: "no_stripe_subscription",
+        });
+      }
+      if (!stripe) {
+        return res.status(503).json({ error: "Payment processing unavailable" });
       }
 
-      // Reset user to free plan
-      await storage.updateUserPlan(userId, 'free');
+      let accessUntil: string | null = null;
+      try {
+        // Already scheduled for cancellation is not an error: say when access ends.
+        const subscription = await stripeGateway.endSubscriptionAtPeriodEnd(user.stripeSubscriptionId);
+        const periodEnd = (subscription as any)?.current_period_end;
+        if (typeof periodEnd === 'number' && Number.isFinite(periodEnd)) {
+          accessUntil = new Date(periodEnd * 1000).toISOString();
+        }
+      } catch (stripeError) {
+        log.error('Error cancelling subscription in Stripe:', stripeError);
+        return res.status(502).json({ error: "We could not cancel the subscription. Nothing was changed." });
+      }
 
-      return res.json({ success: true, message: "Subscription cancelled successfully" });
+      return res.json({
+        success: true,
+        message: "Subscription cancelled. You keep access until the end of the period you paid for.",
+        accessUntil,
+      });
 
     } catch (error) {
       log.error('Error cancelling subscription:', error);

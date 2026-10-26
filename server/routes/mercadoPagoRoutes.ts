@@ -87,6 +87,27 @@ async function deactivatePlan(
   if (user.mpPreapprovalId && user.mpPreapprovalId !== preapprovalId) return;
   // A Stripe subscription, if any, stays in charge.
   if (user.stripeSubscriptionId) return;
+
+  /*
+   * Days already paid for are not refundable, so they are not withdrawable either.
+   *
+   * MercadoPago has no "cancel at period end": ending the preapproval is the only way to stop
+   * future charges, and it takes effect immediately even though the customer has paid to the end
+   * of the month. The cancellation route writes `paidUntil` from the preapproval's next payment
+   * date before it cancels, so this path — reached by the `cancelled` notification — keeps the
+   * plan and lets the grace processor end it on the right day.
+   */
+  if (user.paidUntil && user.paidUntil.getTime() > Date.now()) {
+    if (!keepId) {
+      await storage.updateUser(userId, { mpPreapprovalId: null });
+    }
+    log.info(
+      `[MercadoPago] ${userId} keeps the paid plan until ${user.paidUntil.toISOString()} ` +
+        `(preapproval ${preapprovalId} no longer active)`,
+    );
+    return;
+  }
+
   await storage.updateUserPlan(userId, 'free', 'monthly');
   // A paused subscription is still the one that will resume and charge, so its id stays:
   // dropping it would leave the customer unable to cancel from their own profile.
@@ -219,16 +240,60 @@ export function registerMercadoPagoRoutes(app: Express) {
 
     const user = await storage.getUser(userId);
     if (!user?.mpPreapprovalId) {
-      return res.status(400).json({ error: 'No MercadoPago subscription found' });
+      return res.status(400).json({ error: 'No MercadoPago subscription found', code: 'no_mp_subscription' });
+    }
+
+    /*
+     * How far the money already reaches.
+     *
+     * Cancelling the preapproval is immediate and irreversible, so the date has to be read
+     * *before* it — afterwards MercadoPago stops reporting a next payment, and there would be
+     * nothing left to say how many days the customer has paid for. Best effort: if the lookup
+     * fails, the previous behaviour (end it now) is what remains, and it is logged.
+     */
+    let paidUntil: Date | null = null;
+    try {
+      const state = await getPreapproval(user.mpPreapprovalId);
+      if (state.nextPaymentDate) {
+        const next = new Date(state.nextPaymentDate);
+        if (!Number.isNaN(next.getTime()) && next.getTime() > Date.now()) {
+          paidUntil = next;
+        }
+      }
+    } catch (error) {
+      log.warn(
+        `[MercadoPago] Could not read the paid period of ${user.mpPreapprovalId} before cancelling:`,
+        messageOf(error),
+      );
+    }
+
+    // Written first, so the `cancelled` notification (which may arrive before this request
+    // returns) finds it and keeps the plan instead of downgrading immediately.
+    if (paidUntil) {
+      await storage.updateUser(userId, { paidUntil });
     }
 
     try {
       await cancelPreapproval(user.mpPreapprovalId);
     } catch (error: any) {
+      // Nothing was cancelled, so nothing may change.
+      if (paidUntil) {
+        await storage.updateUser(userId, { paidUntil: null }).catch(() => undefined);
+      }
       log.error('[MercadoPago] Cancel failed:', error?.message || error);
       return res.status(502).json({ error: 'MercadoPago is unavailable' });
     }
 
+    if (paidUntil) {
+      log.info(`[MercadoPago] ${userId} cancelled; plan kept until ${paidUntil.toISOString()}`);
+      return res.json({
+        success: true,
+        message: 'Subscription cancelled. You keep access until the end of the period you paid for.',
+        accessEndsAt: paidUntil.toISOString(),
+      });
+    }
+
+    // No date to stand on: end it now, as before.
     await deactivatePlan(userId, user.mpPreapprovalId);
     return res.json({ success: true });
   });

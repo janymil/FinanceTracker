@@ -6,6 +6,32 @@ import { withJobRun } from './errorGuard/jobs.js';
 class GraceProcessor {
   private isRunning = false;
 
+  // A cancelled subscription whose paid period has now run out.
+  //
+  // This is not a failed payment: MercadoPago preapprovals cannot be cancelled "at period end",
+  // so the cancellation route remembers the date and the plan is kept until it passes. There is
+  // no further notification from MercadoPago to act on, which is why this sweep exists.
+  private async downgradeExpiredPaidPeriods(): Promise<void> {
+    const expired = await storage.getUsersWithExpiredPaidUntil();
+    if (expired.length === 0) return;
+
+    log.info(`Found ${expired.length} cancelled subscriptions whose paid period has ended`);
+
+    for (const user of expired) {
+      try {
+        await storage.updateUser(user.id, { plan: 'free', paidUntil: null } as any);
+        log.info(`Downgraded ${user.id} to free: the paid period of a cancelled subscription ended`);
+
+        if (user.email) {
+          const sent = await sendAccountDowngradedNotification(user.email, user.firstName || 'User');
+          log.info(`Downgrade notification after cancellation sent to ${user.email}: ${sent}`);
+        }
+      } catch (error) {
+        log.error(`Error ending the paid period of ${user.id}:`, error);
+      }
+    }
+  }
+
   // Process users in grace period for warnings and downgrades
   async processGracePeriods(): Promise<void> {
     if (this.isRunning) {
@@ -17,10 +43,11 @@ class GraceProcessor {
       this.isRunning = true;
       log.info('Starting grace period processing...');
 
+      await this.downgradeExpiredPaidPeriods();
+
       // Get users with expired grace periods for downgrade
       const expiredUsers = await storage.getUsersWithExpiredGrace();
       log.info(`Found ${expiredUsers.length} users with expired grace periods`);
-
       // Downgrade expired users
       for (const user of expiredUsers) {
         try {

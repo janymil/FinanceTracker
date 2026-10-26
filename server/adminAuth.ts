@@ -15,6 +15,18 @@ import { log } from './logger';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_ROLE = 'admin';
 
+/**
+ * Whether the shared password may open the console at all.
+ *
+ * It is a single secret with no second step, and the admin surface can read and delete every
+ * customer's records, so production refuses it unless the operator writes the risk down:
+ * `ALLOW_LEGACY_ADMIN_PASSWORD=1`. Development keeps it, because the Clerk test instance
+ * usually has no admin role on a fresh account.
+ */
+function legacyPasswordAllowed(): boolean {
+  return process.env.NODE_ENV !== 'production' || process.env.ALLOW_LEGACY_ADMIN_PASSWORD === '1';
+}
+
 if (!ADMIN_PASSWORD) {
   log.warn('ADMIN_PASSWORD environment variable is not set - legacy admin login will be disabled until configured.');
 }
@@ -59,10 +71,18 @@ function requiresSecondFactor(): boolean {
 }
 
 if (process.env.ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
-  log.warn(
-    'ADMIN_PASSWORD is set: the shared-password admin door has no second factor. Remove it once ' +
-      'every admin signs in through Clerk, so that 2FA can actually be required.',
-  );
+  if (legacyPasswordAllowed()) {
+    log.warn(
+      'ADMIN_PASSWORD is set and ALLOW_LEGACY_ADMIN_PASSWORD=1: the shared-password admin door ' +
+        'is OPEN with no second factor. Remove both once every admin signs in through Clerk.',
+    );
+  } else {
+    log.warn(
+      'ADMIN_PASSWORD is set but IGNORED in production: the shared password is refused, and ' +
+        'admins must sign in through Clerk with a second factor. Set ALLOW_LEGACY_ADMIN_PASSWORD=1 ' +
+        'only to re-open the old door deliberately.',
+    );
+  }
 }
 
 async function isClerkAdmin(req: Request): Promise<boolean> {
@@ -130,6 +150,17 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
 
   if (!password || typeof password !== 'string') {
     return res.status(400).json({ message: 'Password required' });
+  }
+
+  if (!legacyPasswordAllowed()) {
+    log.warn(
+      'Admin password login refused: production requires the Clerk admin account with a second ' +
+        'factor. Set ALLOW_LEGACY_ADMIN_PASSWORD=1 to re-open the shared-password door.',
+    );
+    return res.status(401).json({
+      message: 'Password sign-in is disabled. Sign in with your admin account.',
+      code: 'legacy_password_disabled',
+    });
   }
 
   if (!ADMIN_PASSWORD || !passwordMatches(password, ADMIN_PASSWORD)) {

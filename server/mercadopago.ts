@@ -128,6 +128,11 @@ export interface PreapprovalState {
    * change — status alone would swallow a later "authorized" (a pause that is resumed).
    */
   lastModified: string | null;
+  /**
+   * The next charge MercadoPago had planned. It is the only proof of how far the money already
+   * reaches, since a cancelled preapproval keeps no record of the days it paid for.
+   */
+  nextPaymentDate?: string | null;
 }
 
 function planFromReason(reason: string | undefined): PlanId {
@@ -147,6 +152,7 @@ function toState(data: any): PreapprovalState {
     plan: planFromReason(data.reason),
     interval: intervalFromPreapproval(data),
     lastModified: data.last_modified ? String(data.last_modified) : null,
+    nextPaymentDate: data.next_payment_date ? String(data.next_payment_date) : null,
   };
 }
 

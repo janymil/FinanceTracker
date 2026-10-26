@@ -9,6 +9,7 @@ import { buildTrendsPayload, requestPdf, PdfProcessorError } from '../pdfProcess
 import { checkPdf } from '@shared/invariants';
 import { reportInvariant } from '../errorGuard/report.js';
 import { centsToNumber, parseAmountToCents } from '@shared/money';
+import { rateLimit } from '../middleware/rateLimit';
 
 /**
  * Sum a list of money values.
@@ -26,7 +27,7 @@ function sumAmounts(rows: Array<{ amount: unknown }>): number {
 
 export function registerPDFRoutes(app: any) {
   // Generate PDF report for trends data - Premium plan required
-  app.post('/api/generate-trends-pdf', isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/generate-trends-pdf', isAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 10, keyPrefix: 'trends-pdf', perUser: true }), async (req: Request, res: Response) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
@@ -228,15 +229,14 @@ export function registerPDFRoutes(app: any) {
     } catch (error) {
       log.error('PDF generation error:', error);
       if (error instanceof PdfProcessorError) {
+        // The processor is a service of ours and its messages are written for people.
         return res.status(error.statusCode).json({
           error: error.message,
           details: error.details
         });
       }
-      res.status(500).json({ 
-        error: 'PDF generation failed',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
+      // Anything else is internal (a storage or database message) and stays in the log.
+      res.status(500).json({ error: 'PDF generation failed' });
     }
   });
 }

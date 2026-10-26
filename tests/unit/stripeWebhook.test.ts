@@ -73,6 +73,9 @@ let server: Server;
 let baseUrl: string;
 let stripeGateway: {
   cancelSubscription: (subscriptionId: string) => Promise<void>;
+  endSubscriptionAtPeriodEnd: (subscriptionId: string) => Promise<any>;
+  upgradeSubscription: (subscriptionId: string, itemId: string, priceId: string) => Promise<any>;
+  scheduleDowngrade: (subscriptionId: string, currentPriceId: string, newPriceId: string, periodEnd: number) => Promise<any>;
   retrieveSubscription: (subscriptionId: string) => Promise<{ id: string; status: string }>;
   retrieveCheckoutSession: (sessionId: string) => Promise<any>;
 };
@@ -456,7 +459,10 @@ describe('POST /api/stripe-webhook', () => {
       expect(storage.updateUserPlan).not.toHaveBeenCalled();
     });
 
-    it('ends the subscription an upgrade replaced, and keeps the new one', async () => {
+    it('does not cancel anything when an old-style success URL is opened or replayed', async () => {
+      // A plan change now updates the subscription the customer already has, so there is no
+      // second subscription to end. This URL stays valid forever, so it must not be a way to
+      // cancel somebody's subscription by opening a link — and it used to be exactly that.
       const cancel = vi.spyOn(stripeGateway, 'cancelSubscription').mockResolvedValue(undefined);
       vi.spyOn(stripeGateway, 'retrieveCheckoutSession').mockResolvedValue(
         paidSession({
@@ -468,8 +474,9 @@ describe('POST /api/stripe-webhook', () => {
 
       await visit();
 
-      expect(cancel).toHaveBeenCalledWith('sub_old');
-      expect(cancel).not.toHaveBeenCalledWith('sub_new');
+      expect(cancel).not.toHaveBeenCalled();
+      // The plan itself is still applied: that is what the page is for.
+      expect(storage.updateUserPlan).toHaveBeenCalledWith('user_9', 'premium', 'monthly');
     });
   });
 
@@ -489,7 +496,64 @@ describe('POST /api/stripe-webhook', () => {
     });
   });
 
-  describe('a resent checkout notice', () => {
+  describe('POST /api/cancel-subscription', () => {
+  const cancelRequest = () =>
+    fetch(`${baseUrl}/api/cancel-subscription`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    });
+
+  it('stops the renewal and keeps the period the customer paid for', async () => {
+    const periodEnd = Math.floor(Date.now() / 1000) + 10 * 24 * 60 * 60;
+    vi.mocked(storage.getUser).mockResolvedValueOnce({
+      id: 'user_1',
+      plan: 'premium',
+      stripeSubscriptionId: 'sub_1',
+    } as any);
+    const atPeriodEnd = vi
+      .spyOn(stripeGateway, 'endSubscriptionAtPeriodEnd')
+      .mockResolvedValue({ id: 'sub_1', cancel_at_period_end: true, current_period_end: periodEnd });
+    const immediate = vi.spyOn(stripeGateway, 'cancelSubscription');
+
+    const response = await cancelRequest();
+    const body = await response.json();
+
+    // `cancel()` ends the subscription at once, which takes away days the customer paid for.
+    expect(immediate).not.toHaveBeenCalled();
+    expect(atPeriodEnd).toHaveBeenCalledWith('sub_1');
+    // The plan is untouched here; `customer.subscription.deleted` moves them to free at period end.
+    expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    expect(new Date(body.accessUntil).getTime()).toBe(periodEnd * 1000);
+  });
+
+  it('says nothing was cancelled when Stripe refuses', async () => {
+    vi.mocked(storage.getUser).mockResolvedValueOnce({
+      id: 'user_1',
+      plan: 'premium',
+      stripeSubscriptionId: 'sub_1',
+    } as any);
+    vi.spyOn(stripeGateway, 'endSubscriptionAtPeriodEnd').mockRejectedValue(new Error('stripe down'));
+
+    const response = await cancelRequest();
+
+    expect(response.status).toBe(502);
+    expect(storage.updateUserPlan).not.toHaveBeenCalled();
+  });
+
+  it('does not pretend a MercadoPago subscriber cancelled a card subscription', async () => {
+    // Answering 200 here would tell somebody in Peru they had cancelled while the preapproval
+    // kept charging them.
+    vi.mocked(storage.getUser).mockResolvedValueOnce({ id: 'user_1', plan: 'premium' } as any);
+
+    const response = await cancelRequest();
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).code).toBe('no_stripe_subscription');
+  });
+});
+
+describe('a resent checkout notice', () => {
     it('does not revive a subscription that has since been cancelled', async () => {
       vi.spyOn(stripeGateway, 'retrieveSubscription').mockResolvedValue({ id: 'sub_1', status: 'canceled' });
 

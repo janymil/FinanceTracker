@@ -40,12 +40,16 @@ export const POOL_SETTINGS = {
 } as const;
 
 /**
- * TLS settings for the database connection. Verification stays off for Neon endpoints exactly
- * as it was before this file got pool limits: turning it on can stop the app from booting, so
- * it belongs in its own change with a deploy and a rollback plan.
+ * TLS settings for the database connection.
+ *
+ * Neon requires TLS, but its certificate chain is not verifiable from every host, so
+ * verification is off by default — encryption without authentication. That means a party on
+ * the network path could impersonate the database, so it must be switchable without a code
+ * change: set `DB_TLS_VERIFY=1` once the host trusts the CA (Neon publishes the root cert) and
+ * the connection is authenticated as well as encrypted.
  */
 export const sslFor = (url: string) =>
-  url.includes('neon.tech') ? { rejectUnauthorized: false } : undefined;
+  url.includes('neon.tech') ? { rejectUnauthorized: process.env.DB_TLS_VERIFY === '1' } : undefined;
 
 // Initialize database connection based on environment
 let pool: NeonPool | PgPool;
@@ -100,5 +104,30 @@ export async function closePool(): Promise<void> {
     .query(`SET statement_timeout = ${Number(POOL_SETTINGS.statement_timeout)}`)
     .catch((error: any) => log.warn('[db] could not set statement_timeout:', error?.message ?? error));
 });
+
+/**
+ * A dropped idle socket must not take the process down.
+ *
+ * `pg` (and Neon's WebSocket pool) emit `error` on the pool when a client that is sitting
+ * idle is terminated — a network blip, Neon closing an old connection, a host rebooting their
+ * edge. With no listener, Node turns that into an `uncaughtException`, and
+ * `server/index.ts` correctly exits on one; the app therefore restarted whenever the database
+ * dropped an idle socket. Production showed exactly that once:
+ *
+ *     CRITICAL: Uncaught Exception: Connection terminated unexpectedly
+ *       at @neondatabase/serverless/index.mjs:1250
+ *
+ * The socket is already gone and the pool will open a new one on the next query, so the right
+ * answer is to log it and carry on. This does not hide real failures: a query that cannot get
+ * a connection still rejects, and that error reaches its own handler.
+ */
+const onPoolError = (label: string) => (error: unknown) => {
+  log.warn(
+    `[db] ${label} reported a connection error; the pool will replace the socket:`,
+    error instanceof Error ? error.message : String(error),
+  );
+};
+
+(pool as any).on('error', onPoolError('main pool'));
 
 export { pool, db };

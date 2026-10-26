@@ -24,6 +24,11 @@ module.exports = {
       // The server finishes in-flight work and returns pooled connections on SIGTERM; pm2's
       // 1.6 s default would cut that short (see the note above the shutdown handler).
       kill_timeout: 12000,
+      // A ceiling on the process, not on the host. The app keeps per-user state in memory
+      // (rate-limit buckets, QR upload sessions, live-update streams, the AI concurrency
+      // counter). Without a limit, a leak ends as the kernel's OOM killer — which also takes
+      // whatever else it finds — instead of a clean restart of this one process.
+      max_memory_restart: "700M",
       autorestart: true,
       max_restarts: 20,
       restart_delay: 2000,

@@ -376,7 +376,9 @@ export function registerImportRoutes(app: Express) {
     }
   });
 
-  app.post('/api/import-data', isAuthenticated, async (req: any, res) => {
+  // Bulk row import. Writes many transactions per call, so it is capped like the statement
+  // import next to it rather than left open.
+  app.post('/api/import-data', isAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 20, keyPrefix: 'import-data', perUser: true }), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {

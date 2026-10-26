@@ -93,7 +93,7 @@ import { reportInvariant } from "./errorGuard/report.js";
 import { UNCATEGORIZED } from "@shared/calculations";
 import { isRecurrenceFrequency, occurrenceAt } from "@shared/recurrence";
 import { isUniqueViolation } from "./dbErrors";
-import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt, lt, inArray } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, isNotNull, ne, gt, lt, inArray } from "drizzle-orm";
 
 /**
  * Which usage rows count against an allowance.
@@ -1738,6 +1738,15 @@ export class DatabaseStorage implements IStorage {
   async updateUser(userId: string, userData: Partial<User>): Promise<User> {
     try {
       // Clean userData to only include valid user fields
+      //
+      // This whitelist is the whole of what `updateUser` can write, and anything missing here is
+      // dropped *silently*: the caller sees a 200 and the value never changes. That had already
+      // bitten four times — the redemption timestamp, the "warning already sent" marker, the
+      // paid-until date of a cancelled subscription, and the grace flags. The last one was the
+      // worst: the downgrade path cleared `gracePeriodActive`/`graceExpiresAt` through this
+      // method, the clear was discarded, and every run of the grace processor (twice a day,
+      // forever) found the same expired account again and e-mailed the same person another
+      // "your account was downgraded" notice.
       const validFields = {
         email: userData.email,
         firstName: userData.firstName,
@@ -1758,6 +1767,16 @@ export class DatabaseStorage implements IStorage {
         timezone: userData.timezone,
         language: userData.language,
         mpPreapprovalId: userData.mpPreapprovalId,
+        // Set by code redemption; without it nothing records that the plan was activated.
+        activatedAt: userData.activatedAt,
+        // The end of a period MercadoPago already charged for (see `mercadoPagoRoutes`).
+        paidUntil: userData.paidUntil,
+        // Dunning state. The downgrade path clears these four, so they must be writable or the
+        // account is found again on every run.
+        graceExpiresAt: userData.graceExpiresAt,
+        gracePeriodActive: userData.gracePeriodActive,
+        paymentFailureCount: userData.paymentFailureCount,
+        lastPaymentFailureNotified: userData.lastPaymentFailureNotified,
         updatedAt: new Date(),
       };
 
@@ -2501,39 +2520,75 @@ export class DatabaseStorage implements IStorage {
 
   // Goal contributions and activities
   async addGoalContribution(contribution: InsertGoalContribution): Promise<GoalContribution> {
-    const [newContribution] = await db
-      .insert(goalContributions)
-      .values(contribution)
-      .returning();
+    /*
+     * All of it, or none of it.
+     *
+     * This was four separate writes: insert the contribution, bump the participant's total,
+     * recompute the goal, add an activity. A failure anywhere after the first left a
+     * contribution that the totals did not include — and the participant figure was an
+     * increment (`current_contribution + amount`), which nothing ever recomputed, so that drift
+     * was permanent.
+     *
+     * Now one transaction, and both totals are recalculated from the contribution rows rather
+     * than incremented. Reading the truth instead of adjusting a running number also repairs
+     * rows that already drifted.
+     */
+    const newContribution = await db.transaction(async (tx) => {
+      const [inserted] = await tx
+        .insert(goalContributions)
+        .values(contribution)
+        .returning();
 
-    // Update participant contribution
-    await db
-      .update(collaborativeGoalParticipants)
-      .set({
-        currentContribution: sql`${collaborativeGoalParticipants.currentContribution} + ${contribution.amount}`,
-        lastContribution: new Date(),
-      })
-      .where(
-        and(
-          eq(collaborativeGoalParticipants.goalId, contribution.goalId),
-          eq(collaborativeGoalParticipants.userId, contribution.userId)
-        )
-      );
+      const [participantTotal] = await tx
+        .select({ total: sql<string>`COALESCE(SUM(${goalContributions.amount}), 0)` })
+        .from(goalContributions)
+        .where(
+          and(
+            eq(goalContributions.goalId, contribution.goalId),
+            eq(goalContributions.userId, contribution.userId)
+          )
+        );
 
-    // Update goal total
-    await this.updateGoalProgress(contribution.goalId);
+      await tx
+        .update(collaborativeGoalParticipants)
+        .set({
+          currentContribution: participantTotal?.total ?? '0.00',
+          lastContribution: new Date(),
+        })
+        .where(
+          and(
+            eq(collaborativeGoalParticipants.goalId, contribution.goalId),
+            eq(collaborativeGoalParticipants.userId, contribution.userId)
+          )
+        );
 
-    // Create activity
-    await this.createChallengeActivity({
-      goalId: contribution.goalId,
-      userId: contribution.userId,
-      activityType: "contribution",
-      title: "Made a contribution",
-      description: contribution.description || `Contributed $${contribution.amount}`,
-      amount: contribution.amount,
+      const [goalTotal] = await tx
+        .select({ total: sql<string>`COALESCE(SUM(${goalContributions.amount}), 0)` })
+        .from(goalContributions)
+        .where(eq(goalContributions.goalId, contribution.goalId));
+
+      await tx
+        .update(collaborativeGoals)
+        .set({
+          currentAmount: goalTotal?.total ?? '0.00',
+          updatedAt: new Date(),
+        })
+        .where(eq(collaborativeGoals.id, contribution.goalId));
+
+      await tx.insert(challengeActivities).values({
+        goalId: contribution.goalId,
+        userId: contribution.userId,
+        activityType: "contribution",
+        title: "Made a contribution",
+        description: contribution.description || `Contributed $${contribution.amount}`,
+        amount: contribution.amount,
+      });
+
+      return inserted;
     });
 
-    // Check for milestones
+    // Milestones are a side effect over the totals that are now committed. Failing to award one
+    // must not undo a contribution the person actually made.
     await this.checkAndCreateMilestones(contribution.goalId);
 
     return newContribution;
@@ -3084,6 +3139,27 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(users.gracePeriodActive, true),
           lte(users.graceExpiresAt, new Date())
+        )
+      );
+    return results;
+  }
+
+  /**
+   * Accounts whose paid period has run out after they cancelled.
+   *
+   * Only ever set for a cancelled MercadoPago subscription (see `mercadoPagoRoutes`): the card
+   * provider reports the end of a period itself, but a cancelled preapproval stops reporting
+   * anything, so the date has to be remembered and acted on here.
+   */
+  async getUsersWithExpiredPaidUntil(): Promise<User[]> {
+    const results = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          isNotNull(users.paidUntil),
+          lte(users.paidUntil, new Date()),
+          ne(users.plan, 'free')
         )
       );
     return results;

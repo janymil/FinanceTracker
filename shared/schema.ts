@@ -56,6 +56,14 @@ export const users = pgTable("users", {
   aiEnabled: boolean("ai_enabled").default(true).notNull(),
   // MercadoPago subscription that pays for the current plan in Peru (null for Stripe).
   mpPreapprovalId: varchar("mp_preapproval_id"),
+  // When the paid period already invoiced by MercadoPago ends.
+  //
+  // MercadoPago has no "cancel at period end": the only way to stop future charges is to cancel
+  // the preapproval, which says nothing about the days already paid for. Without this date the
+  // app had to choose between charging for another month and cutting the customer off on the day
+  // they cancelled. Setting it on cancellation keeps the plan until it passes; the grace
+  // processor then moves the account to free.
+  paidUntil: timestamp("paid_until"),
   // Last language the person used in the app ('en' | 'es' | 'sk'); e-mails are sent in it.
   language: varchar("language", { length: 5 }),
   // Bill reminders and the weekly summary by e-mail. On by default, off in Profile.

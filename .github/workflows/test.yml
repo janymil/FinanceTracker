@@ -11,8 +11,15 @@ concurrency:
 
 jobs:
   unit:
-    name: typecheck + unit tests + build
+    name: typecheck + unit tests + build (node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    # Production runs a Node version that CI must also run, or a green build certifies a runtime
+    # nobody serves traffic from. Node 24 was serving production while this job tested only 22;
+    # `engines` in package.json says `>=22`, so both ends of that range are checked here.
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
     env:
       # Puppeteer's Chromium download is only needed at runtime for PDF rendering.
       PUPPETEER_SKIP_DOWNLOAD: 'true'
@@ -21,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node }}
           cache: 'npm'
 
       - name: Install

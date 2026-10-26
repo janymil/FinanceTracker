@@ -20,8 +20,11 @@ vi.mock('@clerk/express', () => ({
 let server: Server;
 let baseUrl: string;
 
+// Read once, when `server/adminAuth` is imported below.
+process.env.ADMIN_PASSWORD = 'unit-test-shared-password';
+
 beforeAll(async () => {
-  const { adminAuth } = await import('../../server/adminAuth');
+  const { adminAuth, adminLogin } = await import('../../server/adminAuth');
   const app = express();
   // Stand-ins for express-session and clerkMiddleware, which the test app does not mount.
   app.use((req: any, _res, next) => {
@@ -29,6 +32,8 @@ beforeAll(async () => {
     req.auth = () => ({ userId: req.headers['x-user'] ?? null });
     next();
   });
+  app.use(express.json());
+  app.post('/admin/login', adminLogin);
   app.get('/admin', adminAuth, (_req, res) => res.json({ ok: true }));
   server = app.listen(0);
   baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
@@ -87,6 +92,56 @@ describe('adminAuth', () => {
 
     expect(response.status).toBe(200);
     expect(getUser).not.toHaveBeenCalled();
+  });
+});
+
+describe('the shared admin password', () => {
+  const PASSWORD = 'unit-test-shared-password';
+
+  function login(password: string) {
+    return fetch(`${baseUrl}/admin/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+  }
+
+  const original = { nodeEnv: process.env.NODE_ENV, allow: process.env.ALLOW_LEGACY_ADMIN_PASSWORD };
+
+  afterEach(() => {
+    process.env.NODE_ENV = original.nodeEnv;
+    if (original.allow === undefined) delete process.env.ALLOW_LEGACY_ADMIN_PASSWORD;
+    else process.env.ALLOW_LEGACY_ADMIN_PASSWORD = original.allow;
+  });
+
+  it('works in development, where a fresh Clerk test account has no admin role', async () => {
+    process.env.NODE_ENV = 'development';
+
+    expect((await login(PASSWORD)).status).toBe(200);
+  });
+
+  it('is refused in production even when the password is correct', async () => {
+    // One shared secret with no second factor, guarding an area that can read and delete every
+    // customer's records. Production must not open it by accident.
+    process.env.NODE_ENV = 'production';
+
+    const response = await login(PASSWORD);
+
+    expect(response.status).toBe(401);
+    expect((await response.json()).code).toBe('legacy_password_disabled');
+  });
+
+  it('opens again only when the operator writes the risk down', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.ALLOW_LEGACY_ADMIN_PASSWORD = '1';
+
+    expect((await login(PASSWORD)).status).toBe(200);
+  });
+
+  it('still refuses the wrong password in development', async () => {
+    process.env.NODE_ENV = 'development';
+
+    expect((await login('not-the-password')).status).toBe(401);
   });
 });
 

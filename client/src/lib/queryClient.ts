@@ -105,10 +105,23 @@ export const queryClient = new QueryClient({
     queries: {
       // Every `useQuery({ queryKey: ["/api/..."] })` fetches the URL in its first key element.
       queryFn: getQueryFn({ on401: "throw" }),
-      // Same runtime behaviour the app has always had in the browser (this is the one client the
-      // provider renders from): always fresh, nothing kept once nobody is looking at it.
-      staleTime: 0,
-      gcTime: 0,
+      /*
+       * `staleTime: 0, gcTime: 0` meant "always fresh, forget immediately": every mount refetched
+       * and cached data was dropped the moment nothing was watching it. One person's session in
+       * production showed the cost — inside twenty seconds:
+       *
+       *   GET /api/auth/user      200  x5
+       *   GET /api/transactions   304  x4
+       *   GET /api/categories     304  x3
+       *
+       * `/api/transactions` has no pagination, so each of those is the whole history and every
+       * row is decrypted on the way out. Freshness is not traded away for it: a mutation
+       * invalidates its key and active queries refetch at once, and the live-update stream
+       * (`useRealtimeUpdates`) invalidates when another tab or the server changes something.
+       * A minute of staleness therefore only affects a page nobody has touched.
+       */
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
       retry: 1,
       networkMode: 'online',
     },

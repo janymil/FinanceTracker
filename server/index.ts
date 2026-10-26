@@ -25,12 +25,14 @@ import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import ConnectPgSimple from "connect-pg-simple";
+import { Pool as PgPool } from "pg";
 import * as pathModule from "path";
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 import { cookieConsentMiddleware } from "./cookieMiddleware.js";
 import { renderPageForCrawler } from './ssr.js';
 import { countryBlockingMiddleware, loadBlockedCountries } from "./middleware/countryBlocking.js";
+import { isStaticAssetPath } from "./clerkAuth.js";
 import { checkEncryptionKey } from "./encryptionDiagnostics.js";
 import { reportServerError } from './errorGuard/report.js';
 import { verifyEmailTransport } from './emailService.js';
@@ -105,18 +107,29 @@ if (!sessionSecret) {
 // `any` on purpose: connect-pg-simple and express-session disagree on the Store
 // generic, and the only thing that matters here is that it has `.get/.set/.destroy`.
 let sessionStore: any;
+/** Its own pool (see below), kept so shutdown can hand the sockets back. */
+let sessionPool: import('pg').Pool | null = null;
 if (isProduction) {
   const PgSession = ConnectPgSimple(session);
   const sessionConnectionString = process.env.DATABASE_URL_PROD || process.env.DATABASE_URL;
   if (sessionConnectionString) {
+    // The store gets its own pool instead of the app's, so a session write can never wait
+    // behind a slow report. It is created here rather than by connect-pg-simple because an
+    // idle socket dropped by the server emits `error` on the pool, and an unhandled `error`
+    // event is an uncaught exception — which this app exits on. Same fault as `server/db.ts`.
+    sessionPool = new PgPool({
+      connectionString: sessionConnectionString,
+      ssl: sslFor(sessionConnectionString),
+      ...POOL_SETTINGS,
+    });
+    sessionPool.on('error', (error: Error) => {
+      logger.warn(
+        '[SESSION] pool reported a connection error; the pool will replace the socket:',
+        error.message,
+      );
+    });
     sessionStore = new PgSession({
-      conObject: {
-        connectionString: sessionConnectionString,
-        ssl: sslFor(sessionConnectionString),
-        // The session store opens its own pool; without these limits it could hold
-        // connections forever and starve the main pool.
-        ...POOL_SETTINGS,
-      },
+      pool: sessionPool,
       tableName: 'sessions',
       createTableIfMissing: true,
     });
@@ -168,11 +181,16 @@ app.use((req, res, next) => {
 
 // Security headers middleware - only for frontend user routes
 app.use((req, res, next) => {
-  // Skip security headers for webhooks, static assets, and SEO files
+  // Skip security headers for webhooks, static assets, and SEO files.
+  //
+  // The static-file test used to be `req.path.includes('.')`, which also skipped every route
+  // carrying a dotted value — `/api/learning/merchant/amazon.com` was served with no CSP and no
+  // nosniff. A merchant name is not a stylesheet. `isStaticAssetPath` asks the same question the
+  // Clerk gate asks: does the last segment end in an asset extension?
   if (req.path.startsWith('/api/clerk-webhooks') ||
       req.path.startsWith('/api/stripe-webhook') ||
       req.path.startsWith('/uploads/') ||
-      req.path.includes('.') || // Static files (css, js, images, etc.)
+      isStaticAssetPath(req.path) ||
       req.path === '/robots.txt' ||
       req.path === '/sitemap.xml') {
     return next();
@@ -397,8 +415,12 @@ app.use((req, res, next) => {
   server.listen({
     port,
     host,
-    // reusePort is not supported on Windows (fails with ENOTSUP)
-    ...(process.platform === "win32" ? {} : { reusePort: true }),
+    // `reusePort` is deliberately NOT set. SO_REUSEPORT lets a *second* process bind the same
+    // port instead of failing, and then the kernel splits connections between them. Nearly
+    // everything that must be shared is not: rate-limit buckets, mobile-upload QR sessions and
+    // live-update streams all live in one process's memory, so a duplicate instance would
+    // enforce half-limits and answer "session not found" to half the QR scans. A port that is
+    // already in use must be an error, not a silent second copy.
   }, () => {
     log(`serving on ${host}:${port}`);
     // Warm the blocked-country list at boot. The first request should not be the thing that
@@ -430,7 +452,12 @@ app.use((req, res, next) => {
     if (shuttingDown) return;
     shuttingDown = true;
     log(`[shutdown] ${signal} received — closing server and database pool`);
-    const exit = () => { closePool().finally(() => process.exit(0)); };
+    const exit = () => {
+      // Both pools, in parallel: the app's and the session store's. A socket left open here is
+      // one the database has to time out on its own.
+      Promise.allSettled([closePool(), sessionPool ? sessionPool.end() : Promise.resolve()])
+        .finally(() => process.exit(0));
+    };
     server.close(exit);
     // Keep-alive sockets are idle, not in-flight: releasing them now lets close() finish
     // quickly instead of waiting for the client to give up.
