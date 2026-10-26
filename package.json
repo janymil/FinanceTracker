@@ -39,6 +39,7 @@
     "db:baseline:prod": "node scripts/db-migrate.mjs --baseline --prod",
     "db:drift": "tsx scripts/db-schema-drift.ts",
     "db:drift:prod": "tsx scripts/db-schema-drift.ts --prod",
+    "db:dump": "tsx scripts/db-dump.ts",
     "db:audit-users": "node scripts/db-user-audit.mjs",
     "db:verify-globals": "node scripts/db-verify-globals.mjs",
     "db:clean-users": "node scripts/clean-user-data.mjs",

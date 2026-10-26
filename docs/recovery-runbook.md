@@ -20,24 +20,31 @@ which is a decision rather than an oversight.
 
 | Asset | Lives in | Second copy | Notes |
 |---|---|---|---|
-| Customer records (users, transactions, budgets, goals, import logs) | Neon Postgres project | Neon point-in-time restore **and** a periodic dump to a separate location | The only asset whose loss cannot be undone |
+| Customer records (users, transactions, budgets, goals, import logs) | Neon Postgres project | Neon point-in-time restore **and** a daily dump to a separate location, written by `scripts/db-dump.ts` and scheduled by `ops/kaptia-monitoring/kaptia-db-dump.timer` | The only asset whose loss cannot be undone. The dump is verified with `pg_restore --list` before it is uploaded, because an empty or truncated file is worse than no file: it looks like a backup |
 | Receipts, statements, uploaded PDFs | R2 bucket, with Bunny as the alternate storage path (`server/cloudStorage.ts`, `server/bunnyStorage.ts`) | Bucket copy to a **different** destination | Losing these is bad but survivable; customers upload again |
 | **`ENCRYPTION_KEY`** | `.env` on the server, not in git | Sealed copy held **off** the server, separately from every data copy | Losing this makes the financial data unreadable, permanently |
 | Code + ops units | git (`origin/main`) | — | `ops/` holds the systemd timers and services *as the source of truth*, so a rebuilt server can be restored from the repo |
 | Previous release | `dist.previous` plus `KEEP_BACKUPS=3` in `scripts/deploy.sh` | — | Code rollback is already covered; data rollback is not |
 | Other secrets (Clerk, Stripe, AI providers) | `.env` on the server | Same sealed store as the key line above | Re-issuable from each provider's dashboard, so lower risk than the encryption key |
 
-Values to write down once, here or in the owner's password manager — **not** in git:
+Decisions only the owner can make. Each one blocks something; the "blocks" column says what.
+Values here or in the owner's password manager — **not** in git.
 
-- Neon project, branch and region: `____`
-- Neon restore window (what the plan actually gives you): `____` hours
-- Dump destination and its retention: `____`
-- Bucket-copy destination and its retention: `____`
-- Who holds the sealed `ENCRYPTION_KEY` copies (two people, two places): `____`
+| Decision | Where the answer comes from | Blocks | Status |
+|---|---|---|---|
+| Neon project, branch and region | Neon dashboard → the project the app uses | The drill: you cannot restore into a project you have not identified | `____` |
+| Neon restore window (what the plan actually gives you) | Neon dashboard → plan / history settings. Read it, do not assume it | The RPO on the first row of section 2 — if the plan keeps 6 hours, a 5-minute target is a wish | `____` hours |
+| Dump destination and its retention | Where `BACKUP_S3_BUCKET` or `BACKUP_DIR` will point, and `BACKUP_RETAIN_DAYS` | The daily dump cannot start without it (`db:dump` exits 2) | `____` / `____` days |
+| Bucket-copy destination and its retention | R2 (or Bunny) dashboard → the copy destination | Procedure B; media loss is survivable but it is still a loss | `____` / `____` days |
+| Who holds the sealed `ENCRYPTION_KEY` copies (two people, two places) | Decision, not a lookup | **Everything.** A lost key makes every restored row unreadable, permanently | `____` |
+| Has a drill ever been run? | `docs/dr-drill-log.md` | The honesty of this whole document | No — see the log |
 
 ## 2. Targets
 
-Proposed, to be confirmed by the owner. These are what the drill is measured against.
+**Status: drafted 2026-10-26, still not confirmed by the owner.** Until it is, these numbers are
+the measurement the drill is scored against, not a promise to a customer. Confirming them means
+writing initials and a date beside the table; if a row is not true, change the row rather than
+leaving a target nobody can meet.
 
 | Scenario | Data lost at most (RPO) | Back by (RTO) |
 |---|---|---|
@@ -78,7 +85,33 @@ how many legacy plaintext rows exist, and how many sampled encrypted values the 
 It refuses to run when the target is `DATABASE_URL_PROD`.
 
 Record in the drill log: timestamp restored to, newest transaction found, `dr:verify` result,
-wall-clock minutes to reach PASS, and anything that surprised you.
+wall-clock minutes to reach PASS, and anything that surprised you. The log is
+`docs/dr-drill-log.md`; a drill that is not written there did not happen.
+
+### Restoring from the daily dump (the second path)
+
+Point-in-time restore and the daily dump fail in different ways — one is inside the provider, the
+other is a file you hold — so both paths need proving. The dump path:
+
+```bash
+# 1. Fetch the newest dump from the destination named in section 1.
+#    With BACKUP_S3_*: aws s3 ls / cp against that endpoint and bucket, prefix db/.
+#    With BACKUP_DIR: it is a file in that directory.
+
+# 2. Restore it into an EMPTY database, never over production.
+createdb kaptia_restore
+pg_restore --dbname="postgres://…/kaptia_restore" --no-owner --no-privileges kaptia-<timestamp>.dump
+
+# 3. Then exactly as above: the ORIGINAL key, dr:verify, the drift check.
+export ENCRYPTION_KEY='…'
+export RESTORE_DATABASE_URL='postgres://…/kaptia_restore'
+npm run dr:verify
+npx tsx scripts/db-schema-drift.ts --url "$RESTORE_DATABASE_URL"
+```
+
+The dump's age is the real data-loss window of this path: it is written daily at 03:15, so up to
+24 hours of transactions can be missing. That is the second row of section 2, and it is the reason
+the point-in-time path exists at all.
 
 ### If `dr:verify` reports unreadable values
 

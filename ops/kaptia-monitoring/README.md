@@ -9,18 +9,28 @@ folder are the source of truth so a rebuilt server can be restored.
 | `kaptia-uptime.timer` | every 5 min | `scripts/uptime-check.ts`: API + database + public page; writes a `job_runs` row (visible in Admin → Watch) and e-mails `ERROR_GUARD_ALERT_EMAIL` on failure |
 | `kaptia-health.timer` | hourly | `scripts/healthcheck.ts --deep --max-latency 3000`: catches "up but slow" |
 | `kaptia-prune.timer` | daily 04:30 | `scripts/error-guard-prune.ts --days=30`: retention for error evidence |
+| `kaptia-db-dump.timer` | daily 03:15 | `scripts/db-dump.ts`: `pg_dump` of the customer database, verified with `pg_restore --list`, uploaded to a **separate** destination, old copies pruned, one `job_runs` row per run |
 
 ## Install (on a fresh server)
 
 ```bash
 sudo cp ops/kaptia-monitoring/*.service ops/kaptia-monitoring/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now kaptia-uptime.timer kaptia-health.timer kaptia-prune.timer
+sudo systemctl enable --now kaptia-uptime.timer kaptia-health.timer kaptia-prune.timer kaptia-db-dump.timer
 systemctl list-timers 'kaptia*'
 ```
 
-Logs: `/var/log/kaptia-uptime.log`, `/var/log/kaptia-health.log`, `/var/log/kaptia-prune.log`
-(rotated weekly by `/etc/logrotate.d/kaptia`).
+The dump job needs the PostgreSQL client (`apt-get install -y postgresql-client`); without it the
+run fails loudly with exit 2 instead of pretending to have taken a copy. Prove it once by hand:
+
+```bash
+sudo systemctl start kaptia-db-dump.service && tail -20 /var/log/kaptia-db-dump.log
+```
+
+Logs: `/var/log/kaptia-uptime.log`, `/var/log/kaptia-health.log`, `/var/log/kaptia-prune.log`,
+`/var/log/kaptia-db-dump.log` (rotated weekly by `/etc/logrotate.d/kaptia` — add the dump log to
+that pattern when you install it).
+
 
 ## Notes
 

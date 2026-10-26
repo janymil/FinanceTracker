@@ -1,0 +1,14 @@
+[Unit]
+Description=Run the Kaptia database dump daily
+
+[Timer]
+# 03:15 is quiet: the dump competes with nobody for CPU, and it lands before the prune at 04:30.
+OnCalendar=*-*-* 03:15:00
+AccuracySec=5min
+Persistent=true
+# One run per boot at most, and a gap in the log for a whole day is the signal that something
+# is wrong with the timer itself.
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

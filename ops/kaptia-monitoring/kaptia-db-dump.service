@@ -1,0 +1,23 @@
+[Unit]
+Description=Kaptia database dump (pg_dump, verified, to a separate destination)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/kaptia
+Environment=NODE_ENV=production
+# The script deliberately does not load .env itself: a stray file must not be able to point a
+# production dump at a development database. The variables it reads are:
+#   DATABASE_URL_PROD, BACKUP_S3_BUCKET / _ENDPOINT / _REGION / _ACCESS_KEY_ID / _SECRET_ACCESS_KEY
+#   (or BACKUP_DIR on another mount), BACKUP_RETAIN_DAYS
+EnvironmentFile=/var/www/kaptia/.env
+ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/db-dump.ts
+StandardOutput=append:/var/log/kaptia-db-dump.log
+StandardError=append:/var/log/kaptia-db-dump.log
+NoNewPrivileges=true
+# Dumping and uploading a real database takes longer than a health check, but a hung run must
+# still die instead of holding the timer slot forever.
+TimeoutStartSec=1800
+MemoryMax=512M
+CPUQuota=50%
