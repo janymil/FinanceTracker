@@ -6,10 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, newIdempotencyKey } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from 'react-i18next';
 import { todayLocalISO } from '@/lib/dateUtils';
+
+// One key per save attempt. A second tap that beats the disabled button, or a retry after a
+// timeout, reuses it — so the server returns the row the first attempt created instead of adding
+// a second expense. Replaced after a success.
+let saveRequestKey = newIdempotencyKey();
 
 interface UploadReceiptProps {
   onReceiptProcessed?: (receiptData: any) => void;
@@ -188,7 +193,10 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
       const response = await fetch('/api/transactions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          // A retry of this save (a second tap while OCR runs, a flaky connection) must not
+          // create a second expense: the server answers with the row the first one created.
+          'Idempotency-Key': saveRequestKey
         },
         body: JSON.stringify(transactionData)
       });
@@ -197,6 +205,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
         throw new Error('Failed to save transaction');
       }
 
+      saveRequestKey = newIdempotencyKey();
       toast({
         title: t('upload.transaction_saved'),
         description: t('upload.receipt_saved_description'),

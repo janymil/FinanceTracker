@@ -7,7 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Mic, MicOff, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { apiRequest, getAuthToken } from '@/lib/queryClient';
+import { apiRequest, getAuthToken, newIdempotencyKey } from '@/lib/queryClient';
+
+// One key per save attempt, so a repeat of the same spoken expense cannot become two rows.
+let voiceSaveRequestKey = newIdempotencyKey();
 import { useToast } from '@/hooks/use-toast';
 import { todayLocalISO } from '@/lib/dateUtils';
 
@@ -779,15 +782,22 @@ export function SimpleVoiceInput({ onClose, onComplete }: SimpleVoiceInputProps)
       // behind in their list.
       const categoryId = await resolveCategoryForSave();
 
-      // Create transaction using the main API
-      const response = await apiRequest('POST', '/api/transactions', {
-        amount: parseFloat(accumulatedData.amount),
-        description: accumulatedData.description,
-        type: accumulatedData.type,
-        date: accumulatedData.date || todayLocalISO(),
-        categoryId,
-        referenceNote: accumulatedData.note || transcript || ''
-      });
+      // Create transaction using the main API. The key makes a repeat of this save (a second tap
+      // after the transcript is confirmed) return the row the first one created.
+      const response = await apiRequest(
+        'POST',
+        '/api/transactions',
+        {
+          amount: parseFloat(accumulatedData.amount),
+          description: accumulatedData.description,
+          type: accumulatedData.type,
+          date: accumulatedData.date || todayLocalISO(),
+          categoryId,
+          referenceNote: accumulatedData.note || transcript || ''
+        },
+        { 'Idempotency-Key': voiceSaveRequestKey },
+      );
+      voiceSaveRequestKey = newIdempotencyKey();
 
       const result = await response.json();
       

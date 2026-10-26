@@ -9,7 +9,10 @@ import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit, ImageIc
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, newIdempotencyKey } from "@/lib/queryClient";
+
+// One key per save attempt, so a second tap or a retry returns the row the first one created.
+let saveRequestKey = newIdempotencyKey();
 import { useAiAccess } from "@/hooks/useAiAccess";
 import QRCode from "qrcode";
 import { todayLocalISO } from '@/lib/dateUtils';
@@ -484,7 +487,9 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          // A retry must not create a second expense from the same scanned receipt.
+          'Idempotency-Key': saveRequestKey
         },
         body: JSON.stringify(transactionData)
       });
@@ -492,6 +497,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
       if (!response.ok) {
         throw new Error('Failed to save transaction');
       }
+
+      saveRequestKey = newIdempotencyKey();
 
       toast({
         title: "Transaction saved",

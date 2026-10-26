@@ -8,8 +8,12 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/context/CurrencyContext";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, newIdempotencyKey } from "@/lib/queryClient";
 import { TimeZoneSetting } from "@/components/TimeZoneSetting";
+
+// One key per save attempt: this screen writes the person's very first row, and a repeat of it
+// must return that row instead of creating a second.
+let firstTransactionKey = newIdempotencyKey();
 import { parseFirstTransaction } from "@/lib/firstTransaction";
 
 const doneKey = (userId: string) => `kaptia.welcome.done.${userId}`;
@@ -79,12 +83,19 @@ export function FirstRunWelcome() {
     setSaving(true);
     setMessage(null);
     try {
-      await apiRequest("POST", "/api/transactions", {
-        amount: parsed.amount,
-        description: parsed.description,
-        type,
-        date: new Date().toISOString(),
-      });
+      await apiRequest(
+        "POST",
+        "/api/transactions",
+        {
+          amount: parsed.amount,
+          description: parsed.description,
+          type,
+          date: new Date().toISOString(),
+        },
+        // The first screen only ever writes one row; a repeat of that write must not become two.
+        { "Idempotency-Key": firstTransactionKey },
+      );
+      firstTransactionKey = newIdempotencyKey();
       await queryClient.invalidateQueries();
       toast({ title: t("welcome.saved") });
       finish();
