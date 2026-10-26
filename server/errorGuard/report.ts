@@ -101,6 +101,8 @@ export function reportHttpServerError(input: {
   route: string;
   status: number;
   durationMs: number;
+  /** The request's own id, so the record can be matched to its access-log line. */
+  requestId?: string;
 }): void {
   if (disabled()) return;
   try {
@@ -113,6 +115,7 @@ export function reportHttpServerError(input: {
         method: input.method,
         status: input.status,
         durationMs: input.durationMs,
+        requestId: input.requestId,
         severity: 'error',
       },
     ]);
@@ -124,7 +127,7 @@ export function reportHttpServerError(input: {
 /** A server-side exception that was already handled (a 500 response, a failed job step). */
 export function reportServerError(
   error: unknown,
-  details: { where: string; route?: string; moneyPath?: boolean } = { where: 'server' },
+  details: { where: string; route?: string; moneyPath?: boolean; requestId?: string } = { where: 'server' },
 ): void {
   if (disabled()) return;
   try {
@@ -138,6 +141,10 @@ export function reportServerError(
         source: 'server',
         route: details.route,
         moneyPath: details.moneyPath,
+        // Ties the record to its access-log line, which is the only way back from a support
+        // report to the request that failed.
+        requestId: details.requestId,
+        context: { where: details.where },
       },
     ]);
   } catch {

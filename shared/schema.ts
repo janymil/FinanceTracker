@@ -164,9 +164,21 @@ export const transactions = pgTable("transactions", {
   ocrVendor: varchar("ocr_vendor", { length: 255 }),
   ocrDetectedAmount: decimal("ocr_detected_amount", { precision: 12, scale: 2 }),
   ocrDetectedDate: timestamp("ocr_detected_date"),
+  /**
+   * Idempotency key supplied by the caller.
+   *
+   * A retry — a double tap, a flaky connection, a client that repeats a POST — with the same key
+   * returns the row the first attempt created instead of writing a second expense. Null means "no
+   * key given" and behaves exactly like every insert before this column existed; the unique index
+   * is partial so any number of keyless rows can coexist.
+   */
+  clientRequestId: varchar("client_request_id", { length: 64 }),
 }, (table) => [
   index("IDX_transactions_user_date").on(table.userId, table.date),
   index("IDX_transactions_category").on(table.categoryId),
+  uniqueIndex("UQ_transactions_request_id")
+    .on(table.userId, table.clientRequestId)
+    .where(sql`${table.clientRequestId} is not null`),
 ]);
 
 // Recurring transactions table (separate for cleaner implementation)

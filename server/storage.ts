@@ -554,7 +554,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Transaction operations
-  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+  /**
+   * @param transaction  The row to write.
+   * @param clientRequestId  Optional idempotency key from the caller. When the same key arrives
+   *   twice for the same account, the second call returns the row the first one created instead of
+   *   writing a second expense. This is the one money path where a retry is plausible and silent:
+   *   the interface disables the button, but a flaky connection, a double tap that beats the
+   *   disable, or a client that retries a POST all produce a real duplicate entry that the person
+   *   has to find and delete.
+   */
+  async createTransaction(transaction: InsertTransaction, clientRequestId?: string | null): Promise<Transaction> {
     // Encrypt sensitive fields (but keep amount as numeric for database compatibility)
     const encryptedTransaction = {
       ...transaction,
@@ -563,10 +572,50 @@ export class DatabaseStorage implements IStorage {
       referenceNote: transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null,
       // The receipt text is a page of someone's shopping: it holds the shop, the items and often
       // the last four digits of a card. It is encrypted like the description.
-      ocrText: encryptField(transaction.ocrText ?? null)
+      ocrText: encryptField(transaction.ocrText ?? null),
+      clientRequestId: clientRequestId ?? null,
     };
 
-    const [newTransaction] = await db.insert(transactions).values(encryptedTransaction).returning();
+    const [newTransaction] = await db
+      .insert(transactions)
+      .values(encryptedTransaction)
+      .onConflictDoNothing({
+        target: [transactions.userId, transactions.clientRequestId],
+        // Only rows that carry a key can collide: the index is partial, and `null` means
+        // "no key given", which must keep behaving like every insert before this change.
+        where: sql`${transactions.clientRequestId} is not null`,
+      })
+      .returning();
+
+    if (!newTransaction) {
+      // The key was already used: answer with what that call produced, not an error and not a
+      // second row.
+      const [existing] = await db
+        .select()
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.userId, transaction.userId),
+            eq(transactions.clientRequestId, clientRequestId as string),
+          ),
+        )
+        .limit(1);
+
+      if (!existing) {
+        throw new Error('Transaction could not be created');
+      }
+
+      log.info('[transactions] idempotency key reused; returning the original row', {
+        userId: transaction.userId,
+        transactionId: existing.id,
+      });
+
+      return {
+        ...existing,
+        description: DataEncryption.decryptDescription(existing.description),
+        referenceNote: existing.referenceNote ? DataEncryption.decrypt(existing.referenceNote) : null,
+      };
+    }
 
     // If this is a recurring transaction, create a recurring transaction record
     // Repeats made by the job carry parentTransactionId; restoring or importing them must not
@@ -624,6 +673,7 @@ export class DatabaseStorage implements IStorage {
         ocrVendor: transactions.ocrVendor,
         ocrDetectedAmount: transactions.ocrDetectedAmount,
         ocrDetectedDate: transactions.ocrDetectedDate,
+        clientRequestId: transactions.clientRequestId,
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColor: categories.color,
@@ -667,6 +717,7 @@ export class DatabaseStorage implements IStorage {
         ocrVendor: transactions.ocrVendor,
         ocrDetectedAmount: transactions.ocrDetectedAmount,
         ocrDetectedDate: transactions.ocrDetectedDate,
+        clientRequestId: transactions.clientRequestId,
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColor: categories.color,

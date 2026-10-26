@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import { clerkWebhookHandler } from "./clerkWebhook";
 import path from "path";
 import fs from "fs";
+import { randomUUID } from "crypto";
 
 // Always load base .env file first
 config({ path: path.resolve(process.cwd(), '.env') });
@@ -88,6 +89,25 @@ app.use(cookieParser());
 // limits would hit everybody at once) and `secure` cookies are dropped.
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+
+/**
+ * One id per request, on the response and in every log line about it.
+ *
+ * Without it a support report ("it failed around 4:06") cannot be matched to the request that
+ * failed: the access log has no user and no id, and the error record has no way back to either.
+ * An id from the edge is reused when one arrives, so our line and Cloudflare's can be tied
+ * together for the same request.
+ */
+app.use((req, res, next) => {
+  const incoming = req.header('x-request-id') || req.header('cf-ray');
+  const id =
+    typeof incoming === 'string' && incoming.trim()
+      ? incoming.trim().slice(0, 64)
+      : randomUUID();
+  (req as any).requestId = id;
+  if (!res.headersSent) res.setHeader('X-Request-Id', id);
+  next();
+});
 
 const isProduction = process.env.NODE_ENV === 'production';
 const sessionSecret = process.env.SESSION_SECRET;
@@ -334,7 +354,7 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
+      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms [req ${(req as any).requestId ?? '-'}]`);
     }
   });
 
@@ -355,6 +375,7 @@ app.use((req, res, next) => {
     reportServerError(err, {
       where: 'express.errorHandler',
       route: String(req.originalUrl || '').split('?')[0],
+      requestId: (req as any).requestId,
     });
     if (!res.headersSent) {
       res.status(status).json({ message });

@@ -20,10 +20,16 @@ const KEY_B = '22'.repeat(32);
 
 type EncryptionModule = typeof import('../../server/encryption');
 
-async function load(key: string | undefined, nodeEnv = 'production'): Promise<EncryptionModule> {
+async function load(
+  key: string | undefined,
+  nodeEnv = 'production',
+  previous: string | undefined = undefined,
+): Promise<EncryptionModule> {
   vi.resetModules();
   if (key === undefined) delete process.env.ENCRYPTION_KEY;
   else process.env.ENCRYPTION_KEY = key;
+  if (previous === undefined) delete process.env.ENCRYPTION_KEY_PREVIOUS;
+  else process.env.ENCRYPTION_KEY_PREVIOUS = previous;
   process.env.NODE_ENV = nodeEnv;
   return import('../../server/encryption');
 }
@@ -160,5 +166,76 @@ describe('DataEncryption — when it is switched on', () => {
   it('refuses to start production without a valid key', async () => {
     await expect(load(undefined, 'production')).rejects.toThrow(/ENCRYPTION_KEY/);
     await expect(load('not-a-key', 'production')).rejects.toThrow(/ENCRYPTION_KEY/);
+  });
+});
+
+describe('rotating the key', () => {
+  it('reads rows written with a previous key while the new one is in force', async () => {
+    const before = await load(KEY_A);
+    const written = before.DataEncryption.encrypt('Coffee at the corner shop');
+    expect(written.startsWith('v2:')).toBe(true);
+
+    // The rotation: KEY_A moves to PREVIOUS, KEY_B starts writing.
+    const after = await load(KEY_B, 'production', KEY_A);
+
+    expect(after.DataEncryption.decrypt(written)).toBe('Coffee at the corner shop');
+    expect(after.encryptionKeyRingSize()).toBe(2);
+  });
+
+  it('writes only with the current key, so the backfill has something to do', async () => {
+    const after = await load(KEY_B, 'production', KEY_A);
+    const fresh = after.DataEncryption.encrypt('Lunch');
+
+    // Readable by the new key alone: a previous key that also wrote would leave rows behind.
+    const newKeyOnly = await load(KEY_B);
+    expect(newKeyOnly.DataEncryption.decrypt(fresh)).toBe('Lunch');
+
+    // And not by the old one, which is what makes the rotation meaningful.
+    const oldKeyOnly = await load(KEY_A);
+    expect(oldKeyOnly.DataEncryption.tryDecrypt(fresh)).toBeNull();
+  });
+
+  it('still reads the legacy CBC format during a rotation', async () => {
+    const legacyKey = Buffer.from(KEY_A, 'hex');
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', legacyKey, iv);
+    const encrypted = cipher.update('old row', 'utf8', 'hex') + cipher.final('hex');
+    const stored = `${iv.toString('hex')}:${encrypted}`;
+
+    const after = await load(KEY_B, 'production', KEY_A);
+
+    expect(after.DataEncryption.decrypt(stored)).toBe('old row');
+  });
+
+  it('accepts several previous keys, and ignores junk in the list', async () => {
+    const oldest = '33'.repeat(32);
+    const before = await load(oldest);
+    const written = before.DataEncryption.encrypt('two rotations ago');
+
+    const after = await load(KEY_B, 'production', `${KEY_A}, ${oldest} ,not-a-key`);
+
+    expect(after.encryptionKeyRingSize()).toBe(3);
+    expect(after.DataEncryption.decrypt(written)).toBe('two rotations ago');
+  });
+
+  it('does not duplicate the current key when it is also listed as previous', async () => {
+    const module = await load(KEY_B, 'production', `${KEY_B},${KEY_A}`);
+    expect(module.encryptionKeyRingSize()).toBe(2);
+  });
+
+  it('returns nothing readable when no key in the ring can open the value', async () => {
+    const stranger = await load('44'.repeat(32));
+    const written = stranger.DataEncryption.encrypt('from another installation');
+
+    const after = await load(KEY_B, 'production', KEY_A);
+
+    expect(after.DataEncryption.tryDecrypt(written)).toBeNull();
+    expect(after.DataEncryption.decrypt(written)).toBe(after.DataEncryption.UNREADABLE);
+  });
+
+  it('leaves plain text that happens to contain a colon alone', async () => {
+    // Regression: this used to be treated as ciphertext and rendered as UNREADABLE.
+    const { DataEncryption } = await load(KEY_A);
+    expect(DataEncryption.decrypt('Note: call the bank')).toBe('Note: call the bank');
   });
 });

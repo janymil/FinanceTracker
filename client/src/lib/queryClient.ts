@@ -47,10 +47,16 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  /**
+   * Extra headers. Used for `Idempotency-Key` on money writes: the same key on a retry makes the
+   * server return the row it already created instead of adding a second expense.
+   */
+  extraHeaders?: Record<string, string>,
 ): Promise<Response> {
   const authHeaders = await getAuthHeaders();
   const headers: Record<string, string> = {
     ...authHeaders,
+    ...(extraHeaders ?? {}),
   };
   
   // Add current language for backend translation
@@ -71,6 +77,25 @@ export async function apiRequest(
 
   await throwIfResNotOk(res);
   return res;
+}
+
+/**
+ * A key for one logical money write.
+ *
+ * Sent as `Idempotency-Key`: if the same one arrives twice (a double tap that beats the disabled
+ * button, a retry after a flaky connection), the server answers with the row it already created
+ * instead of adding a second expense. `crypto.randomUUID` needs a secure context, which the app
+ * always runs in; the fallback is for a local http:// preview.
+ */
+export function newIdempotencyKey(): string {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+  } catch {
+    /* fall through */
+  }
+  return `k-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

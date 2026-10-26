@@ -130,8 +130,17 @@ export function registerTransactionRoutes(app: Express) {
       }
       const validatedData = parsed.data;
 
+      // Idempotency: the caller may send one key per logical action, and a repeat of it must not
+      // become a second expense. Accepts the header every HTTP client knows, or the field in the
+      // body for callers that cannot set headers.
+      const rawRequestId = req.get('idempotency-key') ?? req.body.clientRequestId;
+      const clientRequestId =
+        typeof rawRequestId === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(rawRequestId.trim())
+          ? rawRequestId.trim()
+          : null;
+
       // Save transaction to database immediately
-      const transaction = await storage.createTransaction(validatedData);
+      const transaction = await storage.createTransaction(validatedData, clientRequestId);
       notifyDataChange(userId, 'transaction');
 
       // Return response immediately to user

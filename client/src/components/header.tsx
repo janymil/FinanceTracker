@@ -49,12 +49,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { Link, useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { useCurrency } from "@/context/CurrencyContext";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest, clearUserSession } from "@/lib/queryClient";
+import { queryClient, apiRequest, clearUserSession, newIdempotencyKey } from "@/lib/queryClient";
 import { useTheme } from "@/context/ThemeContext";
 import { todayLocalISO } from '@/lib/dateUtils';
 
@@ -139,15 +139,25 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
 
   const queryClient = useQueryClient();
 
+  // One key for this form, reused if the tap registers twice. It is replaced after a success, so
+  // the next expense is a new write rather than a replay of this one.
+  const requestKeyRef = useRef<string>(newIdempotencyKey());
+
   const createTransactionMutation = useMutation({
     mutationFn: async (transactionData: typeof newTransaction) => {
-      const response = await apiRequest("POST", "/api/transactions", {
-        ...transactionData,
-        amount: parseFloat(transactionData.amount),
-      });
+      const response = await apiRequest(
+        "POST",
+        "/api/transactions",
+        {
+          ...transactionData,
+          amount: parseFloat(transactionData.amount),
+        },
+        { "Idempotency-Key": requestKeyRef.current },
+      );
       return response.json();
     },
     onSuccess: () => {
+      requestKeyRef.current = newIdempotencyKey();
       // Invalidate all relevant queries to force refresh
       queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
       queryClient.invalidateQueries({ 

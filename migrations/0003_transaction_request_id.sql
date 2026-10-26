@@ -1,0 +1,2 @@
+ALTER TABLE "transactions" ADD COLUMN "client_request_id" varchar(64);--> statement-breakpoint
+CREATE UNIQUE INDEX "UQ_transactions_request_id" ON "transactions" USING btree ("user_id","client_request_id") WHERE "transactions"."client_request_id" is not null;

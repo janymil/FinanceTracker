@@ -22,6 +22,36 @@ const getEncryptionKey = (): Buffer => {
 
 const ENCRYPTION_KEY = getEncryptionKey();
 
+function parseKey(raw: string | undefined): Buffer | null {
+  const value = (raw ?? '').trim();
+  return /^[0-9a-fA-F]{64}$/.test(value) ? Buffer.from(value, 'hex') : null;
+}
+
+/**
+ * Every key that may have written a row: the current one first, then the ones handed over in
+ * `ENCRYPTION_KEY_PREVIOUS`.
+ *
+ * Rotation used to be all-or-nothing: the ciphertext carries no key id, so the only way to change
+ * the key was to re-encrypt every row inside one window, and a half-finished run left rows nobody
+ * could read. With a ring the new key writes immediately while the old one still reads, so a
+ * rotation is three steps that can each be watched: put the old value in PREVIOUS, put the new one
+ * in ENCRYPTION_KEY, run `db:encrypt:backfill --apply`, then empty PREVIOUS.
+ *
+ * Only the current key ever *writes*. A previous key that is also allowed to write would make the
+ * backfill pointless: rows would keep landing in the old scheme.
+ */
+const DECRYPTION_KEYS: Buffer[] = (() => {
+  const keys: Buffer[] = [ENCRYPTION_KEY];
+  for (const part of (process.env.ENCRYPTION_KEY_PREVIOUS ?? '').split(',')) {
+    const key = parseKey(part);
+    if (key && !keys.some((existing) => existing.equals(key))) keys.push(key);
+  }
+  return keys;
+})();
+
+/** How many keys this process can read with. 1 unless a rotation is in progress. */
+export const encryptionKeyRingSize = (): number => DECRYPTION_KEYS.length;
+
 /**
  * Version prefix for the authenticated scheme (AES-256-GCM). A value that does not start with
  * it is legacy AES-256-CBC, `iv:ciphertext`. Both are read; only the new one is written.
@@ -105,22 +135,39 @@ export class DataEncryption {
       return encryptedData;
     }
 
-    if (encryptedData.startsWith(`${SCHEME_GCM}:`)) {
-      return this.decryptGcm(encryptedData);
+    // Recognisable ciphertext: `v2:iv:tag:ciphertext`, or the legacy `hexIv:hexCiphertext`.
+    // Anything else is plaintext written before that column was covered, and must come back
+    // unchanged rather than as UNREADABLE. The legacy pattern is the strict one — a description
+    // like "Note: hi" has a colon too, and treating it as ciphertext turned it into UNREADABLE.
+    const looksLikeCiphertext =
+      encryptedData.startsWith(`${SCHEME_GCM}:`) || /^[0-9a-f]{16,}:[0-9a-f]{2,}$/i.test(encryptedData);
+    if (!looksLikeCiphertext) {
+      return encryptedData;
     }
 
-    if (!encryptedData.includes(':')) {
-      return encryptedData; // Return as-is if not encrypted
+    // Every key that could have written it, in order. A wrong key simply fails and the next one
+    // is tried; the authentication tag in v2 is what makes "wrong key" indistinguishable from
+    // "altered ciphertext", so a null here means the value is not usable either way.
+    for (const key of DECRYPTION_KEYS) {
+      const plaintext = this.decryptWith(encryptedData, key);
+      if (plaintext !== null) return plaintext;
     }
 
-    const [ivHex, encrypted] = encryptedData.split(':');
-    if (!ivHex || !encrypted) {
-      return encryptedData; // Return as-is if malformed
+    return null;
+  }
+
+  /** One attempt with one key. Null means "this key cannot open this value". */
+  private static decryptWith(value: string, key: Buffer): string | null {
+    if (value.startsWith(`${SCHEME_GCM}:`)) {
+      return this.decryptGcmWith(value, key);
     }
+
+    const [ivHex, encrypted] = value.split(':');
+    if (!ivHex || !encrypted) return null;
 
     try {
       const iv = Buffer.from(ivHex, 'hex');
-      const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
 
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
@@ -129,7 +176,7 @@ export class DataEncryption {
     } catch {
       // Backward compatibility for legacy createCipher format
       try {
-        const legacyDecipher = crypto.createDecipher('aes-256-cbc', ENCRYPTION_KEY);
+        const legacyDecipher = crypto.createDecipher('aes-256-cbc', key);
         let decrypted = legacyDecipher.update(encrypted, 'hex', 'utf8');
         decrypted += legacyDecipher.final('utf8');
         return decrypted;
@@ -144,14 +191,14 @@ export class DataEncryption {
    * the authentication tag cannot tell us which it was — and both mean "this value is not
    * usable", which is what the caller acts on.
    */
-  private static decryptGcm(value: string): string | null {
+  private static decryptGcmWith(value: string, key: Buffer): string | null {
     const [, ivHex, tagHex, ciphertext] = value.split(':');
     if (!ivHex || !tagHex || !ciphertext) return null;
 
     try {
       const decipher = crypto.createDecipheriv(
         'aes-256-gcm',
-        ENCRYPTION_KEY,
+        key,
         Buffer.from(ivHex, 'hex'),
       );
       decipher.setAuthTag(Buffer.from(tagHex, 'hex'));

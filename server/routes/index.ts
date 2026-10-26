@@ -67,6 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         route,
         status: res.statusCode,
         durationMs: Date.now() - startedAt,
+        requestId: (req as any).requestId,
       });
     });
     next();
