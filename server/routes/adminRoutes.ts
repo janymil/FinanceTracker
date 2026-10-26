@@ -2,6 +2,7 @@ import { log } from '../logger';
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage.js";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
+import { cancelBilling } from "../cancelBilling.js";
 import { rateLimit } from "../middleware/rateLimit";
 import { db } from "../db.js";
 import { blockedCountries } from "../../shared/schema.ts";
@@ -223,6 +224,21 @@ export function registerAdminRoutes(app: Express) {
       }
       
       log.info(`Deleting user: ${userId} (${user.email})`);
+
+      // An admin deleting an account must not leave a live charge behind: the person can
+      // no longer sign in to cancel it, and the record that identifies them is about to go.
+      const billing = await cancelBilling({
+        stripeSubscriptionId: (user as any).stripeSubscriptionId,
+        mpPreapprovalId: (user as any).mpPreapprovalId,
+      });
+      if (!billing.ok) {
+        log.error(`Could not stop billing for ${userId}: ${billing.failures.join('; ')}`);
+        return res.status(409).json({
+          success: false,
+          message: `Could not stop the subscription (${billing.failures.join('; ')}). Nothing was deleted.`,
+        });
+      }
+
       await storage.deleteUserCompletely(userId);
       log.info(`Successfully deleted user: ${userId}`);
       

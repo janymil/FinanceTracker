@@ -9,6 +9,7 @@ import {
   findPreapprovalForUser,
   getPreapproval,
   isMercadoPagoConfigured,
+  listPreapprovalsForUser,
   verifyWebhookSignature,
 } from '../mercadopago';
 import { regionForRequest } from '../billingRegion';
@@ -23,16 +24,63 @@ function baseUrl(req: Request): string {
   return 'https://kaptia.app';
 }
 
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 async function activatePlan(userId: string, plan: PlanId, interval: BillingInterval, preapprovalId: string) {
   const current = await storage.getUser(userId);
-  // Stripe stays in charge when it is the one paying for a plan.
-  if (current?.stripeSubscriptionId && current.plan !== 'free') return;
+
+  // Stripe stays in charge when it is the one paying for a plan. A Peruvian subscription
+  // authorised on top of it would be a second charge for the same access, so it is ended
+  // here instead of being left to bill quietly.
+  if (current?.stripeSubscriptionId && current.plan !== 'free') {
+    log.warn(
+      `[MercadoPago] ${userId} already pays with Stripe; cancelling preapproval ${preapprovalId}`,
+    );
+    await cancelQuietly(preapprovalId, 'Stripe is already paying for this plan');
+    return;
+  }
+
   await storage.updateUserPlan(userId, plan, interval);
   await storage.updateUser(userId, { mpPreapprovalId: preapprovalId });
   log.info(`[MercadoPago] ${userId} activated ${plan} (${interval}) via preapproval ${preapprovalId}`);
+
+  // Two pending authorisations can both be completed — pressing "subscribe" twice creates
+  // two, and both are payable. One subscription per person: end the others.
+  await cancelOtherPreapprovals(userId, preapprovalId);
 }
 
-async function deactivatePlan(userId: string, preapprovalId: string) {
+/** Ends a preapproval without failing the caller: the caller already has the outcome it needs. */
+async function cancelQuietly(preapprovalId: string, reason: string): Promise<void> {
+  try {
+    await cancelPreapproval(preapprovalId);
+    log.info(`[MercadoPago] Cancelled preapproval ${preapprovalId} (${reason})`);
+  } catch (error) {
+    log.error(`[MercadoPago] Could not cancel preapproval ${preapprovalId} (${reason}):`, messageOf(error));
+  }
+}
+
+/** Every *other* live-or-pending preapproval for this person, ended. */
+async function cancelOtherPreapprovals(userId: string, keepId: string): Promise<void> {
+  try {
+    const others = await listPreapprovalsForUser(userId);
+    for (const other of others) {
+      if (other.id === keepId) continue;
+      if (other.status !== 'authorized' && other.status !== 'pending') continue;
+      await cancelQuietly(other.id, `another subscription of ${userId} is active`);
+    }
+  } catch (error) {
+    // Listing is a safety net, not the activation itself: never fail a paid plan over it.
+    log.info('[MercadoPago] Could not list other subscriptions:', messageOf(error));
+  }
+}
+
+async function deactivatePlan(
+  userId: string,
+  preapprovalId: string,
+  { keepId = false }: { keepId?: boolean } = {},
+) {
   const user = await storage.getUser(userId);
   if (!user) return;
   // A replaced (old) preapproval ending must not downgrade someone already on a new one.
@@ -40,7 +88,11 @@ async function deactivatePlan(userId: string, preapprovalId: string) {
   // A Stripe subscription, if any, stays in charge.
   if (user.stripeSubscriptionId) return;
   await storage.updateUserPlan(userId, 'free', 'monthly');
-  await storage.updateUser(userId, { mpPreapprovalId: null });
+  // A paused subscription is still the one that will resume and charge, so its id stays:
+  // dropping it would leave the customer unable to cancel from their own profile.
+  if (!keepId) {
+    await storage.updateUser(userId, { mpPreapprovalId: null });
+  }
   log.info(`[MercadoPago] ${userId} downgraded to free (preapproval ${preapprovalId} is no longer active)`);
 }
 
@@ -93,13 +145,27 @@ export function registerMercadoPagoRoutes(app: Express) {
     }
 
     try {
-      // A second preapproval must never run next to the first: end the old one first.
-      if (user.mpPreapprovalId && user.plan !== 'free') {
-        await cancelPreapproval(user.mpPreapprovalId);
+      // A second preapproval must never run next to the first: end the old one first. That
+      // includes a *pending* one — the payer could still authorise it from an earlier tab,
+      // and two authorised subscriptions mean two charges for one plan.
+      if (user.mpPreapprovalId) {
+        try {
+          await cancelPreapproval(user.mpPreapprovalId);
+        } catch (error) {
+          // An id MercadoPago no longer knows (already cancelled) is fine; anything else
+          // means the old subscription may still charge, so no new one is created.
+          const alreadyGone = error instanceof MercadoPagoError && error.status === 404;
+          if (!alreadyGone) {
+            log.error(`[MercadoPago] Could not cancel ${user.mpPreapprovalId} before replacing it:`, messageOf(error));
+            return res.status(502).json({ error: 'MercadoPago is unavailable. Please try again.' });
+          }
+        }
         // The old plan ends with it; the new plan starts when the new preapproval is
         // authorised. Someone who walks away from the new authorisation is not left on a
         // paid plan that nothing is paying for.
-        await deactivatePlan(userId, user.mpPreapprovalId);
+        if (user.plan !== 'free') {
+          await deactivatePlan(userId, user.mpPreapprovalId);
+        }
       }
 
       const created = await createPreapproval({
@@ -197,19 +263,25 @@ export function registerMercadoPagoRoutes(app: Express) {
       if (type === 'subscription_preapproval' || type === 'preapproval') {
         const state = await getPreapproval(dataId);
 
-        // Deduplicated on "<id>:<state>", not on the id alone. MercadoPago sends the same
-        // resource id for every state of the same subscription, so a key of just the id
-        // would swallow the later "cancelled" notice and leave the customer on a paid plan
-        // they no longer pay for.
-        const eventKey = `${state.id}:${state.status}`;
+        // Deduplicated on "<id>:<status>:<last-modified>", never on the id alone.
+        // MercadoPago sends the same resource id for every state of the same subscription, so
+        // a key of just the id would swallow the later "cancelled" notice and leave the
+        // customer on a paid plan they no longer pay for. The status alone is not enough
+        // either: pausing and then resuming returns to "authorized", and keying on the status
+        // would drop the resume — the plan would stay free while the charges resumed.
+        const eventKey = `${state.id}:${state.status}:${state.lastModified ?? ''}`;
         const firstDelivery = await storage.claimWebhookEvent({
           source: 'mercadopago',
           key: eventKey,
           type,
         });
         if (!firstDelivery) {
-          log.info(`[MercadoPago] Repeat notification ignored for ${eventKey}`);
-          return res.status(200).json({ received: true, duplicate: true });
+          // Not "duplicate": the claim may belong to a delivery that crashed mid-handling,
+          // and answering 2xx would tell MercadoPago to stop retrying — the event would be
+          // lost. A retry after the lease expires applies it. Every handler here sets an
+          // absolute state, so applying a finished event twice changes nothing.
+          log.info(`[MercadoPago] ${eventKey} is claimed elsewhere; asking for a retry`);
+          return res.status(500).json({ error: 'Event is being handled', retry: true });
         }
 
         const userId = state.externalReference;
@@ -218,12 +290,13 @@ export function registerMercadoPagoRoutes(app: Express) {
             if (state.status === 'authorized') {
               await activatePlan(userId, state.plan, state.interval, state.id);
             } else if (state.status === 'cancelled' || state.status === 'paused') {
-              await deactivatePlan(userId, state.id);
+              // Paused keeps the id: it is the subscription that may still resume and charge.
+              await deactivatePlan(userId, state.id, { keepId: state.status === 'paused' });
             }
           }
         } catch (error) {
-          // Free the claim, otherwise MercadoPago's retry would be answered as a duplicate
-          // and the plan would never activate.
+          // Free the claim, otherwise MercadoPago's retry would be answered as "being
+          // handled" and the plan would only come back once the claim's lease expired.
           await storage.releaseWebhookEvent('mercadopago', eventKey).catch(() => undefined);
           throw error;
         }

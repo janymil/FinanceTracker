@@ -2,6 +2,11 @@ import { log } from './logger';
 import type { Request, Response } from 'express';
 import { syncCreatedClerkUser } from './clerkUsers';
 import { isUniqueViolation } from './dbErrors';
+import {
+  cancelBilling as cancelBillingForUser,
+  type BillingSubscriptionIds,
+  type CancelBillingResult,
+} from './cancelBilling';
 
 /**
  * Clerk → database sync (user.created / user.updated / user.deleted).
@@ -22,6 +27,11 @@ export interface WebhookDeps {
   loadStorage: () => Promise<WebhookStorage>;
   /** Verifies the raw body and returns the event, or throws. */
   verify: (rawBody: Buffer | string, headers: Record<string, string>, secret: string) => Promise<any>;
+  /**
+   * Stops every subscription that bills the person before their account is deleted.
+   * Optional so a test can inject a stub and never reach a payment provider.
+   */
+  cancelBilling?: (ids: BillingSubscriptionIds) => Promise<CancelBillingResult>;
 }
 
 
@@ -108,14 +118,31 @@ export function createClerkWebhookHandler(deps: WebhookDeps = defaultDeps) {
         case 'user.updated':
           outcome = await applyUserUpdated(data, storage);
           break;
-        case 'user.deleted':
-          if (await storage.getUser(data.id)) {
-            await storage.deleteUserCompletely(data.id);
-            outcome = 'deleted';
-          } else {
+        case 'user.deleted': {
+          const existing = await storage.getUser(data.id);
+          if (!existing) {
             outcome = 'nothing-to-delete';
+            break;
           }
+          // Deleting the login is a cancellation, whoever pressed the button: the person
+          // cannot sign in afterwards, so a charge left running could never be stopped by
+          // them. Stop the money first; if that fails, answer 5xx and let Clerk retry
+          // instead of erasing the only record that identifies them.
+          const stopBilling = deps.cancelBilling ?? cancelBillingForUser;
+          const billing = await stopBilling({
+            stripeSubscriptionId: (existing as { stripeSubscriptionId?: string | null }).stripeSubscriptionId,
+            mpPreapprovalId: (existing as { mpPreapprovalId?: string | null }).mpPreapprovalId,
+          });
+          if (!billing.ok) {
+            log.error(
+              `Clerk user.deleted for ${data.id}: could not stop billing (${billing.failures.join('; ')}); nothing deleted`,
+            );
+            return reply(500, { error: 'Could not stop the subscription; nothing was deleted' });
+          }
+          await storage.deleteUserCompletely(data.id);
+          outcome = 'deleted';
           break;
+        }
         default:
           outcome = 'unhandled-type';
       }

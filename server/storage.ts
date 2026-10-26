@@ -1,5 +1,6 @@
 import { log } from './logger';
 import crypto from 'crypto';
+import { PLAN_PRICES } from '../shared/pricing';
 import {
   merchantLearning,
   users,
@@ -1850,10 +1851,13 @@ export class DatabaseStorage implements IStorage {
         stats.freeUsers = count;
       } else if (stat.plan === 'standard') {
         stats.standardUsers = count;
-        stats.totalRevenue += count * 4.99; // $4.99/month
+        // List price from the one price list, in US dollars and per month. This is an
+        // estimate, not a ledger: yearly subscribers are counted at the monthly rate and
+        // Peruvian subscribers (soles) at the dollar rate.
+        stats.totalRevenue += count * PLAN_PRICES.standard.usd.monthly;
       } else if (stat.plan === 'premium') {
         stats.premiumUsers = count;
-        stats.totalRevenue += count * 9.99; // $9.99/month
+        stats.totalRevenue += count * PLAN_PRICES.premium.usd.monthly;
       }
     });
 
@@ -2912,13 +2916,28 @@ export class DatabaseStorage implements IStorage {
 
   // Gateway notification de-duplication. The insert is the claim: the composite primary
   // key rejects a second delivery of the same event, so no read-then-write race exists.
+  //
+  // The claim is a lease, not a tombstone. If the process dies between claiming an event and
+  // finishing it, the row would otherwise make the gateway's retry look like a duplicate and
+  // the event would be lost — for a cancellation or a refund that means a paid plan nobody is
+  // paying for. So a delivery that cannot get the claim is answered "retry" by the routes,
+  // never "duplicate": after the lease expires the retry takes the claim over and applies the
+  // event. The lease only needs to be longer than a handler (they are database writes) and is
+  // deliberately short so a crashed delivery is recovered within the gateway's first retries.
   async claimWebhookEvent(event: { source: string; key: string; type?: string | null }): Promise<boolean> {
-    const inserted = await db
+    const CLAIM_LEASE_MS = 60 * 1000;
+    const leaseExpiredBefore = new Date(Date.now() - CLAIM_LEASE_MS);
+
+    const claimed = await db
       .insert(webhookEvents)
       .values({ source: event.source, eventKey: event.key, eventType: event.type ?? null })
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: [webhookEvents.source, webhookEvents.eventKey],
+        set: { receivedAt: new Date(), eventType: event.type ?? null },
+        setWhere: lt(webhookEvents.receivedAt, leaseExpiredBefore),
+      })
       .returning({ eventKey: webhookEvents.eventKey });
-    return inserted.length > 0;
+    return claimed.length > 0;
   }
 
   async releaseWebhookEvent(source: string, key: string): Promise<void> {

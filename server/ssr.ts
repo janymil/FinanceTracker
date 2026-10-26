@@ -1,5 +1,6 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
+import { amountFor, currencyForLanguage, formatMoney } from '../shared/pricing';
 
 // Multilingual content data
 const multilingualContent: Record<string, Record<string, any>> = {
@@ -307,6 +308,14 @@ function getCopyrightText(lang: string): string {
 }
 
 function getPageContent(route: string, lang: string = 'en'): string {
+  // Prices on these pages are read by search engines and by people who then reach checkout,
+  // so they come from the one price list, in the currency that language is charged in:
+  // Spanish pages quote soles (the Peru market), everything else US dollars.
+  const currency = currencyForLanguage(lang);
+  const price = (plan: 'standard' | 'premium', per: string) =>
+    `${formatMoney(amountFor(plan, 'monthly', currency), currency)}/${per}`;
+  const freePrice = (per: string) => `${formatMoney(0, currency)}/${per}`;
+
   const content = {
     'en': {
       '/': `
@@ -331,10 +340,10 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <h3>Free Plan</h3>
                 <p>Basic expense tracking with up to 100 transactions</p>
                 
-                <h3>Standard Plan - $4.99/month</h3>
+                <h3>Standard Plan - ${price('standard', 'month')}</h3>
                 <p>Enhanced features including budgets, goals, AI categorization, and receipt scanning</p>
                 
-                <h3>Premium Plan - $9.90/month</h3>
+                <h3>Premium Plan - ${price('premium', 'month')}</h3>
                 <p>Unlimited transactions, advanced analytics, AI insights, and cloud backup</p>
             </div>
         </section>
@@ -345,7 +354,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
             <p>Choose the plan that fits your tracking needs</p>
             
             <div>
-                <h2>Free Plan - $0/month</h2>
+                <h2>Free Plan - ${freePrice('month')}</h2>
                 <ul>
                     <li>Up to 100 transactions</li>
                     <li>Basic expense tracking</li>
@@ -353,7 +362,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Simple categories</li>
                 </ul>
                 
-                <h2>Standard Plan - $4.99/month</h2>
+                <h2>Standard Plan - ${price('standard', 'month')}</h2>
                 <ul>
                     <li>Unlimited transactions</li>
                     <li>Budget management</li>
@@ -365,7 +374,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Collaborative goals</li>
                 </ul>
                 
-                <h2>Premium Plan - $9.90/month</h2>
+                <h2>Premium Plan - ${price('premium', 'month')}</h2>
                 <ul>
                     <li>Everything in Standard</li>
                     <li>Advanced AI insights</li>
@@ -566,10 +575,10 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <h3>Plan Gratuito</h3>
                 <p>Seguimiento básico de gastos con hasta 100 transacciones</p>
                 
-                <h3>Plan Estándar - $4.99/mes</h3>
+                <h3>Plan Estándar - ${price('standard', 'mes')}</h3>
                 <p>Características mejoradas incluyendo presupuestos, metas, categorización IA y escaneo de recibos</p>
                 
-                <h3>Plan Premium - $9.90/mes</h3>
+                <h3>Plan Premium - ${price('premium', 'mes')}</h3>
                 <p>Transacciones ilimitadas, análisis avanzados, insights de IA y respaldo en la nube</p>
             </div>
         </section>
@@ -580,7 +589,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
             <p>Elige el plan perfecto para tus necesidades de seguimiento</p>
             
             <div>
-                <h2>Plan Gratuito - $0/mes</h2>
+                <h2>Plan Gratuito - ${freePrice('mes')}</h2>
                 <ul>
                     <li>Hasta 100 transacciones</li>
                     <li>Seguimiento básico de gastos</li>
@@ -588,7 +597,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Categorías simples</li>
                 </ul>
                 
-                <h2>Plan Estándar - $4.99/mes</h2>
+                <h2>Plan Estándar - ${price('standard', 'mes')}</h2>
                 <ul>
                     <li>Transacciones ilimitadas</li>
                     <li>Gestión de presupuestos</li>
@@ -600,7 +609,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Metas colaborativas</li>
                 </ul>
                 
-                <h2>Plan Premium - $9.90/mes</h2>
+                <h2>Plan Premium - ${price('premium', 'mes')}</h2>
                 <ul>
                     <li>Todo en Estándar</li>
                     <li>Insights avanzados de IA</li>
@@ -801,10 +810,10 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <h3>Bezplatný Plán</h3>
                 <p>Základné sledovanie výdavkov s až 100 transakciami</p>
                 
-                <h3>Štandardný Plán - $4.99/mesiac</h3>
+                <h3>Štandardný Plán - ${price('standard', 'mesiac')}</h3>
                 <p>Vylepšené funkcie vrátane rozpočtov, cieľov, AI kategorizácie a skenovania účteniek</p>
                 
-                <h3>Prémiový Plán - $9.90/mesiac</h3>
+                <h3>Prémiový Plán - ${price('premium', 'mesiac')}</h3>
                 <p>Neobmedzené transakcie, pokročilé analýzy, AI poznatky a cloudové zálohovanie</p>
             </div>
         </section>
@@ -815,7 +824,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
             <p>Vyber si perfektný plán pre svoje potreby sledovania</p>
             
             <div>
-                <h2>Bezplatný Plán - $0/mesiac</h2>
+                <h2>Bezplatný Plán - ${freePrice('mesiac')}</h2>
                 <ul>
                     <li>Až 100 transakcií</li>
                     <li>Základné sledovanie výdavkov</li>
@@ -823,7 +832,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Jednoduché kategórie</li>
                 </ul>
                 
-                <h2>Štandardný Plán - $4.99/mesiac</h2>
+                <h2>Štandardný Plán - ${price('standard', 'mesiac')}</h2>
                 <ul>
                     <li>Neobmedzené transakcie</li>
                     <li>Správa rozpočtu</li>
@@ -835,7 +844,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                     <li>Spolupracujúce ciele</li>
                 </ul>
                 
-                <h2>Prémiový Plán - $9.90/mesiac</h2>
+                <h2>Prémiový Plán - ${price('premium', 'mesiac')}</h2>
                 <ul>
                     <li>Všetko v Štandardnom</li>
                     <li>Pokročilé AI poznatky</li>

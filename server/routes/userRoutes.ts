@@ -1,15 +1,12 @@
 import type { Express } from "express";
-import Stripe from "stripe";
 import { clerkClient } from "@clerk/express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage, translateCategories } from "../categoryTranslations";
 import { rateLimit } from "../middleware/rateLimit";
 import { reportServerError } from "../errorGuard/report";
-import { cancelPreapproval } from "../mercadopago";
+import { cancelBilling } from "../cancelBilling";
 import { log } from '../logger';
-
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export function registerUserRoutes(app: Express) {
   /**
@@ -90,35 +87,21 @@ export function registerUserRoutes(app: Express) {
         const user = await storage.getUser(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        if ((user as any).stripeSubscriptionId && stripe) {
-          try {
-            await stripe.subscriptions.cancel((user as any).stripeSubscriptionId);
-          } catch (billingError) {
-            reportServerError(billingError, {
-              where: 'account.delete.billing',
-              route: '/api/account/delete',
-              moneyPath: true,
-            });
-            return res.status(409).json({
-              message: 'We could not stop the subscription. Nothing was deleted. Please contact support.',
-            });
-          }
-        }
-
-        // A Peruvian subscriber is billed by MercadoPago, which must be stopped as well.
-        if ((user as any).mpPreapprovalId) {
-          try {
-            await cancelPreapproval((user as any).mpPreapprovalId);
-          } catch (billingError) {
-            reportServerError(billingError, {
-              where: 'account.delete.mercadopago',
-              route: '/api/account/delete',
-              moneyPath: true,
-            });
-            return res.status(409).json({
-              message: 'We could not stop the subscription. Nothing was deleted. Please contact support.',
-            });
-          }
+        // 1. Stop every subscription first. If one cannot be stopped, nothing is deleted:
+        //    a customer who can no longer sign in must not keep being charged.
+        const billing = await cancelBilling({
+          stripeSubscriptionId: (user as any).stripeSubscriptionId,
+          mpPreapprovalId: (user as any).mpPreapprovalId,
+        });
+        if (!billing.ok) {
+          reportServerError(new Error(billing.failures.join('; ')), {
+            where: 'account.delete.billing',
+            route: '/api/account/delete',
+            moneyPath: true,
+          });
+          return res.status(409).json({
+            message: 'We could not stop the subscription. Nothing was deleted. Please contact support.',
+          });
         }
 
         await storage.deleteUserCompletely(userId);

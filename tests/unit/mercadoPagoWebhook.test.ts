@@ -61,6 +61,8 @@ function preapproval(status: string, overrides: Record<string, unknown> = {}) {
     external_reference: 'user_1',
     reason: 'Kaptia Premium',
     auto_recurring: { frequency_type: 'months' },
+    // MercadoPago sends this on every state change; the duplicate key depends on it.
+    last_modified: '2026-01-01T00:00:00.000Z',
     ...overrides,
   };
 }
@@ -141,7 +143,7 @@ describe('POST /api/mercadopago/webhook', () => {
     expect(storage.updateUser).toHaveBeenCalledWith('user_1', { mpPreapprovalId: 'pre-1' });
   });
 
-  it('ignores the same notice twice', async () => {
+  it('applies the same notice once and asks MercadoPago to retry the copy it cannot claim', async () => {
     stubPreapproval(preapproval('authorized'));
     const signature = sign(String(Date.now()));
     const body = { type: 'subscription_preapproval', data: { id: 'pre-1' } };
@@ -150,8 +152,9 @@ describe('POST /api/mercadopago/webhook', () => {
     const second = await notify(body, signature);
 
     expect(first.status).toBe(200);
-    expect(second.status).toBe(200);
-    expect(second.json.duplicate).toBe(true);
+    // 500, not 200: an unfinished claim may belong to a delivery that crashed mid-handling,
+    // and a 2xx would make MercadoPago stop retrying a notice that was never applied.
+    expect(second.status).toBe(500);
     expect(storage.updateUserPlan).toHaveBeenCalledTimes(1);
   });
 
@@ -224,5 +227,94 @@ describe('POST /api/mercadopago/webhook', () => {
     const retry = await notify(body, signature);
     expect(retry.status).toBe(200);
     expect(storage.updateUserPlan).toHaveBeenCalledWith('user_1', 'premium', 'monthly');
+  });
+
+  it('brings the plan back when a paused subscription is resumed', async () => {
+    storage.getUser.mockResolvedValue({
+      id: 'user_1',
+      plan: 'premium',
+      stripeSubscriptionId: null,
+      mpPreapprovalId: 'pre-1',
+    } as any);
+
+    // Paused: the charge stops, so the plan stops.
+    stubPreapproval(preapproval('paused', { last_modified: '2026-02-01T00:00:00.000Z' }));
+    await notify(
+      { type: 'subscription_preapproval', data: { id: 'pre-1' } },
+      sign(String(Date.now())),
+    );
+    expect(storage.updateUserPlan).toHaveBeenLastCalledWith('user_1', 'free', 'monthly');
+    // The id stays on the account (see the test below), so the resume still matches it.
+    expect(storage.updateUser).not.toHaveBeenCalledWith('user_1', { mpPreapprovalId: null });
+
+    // Resumed: same id, and "authorized" again — the state the subscription started in.
+    // Keying the notice on the status alone dropped this and left a paying customer on free.
+    storage.getUser.mockResolvedValue({
+      id: 'user_1',
+      plan: 'free',
+      stripeSubscriptionId: null,
+      mpPreapprovalId: 'pre-1',
+    } as any);
+    stubPreapproval(preapproval('authorized', { last_modified: '2026-03-01T00:00:00.000Z' }));
+    const resumed = await notify(
+      { type: 'subscription_preapproval', data: { id: 'pre-1' } },
+      sign(String(Date.now())),
+    );
+
+    expect(resumed.status).toBe(200);
+    expect(resumed.json.duplicate).toBeUndefined();
+    expect(storage.updateUserPlan).toHaveBeenLastCalledWith('user_1', 'premium', 'monthly');
+    expect(storage.updateUser).toHaveBeenCalledWith('user_1', { mpPreapprovalId: 'pre-1' });
+  });
+
+  it('keeps a paused subscription on the account so the customer can still cancel it', async () => {
+    storage.getUser.mockResolvedValue({
+      id: 'user_1',
+      plan: 'premium',
+      stripeSubscriptionId: null,
+      mpPreapprovalId: 'pre-1',
+    } as any);
+    stubPreapproval(preapproval('paused', { last_modified: '2026-04-01T00:00:00.000Z' }));
+
+    const result = await notify(
+      { type: 'subscription_preapproval', data: { id: 'pre-1' } },
+      sign(String(Date.now())),
+    );
+
+    expect(result.status).toBe(200);
+    expect(storage.updateUserPlan).toHaveBeenLastCalledWith('user_1', 'free', 'monthly');
+    // Not cleared: the id is the only handle the profile page has on a paused subscription.
+    expect(storage.updateUser).not.toHaveBeenCalledWith('user_1', { mpPreapprovalId: null });
+  });
+
+  it('ends a second subscription that was left pending when the first is authorised', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (url: string | URL, init?: { method?: string }) => {
+      const target = String(url);
+      if (target.includes('/preapproval/search')) {
+        // Two authorisations for the same person: the one being activated, and one left
+        // pending by a second click on "subscribe".
+        return {
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({
+            results: [preapproval('authorized'), preapproval('pending', { id: 'pre-2' })],
+          }),
+        };
+      }
+      calls.push(`${init?.method ?? 'GET'} ${target.replace('https://api.mercadopago.com', '')}`);
+      return { ok: true, status: 200, text: async () => JSON.stringify(preapproval('authorized')) };
+    }));
+
+    const result = await notify(
+      { type: 'subscription_preapproval', data: { id: 'pre-1' } },
+      sign(String(Date.now())),
+    );
+
+    expect(result.status).toBe(200);
+    expect(storage.updateUserPlan).toHaveBeenCalledWith('user_1', 'premium', 'monthly');
+    // Two payable subscriptions would be two charges for one plan.
+    expect(calls).toContain('PUT /preapproval/pre-2');
+    expect(calls).not.toContain('PUT /preapproval/pre-1');
   });
 });

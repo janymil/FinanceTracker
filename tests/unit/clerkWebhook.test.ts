@@ -15,6 +15,9 @@ const storage = {
   deleteUserCompletely: vi.fn(),
 };
 
+/** Stops the money before the account goes; a test must never reach a payment provider. */
+const cancelBilling = vi.fn(async () => ({ ok: true, cancelled: [] as string[], failures: [] as string[] }));
+
 let server: Server;
 let baseUrl: string;
 
@@ -52,7 +55,11 @@ const createdEvent = {
 beforeAll(() => {
   const app = express();
   app.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
-  app.post('/api/clerk-webhooks', createClerkWebhookHandler({ loadStorage: async () => storage as any, verify: defaultVerify }));
+  app.post('/api/clerk-webhooks', createClerkWebhookHandler({
+    loadStorage: async () => storage as any,
+    verify: defaultVerify,
+    cancelBilling: cancelBilling as any,
+  }));
   server = app.listen(0);
   baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 });
@@ -71,6 +78,7 @@ beforeEach(() => {
   storage.getUser.mockResolvedValue(undefined);
   storage.createUser.mockResolvedValue({});
   storage.updateUser.mockResolvedValue({});
+  cancelBilling.mockResolvedValue({ ok: true, cancelled: [], failures: [] });
 });
 
 describe('signature and configuration', () => {
@@ -158,6 +166,40 @@ describe('events', () => {
     storage.deleteUserCompletely.mockClear();
     sent = signed({ type: 'user.deleted', data: { id: 'user_42' } }, { id: 'msg_2' });
     expect((await post(sent.body, sent.headers)).json.outcome).toBe('nothing-to-delete');
+    expect(storage.deleteUserCompletely).not.toHaveBeenCalled();
+  });
+
+  it('stops billing before deleting: a deletion from the identity provider is a cancellation', async () => {
+    storage.getUser.mockResolvedValue({
+      id: 'user_42',
+      stripeSubscriptionId: 'sub_42',
+      mpPreapprovalId: 'pre-42',
+    });
+
+    const { body, headers } = signed({ type: 'user.deleted', data: { id: 'user_42' } });
+    const response = await post(body, headers);
+
+    expect(response.status).toBe(200);
+    expect(response.json.outcome).toBe('deleted');
+    expect(cancelBilling).toHaveBeenCalledWith({
+      stripeSubscriptionId: 'sub_42',
+      mpPreapprovalId: 'pre-42',
+    });
+    // The money must be stopped before the only record that identifies the person is gone.
+    expect(cancelBilling.mock.invocationCallOrder[0]).toBeLessThan(
+      storage.deleteUserCompletely.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('refuses to delete an account whose subscription could not be stopped', async () => {
+    storage.getUser.mockResolvedValue({ id: 'user_42', stripeSubscriptionId: 'sub_42' });
+    cancelBilling.mockResolvedValueOnce({ ok: false, cancelled: [], failures: ['stripe: network down'] });
+
+    const { body, headers } = signed({ type: 'user.deleted', data: { id: 'user_42' } });
+    const response = await post(body, headers);
+
+    // 500 so Clerk retries the deletion once the provider is reachable again.
+    expect(response.status).toBe(500);
     expect(storage.deleteUserCompletely).not.toHaveBeenCalled();
   });
 

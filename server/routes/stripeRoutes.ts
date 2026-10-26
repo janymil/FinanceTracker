@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { regionForRequest } from "../billingRegion";
+import { reportServerError } from "../errorGuard/report";
 import type { User } from "@shared/schema";
 import {
   PRICE_ENV_KEYS,
@@ -60,15 +61,36 @@ async function releaseEvent(eventId: string): Promise<void> {
 }
 
 /**
- * The one place the refund handler reaches out to Stripe. Exported so tests can replace it:
- * a unit test must never perform a real API call, and this is the only write in the handler.
+ * The one place the refund handler and the subscription checks reach out to Stripe. Exported so
+ * tests can replace it: a unit test must never perform a real API call, and these are the only
+ * writes and reads the handlers perform against the provider.
+ *
+ * The payloads are typed `any` on purpose — the SDK describes the *latest* API version while a
+ * webhook body (and an old checkout session) is shaped by whatever version created it. What
+ * matters here is `status`, `id` and `metadata`, which have never moved.
  */
 export const stripeGateway = {
   async cancelSubscription(subscriptionId: string): Promise<void> {
     if (!stripe) throw new Error('Stripe is not configured');
     await stripe.subscriptions.cancel(subscriptionId);
   },
+  /** The subscription as it is *now*, which is the only thing that proves a plan is paid for. */
+  async retrieveSubscription(subscriptionId: string): Promise<any> {
+    if (!stripe) throw new Error('Stripe is not configured');
+    return stripe.subscriptions.retrieve(subscriptionId);
+  },
+  async retrieveCheckoutSession(sessionId: string): Promise<any> {
+    if (!stripe) throw new Error('Stripe is not configured');
+    return stripe.checkout.sessions.retrieve(sessionId);
+  },
 };
+
+/** The subscription behind a checkout session or an invoice, in any Stripe API version. */
+function subscriptionIdOf(object: any): string | null {
+  const value = object?.subscription ?? object?.parent?.subscription_details?.subscription ?? null;
+  if (!value) return null;
+  return typeof value === 'string' ? value : (value.id ?? null);
+}
 
 /** Customers are only ever sent back to our own site, never to a caller-supplied origin. */
 function appBaseUrl(): string {
@@ -415,7 +437,7 @@ export function registerStripeRoutes(app: Express) {
 
       // Verify the session with Stripe. The plan comes from the metadata the server
       // wrote when it created the session, never from the query string.
-      const session = await stripe.checkout.sessions.retrieve(session_id);
+      const session = await stripeGateway.retrieveCheckoutSession(session_id);
       const plan = session.metadata?.plan;
       if (!plan) {
         return res.redirect('/?error=invalid_params');
@@ -454,17 +476,42 @@ export function registerStripeRoutes(app: Express) {
         return res.redirect('/?error=user_not_found');
       }
 
-
+      /*
+       * This URL stays valid forever, so opening it again is not a second purchase. A paid
+       * payment stays "paid" after the subscription is cancelled and after a full refund, so
+       * the payment is not the proof the plan is still earned — the subscription is. Without
+       * this check a cancelled customer could put themselves back on a paid plan for good:
+       * no later event would ever arrive to undo it.
+       */
+      const subscriptionId = subscriptionIdOf(session);
+      if (dbPlan !== 'free') {
+        if (session.status !== 'complete' || !subscriptionId) {
+          log.info(`[Billing] Checkout session ${session.id} is not complete; plan left unchanged`);
+          return res.redirect('/?error=payment_not_completed');
+        }
+        try {
+          const subscription = await stripeGateway.retrieveSubscription(subscriptionId);
+          if (!['active', 'trialing'].includes(subscription.status)) {
+            log.info(
+              `[Billing] Refusing to grant ${dbPlan}: subscription ${subscriptionId} is ${subscription.status}`,
+            );
+            return res.redirect('/?error=subscription_not_active');
+          }
+        } catch (error) {
+          log.error(
+            '[Billing] Could not confirm the subscription behind a checkout session:',
+            error instanceof Error ? error.message : error,
+          );
+          return res.redirect('/?error=subscription_check_failed');
+        }
+      }
 
       // Handle existing subscription if this is an upgrade (the id was written by our
       // own checkout code, and the new subscription is never the one cancelled).
-      if (
-        session.metadata?.existingSubscriptionId &&
-        session.subscription !== session.metadata.existingSubscriptionId
-      ) {
+      if (session.metadata?.existingSubscriptionId && session.metadata.existingSubscriptionId !== subscriptionId) {
         try {
           // Cancel the existing subscription
-          await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
+          await stripeGateway.cancelSubscription(session.metadata.existingSubscriptionId);
           log.info(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
         } catch (cancelError) {
           log.error('Error cancelling existing subscription:', cancelError);
@@ -476,12 +523,14 @@ export function registerStripeRoutes(app: Express) {
       try {
         await storage.updateUserPlan(userId, dbPlan as 'free' | 'standard' | 'premium', billingInterval as 'monthly' | 'yearly');
         
-        // Store Stripe customer and subscription info if available
+        // Store Stripe customer and subscription info if available. Only a subscription we
+        // have just confirmed is live is written back: a cancelled id would block the
+        // customer from subscribing again.
         if (session.customer) {
           await storage.updateUserStripeInfo(
             userId, 
             session.customer as string,
-            (session.subscription as string) || ''
+            subscriptionId || ''
           );
         }
         
@@ -736,8 +785,13 @@ export function registerStripeRoutes(app: Express) {
     }
 
     if (!claimed) {
-      log.info(`Duplicate webhook event ignored: ${event.type} ${event.id}`);
-      return res.json({ received: true, duplicate: true });
+      // Either this event was already handled, or the delivery holding the claim has not
+      // finished. Answering 2xx here is what lost events when the holder had crashed: the
+      // gateway records the delivery as done and never asks again. A non-2xx asks it to
+      // retry; once the claim's lease expires the retry is applied. Re-applying a finished
+      // event is safe — every handler sets an absolute state, never an increment.
+      log.info(`[Stripe] ${event.type} ${event.id} is claimed elsewhere; asking for a retry`);
+      return res.status(500).json({ error: 'Event is being handled', retry: true });
     }
 
     log.info(`Received webhook event: ${event.type}`);
@@ -858,6 +912,22 @@ export function registerStripeRoutes(app: Express) {
       const settled = session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
 
       if (userId && plan && settled) {
+        // Same rule as the success page: a paid session proves a payment happened once, not
+        // that the subscription behind it is still paid for. A resent old event must not
+        // revive a cancelled plan.
+        const checkoutSubscriptionId = subscriptionIdOf(session);
+        if (checkoutSubscriptionId) {
+          // Throws on an API failure on purpose: the event is released and Stripe retries,
+          // so a transient error cannot leave a paying customer without their plan.
+          const subscription = await stripeGateway.retrieveSubscription(checkoutSubscriptionId);
+          if (!['active', 'trialing'].includes(subscription.status)) {
+            log.info(
+              `[Billing] Checkout ${session.id} belongs to a ${subscription.status} subscription; plan left unchanged`,
+            );
+            return;
+          }
+        }
+
         // Map plan names to database values  
         const planMapping = {
           'free': { plan: 'free', interval: 'monthly' },
@@ -874,7 +944,32 @@ export function registerStripeRoutes(app: Express) {
           
           // Store Stripe customer info
           if (session.customer) {
-            await storage.updateUserStripeInfo(userId, session.customer as string, session.subscription as string);
+            await storage.updateUserStripeInfo(
+              userId,
+              session.customer as string,
+              subscriptionIdOf(session) || '',
+            );
+          }
+
+          // An upgrade creates a second subscription and used to rely on the browser reaching
+          // the success page to cancel the first one. If the tab is closed after paying, both
+          // keep billing, so the old one is ended here instead — this does not depend on the
+          // browser coming back.
+          const replacedSubscriptionId = session.metadata?.existingSubscriptionId;
+          if (replacedSubscriptionId && replacedSubscriptionId !== subscriptionIdOf(session)) {
+            try {
+              await stripeGateway.cancelSubscription(replacedSubscriptionId);
+              log.info(`[Billing] Cancelled replaced subscription ${replacedSubscriptionId} for user ${userId}`);
+            } catch (error) {
+              // Already cancelled by the success page, or Stripe refused. The new plan is
+              // already applied, so this is reported rather than thrown: failing here would
+              // only re-run a webhook that cannot fix it.
+              reportServerError(error, {
+                where: 'stripe.webhook.checkout.replaced',
+                route: '/api/stripe-webhook',
+                moneyPath: true,
+              });
+            }
           }
           
           log.info(`Updated user ${userId} to plan ${dbPlan} (${billingInterval})`);
@@ -899,6 +994,17 @@ export function registerStripeRoutes(app: Express) {
       const user = await getUserByStripeCustomerId(invoice.customer);
       if (!user) {
         log.info('No user found for customer:', invoice.customer);
+        return;
+      }
+
+      // A failure for a subscription the person no longer holds must not start a grace
+      // period: when that period expires the account would be downgraded even though the
+      // subscription they do hold is being paid.
+      const failingSubscriptionId = subscriptionIdOf(invoice);
+      if (failingSubscriptionId && user.stripeSubscriptionId && user.stripeSubscriptionId !== failingSubscriptionId) {
+        log.info(
+          `[Billing] Ignoring failed invoice ${invoice.id} for old subscription ${failingSubscriptionId}`,
+        );
         return;
       }
 
@@ -1000,14 +1106,24 @@ export function registerStripeRoutes(app: Express) {
       // Invoices that do not belong to a subscription (one-off charges) have nothing to
       // confirm here. Without this guard the retrieve below throws, the route answers 500
       // and Stripe keeps retrying an event that can never succeed.
-      if (!invoice.subscription) {
+      const invoiceSubscriptionId = subscriptionIdOf(invoice);
+      if (!invoiceSubscriptionId) {
         log.info(`Invoice ${invoice.id} is not tied to a subscription; plan left unchanged`);
         await storage.clearUserGracePeriod(user.id);
         return;
       }
 
+      // A paid invoice for a subscription the person has since replaced says nothing about
+      // the plan they hold now — and must not reopen one they cancelled.
+      if (user.stripeSubscriptionId && user.stripeSubscriptionId !== invoiceSubscriptionId) {
+        log.info(
+          `[Billing] Invoice ${invoice.id} belongs to old subscription ${invoiceSubscriptionId}; plan left unchanged`,
+        );
+        return;
+      }
+
       // Get subscription details to determine plan
-      const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+      const subscription = await stripeGateway.retrieveSubscription(invoiceSubscriptionId);
 
       // A cancelled subscription must not be brought back to life by a replayed old
       // invoice: the refund handler cancels the subscription before it downgrades.
@@ -1060,10 +1176,26 @@ export function registerStripeRoutes(app: Express) {
         return;
       }
 
+      // Only the subscription we have stored for this person may change their plan. Stripe
+      // does not promise delivery order, so an update written before a cancellation can
+      // arrive after it; an "active" notice for a subscription that has ended must not bring
+      // the plan back.
+      if (user.stripeSubscriptionId && user.stripeSubscriptionId !== subscription.id) {
+        log.info(
+          `Ignoring ${subscription.status} update for old subscription ${subscription.id} for user ${user.id}`,
+        );
+        return;
+      }
+
       // Handle different subscription statuses
       switch (subscription.status) {
-        case 'active':
-          // Subscription is active, ensure user has correct plan
+        case 'active': {
+          // The event describes the subscription as it was when the event was created. Ask
+          // Stripe what it is now, so a stale event cannot revive one that was cancelled.
+          if (!(await isSubscriptionLive(subscription.id))) {
+            log.info(`[Billing] ${subscription.id} is no longer live; plan left unchanged`);
+            break;
+          }
           const priceId = subscription.items.data[0]?.price.id;
           if (priceId) {
             const planConfig = await mapStripePriceToPlan(priceId);
@@ -1073,6 +1205,7 @@ export function registerStripeRoutes(app: Express) {
             }
           }
           break;
+        }
           
         case 'past_due':
           // Payment is overdue, but subscription still exists
@@ -1081,11 +1214,7 @@ export function registerStripeRoutes(app: Express) {
           
         case 'canceled':
         case 'unpaid':
-          if (user.stripeSubscriptionId && user.stripeSubscriptionId !== subscription.id) {
-            log.info(`Ignoring ${subscription.status} old subscription ${subscription.id} for user ${user.id}`);
-            break;
-          }
-          // Subscription cancelled or unpaid, downgrade to free
+          // The ownership check above already ignored every other subscription.
           await storage.updateUserPlan(user.id, 'free', 'monthly');
           log.info(`User ${user.id} downgraded to free due to subscription status: ${subscription.status}`);
           break;
@@ -1097,6 +1226,25 @@ export function registerStripeRoutes(app: Express) {
     } catch (error) {
       log.error('Error handling subscription update:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Whether the subscription is paid for *right now*, asked of Stripe rather than an event.
+   * A subscription that no longer exists, or that the API will not confirm, is not proof of
+   * a paid plan.
+   */
+  async function isSubscriptionLive(subscriptionId: string): Promise<boolean> {
+    try {
+      const subscription = await stripeGateway.retrieveSubscription(subscriptionId);
+      return ['active', 'trialing'].includes(subscription.status);
+    } catch (error) {
+      log.info(
+        `[Billing] Could not confirm subscription ${subscriptionId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return false;
     }
   }
 
@@ -1140,6 +1288,20 @@ export function registerStripeRoutes(app: Express) {
       const user = await getUserByStripeCustomerId(subscription.customer);
       if (!user) {
         log.info('No user found for customer:', subscription.customer);
+        return;
+      }
+
+      // A second live subscription is a second charge. Creation only ever sets the plan for
+      // the subscription this person is actually on.
+      if (user.stripeSubscriptionId && user.stripeSubscriptionId !== subscription.id) {
+        log.info(
+          `Ignoring creation of ${subscription.id}: user ${user.id} already has ${user.stripeSubscriptionId}`,
+        );
+        return;
+      }
+
+      if (!['active', 'trialing'].includes(subscription.status)) {
+        log.info(`[Billing] New subscription ${subscription.id} is ${subscription.status}; plan left unchanged`);
         return;
       }
 

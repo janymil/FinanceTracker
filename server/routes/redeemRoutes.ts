@@ -165,15 +165,18 @@ export function registerRedeemRoutes(app: Express) {
         });
       }
 
-      // Determine new plan based on total codes after successful redemption
+      // Determine the plan the codes are worth.
       const totalCodesAfterRedemption = currentCodeCount + redeemedCodes.length;
-      let plan: string;
-      
-      if (totalCodesAfterRedemption >= 2) {
-        plan = "premium";
-      } else {
-        plan = "standard";
-      }
+      const planFromCodes: 'standard' | 'premium' =
+        totalCodesAfterRedemption >= 2 ? "premium" : "standard";
+
+      // A code may only ever raise a plan. Someone already paying for Premium who redeems a
+      // single code must not be moved down to Standard while still being charged Premium.
+      const currentPlan = (await storage.getUser(userId))?.plan ?? 'free';
+      const planRank = { free: 0, standard: 1, premium: 2 } as const;
+      const currentRank = planRank[currentPlan as keyof typeof planRank] ?? 0;
+      const plan: 'free' | 'standard' | 'premium' =
+        planRank[planFromCodes] > currentRank ? planFromCodes : (currentPlan as 'free' | 'standard' | 'premium');
 
       // Update user's plan and set activation timestamp
       await storage.updateUser(userId, { 

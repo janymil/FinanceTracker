@@ -71,7 +71,11 @@ vi.mock('../../server/billingRegion', () => ({
 
 let server: Server;
 let baseUrl: string;
-let stripeGateway: { cancelSubscription: (subscriptionId: string) => Promise<void> };
+let stripeGateway: {
+  cancelSubscription: (subscriptionId: string) => Promise<void>;
+  retrieveSubscription: (subscriptionId: string) => Promise<{ id: string; status: string }>;
+  retrieveCheckoutSession: (sessionId: string) => Promise<any>;
+};
 const signer = new Stripe('sk_test_unit');
 
 function signedHeader(payload: string): string {
@@ -137,6 +141,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.claimed.clear();
   mocks.failures.length = 0;
+  // Every checkout handler now asks Stripe whether the subscription is still live. A test
+  // must never make that call, so it answers "active" unless the test says otherwise.
+  vi.spyOn(stripeGateway, 'retrieveSubscription').mockResolvedValue({ id: 'sub_1', status: 'active' });
 });
 
 describe('POST /api/stripe-webhook', () => {
@@ -171,13 +178,15 @@ describe('POST /api/stripe-webhook', () => {
     expect(storage.updateUserStripeInfo).toHaveBeenCalledWith('user_9', 'cus_1', 'sub_1');
   });
 
-  it('applies the same event only once when Stripe retries it', async () => {
+  it('applies the same event only once, and asks Stripe to retry the copy it cannot claim', async () => {
     const payload = checkoutEvent('evt_5');
     const first = await post(payload, signedHeader(payload));
     const second = await post(payload, signedHeader(payload));
     expect(first.status).toBe(200);
-    expect(second.status).toBe(200);
-    expect(second.json.duplicate).toBe(true);
+    // 500, not 200: an unfinished claim may belong to a delivery that crashed mid-handling,
+    // and answering 2xx would tell Stripe to stop asking. The retry is applied once the
+    // claim's lease expires.
+    expect(second.status).toBe(500);
     expect(storage.updateUserPlan).toHaveBeenCalledTimes(1);
   });
 
@@ -380,6 +389,167 @@ describe('POST /api/stripe-webhook', () => {
 
       expect(result.status).toBe(200);
       expect(cancel).not.toHaveBeenCalled();
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The success page is a URL the browser keeps forever. Opening it again must not be a
+   * second purchase: the payment stays "paid" after a cancellation or a refund, so the
+   * subscription is what decides whether the plan is still earned.
+   */
+  describe('the checkout success page', () => {
+    const paidSession = (overrides: Record<string, unknown> = {}) => ({
+      id: 'cs_test_1',
+      status: 'complete',
+      payment_status: 'paid',
+      customer: 'cus_1',
+      subscription: 'sub_1',
+      metadata: { userId: 'user_9', plan: 'premium' },
+      ...overrides,
+    });
+
+    async function visit(): Promise<Response> {
+      return fetch(`${baseUrl}/api/subscription-success?session_id=cs_test_1`, { redirect: 'manual' });
+    }
+
+    it('grants the plan when the subscription behind the session is live', async () => {
+      vi.spyOn(stripeGateway, 'retrieveCheckoutSession').mockResolvedValue(paidSession());
+      vi.spyOn(stripeGateway, 'retrieveSubscription').mockResolvedValue({ id: 'sub_1', status: 'active' });
+
+      const response = await visit();
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toContain('upgrade=success');
+      expect(storage.updateUserPlan).toHaveBeenCalledWith('user_9', 'premium', 'monthly');
+      expect(storage.updateUserStripeInfo).toHaveBeenCalledWith('user_9', 'cus_1', 'sub_1');
+    });
+
+    it('refuses an old link whose subscription was cancelled or refunded', async () => {
+      vi.spyOn(stripeGateway, 'retrieveCheckoutSession').mockResolvedValue(paidSession());
+      vi.spyOn(stripeGateway, 'retrieveSubscription').mockResolvedValue({ id: 'sub_1', status: 'canceled' });
+
+      const response = await visit();
+
+      expect(response.headers.get('location')).toContain('subscription_not_active');
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+      // A dead subscription id must not be written back: it would block the next purchase.
+      expect(storage.updateUserStripeInfo).not.toHaveBeenCalled();
+    });
+
+    it('refuses when the subscription cannot be confirmed', async () => {
+      vi.spyOn(stripeGateway, 'retrieveCheckoutSession').mockResolvedValue(paidSession());
+      vi.spyOn(stripeGateway, 'retrieveSubscription').mockRejectedValue(new Error('stripe is down'));
+
+      const response = await visit();
+
+      expect(response.headers.get('location')).toContain('subscription_check_failed');
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
+
+    it('refuses a session that was never paid', async () => {
+      vi.spyOn(stripeGateway, 'retrieveCheckoutSession').mockResolvedValue(paidSession({ payment_status: 'unpaid' }));
+
+      const response = await visit();
+
+      expect(response.headers.get('location')).toContain('payment_not_completed');
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
+
+    it('ends the subscription an upgrade replaced, and keeps the new one', async () => {
+      const cancel = vi.spyOn(stripeGateway, 'cancelSubscription').mockResolvedValue(undefined);
+      vi.spyOn(stripeGateway, 'retrieveCheckoutSession').mockResolvedValue(
+        paidSession({
+          subscription: 'sub_new',
+          metadata: { userId: 'user_9', plan: 'premium', existingSubscriptionId: 'sub_old' },
+        }),
+      );
+      vi.spyOn(stripeGateway, 'retrieveSubscription').mockResolvedValue({ id: 'sub_new', status: 'active' });
+
+      await visit();
+
+      expect(cancel).toHaveBeenCalledWith('sub_old');
+      expect(cancel).not.toHaveBeenCalledWith('sub_new');
+    });
+  });
+
+  describe('an upgrade', () => {
+    it('cancels the subscription it replaced even if the browser never comes back', async () => {
+      const cancel = vi.spyOn(stripeGateway, 'cancelSubscription').mockResolvedValue(undefined);
+
+      const payload = checkoutEvent('evt_up1', {
+        metadata: { userId: 'user_9', plan: 'premium', existingSubscriptionId: 'sub_old' },
+      });
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      // Closing the tab after paying used to leave both subscriptions billing.
+      expect(cancel).toHaveBeenCalledWith('sub_old');
+      expect(storage.updateUserPlan).toHaveBeenCalledWith('user_9', 'premium', 'monthly');
+    });
+  });
+
+  describe('a resent checkout notice', () => {
+    it('does not revive a subscription that has since been cancelled', async () => {
+      vi.spyOn(stripeGateway, 'retrieveSubscription').mockResolvedValue({ id: 'sub_1', status: 'canceled' });
+
+      const payload = checkoutEvent('evt_old1');
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+      expect(storage.updateUserStripeInfo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a subscription event that arrives out of order', () => {
+    it('cannot change the plan of a subscription the person has replaced', async () => {
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_10',
+        stripeCustomerId: 'cus_1',
+        stripeSubscriptionId: 'sub_new',
+        plan: 'premium',
+      } as any);
+      const retrieve = vi
+        .spyOn(stripeGateway, 'retrieveSubscription')
+        .mockResolvedValue({ id: 'sub_old', status: 'active' });
+
+      const payload = eventOf('evt_u1', 'customer.subscription.updated', {
+        id: 'sub_old',
+        object: 'subscription',
+        customer: 'cus_1',
+        status: 'active',
+        items: { data: [{ price: { id: 'price_x' } }] },
+      });
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(retrieve).not.toHaveBeenCalled();
+      expect(storage.updateUserPlan).not.toHaveBeenCalled();
+    });
+
+    it('asks Stripe whether an "active" notice is still true before granting anything', async () => {
+      storage.getUserByStripeCustomerId.mockResolvedValue({
+        id: 'user_10',
+        stripeCustomerId: 'cus_1',
+        stripeSubscriptionId: null,
+        plan: 'free',
+      } as any);
+      const retrieve = vi
+        .spyOn(stripeGateway, 'retrieveSubscription')
+        .mockResolvedValue({ id: 'sub_9', status: 'canceled' });
+
+      const payload = eventOf('evt_u2', 'customer.subscription.updated', {
+        id: 'sub_9',
+        object: 'subscription',
+        customer: 'cus_1',
+        status: 'active',
+        items: { data: [{ price: { id: 'price_x' } }] },
+      });
+      const result = await post(payload, signedHeader(payload));
+
+      expect(result.status).toBe(200);
+      expect(retrieve).toHaveBeenCalledWith('sub_9');
       expect(storage.updateUserPlan).not.toHaveBeenCalled();
     });
   });

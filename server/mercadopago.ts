@@ -120,6 +120,12 @@ export interface PreapprovalState {
   externalReference: string | null;
   plan: PlanId;
   interval: BillingInterval;
+  /**
+   * When MercadoPago last touched this resource. The same id comes back for every state of
+   * the same subscription, so de-duplication has to key on something that changes with each
+   * change — status alone would swallow a later "authorized" (a pause that is resumed).
+   */
+  lastModified: string | null;
 }
 
 function planFromReason(reason: string | undefined): PlanId {
@@ -138,6 +144,7 @@ function toState(data: any): PreapprovalState {
     externalReference: data.external_reference ? String(data.external_reference) : null,
     plan: planFromReason(data.reason),
     interval: intervalFromPreapproval(data),
+    lastModified: data.last_modified ? String(data.last_modified) : null,
   };
 }
 
@@ -153,6 +160,18 @@ export async function findPreapprovalForUser(userId: string): Promise<Preapprova
   if (results.length === 0) return null;
   const sorted = [...results].sort((a, b) => String(b.date_created ?? '').localeCompare(String(a.date_created ?? '')));
   return toState(sorted[0]);
+}
+
+/**
+ * Every preapproval ever created for a user, newest first. Used to end the others when one
+ * is authorised: two live subscriptions mean two charges for one plan.
+ */
+export async function listPreapprovalsForUser(userId: string): Promise<PreapprovalState[]> {
+  const data = await mpFetch(`/preapproval/search?external_reference=${encodeURIComponent(userId)}`);
+  const results: any[] = Array.isArray(data?.results) ? data.results : [];
+  return [...results]
+    .sort((a, b) => String(b.date_created ?? '').localeCompare(String(a.date_created ?? '')))
+    .map(toState);
 }
 
 export async function cancelPreapproval(id: string): Promise<void> {

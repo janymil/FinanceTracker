@@ -898,7 +898,7 @@ export default function AdminAnalytics() {
               <CardContent>
                 <div className="text-2xl font-bold">${stats?.totalRevenue || 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  Monthly recurring revenue
+                  Estimated monthly recurring revenue, at list price
                 </p>
               </CardContent>
             </Card>
