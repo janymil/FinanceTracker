@@ -53,4 +53,10 @@ export async function generateVoiceGreetings() {
 // Call this once to generate all greeting files
 generateVoiceGreetings().then(() => {
   log.info('🎉 All voice greetings generated!');
-}).catch(console.error);
+}).catch((error: unknown) => {
+  // `.catch(console.error)` bypassed the scrubber in server/logger.ts — and it was invisible to
+  // `npm run check:logging` until that check started matching references, not just calls.
+  log.error('Voice greeting generation failed', {
+    error: error instanceof Error ? error.message : String(error),
+  });
+});
