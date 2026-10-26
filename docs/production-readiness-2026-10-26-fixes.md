@@ -163,6 +163,50 @@ still an unconfirmed setting. That is a credential and a destination, not a code
    `UploadReceiptModal.tsx`, `simple-voice-input.tsx`, `FirstRunWelcome.tsx`. Same one-line header.
 6. **Exports in memory**, **CSP nonces**, **metrics**, a second alert address, and a named owner.
 
+## History endpoint — pagination, without needing the browser suite
+
+I said this was blocked on the browser suite. That was too coarse: the real blocker is narrower, and
+most of the change did not need it.
+
+**Done**
+
+| What | Detail |
+|---|---|
+| The endpoint takes a window | `limit` (capped at 500), `offset`, `from`, `to`; `X-Total-Count`, `X-Page-Limit`, `X-Page-Offset` on the response so a screen can say "showing the latest N of M" instead of quietly showing less. No `limit` still means everything, so an old client is unaffected. |
+| Strict parsing | A bad `limit`, a negative `offset`, an unreadable date or a window that ends before it starts is a 400 — never a silent "here is the whole account". `shared/transactionWindow.ts`, 9 unit tests. |
+| A total order | `date desc, id desc`. `date` alone is not a total order, and an offset over an unstable order shows one row twice and skips another. Proven against a real database. |
+| Three call sites already windowed | the trend chart asks for the six months it draws; the first-run screen and the currency context ask for one row, because their only question is "does this account have any". |
+| A gate that does the job the browser suite would | `scripts/check-transaction-queries.ts`, part of `npm run check`: every client read without a limit **or a date window** fails the build. The budget may only shrink and each entry carries a reason. |
+
+**Not done, and the reason changed**
+
+Seven files still read the full history, and each one is blocked by the same thing: they **compute a
+figure in the browser from the rows**. A total summed from a truncated list is a wrong number — a
+worse outcome than a slow screen. So those screens need their totals to come from
+`/api/financial-summary` (which already exists and is SQL-aggregated) *before* they can take a
+window. That is a different change from pagination, and it is the one that genuinely wants the
+browser suite.
+
+This also corrected a mistake in the first version of this change: the chart was windowed by a date
+*and* a 500-row cap. A busy account has more than 500 rows in six months, so the cap would have
+under-reported the chart silently. The cap is gone — a date window returns every row in the period,
+so it cannot truncate — and the gate now treats `?from=` as bounded.
+
+### Score: 84 → 85
+
+| Category | Weight | Was | Now | What moved |
+|---|---|---|---|---|
+| Money correctness | 20 % | 90 | 90 | — |
+| Data integrity & privacy | 15 % | 92 | 92 | — |
+| Security & access | 20 % | 86 | 86 | — |
+| Reliability & recovery | 20 % | 84 | 84 | — |
+| Observability | 5 % | 88 | 88 | — |
+| **Performance & scale** | 10 % | 60 | **66** | the endpoint is windowed and enforced; the largest repeated payload is bounded |
+| **Testing & release safety** | 10 % | 75 | **77** | 7 integration tests on a money path that had none |
+
+Still 60 → 66 rather than higher: four money screens still download everything, and the second
+instance is still a project.
+
 ## Third wave — the "next" list, done
 
 The five items the previous message listed as the next step, plus the restore claim that was never
