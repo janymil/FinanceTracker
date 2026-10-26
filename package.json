@@ -28,6 +28,7 @@
     "sitemap:generate": "node scripts/generate-sitemap.mjs",
     "error-guard:smoke": "tsx scripts/error-guard-smoke.ts",
     "error-guard:prune": "tsx scripts/error-guard-prune.ts",
+    "prune:retention": "tsx scripts/prune-retention.ts",
     "uptime:check": "tsx scripts/uptime-check.ts",
     "ai:chain-check": "tsx scripts/ai-chain-check.ts",
     "audit:flows": "tsx scripts/audit-flows.ts",
@@ -50,6 +51,7 @@
     "db:clean-users": "node scripts/clean-user-data.mjs",
     "db:clean-users:prod": "node scripts/clean-user-data.mjs --prod",
     "dr:verify": "tsx scripts/restore-verify.ts",
+    "billing:reconcile": "tsx scripts/billing-reconcile.ts",
     "load:import": "tsx scripts/load-test-import.ts"
   },
   "dependencies": {

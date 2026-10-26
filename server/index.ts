@@ -34,6 +34,7 @@ import { cookieConsentMiddleware } from "./cookieMiddleware.js";
 import { renderPageForCrawler } from './ssr.js';
 import { countryBlockingMiddleware, loadBlockedCountries } from "./middleware/countryBlocking.js";
 import { isStaticAssetPath } from "./clerkAuth.js";
+import { runWithRequestId } from "./requestContext.js";
 import { checkEncryptionKey } from "./encryptionDiagnostics.js";
 import { reportServerError } from './errorGuard/report.js';
 import { verifyEmailTransport } from './emailService.js';
@@ -106,7 +107,9 @@ app.use((req, res, next) => {
       : randomUUID();
   (req as any).requestId = id;
   if (!res.headersSent) res.setHeader('X-Request-Id', id);
-  next();
+  // Carried through every await below, so an outbound call to the PDF or AI service can send the
+  // same id and one search covers all three logs.
+  runWithRequestId(id, next);
 });
 
 const isProduction = process.env.NODE_ENV === 'production';

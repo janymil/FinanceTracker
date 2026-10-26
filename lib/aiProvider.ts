@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { anonymizeMessages, type AnonymizeExtras } from '../shared/aiAnonymizer';
+import { requestIdHeaders } from '../server/requestContext';
 
 /**
  * Central AI routing layer.
@@ -329,6 +330,8 @@ async function callGateway(config: { url: string; key: string }, params: any, ta
       'x-api-key': config.key,
       'x-app': 'kaptia',
       ...(task ? { 'x-task': task } : {}),
+      // Ties a gateway log line to the request that caused it.
+      ...requestIdHeaders(),
     },
     body: JSON.stringify(body),
     // Aborting also tells the gateway to stop spending on this request.

@@ -1,5 +1,5 @@
 [Unit]
-Description=Kaptia error-data retention (delete evidence older than 30 days)
+Description=Kaptia data retention (error evidence, AI usage, AI cache, job records, sessions)
 After=network-online.target
 Wants=network-online.target
 
@@ -7,7 +7,10 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=/var/www/kaptia
 Environment=NODE_ENV=production
+# Two steps, one timer. The first was the only retention that existed; the second turns the rest of
+# the published table into what actually happens to the rows.
 ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/error-guard-prune.ts --days=30
+ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/prune-retention.ts
 StandardOutput=append:/var/log/kaptia-prune.log
 StandardError=append:/var/log/kaptia-prune.log
 NoNewPrivileges=true

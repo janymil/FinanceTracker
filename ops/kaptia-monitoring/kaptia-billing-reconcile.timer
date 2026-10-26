@@ -1,0 +1,13 @@
+[Unit]
+Description=Run the Kaptia billing reconciliation daily
+
+[Timer]
+# 06:20 — after the dump at 03:15 and the prune at 04:30, and after any early-morning renewal has
+# been processed by the provider.
+OnCalendar=*-*-* 06:20:00
+AccuracySec=10min
+Persistent=true
+RandomizedDelaySec=180
+
+[Install]
+WantedBy=timers.target

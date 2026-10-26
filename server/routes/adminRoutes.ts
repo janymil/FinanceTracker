@@ -5,6 +5,7 @@ import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
 import { cancelBilling } from "../cancelBilling.js";
 import { rateLimit } from "../middleware/rateLimit";
 import { db } from "../db.js";
+import { runtimeSnapshot } from "../runtimeMetrics.js";
 import { blockedCountries } from "../../shared/schema.ts";
 import {
   AI_ACTION_WEIGHTS,
@@ -46,6 +47,20 @@ export function registerAdminRoutes(app: Express) {
       req.session = {};
     }
     return res.json({ authenticated: !!req.session?.isAdminAuthenticated });
+  });
+
+  /**
+   * How the process itself is doing: memory, event-loop delay, database pool, job freshness and
+   * the error counters. Admin-only — it names job names and releases, and it is the one screen
+   * that answers "is it slow, and where" without reading logs.
+   */
+  app.get('/api/admin-analytics/runtime', adminAuth, async (_req: any, res: Response) => {
+    try {
+      return res.json(await runtimeSnapshot());
+    } catch (error) {
+      log.error('Admin runtime snapshot failed:', error);
+      return res.status(500).json({ message: 'Runtime snapshot unavailable' });
+    }
   });
 
   // Admin dashboard - get all users with payment details

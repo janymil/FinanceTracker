@@ -1,0 +1,20 @@
+[Unit]
+Description=Kaptia billing reconciliation (report-only: do what the customer pays for match the account)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/kaptia
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/kaptia/.env
+# Report-only on purpose. It exits non-zero when an account disagrees with the provider, so the
+# unit shows as failed and the log names the accounts. Correcting rows is a human step:
+#   npm run billing:reconcile -- --apply
+ExecStart=/var/www/kaptia/node_modules/.bin/tsx scripts/billing-reconcile.ts
+StandardOutput=append:/var/log/kaptia-billing-reconcile.log
+StandardError=append:/var/log/kaptia-billing-reconcile.log
+NoNewPrivileges=true
+TimeoutStartSec=300
+MemoryMax=256M
+CPUQuota=50%

@@ -948,6 +948,17 @@ export function registerStripeRoutes(app: Express) {
           await handleChargeRefunded(event.data.object);
           break;
 
+        // A chargeback: reported when opened, acted on only when lost. Unsubscribed before this,
+        // so a disputed charge kept the paid plan and nothing said a customer was disputing us.
+        case 'charge.dispute.created':
+        case 'charge.dispute.funds_withdrawn':
+          await handleDisputeCreated(event.data.object);
+          break;
+
+        case 'charge.dispute.closed':
+          await handleDisputeClosed(event.data.object);
+          break;
+
         default:
           log.info(`Unhandled webhook event type: ${event.type}`);
       }
@@ -1469,6 +1480,65 @@ export function registerStripeRoutes(app: Express) {
    *
    * A partial refund is a price correction, not an exit, so the plan stays.
    */
+  /**
+   * A chargeback.
+   *
+   * `charge.dispute.created` used to be unsubscribed, so a disputed charge left the paid plan in
+   * place and nothing anywhere said a customer was disputing us. The plan is deliberately NOT
+   * changed on creation — a dispute is a claim, not a verdict, and cutting off somebody whose bank
+   * opened one by mistake is worse than waiting. It is reported so it is visible in Admin → Watch,
+   * and a *lost* dispute ends the paid plan.
+   */
+  async function handleDisputeCreated(dispute: any) {
+    const amount = Number(dispute.amount ?? 0) / 100;
+    log.warn(
+      `[Billing] Dispute ${dispute.id} opened for ${amount.toFixed(2)} ${String(dispute.currency ?? '').toUpperCase()} ` +
+        `(${dispute.reason ?? 'no reason given'}); plan left unchanged until it closes`,
+    );
+    reportServerError(new Error(`Chargeback opened: ${dispute.reason ?? 'unknown reason'}`), {
+      where: 'stripe.dispute.created',
+      route: '/api/stripe-webhook',
+      moneyPath: true,
+    });
+  }
+
+  async function handleDisputeClosed(dispute: any) {
+    const status = String(dispute.status ?? 'unknown');
+    log.warn(`[Billing] Dispute ${dispute.id} closed as ${status}`);
+
+    if (status !== 'lost') {
+      // Won, warning_closed, or closed without a chargeback: the money stands.
+      log.info(`[Billing] Dispute ${dispute.id} did not cost the payment; plan left unchanged`);
+      return;
+    }
+
+    try {
+      const user = await getUserByStripeCustomerId(dispute.charge?.customer ?? dispute.customer);
+      if (!user) {
+        log.info(`[Billing] Lost dispute ${dispute.id} matches no user; nothing to downgrade`);
+        return;
+      }
+
+      if (user.stripeSubscriptionId) {
+        try {
+          await stripeGateway.cancelSubscription(user.stripeSubscriptionId);
+        } catch (error) {
+          log.error(`[Billing] Could not cancel ${user.stripeSubscriptionId} after a lost dispute:`, error);
+        }
+      }
+
+      await storage.updateUserPlan(user.id, 'free', 'monthly');
+      reportServerError(new Error(`Chargeback lost for ${user.id}; plan moved to free`), {
+        where: 'stripe.dispute.closed',
+        route: '/api/stripe-webhook',
+        moneyPath: true,
+      });
+    } catch (error) {
+      log.error(`[Billing] Failed to apply a lost dispute ${dispute.id}:`, error);
+      throw error;
+    }
+  }
+
   async function handleChargeRefunded(charge: any) {
     const amount = Number(charge.amount ?? 0);
     const refundedAmount = Number(charge.amount_refunded ?? 0);

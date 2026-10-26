@@ -849,8 +849,44 @@ export function registerExportRoutes(app: Express) {
           for (const row of oldTransactions) await storage.createTransaction(stripForReinsert(row));
           for (const row of oldBudgets) await storage.createBudget(stripForReinsert(row));
           for (const row of oldGoals) await storage.createGoal(stripForReinsert(row));
-          // Only this branch can honestly say the old data is back: it re-inserted it and every
-          // step above succeeded. If the rollback itself failed, the message says so below.
+
+          // "Your previous data was kept" is a claim, so it is checked rather than assumed: the
+          // rollback re-inserts rows one by one, and a row that failed to come back must not be
+          // hidden behind that sentence. Counts are enough — the rows are the ones that were here
+          // a moment ago.
+          const after = {
+            transactions: (await storage.getUserTransactions(userId)).length,
+            budgets: (await storage.getUserBudgets(userId)).length,
+            goals: (await storage.getUserGoals(userId).catch(() => [])).length,
+          };
+          const before = {
+            transactions: oldTransactions.length,
+            budgets: oldBudgets.length,
+            goals: oldGoals.length,
+          };
+          const keptEverything =
+            after.transactions >= before.transactions &&
+            after.budgets >= before.budgets &&
+            after.goals >= before.goals;
+
+          if (!keptEverything) {
+            reportServerError(
+              new Error(
+                `Restore rollback came back short: before ${JSON.stringify(before)}, after ${JSON.stringify(after)}`,
+              ),
+              { where: 'backup.restore.rollback.short', route: '/api/restore-backup', moneyPath: true },
+            );
+            return res.status(500).json({
+              message:
+                "The restore failed and part of your previous data could not be put back automatically. Please contact support; your backup file is still stored.",
+              code: 'restore_rollback_incomplete',
+              before,
+              after,
+            });
+          }
+
+          // Only this branch can honestly say the old data is back: it re-inserted it, every step
+          // above succeeded, and the counts agree.
           return res.status(500).json({
             message: "Failed to restore backup. Your previous data was kept.",
             restoredData,

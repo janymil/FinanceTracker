@@ -20,6 +20,7 @@
  *   }
  */
 import fetch from 'node-fetch';
+import { requestIdHeaders } from './requestContext.js';
 
 const DEFAULT_SERVICE_URL = 'https://pdf-processor.formatika.dev';
 
@@ -77,6 +78,8 @@ export async function requestPdf(payload: ProcessorPayload): Promise<Buffer> {
       headers: {
         'Content-Type': 'application/json',
         ...(key ? { 'x-api-key': key } : {}),
+        // Same id as our access-log line, so a slow render is one search across both services.
+        ...requestIdHeaders(),
       },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(timeoutMs()),
