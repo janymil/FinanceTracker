@@ -125,25 +125,19 @@ app.use(session({
 
 app.use(cookieConsentMiddleware);
 
-// Country blocking middleware - must be after session but before routes
-// Delay initialization to ensure database is ready
-let countryBlockingInitialized = false;
-app.use(async (req, res, next) => {
-  if (!countryBlockingInitialized) {
-    // Skip middleware until server is fully initialized
-    const uptime = process.uptime();
-    if (uptime < 5) { // Wait 5 seconds for server startup
-      return next();
-    }
-    countryBlockingInitialized = true;
-  }
-  
-  try {
-    await countryBlockingMiddleware(req, res, next);
-  } catch (error) {
+// Country blocking middleware - must be after session but before routes.
+//
+// There used to be a `process.uptime() < 5 → next()` guard here "to let the database come up",
+// which meant every restart — and `scripts/deploy.sh` restarts on every deploy — served a
+// blocked country normally for five seconds. The middleware now waits for the list instead of
+// skipping the check, and refuses the request when the list cannot be read.
+app.use((req, res, next) => {
+  countryBlockingMiddleware(req, res, next).catch((error) => {
     logger.error('Country blocking middleware error:', error);
-    next();
-  }
+    if (res.headersSent) return next();
+    // Fail closed: an unexpected throw here is a guard failing, not a permission slip.
+    res.status(503).json({ error: 'Service temporarily unavailable' });
+  });
 });
 
 // HTTPS redirect middleware for production

@@ -37,8 +37,33 @@ function passwordMatches(candidate: string, expected: string): boolean {
  * customised. Admin traffic is a handful of requests, so a short cache keeps this cheap;
  * the cost is that a revoked admin keeps access for at most ROLE_CACHE_TTL_MS.
  */
-const roleCache = new Map<string, { isAdmin: boolean; checkedAt: number }>();
+const roleCache = new Map<string, { isAdmin: boolean; checkedAt: number; twoFactor: boolean }>();
 const ROLE_CACHE_TTL_MS = 60_000;
+
+/**
+ * Whether an admin sign-in must carry a second factor.
+ *
+ * Enforcement is on in production by default and off elsewhere, because a developer who has not
+ * enrolled in the test Clerk instance should not be locked out of their own machine. The switch
+ * is `ADMIN_REQUIRE_2FA`: `1` always enforces, `0` never does, anything else follows
+ * `NODE_ENV`.
+ *
+ * The legacy `ADMIN_PASSWORD` door cannot be protected this way — it is a shared secret with no
+ * second step — so it is a deliberate 2FA bypass and is announced at boot.
+ */
+function requiresSecondFactor(): boolean {
+  const flag = (process.env.ADMIN_REQUIRE_2FA ?? 'auto').toLowerCase();
+  if (['0', 'false', 'off', 'no'].includes(flag)) return false;
+  if (['1', 'true', 'on', 'yes'].includes(flag)) return true;
+  return process.env.NODE_ENV === 'production';
+}
+
+if (process.env.ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
+  log.warn(
+    'ADMIN_PASSWORD is set: the shared-password admin door has no second factor. Remove it once ' +
+      'every admin signs in through Clerk, so that 2FA can actually be required.',
+  );
+}
 
 async function isClerkAdmin(req: Request): Promise<boolean> {
   let userId: string | null = null;
@@ -51,15 +76,30 @@ async function isClerkAdmin(req: Request): Promise<boolean> {
 
   const cached = roleCache.get(userId);
   if (cached && Date.now() - cached.checkedAt < ROLE_CACHE_TTL_MS) {
-    return cached.isAdmin;
+    return cached.isAdmin && (!requiresSecondFactor() || cached.twoFactor);
   }
 
   try {
     const user = await clerkClient.users.getUser(userId);
     const isAdmin = (user.publicMetadata as Record<string, unknown> | undefined)?.role === ADMIN_ROLE;
-    roleCache.set(userId, { isAdmin, checkedAt: Date.now() });
-    if (isAdmin) log.info('Admin access granted via Clerk role', { userId });
-    return isAdmin;
+    const twoFactor = Boolean(user.twoFactorEnabled);
+    roleCache.set(userId, { isAdmin, checkedAt: Date.now(), twoFactor });
+
+    if (!isAdmin) return false;
+
+    if (requiresSecondFactor() && !twoFactor) {
+      // Refused, not warned: an admin console can read every customer's records, and a stolen
+      // password is the whole threat model this check exists for.
+      log.warn(
+        'Admin access refused: this Clerk account has no second factor enrolled. Enroll it in ' +
+          'Clerk (or set ADMIN_REQUIRE_2FA=0 to accept the risk in writing).',
+        { userId },
+      );
+      return false;
+    }
+
+    log.info('Admin access granted via Clerk role', { userId, secondFactor: twoFactor });
+    return true;
   } catch (error) {
     // Fail closed: a Clerk outage must never open the admin surface.
     log.error('Admin role lookup failed', { error: (error as Error).message });

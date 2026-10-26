@@ -2,7 +2,28 @@ import { log } from '../logger';
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../db.js';
 import { blockedCountries } from '../../shared/schema.ts';
-import { eq } from 'drizzle-orm';
+
+/**
+ * Country blocking.
+ *
+ * Three things used to go wrong here, all of them silently:
+ *
+ *  1. For the first five seconds after every process start the check was skipped entirely
+ *     (`process.uptime() < 5 → next()`), so every deploy — and there is one per push — opened a
+ *     window in which a blocked country was served the app like any other. A request that
+ *     arrives before the list is ready now *waits* for it instead of being let through.
+ *  2. A failed read of the blocked list returned an empty set, which reads as "nothing is
+ *     blocked": the strictest failure mode dressed up as a normal answer. It now retries
+ *     briefly, serves a stale list when it has one, and otherwise refuses the request.
+ *  3. Every request called the free GeoJS endpoint. Results are cached per address now, so one
+ *     visitor is one lookup per ten minutes rather than one per request.
+ *
+ * What is deliberately *not* fail-closed: a geolocation lookup that fails. Refusing every
+ * request because a third-party service is down turns their outage into ours, and blocking is a
+ * compliance guard, not the primary access control. `COUNTRY_BLOCK_GEO_FAIL_CLOSED=1` opts into
+ * refusing those too. The *list* failing is different — without it nobody can tell who should be
+ * blocked — and that refuses by default (`COUNTRY_BLOCK_FAIL_OPEN=1` to opt out).
+ */
 
 interface GeoJSResponse {
   country_code: string;
@@ -12,125 +33,260 @@ interface GeoJSResponse {
   ip: string;
 }
 
-// Cache blocked countries for 5 minutes to avoid frequent DB queries
+export interface GeoInfo {
+  countryCode: string;
+  country: string;
+  city: string;
+  ip: string;
+}
+
+/** How long a successfully loaded blocklist is trusted. */
+const LIST_TTL_MS = 5 * 60 * 1000;
+/** How long a geolocation answer is reused for one address. */
+const GEO_TTL_MS = 10 * 60 * 1000;
+/** Cap on the geolocation cache, so a flood of addresses cannot grow it without limit. */
+const GEO_CACHE_MAX = 5_000;
+/** After the list fails to load, stop hammering the database for this long. */
+const LIST_FAILURE_BACKOFF_MS = 5_000;
+const LOAD_ATTEMPTS = 3;
+const LOAD_RETRY_MS = 250;
+
 let blockedCountriesCache: Set<string> | null = null;
 let cacheExpiry: number = 0;
+let loadInFlight: Promise<Set<string>> | null = null;
+let listFailedAt = 0;
 
-async function getBlockedCountries(): Promise<Set<string>> {
+const geoCache = new Map<string, { info: GeoInfo | null; expires: number }>();
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function listFailOpen(): boolean {
+  return process.env.COUNTRY_BLOCK_FAIL_OPEN === '1';
+}
+
+function geoFailClosed(): boolean {
+  return process.env.COUNTRY_BLOCK_GEO_FAIL_CLOSED === '1';
+}
+
+
+async function fetchBlockedCountries(): Promise<Set<string>> {
+  const blocked = await db.select({ countryCode: blockedCountries.countryCode }).from(blockedCountries);
+  return new Set(blocked.map((b) => b.countryCode.toUpperCase()));
+}
+
+/**
+ * The blocked-country list, cached. Retries a few times, then serves a stale copy if it has one,
+ * and only then throws — the caller decides what "we cannot tell" means for a request.
+ */
+export async function loadBlockedCountries(): Promise<Set<string>> {
   const now = Date.now();
-  
   if (blockedCountriesCache && cacheExpiry > now) {
     return blockedCountriesCache;
   }
-
-  try {
-    const blocked = await db.select({ countryCode: blockedCountries.countryCode })
-      .from(blockedCountries);
-    
-    blockedCountriesCache = new Set(blocked.map(b => b.countryCode.toUpperCase()));
-    cacheExpiry = now + (5 * 60 * 1000); // 5 minutes
-  } catch (error) {
-    log.error('Error fetching blocked countries:', error);
-    // Return empty set if database is not ready
-    return new Set();
+  if (loadInFlight) {
+    return loadInFlight;
   }
-  
-  return blockedCountriesCache || new Set();
+
+  // This failed a moment ago: answer from that failure instead of queueing three more attempts
+  // per request. During a database blip that would turn a slow query into a request storm.
+  if (!blockedCountriesCache && now - listFailedAt < LIST_FAILURE_BACKOFF_MS) {
+    throw new Error('Blocked-country list is unavailable (recent failure)');
+  }
+
+  loadInFlight = (async () => {
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= LOAD_ATTEMPTS; attempt += 1) {
+      try {
+        const set = await fetchBlockedCountries();
+        blockedCountriesCache = set;
+        cacheExpiry = Date.now() + LIST_TTL_MS;
+        listFailedAt = 0;
+        return set;
+      } catch (error) {
+        lastError = error;
+        if (attempt < LOAD_ATTEMPTS) await sleep(LOAD_RETRY_MS * attempt);
+      }
+    }
+
+    listFailedAt = Date.now();
+    if (blockedCountriesCache) {
+      log.warn('Blocked-country list could not be refreshed; serving the last known copy', {
+        error: lastError instanceof Error ? lastError.message : String(lastError),
+      });
+      return blockedCountriesCache;
+    }
+    throw lastError instanceof Error ? lastError : new Error('Blocked-country list unavailable');
+  })().finally(() => {
+    loadInFlight = null;
+  });
+
+  return loadInFlight;
 }
 
 export function invalidateBlockedCountriesCache() {
   blockedCountriesCache = null;
   cacheExpiry = 0;
+  listFailedAt = 0;
 }
 
-export async function countryBlockingMiddleware(req: Request, res: Response, next: NextFunction) {
+function readGeoCache(ip: string): { hit: true; info: GeoInfo | null } | { hit: false } {
+  const entry = geoCache.get(ip);
+  if (!entry) return { hit: false };
+  if (entry.expires <= Date.now()) {
+    geoCache.delete(ip);
+    return { hit: false };
+  }
+  return { hit: true, info: entry.info };
+}
+
+function writeGeoCache(ip: string, info: GeoInfo | null): void {
+  if (geoCache.size >= GEO_CACHE_MAX) {
+    // Insertion-ordered, so the oldest entries go first. Cheap and bounded beats clever.
+    // `forEach` rather than `for…of` on the key iterator: the server build targets ES5.
+    let toDrop = Math.ceil(GEO_CACHE_MAX / 10);
+    geoCache.forEach((_value, key) => {
+      if (toDrop <= 0) return;
+      geoCache.delete(key);
+      toDrop -= 1;
+    });
+  }
+  geoCache.set(ip, { info, expires: Date.now() + GEO_TTL_MS });
+}
+
+/** Country for an address, from the cache when possible. `null` means "could not determine". */
+async function lookupCountry(ip: string): Promise<GeoInfo | null> {
+  const cached = readGeoCache(ip);
+  if (cached.hit) return cached.info;
+
   try {
-    // Skip blocking for admin routes
-    if (req.path.startsWith('/api/admin-analytics')) {
-      return next();
-    }
-
-    // Skip for health checks and static assets
-    if (req.path === '/health' || req.path.startsWith('/assets')) {
-      return next();
-    }
-    // Get client IP
-    const ip = req.headers['x-forwarded-for'] as string || 
-               req.headers['x-real-ip'] as string || 
-               req.socket.remoteAddress || 
-               '';
-
-    // Extract first IP if multiple (proxy chain)
-    const clientIP = ip.split(',')[0].trim();
-
-    // Skip for development or internal requests
-    if (process.env.NODE_ENV === 'development') {
-      return next();
-    }
-
-    // Explicit escape hatch for E2E / synthetic monitoring. Default off; must be set
-    // deliberately in a non-production environment (see tests/e2e/README.md).
-    if (process.env.DISABLE_COUNTRY_BLOCKING === '1' && process.env.NODE_ENV !== 'production') {
-      return next();
-    }
-
-    // Skip for localhost/development
-    if (
-      !clientIP ||
-      clientIP === '127.0.0.1' ||
-      clientIP === '::1' ||
-      clientIP === 'localhost' ||
-      clientIP.startsWith('::ffff:127.0.0.1') ||
-      clientIP.startsWith('192.168.') ||
-      clientIP.startsWith('10.') ||
-      clientIP.startsWith('172.16.')
-    ) {
-      return next();
-    }
-
-    // Fetch geolocation data from GeoJS
-    const geoResponse = await fetch(`https://get.geojs.io/v1/ip/geo/${clientIP}.json`);
-    
+    const geoResponse = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
     if (!geoResponse.ok) {
-      log.error('GeoJS API error:', geoResponse.status);
-      // Allow access if geo service fails
-      return next();
+      log.warn('GeoJS lookup failed', { status: geoResponse.status });
+      writeGeoCache(ip, null);
+      return null;
     }
 
-    const geoData = await geoResponse.json() as GeoJSResponse;
+    const geoData = (await geoResponse.json()) as GeoJSResponse;
     const countryCode = geoData.country_code?.toUpperCase();
-
     if (!countryCode) {
-      // Allow access if country can't be determined
+      writeGeoCache(ip, null);
+      return null;
+    }
+
+    const info: GeoInfo = {
+      countryCode,
+      country: geoData.country ?? '',
+      city: geoData.city ?? '',
+      ip,
+    };
+    writeGeoCache(ip, info);
+    return info;
+  } catch (error) {
+    log.warn('GeoJS lookup threw', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    writeGeoCache(ip, null);
+    return null;
+  }
+}
+
+function refuseForLocation(res: Response) {
+  res.setHeader('Retry-After', '30');
+  return res.status(503).json({
+    error: 'Service temporarily unavailable',
+    message: 'We could not verify your location. Please try again in a moment.',
+  });
+}
+
+
+export async function countryBlockingMiddleware(req: Request, res: Response, next: NextFunction) {
+  // Skip blocking for admin routes
+  if (req.path.startsWith('/api/admin-analytics')) {
+    return next();
+  }
+
+  // Skip for health checks and static assets
+  if (req.path === '/health' || req.path.startsWith('/assets')) {
+    return next();
+  }
+
+  // Skip for development or internal requests
+  if (process.env.NODE_ENV === 'development') {
+    return next();
+  }
+
+  // Explicit escape hatch for E2E / synthetic monitoring. Default off; must be set
+  // deliberately in a non-production environment (see tests/e2e/README.md).
+  if (process.env.DISABLE_COUNTRY_BLOCKING === '1' && process.env.NODE_ENV !== 'production') {
+    return next();
+  }
+
+  // Get client IP
+  const forwarded =
+    (req.headers['x-forwarded-for'] as string) || (req.headers['x-real-ip'] as string) || '';
+
+  // Extract first IP if multiple (proxy chain)
+  const clientIP = forwarded.split(',')[0].trim() || req.socket.remoteAddress || '';
+
+  // Skip for localhost and private ranges: there is no country to look up, and the synthetic
+  // checks come from there.
+  if (
+    !clientIP ||
+    clientIP === '127.0.0.1' ||
+    clientIP === '::1' ||
+    clientIP === 'localhost' ||
+    clientIP.startsWith('::ffff:127.0.0.1') ||
+    clientIP.startsWith('192.168.') ||
+    clientIP.startsWith('10.') ||
+    clientIP.startsWith('172.16.')
+  ) {
+    return next();
+  }
+
+  try {
+    const geo = await lookupCountry(clientIP);
+
+    if (!geo) {
+      if (geoFailClosed()) {
+        log.warn('Country could not be determined — refusing the request', { ip: clientIP });
+        return refuseForLocation(res);
+      }
+      log.warn('Country could not be determined — allowing the request', { ip: clientIP });
       return next();
     }
 
-    // Check if country is blocked
-    const blockedSet = await getBlockedCountries();
-    
-    if (blockedSet.has(countryCode)) {
-      // Log blocked access attempt
-      log.info(`Blocked access from ${countryCode} (${geoData.country}) - IP: ${clientIP}`);
-      
+    // "We do not know who is blocked" is not the same as "nobody is blocked". A request that
+    // arrives while the list is being loaded waits for it here rather than being let through.
+    let blockedSet: Set<string>;
+    try {
+      blockedSet = await loadBlockedCountries();
+    } catch (error) {
+      log.error('Blocked-country list unavailable', {
+        error: error instanceof Error ? error.message : String(error),
+        failOpen: listFailOpen(),
+      });
+      if (listFailOpen()) return next();
+      return refuseForLocation(res);
+    }
+
+    if (blockedSet.has(geo.countryCode)) {
+      log.info(`Blocked access from ${geo.countryCode} (${geo.country}) - IP: ${clientIP}`);
+
       return res.status(403).json({
         error: 'Access denied',
         message: 'Access from your country is not available',
-        country: geoData.country
+        country: geo.country,
       });
     }
 
     // Add country info to request for analytics
-    (req as any).geoInfo = {
-      countryCode,
-      country: geoData.country,
-      city: geoData.city,
-      ip: clientIP
-    };
-
-    next();
+    (req as Request & { geoInfo?: GeoInfo }).geoInfo = geo;
+    return next();
   } catch (error) {
+    // A throw we did not anticipate. Refuse unless the operator asked to fail open: this is a
+    // guard, and a guard that opens itself on a bug is not a guard.
     log.error('Country blocking middleware error:', error);
-    // Allow access on error to prevent blocking legitimate users
-    next();
+    if (listFailOpen()) return next();
+    return refuseForLocation(res);
   }
 }

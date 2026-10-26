@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import type { AddressInfo } from 'net';
 import type { Server } from 'http';
@@ -87,5 +87,55 @@ describe('adminAuth', () => {
 
     expect(response.status).toBe(200);
     expect(getUser).not.toHaveBeenCalled();
+  });
+});
+
+describe('adminAuth — the second factor', () => {
+  afterEach(() => {
+    delete process.env.ADMIN_REQUIRE_2FA;
+  });
+
+  it('refuses an admin account with no second factor when it is required', async () => {
+    process.env.ADMIN_REQUIRE_2FA = '1';
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
+
+    expect((await call({ 'x-user': 'user_admin_no_2fa' })).status).toBe(401);
+  });
+
+  it('accepts an admin account that has one enrolled', async () => {
+    process.env.ADMIN_REQUIRE_2FA = '1';
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: true });
+
+    expect((await call({ 'x-user': 'user_admin_with_2fa' })).status).toBe(200);
+  });
+
+  it('keeps the second-factor answer in the cache, not just the role', async () => {
+    process.env.ADMIN_REQUIRE_2FA = '1';
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
+
+    // Two calls, one lookup: the cached decision must not lose the 2FA result and let the
+    // second request through.
+    expect((await call({ 'x-user': 'user_admin_cached' })).status).toBe(401);
+    expect((await call({ 'x-user': 'user_admin_cached' })).status).toBe(401);
+    expect(getUser).toHaveBeenCalledTimes(1);
+  });
+
+  it('can be turned off, for an operator who accepts the risk in writing', async () => {
+    process.env.ADMIN_REQUIRE_2FA = '0';
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
+
+    expect((await call({ 'x-user': 'user_admin_risk' })).status).toBe(200);
+  });
+
+  it('is not enforced outside production by default, so a developer is not locked out', async () => {
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
+
+    expect((await call({ 'x-user': 'user_admin_dev' })).status).toBe(200);
+  });
+
+  it('never asks the legacy password session for a second factor', async () => {
+    process.env.ADMIN_REQUIRE_2FA = '1';
+
+    expect((await call({ 'x-legacy-admin': '1' })).status).toBe(200);
   });
 });
