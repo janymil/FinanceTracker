@@ -651,8 +651,28 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserTransactions(userId: string, limit?: number): Promise<(Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null })[]> {
-    const baseQuery = db
+  /**
+   * One window of the person's history.
+   *
+   * `limit`/`offset`/`from`/`to` are what let a screen ask for what it shows instead of the whole
+   * lifetime of the account: every row is decrypted on the way out, so "all of it" was the most
+   * expensive thing the app did, several times per page. The old signature (a bare number) still
+   * works, so no caller had to change in the same step as this.
+   *
+   * Ordering is `date desc, id desc` on purpose: `date` alone is not a total order — two rows can
+   * share a day to the second — and an offset over an unstable order can show the same row on two
+   * pages and skip another.
+   */
+  async getUserTransactions(
+    userId: string,
+    options: number | { limit?: number; offset?: number; from?: Date; to?: Date } = {},
+  ): Promise<(Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null })[]> {
+    const window = typeof options === 'number' ? { limit: options } : options;
+    const conditions = [eq(transactions.userId, userId)];
+    if (window.from) conditions.push(gte(transactions.date, window.from));
+    if (window.to) conditions.push(lte(transactions.date, window.to));
+
+    let query = db
       .select({
         id: transactions.id,
         userId: transactions.userId,
@@ -680,10 +700,14 @@ export class DatabaseStorage implements IStorage {
       })
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
-      .where(eq(transactions.userId, userId))
-      .orderBy(desc(transactions.date));
+      .where(and(...conditions))
+      .orderBy(desc(transactions.date), desc(transactions.id))
+      .$dynamic();
 
-    const userTransactions = limit ? await baseQuery.limit(limit) : await baseQuery;
+    if (window.limit !== undefined && window.limit > 0) query = query.limit(window.limit);
+    if (window.offset !== undefined && window.offset > 0) query = query.offset(window.offset);
+
+    const userTransactions = await query;
 
     // Decrypt sensitive fields (amount is not encrypted)
     return userTransactions.map(transaction => ({
@@ -694,6 +718,20 @@ export class DatabaseStorage implements IStorage {
       ocrText: (decryptField(transaction.ocrText ?? null) ?? null) as string | null
     }));
   }
+
+  /** How many rows a window holds, without reading or decrypting any of them. */
+  async countTransactionsInRange(userId: string, from?: Date, to?: Date): Promise<number> {
+    const conditions = [eq(transactions.userId, userId)];
+    if (from) conditions.push(gte(transactions.date, from));
+    if (to) conditions.push(lte(transactions.date, to));
+
+    const [row] = await db
+      .select({ total: count(transactions.id) })
+      .from(transactions)
+      .where(and(...conditions));
+    return Number(row?.total ?? 0);
+  }
+
 
   async getTransactionsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Array<Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null }>> {
     const userTransactions = await db

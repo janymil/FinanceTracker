@@ -10,6 +10,18 @@ import RequirePlan from "@/components/require-plan";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 
+/**
+ * The URL for the six months this chart draws.
+ *
+ * The loop below walks `i = 5 … 0`, so the oldest month it can show is the first day of the month
+ * five months back. Asking for that window returns exactly the rows the chart uses — the unfiltered
+ * request downloaded the account's whole history for the same picture.
+ */
+function trendWindowUrl(now: Date = new Date()): string {
+  const oldest = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  return `/api/transactions?from=${encodeURIComponent(oldest.toISOString())}&limit=500`;
+}
+
 export default function TrendsChart() {
   const { t, i18n } = useTranslation();
   const { isReady, user } = useClerkUserReady();
@@ -28,12 +40,10 @@ export default function TrendsChart() {
     }
   };
 
-  // Fetch user's actual financial data for trend calculation
+  // Fetch the months the chart draws, not the whole history: it only ever walks the last six.
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["/api/transactions"],
+    queryKey: [trendWindowUrl()],
     enabled: isReady && !!user?.id,
-    staleTime: 0,
-    gcTime: 0,
   });
 
   const generateTrendData = () => {

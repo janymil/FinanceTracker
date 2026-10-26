@@ -54,7 +54,9 @@ export function FirstRunWelcome() {
 
   // The same cache the dashboard uses, so no extra request once it has loaded.
   const { data: transactions, isSuccess } = useQuery<unknown[]>({
-    queryKey: ["/api/transactions"],
+    // Only "does this account have any history" is needed here, so one row is enough: the
+    // unfiltered request used to download and decrypt everything to answer the same question.
+    queryKey: ["/api/transactions?limit=1"],
     enabled: Boolean(userId) && hasCurrency,
   });
   const isNewAccount = isSuccess && Array.isArray(transactions) && transactions.length === 0;

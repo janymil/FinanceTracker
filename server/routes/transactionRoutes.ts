@@ -18,6 +18,7 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_NOTE_LENGTH,
 } from "@shared/trackingInput";
+import { parseTransactionWindow } from "@shared/transactionWindow";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe',
@@ -215,13 +216,29 @@ export function registerTransactionRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      const user = await storage.getUser(userId);
 
-      // No viewing limits - users can see all their stored transactions
-      // Storage limits are enforced at creation time
-      let limit = undefined; // Show all transactions user has stored
+      /*
+       * A window, not the whole lifetime of the account.
+       *
+       * Every row is decrypted on the way out, and several screens each asked for all of them —
+       * the request was both the largest payload and the most expensive thing the server did.
+       * `limit`/`offset`/`from`/`to` let a screen ask for what it shows. No `limit` still means
+       * everything, so an old client keeps working; either way the response says how many rows
+       * the window holds, so the interface can be honest about what it left out instead of
+       * quietly showing less.
+       */
+      const parsedWindow = parseTransactionWindow(req.query as Record<string, unknown>);
+      if (!parsedWindow.ok) {
+        return res.status(400).json({ message: parsedWindow.error, code: 'invalid_window' });
+      }
+      const window = parsedWindow.window;
 
-      const transactions = await storage.getUserTransactions(userId, limit);
+      const total = await storage.countTransactionsInRange(userId, window.from, window.to);
+      const transactions = await storage.getUserTransactions(userId, window);
+
+      res.setHeader('X-Total-Count', String(total));
+      res.setHeader('X-Page-Limit', String(window.limit ?? 0));
+      res.setHeader('X-Page-Offset', String(window.offset ?? 0));
 
       // Get user language and translate predefined category names
       const userLanguage = getUserLanguage(req);

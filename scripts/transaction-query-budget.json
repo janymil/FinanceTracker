@@ -1,0 +1,19 @@
+{
+  "$comment": [
+    "Files that still read /api/transactions without a window. This list may only shrink.",
+    "Each entry needs a reason. Before removing one, the screen must either pass ?limit=…",
+    "(and ?from=/&to= when it shows a period) or stop computing numbers in the browser.",
+    "A screen that computes a total from a truncated list shows a wrong number, which is why",
+    "the money screens cannot take a window until their totals come from the server."
+  ],
+  "allowed": {
+    "client/src/hooks/useTransactions.ts": "shared list hook. Its four consumers (transactions, expenses, income, dashboard) each compute at least one figure from the rows, so a cap here would produce a wrong number. Their totals must come from /api/financial-summary first.",
+    "client/src/components/budget-overview.tsx": "spending per budget period is summed in the browser from every row.",
+    "client/src/pages/reports.tsx": "period totals summed in the browser.",
+    "client/src/pages/trends.tsx": "monthly series and breakdowns computed from the full list.",
+    "client/src/pages/calendar.tsx": "month grid built in the browser; can move to a from/to window once its numbers are checked.",
+    "client/src/components/auto-categorization.tsx": "lists uncategorised rows across all history; needs a server-side filter before it can page.",
+    "client/src/components/export-tools.tsx": "an export genuinely wants everything; the server-side export endpoint is the better home for it."
+  }
+}
+

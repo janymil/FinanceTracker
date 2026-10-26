@@ -74,8 +74,9 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         
         // Check if user has any transactions. If this call fails the currency prompt must still
         // work (the server refuses a currency change once transactions exist anyway).
+        // One row answers the question; the unfiltered request returned the whole history.
         try {
-          const transactionsResponse = await apiRequest('GET', '/api/transactions');
+          const transactionsResponse = await apiRequest('GET', '/api/transactions?limit=1');
           const transactions = await transactionsResponse.json();
           const userHasTransactions = Array.isArray(transactions) && transactions.length > 0;
           setHasTransactions(userHasTransactions);
