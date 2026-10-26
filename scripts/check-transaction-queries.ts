@@ -68,8 +68,10 @@ export function findOffenders(): Offender[] {
       if (/\b(POST|PUT|PATCH|DELETE)\b/.test(around)) return;
       // Cache bookkeeping names a key, it does not fetch anything.
       if (/(invalidateQueries|refetchQueries|removeQueries|setQueryData|cancelQueries)/.test(around)) return;
-      // A bounded read says so in the URL it fetches.
-      if (/limit=/.test(around)) return;
+      // A bounded read says so: either how many rows it wants, or the period it shows. A screen
+      // that asks for "October" is not downloading the account's lifetime, and unlike a page size
+      // a date window cannot truncate — every row in the period comes back.
+      if (/limit=/.test(around) || /[?&]from=/.test(around)) return;
 
       offenders.push({
         file: path.relative(ROOT, file),

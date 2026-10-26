@@ -19,7 +19,9 @@ import { useTranslation } from "react-i18next";
  */
 function trendWindowUrl(now: Date = new Date()): string {
   const oldest = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-  return `/api/transactions?from=${encodeURIComponent(oldest.toISOString())}&limit=500`;
+  // No `limit`: a date window cannot truncate, and capping it would quietly under-report the
+  // chart for an account with more than a page of rows in six months.
+  return `/api/transactions?from=${encodeURIComponent(oldest.toISOString())}`;
 }
 
 export default function TrendsChart() {
