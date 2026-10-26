@@ -38,12 +38,24 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json-summary'],
       reportsDirectory: 'coverage',
-      include: ['shared/money.ts', 'shared/calculations.ts', 'shared/trackingInput.ts', 'lib/aiProvider.ts'],
+      include: [
+        'shared/money.ts',
+        'shared/calculations.ts',
+        'shared/trackingInput.ts',
+        'lib/aiProvider.ts',
+        // Money and imports: the two places where a wrong number reaches a customer's screen as
+        // a fact. Added on 2026-10-26 — the gate used to measure four files, all of them maths
+        // helpers, and said nothing about pricing or statement parsing.
+        'shared/pricing.ts',
+        'shared/billingRegion.ts',
+        'shared/statementImport.ts',
+      ],
       all: false,
       /**
-       * Measured on 2026-10-25: 98.09 statements / 89.13 branches / 95.65 functions / 98.09 lines.
-       * The numbers sit a few points below what is there today, so this is a ratchet against
-       * regression rather than a tripwire a small refactor trips.
+       * Measured on 2026-10-26 with the widened include list: 97.87 statements / 88.5 branches /
+       * 96.62 functions / 97.87 lines. The thresholds sit a few points below what is there
+       * today, so this is a ratchet against regression rather than a tripwire a small refactor
+       * trips.
        */
       thresholds: { statements: 95, branches: 85, functions: 90, lines: 95 },
     },

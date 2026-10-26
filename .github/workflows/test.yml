@@ -44,6 +44,23 @@ jobs:
   # - e2e job with Playwright + Clerk test instance
   # A live AI benchmark is NEVER part of this workflow.
 
+  # The browser suite is written and never runs. That is a gap, and a gap that is invisible in
+  # the Checks list is a gap that stays: this job does not fail the build, it says out loud that
+  # the money paths are untested end to end. Switch the suite on by setting the repository
+  # variable E2E_ENABLED=true and adding the secrets the `e2e` job below reads
+  # (E2E_CLERK_SECRET_KEY, ENCRYPTION_KEY) plus the variable E2E_CLERK_PUBLISHABLE_KEY.
+  e2e-status:
+    name: e2e (status)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report whether the browser suite is running
+        if: ${{ vars.E2E_ENABLED != 'true' }}
+        run: |
+          echo "::warning title=Browser tests are switched off::10 Playwright specs exist (add expense, import, checkout, accessibility) but none of them run in CI. Set the repository variable E2E_ENABLED=true to switch them on."
+      - name: Confirm the browser suite is running
+        if: ${{ vars.E2E_ENABLED == 'true' }}
+        run: echo "Browser suite enabled; see the e2e job."
+
   integration:
     name: integration (throwaway Postgres)
     runs-on: ubuntu-latest
