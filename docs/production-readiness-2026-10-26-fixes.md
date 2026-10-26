@@ -163,4 +163,53 @@ still an unconfirmed setting. That is a credential and a destination, not a code
    `UploadReceiptModal.tsx`, `simple-voice-input.tsx`, `FirstRunWelcome.tsx`. Same one-line header.
 6. **Exports in memory**, **CSP nonces**, **metrics**, a second alert address, and a named owner.
 
+## Third wave — the "next" list, done
+
+The five items the previous message listed as the next step, plus the restore claim that was never
+checked.
+
+| Item | What was wrong | What it is now |
+|---|---|---|
+| Billing reconciliation | Billing was event-driven only. A notice that never arrives (past the provider's retries) leaves a paying customer on free, or a cancelled one on paid, and nothing notices. | `scripts/billing-reconcile.ts` asks both providers and compares with the account rows. Report-only unless `--apply`. Daily timer at 06:20; it exits non-zero on drift, so the unit shows as failed and the log names the accounts. **Ran against production: 2 accounts, no disagreement.** |
+| Chargebacks | `charge.dispute.*` was not subscribed at all. A disputed charge kept the paid plan and nothing said a customer was disputing us. | Created/withdrawn are reported (money path) and leave the plan alone; a **lost** dispute cancels the subscription and moves the account to free. |
+| Retention | The privacy policy states retention windows; only error evidence was ever deleted. AI usage, AI cache, job records and expired sessions grew forever. | `scripts/prune-retention.ts`, second step of the existing prune timer: 400 days of AI usage, cache rows past their own expiry or 90 days, 90 days of job records, expired sessions. `--dry-run` counts. **Ran against production: 6 cache rows and 3 sessions deleted.** |
+| Runtime view | The app answered "is it up" and "what went wrong", nothing in between. | `GET /api/admin-analytics/runtime` (admin-only): memory, event-loop delay (mean/p99/max), pool total/idle/waiting/max, stale jobs, error counters. Answers 401 unauthenticated. |
+| Tracing | A slow PDF render could not be followed from our log into theirs. | One request id carried through `AsyncLocalStorage` and sent as `x-request-id` to the PDF processor and the AI gateway. |
+| Restore | "Your previous data was kept" was asserted, not checked. | After the rollback the counts are compared with what was there before; a short rollback answers `restore_rollback_incomplete` instead of the reassuring sentence. |
+
+### Score: 81 → 84
+
+| Category | Weight | Was | Now | What moved |
+|---|---|---|---|---|
+| Security & access | 20 % | 86 | 86 | — |
+| Money correctness | 20 % | 84 | **90** | reconciliation, chargebacks, a checked restore claim |
+| Data integrity & privacy | 15 % | 88 | **92** | retention is now a mechanism, not a paragraph |
+| Reliability & recovery | 20 % | 82 | **84** | two more daily jobs that fail loudly |
+| Testing & release safety | 10 % | 75 | 75 | +10 tests; the browser suite still does not run |
+| Performance & scale | 10 % | 60 | 60 | untouched on purpose — see below |
+| Observability | 5 % | 78 | **88** | runtime view and tracing |
+
+### Why performance stayed at 60, deliberately
+
+It is the one category where the remaining work is blocked, not skipped:
+
+- The 15-point item is pagination of the history endpoint, a client-wide change across the screens
+  that show money. Doing it without a browser suite is how a "fix" becomes a worse bug.
+- The 10-point item is the second instance: rate limits, QR sessions and live-update streams are
+  per-process, so horizontal scaling needs a shared store first. That is a project, not an edit.
+- The 5-point item is a measured capacity number. The load script exists; it needs a disposable
+  database and a signed-in premium test account. **Nothing here needs code from me — it needs a
+  test account.**
+
+### What is left now
+
+| Item | Type |
+|---|---|
+| Pagination of the history endpoint | Code, **after** the browser suite |
+| Browser suite on (`E2E_ENABLED=true`, Clerk test instance) | Needs a test account |
+| Copies off this host (`BACKUP_S3_BUCKET`) | Needs a storage credential |
+| Two sealed key copies | Owner |
+| Exports in memory, CSP nonces, a second alert address | Code / owner |
+| Tax and payment documents, legal review, penetration test | Third party |
+
 
