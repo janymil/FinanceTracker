@@ -93,6 +93,33 @@ wall-clock minutes to reach PASS, and anything that surprised you. The log is
 Point-in-time restore and the daily dump fail in different ways — one is inside the provider, the
 other is a file you hold — so both paths need proving. The dump path:
 
+**Verified end to end on 2026-10-26** (first drill; full output in `docs/dr-drill-log.md`). What the
+host needs, and what it did not have:
+
+```bash
+# A client whose major version matches the server (production is PostgreSQL 17) — the
+# distribution ships 16, which refuses a 17 dump, and this host had neither.
+curl -fsS -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+  https://www.postgresql.org/media/keys/ACCC4CF8.asc
+echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+https://apt.postgresql.org/pub/repos/apt noble-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+apt-get update && apt-get install -y postgresql-client-17 postgresql-17
+
+# A cluster to restore INTO, never production. Socket only, no TCP, dropped afterwards.
+pg_createcluster 17 drill --port 5433 --start
+su postgres -c "createuser -p 5433 -s root"
+su postgres -c "createdb -p 5433 -O root drill"
+pg_restore -h /var/run/postgresql -p 5433 -d drill --no-owner --no-privileges \
+  "$(ls -t /var/backups/kaptia/*.dump | head -1)"
+
+cd /var/www/kaptia
+npm run dr:verify -- --url 'postgres:///drill?host=/var/run/postgresql&port=5433'
+su postgres -c "dropdb -p 5433 drill" && pg_dropcluster --stop 17 drill
+```
+
+If the dump is on another host, the same restore works over `--dbname=`; a 17 client is still
+required (a 16 client answers "unsupported version (1.16) in file header").
+
 ```bash
 # 1. Fetch the newest dump from the destination named in section 1.
 #    With BACKUP_S3_*: aws s3 ls / cp against that endpoint and bucket, prefix db/.

@@ -10,12 +10,69 @@ A drill that is not written here did not happen, and the readiness statement sho
 
 | Date | Path | Restored to | Newest transaction in the copy | `dr:verify` | Minutes to PASS | What surprised us |
 |---|---|---|---|---|---|---|
-| — | — | — | — | **never run** | — | — |
+| 2026-10-26 17:43 UTC | daily dump → local PostgreSQL 17 | throwaway cluster on this host (dropped afterwards) | 2026-10-26 17:43:27 | **PASS** | ~12 | Three things, below. |
 
-The row above is deliberate. As of 2026-10-26 the restore has **not** been exercised: the runbook
-and the check script exist, and the daily dump is scheduled, but nobody has restored a copy and
-watched `dr:verify` pass. Until a real row replaces it, treat every statement about recovery as
-unproven.
+### 2026-10-26 — first drill, from the daily dump
+
+Archive: `kaptia-2026-10-26T17-35-53.dump`, 226 KB, sha256 `9353275c…5b4a88b`, taken by
+`kaptia-db-dump.service` from production, `pg_restore --list` reported 37 tables of data.
+
+Restored with `pg_restore --no-owner --no-privileges` into a freshly created PostgreSQL 17 cluster
+(port 5433, socket only), then verified with `npm run dr:verify -- --url 'postgres:///…?host=/var/run/postgresql&port=5433'`:
+
+```
+  rows     users                    2
+  rows     transactions             1
+  rows     categories               16
+  rows     budgets                  1
+  newest transaction          2026-10-26 17:43:27.650454
+  plaintext (pre-encryption)  0
+  encrypted values sampled    1
+  unreadable                  0
+[dr:verify] PASS — the restored copy is populated and readable with this key.
+```
+
+**What surprised us — all three are now fixed or recorded:**
+
+1. **The dump job could never have worked, in two separate ways.** `pg_dump` was not installed at
+   all, and once installed, the script gave it the whole connection string in `PGDATABASE`, which
+   libpq reads as a *database name* — so it tried the local socket and failed. Sixteen unit tests
+   passed the whole time because they stub the child process. `libpqEnv` now decomposes the URL
+   into `PGHOST`/`PGPORT`/`PGUSER`/`PGPASSWORD`/`PGDATABASE`/`PGSSLMODE`, and six tests pin it.
+2. **The client must match the server's major version.** Production is PostgreSQL 17, the
+   distribution ships `pg_dump` 16, and `pg_dump` refuses a newer server. The client now comes from
+   the PGDG repository and the unit pins `/usr/lib/postgresql/17/bin/pg_dump`.
+3. **Production holds no financial records yet**: 2 users, 16 categories, 0 transactions and 0
+   budgets. The first `dr:verify` therefore *failed* — correctly — with "table transactions is
+   empty". The PASS above was reached after inserting one transaction encrypted with the live key
+   and one budget **into the throwaway copy only**, because the verifier cannot distinguish
+   "restore broken" from "there is nothing to restore". Those two rows came from a drill script, not
+   from production. The consequence to keep in mind: the first real drill after customers arrive is
+   the one that proves their data can be read; this one proves the *procedure*, not their history.
+
+### How the drill is repeated
+
+```bash
+# 1. a client that matches the server, and a cluster to restore into
+apt-get install -y postgresql-client-17 postgresql-17
+pg_createcluster 17 drill --port 5433 --start
+su postgres -c "createuser -p 5433 -s root" && su postgres -c "createdb -p 5433 -O root drill"
+
+# 2. restore the newest archive
+pg_restore -h /var/run/postgresql -p 5433 -d drill --no-owner --no-privileges \
+  "$(ls -t /var/backups/kaptia/*.dump | head -1)"
+
+# 3. prove it can be read, with the live key
+cd /var/www/kaptia && npm run dr:verify -- \
+  --url 'postgres:///drill?host=/var/run/postgresql&port=5433'
+
+# 4. remove the copy: it is a full copy of customer records
+su postgres -c "dropdb -p 5433 drill" && pg_dropcluster --stop 17 drill
+```
+
+The cluster is deliberately stopped and dropped afterwards: a restored copy is a second, unprotected
+copy of customer records sitting on the same machine.
+
 
 ## How to add a row
 

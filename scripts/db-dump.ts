@@ -80,6 +80,52 @@ export function describeSource(url: string): string {
   }
 }
 
+/**
+ * The libpq environment for a connection string.
+ *
+ * This used to be `{ ...process.env, PGDATABASE: options.sourceUrl }`, and `pg_dump` then
+ * ignored the string and tried the *local* socket:
+ *
+ *     pg_dump: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed
+ *
+ * libpq reads `PGDATABASE` as a database name; only the `dbname` *parameter* is expanded when it
+ * looks like a URI. So the job could never have dumped anything — which nobody knew, because the
+ * timer was never installed and the unit tests stub the child process.
+ *
+ * The string is decomposed into the variables libpq does understand. It cannot go in argv:
+ * `ps` shows arguments to every user on the host, and this one carries the password.
+ */
+export function libpqEnv(connectionString: string, base: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...base };
+  delete env.PGDATABASE;
+  delete env.PGHOST;
+  delete env.PGPORT;
+  delete env.PGUSER;
+  delete env.PGPASSWORD;
+
+  try {
+    const url = new URL(connectionString);
+    if (url.protocol !== 'postgres:' && url.protocol !== 'postgresql:') {
+      throw new Error('not a postgres URL');
+    }
+    env.PGHOST = decodeURIComponent(url.hostname);
+    if (url.port) env.PGPORT = url.port;
+    if (url.username) env.PGUSER = decodeURIComponent(url.username);
+    if (url.password) env.PGPASSWORD = decodeURIComponent(url.password);
+    const database = url.pathname.replace(/^\//, '');
+    if (database) env.PGDATABASE = decodeURIComponent(database);
+    // Neon requires TLS; its certificate is not verified here for the same reason the app does
+    // not verify it (see server/db.ts). `sslmode` is carried through when the URL states one.
+    env.PGSSLMODE = url.searchParams.get('sslmode') || 'require';
+    env.PGAPPNAME = 'kaptia-db-dump';
+  } catch {
+    // Not a URL: hand it over as a database name and let libpq decide what it is.
+    env.PGDATABASE = connectionString;
+  }
+
+  return env;
+}
+
 export function parseArgs(argv: string[], env: NodeJS.ProcessEnv = process.env): Options | { error: string } {
   const options: Options = {
     json: false,
@@ -285,8 +331,9 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
 
   try {
     // The connection string goes in the environment, not in argv: `ps` shows arguments to every
-    // user on the host, and this one carries the database password.
-    const childEnv: NodeJS.ProcessEnv = { ...process.env, PGDATABASE: options.sourceUrl };
+    // user on the host, and this one carries the database password. libpq needs it decomposed
+    // into the variables it understands — see `libpqEnv`.
+    const childEnv: NodeJS.ProcessEnv = libpqEnv(options.sourceUrl);
 
     await run(
       options.pgDump,

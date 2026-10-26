@@ -4,6 +4,7 @@ import {
   describeSource,
   dumpFileName,
   isExpired,
+  libpqEnv,
   main,
   objectKey,
   parseArgs,
@@ -16,6 +17,53 @@ import {
  * a copy gets, where it lands, when it is allowed to be deleted, and the refusal to run without
  * a destination.
  */
+describe('libpqEnv', () => {
+  const url = 'postgresql://kaptia_user:s3cret%40pw@ep-cool-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+
+  it('decomposes the connection string into the variables libpq reads', () => {
+    // The bug this pins: the whole string used to go into PGDATABASE, which libpq reads as a
+    // *database name*. pg_dump then ignored it and tried the local socket, so the daily dump
+    // failed with "No such file or directory" the first time it ever ran.
+    const env = libpqEnv(url, {});
+
+    expect(env.PGHOST).toBe('ep-cool-pooler.us-east-2.aws.neon.tech');
+    expect(env.PGDATABASE).toBe('neondb');
+    expect(env.PGUSER).toBe('kaptia_user');
+    expect(env.PGPASSWORD).toBe('s3cret@pw');
+    expect(env.PGSSLMODE).toBe('require');
+    expect(env.PGDATABASE).not.toContain('postgresql://');
+  });
+
+  it('keeps the password out of anything a process listing would show', () => {
+    // The password lives in the environment, never in argv: `ps` shows arguments to every user.
+    expect(Object.values(libpqEnv(url, {})).join(' ')).toContain('s3cret@pw');
+    expect(libpqEnv(url, {})).not.toHaveProperty('PGOPTIONS');
+  });
+
+  it('carries the port when the URL has one, and defaults sslmode to require', () => {
+    const env = libpqEnv('postgres://u:p@db.example.test:6543/kaptia', {});
+
+    expect(env.PGPORT).toBe('6543');
+    expect(env.PGSSLMODE).toBe('require');
+  });
+
+  it('honours an explicit sslmode, including disable', () => {
+    expect(libpqEnv('postgres://u:p@db.example.test/kaptia?sslmode=disable', {}).PGSSLMODE).toBe('disable');
+  });
+
+  it('clears a stale PGDATABASE from the environment it was given', () => {
+    const env = libpqEnv(url, { PGDATABASE: 'wrong', PGHOST: 'wrong', PGPASSWORD: 'wrong' });
+
+    expect(env.PGDATABASE).toBe('neondb');
+    expect(env.PGHOST).toBe('ep-cool-pooler.us-east-2.aws.neon.tech');
+    expect(env.PGPASSWORD).toBe('s3cret@pw');
+  });
+
+  it('passes a bare database name through untouched', () => {
+    expect(libpqEnv('kaptia_local', { PGDATABASE: 'other' }).PGDATABASE).toBe('kaptia_local');
+  });
+});
+
 describe('dumpFileName', () => {
   it('is sortable and free of characters a path or a URL dislikes', () => {
     const name = dumpFileName(new Date('2026-10-26T03:15:00.000Z'));
