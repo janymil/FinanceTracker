@@ -48,13 +48,32 @@ export async function dismissCurrencyModal(page: Page): Promise<void> {
   }
 }
 
+/**
+ * The consent banner is fixed to the bottom of the viewport, so on a phone it covers the
+ * "add expense" button until the visitor chooses. That is correct behaviour — the choice is
+ * theirs to make — but it is a wall for a robot, so it is dismissed the way a person would.
+ * Idempotent: after the first dismissal the banner does not render again.
+ */
+export async function dismissCookieBanner(page: Page): Promise<void> {
+  const reject = page.getByTestId('cookie-consent-reject').first();
+  try {
+    await reject.waitFor({ state: 'visible', timeout: 3_000 });
+    await reject.click();
+    await expect(reject).toBeHidden({ timeout: 10_000 });
+  } catch {
+    // Already answered (or this build shows no banner): nothing to do.
+  }
+}
+
 export async function ensureSession(page: Page): Promise<void> {
   await page.goto(`/${LOCALE}/dashboard`, { waitUntil: 'domcontentloaded' });
   await expect
     .poll(async () => (await page.request.get('/api/auth/user')).status(), { timeout: 45_000 })
     .toBe(200);
   await dismissCurrencyModal(page);
+  await dismissCookieBanner(page);
 }
+
 
 /** Path helper — every route in this app is locale prefixed (/:lang/...). */
 export function path(route: string): string {

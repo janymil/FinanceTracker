@@ -87,10 +87,10 @@ export function CookieBanner() {
                   {t('cookies.banner.description')}
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button onClick={acceptAll} size="sm">
+                  <Button onClick={acceptAll} size="sm" data-testid="cookie-consent-accept">
                     {t('cookies.banner.accept_all')}
                   </Button>
-                  <Button onClick={rejectAll} variant="outline" size="sm">
+                  <Button onClick={rejectAll} variant="outline" size="sm" data-testid="cookie-consent-reject">
                     {t('cookies.banner.reject_non_essential')}
                   </Button>
                   <Button 

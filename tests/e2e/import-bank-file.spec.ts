@@ -39,9 +39,11 @@ function statementCsv(description: string, debit: string): string {
 test.describe('E2E-4 bank statement import', () => {
   test.beforeEach(async ({ page }) => {
     await ensureSession(page);
-    // Importing is a paid feature; the standing demo account is put back on Standard so the
-    // spec does not depend on what another spec left behind.
-    await setPlan(page, 'standard');
+    // Importing is Premium: the server refuses it for anyone else (`/api/import` in
+    // `server/routes/exportRoutes.ts`) and the page is wrapped in `RequirePlan`. This used to say
+    // "Standard", which made the whole spec unreachable — it waited 60s for a tab that never
+    // rendered, and nothing said why.
+    await setPlan(page, 'premium');
   });
 
   test('a CSV is previewed, then imported for exactly its amount', async ({ page }) => {
@@ -50,7 +52,9 @@ test.describe('E2E-4 bank statement import', () => {
     const description = uniqueDescription('E2E bank');
 
     await page.goto(path('/export'));
-    // Import lives on the export page, in its own tab.
+    // Import lives on the export page, in its own tab — and that tab's content is not rendered
+    // until it is selected, so the source cards below do not exist yet.
+    await page.getByTestId('export-tab-import').click();
     await page.getByTestId('import-source-bank-file').click();
     await page.getByTestId('import-file-input').setInputFiles({
       name: 'statement.csv',
@@ -75,6 +79,7 @@ test.describe('E2E-4 bank statement import', () => {
     const before = await fetchSummary(page.request, range);
 
     await page.goto(path('/export'));
+    await page.getByTestId('export-tab-import').click();
     await page.getByTestId('import-source-bank-file').click();
     await page.getByTestId('import-file-input').setInputFiles({
       name: 'not-a-statement.csv',

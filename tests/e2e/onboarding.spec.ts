@@ -175,7 +175,10 @@ test.describe('a brand-new account, start to finish', () => {
   test('Free is still held to its limits for the new account', async () => {
     expect((await page.request.get('/api/budgets')).status()).toBe(403);
     expect((await page.request.get('/api/goals')).status()).toBe(403);
-    expect((await page.request.get('/api/export?format=csv&includeTransactions=true')).status()).toBe(403);
+    // Your own rows are yours to take with you on every plan; only the rendered PDF is paid
+    // (`/api/export` in `server/routes/exportRoutes.ts`). This used to assert 403 for CSV.
+    expect((await page.request.get('/api/export?format=csv&includeTransactions=true')).status()).toBe(200);
+    expect((await page.request.get('/api/export?format=pdf&includeTransactions=true')).status()).toBe(403);
   });
 });
 

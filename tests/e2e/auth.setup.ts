@@ -57,8 +57,12 @@ setup('sign in as the demo account', async ({ page }) => {
 
   // First login only: choose a currency in the welcome modal and make sure the overlay is
   // gone before the state is saved for the other specs.
-  const { dismissCurrencyModal } = await import('./support/env');
+  const { dismissCurrencyModal, dismissCookieBanner } = await import('./support/env');
   await dismissCurrencyModal(page);
+  // The consent banner sits at the bottom of the viewport and, on a phone, covers the "add
+  // expense" button. Answering it here is saved into the cookie jar, so every spec starts on a
+  // page it can actually click.
+  await dismissCookieBanner(page);
 
   mkdirSync(dirname(STATE_FILE), { recursive: true });
   await page.context().storageState({ path: STATE_FILE });

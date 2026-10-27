@@ -271,9 +271,14 @@ test.describe('export (Premium)', () => {
     expect((await page.request.get('/api/export?format=csv&includeTransactions=false')).status()).toBe(400);
   });
 
-  test('a Standard account cannot export data', async ({ page }) => {
+  test('a Standard account may export its rows but not the rendered PDF', async ({ page }) => {
     await setPlan(page, 'standard');
-    expect((await page.request.get('/api/export?format=csv&includeTransactions=true')).status()).toBe(403);
+    // The rule the server actually enforces (`/api/export` in `server/routes/exportRoutes.ts`):
+    // every plan may download its own rows as CSV/JSON; only `format=pdf` needs Premium. This
+    // assertion used to demand 403 for CSV, which was the rule *before* export was opened to
+    // every plan — so it was failing against correct code.
+    expect((await page.request.get('/api/export?format=csv&includeTransactions=true')).status()).toBe(200);
+    expect((await page.request.get('/api/export?format=pdf&includeTransactions=true')).status()).toBe(403);
   });
 
   test('the Export button on the page really downloads a file', async ({ page }) => {

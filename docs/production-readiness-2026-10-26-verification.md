@@ -102,8 +102,52 @@ preferred "when it is configured". Pointing the archive at the media bucket woul
 leaving it here: that bucket is served publicly through the custom domain, and closing public
 access to it is itself still an open item.
 
-## If someone asks for a fourth pass
+## The browser suite ran (2026-10-27 00:20–01:10 UTC)
 
+The suite had never been run: every spec skipped itself. It was run against a **disposable**
+Postgres 16 container (`127.0.0.1:55432`) with the app on `127.0.0.1:4400`, never against
+production and never against the production database — `auth.setup.ts` refuses a `neon.tech` URL
+and the plan updates go to the container.
+
+Two facts made it possible, and neither was known when the earlier passes called this "blocked on a
+Clerk test instance":
+
+1. **Production already signs in against the Clerk *development* instance.** The built bundle
+   carries `pk_test_…`, so `+clerk_test` addresses auto-verify and the robot signs in without an
+   inbox. No second instance and no new credentials were needed.
+2. The suite is self-contained: it stubs the payment provider, serves its own PDF stub, and starts
+   nothing that costs money.
+
+**First run: 44 passed, 11 failed (7.9 min).** Nine of the eleven were the suite's own gaps — it has
+been dormant since it was written, so it drifted from the code it is supposed to describe:
+
+| Failure | Cause (verified in code) | Fixed |
+|---|---|---|
+| 2 × export "must be 403" | `format=pdf` needs Premium; **CSV/JSON are open to every plan** (`server/routes/exportRoutes.ts:311`). The specs encoded the older rule. | Yes — assertions now state the real rule |
+| 2 × bank import, 1 × a11y export | Import is Premium *and* lives in a tab whose content is not rendered until selected. The spec set Standard and clicked a card that did not exist. | Yes — plan + tab |
+| 2 × mobile add expense | The consent banner is `fixed bottom-0 z-50` and covers the Add button on a phone. Correct behaviour; the robot never answered it. | Yes — dismissed once, saved with the session |
+
+**Re-run of the affected specs: all green.** `core-tracking` 16/16, `onboarding` 16/16, `add-expense`
+desktop + mobile 4/4, `import-bank-file` 2/2.
+
+**What is still red — and this is the real finding.** Five accessibility tests, i.e. four rule
+families, on the dashboard, expenses, subscribe, profile and landing screens:
+
+| Rule | Impact | Nodes | What it means |
+|---|---|---|---|
+| `button-name` | **critical** | 5 | Icon-only buttons with no accessible name: the sidebar collapse toggle, the header control, the notification badge, the dialog close, the mascot button. A screen-reader user hears "button". |
+| `color-contrast` | serious | 24 | Sidebar labels, the purple "PRO" badges and the orange border do not reach WCAG AA 4.5:1 |
+| `aria-progressbar-name` | serious | 2 | The two dashboard progress bars announce a percentage with no name |
+| `label-content-name-mismatch` | serious | 3 | Language buttons say `aria-label="Language: English"` while showing `EN` |
+
+These are not test artifacts. They are the app being harder to use than it needs to be, and they
+were invisible until something clicked through the screens.
+
+The suite is now honest enough to be switched on in CI. That needs one repository variable
+(`E2E_ENABLED=true`) and the two Clerk secrets — but the gate is only worth turning on once the
+five accessibility failures are fixed, otherwise it greets every release with red.
+
+## If someone asks for a fourth pass
 
 Do not write another assessment. Run:
 

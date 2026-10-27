@@ -1218,9 +1218,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
           }
         }} className="space-y-4">
           <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
-            <TabsTrigger value="export" className="text-xs md:text-sm">{t('export.tab_export')}</TabsTrigger>
-            <TabsTrigger value="import" className="text-xs md:text-sm">{t('export.tab_import')}</TabsTrigger>
-            <TabsTrigger value="backup" className="text-xs md:text-sm">{t('export.tab_backup')}</TabsTrigger>
+            <TabsTrigger value="export" className="text-xs md:text-sm" data-testid="export-tab-export">{t('export.tab_export')}</TabsTrigger>
+            <TabsTrigger value="import" className="text-xs md:text-sm" data-testid="export-tab-import">{t('export.tab_import')}</TabsTrigger>
+            <TabsTrigger value="backup" className="text-xs md:text-sm" data-testid="export-tab-backup">{t('export.tab_backup')}</TabsTrigger>
           </TabsList>
 
           {/* Export Tab */}

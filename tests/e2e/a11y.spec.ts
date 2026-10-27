@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { E2E_ENABLED, SKIP_REASON, ensureSession, path } from './support/env';
+import { E2E_ENABLED, SKIP_REASON, ensureSession, path, setPlan } from './support/env';
 
 /**
  * E2E-6 — the accessibility gate.
@@ -58,9 +58,14 @@ test.describe('E2E-6 accessibility', () => {
   });
 
   test('the export and import page', async ({ page }) => {
+    // The page is wrapped in `RequirePlan plan="premium"`, so on the standing Standard account
+    // this audited an upgrade prompt. Premium here, back to Standard afterwards so the other
+    // specs see the account they expect.
+    await setPlan(page, 'premium');
     await page.goto(path('/export'));
     await expect(page.getByTestId('export-run')).toBeVisible();
     await expectNoBlockingViolations(page, 'export');
+    await setPlan(page, 'standard');
   });
 
   test('the subscribe page', async ({ page }) => {
