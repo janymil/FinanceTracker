@@ -2477,6 +2477,8 @@
     "financialPlanning": "Planificación Financiera"
   },
   "transactions": {
+    "confirmDelete": "¿Eliminar este movimiento? Se borrará de forma permanente y no se puede deshacer.",
+    "deleteLabel": "Eliminar movimiento",
     "deleted_success": "Transacción eliminada correctamente",
     "allTransactions": "Todas las Transacciones",
     "manageTransactionsDesc": "Gestiona todas tus transacciones de ingresos y gastos",

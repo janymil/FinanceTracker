@@ -4,6 +4,7 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { sumAmountsByCategoryName, sumAmountsByMonthKey, sumTransactionAmounts } from "@shared/calculations";
+import { parseMonthKeyLocal } from "@/lib/dateUtils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -276,7 +277,8 @@ export default function Expenses() {
   const chartData = sumAmountsByMonthKey(expenseTransactions)
     .slice(-6)
     .map(({ monthKey: month, amount }) => {
-      const date = new Date(month + '-01');
+      // Local parts, not UTC: `new Date(month + '-01')` showed September for October in Lima.
+      const date = parseMonthKeyLocal(month);
       const currentLang = i18n.language;
       
       let monthName;

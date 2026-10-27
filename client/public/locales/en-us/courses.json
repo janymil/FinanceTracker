@@ -1,0 +1,12 @@
+{
+  "courses": {
+    "title": "Financial Courses",
+    "subtitle": "Short, practical lessons on cash flow, budgeting and saving. Work through them at your own pace and earn XP as you go.",
+    "stats": {
+      "totalXp": "Total XP",
+      "dayStreak": "Day streak",
+      "bestStreak": "Best streak",
+      "lessons": "Lessons"
+    }
+  }
+}

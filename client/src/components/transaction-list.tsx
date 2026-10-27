@@ -314,7 +314,14 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                           size="sm"
                           variant="ghost"
                           className="h-8 w-8 p-0 text-gray-400 hover:text-destructive"
-                          onClick={() => deleteTransactionMutation.mutate(transaction.id)}
+                          aria-label={t("transactions.deleteLabel")}
+                          title={t("transactions.deleteLabel")}
+                          onClick={() => {
+                            // Deleting leaves no trace: ask first, and say so.
+                            if (window.confirm(t("transactions.confirmDelete"))) {
+                              deleteTransactionMutation.mutate(transaction.id);
+                            }
+                          }}
                           disabled={deleteTransactionMutation.isPending}
                         >
                           <Trash2 className="h-4 w-4" />

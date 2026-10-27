@@ -1,0 +1,12 @@
+{
+  "courses": {
+    "title": "Cursos financieros",
+    "subtitle": "Lecciones cortas y prácticas sobre flujo de caja, presupuesto y ahorro. Avanza a tu propio ritmo y gana XP mientras aprendes.",
+    "stats": {
+      "totalXp": "XP total",
+      "dayStreak": "Días seguidos",
+      "bestStreak": "Mejor racha",
+      "lessons": "Lecciones"
+    }
+  }
+}

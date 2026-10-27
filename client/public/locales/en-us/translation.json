@@ -2297,6 +2297,8 @@
     "financialPlanning": "Financial Planning"
   },
   "transactions": {
+    "confirmDelete": "Delete this transaction? It is removed permanently and this cannot be undone.",
+    "deleteLabel": "Delete transaction",
     "deleted_success": "Transaction deleted successfully",
     "allTransactions": "All Transactions",
     "manageTransactionsDesc": "Manage all your income and expense transactions",

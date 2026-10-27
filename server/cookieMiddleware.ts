@@ -105,7 +105,7 @@ function shouldSetCookie(type: 'essential' | 'functional' | 'analytics', consent
 }
 
 // Middleware to set cookie consent preferences
-export function setCookieConsent(req: Request, res: Response, next: NextFunction) {
+export function setCookieConsent(req: Request, res: Response, _next: NextFunction) {
   const consent = req.body.consent;
   
   if (consent && typeof consent === 'object') {
@@ -130,8 +130,11 @@ export function setCookieConsent(req: Request, res: Response, next: NextFunction
       clearAnalyticsCookies(res);
     }
   }
-  
-  next();
+
+  // Answer here instead of calling next(). `/api/cookie-consent` has no handler after this one,
+  // so every saved choice fell through to the 404 handler: the cookie was written and the page
+  // still reported "not found". 204 because there is deliberately nothing to return.
+  return res.status(204).end();
 }
 
 function clearFunctionalCookies(res: Response) {

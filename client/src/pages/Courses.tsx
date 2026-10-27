@@ -60,7 +60,7 @@ export default function Courses() {
   const [viewMode, setViewMode] = useState<'content' | 'exercises'>('content');
 
   const queryClient = useQueryClient();
-  const { t } = useTranslation('courses');
+  const { t } = useTranslation();
 
   // Icon mapping for modules
   const getIcon = (iconName: string) => {

@@ -77,7 +77,11 @@ const RULES: Rule[] = [
   },
   {
     name: 'card',
-    pattern: /\b(?:\d[ -]?){12,18}\d\b/g,
+    // The boundary guards matter as much as the Luhn check. `\b` matches between "4" and ".",
+    // so a floating-point total such as 1246.30000000000004 offered its 14-digit tail to this
+    // rule, the tail happened to pass Luhn, and the person read "1246.[card]" where the amount
+    // was. A run touching a decimal point is part of a number, not a card.
+    pattern: /(?<!\d)(?<!\d\.)(?:\d[ -]?){12,18}\d(?!\d)(?!\.\d)/g,
     replacement: '[card]',
     accept: (match) => luhnValid(match.replace(/[^0-9]/g, '')),
   },
@@ -184,8 +188,15 @@ const RULES: Rule[] = [
   {
     // Long digit runs are account/reference numbers, never amounts (amounts are shorter
     // and carry decimals).
+    //
+    // The lookarounds are not decoration. `\b` sits happily between "4" and ".", so the old
+    // pattern read the tail of a floating-point total as an account number: a total that had
+    // drifted to 1246.30000000000004 reached the model as "1246.[account]", and the person
+    // read "[account]" where the amount should be. A run that touches a decimal point
+    // (`6.30000000000004`, `12345678901.50`) is part of a number, not an account, and a run
+    // that ends a sentence with a full stop (`…0123.`) is still an account.
     name: 'account_number',
-    pattern: /\b\d{10,20}\b/g,
+    pattern: /(?<!\d)(?<!\d\.)\d{10,20}(?!\d)(?!\.\d)/g,
     replacement: '[account]',
   },
 ];

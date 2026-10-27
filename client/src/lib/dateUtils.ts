@@ -166,10 +166,33 @@ export function formatDetailedDate(date: string | Date): string {
 }
 
 /**
+ * First day of a `YYYY-MM` bucket key, in the browser's own timezone.
+ *
+ * `new Date('2026-10' + '-01')` looks harmless but ECMAScript parses a bare `YYYY-MM-DD`
+ * string as **UTC** midnight, so `getMonth()` reported September for everyone west of
+ * Greenwich: the monthly charts were one month behind in Lima while Bratislava was correct.
+ * The key already names a local calendar month, so it is rebuilt from local parts and the
+ * question never reaches a timezone conversion.
+ */
+export function parseMonthKeyLocal(monthKey: string): Date {
+  const [yearPart, monthPart] = String(monthKey ?? '').split('-');
+  const year = Number(yearPart);
+  const month = Number(monthPart);
+
+  // An unparseable key must not blank a chart with an "Invalid Date" label.
+  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+
+  return new Date(year, month - 1, 1);
+}
+
+/**
  * Format month names for charts with proper localization
  */
 export function formatChartMonth(dateString: string): string {
-  const date = new Date(dateString + '-01');
+  const date = parseMonthKeyLocal(dateString);
   const currentLang = getCurrentLanguageForAPI();
   
   if (currentLang.startsWith('es')) {

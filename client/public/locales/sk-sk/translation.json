@@ -2317,6 +2317,8 @@
     "financialPlanning": "Finančné Plánovanie"
   },
   "transactions": {
+    "confirmDelete": "Odstrániť túto transakciu? Natrvalo sa vymaže a nebude to možné vrátiť.",
+    "deleteLabel": "Odstrániť transakciu",
     "deleted_success": "Transakcia bola úspešne vymazaná",
     "allTransactions": "Všetky Transakcie",
     "manageTransactionsDesc": "Spravujte všetky svoje transakcie príjmov a výdavkov",

@@ -1,0 +1,12 @@
+{
+  "courses": {
+    "title": "Finančné kurzy",
+    "subtitle": "Krátke a praktické lekcie o peňažnom toku, rozpočte a sporení. Prechádzajte ich vlastným tempom a získavajte XP.",
+    "stats": {
+      "totalXp": "Celkom XP",
+      "dayStreak": "Dni v rade",
+      "bestStreak": "Najlepšia séria",
+      "lessons": "Lekcie"
+    }
+  }
+}

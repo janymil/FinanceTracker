@@ -25,7 +25,9 @@
   --radius: 0.75rem;
   
   /* Custom colors for financial app */
-  --success: 142 71% 45%; /* #10B981 */
+  --success: 158 94% 24%; /* #04774D — was hsl(142 71% 45%) = #21C45D, which axe measured at 2.3:1 on
+                             white (the dashboard income amounts, 4.5:1 required). Now 5.6:1.
+                             Dark mode keeps the brighter value below, where the surface is black. */
   --success-foreground: 0 0% 100%; /* #FFFFFF */
   --premium: 262 83% 58%; /* #7C3AED */
   --premium-foreground: 0 0% 100%; /* #FFFFFF */
@@ -61,7 +63,8 @@
   --ring: 213 94% 68%; /* #2563EB */
   
   /* Custom colors for dark mode */
-  --success: 142 71% 45%; /* #10B981 */
+  --success: 142 71% 45%; /* #21C45D — bright on purpose here: 7.4:1 on #0A0A0B. The light block
+                             uses a darker green because white is the background there. */
   --success-foreground: 0 0% 100%; /* #FFFFFF */
   --premium: 262 83% 58%; /* #7C3AED */
   --premium-foreground: 0 0% 100%; /* #FFFFFF */

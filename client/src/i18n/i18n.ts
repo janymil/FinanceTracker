@@ -19,6 +19,8 @@ async function loadTranslations() {
       const response = await fetch(`/locales/${lang}/translation.json`);
       // Load features translation file
       const featuresResponse = await fetch(`/locales/${lang}/features.json`);
+      // Load courses translation file
+      const coursesResponse = await fetch(`/locales/${lang}/courses.json`);
       
       if (response.ok) {
         const translations = await response.json();
@@ -29,8 +31,29 @@ async function loadTranslations() {
           featuresTranslations = await featuresResponse.json();
           // Merge features translations into main translations to maintain structure
           Object.assign(translations, featuresTranslations);
-        } else {
-          console.error(`Failed to load features translations for ${lang}:`, featuresResponse.status);
+        }
+
+        /*
+         * Courses page strings.
+         *
+         * `Courses.tsx` used `useTranslation('courses')`, asking i18next for a *namespace* named
+         * "courses". This loader only ever builds one namespace ("translation"), so the page
+         * rendered `courses.title`, `courses.subtitle` and `courses.stats.*` verbatim in all
+         * three languages. The keys live in their own small file and are merged into the default
+         * namespace, exactly like `features.json` above, so the page asks for `courses.title`.
+         */
+        if (coursesResponse.ok) {
+          Object.assign(translations, await coursesResponse.json());
+        }
+
+        // One call for both optional files: `scripts/check-logging.ts` holds client/src to a
+        // console budget that may not grow, and a missing file is one build problem, not two.
+        const optionalFilesDown = [
+          featuresResponse.ok ? null : `features (${featuresResponse.status})`,
+          coursesResponse.ok ? null : `courses (${coursesResponse.status})`,
+        ].filter(Boolean);
+        if (optionalFilesDown.length > 0) {
+          console.error(`Failed to load optional translations for ${lang}:`, optionalFilesDown.join(', '));
         }
         
         // Store under primary language key 

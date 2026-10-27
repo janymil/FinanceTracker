@@ -32,6 +32,20 @@ describe('anonymizeText', () => {
     expect(anonymizeText('invoice 1234 5678 9012 3456').text).toContain('1234 5678 9012 3456');
   });
 
+  it('never mistakes a drifted float tail for an account number', () => {
+    // 0.1 + 0.2 in binary floating point. Summed with `parseFloat` in aiRoutes a total like this
+    // reached the model, the account rule matched the 14-digit tail after the point, and the
+    // person read "income was 1246.[account]". The card rule had the same hole: the tail passed
+    // Luhn, so it became "1246.[card]" instead.
+    const drifted = 'income was 1246.30000000000004 and spending 987.6543210000001';
+    expect(anonymizeText(drifted).text).toBe(drifted);
+
+    // The rules still do their job: a long run that is not part of a decimal number.
+    expect(anonymizeText('cuenta 1234567890123').text).toBe('cuenta [account]');
+    // …including when it ends a sentence.
+    expect(anonymizeText('ref 1234567890123.').text).toBe('ref [account].');
+  });
+
   it('removes phone numbers with and without a country code', () => {
     expect(anonymizeText('tel +421 903 123 456').text).toBe('tel [phone]');
     expect(anonymizeText('tel 903 123 456').text).toBe('tel [phone]');

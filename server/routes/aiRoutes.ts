@@ -6,6 +6,7 @@ import { storage } from "../storage";
 import { rateLimit } from "../middleware/rateLimit";
 import { adminAuth } from "../adminAuth";
 import { anonymizeText } from "../../shared/aiAnonymizer";
+import { sumTransactionAmountsByType } from "../../shared/calculations";
 import { PLAN_PRICES, formatMoney } from "../../shared/pricing";
 import { getUserLanguage } from "../categoryTranslations";
 import { 
@@ -596,13 +597,11 @@ export function registerAIRoutes(app: Express) {
       const budgets = await storage.getUserBudgets(userId);
       const categories = await storage.getCategories(userId);
       
-      // Calculate summary from transactions
-      const totalIncome = transactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-      const totalExpenses = transactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      // Summed in integer cents. Adding `parseFloat(t.amount)` accumulated binary-float drift,
+      // so a total could be 1246.30000000000004 — which the anonymiser then read as a long
+      // account number and the model turned into "income was 1246.[account]".
+      const totalIncome = sumTransactionAmountsByType(transactions, 'income');
+      const totalExpenses = sumTransactionAmountsByType(transactions, 'expense');
       
       const summary = {
         totalIncome,
