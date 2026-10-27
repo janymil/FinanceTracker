@@ -13,6 +13,7 @@
     "scripts/error-guard-prune.ts",
     "scripts/uptime-check.ts",
     "scripts/db-schema-drift.ts",
+    "scripts/check-readiness.ts",
     "scripts/restore-verify.ts",
     "scripts/load-test-import.ts"
   ],

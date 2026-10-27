@@ -256,4 +256,13 @@ It is the one category where the remaining work is blocked, not skipped:
 | Exports in memory, CSP nonces, a second alert address | Code / owner |
 | Tax and payment documents, legal review, penetration test | Third party |
 
+## Correction after verification (late 2026-10-26)
+
+`production-readiness-2026-10-26-verification.md` re-ran the claims in this file. Two no longer
+matched the tree when read: the idempotency key is wired into all five creation paths (item 5 of
+"What is left, in the order it should be done"), and the release serving traffic was one commit
+behind `HEAD`. `npm run check:readiness` now reports both mechanically, so this file does not have
+to be trusted on either point.
+
+
 

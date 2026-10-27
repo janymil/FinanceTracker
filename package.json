@@ -14,6 +14,7 @@
     "check:logging": "tsx scripts/check-logging.ts",
     "check:client-cache": "tsx scripts/check-client-cache.ts",
     "check:transaction-queries": "tsx scripts/check-transaction-queries.ts",
+    "check:readiness": "tsx scripts/check-readiness.ts",
     "check:stripe-prices": "tsx scripts/check-stripe-prices.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
