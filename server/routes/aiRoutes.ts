@@ -650,13 +650,27 @@ export function registerAIRoutes(app: Express) {
           type: t.type,
           categoryName: t.categoryName
         })),
-        budgets: budgets.map((b: any) => ({
-          id: b.id,
-          name: b.name,
-          amount: String(b.amount),
-          categoryName: b.categoryName,
-          period: b.period
-        })),
+        budgets: (Array.isArray(budgets) ? budgets : []).map((b: any) => {
+          /*
+           * `spent` was missing from this payload, so the model saw "Groceries: 650" and nothing
+           * else: it could not tell a budget that was over from one that had not started, and its
+           * "budget_review" recommendation had no figure to stand on. Counted here, from the same
+           * transactions the model is shown.
+           */
+          const categoryName = b.categoryName || b.name;
+          const spent = transactions
+            .filter((t: any) => t.type === 'expense' && (t.categoryName || '') === categoryName)
+            .reduce((total: number, t: any) => total + (Number(t.amount) || 0), 0);
+
+          return {
+            id: b.id,
+            name: b.name,
+            amount: String(b.amount),
+            categoryName: b.categoryName,
+            period: b.period,
+            spent,
+          };
+        }),
         categories: categories,
         language: language
       };

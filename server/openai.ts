@@ -1451,7 +1451,9 @@ export async function generateDailyRecommendations(
     summary: {
       totalIncome: number;
       totalExpenses: number;
-      netAmount: number;
+      /** Older callers send `netBalance`; both names are read. */
+      netAmount?: number;
+      netBalance?: number;
     };
     budgets: Array<{
       id: number;
@@ -1459,6 +1461,8 @@ export async function generateDailyRecommendations(
       amount: string;
       categoryName: string;
       period: string;
+      /** What has been spent against this budget in the same window. */
+      spent?: number | string;
     }>;
   },
   language: string = 'en-us'
@@ -1506,20 +1510,35 @@ export async function generateDailyRecommendations(
     const avgDailySpending = Array.from(dailySpending.values())
       .reduce((sum, amount) => sum + amount, 0) / Math.max(dailySpending.size, 1);
 
+    /*
+     * The dashboard sends `netBalance`; this prompt read `netAmount` and printed 0.00 for every
+     * premium account, so "your surplus" advice was written against a surplus of nothing.
+     */
+    const netAmount = Number(financialData.summary?.netAmount ?? financialData.summary?.netBalance ?? 0) || 0;
+
+    const budgetLines = financialData.budgets.length > 0
+      ? financialData.budgets.map((budget) => {
+          const limit = Number(budget.amount) || 0;
+          const spent = Number(budget.spent) || 0;
+          const gap = spent - limit;
+          return `- ${budget.name} (${budget.categoryName || 'no category'}, ${budget.period}): limit ${limit.toFixed(2)}, spent ${spent.toFixed(2)}${limit > 0 && gap > 0 ? `, over by ${gap.toFixed(2)}` : ''}`;
+        }).join('\n')
+      : '- No budgets set';
+
     const prompt = `You are a personal budgeting coach analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
 
 Financial Summary:
 - Total Income: ${(financialData.summary?.totalIncome || 0).toFixed(2)}
 - Total Expenses: ${(financialData.summary?.totalExpenses || 0).toFixed(2)}
-- Net Amount: ${(financialData.summary?.netAmount || 0).toFixed(2)}
+- Net Amount: ${netAmount.toFixed(2)}
 - Recent Transactions: ${recentTransactions.length}
 - Average Daily Spending: ${avgDailySpending.toFixed(2)}
 
 Top Spending Categories:
 ${topCategories.map(([cat, amount]) => `- ${cat}: ${amount.toFixed(2)}`).join('\n')}
 
-Budget Information:
-${financialData.budgets.map(b => `- ${b.name}: ${b.amount} (${b.period})`).join('\n')}
+Budget Information (limit / spent):
+${budgetLines}
 
 Recent Transaction Sample:
 ${recentTransactions.slice(0, 10).map(t => 

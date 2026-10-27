@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Lightbulb, TrendingDown, PiggyBank, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -34,9 +35,11 @@ interface FinancialTip {
 }
 
 export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'busy' | 'failed' | 'ready'>('loading');
+  /** Bumped by the retry button; the request itself lives in the effect below. */
+  const [reloadToken, setReloadToken] = useState(0);
   
   // Dynamic month detection at component level for consistent access
   const getMostRecentTransactionMonth = () => {
@@ -86,33 +89,42 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
 
     // Skip API call if no transactions for this month
     if (monthTransactions.length === 0) {
-      console.log('Contextual tips: No transactions for month, skipping API');
       setTips([]);
+      setStatus('ready');
       return;
     }
 
-    // Always fetch fresh tips - no caching
-    const fetchTips = async () => {
-      if (loading) return;
-      
-      setLoading(true);
-      
-      try {
-        const getAuthHeaders = async () => {
-          try {
-            const clerk = (window as any).Clerk;
-            if (clerk && clerk.session) {
-              const token = await clerk.session.getToken();
-              if (token) {
-                return { Authorization: `Bearer ${token}` };
-              }
-            }
-          } catch (error) {
-            console.warn('Failed to get Clerk token:', error);
-          }
-          return {};
-        };
+    let cancelled = false;
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+    const getAuthHeaders = async () => {
+      try {
+        const clerk = (window as any).Clerk;
+        if (clerk && clerk.session) {
+          const token = await clerk.session.getToken();
+          if (token) {
+            return { Authorization: `Bearer ${token}` };
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to get Clerk token:', error);
+      }
+      return {};
+    };
+
+    /*
+     * The panel shows one of four states, and "no tips" is only one of them.
+     *
+     * It used to have two: an array, or an empty array - so a refused request looked exactly like
+     * a month with nothing to say. Switching the language reloads the page, the dashboard asks for
+     * the score and the tips at the same moment, and the server answers two questions at once; the
+     * third request was refused and the panel told the person there were no tips for October. It
+     * now waits and asks again, and says so while it does.
+     */
+    const fetchTips = async (attempt: number) => {
+      setStatus('loading');
+
+      try {
         const authHeaders = await getAuthHeaders();
         const res = await axios.post('/api/ai/contextual-financial-tips', {
           summary,
@@ -126,33 +138,37 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
             'x-user-language': getCurrentLanguageForAPI()
           }
         });
-        
-        const fetchedTips = res.data.tips || [];
-        console.log('Contextual tips: API response received', {
-          status: res.status,
-          hasData: !!res.data,
-          hasTips: !!res.data?.tips,
-          tipsCount: fetchedTips.length,
-          firstTip: fetchedTips[0]?.title || 'none',
-          fullResponse: res.data
-        });
-        
-        setTips(fetchedTips);
-        
+
+        if (cancelled) return;
+        setTips(res.data.tips || []);
+        setStatus('ready');
       } catch (error: any) {
+        if (cancelled) return;
+
+        if (error.response?.status === 429 && attempt < 3) {
+          setStatus('busy');
+          await wait(2000 * attempt);
+          if (!cancelled) await fetchTips(attempt + 1);
+          return;
+        }
+
         console.error('Failed to fetch AI tips:', {
           error: error.message,
-          response: error.response?.data,
           status: error.response?.status
         });
-        setTips([]);
-      } finally {
-        setLoading(false);
+        setTips(null);
+        setStatus('failed');
       }
     };
 
-    fetchTips();
-  }, [summary, transactions, budgets, selectedMonth]);
+    fetchTips(1);
+
+    return () => {
+      cancelled = true;
+    };
+    // `i18n.language` belongs here: the tips are written by the model in the language on screen,
+    // so a language switch has to ask again rather than keep what it already had.
+  }, [summary, transactions, budgets, selectedMonth, i18n.language, reloadToken]);
 
   return (
     <Card className="h-full">
@@ -163,8 +179,20 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {loading ? (
-          <p className="text-sm text-gray-500">{t('generatingAIInsights')}</p>
+        {status === 'loading' || status === 'busy' ? (
+          <p className="text-sm text-gray-500">
+            {status === 'busy' ? t('aiTipsBusy') : t('generatingAIInsights')}
+          </p>
+        ) : status === 'failed' ? (
+          <div className="text-center py-6">
+            <div className="text-gray-400 mb-2">
+              <AlertCircle className="h-12 w-12 mx-auto" />
+            </div>
+            <p className="text-sm text-gray-500 mb-3">{t('aiTipsFailed')}</p>
+            <Button variant="outline" size="sm" onClick={() => setReloadToken((token) => token + 1)}>
+              {t('aiTipsRetry')}
+            </Button>
+          </div>
         ) : tips && tips.length === 0 ? (
           <div className="text-center py-6">
             <div className="text-gray-400 mb-2">

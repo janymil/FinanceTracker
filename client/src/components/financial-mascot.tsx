@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { X, Settings, Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
@@ -8,6 +9,7 @@ import { Label } from "./ui/label";
 import { Badge } from "./ui/badge";
 import { useToast } from "../hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { budgetsForPeriod, calculateFinancialHealth } from "@shared/financialHealth";
 
 interface MascotData {
   id: string;
@@ -19,26 +21,18 @@ interface MascotData {
   isEnabled: boolean;
 }
 
-interface FinancialHealth {
-  score: number;
-  trend: string;
-  category: string;
-  factors?: Array<{
-    name: string;
-    score: number;
-    max: number;
-    status: string;
-    aiInsight: string;
-  }>;
-  aiAnalysis?: {
-    personalizedFactors: string[];
-    recommendations: string[];
-    riskAssessment: string;
-    confidence: number;
-  };
-  achievements?: string[];
-  warnings?: string[];
-  insights?: string[];
+/**
+ * The calendar month the mascot's score describes. The score card passes the month the dashboard
+ * is showing; the floating face has no month selector, so it describes this one.
+ */
+function startOfThisMonth(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+function endOfThisMonth(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 }
 
 export function FinancialMascot() {
@@ -47,12 +41,43 @@ export function FinancialMascot() {
   const [showSettings, setShowSettings] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [mascot, setMascot] = useState<MascotData | null>(null);
-  const [financialHealth, setFinancialHealth] = useState<FinancialHealth | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [position, setPosition] = useState({ x: 16, y: 16 }); // Default: bottom-4 right-4
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const { t } = useTranslation();
+
+  /*
+   * The face needs one number, and the app can compute it.
+   *
+   * This component used to call the AI health endpoint for the whole answer - from every page,
+   * next to the dashboard card that asks for the same thing, and with three retries of its own.
+   * Two AI calls for one screen is what pushed the tips panel past the server's concurrency
+   * limit, and the panel then said "no tips for this period" about a month that had plenty.
+   * The score here is the same rubric the card prints, computed from data already in the cache.
+   */
+  const summaryQuery = useQuery<{ totalIncome: number; totalExpenses: number }>({
+    queryKey: ["/api/financial-summary"],
+    enabled: isReady && !!user?.id,
+  });
+  const budgetsQuery = useQuery<Array<{ amount: string | number; startDate: string; endDate: string }>>({
+    queryKey: ["/api/budgets"],
+    enabled: isReady && !!user?.id,
+  });
+
+  const financialHealth = summaryQuery.data
+    ? {
+        score: calculateFinancialHealth({
+          totalIncome: Number(summaryQuery.data.totalIncome) || 0,
+          totalExpenses: Number(summaryQuery.data.totalExpenses) || 0,
+          budgetTotal: budgetsForPeriod(
+            budgetsQuery.data ?? [],
+            startOfThisMonth(),
+            endOfThisMonth(),
+          ).reduce((total, budget) => total + Number(budget.amount || 0), 0),
+        }).score,
+      }
+    : null;
 
   // Fetch mascot data
   const fetchMascot = async () => {
@@ -114,28 +139,6 @@ export function FinancialMascot() {
     }
   };
 
-  // Fetch financial health data
-  const fetchFinancialHealth = async () => {
-    if (!isReady || !user?.id) return;
-
-    try {
-      const token = await window.Clerk?.session?.getToken();
-      const response = await fetch("/api/financial-health", {
-        headers: {
-          ...(token && { "Authorization": `Bearer ${token}` }),
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setFinancialHealth(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch financial health:', error);
-    }
-  };
-
   // Load cached mascot data immediately on mount
   useEffect(() => {
     if (user?.id) {
@@ -159,7 +162,6 @@ export function FinancialMascot() {
         for (let i = 0; i < retries; i++) {
           try {
             await fetchMascot();
-            await fetchFinancialHealth();
             break;
           } catch (error) {
             console.log(`Fetch attempt ${i + 1} failed, retrying...`);

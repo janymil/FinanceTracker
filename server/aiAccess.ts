@@ -147,10 +147,40 @@ const sustainedLimit = rateLimit({
 const MAX_CONCURRENT_AI_REQUESTS = 2;
 const inFlightByUser = new Map<string, number>();
 
+/**
+ * How long a refused-for-concurrency request waits for a free slot before it is turned away.
+ *
+ * A dashboard legitimately asks two questions at once (the score card and the tips panel), and a
+ * slow answer holds its slot for several seconds. Refusing the third immediately turned "the
+ * adviser is busy" into "this month has no tips" on screen - two different statements, and the
+ * second one was false. Ten seconds is longer than an answer usually takes.
+ */
+const MAX_CONCURRENT_WAIT_MS = Number(process.env.AI_CONCURRENCY_WAIT_MS) || 10_000;
+
 function releaseInFlight(userId: string): void {
   const current = inFlightByUser.get(userId) ?? 0;
   if (current <= 1) inFlightByUser.delete(userId);
   else inFlightByUser.set(userId, current - 1);
+}
+
+/**
+ * Takes a slot, waiting for one while the person's requests are using them all.
+ *
+ * The check and the increment have no await between them, so two waiters waking together cannot
+ * both take the last slot. `false` means the wait ran out.
+ */
+async function acquireSlot(userId: string): Promise<boolean> {
+  const deadline = Date.now() + MAX_CONCURRENT_WAIT_MS;
+
+  for (;;) {
+    const inFlight = inFlightByUser.get(userId) ?? 0;
+    if (inFlight < MAX_CONCURRENT_AI_REQUESTS) {
+      inFlightByUser.set(userId, inFlight + 1);
+      return true;
+    }
+    if (Date.now() > deadline) return false;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
 }
 
 export function aiGuard() {
@@ -166,10 +196,10 @@ export function aiGuard() {
       return denyAi(res, 'ai_quota_exceeded', quota.state);
     }
 
-    const inFlight = inFlightByUser.get(access.userId) ?? 0;
-    if (inFlight >= MAX_CONCURRENT_AI_REQUESTS) {
+    if (!(await acquireSlot(access.userId))) {
       // Same shape the rate limiter answers with: this is a temporary "too many at once", not a
       // quota refusal, and the app already knows how to show it.
+      res.setHeader('Retry-After', '5');
       return res.status(429).json({
         error: 'Too many AI requests in flight',
         message: 'Please wait for the current answer before starting another.',
@@ -177,7 +207,6 @@ export function aiGuard() {
       });
     }
 
-    inFlightByUser.set(access.userId, inFlight + 1);
     // Released however the response ends — success, refusal, error or a dropped connection.
     res.on('finish', () => releaseInFlight(access.userId));
     res.on('close', () => releaseInFlight(access.userId));

@@ -451,7 +451,7 @@ describe('generateExpensePredictions', () => {
 /* ------------------------------------------------------------------ daily recommendations */
 
 describe('generateDailyRecommendations', () => {
-  const data = () => ({
+  const data = (): Parameters<typeof generateDailyRecommendations>[1] => ({
     transactions: [{ id: 1, amount: '12', description: 'Lunch', date: daysAgo(1), type: 'expense' as const, categoryName: 'Food' }],
     summary: { totalIncome: 1000, totalExpenses: 400, netAmount: 600 },
     budgets: [{ id: 1, name: 'Food', amount: '300', categoryName: 'Food', period: 'monthly' }],
@@ -482,6 +482,26 @@ describe('generateDailyRecommendations', () => {
     create.mockResolvedValueOnce(reply({ recommendations: [], insights: [] }));
     await generateDailyRecommendations('u', data(), 'en-us');
     expect(userOf()).not.toMatch(/financial advisor/i);
+  });
+
+  it('shows how much of each budget is already spent, and the gap when it is over', async () => {
+    create.mockResolvedValueOnce(reply({ recommendations: [], insights: [] }));
+    const withSpending = data();
+    withSpending.budgets = [{ id: 1, name: 'Food', amount: '300', categoryName: 'Food', period: 'monthly', spent: 320 }];
+    await generateDailyRecommendations('u', withSpending, 'en-us');
+
+    expect(userOf()).toContain('limit 300.00, spent 320.00, over by 20.00');
+  });
+
+  it('reads the net figure whether the caller sends netBalance or netAmount', async () => {
+    create.mockResolvedValueOnce(reply({ recommendations: [], insights: [] }));
+    // The dashboard sends `netBalance`; this line used to read "Net Amount: 0.00".
+    await generateDailyRecommendations('u', {
+      ...data(),
+      summary: { totalIncome: 1000, totalExpenses: 400, netBalance: 600 },
+    }, 'en-us');
+
+    expect(userOf()).toContain('Net Amount: 600.00');
   });
 
   it('throws on a provider failure and caches nothing', async () => {
