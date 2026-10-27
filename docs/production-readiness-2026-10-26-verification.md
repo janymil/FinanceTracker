@@ -80,7 +80,30 @@ archive, the age limit, and which combinations are allowed to exit zero.
 There is no ninth finding. The remaining distance to "survives a disaster" is three credentials and
 two decisions, and none of them is code.
 
+## After the deploy (2026-10-27 00:10 UTC)
+
+`sudo ./scripts/deploy.sh` ran the full gate — typecheck, disposable-database migration and
+integration run, production drift check, live price check, build, reload, health gate — and
+reported `Deployed at 20261027-001027. Health: ok (release a9b353e7-20261027-001027)`.
+`npm run check:readiness -- --url https://kaptia.app` then reported **8 passed, 0 failed, 1 needs an
+owner**, with `release-deployed` green for the first time.
+
+The one owner item left is the copy that sits off this machine. It is worth being precise about
+*what* that copy is, because "the backups are in R2" is true of one thing and not another:
+
+| What | Where it lives now | Mechanism |
+|---|---|---|
+| Receipt photos, exports, mascot images | Cloudflare R2 | the app writes them as they happen (`R2_*`) |
+| **The daily archive of every customer record** | `/var/backups/kaptia` on this host | `pg_dump` at 03:16, verified, then pruned (`BACKUP_S3_*` or `BACKUP_DIR`) |
+
+The dump script reads `BACKUP_S3_*`, not `R2_*`, so the media bucket has never received an archive.
+The systemd drop-in sets `BACKUP_DIR=/var/backups/kaptia` and its own comment says a bucket is
+preferred "when it is configured". Pointing the archive at the media bucket would be worse than
+leaving it here: that bucket is served publicly through the custom domain, and closing public
+access to it is itself still an open item.
+
 ## If someone asks for a fourth pass
+
 
 Do not write another assessment. Run:
 
