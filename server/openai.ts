@@ -1323,7 +1323,7 @@ RESPONSE FORMAT (JSON):
       "predictedNext": 475.00,
       "confidence": 0.85,
       "trend": "increasing",
-      "factors": ["Seasonal increase", "Recent dining out trend", "Grocery price inflation"]
+      "factors": ["Two months of higher spending in this category", "Recurring payment counted", "Fewer transactions than last month"]
     }
   ],
   "monthlyPredictions": [

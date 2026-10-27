@@ -251,6 +251,14 @@ Check each AI function against these five questions, in this order:
 Where the answer is bad, the order of repair is: payload → prompt → parser → rendering. Fixing the
 rendering first hides a prompt that still produces the wrong thing.
 
+### A refusal is not an empty result
+
+An AI panel has more than two states. "No data for this period" and "the server said no" look
+identical once both become an empty array, and the second one is a lie the customer believes. The
+dashboard asks for the score and the tips at the same time; the guard answers two AI calls at once
+and queues the rest (`server/aiAccess.ts`, `AI_CONCURRENCY_WAIT_MS`), and a panel that is still
+refused must say so and offer to try again — never "nothing to show".
+
 ### Financial adviser (`financial-health-score`)
 
 The score is computed by `shared/financialHealth` (30/25/25/20, bands 80/65/50) and the model writes
