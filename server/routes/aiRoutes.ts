@@ -7,6 +7,8 @@ import { rateLimit } from "../middleware/rateLimit";
 import { adminAuth } from "../adminAuth";
 import { anonymizeText } from "../../shared/aiAnonymizer";
 import { sumTransactionAmountsByType } from "../../shared/calculations";
+import { budgetsForPeriod, calculateFinancialHealth, type FinancialHealth } from "../../shared/financialHealth";
+import { presetRange, rangeStartFrom, rangeEndFrom, localParts } from "../../shared/timezones";
 import { PLAN_PRICES, formatMoney } from "../../shared/pricing";
 import { getUserLanguage } from "../categoryTranslations";
 import { 
@@ -33,6 +35,43 @@ import { eq, desc, lt, gte, sql, and } from "drizzle-orm";
 /** `runAI` answered with its failure payload: say so with a stable code and cache nothing. */
 function aiUnavailable(res: any) {
   return res.status(503).json({ message: 'AI service temporarily unavailable', code: 'ai_unavailable' });
+}
+
+/**
+ * The window a health answer covers: the month the dashboard is showing, or this month.
+ *
+ * A date-only `yyyy-mm-dd` means that calendar day in the person's own zone, exactly as
+ * `/api/financial-summary` reads it, so both cards describe the same days.
+ * `null` means the caller sent dates that are not dates.
+ */
+function healthPeriod(req: any, timeZone: string): { start: Date; end: Date } | null {
+  const startDate = req.query?.startDate;
+  const endDate = req.query?.endDate;
+
+  if (typeof startDate === 'string' && typeof endDate === 'string') {
+    const parsedStart = new Date(startDate);
+    const parsedEnd = new Date(endDate);
+    if (!Number.isFinite(parsedStart.getTime()) || !Number.isFinite(parsedEnd.getTime())) {
+      return null;
+    }
+    const start = rangeStartFrom(startDate, parsedStart, timeZone);
+    const end = rangeEndFrom(endDate, parsedEnd, timeZone);
+    return end < start ? null : { start, end };
+  }
+
+  return presetRange('month', timeZone);
+}
+
+/**
+ * The calendar day of an instant in the person's zone, as `yyyy-mm-dd`.
+ *
+ * `period.end` is the last instant of the last day (23:59 in Lima, which is 04:59 the next day in
+ * UTC), so slicing the ISO string would tell the model the period ended on the 1st of the
+ * following month.
+ */
+function zonedDay(instant: Date, timeZone: string): string {
+  const { year, month, day } = localParts(instant, timeZone);
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
 export function registerAIRoutes(app: Express) {
@@ -592,47 +631,48 @@ export function registerAIRoutes(app: Express) {
         });
       }
 
-      // Get user's financial data
-      const transactions = await storage.getUserTransactions(userId, 100);
-      const budgets = await storage.getUserBudgets(userId);
-      const categories = await storage.getCategories(userId);
+      /*
+       * The window this answer is about.
+       *
+       * The dashboard passes the month it is showing; without that, this month. The old code asked
+       * for "the last 100 transactions" — a rolling window that begins at an arbitrary date and
+       * describes no period at all. It also fed the model six months of spending next to one
+       * month's budget, which is why the advice said both "expenses are below income" and
+       * "spending exceeds budgets" in the same breath.
+       */
+      const timeZone = await storage.getUserTimeZone(userId);
+      const period = healthPeriod(req, timeZone);
+      if (!period) {
+        return res.status(400).json({ message: "Start date and end date must be valid dates" });
+      }
+
+      // The same window the score card uses. `getUserBudgets` attaches `spent` per budget over
+      // that budget's own dates, so the model never reads October's spending against May's budget.
+      const transactions = await storage.getTransactionsByDateRange(userId, period.start, period.end);
+      const periodBudgets = budgetsForPeriod(
+        await storage.getUserBudgets(userId, timeZone),
+        period.start,
+        period.end,
+      );
       
       // Summed in integer cents. Adding `parseFloat(t.amount)` accumulated binary-float drift,
       // so a total could be 1246.30000000000004 — which the anonymiser then read as a long
       // account number and the model turned into "income was 1246.[account]".
       const totalIncome = sumTransactionAmountsByType(transactions, 'income');
       const totalExpenses = sumTransactionAmountsByType(transactions, 'expense');
-      
-      const summary = {
-        totalIncome,
-        totalExpenses,
-        netBalance: totalIncome - totalExpenses
-      };
+      const budgetTotal = periodBudgets.reduce(
+        (total, budget) => total + Number(budget.amount || 0),
+        0,
+      );
 
-      // Create a stable data hash that only changes with significant financial changes
-      // This prevents cache misses from minor data changes like transaction IDs or exact timestamps
-      const stableFinancialData = {
-        transactionCount: transactions.length,
-        totalIncome: Math.round(totalIncome),
-        totalExpenses: Math.round(totalExpenses),
-        budgetCount: budgets.length,
-        recentTransactionTypes: transactions
-          .slice(0, 10)
-          .map(t => ({ type: t.type, amount: Math.round(parseFloat(t.amount)) })),
-        budgetAllocations: budgets.map(b => ({ 
-          categoryName: b.categoryName || 'Uncategorized', 
-          amount: Math.round(parseFloat(b.amount)) 
-        }))
-      };
-
-      // Check unified cache for financial health score
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      // CACHE DISABLED FOR TESTING
-      // Cache system completely removed
-      
-      // Cache system removed
-
-      // Categories already provided via storage layer joins
+      /*
+       * The number is computed here, not by the model.
+       *
+       * `shared/financialHealth` is the rubric the score card prints in its tooltip, so the badge
+       * on this card and the score beside it are the same number by construction. The model is
+       * still asked for the sentences: what is going well, what is not, and what to do next.
+       */
+      const health = calculateFinancialHealth({ totalIncome, totalExpenses, budgetTotal });
 
       // Process transactions with category names
       const processedTransactions = transactions.map(t => ({
@@ -644,21 +684,13 @@ export function registerAIRoutes(app: Express) {
         categoryName: t.categoryName || 'Other'
       }));
 
-      // Calculate budget spending
-      const budgetSpending = new Map();
-      transactions.forEach(t => {
-        if (t.type === 'expense' && t.categoryName) {
-          const current = budgetSpending.get(t.categoryName) || 0;
-          budgetSpending.set(t.categoryName, current + parseFloat(t.amount));
-        }
-      });
-
-      const processedBudgets = budgets
+      // `spent` comes from the budget itself (its own dates), not from whatever the window holds.
+      const processedBudgets = periodBudgets
         .filter(b => b.categoryName)
         .map(b => ({
-          categoryName: b.categoryName,
+          categoryName: b.categoryName as string,
           amount: b.amount,
-          spent: budgetSpending.get(b.categoryName) || 0
+          spent: Number(b.spent || 0),
         }));
 
       // Get user language from consistent header detection
@@ -668,26 +700,26 @@ export function registerAIRoutes(app: Express) {
         transactions: processedTransactions,
         budgets: processedBudgets,
         summary: {
-          totalIncome: summary.totalIncome,
-          totalExpenses: summary.totalExpenses,
-          netBalance: summary.totalIncome - summary.totalExpenses
+          totalIncome,
+          totalExpenses,
+          netBalance: totalIncome - totalExpenses
+        },
+        // Stated explicitly: "for the period shown" needs a period, or the model invents one.
+        period: {
+          start: zonedDay(period.start, timeZone),
+          end: zonedDay(period.end, timeZone)
         },
         language: language
       };
 
-
-
-
-
       // Initialize UnifiedAICache with 24 hours TTL
       const cache = new UnifiedAICache('financial-health-score', userId);
 
-      // Try to get cached result
+      // Try to get cached result. Only the narrative is cached: the score is recomputed on every
+      // request, so a stale entry can never put a stale number in front of the person.
       const cachedResult = await cache.get(aiPayload);
       if (cachedResult) {
-        // Transform AI analysis into frontend-expected format
-        const response = transformAIResponseForMascot(cachedResult);
-        return res.json(response);
+        return res.json(transformAIResponseForMascot(cachedResult, health));
       }
 
       // Use unified AI processor for financial health score
@@ -695,7 +727,7 @@ export function registerAIRoutes(app: Express) {
       if (isAIFailure(healthData)) return aiUnavailable(res);
 
       // Transform AI analysis into frontend-expected format
-      const response = transformAIResponseForMascot(healthData);
+      const response = transformAIResponseForMascot(healthData, health);
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
@@ -708,8 +740,20 @@ export function registerAIRoutes(app: Express) {
   });
 
   // Helper function to transform AI response for mascot component
-  function transformAIResponseForMascot(aiData: any) {
-    // Extract insights from different AI response fields
+  /**
+   * Turns the model's narrative plus the computed score into what the card renders.
+   *
+   * Four things changed here, all of them symptoms of the same "two scores" problem:
+   *
+   *  - the number comes from `health` (the shared rubric), never from the model's own total;
+   *  - achievements and warnings come from the computed factors, so a month scored 100 cannot
+   *    show "0 achievements" while a factor is at its maximum;
+   *  - the model's recommendations land in `warnings`, which is what the "Actions" tab renders.
+   *    They used to be appended to `insights`, so the Actions tab was empty whenever the model
+   *    found nothing alarming, and the advice appeared as an observation instead of an action;
+   *  - `category` is the band that goes with the number, so the mascot's face and the badge agree.
+   */
+  function transformAIResponseForMascot(aiData: any, health: FinancialHealth) {
     const insights: string[] = [];
     const achievements: string[] = [];
     const warnings: string[] = [];
@@ -719,43 +763,20 @@ export function registerAIRoutes(app: Express) {
       insights.push(...aiData.aiAnalysis.personalizedFactors);
     }
 
-    // Add factor insights
-    if (aiData.factors) {
+    // Add one sentence per factor the model looked at
+    if (Array.isArray(aiData.factors)) {
       aiData.factors.forEach((factor: any) => {
-        if (factor.aiInsight) {
+        if (factor?.aiInsight) {
           insights.push(`${factor.name}: ${factor.aiInsight}`);
         }
       });
     }
 
-    // Add recommendations as insights
-    if (aiData.aiAnalysis?.recommendations) {
-      if (Array.isArray(aiData.aiAnalysis.recommendations)) {
-        aiData.aiAnalysis.recommendations.forEach((rec: any) => {
-          if (typeof rec === 'string') {
-            insights.push(rec);
-          } else if (rec.action) {
-            insights.push(rec.action);
-          }
-        });
-      }
-    }
-
-    // Extract achievements from positive factors
-    if (aiData.factors) {
-      aiData.factors.forEach((factor: any) => {
-        if (factor.status === 'good' || factor.status === 'excellent') {
-          achievements.push(`${factor.name} (${factor.score}/${factor.max})`);
-        }
-      });
-    }
-
-    // Extract warnings from negative factors and risk assessment
-    if (aiData.factors) {
-      aiData.factors.forEach((factor: any) => {
-        if (factor.status === 'poor' || factor.status === 'below average') {
-          warnings.push(`${factor.name} (${factor.score}/${factor.max})`);
-        }
+    // The model's advice belongs in Actions, not in Insights
+    if (Array.isArray(aiData.aiAnalysis?.recommendations)) {
+      aiData.aiAnalysis.recommendations.forEach((rec: any) => {
+        if (typeof rec === 'string') warnings.push(rec);
+        else if (rec?.action) warnings.push(rec.action);
       });
     }
 
@@ -763,14 +784,24 @@ export function registerAIRoutes(app: Express) {
       warnings.push(aiData.aiAnalysis.riskAssessment);
     }
 
+    // What went right. Taken from the model's own factor sentences because they are already in
+    // the person's language; the score above is still the computed one.
+    if (Array.isArray(aiData.factors)) {
+      aiData.factors.forEach((factor: any) => {
+        if (factor?.status === 'good' || factor?.status === 'excellent') {
+          achievements.push(`${factor.name} (${factor.score}/${factor.max})`);
+        }
+      });
+    }
+
     return {
-      score: aiData.score || 50,
+      score: health.score,
       trend: aiData.trend || 'stable',
-      category: aiData.category || 'fair',
+      category: health.band,
       insights: insights.slice(0, 10), // Limit to 10 insights
       achievements: achievements.slice(0, 5), // Limit to 5 achievements
       warnings: warnings.slice(0, 5), // Limit to 5 warnings
-      factors: aiData.factors || [],
+      factors: health.factors,
       aiAnalysis: aiData.aiAnalysis || {}
     };
   }

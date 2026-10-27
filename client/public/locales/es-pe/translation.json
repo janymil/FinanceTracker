@@ -638,6 +638,7 @@
   "Detailed expense breakdown and budget tracking available with Standard": "Desglose detallado de gastos y seguimiento de presupuesto disponible con Estándar",
   "Budget by Category": "Presupuesto por Categoría",
   "Edit Budgets": "Editar Presupuestos",
+  "View All Budgets": "Ver Todos los Presupuestos",
   "No spending on budgeted categories yet": "Aún no hay gastos en las categorías presupuestadas",
   "Start spending and your budget progress will appear here": "Comienza a gastar y tu progreso de presupuesto aparecerá aquí",
   "personalizedFinancialTips": "Consejos Financieros Personalizados",
@@ -669,7 +670,7 @@
   "aiFinancialAnalysis": "📊 Análisis Financiero de IA",
   "loadingFinancialInformation": "Cargando información financiera...",
   "View All Transactions": "Ver Todas las Transacciones",
-  "financialHealthAssistant": "Asistente de Salud Financiera",
+  "financialHealthAdvisor": "Asesor Financiero",
   "financialHealthMascot": "Mascota de Salud Financiera",
   "healthScore": "Puntuación de Salud",
   "achievements": "Logros",
@@ -771,7 +772,7 @@
     "poweredByAI": "Impulsado por IA",
     "advancedAnalysis": "Análisis financiero avanzado para usuarios Standard y Premium",
     "requirePlan": {
-      "feature": "Mascota de Salud Financiera Mejorada por IA",
+      "feature": "Asesor Financiero con IA",
       "description": "Obtén un compañero de IA personalizado que analiza tu comportamiento financiero y proporciona perspectivas inteligentes",
       "benefits": {
         "aiAnalysis": "Análisis de salud financiera impulsado por IA",
@@ -818,13 +819,16 @@
       "excellent": "Excelente",
       "good": "Bueno",
       "fair": "Regular",
-      "needs_improvement": "Necesita Mejora"
+      "needs_improvement": "Necesita Mejora",
+      "not_measured": "No medido"
     },
     "score_breakdown": "Desglose de Puntuación:",
     "recommendations": "Recomendaciones:",
     "recommendation_expenses": "Revisa y reduce gastos innecesarios",
     "recommendation_savings": "Intenta ahorrar al menos 10-20% de tus ingresos",
     "recommendation_budgets": "Crea y cumple presupuestos mensuales",
+    "all_good": "Nada que corregir: gastos, ahorro y presupuestos están en un rango saludable.",
+    "loading": "Cargando…",
     "tooltip": {
       "calculation_title": "Cómo se Calcula tu Puntuación de Salud Financiera:",
       "spending_control_title": "Control de Gastos (30%):",
@@ -2837,6 +2841,9 @@
     }
   },
   "help": {
+    "what_this_does": "Qué hace esto",
+    "health_score": "Suma cuatro cosas del mes que estás viendo: cuánto de tus ingresos gastaste, cuánto guardaste, qué tan bien cumpliste tus presupuestos y si el mes terminó con dinero a favor.",
+    "health_advisor": "Explica el mes que estás viendo: qué va bien (fortalezas), qué requiere atención (observaciones) y qué hacer después (acciones). El número es la misma puntuación que la tarjeta de al lado.",
     "seo": {
       "title": "Ayuda y Documentación - Guía del Usuario de Kaptia | Funciones y Soporte",
       "description": "Documentación completa de Kaptia que cubre seguimiento de gastos, escaneo OCR de recibos, categorización con IA, presupuestos, objetivos y todas las funciones. Obtén ayuda con configuración, solución de problemas y aprovechar al máximo tu seguimiento de gastos.",

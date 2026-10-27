@@ -143,7 +143,7 @@ export interface IStorage {
   getUserDataSummary(userId: string): Promise<any>;
 
   // Transaction operations
-  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  createTransaction(transaction: InsertTransaction, clientRequestId?: string | null): Promise<Transaction>;
   getUserTransactions(userId: string, limit?: number): Promise<(Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null })[]>;
   getTransactionsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Array<Transaction & { categoryName?: string | null; categoryIcon?: string | null; categoryColor?: string | null }>>;
   updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction>;

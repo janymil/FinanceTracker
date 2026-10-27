@@ -668,6 +668,7 @@
   "Detailed expense breakdown and budget tracking available with Standard": "Podrobný rozpis výdavkov a sledovanie rozpočtu dostupné so štandardným plánom",
   "Budget by Category": "Rozpočet podľa kategórií",
   "Edit Budgets": "Upraviť Rozpočty",
+  "View All Budgets": "Zobraziť Všetky Rozpočty",
   "No spending on budgeted categories yet": "Zatiaľ žiadne výdavky v rozpočtovaných kategóriách",
   "Start spending and your budget progress will appear here": "Začnite utrácať a váš pokrok rozpočtu sa zobrazí tu",
   "personalizedFinancialTips": "Personalizované Finančné Tipy",
@@ -676,7 +677,7 @@
   "aiTipsDisclaimer": "Tipy sú generované pomocou AI na základe vašich aktuálnych transakcií a nastavení rozpočtu.",
   "loadingFinancialInsights": "Načítavam finančné poznatky...",
   "View All Transactions": "Zobraziť Všetky Transakcie",
-  "financialHealthAssistant": "Asistent finančného zdravia",
+  "financialHealthAdvisor": "Finančný poradca",
   "financialHealthMascot": "Maskot finančného zdravia",
   "healthScore": "Skóre zdravia",
   "achievements": "Úspechy",
@@ -800,7 +801,7 @@
     "poweredByAI": "Poháňané AI",
     "advancedAnalysis": "Pokročilá finančná analýza pre používateľov Standard a Premium",
     "requirePlan": {
-      "feature": "AI-poháňaný maskot finančného zdravia",
+      "feature": "Finančný poradca s AI",
       "description": "Získajte personalizovaného AI spoločníka, ktorý analyzuje vaše finančné správanie a poskytuje inteligentné poznatky",
       "benefits": {
         "aiAnalysis": "AI analýza finančného zdravia",
@@ -827,13 +828,16 @@
       "excellent": "Výborné",
       "good": "Dobré",
       "fair": "Uspokojivé",
-      "needs_improvement": "Potrebuje Zlepšenie"
+      "needs_improvement": "Potrebuje Zlepšenie",
+      "not_measured": "Nemerané"
     },
     "score_breakdown": "Rozpis Skóre:",
     "recommendations": "Odporúčania:",
     "recommendation_expenses": "Skontrolujte a znížte nepotrebné výdavky",
     "recommendation_savings": "Snažte sa šetriť aspoň 10-20% príjmu",
     "recommendation_budgets": "Vytvorte a dodržiavajte mesačné rozpočty",
+    "all_good": "Nie je čo opraviť: výdavky, úspory aj rozpočty sú v zdravom rozmedzí.",
+    "loading": "Načítava sa…",
     "tooltip": {
       "calculation_title": "Ako sa počíta Vaše Skóre Finančného Zdravia:",
       "spending_control_title": "Kontrola Výdavkov (30%):",
@@ -2715,6 +2719,9 @@
     }
   },
   "help": {
+    "what_this_does": "Čo to robí",
+    "health_score": "Sčíta štyri veci za mesiac, ktorý si prezeráte: koľko z príjmu ste minuli, koľko ste si nechali, ako dobre ste dodržali rozpočty a či mesiac skončil s peniazmi navyše.",
+    "health_advisor": "Vysvetlí mesiac, ktorý si prezeráte: čo ide dobre (silné stránky), čo si žiada pozornosť (poznatky) a čo urobiť ďalej (akcie). Číslo je rovnaké skóre ako na susednej karte.",
     "seo": {
       "title": "Pomoc a Dokumentácia - Používateľská Príručka Kaptia | Funkcie a Podpora",
       "description": "Kompletná dokumentácia Kaptia pokrývajúca sledovanie výdavkov, OCR skenovanie účteniek, AI kategorizáciu, rozpočty, ciele a všetky funkcie. Získajte pomoc s nastavením, riešením problémov a maximalizáciou vašej finančnej správy.",

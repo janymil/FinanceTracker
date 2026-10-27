@@ -751,6 +751,8 @@ export default function Dashboard() {
             <LazyFinancialHealthScore
               summary={financialSummary}
               budgets={budgets as any}
+              startDate={startDate.toISOString()}
+              endDate={endDate.toISOString()}
             />
             <LazyQuickFinancialSnapshot
               summary={financialSummary}
@@ -759,10 +761,13 @@ export default function Dashboard() {
             <RequirePlan
               plan="standard"
               compact
-              feature={t("Financial Mascot")}
+              feature={t('financialHealthAdvisor')}
               description={t("Your companion that reacts to your financial health and motivates you.")}
             >
-              <FinancialHealthMascot />
+              <FinancialHealthMascot
+                startDate={startDate.toISOString()}
+                endDate={endDate.toISOString()}
+              />
             </RequirePlan>
           </div>
 
@@ -773,7 +778,11 @@ export default function Dashboard() {
               isLoading={transactionsLoading}
               isPremium={databaseUser?.plan === 'premium'}
             />
-            <BudgetOverview isLimited={(databaseUser?.plan ?? 'free') === 'free'} />
+            <BudgetOverview
+              isLimited={(databaseUser?.plan ?? 'free') === 'free'}
+              startDate={startDate.toISOString()}
+              endDate={endDate.toISOString()}
+            />
           </div>
 
           {/* Interactive trends chart (Standard+) */}

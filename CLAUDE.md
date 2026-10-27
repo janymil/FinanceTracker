@@ -11,6 +11,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run check` — TypeScript type checking + the server logging guard
 - `npm run db:migrate` — apply the reviewed SQL files in `migrations/` in order
 - `npm run db:drift` — read-only: does the database have every table and column the code expects?
+- `npm run db:seed-demo -- --email <address> [--confirm] [--reset]` — fill one account with six
+  months of demo data (categories, transactions, budgets, goals, shared goals) through the storage
+  layer, so the encrypted columns stay readable. Dry run without `--confirm`; `--reset` removes
+  only the rows it created and nothing the person entered themselves.
 - `npm run dr:verify` — after a restore: is the copy populated, and can the current
   `ENCRYPTION_KEY` actually decrypt it? Exit 1 means the copy or the key is wrong. Point it at a
   restored copy (`RESTORE_DATABASE_URL` or `--url`); it refuses `DATABASE_URL_PROD`.
@@ -192,6 +196,20 @@ if (currentLang.startsWith('es')) {
 - `client/public/locales/[lang]/translation.json`
 - All UI text must use translation keys via `useTranslation()` hook
 - No hardcoded English text allowed in components
+
+### Helping a panel explain itself
+
+Every panel that calculates something carries the same `?` next to its title, so a person does not
+need a tutorial to know what the number in front of them means:
+
+```tsx
+<HelpTooltip label={t('help.what_this_does')}>{t('help.health_advisor')}</HelpTooltip>
+```
+
+The component is `client/src/components/help-tooltip.tsx` and the copy lives under `help.*` in the
+three translation files. It renders a real `button`, so the explanation is reachable with the
+keyboard and readable by a screen reader — keep that when adding it to a new panel instead of
+wiring another bare icon by hand.
 
 ## AI and Data Processing
 

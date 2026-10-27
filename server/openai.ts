@@ -877,6 +877,12 @@ export async function generateAIFinancialHealthScore(financialData: {
     categoryName: string;
     type: string;
   }>;
+  /**
+   * The days every figure below covers. Without it the model was asked to score "the period
+   * shown" while the payload held a rolling window of rows, and it said so out loud: "the
+   * summary lists 100 transactions, but only 20 are shown".
+   */
+  period?: { start: string; end: string };
   useAdvancedFactors?: boolean;
 }, language: string = 'en-us'): Promise<{
   score: number;
@@ -904,7 +910,7 @@ export async function generateAIFinancialHealthScore(financialData: {
   };
 }> {
   try {
-    const { summary, budgets, transactions, useAdvancedFactors } = financialData;
+    const { summary, budgets, transactions, useAdvancedFactors, period } = financialData;
     
     // Create hash for caching
     const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
@@ -922,12 +928,15 @@ export async function generateAIFinancialHealthScore(financialData: {
           role: "user",
           content: `Score this person's financial health for the current period:
 
+Period: ${period ? `${period.start} to ${period.end}` : 'not stated'}
+All figures below cover only those days.
+
 Financial Summary:
 - Income: ${summary.totalIncome}
 - Expenses: ${summary.totalExpenses}
 - Net Balance: ${summary.netBalance}
 
-Transaction History (${transactions.length} transactions):
+Transaction History (${transactions.length} transactions in this period, first ${Math.min(transactions.length, 20)} listed):
 ${transactions.slice(0, 20).map(t => 
   `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}

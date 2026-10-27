@@ -678,7 +678,7 @@
   "budgetOptimizationSuggestionsTitle": "📋 Budget Optimization Suggestions",
   "advancedFinancialAnalysisTitle": "🎯 Advanced Financial Analysis",
   "aiFinancialAnalysis": "📊 AI Financial Analysis",
-  "financialHealthAssistant": "Financial Health Assistant",
+  "financialHealthAdvisor": "Financial Advisor",
   "financialHealthMascot": "Financial Health Mascot",
   "healthScore": "Health Score",
   "achievements": "Achievements",
@@ -782,7 +782,7 @@
     "poweredByAI": "Powered by AI",
     "advancedAnalysis": "Advanced financial analysis for Standard & Premium users",
     "requirePlan": {
-      "feature": "AI-Enhanced Financial Health Mascot",
+      "feature": "AI Financial Advisor",
       "description": "Get a personalized AI companion that analyzes your financial behavior and provides intelligent insights",
       "benefits": {
         "aiAnalysis": "AI-powered financial health analysis",
@@ -823,13 +823,16 @@
       "excellent": "Excellent",
       "good": "Good",
       "fair": "Fair",
-      "needs_improvement": "Needs Improvement"
+      "needs_improvement": "Needs Improvement",
+      "not_measured": "Not measured"
     },
     "score_breakdown": "Score Breakdown:",
     "recommendations": "Recommendations:",
     "recommendation_expenses": "Review and reduce unnecessary expenses",
     "recommendation_savings": "Aim to save at least 10-20% of income",
     "recommendation_budgets": "Create and stick to monthly budgets",
+    "all_good": "Nothing to fix: spending, saving and budgets are all in a healthy range.",
+    "loading": "Loading…",
     "tooltip": {
       "calculation_title": "How Your Financial Health Score is Calculated:",
       "spending_control_title": "Spending Control (30%):",
@@ -2657,6 +2660,9 @@
     }
   },
   "help": {
+    "what_this_does": "What this does",
+    "health_score": "Adds up four things for the month you are viewing: how much of your income you spent, how much you kept, how well you kept to your budgets, and whether the month ended with money left over.",
+    "health_advisor": "Explains the month you are viewing: what is going well (strengths), what needs attention (insights) and what to do next (actions). The number is the same score as the card beside it.",
     "seo": {
       "title": "Help & Documentation - Kaptia User Guide | Features & Support",
       "description": "Complete Kaptia documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and getting the most out of your expense tracking.",
@@ -3895,6 +3901,7 @@
   "Daily Recommendations": "Daily Recommendations",
   "Budgets & goals": "Budgets & goals",
   "Budget by Category": "Budget by Category",
+  "View All Budgets": "View All Budgets",
   "Confidence": "Confidence",
   "Premium Feature": "Premium Feature",
   "Trend": "Trend",

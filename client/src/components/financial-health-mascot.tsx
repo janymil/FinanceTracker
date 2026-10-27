@@ -32,6 +32,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import RequirePlan from "./require-plan";
+import { HelpTooltip } from "./help-tooltip";
 
 // Helper function to translate AI factor names
 const translateFactorName = (factorText: string, t: any): string => {
@@ -68,10 +69,19 @@ const translateFactorName = (factorText: string, t: any): string => {
 interface FinancialHealthData {
   score: number;
   trend: 'improving' | 'declining' | 'stable';
-  category: 'excellent' | 'good' | 'fair' | 'poor';
+  category: 'excellent' | 'good' | 'fair' | 'needs_improvement';
   insights: string[];
   achievements: string[];
   warnings: string[];
+}
+
+interface FinancialHealthMascotProps {
+  /**
+   * The month the dashboard is showing. The assistant reads the same days as the score card —
+   * without it, the two cards answered about different windows and could never agree.
+   */
+  startDate?: string;
+  endDate?: string;
 }
 
 interface MascotState {
@@ -81,7 +91,7 @@ interface MascotState {
   color: string;
 }
 
-export default function FinancialHealthMascot() {
+export default function FinancialHealthMascot({ startDate, endDate }: FinancialHealthMascotProps) {
   const { isReady, user } = useClerkUserReady();
   const { t } = useTranslation();
 
@@ -110,7 +120,7 @@ export default function FinancialHealthMascot() {
       bgColor: 'bg-yellow-100',
       borderColor: 'border-yellow-300'
     },
-    poor: {
+    needs_improvement: {
       emotion: 'concerned' as const,
       animation: 'warning' as const,
       message: t('letsWorkTogether'),
@@ -128,9 +138,13 @@ export default function FinancialHealthMascot() {
   const [showDetails, setShowDetails] = useState(false);
 
   const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
-    queryKey: ["/api/financial-health", user?.id],
+    queryKey: ["/api/financial-health", user?.id, startDate, endDate],
     queryFn: async () => {
-      const response = await apiRequest("GET", "/api/financial-health");
+      const params = new URLSearchParams();
+      if (startDate) params.set('startDate', startDate);
+      if (endDate) params.set('endDate', endDate);
+      const query = params.toString();
+      const response = await apiRequest("GET", `/api/financial-health${query ? `?${query}` : ''}`);
       return response.json();
     },
     enabled: isReady && !!user?.id,
@@ -214,17 +228,19 @@ export default function FinancialHealthMascot() {
 
   // 700-level: these are small labels on white or on a -100 tint, and the 600 shades sit below
   // the 4.5:1 AA floor for yellow (3.1:1) and green (3.3:1).
+  // The thresholds are the ones the score card prints in its tooltip, so a score cannot be
+  // "Good" here and "Fair" one card over.
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-700';
-    if (score >= 60) return 'text-blue-700';
-    if (score >= 40) return 'text-yellow-700';
+    if (score >= 65) return 'text-blue-700';
+    if (score >= 50) return 'text-yellow-700';
     return 'text-red-700';
   };
 
   const getScoreBadgeColor = (score: number) => {
     if (score >= 80) return 'bg-green-100 text-green-800 border-green-300';
-    if (score >= 60) return 'bg-blue-100 text-blue-800 border-blue-300';
-    if (score >= 40) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+    if (score >= 65) return 'bg-blue-100 text-blue-800 border-blue-300';
+    if (score >= 50) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     return 'bg-red-100 text-red-800 border-red-300';
   };
 
@@ -290,9 +306,14 @@ export default function FinancialHealthMascot() {
                 <MascotFace emotion={mascotState.emotion} />
               </motion.div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {t('financialHealthAssistant')}
-                </h3>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    {t('financialHealthAdvisor')}
+                  </h3>
+                  <HelpTooltip label={t('help.what_this_does')}>
+                    {t('help.health_advisor')}
+                  </HelpTooltip>
+                </div>
                 <Badge className={`${getScoreBadgeColor(healthData.score)} text-xs`}>
                   {healthData.score}/100
                 </Badge>

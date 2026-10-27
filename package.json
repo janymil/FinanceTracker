@@ -53,6 +53,7 @@
     "db:verify-globals": "node scripts/db-verify-globals.mjs",
     "db:clean-users": "node scripts/clean-user-data.mjs",
     "db:clean-users:prod": "node scripts/clean-user-data.mjs --prod",
+    "db:seed-demo": "tsx scripts/seed-demo-data.ts",
     "dr:verify": "tsx scripts/restore-verify.ts",
     "billing:reconcile": "tsx scripts/billing-reconcile.ts",
     "load:import": "tsx scripts/load-test-import.ts"

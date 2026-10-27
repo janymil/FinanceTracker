@@ -2,14 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit3 } from "lucide-react";
 import { useMemo } from "react";
 import { sumTransactionAmounts } from "@shared/calculations";
+import { budgetsForPeriod } from "@shared/financialHealth";
 import { useLocation } from "wouter";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/context/CurrencyContext";
 
 // Types
 interface Budget {
@@ -38,7 +39,16 @@ interface BudgetWithSpending extends Budget {
 interface BudgetOverviewProps {
   className?: string;
   isLimited?: boolean;
+  /** The month the dashboard is showing. The card lists that month's budgets only. */
+  startDate?: string;
+  endDate?: string;
 }
+
+/**
+ * How many budgets the dashboard shows before "View all". The same five as Recent Transactions,
+ * for the same reason: the card is a glance, and the full list is one click away.
+ */
+const VISIBLE_BUDGETS = 5;
 
 // Constants
 const BUDGET_THRESHOLDS = {
@@ -65,13 +75,6 @@ const getCategoryIcon = (icon: string): string => {
   return iconMap[icon] || '💰';
 };
 
-const formatCurrency = (amount: string | number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
-};
-
 const formatDateRange = (startDate: string, endDate: string): string => {
   const start = new Date(startDate).toLocaleDateString('en-US');
   const end = new Date(endDate).toLocaleDateString('en-US');
@@ -84,10 +87,12 @@ const getProgressColor = (percentage: number): string => {
   return PROGRESS_COLORS.SAFE;
 };
 
-export default function BudgetOverview({ className, isLimited = false }: BudgetOverviewProps) {
+export default function BudgetOverview({ className, isLimited = false, startDate, endDate }: BudgetOverviewProps) {
   const [, setLocation] = useLocation();
   const { isReady, user } = useClerkUserReady();
   const { t } = useTranslation();
+  // The account's own currency: this card used to print every amount in US dollars regardless.
+  const { formatMoney } = useCurrency();
 
   // Fetch budgets using React Query
   const { data: budgets = [], isLoading: budgetsLoading } = useQuery<Budget[]>({
@@ -116,7 +121,11 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
   const budgetsWithSpending = useMemo((): BudgetWithSpending[] => {
     if (!budgets || !transactions) return [];
 
-    return budgets
+    // Only the budgets that apply to the month on screen. Without this the card listed one row
+    // per category per month — "Rent" six times, once for each month that had a budget.
+    const forPeriod = budgetsForPeriod(budgets, startDate ?? new Date(), endDate ?? new Date());
+
+    return forPeriod
       .map((budget) => {
         // Calculate total spending for this category in the current budget period
         const categorySpending = sumTransactionAmounts(transactions
@@ -133,7 +142,10 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
         };
       })
       .sort((a, b) => b.spent - a.spent); // Sort by spending amount descending
-  }, [budgets, transactions]);
+  }, [budgets, transactions, startDate, endDate]);
+
+  // The five busiest budgets; the rest are behind "View all budgets".
+  const visibleBudgets = budgetsWithSpending.slice(0, VISIBLE_BUDGETS);
 
   if (isLimited) {
     return (
@@ -193,13 +205,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
   return (
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{t('Budget by Category')}</CardTitle>
-          <Button size="sm" variant="outline" onClick={() => setLocation('/budget')}>
-            <Edit3 className="h-4 w-4 mr-1" />
-            {t('Edit Budgets')}
-          </Button>
-        </div>
+        <CardTitle className="text-lg font-semibold">{t('Budget by Category')}</CardTitle>
       </CardHeader>
       <CardContent>
         {budgetsWithSpending.length === 0 ? (
@@ -209,7 +215,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
           </div>
         ) : (
           <div className="space-y-6">
-            {budgetsWithSpending.map((budget) => {
+            {visibleBudgets.map((budget) => {
               const spent = budget.spent;
               const budgetAmount = parseFloat(budget.amount);
               const percentage = Math.round((spent / budgetAmount) * 100);
@@ -228,7 +234,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
                   </div>
 
                   <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    <span>{formatCurrency(spent)} / {formatCurrency(budget.amount)}</span>
+                    <span>{formatMoney(spent)} / {formatMoney(budgetAmount)}</span>
                     <span>{formatDateRange(budget.startDate, budget.endDate)}</span>
                   </div>
 
@@ -246,6 +252,16 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
             })}
           </div>
         )}
+
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <Button
+            variant="ghost"
+            className="w-full text-primary hover:text-primary/80"
+            onClick={() => setLocation('/budget')}
+          >
+            {t('View All Budgets')}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
