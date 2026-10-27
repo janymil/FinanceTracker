@@ -36,7 +36,8 @@ describe('the standard category seed', () => {
   });
 
   it('creates every row it claims to', () => {
-    expect(rows.length).toBeGreaterThanOrEqual(20);
+    // 16 = production's system category count on 2026-10-27 (db:verify-globals --prod).
+    expect(rows.length).toBe(16);
   });
 
   it('seeds the goal categories, which are the ones whose absence blocks goal creation', () => {
@@ -46,10 +47,35 @@ describe('the standard category seed', () => {
   });
 
   it('seeds income and expense categories too', () => {
-    expect(rows.filter((row) => row.type === 'expense').length).toBeGreaterThanOrEqual(5);
-    expect(rows.filter((row) => row.type === 'income').length).toBeGreaterThanOrEqual(3);
+    expect(rows.filter((row) => row.type === 'expense').length).toBe(6);
+    expect(rows.filter((row) => row.type === 'income').length).toBe(3);
     expect(rows.map((row) => row.name)).toContain('Food');
     expect(rows.map((row) => row.name)).toContain('Salary');
+  });
+
+  it('matches production row for row, so a rebuild equals the live database', () => {
+    // Snapshot from `node scripts/db-verify-globals.mjs --prod`, 2026-10-27.
+    const PRODUCTION: Array<[string, string, string]> = [
+      ['Food', 'food', 'expense'],
+      ['Entertainment', 'entertainment', 'expense'],
+      ['Housing', 'home', 'expense'],
+      ['Transportation', 'car', 'expense'],
+      ['Healthcare', 'heart', 'expense'],
+      ['Shopping', 'shopping-bag', 'expense'],
+      ['Salary', 'salary', 'income'],
+      ['Freelance', 'laptop', 'income'],
+      ['Investments', 'investment', 'income'],
+      ['Emergency Fund', 'shield', 'goal'],
+      ['Vacation', 'plane', 'goal'],
+      ['House Down Payment', 'home', 'goal'],
+      ['Car Purchase', 'car', 'goal'],
+      ['Debt Payoff', 'credit-card', 'goal'],
+      ['Retirement', 'piggy-bank', 'goal'],
+      ['Other', 'target', 'goal'],
+    ];
+
+    const actual = rows.map((row) => [row.name, row.icon, row.type]);
+    expect(actual.sort()).toEqual(PRODUCTION.sort());
   });
 
   it('uses one name per type, so the idempotent guard cannot insert duplicates', () => {
