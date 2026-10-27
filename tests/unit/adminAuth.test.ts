@@ -24,7 +24,7 @@ let baseUrl: string;
 process.env.ADMIN_PASSWORD = 'unit-test-shared-password';
 
 beforeAll(async () => {
-  const { adminAuth, adminLogin } = await import('../../server/adminAuth');
+  const { adminAuth, adminLogin, isAdminRequest } = await import('../../server/adminAuth');
   const app = express();
   // Stand-ins for express-session and clerkMiddleware, which the test app does not mount.
   app.use((req: any, _res, next) => {
@@ -35,6 +35,10 @@ beforeAll(async () => {
   app.use(express.json());
   app.post('/admin/login', adminLogin);
   app.get('/admin', adminAuth, (_req, res) => res.json({ ok: true }));
+  // The shape `/api/admin-analytics/auth-status` answers with.
+  app.get('/admin/status', async (req: any, res) =>
+    res.json({ authenticated: await isAdminRequest(req) }),
+  );
   server = app.listen(0);
   baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 });
@@ -52,6 +56,11 @@ beforeEach(() => {
 
 function call(headers: Record<string, string> = {}) {
   return fetch(`${baseUrl}/admin`, { headers });
+}
+
+async function status(headers: Record<string, string> = {}) {
+  const response = await fetch(`${baseUrl}/admin/status`, { headers });
+  return response.json();
 }
 
 describe('adminAuth', () => {
@@ -192,5 +201,47 @@ describe('adminAuth — the second factor', () => {
     process.env.ADMIN_REQUIRE_2FA = '1';
 
     expect((await call({ 'x-legacy-admin': '1' })).status).toBe(200);
+  });
+});
+
+/**
+ * The status endpoint the panel asks before it renders anything.
+ *
+ * It used to report only the password session, so a Clerk admin was let through every admin
+ * API and still shown the password form — the panel could never open for them. These tests
+ * pin the rule: the login screen must answer with whatever the guard would decide.
+ */
+describe('isAdminRequest — the answer the login screen shows', () => {
+  it('reports a Clerk admin as authenticated, so the password form never renders', async () => {
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
+
+    expect(await status({ 'x-user': 'user_status_admin' })).toEqual({ authenticated: true });
+  });
+
+  it('reports the legacy password session as authenticated without asking Clerk', async () => {
+    expect(await status({ 'x-legacy-admin': '1' })).toEqual({ authenticated: true });
+    expect(getUser).not.toHaveBeenCalled();
+  });
+
+  it('reports a signed-in user without the admin role as not authenticated', async () => {
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'user' } });
+
+    expect(await status({ 'x-user': 'user_status_plain' })).toEqual({ authenticated: false });
+  });
+
+  it('reports an anonymous visitor as not authenticated without asking Clerk', async () => {
+    expect(await status()).toEqual({ authenticated: false });
+    expect(getUser).not.toHaveBeenCalled();
+  });
+
+  it('agrees with the guard: an admin refused by the second-factor rule is not shown as authenticated', async () => {
+    process.env.ADMIN_REQUIRE_2FA = '1';
+    getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
+
+    // Same account, both doors: the status must not promise access the guard will refuse.
+    expect(await status({ 'x-user': 'user_status_no_2fa' })).toEqual({ authenticated: false });
+    expect((await call({ 'x-user': 'user_status_no_2fa' })).status).toBe(401);
+
+    delete process.env.ADMIN_REQUIRE_2FA;
   });
 });

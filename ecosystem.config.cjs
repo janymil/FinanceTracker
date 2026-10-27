@@ -20,6 +20,12 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         HOST: "127.0.0.1",
+        // The admin console's second-factor demand (server/adminAuth.ts) is waived on this
+        // host: authenticator-app MFA is a paid login-provider feature, so with the demand on
+        // no admin could ever open /admin-analytics. Admin access is one named account whose
+        // public metadata says role="admin" -- revoke it there. Delete this line the day MFA
+        // is included in the plan, so the stronger check comes back on its own.
+        ADMIN_REQUIRE_2FA: "0",
       },
       // The server finishes in-flight work and returns pooled connections on SIGTERM; pm2's
       // 1.6 s default would cut that short (see the note above the shutdown handler).

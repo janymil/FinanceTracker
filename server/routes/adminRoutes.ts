@@ -1,7 +1,7 @@
 import { log } from '../logger';
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage.js";
-import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
+import { adminAuth, adminLogin, adminLogout, isAdminRequest } from "../adminAuth.js";
 import { cancelBilling } from "../cancelBilling.js";
 import { rateLimit } from "../middleware/rateLimit";
 import { db } from "../db.js";
@@ -42,11 +42,21 @@ export function registerAdminRoutes(app: Express) {
   app.post('/api/admin-analytics/logout', adminLogout);
 
   // Check admin auth status
-  app.get('/api/admin-analytics/auth-status', (req: any, res: Response) => {
+  //
+  // This answer is what decides whether the panel renders its password form, so it has to
+  // accept both doors — the legacy password session and a Clerk account whose public metadata
+  // says role="admin". Reporting only the session left Clerk admins on the password screen
+  // while every admin API behind it would already have let them in.
+  app.get('/api/admin-analytics/auth-status', async (req: any, res: Response) => {
     if (!req.session) {
       req.session = {};
     }
-    return res.json({ authenticated: !!req.session?.isAdminAuthenticated });
+    try {
+      return res.json({ authenticated: await isAdminRequest(req) });
+    } catch (error) {
+      log.error('Admin auth-status check failed', { error: (error as Error).message });
+      return res.json({ authenticated: false });
+    }
   });
 
   /**

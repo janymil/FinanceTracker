@@ -127,13 +127,23 @@ async function isClerkAdmin(req: Request): Promise<boolean> {
   }
 }
 
+/**
+ * Whether this request carries admin rights, by either door.
+ *
+ * Exported because `/api/admin-analytics/auth-status` has to answer the same question the
+ * guard does. It used to report only the password session, so a Clerk admin passed every
+ * admin request and still stared at the password form: the panel never unlocked. One
+ * function, one answer, no second opinion to drift.
+ */
+export const isAdminRequest = async (req: Request): Promise<boolean> => {
+  const session = (req as AdminRequest).session;
+  if (session?.isAdminAuthenticated) return true;
+  return isClerkAdmin(req);
+};
+
 export const adminAuth = async (req: AdminRequest, res: Response, next: NextFunction) => {
   try {
-    if (req.session?.isAdminAuthenticated) {
-      return next();
-    }
-
-    if (await isClerkAdmin(req)) {
+    if (await isAdminRequest(req)) {
       return next();
     }
 
