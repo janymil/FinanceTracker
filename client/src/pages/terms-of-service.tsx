@@ -17,7 +17,6 @@ export default function TermsOfService() {
       <SEO
         title={t("terms.seo.title")}
         description={t("terms.seo.description")}
-        canonical={`https://kaptia.app/${currentLang}/terms-of-service`}
       />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("Terms of Service")}</h1>

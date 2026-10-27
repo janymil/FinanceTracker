@@ -1796,7 +1796,7 @@
   },
   "export": {
     "page_title": "Data Management",
-    "page_description": "Export and import your financial data with advanced options",
+    "page_description": "Export and import your spending data with advanced options",
     "tab_export": "Export",
     "tab_import": "Import",
     "tab_backup": "Backup",
@@ -2226,7 +2226,7 @@
     "page_title": "Contact Us",
     "seo_title": "Contact Us - Kaptia Support | Get Help & Send Messages",
     "seo_description": "Contact Kaptia support team for assistance with expense tracking, budgeting, and technical support. Get answers to your questions quickly.",
-    "seo_keywords": "kaptia contact, customer support, help desk, finance app support, expense tracker help, budget app assistance",
+    "seo_keywords": "kaptia contact, customer support, help desk, expense tracker support, expense tracker help, budget tool assistance",
     "page_description": "Have questions about Kaptia? We're here to help. Get in touch with our support team and we'll respond as quickly as possible.",
     "form_title": "Send us a message",
     "form_description": "Fill out the form below and we'll get back to you within 24 hours.",
@@ -2279,8 +2279,8 @@
   },
   "seo": {
     "authTitle": "Sign In | Sign Up - Kaptia",
-    "authDescription": "Create your Kaptia account or sign in to access your spending dashboard. Start tracking expenses, managing budgets, and reaching your savings goals today.",
-    "authKeywords": "kaptia login, sign up finance app, personal finance account, expense tracker registration, budget app login"
+    "authDescription": "Create your Kaptia account or sign in to access your spending dashboard. Start tracking expenses, managing budgets, and reaching your goals today.",
+    "authKeywords": "kaptia login, sign up expense tracker, spending account, expense tracker registration, budget tool login"
   },
   "factors": {
     "budgetManagement": "Budget Management",
@@ -2659,8 +2659,8 @@
   "help": {
     "seo": {
       "title": "Help & Documentation - Kaptia User Guide | Features & Support",
-      "description": "Complete Kaptia documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and maximizing your financial management.",
-      "keywords": "kaptia help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
+      "description": "Complete Kaptia documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and getting the most out of your expense tracking.",
+      "keywords": "kaptia help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget tool documentation, spending tracker support, expense management tutorial"
     },
     "page": {
       "title": "Kaptia Documentation",

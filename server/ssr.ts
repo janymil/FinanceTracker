@@ -8,7 +8,7 @@ const multilingualContent: Record<string, Record<string, any>> = {
     '/': {
       title: 'Kaptia - Smart Spending Tracker with AI Insights',
       description: 'Kaptia turns your everyday expenses into a clear picture of your spending. Track expenses, set budgets, reach goals, and let AI organize the rest.',
-      keywords: 'spending tracker, expense tracking, budget planner, savings goals, expense scanner',
+      keywords: 'spending tracker, expense tracking, budget planner, goals, expense scanner',
       lang: 'en'
     },
     '/pricing': {
@@ -63,8 +63,8 @@ const multilingualContent: Record<string, Record<string, any>> = {
   'es': {
     '/': {
       title: 'Kaptia - Rastreador Inteligente de Gastos con IA',
-      description: 'Kaptia convierte tus gastos diarios en una imagen clara de tus finanzas. Rastrea gastos, crea presupuestos, alcanza metas y deja que la IA organice el resto.',
-      keywords: 'rastreador de gastos, seguimiento de gastos, presupuesto, metas de ahorro, control de finanzas',
+      description: 'Kaptia convierte tus gastos diarios en una imagen clara de tus gastos. Rastrea gastos, crea presupuestos, alcanza metas y deja que la IA organice el resto.',
+      keywords: 'rastreador de gastos, seguimiento de gastos, presupuesto, metas, control de gastos',
       lang: 'es'
     },
     '/pricing': {
@@ -119,7 +119,7 @@ const multilingualContent: Record<string, Record<string, any>> = {
   'sk': {
     '/': {
       title: 'Kaptia - Inteligentný Sledovač Výdavkov s AI',
-      description: 'Kaptia mení vaše každodenné výdavky na jasný obraz o vašich financiách. Sledujte výdavky, tvorte rozpočty, dosahujte ciele a zvyšok nechajte na AI.',
+      description: 'Kaptia mení vaše každodenné výdavky na jasný obraz o vašich výdavkoch. Sledujte výdavky, tvorte rozpočty, dosahujte ciele a zvyšok nechajte na AI.',
       keywords: 'sledovač výdavkov, sledovanie výdavkov, rozpočet, sporiteľské ciele, správa výdavkov',
       lang: 'sk'
     },
@@ -199,6 +199,15 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
 
   const pageData = getPageData(route, language);
 
+  // Same address scheme as scripts/generate-sitemap.mjs and components/SEO.tsx: always
+  // /<lang><path>, no trailing slash on the home page. Three sources of truth that disagreed
+  // (here "/pricing", in the sitemap "/en/pricing") made the crawler pick a canonical by itself.
+  const BASE = 'https://kaptia.app';
+  const path = route === '/' ? '' : route;
+  const pageUrl = `${BASE}/${pageData.lang}${path}`;
+  // Sign-in is a tool, not a landing page: reachable, but not something to rank or advertise.
+  const robots = route === '/auth' ? 'noindex, nofollow' : 'index, follow';
+
   return `<!DOCTYPE html>
 <html lang="${pageData.lang}">
 <head>
@@ -207,31 +216,31 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
     <title>${pageData.title}</title>
     <meta name="description" content="${pageData.description}">
     <meta name="keywords" content="${pageData.keywords}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="${robots}">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kaptia.app${language === 'en' ? '' : '/' + language}${route}">
+    <meta property="og:url" content="${pageUrl}">
     <meta property="og:title" content="${pageData.title}">
     <meta property="og:description" content="${pageData.description}">
     <meta property="og:image" content="https://kaptia.app/og-image.png">
     <meta property="og:locale" content="${pageData.lang === 'en' ? 'en_US' : pageData.lang === 'es' ? 'es_ES' : 'sk_SK'}">
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://kaptia.app${language === 'en' ? '' : '/' + language}${route}">
-    <meta property="twitter:title" content="${pageData.title}">
-    <meta property="twitter:description" content="${pageData.description}">
-    <meta property="twitter:image" content="https://kaptia.app/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="${pageUrl}">
+    <meta name="twitter:title" content="${pageData.title}">
+    <meta name="twitter:description" content="${pageData.description}">
+    <meta name="twitter:image" content="https://kaptia.app/og-image.png">
 
     <!-- Canonical URL with language -->
-    <link rel="canonical" href="https://kaptia.app${language === 'en' ? '' : '/' + language}${route}">
+    <link rel="canonical" href="${pageUrl}">
     
     <!-- Language alternates for SEO -->
-    <link rel="alternate" hreflang="en" href="https://kaptia.app${route}">
-    <link rel="alternate" hreflang="es" href="https://kaptia.app/es${route}">
-    <link rel="alternate" hreflang="sk" href="https://kaptia.app/sk${route}">
-    <link rel="alternate" hreflang="x-default" href="https://kaptia.app${route}">
+    <link rel="alternate" hreflang="en" href="${BASE}/en${path}">
+    <link rel="alternate" hreflang="es" href="${BASE}/es${path}">
+    <link rel="alternate" hreflang="sk" href="${BASE}/sk${path}">
+    <link rel="alternate" hreflang="x-default" href="${BASE}/en${path}">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -245,7 +254,7 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
       "@type": "WebApplication",
       "name": "Kaptia",
       "description": "${pageData.description}",
-      "url": "https://kaptia.app",
+      "url": "${pageUrl}",
       "applicationCategory": "LifestyleApplication",
       "operatingSystem": "Web",
       "inLanguage": "${pageData.lang}",
@@ -327,7 +336,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
             <ul>
                 <li>Expense and Income Tracking</li>
                 <li>Budget Management</li>
-                <li>Savings Goals</li>
+                <li>Goals</li>
                 <li>AI-Powered Categorization</li>
                 <li>Receipt OCR Scanning</li>
                 <li>Mobile QR Code Upload</li>
@@ -366,7 +375,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Unlimited transactions</li>
                     <li>Budget management</li>
-                    <li>Savings goals</li>
+                    <li>Goals</li>
                     <li>AI expense categorization</li>
                     <li>Receipt OCR scanning</li>
                     <li>Mobile QR code upload</li>
@@ -534,8 +543,8 @@ function getPageContent(route: string, lang: string = 'en'): string {
             
             <h2>Key Benefits</h2>
             <ul>
-                <li>Automate everyday money decisions</li>
-                <li>Reduce manual categorization by 95%</li>
+                <li>Automate everyday spending organization</li>
+                <li>Reduce manual categorization</li>
                 <li>Improve your spending health score</li>
                 <li>Predict and prevent overspending</li>
                 <li>Get personalized spending guidance</li>
@@ -556,13 +565,13 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/': `
         <section>
             <h1>Rastreador Inteligente de Gastos con IA</h1>
-            <p>Kaptia convierte tus gastos diarios en una imagen clara de tus finanzas, con presupuestos e insights impulsados por IA.</p>
+            <p>Kaptia convierte tus gastos diarios en una imagen clara de tus gastos, con presupuestos e insights impulsados por IA.</p>
             
             <h2>Características Principales</h2>
             <ul>
                 <li>Seguimiento de Gastos e Ingresos</li>
                 <li>Gestión de Presupuestos</li>
-                <li>Metas de Ahorro</li>
+                <li>Metas</li>
                 <li>Categorización Impulsada por IA</li>
                 <li>Escaneo OCR de Recibos</li>
                 <li>Carga de Códigos QR Móviles</li>
@@ -601,7 +610,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <ul>
                     <li>Transacciones ilimitadas</li>
                     <li>Gestión de presupuestos</li>
-                    <li>Metas de ahorro</li>
+                    <li>Metas</li>
                     <li>Categorización de gastos con IA</li>
                     <li>Escaneo OCR de recibos</li>
                     <li>Carga de códigos QR desde el celular</li>
@@ -770,7 +779,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
             <h2>Beneficios Clave</h2>
             <ul>
                 <li>Automatiza las decisiones de gasto diarias</li>
-                <li>Reduce la categorización manual en un 95%</li>
+                <li>Reduce la categorización manual</li>
                 <li>Mejora tu puntuación de hábitos de gasto</li>
                 <li>Predice y previene el gasto excesivo</li>
                 <li>Obtén orientación personalizada sobre tus gastos</li>
@@ -791,7 +800,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/': `
         <section>
             <h1>Inteligentný Sledovač Výdavkov s AI</h1>
-            <p>Kaptia mení vaše každodenné výdavky na jasný obraz o vašich financiách - s rozpočtami a AI-poháňanými prehľadmi.</p>
+            <p>Kaptia mení vaše každodenné výdavky na jasný obraz o vašich výdavkoch - s rozpočtami a AI-poháňanými prehľadmi.</p>
             
             <h2>Hlavné Funkcie</h2>
             <ul>
@@ -1005,7 +1014,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
             <h2>Kľúčové Výhody</h2>
             <ul>
                 <li>Automatizácia každodenných rozhodnutí o míňaní</li>
-                <li>Zníženie manuálnej kategorizácie o 95%</li>
+                <li>Zníženie manuálnej kategorizácie</li>
                 <li>Zlepšenie skóre návykov míňania</li>
                 <li>Predpovedanie a prevencia nadmerného míňania</li>
                 <li>Získanie personalizovaného vedenia míňania</li>

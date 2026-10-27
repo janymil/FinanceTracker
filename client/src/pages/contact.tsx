@@ -83,7 +83,6 @@ export default function Contact() {
         title={`${t('contact.page_title', 'Contact Us')} | Kaptia`}
         description={t('contact.page_description', 'Have questions about Kaptia? We are here to help. Get in touch with our support team.')}
         keywords="kaptia contact, support, help, email"
-        canonical="https://kaptia.app/contact"
       />
 
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">

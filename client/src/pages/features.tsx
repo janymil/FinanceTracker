@@ -149,7 +149,6 @@ export default function FeaturesPage() {
         title={`${t('Features')} | Kaptia`}
         description={t('features.hero.subtitle', 'Advanced artificial intelligence meets personal finance management')}
         keywords="kaptia features, ai finance, receipt scanning, budget management"
-        canonical="https://kaptia.app/features"
       />
 
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">

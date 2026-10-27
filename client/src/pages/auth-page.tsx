@@ -84,7 +84,7 @@ export default function AuthPage() {
         title={t("seo.authTitle")}
         description={t("seo.authDescription")}
         keywords={t("seo.authKeywords")}
-        canonical="https://kaptia.app/auth"
+        noindex
       />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center">

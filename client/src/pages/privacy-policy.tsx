@@ -19,7 +19,6 @@ export default function PrivacyPolicy() {
       <SEO
         title={t("privacy.seo.title")}
         description={t("privacy.seo.description")}
-        canonical={`https://kaptia.app/${i18n.language?.slice(0, 2) || 'en'}/privacy-policy`}
       />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("privacy.title")}</h1>

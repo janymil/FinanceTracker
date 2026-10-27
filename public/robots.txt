@@ -38,6 +38,8 @@ Disallow: /admin-analytics
 Disallow: /*/admin-analytics
 Disallow: /admin-watch
 Disallow: /*/admin-watch
+Disallow: /courses
+Disallow: /*/courses
 Disallow: /redeem
 Disallow: /*/redeem
 Disallow: /subscribe

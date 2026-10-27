@@ -418,11 +418,10 @@ export default function Dashboard() {
   };
 
   return <>
-    <SEO 
-      title="Dashboard - Financial Overview | Kaptia"
-      description="View your complete financial picture with real-time expense tracking, budget insights, and AI-powered recommendations. Manage transactions and monitor your financial health."
-      keywords="personal finance dashboard, expense tracking, budget overview, financial insights, money management, transaction history"
-      canonical="https://kaptia.app/dashboard"
+    <SEO
+      title="Dashboard - Spending Overview | Kaptia"
+      description="Your spending at a glance: expense tracking, budget progress and AI-organized categories."
+      noindex
     />
       <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

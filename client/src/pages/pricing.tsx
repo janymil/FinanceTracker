@@ -161,7 +161,6 @@ export default function Pricing() {
         title={t('pricing.seo_title')}
         description={t('pricing.seo_description')}
         keywords={t('pricing.seo_keywords')}
-        canonical={`https://kaptia.app/${currentLang}/pricing`}
       />
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">

@@ -1,6 +1,6 @@
 {
   "features.hero.title": "Finančná inteligencia poháňaná AI",
-  "features.hero.subtitle": "Pokročilá umelá inteligencia sa stretáva so správou osobných financií",
+  "features.hero.subtitle": "Pokročilá umelá inteligencia sa stretáva so sledovaním každodenných výdavkov",
   "features.hero.stats.ai_functions": "AI funkcie",
   "features.hero.stats.languages": "Jazyky",
   "features.hero.stats.accuracy_rate": "Miera presnosti",
@@ -215,7 +215,7 @@
   "features": {
     "hero": {
       "title": "Finančná inteligencia poháňaná AI",
-      "subtitle": "Pokročilá umelá inteligencia sa stretáva so správou osobných financií",
+      "subtitle": "Pokročilá umelá inteligencia sa stretáva so sledovaním každodenných výdavkov",
       "stats": {
         "ai_functions": "AI funkcie",
         "languages": "Jazyky",

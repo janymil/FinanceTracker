@@ -176,7 +176,6 @@ export default function Help() {
         title={`${t("Help & Documentation")} | Kaptia`}
         description={t("Complete guide to mastering your spending with Kaptia's powerful features")}
         keywords="kaptia help, documentation, expense tracker guide, receipt ocr, budgets"
-        canonical="https://kaptia.app/help"
       />
 
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white relative bg-grid pb-20">

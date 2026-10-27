@@ -1981,7 +1981,7 @@
   },
   "export": {
     "page_title": "Gestión de Datos",
-    "page_description": "Exporta e importa tus datos financieros con opciones avanzadas",
+    "page_description": "Exporta e importa tus datos de gastos con opciones avanzadas",
     "tab_export": "Exportar",
     "tab_import": "Importar",
     "tab_backup": "Respaldo",
@@ -2406,7 +2406,7 @@
     "page_title": "Contáctanos",
     "seo_title": "Contáctanos - Soporte Kaptia | Obtén Ayuda y Envía Mensajes",
     "seo_description": "Contacta al equipo de soporte de Kaptia para asistencia con seguimiento de gastos, presupuestos y soporte técnico. Obtén respuestas a tus preguntas rápidamente.",
-    "seo_keywords": "contacto kaptia, soporte al cliente, mesa de ayuda, soporte app finanzas, ayuda rastreador gastos, asistencia app presupuesto",
+    "seo_keywords": "contacto kaptia, soporte al cliente, mesa de ayuda, soporte rastreador de gastos, ayuda rastreador gastos, asistencia app presupuesto",
     "page_description": "¿Tienes preguntas sobre Kaptia? Estamos aquí para ayudar. Ponte en contacto con nuestro equipo de soporte y responderemos lo más rápido posible.",
     "form_title": "Envíanos un mensaje",
     "form_description": "Completa el formulario a continuación y te responderemos en 24 horas.",
@@ -2459,8 +2459,8 @@
   },
   "seo": {
     "authTitle": "Iniciar Sesión | Registrarse - Kaptia",
-    "authDescription": "Crea tu cuenta de Kaptia o inicia sesión para acceder a tu panel de gastos. Comienza a rastrear gastos, gestionar presupuestos y alcanzar tus metas de ahorro hoy.",
-    "authKeywords": "kaptia login, registrarse app finanzas, cuenta finanzas personales, registro rastreador gastos, login app presupuesto"
+    "authDescription": "Crea tu cuenta de Kaptia o inicia sesión para acceder a tu panel de gastos. Comienza a rastrear gastos, gestionar presupuestos y alcanzar tus metas hoy.",
+    "authKeywords": "kaptia login, registrarse rastreador de gastos, cuenta de gastos, registro rastreador gastos, login app presupuesto"
   },
   "factors": {
     "budgetManagement": "Gestión de Presupuesto",
@@ -2839,8 +2839,8 @@
   "help": {
     "seo": {
       "title": "Ayuda y Documentación - Guía del Usuario de Kaptia | Funciones y Soporte",
-      "description": "Documentación completa de Kaptia que cubre seguimiento de gastos, escaneo OCR de recibos, categorización con IA, presupuestos, objetivos y todas las funciones. Obtén ayuda con configuración, solución de problemas y maximización de tu gestión financiera.",
-      "keywords": "ayuda kaptia, guía rastreador gastos, tutorial escaneo recibos, ayuda categorización IA, documentación app presupuesto, soporte finanzas personales, tutorial gestión financiera"
+      "description": "Documentación completa de Kaptia que cubre seguimiento de gastos, escaneo OCR de recibos, categorización con IA, presupuestos, objetivos y todas las funciones. Obtén ayuda con configuración, solución de problemas y aprovechar al máximo tu seguimiento de gastos.",
+      "keywords": "ayuda kaptia, guía rastreador gastos, tutorial escaneo recibos, ayuda categorización IA, documentación app presupuesto, soporte rastreador de gastos, tutorial gestión de gastos"
     },
     "page": {
       "title": "Documentación de Kaptia",

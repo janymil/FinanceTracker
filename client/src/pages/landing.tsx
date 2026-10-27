@@ -262,7 +262,6 @@ export default function Landing() {
         title="Kaptia - Smart Spending Tracker with AI Insights | Photos, Voice & Budgets"
         description="Kaptia turns your everyday expenses into a clear picture of your spending. Capture spending by photo, voice, or file import - AI organizes the rest. Start free today!"
         keywords="spending tracker, expense tracker, budget planner, expense scanner, voice expense input, AI categorization, savings goals, smart budgeting, expense tracking"
-        canonical="https://kaptia.app"
       />
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white overflow-hidden">
       {/* ============ NAVIGATION ============ */}

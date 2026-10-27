@@ -72,7 +72,6 @@ export default function Reclamaciones() {
       <SEO
         title={t("reclamaciones.seo.title")}
         description={t("reclamaciones.seo.description")}
-        canonical={`https://kaptia.app/${language}/reclamaciones`}
       />
 
       <div className="min-h-screen bg-[#f7f8fc] dark:bg-[#07080f] text-gray-900 dark:text-white pb-20">
