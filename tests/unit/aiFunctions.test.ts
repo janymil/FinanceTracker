@@ -33,13 +33,11 @@ import {
   generateContextualFinancialTips,
   generateDailyRecommendations,
   generateExpensePredictions,
-  generateFinancialHealthScore,
   generateFinancialTips,
   generateSpendingInsights,
   generateTrendPredictions,
   normalizeForecast,
   parseBankStatement,
-  scoreFromFactors,
   toCategoryChoice,
   voiceExtraction,
   withProseRules,
@@ -493,45 +491,77 @@ describe('generateDailyRecommendations', () => {
   });
 });
 
-/* ------------------------------------------------------------------ health scores */
+/* ------------------------------------------------------------------ financial advice */
 
 const healthInput = () => ({
   summary: { totalIncome: 3000, totalExpenses: 2000, netBalance: 1000 },
-  budgets: [],
+  budgets: [{ categoryName: 'Food', amount: '500', spent: 620 }],
   transactions: [{ description: 'Migros', amount: 40, date: daysAgo(1), categoryName: 'Food', type: 'expense' }],
+  categories: [
+    { name: 'Food', amount: 620, share: 31, purchases: 8, average: 77.5, previousAverage: 400 },
+  ],
+  topMerchants: [{ description: 'Migros', amount: 120, count: 3 }],
+  period: { start: '2026-10-01', end: '2026-10-31' },
 });
 
-describe('generateAIFinancialHealthScore', () => {
-  it('bounds the score and derives the category from it', async () => {
-    create.mockResolvedValueOnce(reply({ score: 140, status: 'Excellent', aiAnalysis: { recommendations: [{ action: 'Keep going' }] } }));
-    const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
-    expect(result.score).toBe(100);
-    expect(result.aiAnalysis.recommendations[0].action).toBe('Keep going');
-  });
+const advice = {
+  summary: 'You spent 2000 of 3000 and kept 1000. Food took 620.',
+  observations: ['Food reached 620, above your usual 400.'],
+  recommendations: [
+    {
+      action: 'Cap food at 500 a month',
+      reason: 'Food reached 620, 120 over the budget',
+      impact: 'Frees 120 a month',
+      priority: 'high',
+    },
+  ],
+  riskAssessment: 'Food is the only budget over its limit.',
+  confidence: 0.8,
+};
 
-  it('scores from the fixed factors and ignores a status word that contradicts the number', async () => {
-    create.mockResolvedValueOnce(reply({
-      // The rubric prompt returns factors, not a total; the app adds them up.
-      status: 'Excellent',
-      factors: [
-        { name: 'Spending control', score: 30, max: 30, insight: 'a' },
-        { name: 'Buffer and saving', score: 15, max: 30, insight: 'b' },
-        { name: 'Budget discipline', score: 10, max: 20, insight: 'c' },
-        { name: 'Tracking completeness', score: 16, max: 20, insight: 'd' },
-      ],
-    }));
-
+describe('generateAIFinancialHealthScore (the adviser)', () => {
+  it('returns advice as actions, each carrying the figure behind it', async () => {
+    create.mockResolvedValueOnce(reply(advice));
     const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
 
-    expect(result.score).toBe(71);
-    // 71 is "good"; the reply said "Excellent" and the number wins.
-    expect(result.category).toBe('good');
-    expect(result.aiAnalysis.personalizedFactors).toEqual(['a', 'b', 'c', 'd']);
+    expect(result.aiAnalysis.recommendations).toEqual([
+      { action: 'Cap food at 500 a month', reason: 'Food reached 620, 120 over the budget', impact: 'Frees 120 a month', priority: 'high' },
+    ]);
+    expect(result.aiAnalysis.personalizedFactors).toEqual(['Food reached 620, above your usual 400.']);
+    expect(result.aiAnalysis.summary).toContain('620');
   });
 
-  it('throws when the reply has no score, instead of inventing 50', async () => {
-    create.mockResolvedValueOnce(reply({ status: 'Good' }));
-    await expect(generateAIFinancialHealthScore(healthInput(), 'en-us')).rejects.toThrow(/no score/);
+  it('does not ask the model to score the month: the app owns that number', async () => {
+    create.mockResolvedValueOnce(reply(advice));
+    const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
+
+    expect(result.score).toBe(0);
+    expect(systemOf()).toMatch(/do not score it/i);
+    expect(systemOf()).not.toMatch(/maxima|four factors/i);
+  });
+
+  it('sends the categories, the budgets over their limit and the person\'s usual level', async () => {
+    create.mockResolvedValueOnce(reply(advice));
+    await generateAIFinancialHealthScore(healthInput(), 'en-us');
+
+    const user = userOf();
+    expect(user).toContain('Food: 620.00 (31.0% of expenses), 8 payment(s), average 77.50, usually 400.00');
+    expect(user).toContain('Food: limit 500.00, spent 620.00, over by 120.00');
+    expect(user).toContain('Migros: 120.00 over 3 payments');
+  });
+
+  it('keeps a bare string recommendation instead of dropping it', async () => {
+    create.mockResolvedValueOnce(reply({ recommendations: ['Cancel the unused gym membership'] }));
+    const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
+
+    expect(result.aiAnalysis.recommendations).toEqual([
+      { action: 'Cancel the unused gym membership', reason: '', impact: '', priority: 'medium' },
+    ]);
+  });
+
+  it('treats a reply with no advice as a failure, not as an empty adviser', async () => {
+    create.mockResolvedValueOnce(reply({ summary: 'Everything looks fine.' }));
+    await expect(generateAIFinancialHealthScore(healthInput(), 'en-us')).rejects.toThrow(/no recommendations/);
   });
 
   it.each([['prose', 'You are doing great'], ['a failure', new Error('503')]])('throws on %s', async (_name, bad) => {
@@ -539,73 +569,11 @@ describe('generateAIFinancialHealthScore', () => {
     else create.mockResolvedValueOnce(reply(bad));
     await expect(generateAIFinancialHealthScore(healthInput(), 'en-us')).rejects.toBeTruthy();
   });
-});
 
-describe('scoreFromFactors', () => {
-  it('adds the factor values into a 0-100 score', () => {
-    expect(scoreFromFactors([
-      { score: 30, max: 30 }, { score: 30, max: 30 }, { score: 20, max: 20 }, { score: 20, max: 20 },
-    ])).toBe(100);
-  });
-
-  it('scales to 100 when the model only fills part of the rubric', () => {
-    expect(scoreFromFactors([{ score: 30, max: 30 }, { score: 15, max: 30 }])).toBe(75);
-  });
-
-  it('clamps a factor above its own maximum and skips unusable entries', () => {
-    expect(scoreFromFactors([{ score: 99, max: 30 }, { score: 15, max: 30 }, { score: 'x', max: 20 }, null])).toBe(75);
-  });
-
-  it('returns null when there is nothing to add', () => {
-    expect(scoreFromFactors(undefined)).toBeNull();
-    expect(scoreFromFactors([])).toBeNull();
-    expect(scoreFromFactors([{ score: 10, max: 30 }])).toBeNull();
-  });
-});
-
-describe('generateFinancialHealthScore', () => {
-  const input = (net: number, income = 1000) => ({
-    transactions: [{ id: 1, amount: '10', description: 'x', date: daysAgo(1), type: 'expense', categoryName: 'Food' }],
-    budgets: [],
-    summary: { totalIncome: income, totalExpenses: income - net, netBalance: net },
-  });
-
-  it('uses the model\'s score and keys the cache on the language', async () => {
-    create.mockResolvedValueOnce(reply({ score: 71, status: 'Good', factors: [], aiAnalysis: { personalizedFactors: ['a'] } }));
-    const result = await generateFinancialHealthScore('u', input(200), 'es-pe');
-
-    expect(result).toMatchObject({ score: 71, category: 'good', insights: ['a'] });
-    expect(result.degraded).toBeUndefined();
-    expect((cache.get.mock.calls[0][1] as any).language).toBe('es-pe');
-  });
-
-  it.each([
-    [250, 92, 'excellent'],
-    [150, 75, 'good'],
-    [50, 55, 'fair'],
-    [-100, 30, 'poor'],
-  ])('with the model down, computes a score from savings alone (net %i -> %i)', async (net, score, category) => {
-    create.mockRejectedValueOnce(new Error('503'));
-    const result = await generateFinancialHealthScore('u', input(net), 'en-us');
-    expect(result).toMatchObject({ score, category, degraded: true });
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    ['sk-sk', 'Kladný čistý zostatok'],
-    ['es-pe', 'Balance neto positivo'],
-    ['en-us', 'Positive net balance'],
-  ])('writes the degraded score in %s', async (language, expected) => {
-    create.mockRejectedValueOnce(new Error('503'));
-    const result = await generateFinancialHealthScore('u', input(200), language);
-    expect(result.achievements).toEqual([expected]);
-  });
-
-  it('treats a reply with no score as a failed reply, not as 50', async () => {
-    create.mockResolvedValueOnce(reply({ status: 'Good' }));
-    const result = await generateFinancialHealthScore('u', input(200), 'en-us');
-    expect(result.degraded).toBe(true);
-    expect(result.score).not.toBe(50);
+  it('asks for the advice in the person\'s own language', async () => {
+    create.mockResolvedValueOnce(reply(advice));
+    await generateAIFinancialHealthScore(healthInput(), 'sk-sk');
+    expect(systemOf()).toMatch(/slovak/i);
   });
 });
 

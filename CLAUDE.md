@@ -227,6 +227,39 @@ wiring another bare icon by hand.
 4. Cache only a real answer (the language is part of the key); a failure is never served from cache
 5. Return a localised response; a provider failure is a 503 `{ code: 'ai_unavailable' }`, never a fake result
 
+### Auditing an AI function (do this before trusting one)
+
+A prompt can be well-formed, cache correctly, never fail — and still not do what its name promises.
+That is what happened to the financial adviser: it was built as a *score* generator, the app later
+took the scoring over, and the card kept the name while the content became statistics.
+
+Check each AI function against these five questions, in this order:
+
+1. **Why does it exist?** The product decision it serves, in one sentence. If the answer is "to
+   produce a number another function already computes", the function is a duplicate.
+2. **Does the name say what it does?** A card called *Advisor* must advise; a tab called *Advice*
+   must contain actions. When the name and the output diverge, fix the output first, then the name.
+3. **Does the prompt ask for that output?** Read the system prompt as if you had never seen the
+   code. If it asks for "one sentence per factor naming the figure it rests on", every sentence will
+   be a statistic — by construction, not by accident.
+4. **Does the payload contain what the answer needs?** Advice about coffee needs per-category
+   amounts, purchase counts and the person's own usual level. Totals alone can only produce totals.
+5. **Check the real output, once.** Call the function with one real account's data (a throwaway
+   script under `scripts/.tmp-*.ts`, deleted afterwards) and read the answer as the person would.
+   Canned test replies cannot show you a sentence that is technically true and useless.
+
+Where the answer is bad, the order of repair is: payload → prompt → parser → rendering. Fixing the
+rendering first hides a prompt that still produces the wrong thing.
+
+### Financial adviser (`financial-health-score`)
+
+The score is computed by `shared/financialHealth` (30/25/25/20, bands 80/65/50) and the model writes
+only what arithmetic cannot: the month in two sentences (`summary`), observations (`insights`, each
+with a figure) and 2-4 actions (`advice`, each with `action` / `reason` / `impact` / `priority`).
+The payload carries per-category spend with its share, purchase count and the person's three-month
+average for that category, plus the five largest payments — that comparison is what turns "you spent
+190" into "you spent 190, usually 42". A reply with no actions is a failed reply, not an empty panel.
+
 ## Security and Privacy
 
 ### Data Protection

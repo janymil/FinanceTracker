@@ -101,13 +101,25 @@ const translateFactorName = (factorText: string, t: any): string => {
   return translatedText;
 };
 
+type AdvicePriority = 'high' | 'medium' | 'low';
+
 interface FinancialHealthData {
   score: number;
   trend: 'improving' | 'declining' | 'stable';
   category: 'excellent' | 'good' | 'fair' | 'needs_improvement';
+  /** The month in two sentences, from the adviser. */
+  summary?: string;
   insights: string[];
   achievements: string[];
+  /** Only the risk line now; the actions have their own, longer shape below. */
   warnings: string[];
+  /** What to change, why, and what it frees up. */
+  advice?: Array<{
+    action: string;
+    reason: string;
+    impact: string;
+    priority: AdvicePriority;
+  }>;
   /** The four computed factors; the strengths tab and the section colours read these. */
   factors?: Array<{
     key: HealthFactorKey;
@@ -308,6 +320,20 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
     .filter((factor) => factor.status === 'excellent' || factor.status === 'good')
     .map((factor) => `${t(FACTOR_LABELS[factor.key])} (${factor.score}/${factor.max})`);
 
+  /*
+   * The advice, kept whole.
+   *
+   * It used to arrive as one string per recommendation and was then sorted into buckets by looking
+   * for words like "budget" or "urgent" inside it - so an action could land under "Budget" for
+   * mentioning the word, and its reason was dropped on the way. An action without its reason is a
+   * command; the reason is what makes it worth following.
+   */
+  const advice = healthData?.advice ?? [];
+  const riskNote = healthData?.warnings?.[0] ?? '';
+
+  const priorityDot = (priority: AdvicePriority) =>
+    priority === 'high' ? 'bg-red-500' : priority === 'low' ? 'bg-slate-400' : 'bg-amber-500';
+
   if (isLoading) {
     return (
       <Card className="relative overflow-hidden">
@@ -452,7 +478,7 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
             <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
               <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                {healthData.warnings?.length || 0} {t('alerts')}
+                {advice.length || healthData.warnings?.length || 0} {t('mascot.tabs.actions')}
               </p>
             </div>
           </div>
@@ -533,7 +559,7 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                           <div className="text-xs text-gray-600 dark:text-gray-400">{t('mascot.tabs.insights')}</div>
                         </div>
                         <div className="bg-white dark:bg-gray-800 p-2 rounded">
-                          <div className="text-sm font-bold text-amber-600">{healthData.warnings?.length || 0}</div>
+                          <div className="text-sm font-bold text-amber-600">{advice.length || healthData.warnings?.length || 0}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-400">{t('mascot.tabs.actions')}</div>
                         </div>
                       </div>
@@ -575,6 +601,11 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
 
                   {/* Insights Tab */}
                   <TabsContent value="insights" className="mt-4 space-y-3">
+                    {healthData?.summary && (
+                      <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                        {healthData.summary}
+                      </p>
+                    )}
                     {healthData?.insights && healthData.insights.length > 0 ? (
                       <div className="space-y-3">
                         {(() => {
@@ -713,143 +744,66 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                     )}
                   </TabsContent>
 
-                  {/* Recommendations Tab */}
+                  {/* Advice Tab: the change, the reason, and what it frees up */}
                   <TabsContent value="recommendations" className="mt-4 space-y-3">
-                    {healthData?.warnings && healthData.warnings.length > 0 ? (
+                    {advice.length > 0 ? (
                       <div className="space-y-3">
-                        {(() => {
-                          // Categorize recommendations for better organization
-                          const urgentItems = healthData.warnings.filter(warning => 
-                            warning.toLowerCase().includes('urgent') || 
-                            warning.toLowerCase().includes('critical') ||
-                            warning.toLowerCase().includes('immediately')
-                          );
-                          const budgetItems = healthData.warnings.filter(warning => 
-                            warning.toLowerCase().includes('budget') || 
-                            warning.toLowerCase().includes('limit') ||
-                            warning.toLowerCase().includes('overspend')
-                          );
-                          const improvementItems = healthData.warnings.filter(warning => 
-                            warning.toLowerCase().includes('improve') || 
-                            warning.toLowerCase().includes('consider') ||
-                            warning.toLowerCase().includes('try')
-                          );
-                          const otherItems = healthData.warnings.filter(warning => 
-                            !urgentItems.includes(warning) && 
-                            !budgetItems.includes(warning) && 
-                            !improvementItems.includes(warning)
-                          );
+                        {advice.map((item, index) => (
+                          <motion.div
+                            key={`advice-${index}`}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.08 }}
+                            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3"
+                          >
+                            <div className="flex items-start gap-2">
+                              <span
+                                aria-hidden="true"
+                                className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${priorityDot(item.priority)}`}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-snug">
+                                  {item.action}
+                                </p>
+                                {item.reason && (
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {item.reason}
+                                  </p>
+                                )}
+                                {item.impact && (
+                                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mt-1">
+                                    {item.impact}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
 
-                          return (
-                            <>
-                              {/* Urgent Actions */}
-                              {urgentItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <AlertTriangle className="h-4 w-4 text-red-600" />
-                                    <span className="text-xs font-semibold text-red-700 dark:text-red-400">{t('mascot.categories.urgentActions')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {urgentItems.map((item, index) => (
-                                      <motion.div
-                                        key={`urgent-${index}`}
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-red-500"
-                                      >
-                                        <div className="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed">
-                                          {translateFactorName(item, t)}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Budget Alerts */}
-                              {budgetItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Shield className="h-4 w-4 text-yellow-600" />
-                                    <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">{t('mascot.categories.budgetManagement')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {budgetItems.map((item, index) => (
-                                      <motion.div
-                                        key={`budget-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-yellow-500"
-                                      >
-                                        <div className="text-xs text-yellow-800 dark:text-yellow-200 font-medium leading-relaxed">
-                                          {translateFactorName(item, t)}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Improvement Suggestions */}
-                              {improvementItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Lightbulb className="h-4 w-4 text-blue-600" />
-                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">{t('mascot.categories.smartSuggestions')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {improvementItems.map((item, index) => (
-                                      <motion.div
-                                        key={`improvement-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-blue-500"
-                                      >
-                                        <div className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
-                                          {translateFactorName(item, t)}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* General Recommendations */}
-                              {otherItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Target className="h-4 w-4 text-gray-600" />
-                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-400">{t('mascot.categories.generalRecommendations')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {otherItems.map((item, index) => (
-                                      <motion.div
-                                        key={`other-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-gray-500"
-                                      >
-                                        <div className="text-xs text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
-                                          {translateFactorName(item, t)}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
+                        {riskNote && (
+                          <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3">
+                            <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">{riskNote}</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : healthData?.warnings && healthData.warnings.length > 0 ? (
+                      /* A reply cached before the advice shape: show the lines rather than nothing. */
+                      <div className="space-y-2">
+                        {healthData.warnings.map((warning, index) => (
+                          <div
+                            key={`warning-${index}`}
+                            className="bg-white dark:bg-gray-800 p-3 rounded-lg border-l-4 border-amber-500 text-xs text-gray-800 dark:text-gray-200 leading-relaxed"
+                          >
+                            {warning}
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="text-center py-6">
-                        <Target className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 dark:text-gray-400">{t('mascot.emptyStates.noRecommendations')}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('mascot.emptyStates.healthLooksGood')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('mascot.emptyStates.addTransactions')}</p>
                       </div>
                     )}
                   </TabsContent>

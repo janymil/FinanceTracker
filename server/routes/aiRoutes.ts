@@ -97,6 +97,51 @@ function zonedDay(instant: Date, timeZone: string): string {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+/**
+ * The person's average monthly spend per category over the three months before `period`.
+ *
+ * Advice that compares a category with the person's own habit is advice ("you spent 62 on coffee,
+ * usually 40"); advice that compares it with nothing is a description. The window is theirs, not a
+ * fixed one: it starts three months before the period the dashboard is showing.
+ *
+ * A new account gets an empty map, not a baseline of zero - a zero baseline would make every
+ * ordinary purchase look like a spike.
+ */
+async function usualMonthlySpendByCategory(
+  userId: string,
+  period: { start: Date; end: Date },
+): Promise<Map<string, number>> {
+  const monthsBack = 3;
+  const until = new Date(period.start.getTime() - 24 * 60 * 60 * 1000);
+  const since = new Date(period.start);
+  since.setUTCMonth(since.getUTCMonth() - monthsBack);
+
+  const rows = await storage.getTransactionsByDateRange(userId, since, until);
+
+  const totals = new Map<string, { amount: number; months: Set<string> }>();
+  for (const row of rows) {
+    if (row.type !== 'expense') continue;
+    const amount = Number(row.amount);
+    if (!Number.isFinite(amount)) continue;
+
+    const name = row.categoryName || 'Other';
+    const entry = totals.get(name) || { amount: 0, months: new Set<string>() };
+    entry.amount += amount;
+    entry.months.add(row.date.toISOString().slice(0, 7));
+    totals.set(name, entry);
+  }
+
+  // Divided by the months that actually hold spending, so an account three weeks old is not
+  // compared against a third of its own history.
+  const averages = new Map<string, number>();
+  totals.forEach((entry, name) => {
+    const months = Math.max(1, Math.min(monthsBack, entry.months.size));
+    averages.set(name, Number((entry.amount / months).toFixed(2)));
+  });
+
+  return averages;
+}
+
 export function registerAIRoutes(app: Express) {
   // Provider/routing diagnostics. Exposes configuration only (never keys), admin only.
   app.get('/api/ai/health', adminAuth, (_req, res) => {
@@ -443,11 +488,11 @@ export function registerAIRoutes(app: Express) {
         return res.status(403).json({ message: "AI financial health score requires standard or premium plan" });
       }
 
-      const { summary, budgets, useAdvancedFactors } = req.body;
+      const { summary, budgets } = req.body;
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      log.info('AI financial health score: calling the AI processor');
+      log.info('AI financial advice: calling the AI processor');
       
       // Get user language from consistent header detection
       const language = getUserLanguage(req);
@@ -462,7 +507,6 @@ export function registerAIRoutes(app: Express) {
           categoryName: t.categoryName || 'Uncategorized',
           type: t.type
         })),
-        useAdvancedFactors,
         language: language
       };
 
@@ -476,13 +520,29 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Generate new AI response
-      const aiScore = await runAI('financial-health-score', userId, aiPayload, user.plan || 'free');
-      if (isAIFailure(aiScore)) return aiUnavailable(res);
+      const adviceData = await runAI('financial-health-score', userId, aiPayload, user.plan || 'free');
+      if (isAIFailure(adviceData)) return aiUnavailable(res);
+
+      /*
+       * The number comes from the rubric, not from the model.
+       *
+       * This endpoint used to return whatever total the model wrote, so the same month could come
+       * back as 71 here and 78 on the dashboard. The model now supplies only the advice.
+       */
+      const health = calculateFinancialHealth({
+        totalIncome: Number(summary?.totalIncome || 0),
+        totalExpenses: Number(summary?.totalExpenses || 0),
+        budgetTotal: Array.isArray(budgets)
+          ? budgets.reduce((total: number, budget: any) => total + Number(budget?.amount || 0), 0)
+          : 0,
+      });
+
+      const response = { ...adviceData, score: health.score, category: health.band, factors: health.factors };
 
       // Cache the result for 24 hours
-      await cache.set(aiPayload, aiScore, false, 24);
+      await cache.set(aiPayload, response, false, 24);
 
-      return res.json(aiScore);
+      return res.json(response);
     } catch (error) {
       log.error("Error generating AI financial health score:", error);
       return res.status(500).json({ message: "Failed to generate AI financial health score" });
@@ -718,10 +778,65 @@ export function registerAIRoutes(app: Express) {
 
       // Get user language from consistent header detection
       const language = getUserLanguage(req);
-      
+
+      /*
+       * What the adviser needs to give advice instead of a report.
+       *
+       * It used to get one month's totals and twenty transaction lines, so the only true sentence it
+       * could write was "expenses were X". These two blocks hand it the shape of the month: every
+       * category with its share and the person's own usual level, and the largest single payments,
+       * which is where a subscription or an avoidable charge actually shows up.
+       */
+      const byCategory = new Map<string, { amount: number; purchases: number }>();
+      const byPayment = new Map<string, { amount: number; count: number }>();
+      for (const transaction of transactions) {
+        if (transaction.type !== 'expense') continue;
+        const amount = Number(transaction.amount);
+        if (!Number.isFinite(amount)) continue;
+
+        const categoryName = transaction.categoryName || 'Other';
+        const category = byCategory.get(categoryName) || { amount: 0, purchases: 0 };
+        category.amount += amount;
+        category.purchases += 1;
+        byCategory.set(categoryName, category);
+
+        const description = (transaction.description || '').trim();
+        if (description) {
+          const payment = byPayment.get(description) || { amount: 0, count: 0 };
+          payment.amount += amount;
+          payment.count += 1;
+          byPayment.set(description, payment);
+        }
+      }
+
+      const usualByCategory = await usualMonthlySpendByCategory(userId, period);
+
+      const categories = Array.from(byCategory.entries())
+        .sort((left, right) => right[1].amount - left[1].amount)
+        .slice(0, 12)
+        .map(([name, { amount, purchases }]) => ({
+          name,
+          amount: Number(amount.toFixed(2)),
+          share: totalExpenses > 0 ? Number(((amount / totalExpenses) * 100).toFixed(1)) : 0,
+          purchases,
+          average: Number((amount / purchases).toFixed(2)),
+          previousAverage: usualByCategory.get(name) ?? null,
+        }));
+
+      const topMerchants = Array.from(byPayment.entries())
+        .sort((left, right) => right[1].amount - left[1].amount)
+        .slice(0, 5)
+        .map(([description, { amount, count }]) => ({
+          description,
+          amount: Number(amount.toFixed(2)),
+          count,
+        }));
+
       const aiPayload = {
         transactions: processedTransactions,
         budgets: processedBudgets,
+        categories,
+        topMerchants,
         summary: {
           totalIncome,
           totalExpenses,
@@ -771,59 +886,60 @@ export function registerAIRoutes(app: Express) {
    *  - the number comes from `health` (the shared rubric), never from the model's own total;
    *  - achievements and warnings come from the computed factors, so a month scored 100 cannot
    *    show "0 achievements" while a factor is at its maximum;
-   *  - the model's recommendations land in `warnings`, which is what the "Actions" tab renders.
-   *    They used to be appended to `insights`, so the Actions tab was empty whenever the model
-   *    found nothing alarming, and the advice appeared as an observation instead of an action;
+   *  - the model's advice lands in `advice`, an array of objects the "Advice" tab renders with its
+   *    reason beside each action. It used to be flattened into `warnings`, so the tab was a list of
+   *    imperatives with nothing behind them, and the same text also appeared among the observations;
    *  - `category` is the band that goes with the number, so the mascot's face and the badge agree.
    */
   function transformAIResponseForMascot(aiData: any, health: FinancialHealth) {
     const insights: string[] = [];
-    const achievements: string[] = [];
     const warnings: string[] = [];
 
-    // Add personalized factors as insights
-    if (aiData.aiAnalysis?.personalizedFactors && Array.isArray(aiData.aiAnalysis.personalizedFactors)) {
+    // The adviser's observations, one sentence each, already in the person's language.
+    if (Array.isArray(aiData.aiAnalysis?.personalizedFactors)) {
       insights.push(...aiData.aiAnalysis.personalizedFactors);
     }
 
-    // Add one sentence per factor the model looked at
-    if (Array.isArray(aiData.factors)) {
-      aiData.factors.forEach((factor: any) => {
-        if (factor?.aiInsight) {
-          insights.push(`${factor.name}: ${factor.aiInsight}`);
-        }
-      });
-    }
+    /*
+     * The advice, kept as objects instead of flattened to strings.
+     *
+     * Flattened, the panel showed "Cap food at 500" with no reason, which reads like an order from
+     * a machine that does not know the month. The reason - "Food reached 620, 120 over the budget"
+     * - is the part that makes it believable and the part the person can check.
+     */
+    const advice: Array<{ action: string; reason: string; impact: string; priority: 'high' | 'medium' | 'low' }> =
+      Array.isArray(aiData.aiAnalysis?.recommendations)
+        ? aiData.aiAnalysis.recommendations
+            .map((rec: any) => (typeof rec === 'string'
+              ? { action: rec.trim(), reason: '', impact: '', priority: 'medium' as const }
+              : {
+                  action: String(rec?.action || '').trim(),
+                  reason: String(rec?.reason || '').trim(),
+                  impact: String(rec?.impact || '').trim(),
+                  priority: (rec?.priority === 'high' || rec?.priority === 'low' ? rec.priority : 'medium') as 'high' | 'medium' | 'low',
+                }))
+            .filter((rec: { action: string }) => rec.action && !isMetaCommentary(rec.action))
+            .slice(0, 5)
+        : [];
 
-    // The model's advice belongs in Actions, not in Insights
-    if (Array.isArray(aiData.aiAnalysis?.recommendations)) {
-      aiData.aiAnalysis.recommendations.forEach((rec: any) => {
-        if (typeof rec === 'string') warnings.push(rec);
-        else if (rec?.action) warnings.push(rec.action);
-      });
-    }
-
-    if (aiData.aiAnalysis?.riskAssessment) {
-      warnings.push(aiData.aiAnalysis.riskAssessment);
-    }
-
-    // What went right. Taken from the model's own factor sentences because they are already in
-    // the person's language; the score above is still the computed one.
-    if (Array.isArray(aiData.factors)) {
-      aiData.factors.forEach((factor: any) => {
-        if (factor?.status === 'good' || factor?.status === 'excellent') {
-          achievements.push(`${factor.name} (${factor.score}/${factor.max})`);
-        }
-      });
+    /*
+     * Only the risk line stays in `warnings`. The actions used to be pushed here as well, so the
+     * same advice appeared twice: once as a string in this list and once as a card.
+     */
+    if (typeof aiData.aiAnalysis?.riskAssessment === 'string' && aiData.aiAnalysis.riskAssessment.trim()) {
+      warnings.push(aiData.aiAnalysis.riskAssessment.trim());
     }
 
     return {
       score: health.score,
       trend: aiData.trend || 'stable',
       category: health.band,
+      summary: typeof aiData.aiAnalysis?.summary === 'string' ? aiData.aiAnalysis.summary.trim() : '',
       insights: insights.filter((line) => !isMetaCommentary(line)).slice(0, 10), // Limit to 10 insights
-      achievements: achievements.slice(0, 5), // Limit to 5 achievements
-      warnings: warnings.filter((line) => !isMetaCommentary(line)).slice(0, 5), // Limit to 5 warnings
+      // The strengths tab is computed from `factors` on the client; this field stays for the shape.
+      achievements: [],
+      warnings: warnings.filter((line) => !isMetaCommentary(line)).slice(0, 3),
+      advice,
       factors: health.factors,
       aiAnalysis: aiData.aiAnalysis || {}
     };

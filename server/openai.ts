@@ -4,7 +4,6 @@ import { createRoutedClient, AI_MODELS } from "../lib/aiProvider";
 import {
   emptyStateCopy,
   financialTipsFallback,
-  healthFallbackCopy,
   isTextInLanguage,
   progressTipFallback,
 } from "../shared/aiFallbacks";
@@ -64,91 +63,69 @@ function generateProse(params: any) {
 }
 
 /**
- * The four factors a health score is made of, with fixed maxima.
+ * The adviser prompt.
  *
- * The prompt used to leave the factor names, their maxima and the total to the model, so the
- * same month could produce different factors and a total that jumped for no visible reason.
- * The rubric now lives here: the model fills in each factor's value and one sentence, and this
- * file does the arithmetic. That also removes the "score: 85" example, which pulled answers
- * towards 85.
+ * WHY IT IS NOT A SCORING PROMPT ANY MORE
+ * ---------------------------------------
+ * This function was built as a score generator: four weighted factors, one sentence each, plus a
+ * risk line. The app now computes the score itself (`shared/financialHealth`), so what was left
+ * reached the screen as four statistics — "expenses were 3,222.97 against income of 7,000" — under
+ * a card called *Financial Advisor*. That is a report, not advice, and the name promised advice.
+ *
+ * The model's job here is the part arithmetic cannot do: look at what the month actually contains
+ * (which categories, which payments, against the person's own usual level), and name the two or
+ * three changes worth making, with the figure each one rests on.
  */
-const HEALTH_FACTORS = [
-  { name: 'Spending control', max: 30, measures: 'expenses against income, and how steady they are' },
-  { name: 'Buffer and saving', max: 30, measures: 'what is left at the end of the period' },
-  { name: 'Budget discipline', max: 20, measures: 'budgets kept to, or "not set" when the person has none' },
-  { name: 'Tracking completeness', max: 20, measures: 'how much of the money is actually categorised' },
-] as const;
+export const FINANCIAL_ADVISOR_PROMPT_VERSION = 'financial-advisor@1';
 
-export const HEALTH_SCORE_PROMPT_VERSION = 'health-score@2';
+export function financialAdvisorPrompt(languageLabel: string): string {
+  return `CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''} ALL text content (summary, observations, recommendations, risk) must be in ${languageLabel}.
 
-/** System prompt for every health-score call. Pure, so both entry points ask the same question. */
-export function healthScoreSystemPrompt(languageLabel: string): string {
-  const factors = HEALTH_FACTORS.map((factor) => `- ${factor.name} / max ${factor.max} / ${factor.measures}`).join('\n');
+You advise one person about one month of their spending. Another card already scores the month, so
+do not score it, grade it or restate it. Your job is the advice.
 
-  return `CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''} ALL text content (factor insights, risk assessment, recommendations) must be in ${languageLabel}.
-
-You score one person's financial health for the period shown.
-
-The scale is fixed: four factors, fixed maxima, 100 points in total. You give each factor a value
-between 0 and its maximum and one sentence explaining it. Do not add factors, rename them or change
-the maxima, and do not return a total - the app adds the values up.
-
-FACTORS (name / max / what it measures):
-${factors}
+Write like an adviser who has read their statement: name the category or the payment, the figure,
+and the change worth making. Advice that could be given to anyone - "spend less", "save more",
+"make a budget" - is worthless here. Every recommendation must rest on a figure in this message,
+and must be something this person can do.
 
 RULES:
-- Use only the data in this message. Never assume income, savings or budgets that are not shown.
-- A factor that cannot be measured from this data (for example budgets when none are set) gets
-  half of its maximum, and its sentence says why instead of inventing a reason.
-- Each factor sentence is one sentence of at most 20 words and names the figure it rests on.
+- Give 2 to 4 recommendations, the most valuable first. If only two things are worth changing, give
+  two; a padded list is worse than a short one.
+- A recommendation must fix something that is worse than it could be. Never recommend keeping a
+  category at a level it is already below - if a category is already under its usual level, leave it
+  out and spend the sentence on something that matters.
+- Each recommendation has: the action (a specific change), the reason (the figure it rests on),
+  the impact (the amount it frees up or redirects in a month), and a priority.
+- Prefer changes that fit this month's numbers: cap a category at a reachable level, cancel or
+  downgrade a subscription, move a fixed amount on payday, replace one habit with a cheaper one.
+- When a category is above the person's usual level, say by how much. When a budget is overspent,
+  name the category and the gap. When a large payment is avoidable, name it.
+- If the month leaves money unassigned, one recommendation says how much to set aside and what for.
+- If the month is genuinely healthy, say so in one sentence and recommend what to protect rather
+  than inventing a problem.
+- Each observation is one sentence of at most 20 words and names its figure.
 - Amounts are written the way they appear in the data: no currency symbol, no currency name.
-- Do not describe the person as a customer of a financial service and do not recommend products.
-- Write only about this person's money. Never mention the list you were given, how complete it is,
-  what you were not shown, the app, this prompt, or your own visibility. A sentence about the
-  analysis itself is not advice, and it is not shown to anyone who can act on it.
+- Never invent a category, merchant or figure that is not in this message.
+- Do not describe the data back to the person, and never mention what you were given, what you were
+  not shown, the app, this prompt or yourself. The person cannot act on any of that.
+- Do not recommend products or services.
 
 Respond with JSON in this exact format:
 {
-  "factors": [
-    { "name": "Spending control", "score": 0, "max": 30, "insight": "One sentence naming the figure." }
-  ],
-  "riskAssessment": "One sentence about the main risk, or the main strength when there is no risk.",
+  "summary": "Two sentences on where this month stands, naming real figures.",
+  "observations": ["One sentence with a figure.", "One sentence with a figure."],
   "recommendations": [
-    { "action": "One thing to do", "impact": "What it changes", "priority": "high|medium|low" }
+    {
+      "action": "The specific change, in the imperative.",
+      "reason": "The figure in this month's data that justifies it.",
+      "impact": "What it frees up per month, as a figure.",
+      "priority": "high|medium|low"
+    }
   ],
+  "riskAssessment": "One sentence, only if there is a real risk to this person's money. Otherwise an empty string.",
   "confidence": 0.0
 }`;
-}
-
-/**
- * Sums the model's factor values into the 0-100 score, or `null` when the reply has no usable
- * factors (then the caller falls back to a whole score, if the model sent one).
- * Scaled to 100 so a model that returns only two factors is not scored out of 50.
- */
-export function scoreFromFactors(factors: unknown): number | null {
-  if (!Array.isArray(factors)) return null;
-
-  const usable = factors.filter((factor: any) =>
-    factor && Number.isFinite(Number(factor.score)) && Number.isFinite(Number(factor.max)) && Number(factor.max) > 0,
-  );
-  if (usable.length < 2) return null;
-
-  const earned = usable.reduce(
-    (sum: number, factor: any) => sum + Math.max(0, Math.min(Number(factor.max), Number(factor.score))),
-    0,
-  );
-  const possible = usable.reduce((sum: number, factor: any) => sum + Number(factor.max), 0);
-  if (possible <= 0) return null;
-
-  return Math.round((earned / possible) * 100);
-}
-
-/** The key the interface shows as a colour band; it is a key, not a translated label. */
-function healthCategory(score: number): 'excellent' | 'good' | 'fair' | 'poor' {
-  if (score >= 90) return 'excellent';
-  if (score >= 70) return 'good';
-  if (score >= 40) return 'fair';
-  return 'poor';
 }
 
 const DEFAULT_FORECAST: FinancialForecast = {
@@ -270,16 +247,6 @@ export interface ExpensePrediction {
   }>;
 }
 
-export interface FinancialHealthData {
-  score: number;
-  trend: 'improving' | 'declining' | 'stable';
-  category: 'excellent' | 'good' | 'fair' | 'poor';
-  insights: string[];
-  achievements: string[];
-  warnings: string[];
-  /** True when the model could not be reached and the score was computed from savings alone. */
-  degraded?: boolean;
-}
 
 /**
  * Turns the model's category answer into something safe to act on: the id must be one of the
@@ -880,7 +847,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     totalExpenses: number;
     netBalance: number;
   };
-  budgets: any[];
+  budgets: Array<{ categoryName?: string | null; amount: string | number; spent?: number | string }>;
   transactions: Array<{
     description: string;
     amount: number;
@@ -889,31 +856,42 @@ export async function generateAIFinancialHealthScore(financialData: {
     type: string;
   }>;
   /**
-   * The days every figure below covers. Without it the model was asked to score "the period
-   * shown" while the payload held a rolling window of rows, and it said so out loud: "the
-   * summary lists 100 transactions, but only 20 are shown".
+   * One line per spending category, with the person's own usual level beside it, so the advice can
+   * say "twice your usual" instead of only naming a total.
    */
+  categories?: Array<{
+    name: string;
+    amount: number;
+    share: number;
+    purchases: number;
+    average: number;
+    previousAverage?: number | null;
+  }>;
+  /** The largest single payments of the month, for advice about a specific charge. */
+  topMerchants?: Array<{ description: string; amount: number; count: number }>;
+  /** The days every figure below covers. */
   period?: { start: string; end: string };
-  useAdvancedFactors?: boolean;
 }, language: string = 'en-us'): Promise<{
+  /**
+   * Not produced by the model any more: `shared/financialHealth` scores the month and the caller
+   * owns that number. Kept in the shape so the older endpoint still answers with one object.
+   */
   score: number;
   status: string;
   color: string;
-  /** Derived from `score` in this file, never from the model's status word. */
   category: 'excellent' | 'good' | 'fair' | 'poor';
-  factors: Array<{
-    name: string;
-    score: number;
-    max: number;
-    status: string;
-    aiInsight?: string;
-  }>;
+  factors: Array<{ name: string; score: number; max: number; status: string; aiInsight?: string }>;
   icon: string;
   aiAnalysis: {
+    /** The month in two sentences, from the model. */
+    summary: string;
+    /** Sentences about the money, each resting on a figure. */
     personalizedFactors: string[];
     riskAssessment: string;
+    /** The advice itself: what to change, why, and what it frees up. */
     recommendations: Array<{
       action: string;
+      reason: string;
       impact: string;
       priority: 'high' | 'medium' | 'low';
     }>;
@@ -921,108 +899,126 @@ export async function generateAIFinancialHealthScore(financialData: {
   };
 }> {
   try {
-    const { summary, budgets, transactions, useAdvancedFactors, period } = financialData;
-    
-    // Create hash for caching
-    const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    // Cache system removed
-    // Cache system removed - direct processing only
+    const { summary, budgets, transactions, categories, topMerchants, period } = financialData;
+
+    const savingsShare = summary.totalIncome > 0
+      ? Math.round((summary.netBalance / summary.totalIncome) * 100)
+      : null;
+
+    const categoryLines = (categories ?? []).length > 0
+      ? (categories ?? []).map((category) => {
+          const usual = typeof category.previousAverage === 'number' && category.previousAverage > 0
+            ? `, usually ${category.previousAverage.toFixed(2)}`
+            : '';
+          return `- ${category.name}: ${category.amount.toFixed(2)} (${category.share.toFixed(1)}% of expenses), ${category.purchases} payment(s), average ${category.average.toFixed(2)}${usual}`;
+        }).join('\n')
+      : '- no categorised expenses in this period';
+
+    const budgetLines = budgets.length > 0
+      ? budgets.map((budget) => {
+          const spent = Number(budget.spent ?? 0);
+          const limit = Number(budget.amount ?? 0);
+          const gap = spent - limit;
+          const verdict = limit > 0 && gap > 0 ? `, over by ${gap.toFixed(2)}` : '';
+          return `- ${budget.categoryName || 'Uncategorized'}: limit ${limit.toFixed(2)}, spent ${spent.toFixed(2)}${verdict}`;
+        }).join('\n')
+      : 'none set';
+
+    const merchantLines = (topMerchants ?? [])
+      .map((merchant) => `- ${merchant.description}: ${merchant.amount.toFixed(2)}${merchant.count > 1 ? ` over ${merchant.count} payments` : ''}`)
+      .join('\n');
+
+    const recentLines = transactions
+      .slice(0, 25)
+      .map(t => `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`)
+      .join('\n');
 
     const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
         {
           role: "system",
-          content: healthScoreSystemPrompt(getLanguageLabel(language))
+          content: financialAdvisorPrompt(getLanguageLabel(language))
         },
         {
           role: "user",
-          content: `Score this person's financial health for the current period:
+          content: `${period ? `Month: ${period.start} to ${period.end}` : 'Month: the recent period'}
+Income: ${summary.totalIncome}
+Expenses: ${summary.totalExpenses}
+Left over: ${summary.netBalance}${savingsShare !== null ? ` (${savingsShare}% of income)` : ''}
 
-Period: ${period ? `${period.start} to ${period.end}` : 'not stated'}
-All figures below cover only those days.
+Spending by category:
+${categoryLines}
 
-Financial Summary:
-- Income: ${summary.totalIncome}
-- Expenses: ${summary.totalExpenses}
-- Net Balance: ${summary.netBalance}
+Budgets (limit / spent):
+${budgetLines}
+${merchantLines ? `\nLargest payments:\n${merchantLines}\n` : ''}
+Recent payments:
+${recentLines || '- none'}
 
-Transaction History (${transactions.length} transactions in this period):
-${transactions.slice(0, 60).map(t => 
-  `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
-).join('\n')}
-
-Budgets: ${budgets.length > 0
-  ? budgets.slice(0, 8).map((b: any) => `- ${b.categoryName || b.name || 'Uncategorized'}: ${b.spent ?? 0} of ${b.amount}`).join('\n')
-  : 'none set - treat budget discipline as not measurable'}
-
-Analysis depth: ${useAdvancedFactors ? 'standard' : 'basic'}`
+Write this month's advice.`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3
+      // Advice that quotes exact figures still needs constraining, but a little more freedom than a
+      // scorecard: the change worth recommending is not always the largest category.
+      temperature: 0.4
     });
 
     const result = parseModelJson(response.choices[0].message.content);
 
     /*
-     * The score now comes from the fixed rubric: the model fills in each factor's value, this
-     * file adds them up (scoreFromFactors). A whole "score" is still accepted, because a model
-     * (or the gateway) may answer in the older shape. A reply with neither is a failed reply,
-     * not a score of 50.
+     * No score is read from the reply any more. The app scores the month
+     * (`shared/financialHealth`) so the badge on this panel and the score card beside it are the
+     * same number; a model's own total would only be a second opinion nobody can check.
+     *
+     * What is read is the advice, and a reply without any is a failed reply: an empty advice panel
+     * under a card called "Financial Advisor" is worse than an error the caller can retry.
      */
-    const fromFactors = scoreFromFactors(result.factors);
-    const wholeScore = Number(result.score);
-    const rawScore = fromFactors ?? (Number.isFinite(wholeScore) ? wholeScore : null);
-    if (rawScore === null) {
-      throw new AIResponseError('The health score reply had no score');
-    }
-
-    const score = Math.max(0, Math.min(100, rawScore));
-
-    // The interface reads `aiAnalysis`; the rubric prompt answers at the top level, so both
-    // shapes are accepted here rather than silently returning empty sections.
     const analysis = result.aiAnalysis && typeof result.aiAnalysis === 'object' ? result.aiAnalysis : {};
-    const recommendations = Array.isArray(analysis.recommendations)
-      ? analysis.recommendations
-      : Array.isArray(result.recommendations)
-        ? result.recommendations
+    const rawRecommendations = Array.isArray(result.recommendations)
+      ? result.recommendations
+      : Array.isArray(analysis.recommendations)
+        ? analysis.recommendations
         : [];
 
-    const processedResult = {
-      score,
-      status: result.status || 'Fair',
-      color: result.color || 'yellow',
-      // Derived from the number, never from a status word: the same score cannot be "good" in
-      // one reply and "fair" in the next.
-      category: healthCategory(score),
-      factors: Array.isArray(result.factors) ? result.factors : [],
-      icon: result.icon || 'Shield',
+    const recommendations = rawRecommendations
+      .map((rec: any) => (typeof rec === 'string'
+        ? { action: rec.trim(), reason: '', impact: '', priority: 'medium' as const }
+        : {
+            action: String(rec?.action || rec?.title || '').trim(),
+            reason: String(rec?.reason || rec?.because || '').trim(),
+            impact: String(rec?.impact || rec?.saving || '').trim(),
+            priority: (rec?.priority === 'high' || rec?.priority === 'low' ? rec.priority : 'medium') as 'high' | 'medium' | 'low',
+          }))
+      .filter((rec: { action: string }) => rec.action.length > 0);
+
+    if (recommendations.length === 0) {
+      throw new AIResponseError('The advice reply had no recommendations');
+    }
+
+    return {
+      // The caller owns the number; these fields keep the older response shape intact.
+      score: 0,
+      status: '',
+      color: '',
+      category: 'fair',
+      factors: [],
+      icon: 'Shield',
       aiAnalysis: {
-        personalizedFactors: Array.isArray(analysis.personalizedFactors)
-          ? analysis.personalizedFactors
-          : Array.isArray(result.factors)
-            ? result.factors.map((factor: any) => factor?.insight).filter(Boolean)
-            : [],
-        riskAssessment: analysis.riskAssessment || result.riskAssessment || '',
-        recommendations: recommendations.map((rec: any) => typeof rec === 'string'
-          ? { action: rec, impact: '', priority: 'medium' }
-          : {
-              action: rec?.action || rec?.title || '',
-              impact: rec?.impact || rec?.description || '',
-              priority: rec?.priority || 'medium'
-            }),
-        confidence: Math.max(0, Math.min(1, Number(analysis.confidence ?? result.confidence ?? 0.7)))
+        summary: typeof result.summary === 'string' ? result.summary.trim() : '',
+        personalizedFactors: (() => {
+          const observations = textList(result.observations);
+          return observations.length > 0 ? observations : textList(analysis.personalizedFactors);
+        })(),
+        riskAssessment: typeof result.riskAssessment === 'string' ? result.riskAssessment.trim() : '',
+        recommendations,
+        confidence: Math.max(0, Math.min(1, Number(result.confidence ?? analysis.confidence ?? 0.7)))
       }
     };
-
-    // Cache the result in unified cache system
-    // Cache system removed
-    
-    return processedResult;
   } catch (error) {
-    // No invented "score 50": the caller reports the failure and nothing is cached.
-    log.error('Error generating AI financial health score:', error);
+    // No invented example: the caller reports the failure and nothing is cached.
+    log.error('Error generating financial advice:', error);
     throw error;
   }
 }
@@ -2015,200 +2011,6 @@ You are an expert personal budgeting coach who provides personalized, contextual
   }
 }
 
-export async function generateFinancialHealthScore(
-  userId: string,
-  financialData: {
-    transactions: Array<{
-      id: number;
-      amount: string;
-      description: string;
-      date: string;
-      type: string;
-      categoryName: string;
-    }>;
-    budgets: Array<{
-      categoryName: string;
-      amount: string;
-      spent: number;
-    }>;
-    summary: {
-      totalIncome: number;
-      totalExpenses: number;
-      netBalance: number;
-    };
-  },
-  language: string = 'en-us'
-): Promise<FinancialHealthData> {
-  const normalizedLanguage = normalizeLanguageCode(language);
-  try {
-    const { transactions, budgets, summary } = financialData;
-    
-    // Initialize UnifiedAICache with 24 hours TTL
-    const cache = new UnifiedAICache('financial-health-score', userId);
-    
-    // Create a more stable hash that focuses on significant financial changes
-    // Exclude transaction IDs and exact timestamps to reduce cache misses
-    const stableData = {
-      language: normalizedLanguage,
-      transactionCount: transactions.length,
-      totalIncome: summary.totalIncome,
-      totalExpenses: summary.totalExpenses,
-      budgetCount: budgets.length,
-      recentTransactions: transactions
-        .slice(0, 10)
-        .map(t => ({
-          amount: Math.round(parseFloat(t.amount)),
-          type: t.type,
-          categoryName: t.categoryName
-        }))
-    };
-    
-    // Check cache first
-    const cachedResult = await cache.get(stableData);
-    if (cachedResult) {
-      return cachedResult;
-    }
-
-    // Prepare data for AI analysis
-    const recentTransactions = transactions
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 50);
-
-    const categorySpending = new Map();
-    transactions.forEach(t => {
-      if (t.type === 'expense') {
-        const current = categorySpending.get(t.categoryName) || 0;
-        categorySpending.set(t.categoryName, current + parseFloat(t.amount));
-      }
-    });
-
-    const response = await generateProse({
-      model: AI_MODELS.default,
-      messages: [
-        {
-          role: "system",
-          content: healthScoreSystemPrompt(getLanguageLabel(normalizedLanguage))
-        },
-        {
-          role: "user",
-          content: `Score this person's financial health for the current period:
-
-Financial Summary:
-- Income: ${summary.totalIncome}
-- Expenses: ${summary.totalExpenses}
-- Net Balance: ${summary.netBalance}
-
-Transaction History (${recentTransactions.length} transactions):
-${recentTransactions.slice(0, 20).map(t => 
-  `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
-).join('\n')}
-
-Budgets: ${budgets.length > 0
-  ? budgets.slice(0, 8).map((b: any) => `- ${b.categoryName || b.name || 'Uncategorized'}: ${b.spent ?? 0} of ${b.amount}`).join('\n')
-  : 'none set - treat budget discipline as not measurable'}
-
-Spending by category (expenses only):
-${Array.from(categorySpending.entries()).slice(0, 10).map(([name, amount]) => `- ${name}: ${amount}`).join('\n') || '- no expenses recorded'}`
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.2
-    });
-
-    const result = parseModelJson(response.choices[0].message.content);
-
-    // Same rubric as generateAIFinancialHealthScore: factors first, a whole score second.
-    const fromFactors = scoreFromFactors(result.factors);
-    const wholeScore = Number(result.score);
-    const rawScore = fromFactors ?? (Number.isFinite(wholeScore) ? wholeScore : null);
-    if (rawScore === null) {
-      throw new AIResponseError('The health score reply had no score');
-    }
-    const score = Math.max(0, Math.min(100, rawScore));
-
-    const analysis = result.aiAnalysis && typeof result.aiAnalysis === 'object' ? result.aiAnalysis : {};
-    const factors = Array.isArray(result.factors) ? result.factors : [];
-
-    const processedResult = {
-      score,
-      status: result.status || 'Fair',
-      color: result.color || 'yellow',
-      factors,
-      icon: result.icon || 'Shield',
-      aiAnalysis: {
-        personalizedFactors: Array.isArray(analysis.personalizedFactors)
-          ? analysis.personalizedFactors
-          : factors.map((factor: any) => factor?.insight).filter(Boolean),
-        riskAssessment: analysis.riskAssessment || result.riskAssessment || '',
-        recommendations: Array.isArray(analysis.recommendations)
-          ? analysis.recommendations
-          : Array.isArray(result.recommendations)
-            ? result.recommendations
-            : [],
-        confidence: Math.max(0, Math.min(1, Number(analysis.confidence ?? result.confidence ?? 0.7)))
-      }
-    };
-
-    // Convert to frontend-expected format. The category comes from the number, so a status word
-    // written by the model can never contradict the score next to it.
-    const healthData: FinancialHealthData = {
-      score: processedResult.score,
-      trend: 'stable', // Default trend
-      category: healthCategory(processedResult.score),
-      insights: processedResult.aiAnalysis.personalizedFactors,
-      // A factor is an achievement when it earned at least 70 % of its own maximum.
-      achievements: factors
-        .filter((factor: any) => Number(factor?.max) > 0 && Number(factor.score) / Number(factor.max) >= 0.7)
-        .map((factor: any) => factor.insight || factor.aiInsight)
-        .filter(Boolean),
-      warnings: Array.isArray(processedResult.aiAnalysis.recommendations)
-        ? processedResult.aiAnalysis.recommendations.map((rec: any) => (typeof rec === 'string' ? rec : rec?.action || rec?.title || '')).filter(Boolean)
-        : []
-    };
-
-    // Cache the result with 24 hours TTL
-    await cache.set(stableData, healthData, false, 24);
-    
-    return healthData;
-  } catch (error) {
-    log.error('Error generating financial health score:', error);
-    
-    // Return fallback data based on simple calculations
-    const { summary } = financialData;
-    const savingsRate = summary.totalIncome > 0 ? 
-      (summary.totalIncome - summary.totalExpenses) / summary.totalIncome : 0;
-    
-    let score = 50;
-    let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
-    
-    const healthCopy = healthFallbackCopy(normalizedLanguage);
-
-    // Use proper score-based thresholds for category determination
-    if (savingsRate > 0.2) {
-      score = 92; // Set to 92 for excellent savings rate
-      category = 'excellent';
-    } else if (savingsRate > 0.1) {
-      score = 75;
-      category = 'good';
-    } else if (savingsRate > 0) {
-      score = 55;
-      category = 'fair';
-    } else {
-      score = 30;
-      category = 'poor';
-    }
-    
-    return {
-      score,
-      trend: 'stable',
-      category,
-      insights: [healthCopy.unavailable],
-      achievements: summary.netBalance > 0 ? [healthCopy.positiveBalance] : [],
-      warnings: summary.netBalance < 0 ? [healthCopy.expensesExceedIncome] : [],
-      degraded: true,
-    };
-  }
-}
 
 /**
  * Parse bank statement text and extract transactions using AI - Server Fallback
