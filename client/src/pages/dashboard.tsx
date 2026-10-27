@@ -795,8 +795,10 @@ export default function Dashboard() {
             <LazyTrendsChart />
           </RequirePlan>
 
-          {/* Contextual tips + expense breakdown (Standard+) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Contextual tips + expense breakdown (Standard+). One column on purpose: the
+              breakdown carries a pie and a per-category list, and sharing a row with the tips
+              squeezed both into half the width. */}
+          <div className="grid grid-cols-1 gap-8">
             <RequirePlan
               plan="standard"
               compact

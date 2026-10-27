@@ -613,6 +613,14 @@ export async function generateFinancialTips(
     // Prepare the financial summary for the model
     const netBalance = totalIncome - totalExpenses;
     const transactionCount = recentTransactions.length;
+
+    // An empty list must not become "Invalid Date": Math.min() of nothing is Infinity.
+    const transactionTimes = recentTransactions
+      .map((transaction) => new Date(transaction.date).getTime())
+      .filter((time) => Number.isFinite(time));
+    const transactionRange = transactionTimes.length > 0
+      ? `${new Date(Math.min(...transactionTimes)).toLocaleDateString()} to ${new Date(Math.max(...transactionTimes)).toLocaleDateString()}`
+      : 'no dated transactions in this period';
     
     const summary = `Financial Summary:
 - Monthly Income: ${totalIncome}
@@ -640,7 +648,7 @@ Transaction Pattern Analysis:
 - Average transaction size: ${((totalIncome + totalExpenses) / Math.max(transactionCount, 1)).toFixed(2)}
 - Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
 - Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
-- Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
+- Date range: ${transactionRange}
 
 Write the one analysis card for this data.`;
 

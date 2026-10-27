@@ -447,12 +447,35 @@ export function registerTransactionRoutes(app: Express) {
 
       // Get user language and translate predefined category names
       const userLanguage = getUserLanguage(req);
+
+      /*
+       * The tips card asks the model to name the figure it rests on, and it was being handed an
+       * empty list: `recentTransactions` was declared in the client's type but nothing ever
+       * filled it, so the prompt said "Transaction Count: 0" and its date range was "Invalid
+       * Date to Invalid Date". The last 20 rows of the period are enough for an analysis that
+       * quotes one or two of them.
+       */
+      const recentTransactions = (await storage.getTransactionsByDateRange(userId, start, end))
+        .sort((left, right) => right.date.getTime() - left.date.getTime())
+        .slice(0, 20)
+        .map((transaction) => ({
+          id: transaction.id,
+          description: transaction.description,
+          amount: transaction.amount,
+          type: transaction.type,
+          date: transaction.date.toISOString(),
+          categoryName: transaction.categoryName
+            ? translateCategoryName(transaction.categoryName, userLanguage)
+            : null,
+        }));
+
       const translatedSummary = {
         ...summary,
         transactionsByCategory: summary.transactionsByCategory.map((cat: any) => ({
           ...cat,
           categoryName: translateCategoryName(cat.categoryName, userLanguage)
-        }))
+        })),
+        recentTransactions
       };
 
       res.json(translatedSummary);

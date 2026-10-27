@@ -30,7 +30,8 @@ import {
   Star
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion, AnimatePresence } from "framer-motion";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
 import RequirePlan from "./require-plan";
 import { HelpTooltip } from "./help-tooltip";
 
@@ -393,25 +394,24 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
             </div>
           </div>
 
-          {/* Toggle Details Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDetails(!showDetails)}
-            className="w-full"
-          >
-            {showDetails ? t('hideDetails') : t('showDetails')}
-          </Button>
-
-          {/* Detailed Information */}
-          <AnimatePresence>
-            {showDetails && (
+          {/* Details open in a dialog. Inline, the panel pushed the card out of its row and the
+              recommendations ended up buried under four tabs, which is exactly the part people
+              were meant to act on. */}
+          <Dialog open={showDetails} onOpenChange={setShowDetails}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full">
+                {t('showDetails')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t('financialHealthAdvisor')}</DialogTitle>
+                <DialogDescription>{t('help.health_advisor')}</DialogDescription>
+              </DialogHeader>
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="mt-4"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
               >
                 {/* AI Financial Metrics */}
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg mb-4">
@@ -801,8 +801,8 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                   </div>
                 </div>
               </motion.div>
-            )}
-          </AnimatePresence>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     </RequirePlan>

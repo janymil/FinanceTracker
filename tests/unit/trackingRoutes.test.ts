@@ -12,6 +12,7 @@ const storage = vi.hoisted(() => ({
   getUserTimeZone: vi.fn(),
   getUserFinancialSummary: vi.fn(),
   getUserTransactions: vi.fn(),
+  getTransactionsByDateRange: vi.fn(),
   getUserBudgets: vi.fn(),
   getUserGoals: vi.fn(),
   getCategories: vi.fn(),
@@ -84,6 +85,7 @@ beforeEach(() => {
   storage.getUserGoals.mockResolvedValue([]);
   storage.countUserTransactions.mockResolvedValue(0);
   storage.getUserFinancialSummary.mockResolvedValue({ transactionsByCategory: [], totalExpenses: 0 });
+  storage.getTransactionsByDateRange.mockResolvedValue([]);
 });
 
 describe('financial summary', () => {
@@ -107,6 +109,28 @@ describe('financial summary', () => {
     expect((await call('GET', '/api/financial-summary?startDate=x&endDate=y')).status).toBe(400);
     expect((await call('GET', '/api/financial-summary?startDate=2026-10-31&endDate=2026-10-01')).status).toBe(400);
     expect(storage.getUserFinancialSummary).not.toHaveBeenCalled();
+  });
+
+  it('sends the period\'s newest transactions for the tips prompt', async () => {
+    // The tips card asks the model to name the figure it rests on. That field was declared in the
+    // client's type and never filled, so the prompt said "Transaction Count: 0".
+    storage.getUserFinancialSummary.mockResolvedValue({
+      transactionsByCategory: [{ categoryName: 'Food', amount: 20, type: 'expense' }],
+      totalExpenses: 20,
+      totalIncome: 0,
+      netBalance: -20,
+    });
+    storage.getTransactionsByDateRange.mockResolvedValue([
+      tx(1, '2026-10-02T17:00:00Z', 'Groceries — Wong'),
+      tx(2, '2026-10-20T17:00:00Z', 'Groceries — Metro'),
+    ]);
+
+    const response = await call('GET', '/api/financial-summary?startDate=2026-10-01&endDate=2026-10-31');
+
+    expect(response.status).toBe(200);
+    expect(response.json.recentTransactions).toHaveLength(2);
+    expect(response.json.recentTransactions[0].description).toBe('Groceries — Metro');
+    expect(response.json.recentTransactions[0].categoryName).toBe('Food');
   });
 });
 
