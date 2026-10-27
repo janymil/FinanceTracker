@@ -118,7 +118,7 @@ Clerk test instance":
 2. The suite is self-contained: it stubs the payment provider, serves its own PDF stub, and starts
    nothing that costs money.
 
-**First run: 44 passed, 11 failed (7.9 min).** Nine of the eleven were the suite's own gaps — it has
+**First run: 44 passed, 11 failed (7.9 min).** Seven of the eleven were the suite's own gaps — it has
 been dormant since it was written, so it drifted from the code it is supposed to describe:
 
 | Failure | Cause (verified in code) | Fixed |
