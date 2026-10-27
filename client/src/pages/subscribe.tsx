@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Crown, Check, ArrowLeft, CreditCard } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { useBillingRegion } from "@/hooks/useBillingRegion";
+import type { PaymentGateway } from "@shared/billingRegion";
 import { AutoRenewalNotice } from "@/components/AutoRenewalNotice";
 import {
   amountFor,
@@ -29,11 +30,18 @@ export default function Subscribe() {
   const currentLang = langMatch
     ? langMatch[1]
     : (localStorage.getItem('preferredLanguage') || i18n.language || 'en').slice(0, 2);
-  // The server decides from the visitor's country: Peru pays in soles (MercadoPago),
-  // everyone else in dollars (Stripe). Language is only the fallback.
-  const currency: BillingCurrency = useBillingRegion(currentLang).currency;
+  // Which payment methods this visitor may use. Peru is MercadoPago only; everywhere else the
+  // person chooses, because a Peruvian abroad still pays with a Peruvian MercadoPago account.
+  const region = useBillingRegion(currentLang);
+  const gateways: PaymentGateway[] = region.gateways?.length ? region.gateways : [region.gateway];
+  const [chosenMethod, setChosenMethod] = useState<PaymentGateway | null>(null);
+  const method: PaymentGateway =
+    chosenMethod && gateways.includes(chosenMethod) ? chosenMethod : region.gateway;
+  // MercadoPago charges soles, Stripe charges dollars — the page must quote the one being used.
+  const currency: BillingCurrency = method === 'mercadopago' ? 'pen' : 'usd';
   const priceLabel = (plan: PlanId, interval: BillingInterval) =>
     formatMoney(amountFor(plan, interval, currency), currency);
+
 
   // Get user's current plan and billing interval
   const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
@@ -68,7 +76,8 @@ export default function Subscribe() {
 
       const planName = interval === 'year' ? `${plan}-yearly` : plan;
 
-      // Peru pays in soles through MercadoPago; everything else goes to Stripe.
+      // The method the person picked decides the gateway: soles through MercadoPago (offered
+      // everywhere), dollars by card through Stripe (everywhere except Peru).
       if (currency === 'pen') {
         const mpResponse = await fetch('/api/mercadopago/subscribe', {
           method: 'POST',
@@ -194,6 +203,33 @@ export default function Subscribe() {
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2" data-testid="mercadopago-note">
                 {t('subscribe.mercadopago_note')}
               </p>
+            )}
+            {gateways.length > 1 && (
+              <div
+                className="mt-4 flex flex-wrap items-center justify-center gap-2"
+                data-testid="payment-method"
+              >
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {t('subscribe.pay_method')}
+                </span>
+                <Button
+                  size="sm"
+                  variant={method === 'stripe' ? 'default' : 'outline'}
+                  data-testid="pay-method-stripe"
+                  onClick={() => setChosenMethod('stripe')}
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  {t('subscribe.pay_method_card')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={method === 'mercadopago' ? 'default' : 'outline'}
+                  data-testid="pay-method-mercadopago"
+                  onClick={() => setChosenMethod('mercadopago')}
+                >
+                  {t('subscribe.pay_method_mercadopago')}
+                </Button>
+              </div>
             )}
           </div>
 
@@ -492,7 +528,9 @@ export default function Subscribe() {
           {/* Security & Terms */}
           <div className="text-center mt-8 space-y-2">
             <p className="text-sm text-gray-500">
-              {t('subscribe.secure_payment')}
+              {method === 'mercadopago'
+                ? t('subscribe.secure_payment_mercadopago')
+                : t('subscribe.secure_payment')}
             </p>
             <p className="text-xs text-gray-400">
               {t('subscribe.terms_agreement')}

@@ -12,8 +12,8 @@ import {
   listPreapprovalsForUser,
   verifyWebhookSignature,
 } from '../mercadopago';
-import { regionForRequest } from '../billingRegion';
 import type { BillingInterval, PlanId } from '../../shared/pricing';
+
 
 const PAID_PLANS: PlanId[] = ['standard', 'premium'];
 const INTERVALS: BillingInterval[] = ['monthly', 'yearly'];
@@ -149,21 +149,13 @@ export function registerMercadoPagoRoutes(app: Express) {
       });
     }
 
-    // MercadoPago charges soles, so it is only for Peru. The id is saved before the payer
-    // authorises, so only a *paid* plan counts as an existing MercadoPago subscriber who
-    // may change plan from anywhere.
-    const region = regionForRequest(req);
-    const activeMercadoPagoSubscriber = Boolean(user.mpPreapprovalId) && user.plan !== 'free';
-    if (!activeMercadoPagoSubscriber && region.gateway !== 'mercadopago') {
-      return res.status(403).json({
-        error: 'MercadoPago is only available in Peru.',
-        code: 'wrong_gateway',
-        gateway: region.gateway,
-      });
-    }
+    // MercadoPago is offered in every country now: the account is Peruvian, so it charges
+    // soles, and that is exactly what a Peruvian customer abroad needs. The region is no
+    // longer read here — Stripe is the restricted side, and it is enforced in its own route.
     if (!user.email) {
       return res.status(400).json({ error: 'Add an e-mail address to your account before subscribing' });
     }
+
 
     try {
       // A second preapproval must never run next to the first: end the old one first. That

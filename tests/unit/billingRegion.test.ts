@@ -17,4 +17,36 @@ describe('regionForCountry', () => {
     expect(regionForCountry('XX', 'en')).toMatchObject({ gateway: 'stripe', country: null });
     expect(regionForCountry('T1', 'es')).toMatchObject({ gateway: 'mercadopago' });
   });
+
+  it('offers MercadoPago in every country, and keeps Stripe out of Peru only', () => {
+    // Peru: soles, MercadoPago only — Stripe is the restricted side now.
+    expect(regionForCountry('PE', 'en')).toMatchObject({
+      gateway: 'mercadopago',
+      gateways: ['mercadopago'],
+      stripeBlocked: true,
+    });
+
+    // Everywhere else both are offered, Stripe first. This is what a Peruvian abroad needs:
+    // the browser says Spain or the US, and their MercadoPago account still works.
+    for (const country of ['SK', 'US', 'ES', 'MX']) {
+      expect(regionForCountry(country, 'sk')).toMatchObject({
+        gateway: 'stripe',
+        gateways: ['stripe', 'mercadopago'],
+        stripeBlocked: false,
+      });
+    }
+  });
+
+  it('never removes Stripe on a guess', () => {
+    // No country to go on: the language still picks the price shown first, but nothing is
+    // blocked — locking a paying customer out of a method is worse than offering one extra.
+    expect(regionForCountry(null, 'es')).toMatchObject({
+      currency: 'pen',
+      gateway: 'mercadopago',
+      gateways: ['stripe', 'mercadopago'],
+      stripeBlocked: false,
+    });
+    expect(regionForCountry('XX', 'sk').stripeBlocked).toBe(false);
+    expect(regionForCountry('T1', 'es').stripeBlocked).toBe(false);
+  });
 });

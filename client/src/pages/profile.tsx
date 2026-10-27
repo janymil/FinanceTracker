@@ -15,7 +15,6 @@ import { AiUsageMeter } from "../components/ai-usage-meter";
 import { Switch } from "../components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useBillingRegion } from "../hooks/useBillingRegion";
 import { TimeZoneSetting } from "../components/TimeZoneSetting";
 
 export default function ProfilePage() {
@@ -36,7 +35,11 @@ export default function ProfilePage() {
   // The AI switch. `aiEnabled` is false only when the account explicitly turned AI off.
   const [aiEnabled, setAiEnabled] = useState<boolean>((authUser as any)?.aiEnabled !== false);
   const [isSavingAi, setIsSavingAi] = useState(false);
-  const billingRegion = useBillingRegion(i18n.language || 'en');
+  // Which cancellation to offer is decided by how this customer actually pays, not by where
+  // their browser is. A Peruvian abroad pays with MercadoPago and must still be able to stop it;
+  // a foreigner who picked MercadoPago would otherwise be sent to a Stripe portal that has
+  // nothing of theirs in it.
+  const paysWithMercadoPago = Boolean((authUser as any)?.mpPreapprovalId);
 
   useEffect(() => {
     setAiEnabled((authUser as any)?.aiEnabled !== false);
@@ -459,7 +462,7 @@ export default function ProfilePage() {
               {authUser.plan !== 'free' && (
                 <div className="space-y-4">
                   <h4 className="font-medium">{t('profile.Subscription Management')}</h4>
-                  {billingRegion.gateway === 'mercadopago' ? (
+                  {paysWithMercadoPago ? (
                     <div className="grid gap-3">
                       <Button
                         variant="outline"

@@ -3403,6 +3403,7 @@
     "already_have_account": "¿Ya tienes una cuenta?",
     "sign_in_here": "Inicia sesión aquí",
     "secure_payment": "Procesamiento seguro de pagos por Stripe",
+    "secure_payment_mercadopago": "Procesamiento seguro de pagos por Mercado Pago",
     "terms_agreement": "Al suscribirse, aceptas nuestros Términos de Servicio y Política de Privacidad",
     "billing": {
       "monthly": "Mensual",
@@ -3434,6 +3435,9 @@
       }
     },
     "mercadopago_note": "Los pagos en Perú los procesa MercadoPago de forma segura.",
+    "pay_method": "Método de pago",
+    "pay_method_card": "Tarjeta · dólares",
+    "pay_method_mercadopago": "Mercado Pago · soles",
     "payment_error": "No pudimos iniciar el pago. Inténtalo de nuevo."
   },
   "pdf": {

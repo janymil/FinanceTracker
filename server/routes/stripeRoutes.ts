@@ -375,8 +375,9 @@ export function registerStripeRoutes(app: Express) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Stripe is for dollars only. Peru pays in soles through MercadoPago, so a new
-      // Stripe checkout from there is refused (existing Stripe subscribers are untouched).
+      // Stripe charges dollars, so it is not offered in Peru: soles are the market price
+      // there and MercadoPago is the local method. Decided by the country alone — an unknown
+      // location keeps Stripe, because guessing wrong would lock out a paying customer.
       const region = regionForRequest(req);
       if (user.mpPreapprovalId && user.plan !== 'free' && !user.stripeSubscriptionId) {
         return res.status(409).json({
@@ -384,11 +385,11 @@ export function registerStripeRoutes(app: Express) {
           code: 'already_subscribed',
         });
       }
-      if (!user.stripeSubscriptionId && region.gateway !== 'stripe') {
+      if (!user.stripeSubscriptionId && region.stripeBlocked) {
         return res.status(403).json({
           error: "Payments from your country go through MercadoPago.",
           code: 'wrong_gateway',
-          gateway: region.gateway,
+          gateway: 'mercadopago',
         });
       }
       const currency: BillingCurrency = user.stripeSubscriptionId ? currencyForRequest(req) : 'usd';

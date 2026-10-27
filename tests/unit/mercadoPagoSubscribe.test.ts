@@ -21,9 +21,9 @@ vi.mock('../../server/clerkAuth', () => ({
   isAuthenticated: (_req: unknown, _res: unknown, next: () => void) => next(),
   getUserId: () => 'user_1',
 }));
-vi.mock('../../server/billingRegion', () => ({
-  regionForRequest: () => ({ country: 'PE', gateway: 'mercadopago', currency: 'pen' }),
-}));
+// No billing-region stub on purpose: MercadoPago is offered in every country now, so the route
+// must not consult the visitor's location at all. If it starts doing so again, these tests break
+// only if the gate rejects — the policy itself is covered in billingRegion.test.ts.
 
 const ORIGINAL_ENV = { ...process.env };
 
