@@ -754,6 +754,7 @@
     "try_again": "The mascot could not be created right now. Please try again in a moment.",
     "toggle_failed": "Failed to toggle mascot",
     "show": "Show Mascot",
+    "strengthsHint": "The parts of your score that are at their best this month.",
     "tabs": {
       "overview": "Overview",
       "insights": "Insights",

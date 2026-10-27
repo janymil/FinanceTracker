@@ -1,9 +1,9 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { DollarSign } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/context/CurrencyContext";
 
 
 interface ExpenseChartProps {
@@ -20,6 +20,7 @@ const COLORS = [
 
 export function ExpenseChart({ summary }: ExpenseChartProps) {
   const { t } = useTranslation();
+  const { formatMoney } = useCurrency();
   const { data: expenseData } = useQuery({
     queryKey: ['/api/expense-breakdown'],
     enabled: !summary,
@@ -42,6 +43,9 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
 
   const chartData = data.map((item: any, index: number) => ({
     ...item,
+    // `name` is what a slice label and the tooltip read. Without it recharts fell back to the
+    // series index, which is why the pie said "5 (51.2%)" instead of "Rent (51.2%)".
+    name: item.category,
     color: item.color || COLORS[index % COLORS.length],
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(1) : '0.0'
   }));
@@ -87,48 +91,54 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percentage }) => `${name} (${percentage}%)`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="amount"
-              >
-                {chartData.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value: number) => [`$${value.toLocaleString()}`, t('Amount')]}
-                labelFormatter={(label) => `${t('Category')}: ${label}`}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        
-        <div className="mt-4 space-y-2">
-          {chartData.map((item: any, index: number) => (
-            <div key={index} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: item.color }}
+        {/* Pie on the left, categories on the right. The list is what people actually read, and
+            underneath the chart it pushed the card to twice the height of its neighbours. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:items-center">
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percentage }) => `${name} (${percentage}%)`}
+                  outerRadius={95}
+                  fill="#8884d8"
+                  dataKey="amount"
+                >
+                  {chartData.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number, _name: any, entry: any) => [
+                    formatMoney(Number(value)),
+                    `${entry?.payload?.percentage ?? ''}%`,
+                  ]}
+                  labelFormatter={(label) => `${t('Category')}: ${label}`}
                 />
-                <span>{item.category}</span>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="space-y-2 md:max-h-[300px] md:overflow-y-auto pr-1">
+            {chartData.map((item: any, index: number) => (
+              <div key={index} className="flex items-center justify-between gap-3 text-sm">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="truncate">{item.category}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 tabular-nums">
+                  <span className="font-medium">{formatMoney(item.amount)}</span>
+                  <span className="text-gray-500">({item.percentage}%)</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">${item.amount.toLocaleString()}</span>
-                <span className="text-gray-500">({item.percentage}%)</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -773,6 +773,7 @@
     "try_again": "Maskota sa teraz nepodarilo vytvoriť. Skúste to o chvíľu znova.",
     "toggle_failed": "Nepodarilo sa prepnúť maskota",
     "show": "Zobraziť maskota",
+    "strengthsHint": "Časti vášho skóre, ktoré sú tento mesiac na svojom maxime.",
     "tabs": {
       "overview": "Prehľad",
       "insights": "Poznatky",

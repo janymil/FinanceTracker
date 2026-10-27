@@ -744,6 +744,7 @@
     "try_again": "No pudimos crear la mascota en este momento. Vuelve a intentarlo en un momento.",
     "toggle_failed": "Falló al alternar mascota",
     "show": "Mostrar Mascota",
+    "strengthsHint": "Las partes de tu puntuación que están en su mejor nivel este mes.",
     "tabs": {
       "overview": "Resumen",
       "insights": "Perspectivas",

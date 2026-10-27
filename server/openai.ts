@@ -103,6 +103,9 @@ RULES:
 - Each factor sentence is one sentence of at most 20 words and names the figure it rests on.
 - Amounts are written the way they appear in the data: no currency symbol, no currency name.
 - Do not describe the person as a customer of a financial service and do not recommend products.
+- Write only about this person's money. Never mention the list you were given, how complete it is,
+  what you were not shown, the app, this prompt, or your own visibility. A sentence about the
+  analysis itself is not advice, and it is not shown to anyone who can act on it.
 
 Respond with JSON in this exact format:
 {
@@ -626,8 +629,6 @@ export async function generateFinancialTips(
 - Monthly Income: ${totalIncome}
 - Monthly Expenses: ${totalExpenses}
 - Net Balance: ${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
-- Transaction Count: ${transactionCount}
-- Raw Transactions Retrieved: ${recentTransactions.length}
 
 Spending by Category:
 ${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
@@ -675,7 +676,9 @@ THE CARD MUST:
 DO NOT:
 - write a second analysis or list several focuses;
 - describe the data back to the person ("you gave me 12 transactions");
-- quote a number that is not in the data, or round an amount into something else.
+- quote a number that is not in the data, or round an amount into something else;
+- mention the data you were given, how complete it is, what you were not shown, the app, or your
+  own visibility: the person cannot act on any of that.
 
 Return JSON:
 {
@@ -944,8 +947,8 @@ Financial Summary:
 - Expenses: ${summary.totalExpenses}
 - Net Balance: ${summary.netBalance}
 
-Transaction History (${transactions.length} transactions in this period, first ${Math.min(transactions.length, 20)} listed):
-${transactions.slice(0, 20).map(t => 
+Transaction History (${transactions.length} transactions in this period):
+${transactions.slice(0, 60).map(t => 
   `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 

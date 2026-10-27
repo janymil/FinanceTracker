@@ -38,6 +38,29 @@ function aiUnavailable(res: any) {
 }
 
 /**
+ * Sentences about the prompt instead of the person's money.
+ *
+ * The health prompt used to print its own payload limits ("22 transactions, first 20 listed"), and
+ * the model dutifully reported them back: "the history lists 20 of 22 transactions, so two are not
+ * shown", and a risk assessment that named "incomplete visibility" as the main risk. That is a note
+ * to the developer, shown to the customer in place of advice. The prompt no longer says it and
+ * forbids it; this is the belt to that braces, so the same sentence cannot reach a screen again
+ * when a model decides to be helpful.
+ */
+const META_COMMENTARY = [
+  /\bnot shown\b/i,
+  /\bvisibility\b/i,
+  /\blists? \d+ of \d+/i,
+  /\b\d+ of \d+ (?:transactions|payments|rows)\b/i,
+  /\bdetails (?:are|were) (?:only )?shown\b/i,
+  /\bdata (?:provided|given|supplied)\b/i,
+];
+
+function isMetaCommentary(text: string): boolean {
+  return META_COMMENTARY.some((pattern) => pattern.test(text));
+}
+
+/**
  * The window a health answer covers: the month the dashboard is showing, or this month.
  *
  * A date-only `yyyy-mm-dd` means that calendar day in the person's own zone, exactly as
@@ -798,9 +821,9 @@ export function registerAIRoutes(app: Express) {
       score: health.score,
       trend: aiData.trend || 'stable',
       category: health.band,
-      insights: insights.slice(0, 10), // Limit to 10 insights
+      insights: insights.filter((line) => !isMetaCommentary(line)).slice(0, 10), // Limit to 10 insights
       achievements: achievements.slice(0, 5), // Limit to 5 achievements
-      warnings: warnings.slice(0, 5), // Limit to 5 warnings
+      warnings: warnings.filter((line) => !isMetaCommentary(line)).slice(0, 5), // Limit to 5 warnings
       factors: health.factors,
       aiAnalysis: aiData.aiAnalysis || {}
     };

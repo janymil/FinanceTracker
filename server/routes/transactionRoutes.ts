@@ -457,7 +457,7 @@ export function registerTransactionRoutes(app: Express) {
        */
       const recentTransactions = (await storage.getTransactionsByDateRange(userId, start, end))
         .sort((left, right) => right.date.getTime() - left.date.getTime())
-        .slice(0, 20)
+        .slice(0, 40)
         .map((transaction) => ({
           id: transaction.id,
           description: transaction.description,

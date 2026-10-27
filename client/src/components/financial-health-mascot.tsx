@@ -34,6 +34,40 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { motion } from "framer-motion";
 import RequirePlan from "./require-plan";
 import { HelpTooltip } from "./help-tooltip";
+import type { HealthFactorKey, HealthFactorStatus } from "@shared/financialHealth";
+
+/** Label key per factor, so a strength is named without matching on translated text. */
+const FACTOR_LABELS: Record<HealthFactorKey, string> = {
+  spendingControl: 'financial_health.spending_control',
+  savingsRate: 'financial_health.savings_rate',
+  budgetAdherence: 'financial_health.budget_adherence',
+  financialStability: 'financial_health.financial_stability',
+};
+
+/**
+ * The insights tab groups sentences by topic, and a topic is not a verdict: "all seven budgets were
+ * within their limits" and "spending exceeded the budgets" can sit in the same section. Painting
+ * the section green or red therefore contradicts half its content — the old code painted anything
+ * mentioning "expense" red, so good news arrived in the alarm colour.
+ *
+ * The panels stay neutral. The one precise claim is the factor status, shown as a dot beside the
+ * section that matches it, and spelled out in full on the score card.
+ */
+const STATUS_DOT: Record<HealthFactorStatus, string> = {
+  excellent: 'bg-green-500',
+  good: 'bg-blue-500',
+  fair: 'bg-yellow-500',
+  needs_improvement: 'bg-red-500',
+  not_measured: 'bg-gray-400',
+};
+
+const STATUS_RANK: Record<HealthFactorStatus, number> = {
+  excellent: 0,
+  good: 1,
+  fair: 2,
+  needs_improvement: 3,
+  not_measured: 4,
+};
 
 // Helper function to translate AI factor names
 const translateFactorName = (factorText: string, t: any): string => {
@@ -74,6 +108,13 @@ interface FinancialHealthData {
   insights: string[];
   achievements: string[];
   warnings: string[];
+  /** The four computed factors; the strengths tab and the section colours read these. */
+  factors?: Array<{
+    key: HealthFactorKey;
+    score: number;
+    max: number;
+    status: HealthFactorStatus;
+  }>;
 }
 
 interface FinancialHealthMascotProps {
@@ -245,6 +286,28 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
     return 'bg-red-100 text-red-800 border-red-300';
   };
 
+  const factorStatus = (key: HealthFactorKey): HealthFactorStatus =>
+    healthData?.factors?.find((factor) => factor.key === key)?.status ?? 'not_measured';
+
+  const worstOf = (keys: HealthFactorKey[]): HealthFactorStatus =>
+    keys
+      .map(factorStatus)
+      .sort((left, right) => STATUS_RANK[right] - STATUS_RANK[left])[0] ?? 'not_measured';
+
+  const spendingDot = STATUS_DOT[factorStatus('spendingControl')];
+  const savingDot = STATUS_DOT[worstOf(['savingsRate', 'budgetAdherence'])];
+
+  /*
+   * Strengths come from the computed factors, not from the model's reply.
+   *
+   * They used to read `factor.status` out of the AI answer, but the health-score prompt never asks
+   * for a status — only name, score, max and a sentence — so the list was always empty and the tab
+   * read "0 achievements" even on a month scored 83.
+   */
+  const strengths = (healthData?.factors ?? [])
+    .filter((factor) => factor.status === 'excellent' || factor.status === 'good')
+    .map((factor) => `${t(FACTOR_LABELS[factor.key])} (${factor.score}/${factor.max})`);
+
   if (isLoading) {
     return (
       <Card className="relative overflow-hidden">
@@ -377,7 +440,7 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
             <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
               <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                {healthData.achievements?.length || 0} {t('achievements')}
+                {strengths.length} {t('mascot.tabs.strengths')}
               </p>
             </div>
             <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
@@ -462,7 +525,7 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                       <h5 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-2">{t('mascot.quickSummary')}</h5>
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div className="bg-white dark:bg-gray-800 p-2 rounded">
-                          <div className="text-sm font-bold text-green-600">{healthData.achievements?.length || 0}</div>
+                          <div className="text-sm font-bold text-green-600">{strengths.length}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-400">{t('mascot.tabs.strengths')}</div>
                         </div>
                         <div className="bg-white dark:bg-gray-800 p-2 rounded">
@@ -477,11 +540,14 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                     </div>
                   </TabsContent>
 
-                  {/* Achievements Tab */}
+                  {/* Strengths Tab */}
                   <TabsContent value="achievements" className="mt-4 space-y-3">
-                    {healthData?.achievements && healthData.achievements.length > 0 ? (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {t('mascot.strengthsHint')}
+                    </p>
+                    {strengths.length > 0 ? (
                       <div className="space-y-2">
-                        {healthData.achievements.map((achievement, index) => (
+                        {strengths.map((strength, index) => (
                           <motion.div
                             key={index}
                             initial={{ opacity: 0, x: -20 }}
@@ -492,7 +558,7 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                             <div className="flex items-start gap-2">
                               <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                               <div className="text-xs text-green-800 dark:text-green-200 font-medium leading-relaxed">
-                                {achievement}
+                                {strength}
                               </div>
                             </div>
                           </motion.div>
@@ -539,10 +605,11 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                             <>
                               {/* Spending Patterns */}
                               {spendingInsights.length > 0 && (
-                                <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-3 rounded-lg">
+                                <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-slate-900/30 dark:to-indigo-900/20 p-3 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <DollarSign className="h-4 w-4 text-red-600" />
-                                    <span className="text-xs font-medium text-red-700 dark:text-red-400">{t('mascot.categories.spendingPatterns')}</span>
+                                    <DollarSign className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">{t('mascot.categories.spendingPatterns')}</span>
+                                    <span aria-hidden="true" className={`w-2 h-2 rounded-full ${spendingDot}`} />
                                   </div>
                                   <div className="space-y-2">
                                     {spendingInsights.map((insight, index) => (
@@ -553,8 +620,8 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                                         transition={{ delay: index * 0.1 }}
                                         className="flex items-start gap-2"
                                       >
-                                        <div className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-red-600 dark:text-red-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
+                                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                        <div className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
                                       </motion.div>
                                     ))}
                                   </div>
@@ -563,10 +630,11 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
 
                               {/* Savings & Budget */}
                               {savingInsights.length > 0 && (
-                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 rounded-lg">
+                                <div className="bg-gradient-to-r from-slate-50 to-emerald-50 dark:from-slate-900/30 dark:to-emerald-900/20 p-3 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <PiggyBank className="h-4 w-4 text-green-600" />
-                                    <span className="text-xs font-medium text-green-700 dark:text-green-400">{t('mascot.categories.savingsBudget')}</span>
+                                    <PiggyBank className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">{t('mascot.categories.savingsBudget')}</span>
+                                    <span aria-hidden="true" className={`w-2 h-2 rounded-full ${savingDot}`} />
                                   </div>
                                   <div className="space-y-2">
                                     {savingInsights.map((insight, index) => (
@@ -577,8 +645,8 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                                         transition={{ delay: index * 0.1 }}
                                         className="flex items-start gap-2"
                                       >
-                                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-green-600 dark:text-green-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
+                                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                        <div className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
                                       </motion.div>
                                     ))}
                                   </div>
