@@ -467,6 +467,7 @@ export function FinancialMascot() {
             size="sm"
             className="absolute -top-2 -left-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-full z-10"
             onClick={() => setShowSettings(!showSettings)}
+            aria-label={t('a11y.mascot_settings')}
           >
             <Settings className="h-3 w-3" />
           </Button>

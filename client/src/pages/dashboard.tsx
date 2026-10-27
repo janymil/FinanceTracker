@@ -442,7 +442,7 @@ export default function Dashboard() {
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-gray-500" />
                   <Select value={selectedMonthNum} onValueChange={setSelectedMonthNum}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-32" aria-label={t('Month')}>
                       <SelectValue placeholder={t("Month")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -454,7 +454,7 @@ export default function Dashboard() {
                     </SelectContent>
                   </Select>
                   <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger className="w-20">
+                    <SelectTrigger className="w-20" aria-label={t('Year')}>
                       <SelectValue placeholder={t("Year")} />
                     </SelectTrigger>
                     <SelectContent>

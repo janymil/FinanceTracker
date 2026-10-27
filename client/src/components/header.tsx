@@ -234,7 +234,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             <Button 
               size="sm" 
               variant="outline"
-              className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-orange-950"
+              className="border-orange-600 text-orange-700 hover:bg-orange-50 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-orange-950"
             >
               <Gift className="h-4 w-4 mr-2" />
               {t("Redeem Code")}
@@ -481,6 +481,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             size="sm"
             onClick={toggleTheme}
             className="hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label={t('a11y.toggle_theme')}
           >
             {theme === 'light' ? (
               <Moon className="h-4 w-4" />

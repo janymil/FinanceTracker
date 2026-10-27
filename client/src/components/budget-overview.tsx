@@ -232,7 +232,9 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
                     <span>{formatDateRange(budget.startDate, budget.endDate)}</span>
                   </div>
 
-                  <Progress 
+                  <Progress
+                    aria-label={t('a11y.budget_progress')}
+                    aria-valuetext={`${Math.round(percentage)}%`}
                     value={Math.min(percentage, 100)} 
                     className="h-2"
                     style={{

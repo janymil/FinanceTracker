@@ -90,7 +90,7 @@ export default function FinancialHealthMascot() {
       emotion: 'excited' as const,
       animation: 'celebrating' as const,
       message: t('youreCrushingGoals'),
-      color: 'text-green-600',
+      color: 'text-green-700',
       bgColor: 'bg-green-100',
       borderColor: 'border-green-300'
     },
@@ -98,7 +98,7 @@ export default function FinancialHealthMascot() {
       emotion: 'happy' as const,
       animation: 'idle' as const,
       message: t('greatFinancialHabits'),
-      color: 'text-blue-600',
+      color: 'text-blue-700',
       bgColor: 'bg-blue-100',
       borderColor: 'border-blue-300'
     },
@@ -106,7 +106,7 @@ export default function FinancialHealthMascot() {
       emotion: 'neutral' as const,
       animation: 'thinking' as const,
       message: t('youreOnTheRightTrack'),
-      color: 'text-yellow-600',
+      color: 'text-yellow-700',
       bgColor: 'bg-yellow-100',
       borderColor: 'border-yellow-300'
     },
@@ -114,7 +114,7 @@ export default function FinancialHealthMascot() {
       emotion: 'concerned' as const,
       animation: 'warning' as const,
       message: t('letsWorkTogether'),
-      color: 'text-red-600',
+      color: 'text-red-700',
       bgColor: 'bg-red-100',
       borderColor: 'border-red-300'
     }
@@ -212,11 +212,13 @@ export default function FinancialHealthMascot() {
     }
   };
 
+  // 700-level: these are small labels on white or on a -100 tint, and the 600 shades sit below
+  // the 4.5:1 AA floor for yellow (3.1:1) and green (3.3:1).
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-blue-600';
-    if (score >= 40) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 80) return 'text-green-700';
+    if (score >= 60) return 'text-blue-700';
+    if (score >= 40) return 'text-yellow-700';
+    return 'text-red-700';
   };
 
   const getScoreBadgeColor = (score: number) => {

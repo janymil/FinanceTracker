@@ -38,13 +38,37 @@ export async function dismissCurrencyModal(page: Page): Promise<void> {
     }
   }
 
+  // The first-run welcome is two steps, and each step has its own "Skip for now". Two traps here:
+  //   1. it renders only after the dashboard's transaction query settles, so asking "is it visible?"
+  //      immediately answers "no" and the dialog then appears and blocks every later click;
+  //   2. skipping step 1 leaves step 2 open, and the modal overlay swallows the next click for 30s.
+  // So: decide from the API whether this account is new, wait for the dialog, then skip until it
+  // is gone. Bounded, so a stubborn dialog fails the setup instead of hanging it.
+  const isNewAccount = await page.request
+    .get('/api/transactions?limit=1')
+    .then(async (response) => {
+      const total = response.headers()['x-total-count'];
+      if (total !== undefined) return total === '0';
+      const body = await response.json().catch(() => null);
+      return Array.isArray(body) ? body.length === 0 : false;
+    })
+    .catch(() => false);
+
+  if (!isNewAccount) return;
+
   const welcome = page.getByTestId('first-run-welcome');
-  try {
-    await welcome.waitFor({ state: 'visible', timeout: me.currency ? 1_500 : 8_000 });
-    await welcome.getByTestId('welcome-skip').first().click();
-    await expect(welcome).toBeHidden({ timeout: 10_000 });
-  } catch {
-    // no welcome for this account (already finished, or it has transactions)
+  await welcome.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => undefined);
+
+  for (let step = 0; step < 3; step += 1) {
+    const visible = await welcome.isVisible().catch(() => false);
+    if (!visible) return;
+
+    const skip = welcome.getByTestId('welcome-skip').first();
+    if (!(await skip.isVisible().catch(() => false))) return;
+    await skip.click({ timeout: 5_000 }).catch(() => {});
+    await expect(welcome)
+      .toBeHidden({ timeout: 5_000 })
+      .catch(() => undefined);
   }
 }
 
@@ -58,7 +82,9 @@ export async function dismissCookieBanner(page: Page): Promise<void> {
   const reject = page.getByTestId('cookie-consent-reject').first();
   try {
     await reject.waitFor({ state: 'visible', timeout: 3_000 });
-    await reject.click();
+    // Bounded: if a dialog is still on top, this must give up in seconds and let the real failure
+    // surface, rather than burning the whole test timeout waiting for a click that never lands.
+    await reject.click({ timeout: 5_000 });
     await expect(reject).toBeHidden({ timeout: 10_000 });
   } catch {
     // Already answered (or this build shows no banner): nothing to do.

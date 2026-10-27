@@ -33,11 +33,16 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
   );
 }
 
-// Loading fallback component
+// Loading fallback component.
+// `role="status"` is what a screen reader expects from a loading indicator, and the label is
+// gray-500 rather than gray-400: 400 is 2.5:1 on white, which fails AA (and axe caught the
+// placeholder while the real widget was still on its way).
 function LoadingFallback({ className = "h-48" }: { className?: string }) {
   return (
     <div className={`${className} bg-white dark:bg-gray-800 rounded-xl animate-pulse border flex items-center justify-center`}>
-      <div className="text-gray-400 dark:text-gray-600">Loading...</div>
+      <div className="text-gray-500 dark:text-gray-400" role="status" data-testid="lazy-loading">
+        Loading...
+      </div>
     </div>
   );
 }

@@ -1239,10 +1239,10 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium">{t('export.format_label')}</label>
+                      <label htmlFor="export-format" className="text-sm font-medium">{t('export.format_label')}</label>
                       <Select value={exportOptions.format} onValueChange={(value: any) => 
                         setExportOptions(prev => ({ ...prev, format: value }))}>
-                        <SelectTrigger>
+                        <SelectTrigger id="export-format">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1255,10 +1255,10 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium">{t('export.date_range_label')}</label>
+                      <label htmlFor="export-date-range" className="text-sm font-medium">{t('export.date_range_label')}</label>
                       <Select value={exportOptions.dateRange} onValueChange={(value: any) => 
                         setExportOptions(prev => ({ ...prev, dateRange: value }))}>
-                        <SelectTrigger>
+                        <SelectTrigger id="export-date-range">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

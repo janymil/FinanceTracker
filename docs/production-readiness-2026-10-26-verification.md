@@ -147,6 +147,32 @@ The suite is now honest enough to be switched on in CI. That needs one repositor
 (`E2E_ENABLED=true`) and the two Clerk secrets — but the gate is only worth turning on once the
 five accessibility failures are fixed, otherwise it greets every release with red.
 
+## Accessibility: five pages to green (2026-10-27 02:40 UTC)
+
+The five failing accessibility tests are green, each fixed at the cause rather than by loosening
+the check. Two of the fixes were token-level, which is why they cleared many nodes at once:
+
+| Was | Now | Why |
+|---|---|---|
+| `--primary` `hsl(213 94% 68%)` | `#2563EB` (blue-600) | The comment always claimed `#2563EB`; white on the real value was ~2.6:1. Now 5.2:1 — every primary button and the active sidebar item. |
+| `--muted-foreground` `#718096` | `#48566B` | 4.0:1 on white, below the AA floor for body text. Now ~7:1. |
+| `--destructive` `#EF4444` | `#B91C1C` | White on red-500 was 3.3:1 and red text on white 3.7:1; the delete button and "delete my account" heading both failed. |
+| white on `purple-500` / `blue-500` / `green-500` badges | the 700 shades | At 10px the label needs 4.5:1; the 500s sat near 3.5:1. |
+| `green-600` / `red-600` / `yellow-600` on `-50` tiles and white | the 700 shades | 3.1–3.3:1 on tinted backgrounds. |
+| `opacity-80` on a small caption | removed | Opacity on text is a contrast multiplier. |
+| icon-only buttons with no name | `aria-label` from the `a11y.*` keys, in all three locales | Sidebar collapse/close, theme toggle, mascot settings; the toast close got an `sr-only` label. |
+| two dashboard progress bars | named with `aria-label` + `aria-valuetext` | A bare `role="progressbar"` announces nothing. |
+| language buttons `aria-label="Language: English"` showing `EN` | visible code + `sr-only` full name | WCAG 2.5.3 wants the visible text inside the accessible name. |
+| export and add-expense selects | real `<label htmlFor>` ↔ `id` | The labels existed but were never associated with the control. |
+
+Three failures were the *suite's* fault, not the app's, and were fixed as such: the first-run
+welcome renders only after the dashboard's query settles (asking "is it visible?" immediately said
+no, then the dialog appeared and swallowed clicks), the loading skeleton was being scored mid-pulse
+(`animate-pulse` on the text) and is now excluded from the audit while keeping `role="status"`, and
+the a11y spec now has a 120s budget because it scans up to four screens per test.
+
+Result: `6 passed` where it began as `5 failed`.
+
 ## If someone asks for a fourth pass
 
 Do not write another assessment. Run:

@@ -111,7 +111,8 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
       title: t("Monthly Balance"),
       value: formatCurrency(summary?.netBalance || 0),
       description: (summary?.netBalance || 0) >= 0 ? t("Positive cash flow") : t("Negative cash flow"),
-      color: (summary?.netBalance || 0) >= 0 ? "text-green-600" : "text-red-600",
+      // 700-level on the tinted tile backgrounds: green-600 on green-50 is ~3.3:1.
+      color: (summary?.netBalance || 0) >= 0 ? "text-green-700" : "text-red-700",
       bgColor: (summary?.netBalance || 0) >= 0 ? "bg-green-50" : "bg-red-50"
     },
     {
@@ -119,7 +120,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
       title: t("Top Expense"),
       value: topExpense ? formatCurrency(topExpense.amount) : `${displayCurrency}0`,
       description: topExpense?.categoryName || t("No expenses"),
-      color: "text-red-600",
+      color: "text-red-700",
       bgColor: "bg-red-50"
     },
     {
@@ -127,7 +128,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
       title: t("Top Income"),
       value: topIncome ? formatCurrency(topIncome.amount) : `${displayCurrency}0`,
       description: topIncome?.categoryName || t("No income"),
-      color: "text-green-600",
+      color: "text-green-700",
       bgColor: "bg-green-50"
     },
     {
@@ -168,7 +169,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
                   <p className={`text-lg font-bold ${insight.color} mb-1`}>
                     {insight.value}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-600">
                     {insight.description}
                   </p>
                 </div>
@@ -178,7 +179,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="text-xs text-gray-500 space-y-1">
+          <div className="text-xs text-gray-600 space-y-1">
             <p className="font-medium">{t("Quick Tips")}:</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               {(summary?.netBalance || 0) < 0 && (

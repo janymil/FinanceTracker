@@ -156,7 +156,6 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
               key={language.code}
               type="button"
               onClick={() => switchLanguage(language.code)}
-              aria-label={`${t("Language", "Language")}: ${language.name}`}
               aria-current={currentLang === language.code ? 'true' : undefined}
               className={cn(
                 'px-2 py-1 rounded transition-colors uppercase tracking-wide',
@@ -166,6 +165,10 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
               )}
             >
               {language.code}
+              {/* The visible label is the two-letter code; WCAG 2.5.3 wants the accessible name
+                  to contain it. This keeps the code as the start of the name instead of replacing
+                  it with "Language: English", which axe flagged as a mismatch. */}
+              <span className="sr-only"> — {language.name}</span>
             </button>
           ))}
         </div>

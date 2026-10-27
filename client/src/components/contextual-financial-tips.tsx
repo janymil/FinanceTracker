@@ -173,7 +173,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
             <p className="text-sm text-gray-500 mb-2">
               {t('noFinancialTipsAvailable')}
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-500">
               {t('aiTipsDisclaimer')}
             </p>
           </div>
@@ -199,7 +199,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
               );
             })}
             <div className="text-center mt-4">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 {t('aiTipsDisclaimer')}
               </p>
             </div>

@@ -209,12 +209,14 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
           )}
 
           <div className="flex items-center space-x-2">
-            {/* Desktop collapse button */}
+            {/* Desktop collapse button. Icon-only, so the accessible name is the only thing a
+                screen reader gets — without it the control is announced as "button". */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="hidden lg:flex"
+              aria-label={isCollapsed ? t('a11y.expand_sidebar') : t('a11y.collapse_sidebar')}
             >
               {isCollapsed ? (
                 <ChevronRight className="h-4 w-4" />
@@ -229,6 +231,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
               size="sm"
               onClick={() => setIsOpen(false)}
               className="lg:hidden"
+              aria-label={t('a11y.close_sidebar')}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -262,8 +265,10 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                           <span className="truncate">{item.title}</span>
                           {item.badge && !accessible && (
                             <div className={cn(
+                              // 700-level backgrounds: at 10px the label needs 4.5:1, and white on
+                              // the 500 shades sat near 3.5:1. This is the usual badge treatment.
                               "inline-flex items-center px-2 py-0.5 ml-2 text-[10px] font-medium text-white rounded-full border-0 shrink-0",
-                              item.badge === "Standard" ? "bg-blue-500" : "bg-purple-500"
+                              item.badge === "Standard" ? "bg-blue-700" : "bg-purple-700"
                             )}>
                               <Crown className="h-2.5 w-2.5 mr-1" />
                               <span className="leading-none">{item.badge}</span>
@@ -299,7 +304,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                 <Badge variant="secondary">{currentPlan}</Badge>
               )}
             </div>
-            <div className="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 pt-1">
+            <div className="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-400 pt-1">
               <Link href={`/${currentLang}/terms-of-service`} onClick={() => setIsOpen(false)} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                 {t("Terms")}
               </Link>

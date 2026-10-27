@@ -200,7 +200,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
               <p className="text-2xl font-bold text-green-800 dark:text-green-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.income)}
               </p>
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+              <p className="text-xs text-green-700 dark:text-green-400 mt-1">
                 {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) === 1 ? t('transaction') : t('transactionPlural')}
               </p>
             </div>
@@ -222,7 +222,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
               <p className="text-2xl font-bold text-red-800 dark:text-red-200 transition-all duration-300 ease-out">
                 {formatCurrency(Math.abs(animatedValues.expenses))}
               </p>
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+              <p className="text-xs text-red-700 dark:text-red-400 mt-1">
                 {summary?.expenseTransactionCount || 0} {(summary?.expenseTransactionCount || 0) === 1 ? t('transaction') : t('transactionPlural')}
               </p>
             </div>
@@ -274,7 +274,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                  budgetInfo.status === 'moderate' ? t('dashboard.moderate') :
                  budgetInfo.status === 'critical' ? t('dashboard.critical') : ''}
               </p>
-              <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
+              <p className={`text-xs mt-1 ${budgetInfo.textColor}`}>
                 {budgetInfo.status === 'loading' ? t('dashboard.loading') :
                  budgetInfo.status === 'no-budget' ? t('dashboard.no_budget_set') :
                  `${Math.round(budgetInfo.percentage)}% ${t('dashboard.utilized')}. ${t('dashboard.remaining')}: ${formatCurrency(budgetInfo.remaining)}`}

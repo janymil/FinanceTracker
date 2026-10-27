@@ -215,7 +215,7 @@ export default function Subscribe() {
                 <Card className={`relative ${isCurrentPlan('standard', 'monthly') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
                   {isCurrentPlan('standard', 'monthly') && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-green-500 text-white px-4 py-1">
+                      <Badge className="bg-green-700 text-white px-4 py-1">
                         {t('subscribe.current_plan')}
                       </Badge>
                     </div>
@@ -275,7 +275,7 @@ export default function Subscribe() {
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <Badge className={`px-4 py-1 ${
                       isCurrentPlan('premium', 'monthly')
-                        ? 'bg-green-500 text-white'
+                        ? 'bg-green-700 text-white'
                         : 'bg-purple-600 text-white'
                     }`}>
                       {isCurrentPlan('premium', 'monthly') ? (
@@ -342,7 +342,7 @@ export default function Subscribe() {
                 <Card className={`relative ${isCurrentPlan('standard', 'yearly') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
                   {isCurrentPlan('standard', 'yearly') && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-green-500 text-white px-4 py-1">
+                      <Badge className="bg-green-700 text-white px-4 py-1">
                         {t('subscribe.current_plan')}
                       </Badge>
                     </div>
@@ -407,7 +407,7 @@ export default function Subscribe() {
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <Badge className={`px-4 py-1 ${
                       isCurrentPlan('premium', 'yearly')
-                        ? 'bg-green-500 text-white'
+                        ? 'bg-green-700 text-white'
                         : 'bg-purple-600 text-white'
                     }`}>
                       {isCurrentPlan('premium', 'yearly') ? (

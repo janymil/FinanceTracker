@@ -111,11 +111,22 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
   const healthData = calculateHealthScore();
   const StatusIcon = healthData.icon || CheckCircle;
 
+  // Explicit classes instead of `text-${color}-600`. Two reasons: 600-level yellow is 3.1:1 on
+  // white (axes flags it, and rightly), and a class built by interpolation is invisible to
+  // Tailwind's scanner, so whether it exists in the stylesheet is luck.
+  const SCORE_TEXT: Record<string, string> = {
+    green: 'text-green-700 dark:text-green-300',
+    blue: 'text-blue-700 dark:text-blue-300',
+    yellow: 'text-yellow-700 dark:text-yellow-300',
+    red: 'text-red-700 dark:text-red-300',
+  };
+  const scoreText = SCORE_TEXT[healthData.color] ?? 'text-gray-700 dark:text-gray-300';
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <StatusIcon className={`h-5 w-5 text-${healthData.color}-600`} />
+          <StatusIcon className={`h-5 w-5 ${scoreText}`} />
           {t('financial_health.title')}
           <TooltipProvider>
             <Tooltip>
@@ -149,13 +160,15 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-center">
-          <div className={`text-4xl font-bold text-${healthData.color}-600 mb-2`}>
+          <div className={`text-4xl font-bold ${scoreText} mb-2`}>
             {healthData.score}
           </div>
-          <div className={`text-sm font-medium text-${healthData.color}-600`}>
+          <div className={`text-sm font-medium ${scoreText}`}>
             {healthData.status}
           </div>
-          <Progress 
+          <Progress
+            aria-label={t('a11y.health_score')}
+            aria-valuetext={`${healthData.score} / 100`}
             value={healthData.score} 
             className="mt-3"
             style={{

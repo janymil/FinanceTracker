@@ -235,7 +235,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium">{t('Timeline Forecast')}</h4>
                     <Select value={predictionPeriod} onValueChange={(value: any) => setPredictionPeriod(value)}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-32" aria-label={t('Timeline Forecast')}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

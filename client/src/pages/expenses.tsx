@@ -453,7 +453,7 @@ export default function Expenses() {
                       value={newExpense.categoryId || ""} 
                       onValueChange={(value) => setNewExpense({ ...newExpense, categoryId: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="category">
                         <SelectValue placeholder={t("expenses.form.category_placeholder")}>
                           {newExpense.categoryId && expenseCategories.find(cat => cat.id.toString() === newExpense.categoryId)?.name}
                         </SelectValue>
@@ -530,7 +530,7 @@ export default function Expenses() {
                                   recurringFrequency: value as "weekly" | "monthly" | "yearly" 
                                 })}
                               >
-                                <SelectTrigger>
+                                <SelectTrigger id="frequency">
                                   <SelectValue placeholder={t("expenses.form.frequency_placeholder")} />
                                 </SelectTrigger>
                                 <SelectContent>

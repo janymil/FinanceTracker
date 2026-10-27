@@ -83,7 +83,11 @@ export function OnboardingChecklist({ userId, lang, plan, transactionsCount, inc
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <Progress value={(completed / steps.length) * 100} className="mt-3 h-2" />
+        <Progress
+          value={steps.length > 0 ? (completed / steps.length) * 100 : 0}
+          className="mt-3 h-2"
+          aria-label={t('a11y.onboarding_progress')}
+        />
       </CardHeader>
       <CardContent className="space-y-2">
         {steps.map((step) => (

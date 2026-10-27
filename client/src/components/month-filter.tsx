@@ -107,7 +107,7 @@ export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeR
               ))}
             </div>
 
-            <Button
+            <Button aria-label={t('a11y.next_months')}
               variant="ghost"
               size="sm"
               onClick={handleNextMonths}

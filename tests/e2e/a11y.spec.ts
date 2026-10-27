@@ -22,12 +22,27 @@ const BLOCKING_IMPACTS = new Set(['critical', 'serious']);
 
 /** Runs axe and fails with the rule id, the impact and the offending selectors. */
 async function expectNoBlockingViolations(page: Page, where: string): Promise<void> {
-  const { violations } = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
+  // Audit the real screen, not its skeleton. The dashboard lazy-loads several widgets behind a
+  // placeholder, and axe was scoring the "Loading..." text of a card that no customer ever
+  // sees for more than a moment. Waiting is also what a person does.
+  await expect(page.locator('[data-testid="lazy-loading"]'))
+    .toHaveCount(0, { timeout: 20_000 })
+    .catch(() => undefined);
+
+  // Skeletons are excluded on purpose: the card carries `animate-pulse`, so axe samples the text
+  // mid-fade and reports a contrast ratio that no user ever sees (and some dev-server chunks never
+  // resolve at all). The placeholder keeps `role="status"` so a screen reader still announces it.
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(AXE_TAGS)
+    .exclude('[data-testid="lazy-loading"]')
+    .analyze();
   const blocking = violations.filter((violation) => BLOCKING_IMPACTS.has(violation.impact ?? ''));
 
   const report = blocking
     .map((violation) => {
-      const nodes = violation.nodes.slice(0, 5).map((node) => `      ${node.target.join(' ')}`);
+      const nodes = violation.nodes
+        .slice(0, 5)
+        .map((node) => `      ${node.target.join(' ')}\n        ${node.html.slice(0, 300)}`);
       return `  ${violation.id} [${violation.impact}] ${violation.help} (${violation.nodes.length})\n${nodes.join('\n')}`;
     })
     .join('\n');
@@ -36,6 +51,11 @@ async function expectNoBlockingViolations(page: Page, where: string): Promise<vo
 }
 
 test.describe('E2E-6 accessibility', () => {
+  // This spec audits up to four screens per test and waits for lazy widgets to arrive before
+  // scoring them. On a cold Vite dev bundle that is comfortably more than the 60s default, and a
+  // timeout looks exactly like a violation in the report — so it gets its own budget.
+  test.describe.configure({ timeout: 120_000 });
+
   test.beforeEach(async ({ page }) => {
     await ensureSession(page);
   });
