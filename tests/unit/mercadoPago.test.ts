@@ -58,7 +58,7 @@ describe('MercadoPago preapproval', () => {
     });
   });
 
-  it('uses a yearly frequency for the yearly plan', async () => {
+  it('expresses a yearly plan as twelve months, the only form MercadoPago accepts', async () => {
     process.env.MERCADOPAGO_ACCESS_TOKEN = 'TEST-token';
     const fetchMock = vi.fn(async () => ({
       ok: true,
@@ -76,10 +76,13 @@ describe('MercadoPago preapproval', () => {
 
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     const body = JSON.parse(String(init.body));
+    // `frequency_type: 'years'` is rejected by the API ("valid ones are [days, months]"), so
+    // every yearly subscription used to fail with a 502. A year is twelve months.
     expect(body.auto_recurring).toMatchObject({
       transaction_amount: 99.9,
       currency_id: 'PEN',
-      frequency_type: 'years',
+      frequency: 12,
+      frequency_type: 'months',
     });
   });
 

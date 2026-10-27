@@ -99,8 +99,11 @@ export async function createPreapproval(input: CreatePreapprovalInput): Promise<
     notification_url: webhookUrlFor(input.backUrl),
     status: 'pending',
     auto_recurring: {
-      frequency: 1,
-      frequency_type: input.interval === 'yearly' ? 'years' : 'months',
+      // MercadoPago accepts [days, months] only: `frequency_type: 'years'` is answered with a
+      // 400 ("Invalid value for frequency type"), which is why every yearly plan failed. A year
+      // is twelve months.
+      frequency: input.interval === 'yearly' ? 12 : 1,
+      frequency_type: 'months',
       transaction_amount: amount,
       currency_id: 'PEN',
     },
@@ -140,8 +143,12 @@ function planFromReason(reason: string | undefined): PlanId {
 }
 
 function intervalFromPreapproval(data: any): BillingInterval {
+  const frequency = Number(data?.auto_recurring?.frequency ?? 1);
   const frequencyType = String(data?.auto_recurring?.frequency_type ?? 'months').toLowerCase();
-  return frequencyType.startsWith('year') ? 'yearly' : 'monthly';
+  // MercadoPago only reports `days` or `months`, and a year arrives as twelve months. Reading
+  // the type alone would file every yearly subscriber as monthly.
+  const months = frequencyType.startsWith('day') ? frequency / 30 : frequency;
+  return months >= 12 ? 'yearly' : 'monthly';
 }
 
 function toState(data: any): PreapprovalState {
