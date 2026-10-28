@@ -248,7 +248,12 @@ function Router() {
             return <AppLoader />;
           }} />
 
-          {/* Mobile upload - special case without language prefix */}
+          {/* Mobile upload — the page a phone opens after scanning the receipt QR code.
+              Two shapes on purpose: the QR encodes the language-prefixed one (what the router
+              knows how to render), and the unprefixed one stays for codes drawn before that and
+              for anything a person types. `LanguageGuard` leaves both alone, see
+              `isLanguageFreePath`. */}
+          <Route path="/:lang/mobile-upload/:sessionId" component={MobileUpload} />
           <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
 
           {/* 404 page */}

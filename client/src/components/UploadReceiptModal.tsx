@@ -146,7 +146,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
       }
       
       const { sessionId } = await response.json();
-      const qrUrl = `${window.location.origin}/mobile-upload/${sessionId}`;
+      // The language prefix is not decoration: every page of this app lives under `/:lang`,
+      // and the unprefixed path is rewritten by LanguageGuard into a URL no route serves,
+      // so the phone used to land on the 404 page instead of the camera page.
+      const qrUrl = `${window.location.origin}/${currentLocale}/mobile-upload/${sessionId}`;
       
       const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
         width: 256,

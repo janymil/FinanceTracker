@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useClerk } from '@clerk/clerk-react';
 import { esES, skSK } from '@clerk/localizations';
-import { detectLanguageAndRedirect } from '../i18n/languageDetector.ts';
+import { detectLanguageAndRedirect, isLanguageFreePath } from '../i18n/languageDetector.ts';
 
 interface LanguageGuardProps {
   children: React.ReactNode;
@@ -79,6 +79,16 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
   const clerk = useClerk();
 
   useEffect(() => {
+    // The page a phone opens from a receipt QR code lives outside the language prefix, on
+    // purpose: the code is drawn once and may be scanned by a device with another language.
+    // Without this the guard rewrote `/mobile-upload/<id>` to `/es/mobile-upload/<id>`, no
+    // route matched, and the phone showed the 404 page instead of the camera page.
+    // See `isLanguageFreePath` in i18n/languageDetector.ts.
+    if (isLanguageFreePath(location)) {
+      setReady(true);
+      return;
+    }
+
     const pathParts = location.split('/').filter(Boolean);
     const lang = pathParts[0];
 

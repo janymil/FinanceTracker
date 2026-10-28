@@ -66,6 +66,26 @@ const languageDetector = {
 
 export default languageDetector;
 
+/**
+ * Pages that live outside the language prefix.
+ *
+ * The receipt page a phone opens from a QR code is drawn once and scanned later, by a device
+ * that knows nothing about the desktop's language. `LanguageGuard` used to prefix every path,
+ * so `/mobile-upload/<id>` became `/es/mobile-upload/<id>`, matched no route, and the phone got
+ * the 404 page — "subir recibo con teléfono" could never open.
+ *
+ * Keep this list to pages that are reached by a link somebody else holds (a QR code, a
+ * printed URL), never to pages a person navigates to inside the app.
+ */
+export const LANGUAGE_FREE_PATHS = ['/mobile-upload'];
+
+/** True for `/mobile-upload` and anything under it (`/mobile-upload/<sessionId>`). */
+export function isLanguageFreePath(pathname: string): boolean {
+  return LANGUAGE_FREE_PATHS.some(
+    (base) => pathname === base || pathname.startsWith(`${base}/`)
+  );
+}
+
 // Standalone function for redirecting to correct language route
 export function detectLanguageAndRedirect() {
   const currentPath = window.location.pathname;
