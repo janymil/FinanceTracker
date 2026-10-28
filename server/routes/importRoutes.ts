@@ -4,7 +4,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { aiGuard } from "../aiAccess";
 import { storage } from "../storage";
 import { checkImport } from "@shared/invariants";
-import { parseAmountToCents, centsToNumber } from "@shared/money";
+
 import { reportInvariant } from "../errorGuard/report.js";
 import { z } from "zod";
 import { 
@@ -102,188 +102,9 @@ const importDataSchema = z.object({
   collaborativeGoals: z.array(z.any()).optional().default([]),
 });
 
-// CSV parsing utility with auto-delimiter detection
-/** Split one CSV line on the delimiter, respecting quoted fields ("1,234.56" stays one value). */
-function splitCsvLine(line: string, delimiter: string): string[] {
-  const out: string[] = [];
-  let current = '';
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i += 1) {
-    const char = line[i];
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"';
-        i += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-    if (char === delimiter && !inQuotes) {
-      out.push(current.trim());
-      current = '';
-      continue;
-    }
-    current += char;
-  }
-  out.push(current.trim());
-  return out;
-}
-
-/**
- * A money cell from a spreadsheet, read with the app's one parser.
- *
- * `parseFloat("1,234.56")` is 1, so a US-formatted import turned every amount above a thousand
- * into a single unit. `/shared/money` understands both conventions ("1,234.56" and "1.234,56"),
- * so the import uses it instead of a second, weaker reader.
- */
-function readAmountCell(value: unknown): number | null {
-  if (value === null || value === undefined || String(value).trim() === '') return null;
-  try {
-    return centsToNumber(Math.abs(parseAmountToCents(value as string | number)));
-  } catch {
-    return null;
-  }
-}
-
-function parseCSV(csvContent: string): Record<string, any>[] {
-  const lines = csvContent.trim().split('\n');
-  if (lines.length < 2) return [];
-  
-  // Auto-detect delimiter: check if semicolon is more common than comma in the header
-  const headerLine = lines[0];
-  const commaCount = (headerLine.match(/,/g) || []).length;
-  const semicolonCount = (headerLine.match(/;/g) || []).length;
-  const delimiter = semicolonCount > commaCount ? ';' : ',';
-  
-  const headers = splitCsvLine(headerLine, delimiter).map(h => h.replace(/"/g, ''));
-  const rows = [];
-  
-  for (let i = 1; i < lines.length; i++) {
-    const values = splitCsvLine(lines[i], delimiter).map(v => v.replace(/"/g, ''));
-    if (values.length === headers.length) {
-      const row: Record<string, any> = {};
-      headers.forEach((header, index) => {
-        row[header] = values[index];
-      });
-      rows.push(row);
-    }
-  }
-  
-  return rows;
-}
-
-// CSV to JSON converter for financial data
-function convertCSVToJSON(csvData: Record<string, any>[]): any {
-  const result = {
-    incomes: [] as any[],
-    expenses: [] as any[],
-    categories: [] as any[],
-    budgets: [] as any[],
-    goals: [] as any[],
-    collaborativeGoals: [] as any[]
-  };
-
-  const errors: string[] = [];
-
-  csvData.forEach((row, index) => {
-    const dataType = row.dataType?.toLowerCase();
-    
-    if (!dataType) {
-      errors.push(`Row ${index + 2}: Missing dataType`);
-      return;
-    }
-
-    // Skip validation here - we'll handle it in the processing section for better error messages
-    
-    try {
-      // Process transactions
-      if (dataType === 'transaction') {
-        // Validate transaction fields
-        if (readAmountCell(row.amount) === null) {
-          errors.push(`Row ${index + 2}: amount is required and must be a valid number`);
-          return;
-        }
-        if (!row.description || row.description.trim() === '') {
-          errors.push(`Row ${index + 2}: description is required`);
-          return;
-        }
-        if (!row.date) {
-          errors.push(`Row ${index + 2}: date is required`);
-          return;
-        }
-        if (!row.transactionType || !['income', 'expense'].includes(row.transactionType)) {
-          errors.push(`Row ${index + 2}: transactionType must be either "income" or "expense"`);
-          return;
-        }
-        
-        // Validate recurring frequency if provided
-        if (row.isRecurring === 'true' && row.recurringFrequency) {
-          const frequency = row.recurringFrequency.toLowerCase();
-          if (!['daily', 'weekly', 'monthly', 'quarterly', 'yearly'].includes(frequency)) {
-            errors.push(`Row ${index + 2}: recurringFrequency must be one of: daily, weekly, monthly, quarterly, yearly`);
-            return;
-          }
-        }
-        
-        const transaction = formatTransaction(row);
-        
-        if (row.transactionType === 'income') {
-          result.incomes.push(transaction);
-        } else if (row.transactionType === 'expense') {
-          result.expenses.push(transaction);
-        }
-      }
-      
-      // Process budgets
-      else if (dataType === 'budget') {
-        // Check if category exists for budget
-        if (!row.category || row.category.trim() === '') {
-          errors.push(`Row ${index + 2}: category is required for budgets`);
-          return;
-        }
-        
-        // Check if budgetAmount exists
-        if (row.budgetAmount !== undefined && row.budgetAmount !== '' && readAmountCell(row.budgetAmount) === null) {
-          errors.push(`Row ${index + 2}: budgetAmount is required and must be a valid number`);
-          return;
-        }
-        
-        const budget = formatBudget(row);
-        result.budgets.push(budget);
-      }
-      
-      // Process goals
-      else if (dataType === 'goal') {
-        // Validate goal fields
-        if (!row.goalTargetAmount || isNaN(parseFloat(row.goalTargetAmount))) {
-          errors.push(`Row ${index + 2}: goalTargetAmount is required and must be a valid number`);
-          return;
-        }
-        if (!row.goalTargetDate) {
-          errors.push(`Row ${index + 2}: goalTargetDate is required`);
-          return;
-        }
-        if (!row.goalCategory || row.goalCategory.trim() === '') {
-          errors.push(`Row ${index + 2}: goalCategory is required`);
-          return;
-        }
-        
-        const goal = formatGoal(row);
-        result.goals.push(goal);
-      }
-    } catch (error) {
-      errors.push(`Row ${index + 2}: ${error instanceof Error ? error.message : 'Processing error'}`);
-    }
-  });
-
-  if (errors.length > 0) {
-    throw new Error(`CSV validation errors:\n${errors.join('\n')}`);
-  }
-
-  return result;
-}
-
+// CSV parsing lives in `shared/importCsv.ts`, next to the writer that produces the export: the
+// two used to disagree about the file, so exporting and re-importing was impossible.
+import { csvRowsToImportData, parseCsvRows, readCsvAmount } from "@shared/importCsv";
 // Store active SSE connections for progress updates.
 //
 // The key includes the account. The session id is chosen by the client, so two people can
@@ -400,8 +221,19 @@ export function registerImportRoutes(app: Express) {
       
       // Parse content based on format
       if (format === 'csv') {
-        const csvData = parseCSV(content);
-        importData = convertCSVToJSON(csvData);
+        try {
+          const csvData = parseCsvRows(content);
+          if (csvData.length === 0) {
+            return res.status(400).json({ message: "The file has a header but no rows to import" });
+          }
+          importData = csvRowsToImportData(csvData);
+        } catch (error) {
+          // Row-by-row reasons ("Row 3: date is required") instead of the generic failure this
+          // used to answer with, which told the person nothing about their own file.
+          return res.status(400).json({
+            message: error instanceof Error ? error.message : 'Invalid CSV data',
+          });
+        }
       } else if (format === 'json') {
         try {
           importData = JSON.parse(content);
@@ -890,7 +722,7 @@ export function registerImportRoutes(app: Express) {
 
       for (const transaction of transactions) {
         try {
-          const amount = readAmountCell(transaction.amount);
+          const amount = readCsvAmount(transaction.amount);
           // yyyy-MM-dd from a bank file is a calendar day, not an instant: parsed as noon UTC
           // it shows the same date in Lima (midnight UTC showed the previous evening).
           const date = toCalendarDate(transaction.date);

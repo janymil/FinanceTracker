@@ -8,9 +8,9 @@ import { cloudStorage } from "../cloudStorage";
 import {
   cleanDateValue,
   cleanId,
-  csvField,
   neutralizeSpreadsheetCell,
 } from "@shared/trackingInput";
+import { buildTransactionsCsv } from "@shared/importCsv";
 import { localParts, monthRange, presetRange, rangeEndFrom, rangeStartFrom, resolveTimeZone } from "@shared/timezones";
 import { centsToNumber, parseAmountToCents } from "@shared/money";
 import { collectUserData } from "../userExport";
@@ -385,18 +385,16 @@ export function registerExportRoutes(app: Express) {
         res.setHeader('Content-Disposition', 'attachment; filename="kaptia-export.json"');
         return res.json(exportData);
       } else if (format === 'csv') {
-        // For CSV, we'll export transactions only as CSV format is tabular
+        // For CSV, we'll export transactions only as CSV format is tabular.
         if (exportData.transactions) {
-          // Text cells are quoted and defused against spreadsheet formulas; the BOM keeps accents readable in Excel.
-          const csvHeader = 'Date,Description,Amount,Type,Category\r\n';
-          const csvRows = exportData.transactions.map((t: any) => {
-            const dateStr = t.date instanceof Date ? t.date.toISOString().split('T')[0] : String(t.date || '').split('T')[0];
-            return [dateStr, csvField(t.description), Number(t.amount).toFixed(2), t.type, csvField(t.categoryName || 'Uncategorized')].join(',');
-          }).join('\r\n');
+          // Written in the shape this app can read back (see shared/importCsv): the export used
+          // to be a readable table the importer rejected, so a file this app produced could not
+          // be imported by this app. Text cells stay quoted and defused against formulas.
+          const csv = buildTransactionsCsv(exportData.transactions);
 
           res.setHeader('Content-Type', 'text/csv; charset=utf-8');
           res.setHeader('Content-Disposition', 'attachment; filename="kaptia-transactions.csv"');
-          return res.send('\uFEFF' + csvHeader + csvRows);
+          return res.send(csv);
         } else {
           return res.status(400).json({ message: "CSV export requires transactions to be included" });
         }
@@ -466,27 +464,56 @@ export function registerExportRoutes(app: Express) {
         const byCategoryCents = new Map<string, number>();
         for (const t of rows) {
           if (t.type !== 'expense') continue;
-          const name = t.categoryName || 'Uncategorized';
+          const name = t.categoryName || '';
           byCategoryCents.set(name, (byCategoryCents.get(name) || 0) + parseAmountToCents(t.amount));
         }
-        const byCategory = new Map<string, number>(
-          Array.from(byCategoryCents.entries()).map(([name, cents]) => [name, centsToNumber(cents)]),
-        );
+        // Biggest first: the doughnut legend is read top to bottom, and the rest is grouped by
+        // the processor instead of being silently dropped after the eighth slice.
+        const categories = Array.from(byCategoryCents.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, cents]) => ({ name, amount: centsToNumber(cents) }));
 
         const dayLabel = (instant: Date) => {
           const day = localParts(instant, timeZone);
           return `${day.year}-${String(day.month).padStart(2, '0')}-${String(day.day).padStart(2, '0')}`;
         };
-        const periodLabel = range ? `${dayLabel(range.start)} - ${dayLabel(range.end)}` : 'all time';
+
+        /*
+         * One point per month, from every row in the export.
+         *
+         * The chart used to be drawn from the first ten rows with the same balance copied onto
+         * every month, so a report covering a year showed a flat line and the person could see it
+         * was not their data. Cents in, cents out, months in the reader's own time zone.
+         */
+        const monthlyCents = new Map<string, { income: number; expenses: number }>();
+        for (const t of rows) {
+          const instant = new Date(t.date);
+          if (Number.isNaN(instant.getTime())) continue;
+          const parts = localParts(instant, timeZone);
+          const key = `${parts.year}-${String(parts.month).padStart(2, '0')}`;
+          const entry = monthlyCents.get(key) ?? { income: 0, expenses: 0 };
+          const cents = parseAmountToCents(t.amount);
+          if (t.type === 'income') entry.income += cents;
+          else entry.expenses += cents;
+          monthlyCents.set(key, entry);
+        }
+        const monthly = Array.from(monthlyCents.entries())
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([period, value]) => ({
+            period,
+            income: centsToNumber(value.income),
+            expenses: centsToNumber(value.expenses),
+          }));
 
         const pdfBuffer = await requestPdf(
           buildMonthlyPayload({
             userName: exportData.userName,
             email: user.email || undefined,
             language: getUserLanguage(req),
-            period: periodLabel,
             currency: user.currency || undefined,
             totals,
+            monthly,
+            ...(range ? { range: { from: dayLabel(range.start), to: dayLabel(range.end) } } : {}),
             transactions: rows.map((t: any) => ({
               date: t.date,
               description: t.description,
@@ -494,7 +521,7 @@ export function registerExportRoutes(app: Express) {
               type: t.type,
               categoryName: t.categoryName || undefined
             })),
-            categories: Array.from(byCategory.entries()).map(([name, amount]) => ({ name, amount })),
+            categories,
             budgets: exportData.budgets ?? [],
             goals: exportData.goals ?? []
           })

@@ -74,8 +74,12 @@ app.post('/generate-pdf', requireApiKey, async (req, res) => {
       goals = [],
       insights = [],
       language = 'en-us',
-      period = 'Monthly',
+      period = '',
       currency = '$',
+      totals,
+      monthly = [],
+      range,
+      metrics,
     } = req.body;
 
     // Generate QR code as Base64 Data URL (pure JS, zero native dependencies)
@@ -105,6 +109,10 @@ app.post('/generate-pdf', requireApiKey, async (req, res) => {
       language,
       period,
       currency,
+      totals,
+      monthly,
+      range,
+      metrics,
     });
 
     const pdfBuffer = await renderToBuffer(documentElement);

@@ -155,7 +155,10 @@ describe('export', () => {
     expect(response.headers.get('content-type')).toContain('text/csv');
     // The BOM keeps accents readable in Excel; fetch hides it from .text(), so check the raw bytes.
     expect(Array.from(response.bytes.slice(0, 3))).toEqual([0xef, 0xbb, 0xbf]);
-    expect(response.text).toContain('Date,Description,Amount,Type,Category\r\n');
+    // The header is the one the importer reads, so an exported file can be imported again
+    // (see shared/importCsv and tests/unit/importCsvRoundTrip.test.ts).
+    expect(response.text).toContain('dataType,date,description,amount,transactionType,category\r\n');
+    expect(response.text).toContain('transaction,2026-10-01');
     expect(response.text).toContain('October first');
     expect(response.text).toContain('25.00');
     expect(response.text).not.toContain('September dinner');

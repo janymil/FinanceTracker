@@ -194,7 +194,7 @@ describe('payload builders — pure contract', () => {
     expect(payload.transactions[1].type).toBe('income');
   });
 
-  it('summarises totals into insights', () => {
+  it('states the two facts the report prints in words, in no language of its own', () => {
     const payload = buildTrendsPayload({
       userName: 'Test User',
       language: 'en-us',
@@ -205,19 +205,24 @@ describe('payload builders — pure contract', () => {
       transactions: [],
     });
 
-    expect(payload.insights?.[0]).toMatchObject({ title: 'Savings rate' });
-    expect(payload.insights?.[0].description).toContain('60.0%');
-    expect(payload.insights?.[1]).toMatchObject({ title: 'Largest category' });
-    expect(payload.insights?.[1].description).toContain('Rent');
+    // Numbers, not English sentences: the processor writes them in the reader's language.
+    expect(payload.metrics?.savingsRate).toBeCloseTo(60, 5);
+    expect(payload.metrics?.topCategory).toMatchObject({ name: 'Rent', amount: 300 });
+    expect(payload.metrics?.topCategory?.percentage).toBeCloseTo(75, 5);
+    expect(payload.insights).toBeUndefined();
   });
 
-  it('builds the monthly payload for a single month', () => {
+  it('builds the monthly payload with every row, the totals and one point per month', () => {
     const payload = buildMonthlyPayload({
       userName: 'Jana',
       language: 'sk',
       period: '2026-03',
       currency: '€',
       totals: { income: 3500, expenses: 1286.08 },
+      monthly: [
+        { period: '2026-02', income: 1000, expenses: 200 },
+        { period: '2026-03', income: 2500, expenses: 1086.08 },
+      ],
       transactions: [
         { date: '2026-03-02T10:00:00.000Z', description: 'Lidl', amount: '84.30', type: 'expense' },
       ],
@@ -227,9 +232,34 @@ describe('payload builders — pure contract', () => {
     });
 
     expect(payload.userData.firstName).toBe('Jana');
-    expect(payload.transactions[0].balance).toBeCloseTo(2213.92, 2);
+    // The three numbers a financial report exists for.
+    expect(payload.totals).toEqual({ income: 3500, expenses: 1286.08, net: 2213.92 });
+    // The chart is the period, not a sample of it: every month, oldest first.
+    expect(payload.monthly).toEqual([
+      { period: '2026-02', income: 1000, expenses: 200, net: 800 },
+      { period: '2026-03', income: 2500, expenses: 1086.08, net: 1413.92 },
+    ]);
+    // Every row is sent; the report used to print only the first twelve.
+    expect(payload.transactions).toHaveLength(1);
+    expect(payload.transactions[0]).toMatchObject({ month: '2026-03', amount: 84.3, type: 'expense' });
+    // The category carries its share of the spending, so the legend can show a percentage.
+    expect(payload.categories[0]).toMatchObject({ name: 'Potraviny', amount: 84.3 });
+    expect(payload.categories[0].percentage).toBeCloseTo((84.3 / 1286.08) * 100, 5);
     expect(payload.budgets?.[0]).toEqual({ categoryName: 'Potraviny', amount: 200, spent: 84.3 });
     expect(payload.goals?.[0]).toEqual({ name: 'Dovolenka', targetAmount: 1000, currentAmount: 250 });
+  });
+
+  it('keeps a pre-worded period out of the payload when the caller has none', () => {
+    const payload = buildMonthlyPayload({
+      userName: 'Jana',
+      language: 'es-pe',
+      totals: { income: 10, expenses: 5 },
+      transactions: [],
+      categories: [],
+    });
+
+    // No `period`: the report prints the dates, or "todo el periodo", in the reader's language.
+    expect(payload.period).toBeUndefined();
   });
 
   it('truncates the display currency to 5 characters', () => {

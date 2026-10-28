@@ -53,10 +53,18 @@ export interface ProcessorTransaction {
   type?: 'income' | 'expense';
 }
 
+export interface ProcessorMonthlyPoint {
+  /** `YYYY-MM` */
+  period: string;
+  income: number;
+  expenses: number;
+  net: number;
+}
+
 export interface ProcessorPayload {
   userData: { firstName: string; lastName: string; email: string };
   transactions: ProcessorTransaction[];
-  categories: Array<{ name: string; amount: number; color?: string }>;
+  categories: Array<{ name: string; amount: number; percentage?: number; color?: string }>;
   budgets?: Array<{ categoryName: string; amount: number; spent: number }>;
   goals?: Array<{ name: string; targetAmount: number; currentAmount: number }>;
   insights?: Array<{ title: string; description: string }>;
@@ -64,6 +72,23 @@ export interface ProcessorPayload {
   period?: string;
   /** Display currency symbol (`$`, `€`, `Kč`, …) — not an ISO code. */
   currency?: string;
+  /** The three numbers a financial report exists for. */
+  totals?: { income: number; expenses: number; net: number };
+  /**
+   * One point per month the report covers, for the trend chart.
+   *
+   * The chart used to be drawn from the first ten rows with the same "balance" copied onto every
+   * month, which produced a flat line on a report covering a whole year. The monthly series is
+   * computed here, from the rows, so the chart is the period and not a sample of it.
+   */
+  monthly?: ProcessorMonthlyPoint[];
+  /** The period as calendar days, so the report can print it in the reader's language. */
+  range?: { from?: string; to?: string };
+  /** Facts the report states in words; rendered in the reader's language, never pre-translated. */
+  metrics?: {
+    savingsRate?: number;
+    topCategory?: { name: string; amount: number; percentage?: number };
+  };
 }
 
 /** Sends the payload to the processor and returns the PDF bytes. */
@@ -143,31 +168,6 @@ function mapTransactions(
   });
 }
 
-function buildInsights(
-  totals: { income: number; expenses: number },
-  categories: Array<{ name: string; amount: number; percentage?: number }>
-): Array<{ title: string; description: string }> {
-  const insights: Array<{ title: string; description: string }> = [];
-
-  if (totals.income > 0) {
-    const savingsRate = ((totals.income - totals.expenses) / totals.income) * 100;
-    insights.push({
-      title: 'Savings rate',
-      description: `You kept ${savingsRate.toFixed(1)}% of your income (${totals.income.toFixed(2)} in, ${totals.expenses.toFixed(2)} out).`,
-    });
-  }
-
-  if (categories.length > 0) {
-    const top = [...categories].sort((a, b) => b.amount - a.amount)[0];
-    insights.push({
-      title: 'Largest category',
-      description: `${top.name}: ${top.amount.toFixed(2)}${top.percentage != null ? ` (${top.percentage.toFixed(1)}% of expenses)` : ''}.`,
-    });
-  }
-
-  return insights;
-}
-
 export interface TrendsPayloadInput {
   userName?: string | null;
   email?: string | null;
@@ -185,15 +185,22 @@ export interface TrendsPayloadInput {
 export function buildTrendsPayload(input: TrendsPayloadInput): ProcessorPayload {
   const { firstName, lastName } = splitName(input.userName);
   const balanceByMonth = new Map(input.monthly.map((m) => [m.period, m.netBalance]));
-  const totals = {
-    income: input.monthly.reduce((sum, m) => sum + m.income, 0),
-    expenses: input.monthly.reduce((sum, m) => sum + m.expenses, 0),
-  };
+  const income = input.monthly.reduce((sum, m) => sum + m.income, 0);
+  const expenses = input.monthly.reduce((sum, m) => sum + m.expenses, 0);
+  const top = [...input.categories].sort((a, b) => b.amount - a.amount)[0];
 
   return {
     userData: { firstName, lastName, email: input.email || '' },
     transactions: mapTransactions(input.transactions, balanceByMonth),
-    categories: input.categories.map((c) => ({ name: c.name, amount: c.amount, color: c.color })),
+    categories: input.categories
+      .slice()
+      .sort((a, b) => b.amount - a.amount)
+      .map((c) => ({
+        name: c.name,
+        amount: c.amount,
+        color: c.color,
+        ...(expenses > 0 ? { percentage: (c.amount / expenses) * 100 } : {}),
+      })),
     budgets: (input.budgets || []).map((b) => ({
       categoryName: b.categoryName || 'Uncategorized',
       amount: Number(b.amount) || 0,
@@ -204,7 +211,23 @@ export function buildTrendsPayload(input: TrendsPayloadInput): ProcessorPayload 
       targetAmount: Number(g.targetAmount) || 0,
       currentAmount: Number(g.currentAmount) || 0,
     })),
-    insights: buildInsights(totals, input.categories),
+    totals: { income, expenses, net: income - expenses },
+    monthly: input.monthly
+      .slice()
+      .sort((a, b) => a.period.localeCompare(b.period))
+      .map((m) => ({ period: m.period, income: m.income, expenses: m.expenses, net: m.netBalance })),
+    metrics: {
+      ...(income > 0 ? { savingsRate: ((income - expenses) / income) * 100 } : {}),
+      ...(top
+        ? {
+            topCategory: {
+              name: top.name,
+              amount: top.amount,
+              percentage: expenses > 0 ? (top.amount / expenses) * 100 : undefined,
+            },
+          }
+        : {}),
+    },
     language: input.language,
     period: input.period,
     currency: normalizeCurrency(input.currency),
@@ -215,31 +238,66 @@ export interface MonthlyPayloadInput {
   userName?: string | null;
   email?: string | null;
   language: string;
-  period: string;
+  /** Only when the caller has a readable period label; otherwise the report names it itself. */
+  period?: string;
   currency?: string;
   totals: { income: number; expenses: number };
   transactions: SourceTransaction[];
   categories: Array<{ name: string; amount: number }>;
   budgets?: Array<{ categoryName?: string; amount: string | number; spent?: number }>;
   goals?: Array<{ name: string; targetAmount: string | number; currentAmount?: string | number }>;
+  /** Month-by-month series, computed from the rows in the person's own zone. */
+  monthly?: Array<{ period: string; income: number; expenses: number }>;
+  range?: { from?: string; to?: string };
 }
 
-/** Payload for the monthly report (`/api/export-pdf`). */
+/**
+ * Payload for the export report (`/api/export?format=pdf`).
+ *
+ * The report is everything the person asked to export: every row, every category, the totals,
+ * one point per month, and the two facts worth writing in a sentence. Nothing is pre-worded here
+ * — labels belong to the processor, which knows the reader's language.
+ */
 export function buildMonthlyPayload(input: MonthlyPayloadInput): ProcessorPayload {
   const { firstName, lastName } = splitName(input.userName);
 
-  // One month per report: every row shares that month's net balance for the chart.
-  const monthNet = input.totals.income - input.totals.expenses;
-  const balanceByMonth = new Map<string, number>();
-  for (const t of input.transactions) {
-    const date = typeof t.date === 'string' ? t.date : t.date.toISOString();
-    balanceByMonth.set(date.slice(0, 7), monthNet);
-  }
+  const totals = {
+    income: input.totals.income,
+    expenses: input.totals.expenses,
+    net: input.totals.income - input.totals.expenses,
+  };
+
+  const monthly = (input.monthly ?? [])
+    .slice()
+    .sort((a, b) => a.period.localeCompare(b.period))
+    .map((m) => ({
+      period: m.period,
+      income: m.income,
+      expenses: m.expenses,
+      net: m.income - m.expenses,
+    }));
+
+  const balanceByMonth = new Map(monthly.map((m) => [m.period, m.net]));
+
+  const categories = input.categories
+    .slice()
+    .sort((a, b) => b.amount - a.amount)
+    .map((c) => ({
+      name: c.name,
+      amount: c.amount,
+      ...(totals.expenses > 0 ? { percentage: (c.amount / totals.expenses) * 100 } : {}),
+    }));
+
+  const top = categories[0];
 
   return {
     userData: { firstName, lastName, email: input.email || '' },
-    transactions: mapTransactions(input.transactions, balanceByMonth),
-    categories: input.categories,
+    // Oldest first: a report reads like a statement, and the table no longer stops at twelve rows.
+    transactions: mapTransactions(
+      input.transactions.slice().sort((a, b) => +new Date(a.date) - +new Date(b.date)),
+      balanceByMonth,
+    ),
+    categories,
     budgets: (input.budgets || []).map((b) => ({
       categoryName: b.categoryName || 'Uncategorized',
       amount: Number(b.amount) || 0,
@@ -250,7 +308,15 @@ export function buildMonthlyPayload(input: MonthlyPayloadInput): ProcessorPayloa
       targetAmount: Number(g.targetAmount) || 0,
       currentAmount: Number(g.currentAmount) || 0,
     })),
-    insights: buildInsights(input.totals, input.categories),
+    totals,
+    monthly,
+    ...(input.range ? { range: input.range } : {}),
+    metrics: {
+      ...(totals.income > 0
+        ? { savingsRate: ((totals.income - totals.expenses) / totals.income) * 100 }
+        : {}),
+      ...(top ? { topCategory: { name: top.name, amount: top.amount, percentage: top.percentage } } : {}),
+    },
     language: input.language,
     period: input.period,
     currency: normalizeCurrency(input.currency),
