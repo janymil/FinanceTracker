@@ -2199,6 +2199,7 @@
     "global": "Global",
     "files_stored": "archivos almacenados",
     "no_backup_status": "No hay estado de respaldo disponible",
+    "backup_storage_unavailable": "El almacenamiento del respaldo en la nube no está configurado. Todavía no se está guardando nada.",
     "creating_backup": "Creando Respaldo...",
     "backup_now": "Respaldar Ahora",
     "restoring": "Restaurando...",

@@ -4,7 +4,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage } from "../categoryTranslations";
 import { buildMonthlyPayload, requestPdf, PdfProcessorError } from "../pdfProcessorClient";
-import { cloudStorage } from "../cloudStorage";
+import { cloudStorage, storageInfo } from "../cloudStorage";
 import {
   cleanDateValue,
   cleanId,
@@ -545,7 +545,7 @@ export function registerExportRoutes(app: Express) {
   app.get('/api/export', isAuthenticated, handleExport);
   app.post('/api/export', isAuthenticated, handleExport);
 
-  // Cloud backup endpoints using Cloud Storage (Cloudflare R2 or Bunny fallback)
+  // Cloud backup endpoints. One provider: Cloudflare R2 (see server/cloudStorage.ts).
   const backupStorage = cloudStorage;
 
   // Create backup endpoint
@@ -590,7 +590,7 @@ export function registerExportRoutes(app: Express) {
         }
       };
 
-      // Use the existing createBackup method from BunnyStorage
+      // createBackup writes under backups/user-<id>/ in the bucket
       log.info('Creating a backup for user', userId);
       
       const filename = await backupStorage.createBackup(userId, backupData);
@@ -632,6 +632,7 @@ export function registerExportRoutes(app: Express) {
       // Use the existing getUserBackups method
       const backups = await backupStorage.getUserBackups(userId);
       const lastBackup = backups.length > 0 ? backups[0] : null;
+      const storageMeta = storageInfo();
 
       res.json({
         lastBackup: lastBackup ? {
@@ -668,8 +669,12 @@ export function registerExportRoutes(app: Express) {
         },
         info: {
           totalBackups: backups.length,
-          provider: "Bunny.net CDN",
-          region: "Global",
+          // Where the files actually are, from the provider itself — not a literal. The tab said
+          // "Bunny.net CDN" for a year while the files were being written to Cloudflare R2.
+          provider: storageMeta.provider,
+          region: storageMeta.region,
+          bucket: storageMeta.bucket,
+          configured: storageMeta.configured,
           encryption: "AES-256"
         }
       });

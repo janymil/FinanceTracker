@@ -1,7 +1,7 @@
 import { log } from './logger';
 import type { BackupSettings } from '@shared/schema';
 import { storage } from './storage';
-import { bunnyStorage } from './bunnyStorage';
+import { cloudStorage } from './cloudStorage';
 import { withJobRun } from './errorGuard/jobs.js';
 
 interface ScheduledBackup {
@@ -171,14 +171,15 @@ class BackupScheduler {
       // Get user's data for backup
       const backupData = await this.collectUserData(userId);
       
-      // Upload to Bunny.net
-      const backupFilename = await bunnyStorage.createBackup(userId, backupData);
+      // The same provider the manual "Backup now" button and the status tab use, so the two
+      // cannot disagree about where a backup went.
+      const backupFilename = await cloudStorage.createBackup(userId, backupData);
       
       // Clean up old backups based on retention policy
       const settings = await storage.getUserBackupSettings(userId);
       if (settings && settings.retentionDays) {
         try {
-          await bunnyStorage.cleanupOldBackups(userId, settings.retentionDays);
+          await cloudStorage.cleanupOldBackups(userId, settings.retentionDays);
         } catch (error) {
           log.error(`Failed to cleanup old backups for user ${userId}:`, error);
           // Don't fail the backup process if cleanup fails
@@ -186,7 +187,7 @@ class BackupScheduler {
       }
       
       // Update backup status in database
-      const backupInfo = await bunnyStorage.getBackupInfo(userId);
+      const backupInfo = await cloudStorage.getBackupInfo(userId);
       await storage.updateBackupSettings(userId, {
         lastBackupDate: new Date(),
         totalBackups: backupInfo.totalBackups,

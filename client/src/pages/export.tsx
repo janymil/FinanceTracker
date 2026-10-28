@@ -55,7 +55,16 @@ interface ExportOptions {
 }
 
 interface ImportOptions {
-  source: "csv" | "excel" | "json" | "mint" | "quickbooks" | "ynab" | "personalcapital" | "bank" | "pdf-statement" | "bank-file";
+  /**
+   * The four sources this screen actually offers. It also listed `excel`, `mint`, `quickbooks`,
+   * `ynab`, `personalcapital` and `bank`, none of which had a tile, a handler or a server route —
+   * a shape that promised formats the import cannot read.
+   *
+   * Excel is not one of them on purpose: a spreadsheet is read in the browser by the bank-file
+   * flow (`.csv, .txt, .xlsx, .xls`), which parses it before sending rows. The plain import
+   * posts text, and an `.xlsx` is not text.
+   */
+  source: "csv" | "json" | "pdf-statement" | "bank-file";
   mapColumns: boolean;
   skipFirstRow: boolean;
   dateFormat: string;
@@ -541,10 +550,21 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setImportResults(null);
+    if (!file) return;
+
+    // The input restricts this to .csv/.json, but a file picker can still hand over anything.
+    // An .xlsx posted as text is binary noise, and the server can only answer "invalid CSV".
+    if (!/\.(csv|json)$/i.test(file.name)) {
+      toast({
+        title: t('export.invalid_file'),
+        description: t('export.bank_file.invalid_type'),
+        variant: 'destructive',
+      });
+      return;
     }
+
+    setSelectedFile(file);
+    setImportResults(null);
   };
 
   const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -1876,8 +1896,16 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     <div className="p-4 border rounded-lg">
                       <div className="text-sm text-muted-foreground">{t('export.backup_info')}</div>
                       <div className="text-sm space-y-1">
-                        <div>{t('export.provider')}: {backupStatusData.info?.provider || 'Bunny.net CDN'}</div>
-                        <div>{t('export.region')}: {backupStatusData.info?.region || t('export.global')}</div>
+                        {/* Everything here comes from the storage provider. A literal used to sit
+                            in this spot, naming a provider the files were not stored with. */}
+                        {backupStatusData.info?.provider ? (
+                          <>
+                            <div>{t('export.provider')}: {backupStatusData.info.provider}</div>
+                            <div>{t('export.region')}: {backupStatusData.info.region || t('export.global')}</div>
+                          </>
+                        ) : (
+                          <div className="text-amber-600 dark:text-amber-400">{t('export.backup_storage_unavailable')}</div>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 mt-2">
                         <Shield className="h-3 w-3 text-green-500" />

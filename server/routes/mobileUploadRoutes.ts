@@ -125,7 +125,7 @@ export function registerMobileUploadRoutes(app: any) {
         log.info('Processing OCR directly...');
         
         // Import OCR processing functions
-        const { extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
+        const { extractStructuredData, uploadReceiptFile } = await import('../uploadReceipt');
         const { categorizeExpense } = await import('../openai');
         const { checkAiAccess } = await import('../aiAccess');
         const { anonymizeText } = await import('../../shared/aiAnonymizer');
@@ -211,17 +211,17 @@ export function registerMobileUploadRoutes(app: any) {
 
         let imageUrl: string | undefined;
 
-        // Upload to Bunny.net if user has appropriate plan
+        // Keep the photo in object storage when the plan includes it
         if (canStore) {
           const extension = file.mimetype.split('/')[1] || 'jpg';
           // Random name, and the read goes through the owner-only route (see uploadReceipt).
           const fileName = `${crypto.randomUUID()}.${extension}`;
           
           try {
-            imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype, userId);
-            log.info('Image upload to Bunny.net completed');
+            imageUrl = await uploadReceiptFile(fileName, file.buffer, file.mimetype, userId);
+            log.info('Receipt photo stored in object storage');
           } catch (uploadError) {
-            log.error('Upload to Bunny.net failed:', uploadError);
+            log.error('Receipt photo upload failed:', uploadError);
           }
         }
 

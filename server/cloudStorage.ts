@@ -315,189 +315,27 @@ export class CloudflareR2Storage implements CloudStorageService {
 }
 
 // -------------------------------------------------------------
-// Legacy Bunny.net Provider (Kept as fallback if Bunny keys set)
+// The one storage provider
+//
+// Cloudflare R2 only. A Bunny.net provider used to sit here as a fallback, and the nightly
+// backup job still imported that older module directly — so the manual backup wrote to R2 while
+// the automatic one wrote somewhere else, and the "Estado de respaldo en la nube" tab (which
+// asks this module) could only ever say "never, 0 files". One provider, one source of truth.
 // -------------------------------------------------------------
-export class BunnyStorage implements CloudStorageService {
-  private config: { storageZone: string; accessKey: string; storagePassword: string; pullzoneUrl: string };
-  private baseUrl: string;
+export const cloudStorage: CloudStorageService = new CloudflareR2Storage();
 
-  constructor() {
-    this.config = {
-      storageZone: process.env.BUNNY_STORAGE_ZONE || '',
-      accessKey: process.env.BUNNY_ACCESS_KEY || '',
-      storagePassword: process.env.BUNNY_STORAGE_PASSWORD || '',
-      pullzoneUrl: process.env.BUNNY_PULLZONE_URL || 'https://kaptia.b-cdn.net',
-    };
-    this.baseUrl = `https://la.storage.bunnycdn.com/${this.config.storageZone}`;
-  }
-
-  public get configured(): boolean {
-    return Boolean(this.config.storageZone && this.config.accessKey && this.config.storagePassword);
-  }
-
-  getPublicUrl(filePath: string): string {
-    const cleanKey = filePath.replace(/^\/+/, '');
-    return `${this.config.pullzoneUrl.replace(/\/$/, '')}/${cleanKey}`;
-  }
-
-  private async makeRequest(method: string, path: string, data?: string | Buffer, contentType?: string): Promise<any> {
-    if (!this.configured) {
-      throw new Error('Bunny.net credentials not properly configured');
-    }
-    const url = `${this.baseUrl}${path}`;
-    const headers: Record<string, string> = {
-      AccessKey: this.config.storagePassword,
-    };
-    if (data) {
-      headers['Content-Type'] = contentType || 'application/octet-stream';
-    }
-
-    const fetchModule = await import('node-fetch');
-    const fetchFn = (fetchModule.default || fetchModule) as any;
-    const response = await fetchFn(url, { method, headers, body: data });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Bunny.net API error: ${response.status} - ${errorText}`);
-    }
-
-    const text = await response.text();
-    if (text) {
-      try {
-        return JSON.parse(text);
-      } catch {
-        return text;
-      }
-    }
-    return null;
-  }
-
-  async uploadFile(filePath: string, data: string | Buffer, contentType = 'application/json'): Promise<string> {
-    await this.makeRequest('PUT', `/${filePath.replace(/^\/+/, '')}`, data, contentType);
-    return this.getPublicUrl(filePath);
-  }
-
-  async downloadFile(filePath: string): Promise<string> {
-    if (!this.configured) throw new Error('Bunny.net credentials not configured');
-    const fetchModule = await import('node-fetch');
-    const fetchFn = (fetchModule.default || fetchModule) as any;
-    const response = await fetchFn(`${this.baseUrl}/${filePath.replace(/^\/+/, '')}`, {
-      method: 'GET',
-      headers: { AccessKey: this.config.storagePassword },
-    });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.text();
-  }
-
-  async deleteFile(filePath: string): Promise<void> {
-    await this.makeRequest('DELETE', `/${filePath.replace(/^\/+/, '')}`);
-  }
-
-  /** Raw bytes for anything binary (a receipt photo); `downloadFile` decodes UTF-8. */
-  async downloadBuffer(filePath: string): Promise<{ data: Buffer; contentType: string | null }> {
-    if (!this.configured) throw new Error('Bunny.net credentials not configured');
-    const fetchModule = await import('node-fetch');
-    const fetchFn = (fetchModule.default || fetchModule) as any;
-    const response = await fetchFn(`${this.baseUrl}/${filePath.replace(/^\/+/, '')}`, {
-      method: 'GET',
-      headers: { AccessKey: this.config.storagePassword },
-    });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const arrayBuffer = await response.arrayBuffer();
-    return {
-      data: Buffer.from(arrayBuffer),
-      contentType: response.headers.get('content-type'),
-    };
-  }
-
-  async listFiles(path = ''): Promise<StorageFileInfo[]> {
-    try {
-      const cleanPath = path.replace(/^\/+/, '');
-      const result = await this.makeRequest('GET', `/${cleanPath}/`);
-      if (Array.isArray(result)) return result;
-      return [];
-    } catch {
-      return [];
-    }
-  }
-
-  async createBackup(userId: string | number, backupData: any): Promise<string> {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `backup-${timestamp}.json`;
-    const filePath = `backups/user-${userId}/${filename}`;
-    const backupContent = JSON.stringify(backupData, null, 2);
-    await this.uploadFile(filePath, backupContent, 'application/json');
-    return filename;
-  }
-
-  async getUserBackups(userId: string | number): Promise<StorageFileInfo[]> {
-    const files = await this.listFiles(`backups/user-${userId}`);
-    return files
-      .filter((file) => !file.IsDirectory && file.ObjectName.endsWith('.json'))
-      .sort((a, b) => new Date(b.DateCreated).getTime() - new Date(a.DateCreated).getTime());
-  }
-
-  async cleanupOldBackups(userId: string | number, retentionDays: number): Promise<number> {
-    const backups = await this.getUserBackups(userId);
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-    let deletedCount = 0;
-    for (const backup of backups) {
-      if (new Date(backup.DateCreated) < cutoffDate) {
-        await this.deleteFile(`backups/user-${userId}/${backup.ObjectName}`);
-        deletedCount++;
-      }
-    }
-    return deletedCount;
-  }
-
-  async restoreBackup(userId: string | number, backupFilename: string): Promise<any> {
-    const filePath = `backups/user-${userId}/${backupFilename}`;
-    const content = await this.downloadFile(filePath);
-    return JSON.parse(content);
-  }
-
-  async getBackupInfo(userId: string | number): Promise<{
-    totalBackups: number;
-    totalSize: number;
-    oldestBackup: string | null;
-    newestBackup: string | null;
-  }> {
-    const backups = await this.getUserBackups(userId);
-    if (backups.length === 0) {
-      return { totalBackups: 0, totalSize: 0, oldestBackup: null, newestBackup: null };
-    }
-    const totalSize = backups.reduce((sum, b) => sum + (b.Length || 0), 0);
-    const sorted = backups.sort((a, b) => new Date(a.DateCreated).getTime() - new Date(b.DateCreated).getTime());
-    return {
-      totalBackups: backups.length,
-      totalSize,
-      oldestBackup: sorted[0]?.DateCreated || null,
-      newestBackup: sorted[sorted.length - 1]?.DateCreated || null,
-    };
-  }
+/** What the backup tab is allowed to tell the person about where their data lives. */
+export function storageInfo(): {
+  provider: string;
+  region: string;
+  bucket: string | null;
+  configured: boolean;
+} {
+  const r2 = cloudStorage as CloudflareR2Storage;
+  return {
+    provider: 'Cloudflare R2',
+    region: (process.env.R2_JURISDICTION || 'global').toLowerCase() === 'eu' ? 'European Union' : 'Global',
+    bucket: process.env.R2_BUCKET_NAME || null,
+    configured: typeof r2.configured === 'boolean' ? r2.configured : false,
+  };
 }
-
-// -------------------------------------------------------------
-// Unified Storage Dispatcher
-// Automatically prefers Cloudflare R2 if R2 env vars are present,
-// falls back to Bunny.net if present.
-// -------------------------------------------------------------
-function getPrimaryStorage(): CloudStorageService {
-  const r2 = new CloudflareR2Storage();
-  if (r2.configured) {
-    return r2;
-  }
-
-  const bunny = new BunnyStorage();
-  if (bunny.configured) {
-    return bunny;
-  }
-
-  // Return R2 instance as default (graceful error messages when called)
-  return r2;
-}
-
-export const cloudStorage: CloudStorageService = getPrimaryStorage();
-// Backwards compatibility alias
-export const bunnyStorage = cloudStorage;

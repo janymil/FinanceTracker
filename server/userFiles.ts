@@ -34,7 +34,7 @@ async function deletePrefix(prefix: string, result: FileCleanupResult): Promise<
   }
 
   for (const file of files) {
-    // R2 returns the full key in `Path`; Bunny returns a zone-relative one. Trust `Path` only
+    // The object store returns the full key in `Path`. Trust `Path` only
     // when it is inside the prefix we asked for, otherwise build the key ourselves.
     const key =
       file.Path && file.Path.includes(prefix.replace(/\/$/, '')) ? file.Path : `${prefix}${file.ObjectName}`;

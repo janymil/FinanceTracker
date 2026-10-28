@@ -2122,6 +2122,7 @@
     "global": "Globálny",
     "files_stored": "súborov uložených",
     "no_backup_status": "Stav zálohy nie je k dispozícii",
+    "backup_storage_unavailable": "Úložisko pre cloudovú zálohu nie je nastavené. Zatiaľ sa nič neukladá.",
     "creating_backup": "Vytváram Zálohu...",
     "backup_now": "Zálohovať Teraz",
     "restoring": "Obnovujem...",

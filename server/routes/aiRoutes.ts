@@ -898,20 +898,17 @@ export function registerAIRoutes(app: Express) {
       const filename = `mascot-${userId}-${Date.now()}.png`;
       log.info(`Mascot image generated with ${generated.model} (${imageBuffer.length} bytes)`);
 
-      // Store it permanently in Bunny CDN
-      const { bunnyStorage } = await import('../bunnyStorage');
-      
+      // Store it permanently in object storage (Cloudflare R2). The public URL comes from the
+      // bucket's own domain, so nothing here builds a CDN host by hand any more.
+      const { cloudStorage } = await import('../cloudStorage');
+
       let permanentImageUrl: string;
-      
+
       try {
-        // Upload to Bunny CDN
-        const bunnyPath = `mascots/${userId}/${filename}`;
-        await bunnyStorage.uploadFile(bunnyPath, imageBuffer, 'image/png');
-        
-        // Get the CDN URL
-        const cdnBaseUrl = process.env.BUNNY_CDN_URL || `https://${process.env.BUNNY_STORAGE_ZONE}.b-cdn.net`;
-        permanentImageUrl = `${cdnBaseUrl}/${bunnyPath}`;
-        log.info(`Mascot image stored permanently on CDN at: ${permanentImageUrl}`);
+        const mascotPath = `mascots/${userId}/${filename}`;
+        await cloudStorage.uploadFile(mascotPath, imageBuffer, 'image/png');
+        permanentImageUrl = cloudStorage.getPublicUrl(mascotPath);
+        log.info(`Mascot image stored in object storage at: ${permanentImageUrl}`);
       } catch (storageError) {
         log.error("Failed to store image on CDN, falling back to local storage:", storageError);
         
@@ -945,16 +942,17 @@ export function registerAIRoutes(app: Express) {
         // Delete old image if it exists
         if (existingMascot.imageUrl) {
           try {
-            // Check if it's a CDN URL or local file
-            if (existingMascot.imageUrl.includes('b-cdn.net') || existingMascot.imageUrl.includes('bunny')) {
-              // Delete from Bunny CDN
-              const cdnPath = existingMascot.imageUrl.split('.net/')[1];
-              if (cdnPath) {
-                await bunnyStorage.deleteFile(cdnPath);
-                log.info('Deleted previous mascot from CDN:', cdnPath);
+            // Our own object storage, or a local file from before it existed. A URL from the old
+            // CDN cannot be deleted any more (its credentials are gone) and is simply replaced.
+            const { cloudStorage } = await import('../cloudStorage');
+            const publicBase = cloudStorage.getPublicUrl('');
+            if (existingMascot.imageUrl.startsWith(publicBase)) {
+              const objectPath = existingMascot.imageUrl.slice(publicBase.length);
+              if (objectPath) {
+                await cloudStorage.deleteFile(objectPath);
+                log.info('Deleted previous mascot from object storage:', objectPath);
               }
             } else if (existingMascot.imageUrl.startsWith('/uploads/mascots/')) {
-              // Delete local file (fallback for old mascots)
               const fs = await import('fs/promises');
               const path = await import('path');
               const oldFilePath = path.join(process.cwd(), existingMascot.imageUrl);

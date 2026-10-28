@@ -2014,6 +2014,7 @@
     "global": "Global",
     "files_stored": "files stored",
     "no_backup_status": "No backup status available",
+    "backup_storage_unavailable": "Cloud backup storage is not configured. Nothing is being saved yet.",
     "creating_backup": "Creating Backup...",
     "backup_now": "Backup Now",
     "restoring": "Restoring...",

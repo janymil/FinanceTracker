@@ -75,9 +75,6 @@ export async function uploadReceiptFile(
  * lines, never as the reader.
  */
 
-// Legacy alias
-export const uploadToBunny = uploadReceiptFile;
-
 // Main upload handler
 export const uploadReceiptHandler = [
   upload.single('receipt'),
