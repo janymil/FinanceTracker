@@ -317,10 +317,10 @@ export class CloudflareR2Storage implements CloudStorageService {
 // -------------------------------------------------------------
 // The one storage provider
 //
-// Cloudflare R2 only. A Bunny.net provider used to sit here as a fallback, and the nightly
-// backup job still imported that older module directly — so the manual backup wrote to R2 while
-// the automatic one wrote somewhere else, and the "Estado de respaldo en la nube" tab (which
-// asks this module) could only ever say "never, 0 files". One provider, one source of truth.
+// Cloudflare R2 only. A second provider used to sit here as a fallback, and the nightly
+// backup job imported that older module directly — so the manual backup wrote to R2 while the
+// automatic one wrote somewhere else, and the "Estado de respaldo en la nube" tab (which asks
+// this module) could only ever say "never, 0 files". One provider, one source of truth.
 // -------------------------------------------------------------
 export const cloudStorage: CloudStorageService = new CloudflareR2Storage();
 

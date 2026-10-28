@@ -670,7 +670,7 @@ export function registerExportRoutes(app: Express) {
         info: {
           totalBackups: backups.length,
           // Where the files actually are, from the provider itself — not a literal. The tab said
-          // "Bunny.net CDN" for a year while the files were being written to Cloudflare R2.
+          // a fixed provider name for a year while the files were written to Cloudflare R2.
           provider: storageMeta.provider,
           region: storageMeta.region,
           bucket: storageMeta.bucket,
