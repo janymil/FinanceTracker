@@ -66,7 +66,7 @@ test.describe('E2E-1 add expense', () => {
 
     // The dialog must close and only one row may exist.
     await expect(page.getByRole('dialog')).toBeHidden({ timeout: 20_000 });
-    await expect(page.getByText(description, { exact: false })).toHaveCount(1, { timeout: 20_000 });
+    await expect(expenses.transactionRow(description)).toHaveCount(1, { timeout: 20_000 });
 
     const after = await fetchSummary(page.request, range);
     expect(after.totalExpensesInCents - before.totalExpensesInCents).toBe(1000);

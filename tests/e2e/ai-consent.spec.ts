@@ -23,10 +23,12 @@ test.describe('AI consent gate', () => {
       expect(me.ok()).toBeTruthy();
       expect((await me.json()).plan).toBe('free');
 
-      // Methods matter: insights is a GET, tip is a POST (a wrong method would hit no route at all).
+      // Methods matter: insights is a GET, categorize is a POST (a wrong method would hit no
+      // route at all). `/api/ai/tip` used to be the POST here; it was removed when the three
+      // other advice panels were.
       const calls = [
         { endpoint: '/api/ai/insights', send: () => page.request.get('/api/ai/insights') },
-        { endpoint: '/api/ai/tip', send: () => page.request.post('/api/ai/tip', { data: {} }) },
+        { endpoint: '/api/ai/categorize', send: () => page.request.post('/api/ai/categorize', { data: { transactions: [] } }) },
       ];
       for (const { endpoint, send } of calls) {
         const response = await send();

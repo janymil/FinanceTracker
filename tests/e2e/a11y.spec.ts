@@ -72,7 +72,9 @@ test.describe('E2E-6 accessibility', () => {
 
     // The dialog is where the labels matter: an unlabelled amount field is invisible to a
     // screen reader, and a dialog that does not trap focus loses the keyboard behind it.
+    // The page's add button is a menu (type it, say it, scan it), so pick "type" first.
     await addButton.click();
+    await page.getByTestId('quick-add-type').click();
     await expect(page.locator('#tx-amount')).toBeVisible();
     await expectNoBlockingViolations(page, 'expenses · add dialog');
   });

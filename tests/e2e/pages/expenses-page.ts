@@ -28,7 +28,9 @@ export class ExpensesPage {
   }
 
   async openDialog(): Promise<void> {
+    // The page's "add" button is a menu (type it, say it, scan it), not a direct form opener.
     await this.addButton.click();
+    await this.page.getByTestId('quick-add-type').click();
     await expect(this.amountInput).toBeVisible();
   }
 
@@ -49,6 +51,8 @@ export class ExpensesPage {
   }
 
   transactionRow(description: string): Locator {
-    return this.page.getByText(description, { exact: false });
+    // A row is shown in the ledger and again in the page's "biggest payments" and payee panels,
+    // so the lookup is scoped to the list the test actually means.
+    return this.page.getByTestId('ledger').getByText(description, { exact: false });
   }
 }

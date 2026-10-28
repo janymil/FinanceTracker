@@ -227,7 +227,9 @@ test.describe('export (Premium)', () => {
     const bytes = await csv.body();
     expect(Array.from(bytes.subarray(0, 3))).toEqual([0xef, 0xbb, 0xbf]); // BOM for Excel
     const text = bytes.toString('utf8');
-    expect(text).toContain('Date,Description,Amount,Type,Category\r\n');
+    // The CSV is the round-trip format `shared/importCsv.ts` reads back, so `dataType` names
+    // what each row is and the column order is that file's, not a per-format choice.
+    expect(text).toContain('dataType,date,description,amount,transactionType,category\r\n');
     expect(text).toContain(`"'=cmd`); // defused
     expect(text).not.toMatch(/,"=cmd/);
     expect(text).toContain('7.25');
