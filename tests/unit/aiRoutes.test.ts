@@ -15,6 +15,8 @@ const storage = vi.hoisted(() => ({
   getUserBudgets: vi.fn(),
   getUserFinancialSummary: vi.fn(),
   getUserGoals: vi.fn(),
+  getTransactionsByDateRange: vi.fn(),
+  getUserTimeZone: vi.fn(),
 }));
 const runAI = vi.hoisted(() => vi.fn());
 const cache = vi.hoisted(() => ({ get: vi.fn(), set: vi.fn() }));
@@ -72,6 +74,10 @@ beforeEach(() => {
   storage.getUserBudgets.mockReset().mockResolvedValue([]);
   storage.getUserFinancialSummary.mockReset().mockResolvedValue({ totalIncome: 1000, totalExpenses: 400, transactionsByCategory: [] });
   storage.getUserGoals.mockReset().mockResolvedValue([]);
+  storage.getTransactionsByDateRange.mockReset().mockResolvedValue([
+    { id: 1, description: 'Migros', amount: '40', date: new Date('2026-10-01'), type: 'expense', categoryName: 'Food', isRecurring: false },
+  ]);
+  storage.getUserTimeZone.mockReset().mockResolvedValue('UTC');
   runAI.mockReset();
   cache.get.mockReset().mockResolvedValue(null);
   cache.set.mockReset().mockResolvedValue(undefined);
@@ -106,32 +112,6 @@ describe('a failed AI answer is a 503 and is never cached', () => {
     const { status, json } = await call('GET', '/api/trend-predictions');
     expect(status).toBe(503);
     expect(json.code).toBe('ai_unavailable');
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it('POST /api/ai/financial-health-score', async () => {
-    runAI.mockResolvedValueOnce(FAILURE);
-    const { status, json } = await call('POST', '/api/ai/financial-health-score', { summary: { totalIncome: 1 }, budgets: [] });
-    expect(status).toBe(503);
-    expect(json.code).toBe('ai_unavailable');
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it('POST /api/ai/daily-recommendations', async () => {
-    runAI.mockResolvedValueOnce(FAILURE);
-    const { status } = await call('POST', '/api/ai/daily-recommendations', {
-      transactions: [{ id: 1, amount: '1', description: 'x', date: '2026-10-01', type: 'expense' }],
-      summary: { totalIncome: 1, totalExpenses: 1 },
-      budgets: [],
-    });
-    expect(status).toBe(503);
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it('POST /api/ai/tip', async () => {
-    runAI.mockResolvedValueOnce(FAILURE);
-    const { status } = await call('POST', '/api/ai/tip', { financialData: { totalIncome: 1, totalExpenses: 1, categories: [], transactions: [] } });
-    expect(status).toBe(503);
     expect(cache.set).not.toHaveBeenCalled();
   });
 
@@ -183,28 +163,6 @@ describe('a real AI answer is returned and cached', () => {
   });
 });
 
-describe('POST /api/ai/tip in fetch_cached mode', () => {
-  const entry = (language?: string) => ({ outputJson: [{ title: 'cached tip' }], inputJson: language ? { language } : {} });
-
-  it('returns the last tip when it is in the language on screen', async () => {
-    (storage as any).getRecentAICacheEntry = vi.fn().mockResolvedValue(entry('sk-sk'));
-    const { json } = await call('POST', '/api/ai/tip', { mode: 'fetch_cached' }, { 'x-user-language': 'sk-sk' });
-    expect(json.tip).toEqual([{ title: 'cached tip' }]);
-  });
-
-  it('does not show a tip that was written in another language', async () => {
-    (storage as any).getRecentAICacheEntry = vi.fn().mockResolvedValue(entry('en-us'));
-    const { json } = await call('POST', '/api/ai/tip', { mode: 'fetch_cached' }, { 'x-user-language': 'sk-sk' });
-    expect(json.tip).toBeNull();
-  });
-
-  it('still shows an older tip that has no language recorded', async () => {
-    (storage as any).getRecentAICacheEntry = vi.fn().mockResolvedValue(entry());
-    const { json } = await call('POST', '/api/ai/tip', { mode: 'fetch_cached' }, { 'x-user-language': 'sk-sk' });
-    expect(json.tip).not.toBeNull();
-  });
-});
-
 describe('plan rules still hold', () => {
   it('insights are a Premium feature', async () => {
     storage.getUser.mockResolvedValue({ ...premium, plan: 'standard' });
@@ -214,76 +172,48 @@ describe('plan rules still hold', () => {
   });
 });
 
-describe('POST /api/ai/contextual-financial-tips', () => {
-  const body = () => ({
-    transactions: [{ description: 'Migros', amount: 40, categoryName: 'Food', type: 'expense', date: '2026-10-01' }],
-    summary: { totalIncome: 100, totalExpenses: 300, netBalance: -200 },
-    budgets: [],
-    selectedMonth: '2026-10',
-  });
-  const SLOVAK_REVIEW = 'Skontrolujte svoje výdavky';
+describe('the adviser is a Premium feature', () => {
+  it('refuses a standard account before any AI call', async () => {
+    storage.getUser.mockResolvedValue({ ...premium, plan: 'standard' });
+    const { status, json } = await call('GET', '/api/financial-health');
 
-  it('on an AI failure answers with rule-based tips in the person\'s language and caches nothing', async () => {
-    runAI.mockResolvedValueOnce(FAILURE);
-    const { status, json } = await call('POST', '/api/ai/contextual-financial-tips', body(), { 'x-user-language': 'sk-sk' });
+    expect(status).toBe(403);
+    expect(json.code).toBe('plan_required');
+    expect(runAI).not.toHaveBeenCalled();
+  });
+
+  it('answers a premium account with advice and the computed score', async () => {
+    runAI.mockResolvedValueOnce({
+      aiAnalysis: {
+        summary: 'Quedaron 600 de 1000.',
+        personalizedFactors: ['Food llegó a 400.'],
+        recommendations: [{ action: 'Limita comida a 300', reason: 'Food llegó a 400', impact: 'Libera 100', priority: 'high' }],
+        riskAssessment: '',
+      },
+    });
+    const { status, json } = await call('GET', '/api/financial-health?startDate=2026-10-01&endDate=2026-10-31');
 
     expect(status).toBe(200);
-    expect(json.tips.map((t: any) => t.title)).toContain(SLOVAK_REVIEW);
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it('does the same when the AI call throws', async () => {
-    runAI.mockRejectedValueOnce(new Error('network'));
-    const { json } = await call('POST', '/api/ai/contextual-financial-tips', body(), { 'x-user-language': 'es-pe' });
-    expect(json.tips.map((t: any) => t.title)).toContain('Revisa tus gastos');
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it('does not cache or show tips that have no title or text: the fallback takes their place', async () => {
-    runAI.mockResolvedValueOnce({ tips: [{ id: 'x', title: '', description: 'only text' }, { title: 'only title' }] });
-    const { json } = await call('POST', '/api/ai/contextual-financial-tips', body(), { 'x-user-language': 'sk-sk' });
-
-    expect(json.tips.map((t: any) => t.id)).toContain('fallback_spending');
-    expect(JSON.stringify(json)).not.toMatch(/Financial Tip|No description available/);
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it('caches and returns real tips', async () => {
-    runAI.mockResolvedValueOnce({ tips: [{ id: 'a', title: 'Zníž výdavky', description: 'Pozri potraviny', category: 'spending', priority: 'high', actionable: true }] });
-    const { json } = await call('POST', '/api/ai/contextual-financial-tips', body(), { 'x-user-language': 'sk-sk' });
-
-    expect(json.tips).toHaveLength(1);
-    expect(json.tips[0].title).toBe('Zníž výdavky');
-    expect(cache.set).toHaveBeenCalledTimes(1);
-  });
-
-  it('gives a free plan an empty list without calling the model', async () => {
-    storage.getUser.mockResolvedValue({ ...premium, plan: 'free' });
-    const { json } = await call('POST', '/api/ai/contextual-financial-tips', body());
-    expect(json).toEqual({ tips: [] });
-    expect(runAI).not.toHaveBeenCalled();
+    expect(json.category).toBeDefined();
+    expect(json.advice[0]).toMatchObject({ action: 'Limita comida a 300', reason: 'Food llegó a 400' });
+    expect(json.summary).toBe('Quedaron 600 de 1000.');
   });
 });
 
 describe('what the routes log', () => {
-  it('never prints a transaction or an AI answer', async () => {
+  it('never prints a transaction, a goal or an AI answer', async () => {
     const log = vi.spyOn(console, 'log');
-    runAI.mockResolvedValueOnce({ recommendations: [{ title: 'SECRET-TIP' }], insights: [] });
-    await call('POST', '/api/ai/daily-recommendations', {
-      transactions: [{ id: 1, amount: '1', description: 'SECRET-MERCHANT', date: '2026-10-01', type: 'expense' }],
-      summary: { totalIncome: 1, totalExpenses: 1 },
-      budgets: [],
-    });
-    await call('POST', '/api/ai/contextual-financial-tips', {
-      transactions: [{ description: 'SECRET-MERCHANT', amount: 9, categoryName: 'Food', type: 'expense', date: '2026-10-01' }],
-      summary: { totalIncome: 1, totalExpenses: 1, netBalance: 0 },
-      budgets: [{ categoryName: 'SECRET-BUDGET', amount: 5, spent: 1, remaining: 4 }],
-      selectedMonth: '2026-10',
-    });
+    storage.getTransactionsByDateRange.mockResolvedValue([
+      { id: 1, description: 'SECRET-MERCHANT', amount: '9', date: new Date('2026-10-01'), type: 'expense', categoryName: 'Food', isRecurring: true },
+    ]);
+    storage.getUserGoals.mockResolvedValue([{ name: 'SECRET-GOAL', targetAmount: '100', currentAmount: '10', targetDate: '2027-01-01' }]);
+    runAI.mockResolvedValueOnce({ aiAnalysis: { recommendations: [{ action: 'SECRET-TIP' }] } });
+
+    await call('GET', '/api/financial-health?startDate=2026-10-01&endDate=2026-10-31');
 
     const printed = JSON.stringify(log.mock.calls);
     expect(printed).not.toContain('SECRET-MERCHANT');
     expect(printed).not.toContain('SECRET-TIP');
-    expect(printed).not.toContain('SECRET-BUDGET');
+    expect(printed).not.toContain('SECRET-GOAL');
   });
 });

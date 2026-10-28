@@ -41,9 +41,6 @@ const payload = { language: 'sk-sk', transactions: [{ id: 1 }], budgets: [{ cate
 
 describe('runAI passes the language to every task', () => {
   it.each([
-    ['financial-tips', 'generateFinancialTips', 2],
-    ['contextual-tips', 'generateContextualFinancialTips', 2],
-    ['daily-recommendations', 'generateDailyRecommendations', 2],
     ['spending-insights', 'generateSpendingInsights', 2],
     ['financial-health-score', 'generateAIFinancialHealthScore', 1],
     ['expense-predictions', 'generateExpensePredictions', 2],

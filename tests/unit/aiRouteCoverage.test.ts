@@ -62,7 +62,7 @@ describe('every AI call site is behind the gate', () => {
 
   it('finds the AI functions it is supposed to guard', () => {
     expect(names).toEqual(expect.arrayContaining([
-      'categorizeExpense', 'generateFinancialTips', 'generateSpendingInsights',
+      'categorizeExpense', 'generateAIFinancialHealthScore', 'generateSpendingInsights',
       'generateTrendPredictions', 'runAI',
     ]));
   });

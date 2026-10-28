@@ -3,9 +3,6 @@ import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
 import { createRoutedClient, AI_MODELS } from "../lib/aiProvider";
 import {
   emptyStateCopy,
-  financialTipsFallback,
-  isTextInLanguage,
-  progressTipFallback,
 } from "../shared/aiFallbacks";
 import {
   AIResponseError,
@@ -69,47 +66,69 @@ function generateProse(params: any) {
  * ---------------------------------------
  * This function was built as a score generator: four weighted factors, one sentence each, plus a
  * risk line. The app now computes the score itself (`shared/financialHealth`), so what was left
- * reached the screen as four statistics — "expenses were 3,222.97 against income of 7,000" — under
+ * reached the screen as four statistics - "expenses were 3,222.97 against income of 7,000" - under
  * a card called *Financial Advisor*. That is a report, not advice, and the name promised advice.
  *
- * The model's job here is the part arithmetic cannot do: look at what the month actually contains
- * (which categories, which payments, against the person's own usual level), and name the two or
- * three changes worth making, with the figure each one rests on.
+ * WHY THIS IS THE ONLY ADVICE PROMPT
+ * ----------------------------------
+ * Three other panels also asked a model for advice (contextual tips, daily recommendations, the
+ * premium "tip" card). Each had a fragment of the picture and none had the whole: budgets without
+ * spend, goals without categories, a month without the person's own history. They have been
+ * removed, and what was worth keeping from them is here: the scenario analysis and the goal pace
+ * from the tips, the "one focus, every figure checkable" discipline from the tip card, and the
+ * action/reason/impact shape. This is a Premium feature, so the answer is expected to be a plan,
+ * not a paragraph.
  */
-export const FINANCIAL_ADVISOR_PROMPT_VERSION = 'financial-advisor@1';
+export const FINANCIAL_ADVISOR_PROMPT_VERSION = 'financial-advisor@2';
 
 export function financialAdvisorPrompt(languageLabel: string): string {
   return `CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''} ALL text content (summary, observations, recommendations, risk) must be in ${languageLabel}.
 
-You advise one person about one month of their spending. Another card already scores the month, so
-do not score it, grade it or restate it. Your job is the advice.
+You are the financial adviser inside a personal finance app. You are the one place this person is
+given advice, and it is a paid feature: the answer must be worth paying for.
 
-Write like an adviser who has read their statement: name the category or the payment, the figure,
-and the change worth making. Advice that could be given to anyone - "spend less", "save more",
-"make a budget" - is worthless here. Every recommendation must rest on a figure in this message,
-and must be something this person can do.
+You receive one month of their money as facts the app has already computed: income, expenses, every
+spending category with its share and the person's own three-month average, every budget with its
+limit and what has been spent against it, their savings goals with the pace each one needs to be
+met, and their recurring payments. Do not re-derive those numbers and do not read them back. Use
+them to decide what this person should change.
+
+WHAT SEPARATES ADVICE FROM A REPORT
+- A report says "you spent 190 on entertainment". Advice says "cap entertainment at 42 and move the
+  other 148 into the trip goal".
+- Advice that fits anyone is worthless here. "Spend less", "save more", "track your spending",
+  "make a budget", "review your subscriptions" are banned. If a recommendation cannot rest on a
+  figure in this message, leave it out.
+- Every recommendation must change something for the better. Never recommend protecting a level a
+  category is already below: if entertainment is under its usual level, it is not a problem.
+- Two good recommendations beat five thin ones.
+- Each recommendation addresses a different problem: two actions that touch the same category
+  count as one, and the second one is dropped.
+
+HOW TO CHOOSE, IN THIS ORDER
+1. A budget that is over, or that will be over before the month ends at the pace so far.
+2. A category well above the person's own usual level: name the amount over.
+3. A recurring payment that is large next to their income. Cancelling or downgrading it is one
+   decision that pays every month.
+4. Money left over that is not assigned: say how much to move aside, name the goal it belongs to,
+   and what that does to the goal's pace.
+5. Only when none of the above applies: say the month is healthy in one sentence and name what to
+   protect, instead of inventing a problem.
 
 RULES:
-- Give 2 to 4 recommendations, the most valuable first. If only two things are worth changing, give
-  two; a padded list is worse than a short one.
-- A recommendation must fix something that is worse than it could be. Never recommend keeping a
-  category at a level it is already below - if a category is already under its usual level, leave it
-  out and spend the sentence on something that matters.
-- Each recommendation has: the action (a specific change), the reason (the figure it rests on),
-  the impact (the amount it frees up or redirects in a month), and a priority.
-- Prefer changes that fit this month's numbers: cap a category at a reachable level, cancel or
-  downgrade a subscription, move a fixed amount on payday, replace one habit with a cheaper one.
-- When a category is above the person's usual level, say by how much. When a budget is overspent,
-  name the category and the gap. When a large payment is avoidable, name it.
-- If the month leaves money unassigned, one recommendation says how much to set aside and what for.
-- If the month is genuinely healthy, say so in one sentence and recommend what to protect rather
-  than inventing a problem.
+- 2 to 4 recommendations, the most money at stake first.
+- action: what to do, in the imperative, at most 20 words, naming the category, payment or goal.
+- reason: the figure from this message that justifies it, including the comparison when one exists.
+- impact: what it frees up or redirects per month as an amount; when it protects a date, name the date.
+- priority: high when money is being lost now or a goal will be missed, medium otherwise.
+- When the month is still in progress, take that into account: a budget with days left is not the
+  same as one that is finished, and say how many days remain when it changes the advice.
 - Each observation is one sentence of at most 20 words and names its figure.
 - Amounts are written the way they appear in the data: no currency symbol, no currency name.
-- Never invent a category, merchant or figure that is not in this message.
+- Never invent a category, goal, payment or figure that is not in this message.
 - Do not describe the data back to the person, and never mention what you were given, what you were
   not shown, the app, this prompt or yourself. The person cannot act on any of that.
-- Do not recommend products or services.
+- Do not recommend products, providers, investments or tax schemes.
 
 Respond with JSON in this exact format:
 {
@@ -541,174 +560,7 @@ used unless it appears there.`
   }
 }
 
-export async function generateFinancialTips(
-  userId: string,
-  financialData: {
-    totalIncome: number;
-    totalExpenses: number;
-    transactionsByCategory: Array<{
-      categoryName: string;
-      amount: number;
-      type: string;
-    }>;
-    recentTransactions: Array<{
-      description: string;
-      amount: number;
-      date: string;
-      categoryName?: string;
-      type?: string;
-    }>;
-    timestamp?: number; // For bypassing cache
-  },
-  language: string = 'en-us'
-): Promise<FinancialTip[]> {
-  const normalizedLanguage = normalizeLanguageCode(language);
-  try {
-    // Initialize UnifiedAICache with 168 hours (7 days) TTL
-    const cache = new UnifiedAICache('financial-tips', userId);
-    const cacheKey = { ...financialData, language: normalizedLanguage };
 
-    // Check cache first (unless bypassing with timestamp)
-    if (!financialData.timestamp) {
-      const cachedResult = await cache.get(cacheKey);
-      if (cachedResult) {
-
-        return cachedResult;
-      }
-    } else {
-
-    }
-    const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
-
-    // Prepare the financial summary for the model
-    const netBalance = totalIncome - totalExpenses;
-    const transactionCount = recentTransactions.length;
-
-    // An empty list must not become "Invalid Date": Math.min() of nothing is Infinity.
-    const transactionTimes = recentTransactions
-      .map((transaction) => new Date(transaction.date).getTime())
-      .filter((time) => Number.isFinite(time));
-    const transactionRange = transactionTimes.length > 0
-      ? `${new Date(Math.min(...transactionTimes)).toLocaleDateString()} to ${new Date(Math.max(...transactionTimes)).toLocaleDateString()}`
-      : 'no dated transactions in this period';
-    
-    const summary = `Financial Summary:
-- Monthly Income: ${totalIncome}
-- Monthly Expenses: ${totalExpenses}
-- Net Balance: ${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
-
-Spending by Category:
-${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
-  `- ${cat.categoryName}: ${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
-).join('\n')}
-
-Income by Category:
-${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => 
-  `- ${cat.categoryName}: ${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
-).join('\n')}
-
-Recent Transactions (last 10):
-${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.description}: ${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
-).join('\n')}
-
-Transaction Pattern Analysis:
-- Average transaction size: ${((totalIncome + totalExpenses) / Math.max(transactionCount, 1)).toFixed(2)}
-- Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
-- Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
-- Date range: ${transactionRange}
-
-Write the one analysis card for this data.`;
-
-    // One prompt, one copy: lib/aiProvider sends it to the gateway first, then direct.
-    const response = await generateProse({
-      model: AI_MODELS.default,
-      messages: [
-        {
-          role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (analysis, insights, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
-
-You write ONE short analysis card for a dashboard.
-
-Choose the single most useful focus for the data you are given. When two focuses are equally
-useful, choose the one with the larger amount at stake, so the same data always produces the
-same card.
-
-THE CARD MUST:
-- use the person's own numbers: every amount and percentage must be in the data below or computed from it;
-- name the figure it is built on (for example "600 of your 2,100 in expenses"), so it can be checked;
-- keep the title to 8 words and the body to 4 sentences;
-- end with one action the person can take this week.
-
-DO NOT:
-- write a second analysis or list several focuses;
-- describe the data back to the person ("you gave me 12 transactions");
-- quote a number that is not in the data, or round an amount into something else;
-- mention the data you were given, how complete it is, what you were not shown, the app, or your
-  own visibility: the person cannot act on any of that.
-
-Return JSON:
-{
-  "title": "Short title naming the focus",
-  "description": "What the numbers show, which figure it rests on, and the one action.",
-  "category": "spending|saving|budgeting|income|education",
-  "priority": "high|medium|low",
-  "actionable": true,
-  "estimatedSaving": 0,
-  "educational": false
-}`
-        },
-        {
-          role: "user",
-          content: summary
-        }
-      ],
-      response_format: { type: "json_object" },
-      // 0.9 was the highest in the app, on text that quotes exact figures: it is where invented
-      // percentages came from. One focus per call needs far less freedom than six did.
-      temperature: 0.5
-    });
-
-    const result = parseModelJson(response.choices[0].message.content);
-
-    // Handle comprehensive analysis response. A model that answers in the wrong language
-    // is not shown to the user: the localised fallback takes its place, and the drift is
-    // reported so it can be fixed in the prompt rather than silently shipped.
-    // Only a real model answer is worth keeping for a week; a stand-in is rebuilt every time.
-    let cacheable = Boolean(result.title && result.description);
-    const rawTips: FinancialTip[] = result.title && result.description ? [{
-      title: result.title,
-      description: result.description,
-      category: result.category || 'comprehensive',
-      priority: result.priority || 'high',
-      actionable: Boolean(result.actionable),
-      estimatedSaving: result.estimatedSaving || undefined,
-      educational: Boolean(result.educational)
-    }] : [{ ...financialTipsFallback(normalizedLanguage), degraded: true }];
-
-    const processedTips: FinancialTip[] = rawTips.map((tip) => {
-      const inLanguage = isTextInLanguage(`${tip.title} ${tip.description}`, normalizedLanguage);
-      if (!inLanguage) {
-        log.warn(
-          `[AI] Replacing tips written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
-        );
-        cacheable = false;
-        return { ...financialTipsFallback(normalizedLanguage), degraded: true };
-      }
-      return tip;
-    });
-
-    // Cache the result with 168 hours (7 days) TTL
-    if (cacheable) await cache.set(cacheKey, processedTips, false, 168);
-    
-    return processedTips;
-  } catch (error) {
-    log.error('Error generating financial tips:', error);
-    // Deterministic fallback, in the caller's language — never English on a Slovak screen.
-    // Marked degraded: it is shown to the person but is not charged or kept for a week.
-    return [{ ...financialTipsFallback(normalizedLanguage), degraded: true }];
-  }
-}
 
 export async function generateSpendingInsights(
   userId: string,
@@ -869,8 +721,20 @@ export async function generateAIFinancialHealthScore(financialData: {
   }>;
   /** The largest single payments of the month, for advice about a specific charge. */
   topMerchants?: Array<{ description: string; amount: number; count: number }>;
-  /** The days every figure below covers. */
-  period?: { start: string; end: string };
+  /** The person's own savings goals, with the pace each one needs. */
+  goals?: Array<{
+    name: string;
+    target: number;
+    saved: number;
+    remaining: number;
+    progress: number;
+    monthsLeft: number | null;
+    monthlyNeeded: number | null;
+  }>;
+  /** Payments the person flagged as repeating: the cheapest money to free up. */
+  recurring?: Array<{ description: string; amount: number; count: number }>;
+  /** The days every figure below covers, and whether the month is over. */
+  period?: { start: string; end: string; status?: string; daysLeft?: number };
 }, language: string = 'en-us'): Promise<{
   /**
    * Not produced by the model any more: `shared/financialHealth` scores the month and the caller
@@ -899,7 +763,7 @@ export async function generateAIFinancialHealthScore(financialData: {
   };
 }> {
   try {
-    const { summary, budgets, transactions, categories, topMerchants, period } = financialData;
+    const { summary, budgets, transactions, categories, topMerchants, goals, recurring, period } = financialData;
 
     const savingsShare = summary.totalIncome > 0
       ? Math.round((summary.netBalance / summary.totalIncome) * 100)
@@ -928,6 +792,26 @@ export async function generateAIFinancialHealthScore(financialData: {
       .map((merchant) => `- ${merchant.description}: ${merchant.amount.toFixed(2)}${merchant.count > 1 ? ` over ${merchant.count} payments` : ''}`)
       .join('\n');
 
+    /*
+     * Goals and recurring payments, as facts with their arithmetic done.
+     *
+     * A goal with no pace is a wish: "3,000 for the trip" says nothing about whether it will be
+     * reached. The pace is computed on the server, so the advice can say "move 300 into the trip and
+     * it lands in six months" instead of "consider saving".
+     */
+    const goalLines = (goals ?? [])
+      .map((goal) => {
+        const pace = goal.monthlyNeeded !== null
+          ? `, needs ${goal.monthlyNeeded.toFixed(2)} a month for ${goal.monthsLeft} more month(s)`
+          : ', no target date';
+        return `- ${goal.name}: ${goal.saved.toFixed(2)} of ${goal.target.toFixed(2)} (${goal.progress}%), ${goal.remaining.toFixed(2)} left${pace}`;
+      })
+      .join('\n');
+
+    const recurringLines = (recurring ?? [])
+      .map((payment) => `- ${payment.description}: ${payment.amount.toFixed(2)}${payment.count > 1 ? ` over ${payment.count} payments` : ''}`)
+      .join('\n');
+
     const recentLines = transactions
       .slice(0, 25)
       .map(t => `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`)
@@ -942,7 +826,7 @@ export async function generateAIFinancialHealthScore(financialData: {
         },
         {
           role: "user",
-          content: `${period ? `Month: ${period.start} to ${period.end}` : 'Month: the recent period'}
+          content: `${period ? `Month: ${period.start} to ${period.end}${period.status ? ` (${period.status}${period.daysLeft ? `, ${period.daysLeft} day(s) left` : ''})` : ''}` : 'Month: the recent period'}
 Income: ${summary.totalIncome}
 Expenses: ${summary.totalExpenses}
 Left over: ${summary.netBalance}${savingsShare !== null ? ` (${savingsShare}% of income)` : ''}
@@ -952,7 +836,10 @@ ${categoryLines}
 
 Budgets (limit / spent):
 ${budgetLines}
-${merchantLines ? `\nLargest payments:\n${merchantLines}\n` : ''}
+
+Savings goals (saved of target, and the pace each one needs):
+${goalLines || 'none set'}
+${merchantLines ? `\nLargest payments:\n${merchantLines}\n` : ''}${recurringLines ? `\nRecurring payments (the person flagged these as repeating):\n${recurringLines}\n` : ''}
 Recent payments:
 ${recentLines || '- none'}
 
@@ -1437,604 +1324,9 @@ You are an advanced financial forecasting AI specializing in expense prediction 
   }
 }
 
-export async function generateDailyRecommendations(
-  userId: string,
-  financialData: {
-    transactions: Array<{
-      id: number;
-      amount: string;
-      description: string;
-      date: string;
-      type: 'income' | 'expense';
-      categoryName?: string;
-    }>;
-    summary: {
-      totalIncome: number;
-      totalExpenses: number;
-      /** Older callers send `netBalance`; both names are read. */
-      netAmount?: number;
-      netBalance?: number;
-    };
-    budgets: Array<{
-      id: number;
-      name: string;
-      amount: string;
-      categoryName: string;
-      period: string;
-      /** What has been spent against this budget in the same window. */
-      spent?: number | string;
-    }>;
-  },
-  language: string = 'en-us'
-) {
-  const normalizedLanguage = normalizeLanguageCode(language);
-  try {
-    // Initialize UnifiedAICache with 24 hours TTL
-    const cache = new UnifiedAICache('daily-recommendations', userId);
 
-    // Check cache first with language-aware key
-    const cacheKey = { ...financialData, language: normalizedLanguage };
-    const cachedResult = await cache.get(cacheKey);
-    if (cachedResult) {
-      return cachedResult;
-    }
 
 
-    // Limit data to last 3 months and 100 transactions for efficiency
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-    
-    const recentTransactions = financialData.transactions
-      .filter(t => new Date(t.date) >= threeMonthsAgo)
-      .slice(0, 100);
-
-    // Calculate spending patterns
-    const categorySpending = new Map();
-    const dailySpending = new Map();
-    
-    recentTransactions.forEach(t => {
-      if (t.type === 'expense') {
-        const amount = parseFloat(t.amount);
-        const categoryName = t.categoryName || 'Other';
-        const date = new Date(t.date).toDateString();
-        
-        categorySpending.set(categoryName, (categorySpending.get(categoryName) || 0) + amount);
-        dailySpending.set(date, (dailySpending.get(date) || 0) + amount);
-      }
-    });
-
-    const topCategories = Array.from(categorySpending.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    const avgDailySpending = Array.from(dailySpending.values())
-      .reduce((sum, amount) => sum + amount, 0) / Math.max(dailySpending.size, 1);
-
-    /*
-     * The dashboard sends `netBalance`; this prompt read `netAmount` and printed 0.00 for every
-     * premium account, so "your surplus" advice was written against a surplus of nothing.
-     */
-    const netAmount = Number(financialData.summary?.netAmount ?? financialData.summary?.netBalance ?? 0) || 0;
-
-    const budgetLines = financialData.budgets.length > 0
-      ? financialData.budgets.map((budget) => {
-          const limit = Number(budget.amount) || 0;
-          const spent = Number(budget.spent) || 0;
-          const gap = spent - limit;
-          return `- ${budget.name} (${budget.categoryName || 'no category'}, ${budget.period}): limit ${limit.toFixed(2)}, spent ${spent.toFixed(2)}${limit > 0 && gap > 0 ? `, over by ${gap.toFixed(2)}` : ''}`;
-        }).join('\n')
-      : '- No budgets set';
-
-    const prompt = `You are a personal budgeting coach analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
-
-Financial Summary:
-- Total Income: ${(financialData.summary?.totalIncome || 0).toFixed(2)}
-- Total Expenses: ${(financialData.summary?.totalExpenses || 0).toFixed(2)}
-- Net Amount: ${netAmount.toFixed(2)}
-- Recent Transactions: ${recentTransactions.length}
-- Average Daily Spending: ${avgDailySpending.toFixed(2)}
-
-Top Spending Categories:
-${topCategories.map(([cat, amount]) => `- ${cat}: ${amount.toFixed(2)}`).join('\n')}
-
-Budget Information (limit / spent):
-${budgetLines}
-
-Recent Transaction Sample:
-${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.date}: ${t.type} ${t.amount} - ${t.description}`
-).join('\n')}
-
-IMPORTANT: Use actual category names from the Top Spending Categories list above. Do NOT use "Category 1", "Category 2", etc. Use the real category names like "Transportation", "Food", "Utilities", etc.
-
-Please provide:
-1. 3-5 actionable daily task recommendations
-2. 2-3 personalized financial insights
-
-Return your response in this exact JSON format:
-{
-  "recommendations": [
-    {
-      "id": "rec-1",
-      "type": "budget_review",
-      "priority": "high",
-      "title": "Short title naming the action",
-      "description": "What the data shows, naming the figure it rests on",
-      "action": "The one thing to do next",
-      "impact": "What changes, in the person's own amounts",
-      "timeToComplete": "5 minutes"
-    }
-  ],
-  "insights": [
-    {
-      "id": "insight-1", 
-      "insight": "Your weekend spending is 40% higher than weekdays",
-      "basedOn": "Transaction pattern analysis",
-      "confidence": 0.85,
-      "timeframe": "Last 30 days"
-    }
-  ]
-}
-
-Focus on:
-- Actionable tasks for today/this week
-- Specific spending patterns from their actual data
-- Budget optimization opportunities
-- Realistic financial improvements
-- Data-driven insights with confidence levels
-
-Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
-
-    const response = await generateProse({
-      model: AI_MODELS.default,
-      messages: [
-        {
-          role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (recommendations, insights, descriptions) must be in ${getLanguageLabel(normalizedLanguage)}.
-
-You are an expert personal budgeting coach who provides personalized, actionable recommendations based on real user data. Always return valid JSON.`
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      // 1000 tokens truncated the JSON mid-string ("Unterminated string"), which the
-      // caller turned into an empty card. The prompt asks for tasks + insights + impact,
-      // so give it room and keep the shape small.
-      max_tokens: 2500,
-      temperature: 0.3 // Moderate creativity for personalized recommendations
-    });
-
-    const aiResponse = parseModelJson(response.choices[0].message.content);
-    
-    // Ensure proper data structure
-    const recommendations = Array.isArray(aiResponse.recommendations) 
-      ? aiResponse.recommendations
-      .filter((rec: any) => rec && typeof rec.title === 'string' && rec.title.trim())
-      .map((rec: any, index: number) => ({
-          id: rec.id || `rec-${index + 1}`,
-          type: rec.type || 'general',
-          priority: rec.priority || 'medium',
-          title: rec.title,
-          description: rec.description || '',
-          action: rec.action || '',
-          impact: rec.impact || '',
-          timeToComplete: rec.timeToComplete || ''
-        }))
-      : [];
-
-    const insights = Array.isArray(aiResponse.insights)
-      ? aiResponse.insights
-      .filter((insight: any) => insight && typeof insight.insight === 'string' && insight.insight.trim())
-      .map((insight: any, index: number) => ({
-          id: insight.id || `insight-${index + 1}`,
-          insight: insight.insight,
-          basedOn: insight.basedOn || '',
-          confidence: Number(insight.confidence) || 0.7,
-          timeframe: insight.timeframe || ''
-        }))
-      : [];
-
-    const result = {
-      recommendations,
-      insights
-    };
-
-    // Cache the result with 24 hours TTL and language key
-    await cache.set(cacheKey, result, false, 24);
-    
-    return result;
-
-  } catch (error) {
-    // A provider failure is not "no recommendations": let the caller report it and cache nothing.
-    log.error('Error generating daily recommendations:', error);
-    throw error;
-  }
-}
-
-export async function generateContextualFinancialTips(
-  userId: string,
-  data: {
-    summary: {
-      totalIncome: number;
-      totalExpenses: number;
-      netBalance: number;
-      transactionCount: number;
-    };
-    transactions: Array<{
-      description: string;
-      amount: number;
-      category: string;
-      categoryName?: string;
-      date: string;
-      type?: 'income' | 'expense';
-      recurring?: boolean;
-    }>;
-    budgets: Array<{
-      category: string;
-      categoryName?: string;
-      budgetAmount: number;
-      spent: number;
-      remaining: number;
-      period?: string;
-    }>;
-    goals?: Array<{
-      name: string;
-      targetAmount: number;
-      currentAmount: number;
-      targetDate: string;
-      type: 'saving' | 'debt' | 'investment';
-    }>;
-    selectedMonth: string;
-  },
-  language: string = 'en-us'
-): Promise<{ tips: Array<{
-  id: string;
-  title: string;
-  description: string;
-  category: 'spending' | 'saving' | 'budgeting' | 'income';
-  priority: 'high' | 'medium' | 'low';
-  actionable: boolean;
-}> }> {
-  const normalizedLanguage = normalizeLanguageCode(language);
-  const { summary, transactions, budgets, goals = [], selectedMonth } = data;
-  
-  // Initialize UnifiedAICache with 72 hours TTL
-  const cache = new UnifiedAICache('contextual-tips', userId, selectedMonth);
-  
-  try {
-
-    // Check cache first with language-aware key
-    const cacheKey = { ...data, language: normalizedLanguage };
-    const cachedResult = await cache.get(cacheKey);
-    if (cachedResult) {
-      return cachedResult;
-    }
-    
-    // Return basic tip if no meaningful data
-    if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
-      return {
-        tips: [{
-          id: 'basic_tip',
-          title: emptyStateCopy(normalizedLanguage).firstTipTitle,
-          description: emptyStateCopy(normalizedLanguage).firstTipDescription,
-          category: 'budgeting',
-          priority: 'high',
-          actionable: true
-        }]
-      };
-    }
-
-    // Build comprehensive prompt based on contextual tips routes logic
-    const netBalance = summary.totalIncome - summary.totalExpenses;
-    const savingsRate = summary.totalIncome > 0 ? (netBalance / summary.totalIncome) * 100 : 0;
-    
-    // Analyze spending by category - use the correct field mapping
-    const categorySpending = new Map();
-    const categorizedCount = transactions.filter(t => {
-      const category = t.category || t.categoryName;
-      return category && category !== 'Uncategorized';
-    }).length;
-    const uncategorizedCount = transactions.filter(t => {
-      const category = t.category || t.categoryName;
-      return !category || category === 'Uncategorized';
-    }).length;
-    
-    /*
-     * "Top spending" means money going OUT. The old filter was `amount > 0`, and income is stored
-     * as a positive amount too, so a salary could appear as the biggest spending category and
-     * every percentage printed under it was wrong.
-     */
-    const isIncomeRow = (t: { type?: 'income' | 'expense'; amount: number }) =>
-      t.type === 'income' || (t.type === undefined && t.amount < 0);
-    const isExpenseRow = (t: { type?: 'income' | 'expense'; amount: number }) =>
-      !isIncomeRow(t) && t.amount > 0;
-
-    transactions.forEach(t => {
-      if (isExpenseRow(t)) {
-        const category = t.category || t.categoryName || 'Uncategorized';
-        const current = categorySpending.get(category) || 0;
-        categorySpending.set(category, current + t.amount);
-      }
-    });
-    
-    const topSpendingCategories = Array.from(categorySpending.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
-
-    // A share of zero expenses is 0 %, not Infinity.
-    const expenseBase = summary.totalExpenses > 0 ? summary.totalExpenses : 0;
-    const shareOfExpenses = (amount: number) => (expenseBase > 0 ? (amount / expenseBase) * 100 : 0);
-
-    // Detailed transaction analysis. The two lists must not overlap: an income row used to be
-    // counted as an expense as well, which doubled its weight in the averages.
-    const incomeTransactions = transactions.filter(isIncomeRow);
-    const expenseTransactions = transactions.filter(isExpenseRow);
-    const recurringTransactions = transactions.filter(t => t.recurring);
-    
-    // Calculate transaction patterns
-    const transactionFrequency = new Map();
-    const dailySpending = new Map();
-    
-    expenseTransactions.forEach(t => {
-      const day = new Date(t.date).getDate();
-      const category = t.category || t.categoryName || 'Uncategorized';
-      dailySpending.set(day, (dailySpending.get(day) || 0) + t.amount);
-      transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
-    });
-
-    // Analyze specific financial scenarios for contextual insights.
-    // No emoji prefixes: the model copied them into the answer, and a coloured square in a tip
-    // title is not something the person asked for. The sentence itself says what it is.
-    const scenarios: string[] = [];
-
-    // Check categorization status
-    if (uncategorizedCount > 0 && transactions.length > 0) {
-      const uncategorizedPercent = (uncategorizedCount / transactions.length) * 100;
-      scenarios.push(`Categorization: ${uncategorizedCount} of ${transactions.length} transactions (${uncategorizedPercent.toFixed(0)}%) are uncategorized. Better categorization improves spending insights.`);
-    } else if (categorizedCount === transactions.length && transactions.length > 0) {
-      scenarios.push(`Well organized: all ${transactions.length} transactions are properly categorized, enabling detailed spending analysis.`);
-    }
-
-    // Check for budget overruns with detailed analysis ONLY if budgets exist
-    if (budgets && Array.isArray(budgets) && budgets.length > 0) {
-      budgets.forEach(budget => {
-        const budgetCatName = budget.categoryName || budget.category || 'Uncategorized';
-        const budgetAmount = Number(budget.budgetAmount) || 0;
-        // A budget of zero has no percentage to report, and dividing by it printed Infinity.
-        if (budgetAmount <= 0) return;
-
-        if (budget.remaining < 0) {
-          const overrunPercent = Math.abs((budget.remaining / budgetAmount) * 100);
-          const categoryTransactions = expenseTransactions.filter(t => (t.categoryName || t.category) === budgetCatName);
-          const avgTransactionInCategory = categoryTransactions.length > 0
-            ? categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length
-            : 0;
-
-          scenarios.push(`Budget overrun: the ${budgetCatName} budget is exceeded by ${overrunPercent.toFixed(0)}% this month. Average transaction: ${avgTransactionInCategory.toFixed(2)} across ${categoryTransactions.length} transactions.`);
-        } else if (budget.remaining < budgetAmount * 0.1) {
-          // Budget almost exhausted
-          scenarios.push(`Budget warning: only ${budget.remaining.toFixed(2)} left in the ${budgetCatName} budget (${((budget.remaining / budgetAmount) * 100).toFixed(0)}% remaining).`);
-        }
-      });
-    }
-
-    // Check savings rate scenarios with goal analysis
-    if (savingsRate < 5 && summary.totalIncome > 0) {
-      scenarios.push(`Low savings rate: the savings rate is ${savingsRate.toFixed(1)}%. Consider revisiting the financial goals.`);
-    } else if (savingsRate > 20) {
-      scenarios.push(`Excellent savings: ${savingsRate.toFixed(1)}% of income was kept this month.`);
-    }
-
-    // Analyze goals progress ONLY if goals exist
-    if (goals && Array.isArray(goals) && goals.length > 0) {
-      goals.forEach(goal => {
-        const target = Number(goal.targetAmount) || 0;
-        if (target <= 0) return;
-
-        const progressPercent = (Number(goal.currentAmount) / target) * 100;
-        const daysToTarget = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-        const monthlyNeeded = daysToTarget > 0 ? (target - Number(goal.currentAmount)) / (daysToTarget / 30) : 0;
-
-        if (progressPercent >= 90) {
-          scenarios.push(`Goal achievement: ${progressPercent.toFixed(0)}% of the ${goal.name} goal is done, with ${(target - Number(goal.currentAmount)).toFixed(2)} remaining.`);
-        } else if (monthlyNeeded > netBalance) {
-          scenarios.push(`Goal at risk: the ${goal.name} goal needs ${monthlyNeeded.toFixed(2)} per month, but the current monthly surplus is ${netBalance.toFixed(2)}.`);
-        }
-      });
-    }
-
-    // Check for irregular income patterns
-    if (incomeTransactions.length > 0) {
-      const incomeAmounts = incomeTransactions.map(t => Math.abs(t.amount));
-      const avgIncome = incomeAmounts.reduce((sum, amt) => sum + amt, 0) / incomeAmounts.length;
-      const incomeVariability = avgIncome > 0 && incomeAmounts.some(amt => Math.abs(amt - avgIncome) / avgIncome > 0.3);
-
-      if (incomeVariability && incomeTransactions.length > 1) {
-        scenarios.push(`Income variability: income fluctuates. Largest: ${Math.max(...incomeAmounts).toFixed(2)}, smallest: ${Math.min(...incomeAmounts).toFixed(2)}. Consider a buffer.`);
-      }
-    }
-
-    // Check for spending concentration and patterns
-    topSpendingCategories.forEach(([category, amount]) => {
-      const categoryPercent = shareOfExpenses(amount);
-      const categoryFreq = transactionFrequency.get(category) || 0;
-
-      if (categoryPercent > 40) {
-        scenarios.push(`High category spending: ${category} is ${categoryPercent.toFixed(0)}% of expenses (${amount.toFixed(2)} across ${categoryFreq} transactions).`);
-      }
-    });
-
-    // Check for positive spending improvements
-    if (expenseTransactions.length > 0) {
-      const avgTransactionAmount = expenseBase / expenseTransactions.length;
-      if (avgTransactionAmount < 30 && expenseTransactions.length > 15) {
-        scenarios.push(`Controlled spending: the average transaction is ${avgTransactionAmount.toFixed(2)} across ${expenseTransactions.length} purchases.`);
-      }
-    }
-
-    // Check recurring transaction efficiency
-    if (recurringTransactions.length > 0) {
-      const recurringTotal = recurringTransactions.reduce((sum, t) => sum + t.amount, 0);
-      const recurringPercent = shareOfExpenses(recurringTotal);
-      scenarios.push(`Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring (${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
-    }
-
-    // Build detailed prompt with scenario analysis
-    const prompt = `You are an expert personal budgeting coach analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data and identified scenarios.
-
-FINANCIAL OVERVIEW:
-- Total Income: ${summary.totalIncome.toLocaleString()}
-- Total Expenses: ${summary.totalExpenses.toLocaleString()}
-- Net Balance: ${netBalance.toLocaleString()}
-- Savings Rate: ${savingsRate.toFixed(1)}%
-- Number of Transactions: ${summary.transactionCount}
-
-TOP SPENDING CATEGORIES:
-${topSpendingCategories.map(([cat, amount]) => `- ${cat}: ${amount.toLocaleString()} (${shareOfExpenses(amount).toFixed(1)}%)`).join('\n')}
-
-BUDGET STATUS:
-${budgets.length > 0 ? budgets.map((b: any) => `- ${b.categoryName || b.category || 'Uncategorized'}: ${b.spent.toLocaleString()}/${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by ${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
-
-FINANCIAL GOALS:
-${goals.length > 0 ? goals.map(g => `- ${g.name}: ${g.currentAmount.toLocaleString()}/${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
-
-TRANSACTION ANALYSIS:
-- Total Transactions: ${transactions.length}
-- Income Transactions: ${incomeTransactions.length}
-- Expense Transactions: ${expenseTransactions.length}
-- Recurring Transactions: ${recurringTransactions.length}
-- Categorized Transactions: ${categorizedCount}/${transactions.length} (${transactions.length > 0 ? ((categorizedCount/transactions.length)*100).toFixed(0) : 0}%)
-- Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0] || 'None'} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1] || 0} transactions)
-
-IDENTIFIED FINANCIAL SCENARIOS:
-${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
-
-RECENT TRANSACTIONS (last 8):
-${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - ${t.amount.toLocaleString()} (${t.categoryName || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
-
-CONTEXTUAL ANALYSIS REQUIREMENTS:
-1. Address specific scenarios identified above with targeted, data-driven advice
-2. For budget overruns: ONLY if budgets exist - Analyze transaction patterns and suggest specific reduction strategies
-3. For goal progress: ONLY if goals exist - Calculate required monthly contributions and suggest optimization
-4. For savings rate issues: Provide concrete steps with dollar targets based on their income
-5. For spending patterns: Identify specific categories and transaction behaviors to modify
-6. For income irregularities: Recommend buffer strategies based on their variability patterns
-7. For positive improvements: Reinforce successful behaviors and suggest expansion strategies
-8. Use their actual transaction data, amounts, and patterns in all recommendations
-9. Provide specific dollar amounts, percentages, and realistic timeframes
-10. Make every tip immediately actionable with clear, measurable next steps
-
-CRITICAL: If no budgets are set, DO NOT mention budget overruns, budget comparisons, or budget-related advice. If no goals are set, DO NOT mention goal progress or goal-related recommendations. Focus only on spending patterns, categorization, and general financial health based on actual transaction data.
-
-Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
-{
-  "tips": [
-    {
-      "id": "tip_1",
-      "title": "Scenario-specific actionable title",
-      "description": "Detailed description addressing specific scenarios with concrete steps and amounts",
-      "category": "spending|saving|budgeting|income",
-      "priority": "high|medium|low",
-      "actionable": true
-    }
-  ]
-}`;
-
-    const response = await generateProse({
-      model: AI_MODELS.default,
-      messages: [
-        {
-          role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (tips, titles, descriptions) must be in ${getLanguageLabel(normalizedLanguage)}.
-
-You are an expert personal budgeting coach who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 1200,
-      temperature: 0.3 // Moderate creativity for personalized recommendations
-    });
-
-    const aiResponse = parseModelJson(response.choices[0].message.content);
-    
-    // Ensure proper data structure. Every tip must be in the requested language; a tip
-    // that is not (or a missing description, which used to default to English) is
-    // replaced by the localised fallback instead of being shown to the user.
-    const fallbackTip = progressTipFallback(normalizedLanguage);
-    const rawTips = Array.isArray(aiResponse.tips) ? aiResponse.tips : [];
-    const tips = rawTips
-      .map((tip: any, index: number) => ({
-        id: tip.id || `tip_${Date.now()}_${index}`,
-        title: String(tip.title || ''),
-        description: String(tip.description || ''),
-        category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
-        priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
-        actionable: Boolean(tip.actionable),
-      }))
-      .filter((tip: any) => {
-        const ok =
-          tip.title &&
-          tip.description &&
-          isTextInLanguage(`${tip.title} ${tip.description}`, normalizedLanguage);
-        if (!ok) {
-          log.warn(
-            `[AI] Dropping a contextual tip written in the wrong language (requested ${normalizedLanguage}): "${String(tip.title).slice(0, 60)}"`,
-          );
-        }
-        return ok;
-      });
-
-    if (tips.length === 0) {
-      tips.push({ id: 'fallback_tip', ...fallbackTip });
-    }
-
-
-    
-    // Cache the result for 72 hours with language key
-    await cache.set(cacheKey, { tips }, false, 72);
-    
-    return { tips };
-
-  } catch (error) {
-    log.error('Error generating contextual financial tips (local fallback):', error);
-    type ContextualTip = {
-      id: string;
-      title: string;
-      description: string;
-      category: 'spending' | 'saving' | 'budgeting' | 'income';
-      priority: 'high' | 'medium' | 'low';
-      actionable: boolean;
-    };
-    const fallbackResult: { tips: ContextualTip[] } = {
-      tips: [{
-        id: 'fallback_tip',
-        ...progressTipFallback(normalizedLanguage),
-      }]
-    };
-    
-    // Cache even the fallback result to prevent repeated failures
-    try {
-      await cache.set(data, fallbackResult, true, 72);
-    } catch (cacheError) {
-      log.error('Failed to cache fallback result:', cacheError);
-    }
-    
-    return fallbackResult;
-  }
-}
-
-
-/**
- * Parse bank statement text and extract transactions using AI - Server Fallback
- * This function mirrors the external AI processor for when external service is unavailable
- */
 export async function voiceExtraction(
   userId: string,
   payload: { prompt: string; language?: string },

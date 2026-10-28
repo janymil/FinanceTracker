@@ -84,13 +84,9 @@ const KNOWN_UNVALIDATED = new Set<string>([
   'server/routes/adminRoutes.ts POST /api/admin-analytics/blocked-countries',
   // AI: prompts and inputs forwarded to a model without a schema.
   'server/routes/aiRoutes.ts POST /api/ai/categorize',
-  'server/routes/aiRoutes.ts POST /api/ai/tip',
-  'server/routes/aiRoutes.ts POST /api/ai/financial-health-score',
-  'server/routes/aiRoutes.ts POST /api/ai/daily-recommendations',
   'server/routes/aiRoutes.ts POST /api/mascot/toggle',
   'server/routes/aiRoutes.ts POST /api/ai/expense-predictions',
   'server/routes/aiRoutes.ts POST /api/help-chat',
-  'server/routes/aiRoutes.ts POST /api/ai/contextual-financial-tips',
   // Profile and account.
   'server/routes/authRoutes.ts PUT /api/auth/user',
   'server/routes/userRoutes.ts POST /api/account/delete',

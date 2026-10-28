@@ -17,9 +17,7 @@ import {
 } from "../openai";
 import { runAI, runMeteredAI } from "../../lib/aiProcessor";
 import { generateMascotImage, stableIndexFromId } from "../mascotImage";
-import { annotateEmptyReason } from "../../shared/dailyRecommendations";
 import { isAIFailure, isDegraded } from "../../shared/aiResults";
-import { contextualFallbackTips } from "../../shared/aiFallbacks";
 import { AI_MODELS, getAIProviderStatus } from "../../lib/aiProvider";
 import { UnifiedAICache } from "../../lib/unifiedAICache";
 import { 
@@ -311,114 +309,6 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // AI Financial Tips endpoint with detailed transaction data
-  app.post('/api/ai/tip', isAuthenticated, aiGuard(), async (req: any, res) => {
-    try {
-      const userId = getUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      const user = await storage.getUser(userId);
-      if (!user || user.plan !== 'premium') {
-        return res.status(403).json({ message: "AI financial tips require premium plan" });
-      }
-
-      // Handle fetch_cached mode
-      const { mode, financialData } = req.body;
-      
-      if (mode === 'fetch_cached') {
-        // Get the most recent cached tip directly from database
-        const recentEntry = await storage.getRecentAICacheEntry(userId, 'financial-tips');
-
-        // A tip written in another language than the one on screen is not shown.
-        const storedLanguage = recentEntry?.inputJson?.language;
-        const sameLanguage = !storedLanguage || storedLanguage === getUserLanguage(req);
-
-        if (recentEntry && recentEntry.outputJson && sameLanguage) {
-          return res.json({ tip: recentEntry.outputJson });
-        } else {
-          return res.json({ tip: null });
-        }
-      }
-
-      // Get financial data from request body (sent from frontend)
-      
-      if (!financialData || !financialData.transactions) {
-        return res.status(400).json({ message: "Financial data with transactions required" });
-      }
-
-      // Format transaction data for AI analysis with detailed information
-      const formattedTransactions = financialData.transactions.map((t: any) => ({
-        id: t.id,
-        description: t.note || `${t.categoryName || 'Transaction'}`,
-        amount: t.amount,
-        date: t.date,
-        categoryName: t.categoryName || 'Uncategorized',
-        type: t.type,
-        recurring: t.recurring,
-        budgetAssigned: t.budgetAssigned
-      }));
-
-      // Get user language from consistent header detection
-      const language = getUserLanguage(req);
-      
-      const aiPayload = {
-        totalIncome: financialData.totalIncome,
-        totalExpenses: financialData.totalExpenses,
-        transactionsByCategory: financialData.categories,
-        recentTransactions: formattedTransactions,
-        timestamp: financialData.timestamp,
-        language: language
-      };
-
-      // Initialize UnifiedAICache with 168 hours TTL (7 days)
-      const cache = new UnifiedAICache('financial-tips', userId);
-
-      // Try to get cached result
-      const cachedResult = await cache.get(aiPayload);
-      if (cachedResult) {
-        return res.json(cachedResult);
-      }
-
-      // Generate new AI response
-      const tipResults = await runAI('financial-tips', userId, aiPayload, user.plan || 'free');
-
-      if (isAIFailure(tipResults)) return aiUnavailable(res);
-
-      let responseData;
-      if (Array.isArray(tipResults) && tipResults.length > 0) {
-        // AI processor returns array of tips directly
-        responseData = { tips: tipResults };
-        log.info('TIP ENDPOINT: Using array format, tips count:', tipResults.length);
-      } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
-        // Legacy single tip format
-        responseData = { tip: tipResults.tip };
-        log.info('TIP ENDPOINT: Using legacy tip format');
-      } else if (tipResults && typeof tipResults === 'object' && tipResults.tips) {
-        // Wrapped tips format
-        responseData = tipResults;
-        log.info('TIP ENDPOINT: Using wrapped tips format');
-      } else {
-        log.error('TIP ENDPOINT: Unexpected response format:', {
-          type: typeof tipResults,
-          isArray: Array.isArray(tipResults),
-          keys: tipResults ? Object.keys(tipResults) : 'null',
-        });
-        return res.status(500).json({ message: "Failed to generate financial tip" });
-      }
-
-      // Cache the successful result for 168 hours (7 days). A fixed stand-in is rebuilt every
-      // time instead: keeping it for a week would show old text as if it were today's advice.
-      if (!isDegraded(tipResults)) await cache.set(aiPayload, responseData, false, 168);
-
-      return res.json(responseData);
-    } catch (error) {
-      log.error("Error generating financial tip:", error);
-      return res.status(500).json({ message: "Failed to generate financial tip" });
-    }
-  });
-
   // AI Spending Insights endpoint
   app.get('/api/ai/insights', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
@@ -470,82 +360,6 @@ export function registerAIRoutes(app: Express) {
     } catch (error) {
       log.error("Error generating spending insights:", error);
       return res.status(500).json({ message: "Failed to generate spending insights" });
-    }
-  });
-
-  // AI Financial Health Score (Standard+ required)
-  app.post('/api/ai/financial-health-score', isAuthenticated, aiGuard(), async (req: any, res) => {
-    try {
-      const userId = getUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
-      const user = await storage.getUser(userId);
-      
-      // Require standard+ plan for AI financial health score
-      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
-        return res.status(403).json({ message: "AI financial health score requires standard or premium plan" });
-      }
-
-      const { summary, budgets } = req.body;
-
-      const transactions = await storage.getUserTransactions(userId, 100);
-
-      log.info('AI financial advice: calling the AI processor');
-      
-      // Get user language from consistent header detection
-      const language = getUserLanguage(req);
-      
-      const aiPayload = {
-        summary,
-        budgets: budgets,
-        transactions: transactions.map(t => ({
-          description: t.description,
-          amount: parseFloat(t.amount),
-          date: t.date.toISOString(),
-          categoryName: t.categoryName || 'Uncategorized',
-          type: t.type
-        })),
-        language: language
-      };
-
-      // Initialize UnifiedAICache with 24 hours TTL
-      const cache = new UnifiedAICache('financial-health-score', userId);
-
-      // Try to get cached result
-      const cachedResult = await cache.get(aiPayload);
-      if (cachedResult) {
-        return res.json(cachedResult);
-      }
-
-      // Generate new AI response
-      const adviceData = await runAI('financial-health-score', userId, aiPayload, user.plan || 'free');
-      if (isAIFailure(adviceData)) return aiUnavailable(res);
-
-      /*
-       * The number comes from the rubric, not from the model.
-       *
-       * This endpoint used to return whatever total the model wrote, so the same month could come
-       * back as 71 here and 78 on the dashboard. The model now supplies only the advice.
-       */
-      const health = calculateFinancialHealth({
-        totalIncome: Number(summary?.totalIncome || 0),
-        totalExpenses: Number(summary?.totalExpenses || 0),
-        budgetTotal: Array.isArray(budgets)
-          ? budgets.reduce((total: number, budget: any) => total + Number(budget?.amount || 0), 0)
-          : 0,
-      });
-
-      const response = { ...adviceData, score: health.score, category: health.band, factors: health.factors };
-
-      // Cache the result for 24 hours
-      await cache.set(aiPayload, response, false, 24);
-
-      return res.json(response);
-    } catch (error) {
-      log.error("Error generating AI financial health score:", error);
-      return res.status(500).json({ message: "Failed to generate AI financial health score" });
     }
   });
 
@@ -611,99 +425,6 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // Daily Recommendations endpoint (Premium only)
-  app.post('/api/ai/daily-recommendations', isAuthenticated, aiGuard(), async (req: any, res) => {
-    try {
-      const userId = getUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user || user.plan !== 'premium') {
-        return res.status(403).json({ message: "Daily recommendations require premium plan" });
-      }
-
-      const { transactions, summary, budgets } = req.body;
-
-      if (!transactions || !Array.isArray(transactions)) {
-        return res.status(400).json({ message: "Transactions array is required" });
-      }
-
-      // Create categories object for the payload
-      const categoriesData = await storage.getCategories(userId);
-      const categories: Record<number, string> = {};
-      categoriesData.forEach(cat => {
-        categories[cat.id] = cat.name;
-      });
-      
-      // Get user language from consistent header detection
-      const language = getUserLanguage(req);
-      
-      const aiPayload = {
-        summary: summary,
-        transactions: transactions.slice(0, 100).map(t => ({
-          id: t.id,
-          amount: String(t.amount),
-          description: t.description,
-          date: t.date,
-          type: t.type,
-          categoryName: t.categoryName
-        })),
-        budgets: (Array.isArray(budgets) ? budgets : []).map((b: any) => {
-          /*
-           * `spent` was missing from this payload, so the model saw "Groceries: 650" and nothing
-           * else: it could not tell a budget that was over from one that had not started, and its
-           * "budget_review" recommendation had no figure to stand on. Counted here, from the same
-           * transactions the model is shown.
-           */
-          const categoryName = b.categoryName || b.name;
-          const spent = transactions
-            .filter((t: any) => t.type === 'expense' && (t.categoryName || '') === categoryName)
-            .reduce((total: number, t: any) => total + (Number(t.amount) || 0), 0);
-
-          return {
-            id: b.id,
-            name: b.name,
-            amount: String(b.amount),
-            categoryName: b.categoryName,
-            period: b.period,
-            spent,
-          };
-        }),
-        categories: categories,
-        language: language
-      };
-
-      // Initialize UnifiedAICache with 24 hours TTL
-      const cache = new UnifiedAICache('daily-recommendations', userId);
-
-      // Create stable date-based cache key that includes language to prevent cross-language caching
-      const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      const cacheKey = { date: todayKey, userId: userId, language: language };
-
-      // Try to get cached result using date-based key
-      const cachedResult = await cache.get(cacheKey);
-      if (cachedResult) {
-        log.info('Daily recommendations: Using cached result for date:', todayKey, 'language:', language);
-        return res.json(annotateEmptyReason(cachedResult, { transactionCount: transactions.length, totalIncome: summary?.totalIncome, totalExpenses: summary?.totalExpenses }));
-      }
-
-      // Generate new AI response
-      let recommendations = await runAI('daily-recommendations', userId, aiPayload, user.plan || 'free');
-      if (isAIFailure(recommendations)) return aiUnavailable(res);
-
-      // Cache the result for 24 hours using date-based key with language
-      await cache.set(cacheKey, recommendations, false, 24);
-      log.info('Daily recommendations: Cached new result for date:', todayKey, 'language:', language);
-
-      return res.json(annotateEmptyReason(recommendations, { transactionCount: transactions.length, totalIncome: summary?.totalIncome, totalExpenses: summary?.totalExpenses }));
-    } catch (error) {
-      log.error("Error generating daily recommendations:", error);
-      return res.status(500).json({ message: "Failed to generate daily recommendations" });
-    }
-  });
-
   // Financial Health Score (AI-powered for Standard+ users only)
   app.get('/api/financial-health', isAuthenticated, aiGuard(), async (req: any, res) => {
     try {
@@ -719,12 +440,19 @@ export function registerAIRoutes(app: Express) {
 
 
 
-      // Require standard+ plan for AI financial health analysis
-      if (!user.plan || !['standard', 'premium'].includes(user.plan)) {
-        return res.status(403).json({ 
-          message: "AI financial health analysis requires Standard or Premium subscription",
+      /*
+       * Premium only.
+       *
+       * This is the app's single advice surface: the panels that used to sit beside it (contextual
+       * tips for Standard, the daily and "tip" cards for Premium) have been removed, so the account
+       * that pays for advice gets one considered answer instead of three thin ones.
+       */
+      if (user.plan !== 'premium') {
+        return res.status(403).json({
+          message: "The financial adviser requires the Premium plan",
+          code: 'plan_required',
           currentPlan: user.plan || 'free',
-          requiredPlans: ['standard', 'premium']
+          requiredPlans: ['premium'],
         });
       }
 
@@ -846,11 +574,61 @@ export function registerAIRoutes(app: Express) {
           count,
         }));
 
+      /*
+       * The premium half of the adviser's input.
+       *
+       * Three panels used to ask the model for advice, and none of them had the whole picture: one
+       * had budgets without what had been spent against them, one had goals but no categories, one
+       * had the month without the person's own history. Everything below is computed here, so the
+       * model reasons about facts instead of deciding what the facts are.
+       */
+      const goals = (await storage.getUserGoals(userId)).slice(0, 5).map((goal) => {
+        const target = Number(goal.targetAmount) || 0;
+        const saved = Number(goal.currentAmount) || 0;
+        const targetDate = goal.targetDate ? new Date(goal.targetDate) : null;
+        const monthsLeft = targetDate && Number.isFinite(targetDate.getTime())
+          ? Math.max(0, Math.ceil((targetDate.getTime() - period.end.getTime()) / (30 * 24 * 60 * 60 * 1000)))
+          : null;
+        const remaining = Math.max(0, target - saved);
+
+        return {
+          name: goal.name,
+          target: Number(target.toFixed(2)),
+          saved: Number(saved.toFixed(2)),
+          remaining: Number(remaining.toFixed(2)),
+          progress: target > 0 ? Number(((saved / target) * 100).toFixed(0)) : 0,
+          monthsLeft,
+          monthlyNeeded: monthsLeft && monthsLeft > 0 ? Number((remaining / monthsLeft).toFixed(2)) : null,
+        };
+      });
+
+      const recurringByPayment = new Map<string, { amount: number; count: number }>();
+      for (const transaction of transactions) {
+        if (transaction.type !== 'expense' || !transaction.isRecurring) continue;
+        const description = (transaction.description || '').trim();
+        if (!description) continue;
+        const entry = recurringByPayment.get(description) || { amount: 0, count: 0 };
+        entry.amount += Number(transaction.amount) || 0;
+        entry.count += 1;
+        recurringByPayment.set(description, entry);
+      }
+
+      const recurring = Array.from(recurringByPayment.entries())
+        .sort((left, right) => right[1].amount - left[1].amount)
+        .slice(0, 8)
+        .map(([description, { amount, count }]) => ({
+          description,
+          amount: Number(amount.toFixed(2)),
+          count,
+        }));
+
       const aiPayload = {
         transactions: processedTransactions,
         budgets: processedBudgets,
         categories,
         topMerchants,
+        goals,
+        recurring,
         summary: {
           totalIncome,
           totalExpenses,
@@ -859,7 +637,13 @@ export function registerAIRoutes(app: Express) {
         // Stated explicitly: "for the period shown" needs a period, or the model invents one.
         period: {
           start: zonedDay(period.start, timeZone),
-          end: zonedDay(period.end, timeZone)
+          end: zonedDay(period.end, timeZone),
+          // Advice for the 14th of a month is not advice for the 31st: a budget with days left is
+          // not the same as one that is finished.
+          status: period.end.getTime() < Date.now() ? 'complete' : 'in progress',
+          daysLeft: period.end.getTime() < Date.now()
+            ? 0
+            : Math.max(1, Math.ceil((period.end.getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
         },
         language: language
       };
@@ -1350,187 +1134,4 @@ a bank, a loan, a card or an investment.`
     }
   });
 
-  // Contextual Financial Tips endpoint (moved from contextualFinancialTipsRoutes.ts)
-  app.post('/api/ai/contextual-financial-tips', isAuthenticated, aiGuard(), async (req: any, res) => {
-    try {
-      log.info('🎯 [CONTEXTUAL-TIPS] Starting request processing...');
-      const userId = getUserId(req);
-      if (!userId) {
-        log.error('🚨 [CONTEXTUAL-TIPS] No userId found');
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      log.info('✅ [CONTEXTUAL-TIPS] User authenticated:', userId.substring(0, 8) + '...');
-
-      const { transactions, summary, budgets, goals, selectedMonth } = req.body;
-      
-      // First check user plan
-      log.info('📊 [CONTEXTUAL-TIPS] Getting user data...');
-      const user = await storage.getUser(userId);
-      log.info('👤 [CONTEXTUAL-TIPS] User data:', { userId: userId.substring(0, 8) + '...', plan: user?.plan, hasUser: !!user });
-      
-      // Provide safe defaults for missing data
-      const safeTransactions = transactions || [];
-      const safeSummary = summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 };
-      const safeBudgets = budgets || [];
-      log.info('💾 [CONTEXTUAL-TIPS] Data prepared:', { 
-        transactions: safeTransactions.length, 
-        summary: !!safeSummary, 
-        budgets: safeBudgets.length 
-      });
-      
-      log.info('🎯 Contextual tips - User check:', {
-        userId: userId?.substring(0, 8) + '...',
-        userPlan: user?.plan || 'free',
-        hasUser: !!user
-      });
-
-
-      if (!safeTransactions && !safeSummary) {
-        return res.status(400).json({ message: "Financial data is required" });
-      }
-
-      // Format the selected month for natural language
-      const formatMonth = (selectedMonth: string) => {
-        if (!selectedMonth) return 'Current Month';
-        const [year, month] = selectedMonth.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1);
-        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      };
-
-      const formattedMonth = formatMonth(selectedMonth);
-
-      const language = getUserLanguage(req);
-
-      // Prepare payload for the AI call
-      const aiPayload = {
-        summary: {
-          totalIncome: safeSummary.totalIncome || 0,
-          totalExpenses: safeSummary.totalExpenses || 0,
-          netBalance: safeSummary.netBalance || 0,
-          transactionCount: safeTransactions.length || 0
-        },
-        transactions: safeTransactions.slice(0, 10).map((t: any) => ({
-          description: t.description || t.note || 'Transaction',
-          amount: t.amount,
-          categoryName: t.categoryName || t.category || 'Uncategorized',
-          type: t.type || 'expense',
-          date: t.date
-        })),
-        budgets: safeBudgets?.map((budget: any) => ({
-          category: budget.categoryName,
-          budgetAmount: budget.amount,
-          spent: budget.spent,
-          remaining: budget.remaining
-        })) || [],
-        goals: goals?.map((goal: any) => ({
-          name: goal.name,
-          targetAmount: goal.targetAmount,
-          currentAmount: goal.currentAmount,
-          targetDate: goal.targetDate,
-          progress: goal.progress || ((goal.currentAmount / goal.targetAmount) * 100)
-        })) || [],
-        selectedMonth: formattedMonth,
-        language
-      };
-
-      // Initialize UnifiedAICache with 72 hours TTL
-      const cache = new UnifiedAICache('contextual-tips', userId);
-
-      // Try to get cached result
-      const cachedResult = await cache.get(aiPayload);
-      if (cachedResult) {
-        // Return cached tips with proper formatting
-        const tips = Array.isArray(cachedResult?.tips) ? cachedResult.tips.map((tip: any, index: number) => ({
-          id: tip.id || `tip_${Date.now()}_${index}`,
-          title: tip.title || '',
-          description: tip.description || '',
-          category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
-          priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
-          actionable: Boolean(tip.actionable)
-        })) : [];
-        
-        return res.json({ tips });
-      }
-
-      // Add user plan check for contextual tips
-      if (!user || user?.plan === 'free') {
-        log.info('🚫 Contextual tips - Free plan, returning empty tips');
-        return res.json({ tips: [] });
-      }
-      
-      // Generate new AI response
-      log.info('🤖 Contextual tips - Calling AI processor with payload:', {
-        payloadKeys: Object.keys(aiPayload),
-        language: aiPayload.language,
-        transactionCount: aiPayload.transactions?.length || 0
-      });
-      
-      let result;
-      try {
-        log.info('🤖 [CONTEXTUAL-TIPS] Calling runAI...');
-        result = await runAI('contextual-tips', userId, aiPayload, user?.plan || 'free');
-        log.info('✅ [CONTEXTUAL-TIPS] runAI completed successfully');
-      } catch (aiError: any) {
-        log.error('🚨 [CONTEXTUAL-TIPS] AI failed:', aiError.message);
-        return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
-      }
-      
-      // The model could not be reached: rule-based tips in the person's language, never cached.
-      if (isAIFailure(result)) {
-        log.error('🚨 AI returned an error for contextual tips');
-        return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
-      }
-
-      const aiTips = (Array.isArray(result?.tips) ? result.tips : [])
-        .filter((tip: any) => tip && typeof tip.title === 'string' && tip.title.trim()
-          && typeof tip.description === 'string' && tip.description.trim())
-        .map((tip: any, index: number) => ({
-          id: tip.id || `tip_${Date.now()}_${index}`,
-          title: tip.title,
-          description: tip.description,
-          category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
-          priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
-          actionable: Boolean(tip.actionable)
-        }));
-
-      if (aiTips.length === 0) {
-        return res.json({ tips: generateFallbackTips(safeSummary, safeTransactions, safeBudgets, language) });
-      }
-
-      // Cache only a real answer, for 72 hours
-      await cache.set(aiPayload, { tips: aiTips }, false, 72);
-
-      return res.json({ tips: aiTips });
-    } catch (error: any) {
-      log.error("Error generating contextual financial tips:", {
-        error: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      
-      // Return fallback tips instead of 500 error
-      try {
-        const fallbackSummary = req.body?.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 };
-        const fallbackTransactions = req.body?.transactions || [];
-        const fallbackBudgets = req.body?.budgets || [];
-        const fallbackTips = generateFallbackTips(fallbackSummary, fallbackTransactions, fallbackBudgets, getUserLanguage(req));
-        log.info('🔄 Contextual tips - Returning fallback tips due to error');
-        return res.json({ tips: fallbackTips });
-      } catch (fallbackError) {
-        log.error("Error generating fallback tips:", fallbackError);
-        // Return empty tips as last resort
-        return res.json({ tips: [] });
-      }
-    }
-  });
-
-  // Helper function to generate fallback tips when AI processor fails
-  function generateFallbackTips(summary: any, transactions: any[], budgets: any[], language: string) {
-    return contextualFallbackTips(language, {
-      totalIncome: summary?.totalIncome,
-      totalExpenses: summary?.totalExpenses,
-      transactionCount: transactions?.length,
-      budgetCount: budgets?.length,
-    });
-  }
 }

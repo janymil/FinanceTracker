@@ -7,11 +7,8 @@ const ExpenseChart = lazy(() => import("@/components/expense-chart").then(module
 const FinancialHealthScore = lazy(() => import("@/components/financial-health-score"));
 const FinancialHealthMascot = lazy(() => import("@/components/financial-health-mascot"));
 const QuickFinancialSnapshot = lazy(() => import("@/components/quick-financial-snapshot"));
-const ContextualFinancialTips = lazy(() => import("@/components/contextual-financial-tips"));
 const ExpensePrediction = lazy(() => import("@/components/expense-prediction"));
-const DailyRecommendations = lazy(() => import("@/components/daily-recommendations"));
 const AutoCategorization = lazy(() => import("@/components/auto-categorization"));
-const AIFinancialTips = lazy(() => import("@/components/ai-financial-tips"));
 const TransactionRemindersWidget = lazy(() => import("@/components/transaction-reminders-widget"));
 const UnifiedRemindersWidget = lazy(() => import("@/components/unified-reminders-widget"));
 
@@ -107,14 +104,6 @@ export function LazyQuickFinancialSnapshot(props: any) {
   );
 }
 
-export function LazyContextualFinancialTips(props: any) {
-  return (
-    <LazyComponentWrapper>
-      <ContextualFinancialTips {...props} />
-    </LazyComponentWrapper>
-  );
-}
-
 export function LazyExpensePrediction(props: any) {
   return (
     <LazyComponentWrapper>
@@ -123,26 +112,10 @@ export function LazyExpensePrediction(props: any) {
   );
 }
 
-export function LazyDailyRecommendations(props: any) {
-  return (
-    <LazyComponentWrapper>
-      <DailyRecommendations {...props} />
-    </LazyComponentWrapper>
-  );
-}
-
 export function LazyAutoCategorization(props: any) {
   return (
     <LazyComponentWrapper>
       <AutoCategorization {...props} />
-    </LazyComponentWrapper>
-  );
-}
-
-export function LazyAIFinancialTips(props: any) {
-  return (
-    <LazyComponentWrapper>
-      <AIFinancialTips {...props} />
     </LazyComponentWrapper>
   );
 }

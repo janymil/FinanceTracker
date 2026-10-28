@@ -259,14 +259,22 @@ dashboard asks for the score and the tips at the same time; the guard answers tw
 and queues the rest (`server/aiAccess.ts`, `AI_CONCURRENCY_WAIT_MS`), and a panel that is still
 refused must say so and offer to try again — never "nothing to show".
 
-### Financial adviser (`financial-health-score`)
+### Financial adviser (`financial-health-score`) - the only advice surface, Premium only
+
+There is exactly one place in the app that gives advice. Three panels used to (`contextual-tips`,
+`daily-recommendations`, the premium `financial-tips` card); each had a fragment of the picture and
+they told the customer three slightly different things, so all three were removed along with their
+routes. If advice is ever wanted elsewhere, extend this one instead of adding a fourth.
 
 The score is computed by `shared/financialHealth` (30/25/25/20, bands 80/65/50) and the model writes
 only what arithmetic cannot: the month in two sentences (`summary`), observations (`insights`, each
 with a figure) and 2-4 actions (`advice`, each with `action` / `reason` / `impact` / `priority`).
-The payload carries per-category spend with its share, purchase count and the person's three-month
-average for that category, plus the five largest payments — that comparison is what turns "you spent
-190" into "you spent 190, usually 42". A reply with no actions is a failed reply, not an empty panel.
+
+What it is given, all computed on the server so the model argues with facts instead of inventing
+them: per-category spend with its share, purchase count and the person's own three-month average;
+every budget with its limit and spend; every goal with the pace it needs (`monthlyNeeded`); the
+recurring payments; the five largest payments; and whether the month is still in progress with how
+many days remain. A reply with no actions is a failed reply, not an empty panel.
 
 ## Security and Privacy
 

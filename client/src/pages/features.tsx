@@ -68,27 +68,15 @@ export default function FeaturesPage() {
       ]
     },
     {
-      id: 'contextual',
+      id: 'adviser',
       icon: Target,
-      title: t('features.contextual.title', 'Contextual Financial Tips'),
-      badge: t('features.contextual.badge', 'Standard+'),
-      description: t('features.contextual.description', 'Receive personalized financial advice based on your specific transaction patterns and spending behavior'),
+      title: t('features.adviser.title', 'Financial Adviser'),
+      badge: t('features.adviser.badge', 'Premium'),
+      description: t('features.adviser.description', 'One plan for the month, built from your own categories, budgets and goals: what to change, why, and what it frees up.'),
       benefits: [
-        { title: t('features.contextual.benefits.realtime.title', 'Real-time Analysis'), desc: t('features.contextual.benefits.realtime.desc', 'Instant insights based on your current financial activity') },
-        { title: t('features.contextual.benefits.budget.title', 'Budget Awareness'), desc: t('features.contextual.benefits.budget.desc', 'Tips that consider your budget limits and goals') },
-        { title: t('features.contextual.benefits.goal.title', 'Goal-oriented'), desc: t('features.contextual.benefits.goal.desc', 'Advice tailored to help you achieve your financial objectives') }
-      ]
-    },
-    {
-      id: 'tips',
-      icon: Lightbulb,
-      title: t('features.tips.title', 'AI Financial Tips'),
-      badge: t('features.tips.badge', 'Premium'),
-      description: t('features.tips.description', 'Daily personalized recommendations to optimize your financial health and achieve your money goals faster'),
-      benefits: [
-        { title: t('features.tips.benefits.patterns.title', 'Spending Patterns'), desc: t('features.tips.benefits.patterns.desc', 'Deep analysis of your spending behaviors and trends') },
-        { title: t('features.tips.benefits.strategies.title', 'Saving Strategies'), desc: t('features.tips.benefits.strategies.desc', 'Personalized recommendations to optimize your cash flow') },
-        { title: t('features.tips.benefits.optimization.title', 'Budget Optimization'), desc: t('features.tips.benefits.optimization.desc', 'Smart adjustments to maximize your budget efficiency') }
+        { title: t('features.adviser.benefits.priorities.title', 'What to change first'), desc: t('features.adviser.benefits.priorities.desc', 'The few changes worth making, ordered by the money behind them') },
+        { title: t('features.adviser.benefits.evidence.title', 'Every figure checkable'), desc: t('features.adviser.benefits.evidence.desc', 'Each action names the amount it rests on, taken from your own month') },
+        { title: t('features.adviser.benefits.impact.title', 'What it frees up'), desc: t('features.adviser.benefits.impact.desc', 'Amounts rather than intentions: what each change puts back in your month') }
       ]
     },
     {

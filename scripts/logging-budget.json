@@ -1,8 +1,8 @@
 {
   "$comment": "Ceiling for console.* references in client/src, enforced by scripts/check-logging.ts. It may only go down: remove calls, then run `npm run check:logging -- --update`.",
   "client": {
-    "budget": 211,
-    "measured": "2026-10-27",
+    "budget": 205,
+    "measured": "2026-10-28",
     "note": "The browser has no logger yet; this freezes the count until it does.",
     "files": {
       "client/src/components/simple-voice-input.tsx": 37,
@@ -23,10 +23,8 @@
       "client/src/context/CurrencyContext.tsx": 4,
       "client/src/i18n/languageDetector.ts": 4,
       "client/src/pages/collaborative-goal-detail.tsx": 4,
-      "client/src/components/ai-financial-tips.tsx": 3,
       "client/src/components/UpgradePrompt.tsx": 2,
       "client/src/components/UploadReceipt.tsx": 2,
-      "client/src/components/contextual-financial-tips.tsx": 2,
       "client/src/hooks/useGeolocation.ts": 2,
       "client/src/lib/queryClient.ts": 2,
       "client/src/pages/dashboard.tsx": 2,
@@ -40,7 +38,6 @@
       "client/src/components/auto-categorization.tsx": 1,
       "client/src/components/cloud-backup.tsx": 1,
       "client/src/components/cookie-banner.tsx": 1,
-      "client/src/components/daily-recommendations.tsx": 1,
       "client/src/components/expense-prediction.tsx": 1,
       "client/src/components/export-tools.tsx": 1,
       "client/src/components/header.tsx": 1,

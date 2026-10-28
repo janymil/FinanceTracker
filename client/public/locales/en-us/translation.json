@@ -3600,29 +3600,6 @@
         }
       }
     },
-    "tips": {
-      "title": "AI Financial Analysis",
-      "badge": "Standard+",
-      "description": "Get detailed 4-section financial analysis covering spending patterns, saving recommendations, budget optimization, and advanced insights tailored to your business needs.",
-      "benefits": {
-        "patterns": {
-          "title": "Spending Patterns",
-          "desc": "Deep analysis of your spending behaviors and trends"
-        },
-        "strategies": {
-          "title": "Saving Strategies",
-          "desc": "Personalized recommendations to optimize your cash flow"
-        },
-        "optimization": {
-          "title": "Budget Optimization",
-          "desc": "Smart adjustments to maximize your budget efficiency"
-        },
-        "analysis": {
-          "title": "Advanced Analysis",
-          "desc": "Professional-grade financial insights and forecasting"
-        }
-      }
-    },
     "insights": {
       "title": "Intelligent Spending Insights",
       "badge": "Standard+",
@@ -3737,22 +3714,22 @@
         }
       }
     },
-    "contextual": {
-      "title": "Smart Money Tips",
-      "badge": "Standard+",
-      "description": "Intelligent financial tips that adapts to your current month's spending, budget status, and goal progress to provide the most relevant guidance when you need it.",
+    "adviser": {
+      "title": "Financial Adviser",
+      "badge": "Premium",
+      "description": "One plan for the month, built from your own categories, budgets and goals: what to change, why, and what it frees up.",
       "benefits": {
-        "realtime": {
-          "title": "Real-time Context",
-          "desc": "Advice based on current financial situation"
+        "priorities": {
+          "title": "What to change first",
+          "desc": "The few changes worth making, ordered by the money behind them"
         },
-        "goal": {
-          "title": "Goal-Aligned",
-          "desc": "Tips that help achieve your specific goals"
+        "evidence": {
+          "title": "Every figure checkable",
+          "desc": "Each action names the amount it rests on, taken from your own month"
         },
-        "budget": {
-          "title": "Budget-Aware",
-          "desc": "Considers your budget constraints and targets"
+        "impact": {
+          "title": "What it frees up",
+          "desc": "Amounts rather than intentions: what each change puts back in your month"
         }
       }
     }
@@ -3983,11 +3960,10 @@
         "tagline": "The full intelligent tracking experience",
         "features": [
           "Everything in Standard plan",
-          "AI tips and insights",
+          "Financial adviser: one plan for the month",
           "1,000 AI actions per month",
           "Advanced trends analysis",
           "Expense prediction",
-          "Daily personalized recommendations",
           "Cloud receipt storage",
           "Cloud data backup",
           "Data management (CSV, PDF)",
@@ -4255,5 +4231,6 @@
       "signUp": "Sign up for free",
       "proTipTail": "to see where your money really goes."
     }
-  }
+  },
+  "Financial adviser: one plan for the month": "Financial adviser: one plan for the month"
 }

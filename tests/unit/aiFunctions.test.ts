@@ -30,10 +30,7 @@ import {
   categorizeExpenseWithUserCategories,
   categorizeIncomeWithUserCategories,
   generateAIFinancialHealthScore,
-  generateContextualFinancialTips,
-  generateDailyRecommendations,
   generateExpensePredictions,
-  generateFinancialTips,
   generateSpendingInsights,
   generateTrendPredictions,
   normalizeForecast,
@@ -188,79 +185,13 @@ describe('prose house rules', () => {
   });
 
   it('is applied to everything a person reads', async () => {
-    create.mockResolvedValue(reply({ title: 'T', description: 'a long enough description for the check', category: 'saving' }));
-    await generateFinancialTips('u', tipsInput());
+    create.mockResolvedValue(reply({ recommendations: [{ action: 'Cap food at 500', reason: 'Food reached 620', impact: 'Frees 120', priority: 'high' }] }));
+    await generateAIFinancialHealthScore({
+      summary: { totalIncome: 3000, totalExpenses: 2100, netBalance: 900 },
+      budgets: [],
+      transactions: [],
+    }, 'en-us');
     expect(systemOf()).toContain('HOUSE RULES');
-  });
-});
-
-/* ------------------------------------------------------------------ tips */
-
-const tipsInput = () => ({
-  totalIncome: 3000,
-  totalExpenses: 2100,
-  transactionsByCategory: [{ categoryName: 'Food', amount: 600, type: 'expense' }],
-  recentTransactions: [{ description: 'Migros', amount: 40, date: daysAgo(1), categoryName: 'Food', type: 'expense' }],
-});
-
-describe('generateFinancialTips', () => {
-  it('sends the prompt through the routed client and never calls any other service', async () => {
-    create.mockResolvedValueOnce(reply({
-      title: 'Prehľad výdavkov',
-      description: 'Vaše výdavky na potraviny sú v tomto mesiaci vyššie, a to je možné znížiť pre vaše ciele.',
-      category: 'spending', priority: 'high', actionable: true,
-    }));
-    await generateFinancialTips('u', tipsInput(), 'sk-sk');
-
-    expect(create).toHaveBeenCalledTimes(1);
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it('puts the language in the cache key, so switching language never returns the old text', async () => {
-    create.mockImplementation(async (params: any) => {
-      const slovak = params.messages[0].content.includes('exclusively in Slovak');
-      return reply(slovak
-        ? { title: 'Znížte výdavky', description: 'Vaše výdavky na potraviny sú vysoké, a môžete ušetriť peniaze pre svoje ciele.', category: 'saving' }
-        : { title: 'Reduce gastos', description: 'Tus gastos de comida son altos, y puedes ahorrar dinero para tus metas.', category: 'saving' });
-    });
-    await generateFinancialTips('u', tipsInput(), 'es-pe');
-    await generateFinancialTips('u', tipsInput(), 'sk-sk');
-
-    const keys = cache.get.mock.calls.map((call) => (call[1] as any).language);
-    expect(keys).toEqual(['es-pe', 'sk-sk']);
-    expect((cache.set.mock.calls[0][1] as any).language).toBe('es-pe');
-  });
-
-  it('returns a cached answer without asking the model', async () => {
-    cache.get.mockResolvedValueOnce([{ title: 'cached' }]);
-    expect(await generateFinancialTips('u', tipsInput(), 'en-us')).toEqual([{ title: 'cached' }]);
-    expect(create).not.toHaveBeenCalled();
-  });
-
-  it('replaces a tip written in the wrong language with the Slovak fallback', async () => {
-    create.mockResolvedValueOnce(reply({
-      title: 'Track Your Expenses',
-      description: 'You should track the expenses and the budget of your money with this app and that plan.',
-      category: 'budgeting',
-    }));
-    const [tip] = await generateFinancialTips('u', tipsInput(), 'sk-sk');
-    expect(tip.title).toBe('Sledujte svoje výdavky');
-  });
-
-  it.each([['a provider failure', () => create.mockRejectedValueOnce(new Error('down'))],
-    ['prose', () => create.mockResolvedValueOnce(reply('here are some tips'))],
-    ['JSON without a title', () => create.mockResolvedValueOnce(reply({ note: 'x' }))],
-  ])('answers %s with the localised fallback and caches nothing', async (_name, arrange) => {
-    arrange();
-    const [tip] = await generateFinancialTips('u', tipsInput(), 'es-pe');
-    expect(tip.title).toBe('Registra tus gastos');
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-
-  it('copes with no transactions at all (no NaN in the prompt)', async () => {
-    create.mockResolvedValueOnce(reply({ title: 'T', description: 'D', category: 'saving' }));
-    await generateFinancialTips('u', { ...tipsInput(), recentTransactions: [] }, 'en-us');
-    expect(userOf()).not.toMatch(/NaN|Infinity/);
   });
 });
 
@@ -448,68 +379,6 @@ describe('generateExpensePredictions', () => {
   });
 });
 
-/* ------------------------------------------------------------------ daily recommendations */
-
-describe('generateDailyRecommendations', () => {
-  const data = (): Parameters<typeof generateDailyRecommendations>[1] => ({
-    transactions: [{ id: 1, amount: '12', description: 'Lunch', date: daysAgo(1), type: 'expense' as const, categoryName: 'Food' }],
-    summary: { totalIncome: 1000, totalExpenses: 400, netAmount: 600 },
-    budgets: [{ id: 1, name: 'Food', amount: '300', categoryName: 'Food', period: 'monthly' }],
-  });
-
-  it('keeps real items, drops the ones with no title or text, and invents no English placeholder', async () => {
-    create.mockResolvedValueOnce(reply({
-      recommendations: [
-        { id: 'r1', title: 'Cocina en casa', description: 'Ahorra', action: 'Planifica', impact: 'Alto' },
-        { description: 'no title' },
-      ],
-      insights: [{ insight: 'Gastas más los viernes', confidence: 0.8 }, { basedOn: 'x' }],
-    }));
-    const result = await generateDailyRecommendations('u', data(), 'es-pe');
-
-    expect(result.recommendations).toHaveLength(1);
-    expect(result.insights).toHaveLength(1);
-    expect(JSON.stringify(result)).not.toMatch(/Financial Task|Take action|Positive financial impact|10 minutes|Transaction analysis|Recent activity/);
-  });
-
-  it('keys the cache on the language', async () => {
-    create.mockResolvedValueOnce(reply({ recommendations: [], insights: [] }));
-    await generateDailyRecommendations('u', data(), 'sk-sk');
-    expect((cache.get.mock.calls[0][1] as any).language).toBe('sk-sk');
-  });
-
-  it('describes the model as a budgeting coach, never as an advisor', async () => {
-    create.mockResolvedValueOnce(reply({ recommendations: [], insights: [] }));
-    await generateDailyRecommendations('u', data(), 'en-us');
-    expect(userOf()).not.toMatch(/financial advisor/i);
-  });
-
-  it('shows how much of each budget is already spent, and the gap when it is over', async () => {
-    create.mockResolvedValueOnce(reply({ recommendations: [], insights: [] }));
-    const withSpending = data();
-    withSpending.budgets = [{ id: 1, name: 'Food', amount: '300', categoryName: 'Food', period: 'monthly', spent: 320 }];
-    await generateDailyRecommendations('u', withSpending, 'en-us');
-
-    expect(userOf()).toContain('limit 300.00, spent 320.00, over by 20.00');
-  });
-
-  it('reads the net figure whether the caller sends netBalance or netAmount', async () => {
-    create.mockResolvedValueOnce(reply({ recommendations: [], insights: [] }));
-    // The dashboard sends `netBalance`; this line used to read "Net Amount: 0.00".
-    await generateDailyRecommendations('u', {
-      ...data(),
-      summary: { totalIncome: 1000, totalExpenses: 400, netBalance: 600 },
-    }, 'en-us');
-
-    expect(userOf()).toContain('Net Amount: 600.00');
-  });
-
-  it('throws on a provider failure and caches nothing', async () => {
-    create.mockRejectedValueOnce(new Error('503'));
-    await expect(generateDailyRecommendations('u', data(), 'en-us')).rejects.toThrow('503');
-    expect(cache.set).not.toHaveBeenCalled();
-  });
-});
 
 /* ------------------------------------------------------------------ financial advice */
 
@@ -556,8 +425,10 @@ describe('generateAIFinancialHealthScore (the adviser)', () => {
     const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
 
     expect(result.score).toBe(0);
-    expect(systemOf()).toMatch(/do not score it/i);
-    expect(systemOf()).not.toMatch(/maxima|four factors/i);
+    // The prompt tells the model it is the adviser, not the scorekeeper, and that the figures are
+    // given to it rather than derived by it.
+    expect(systemOf()).toMatch(/one place this person is\s+given advice/i);
+    expect(systemOf()).not.toMatch(/four factors|max \d+/i);
   });
 
   it('sends the categories, the budgets over their limit and the person\'s usual level', async () => {
@@ -597,56 +468,6 @@ describe('generateAIFinancialHealthScore (the adviser)', () => {
   });
 });
 
-/* ------------------------------------------------------------------ contextual tips */
-
-describe('generateContextualFinancialTips', () => {
-  const emptyData = () => ({
-    summary: { totalIncome: 0, totalExpenses: 0, netBalance: 0, transactionCount: 0 },
-    transactions: [],
-    budgets: [],
-    selectedMonth: 'October 2026',
-  });
-
-  it.each([
-    ['sk-sk', 'Začnite svoju finančnú cestu'],
-    ['es-pe', 'Empieza tu camino financiero'],
-    ['en-us', 'Start Your Financial Journey'],
-  ])('with no data gives the first tip in %s, without asking the model', async (language, title) => {
-    const result = await generateContextualFinancialTips('u', emptyData(), language);
-    expect(result.tips[0].title).toBe(title);
-    expect(create).not.toHaveBeenCalled();
-  });
-
-  it('never lists income among the top spending categories', async () => {
-    create.mockResolvedValueOnce(reply({ tips: [{ title: 'T', description: 'D', category: 'spending', priority: 'high', actionable: true }] }));
-
-    await generateContextualFinancialTips('u', {
-      summary: { totalIncome: 3000, totalExpenses: 500, netBalance: 2500, transactionCount: 2 },
-      transactions: [
-        { description: 'Salary', amount: 3000, category: 'Salary', date: daysAgo(2), type: 'income' as const },
-        { description: 'Migros', amount: 500, category: 'Food', date: daysAgo(1), type: 'expense' as const },
-      ],
-      budgets: [],
-      selectedMonth: 'October 2026',
-    }, 'en-us');
-
-    // The spending section runs until the budget section; a salary must not appear in it.
-    const spendingSection = userOf().split('BUDGET STATUS')[0];
-    expect(spendingSection).toContain('Food');
-    expect(spendingSection).not.toContain('Salary');
-  });
-
-  it('on a provider failure answers with the localised progress tip and stores it as a failure', async () => {
-    create.mockRejectedValueOnce(new Error('503'));
-    const data = { ...emptyData(), summary: { totalIncome: 100, totalExpenses: 50, netBalance: 50, transactionCount: 2 },
-      transactions: [{ description: 'x', amount: 5, category: 'Food', date: daysAgo(1), type: 'expense' as const }] };
-    const result = await generateContextualFinancialTips('u', data, 'sk-sk');
-
-    expect(result.tips[0].title).toBe('Sledujte svoj pokrok');
-    const [, , , isError, ttl] = cache.set.mock.calls[0];
-    expect([isError, ttl]).toEqual([true, 72]);
-  });
-});
 
 /* ------------------------------------------------------------------ voice and statements */
 

@@ -1518,11 +1518,8 @@ export default function AdminAnalytics() {
                   <h4 className="font-semibold text-gray-900">Active AI Functions</h4>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {[
-                      { name: 'financial-tips', title: 'Financial Tips', plan: 'Premium', ttl: '7 days', icon: '💡' },
-                      { name: 'daily-recommendations', title: 'Daily Recommendations', plan: 'Premium', ttl: '1 day', icon: '📋' },
-                      { name: 'contextual-tips', title: 'Contextual Tips', plan: 'Premium', ttl: '3 days', icon: '🎯' },
+                      { name: 'financial-health-score', title: 'Financial Adviser', plan: 'Premium', ttl: '1 day', icon: '🧭' },
                       { name: 'expense-predictions', title: 'Expense Predictions', plan: 'Premium', ttl: '2 days', icon: '📈' },
-                      { name: 'financial-health-score', title: 'Health Score', plan: 'Standard+', ttl: '1 day', icon: '❤️' },
                       { name: 'spending-insights', title: 'Spending Insights', plan: 'Premium', ttl: '3 days', icon: '🔍' },
                       { name: 'trend-predictions', title: 'Trend Predictions', plan: 'Premium', ttl: '2 days', icon: '📊' },
                       { name: 'categorizeExpense', title: 'Auto Categorization', plan: 'Standard+', ttl: 'Real-time', icon: '🏷️' },
@@ -1681,7 +1678,7 @@ export default function AdminAnalytics() {
                       onClick={() => {
                         if (confirm('This will clear ALL AI cache entries. Are you sure?')) {
                           // Clear all function caches
-                          ['financial-tips', 'daily-recommendations', 'contextual-tips', 'expense-predictions', 'financial-health-score', 'spending-insights', 'trend-predictions'].forEach(func => {
+                          ['expense-predictions', 'financial-health-score', 'spending-insights', 'trend-predictions'].forEach(func => {
                             clearFunctionCache(func);
                           });
                         }
@@ -1967,11 +1964,8 @@ export default function AdminAnalytics() {
                             // Map function names to display info
                             const functionInfo: Record<string, any> = {
                               'categorizeExpense': { title: 'Expense Categorization', model: 'gpt-4o-mini' },
-                              'generateFinancialTips': { title: 'Financial Tips', model: 'gpt-4o' },
-                              'generateContextualFinancialTips': { title: 'Contextual Tips', model: 'gpt-4o' },
-                              'generateDailyRecommendations': { title: 'Daily Recommendations', model: 'gpt-4o' },
                               'generateSpendingInsights': { title: 'Spending Insights', model: 'gpt-4o' },
-                              'generateAIFinancialHealthScore': { title: 'Health Score', model: 'gpt-4o' },
+                              'generateAIFinancialHealthScore': { title: 'Financial Adviser', model: 'gpt-4o' },
                               'generateTrendPredictions': { title: 'Trend Predictions', model: 'gpt-4o' },
                               'generateExpensePredictions': { title: 'Expense Predictions', model: 'gpt-4o' },
                               'parseBankStatement': { title: 'Bank Statement Parser', model: 'gpt-4o' },
@@ -2114,11 +2108,8 @@ export default function AdminAnalytics() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {[
                           { name: 'categorizeExpense', title: 'Expense Categorization', monthlyRequests: 2000, monthlyCost: 5.00, dailyRequests: 100, cooldown: 0 },
-                          { name: 'generateFinancialTips', title: 'Financial Tips', monthlyRequests: 50, monthlyCost: 8.00, dailyRequests: 5, cooldown: 3600 },
-                          { name: 'generateContextualFinancialTips', title: 'Contextual Tips', monthlyRequests: 100, monthlyCost: 6.00, dailyRequests: 10, cooldown: 1800 },
-                          { name: 'generateDailyRecommendations', title: 'Daily Recommendations', monthlyRequests: 100, monthlyCost: 4.00, dailyRequests: 10, cooldown: 86400 },
                           { name: 'generateSpendingInsights', title: 'Spending Insights', monthlyRequests: 50, monthlyCost: 5.00, dailyRequests: 5, cooldown: 3600 },
-                          { name: 'generateAIFinancialHealthScore', title: 'Health Score', monthlyRequests: 200, monthlyCost: 3.00, dailyRequests: 20, cooldown: 0 },
+                          { name: 'generateAIFinancialHealthScore', title: 'Financial Adviser', monthlyRequests: 200, monthlyCost: 3.00, dailyRequests: 20, cooldown: 0 },
                           { name: 'generateTrendPredictions', title: 'Trend Predictions', monthlyRequests: 30, monthlyCost: 6.00, dailyRequests: 3, cooldown: 7200 },
                           { name: 'generateExpensePredictions', title: 'Expense Predictions', monthlyRequests: 30, monthlyCost: 6.00, dailyRequests: 3, cooldown: 7200 },
                           { name: 'parseBankStatement', title: 'Bank Statement Parser', monthlyRequests: 50, monthlyCost: 2.00, dailyRequests: 10, cooldown: 0 },

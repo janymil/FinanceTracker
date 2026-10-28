@@ -10,9 +10,6 @@ import {
   categorizeExpenseWithUserCategories,
   categorizeIncomeWithUserCategories,
   voiceExtraction,
-  generateContextualFinancialTips,
-  generateFinancialTips,
-  generateDailyRecommendations,
   generateSpendingInsights,
   generateAIFinancialHealthScore,
   generateTrendPredictions,
@@ -148,12 +145,6 @@ async function runDirect(task: string, userId: string, payload: Record<string, a
   switch (task) {
     case 'voice-extraction':
       return voiceExtraction(userId, payload as any, userPlan);
-    case 'contextual-tips':
-      return generateContextualFinancialTips(userId, payload as any, language);
-    case 'financial-tips':
-      return generateFinancialTips(userId, payload as any, language);
-    case 'daily-recommendations':
-      return generateDailyRecommendations(userId, payload as any, language);
     case 'spending-insights':
       return generateSpendingInsights(userId, payload.transactions, language);
     case 'financial-health-score':

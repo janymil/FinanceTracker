@@ -3711,29 +3711,6 @@
         }
       }
     },
-    "tips": {
-      "title": "AI finančná analýza",
-      "badge": "Štandard+",
-      "description": "Získajte detailnú 4-sekčnú finančnú analýzu pokrývajúcu vzorce výdavkov, odporúčania úspor, optimalizáciu rozpočtu a pokročilé poznatky prispôsobené potrebám vašej firmy.",
-      "benefits": {
-        "patterns": {
-          "title": "Vzorce výdavkov",
-          "desc": "Hlboká analýza vašich správaní a trendov výdavkov"
-        },
-        "strategies": {
-          "title": "Stratégie úspor",
-          "desc": "Personalizované odporúčania na optimalizáciu peňažného toku"
-        },
-        "optimization": {
-          "title": "Optimalizácia rozpočtu",
-          "desc": "Inteligentné úpravy na maximalizáciu efektívnosti rozpočtu"
-        },
-        "analysis": {
-          "title": "Pokročilá analýza",
-          "desc": "Finančné poznatky a prognózy profesionálnej úrovne"
-        }
-      }
-    },
     "insights": {
       "title": "Inteligentné poznatky o výdavkoch",
       "badge": "Štandard+",
@@ -3848,22 +3825,22 @@
         }
       }
     },
-    "contextual": {
-      "title": "Inteligentné tipy pre peniaze",
-      "badge": "Štandard+",
-      "description": "Inteligentné finančné tipy, ktoré sa prispôsobuje vašim aktuálnym mesačným výdavkom, stavu rozpočtu a pokroku cieľov na poskytnutie najrelevantnejšieho vedenia keď ho potrebujete.",
+    "adviser": {
+      "title": "Finančný poradca",
+      "badge": "Premium",
+      "description": "Jeden plán na mesiac, postavený na vašich vlastných kategóriách, rozpočtoch a cieľoch: čo zmeniť, prečo a koľko to uvoľní.",
       "benefits": {
-        "realtime": {
-          "title": "Kontext v reálnom čase",
-          "desc": "Rady založené na aktuálnej finančnej situácii"
+        "priorities": {
+          "title": "Čo zmeniť ako prvé",
+          "desc": "Tých pár zmien, ktoré sa oplatia, zoradených podľa peňazí za nimi"
         },
-        "goal": {
-          "title": "Zladené s cieľmi",
-          "desc": "Tipy, ktoré pomáhajú dosiahnuť vaše konkrétne ciele"
+        "evidence": {
+          "title": "Každá suma overiteľná",
+          "desc": "Každá akcia uvádza sumu, o ktorú sa opiera, z vášho vlastného mesiaca"
         },
-        "budget": {
-          "title": "Vedomé rozpočtu",
-          "desc": "Zohľadňuje vaše rozpočtové obmedzenia a ciele"
+        "impact": {
+          "title": "Koľko to uvoľní",
+          "desc": "Sumy, nie zámery: čo každá zmena vráti do vášho mesiaca"
         }
       }
     }
@@ -4095,11 +4072,10 @@
         "tagline": "Kompletné inteligentné sledovanie",
         "features": [
           "Všetko z plánu Standard",
-          "AI tipy a postrehy",
+          "Finančný poradca: plán na mesiac",
           "1 000 AI akcií za mesiac",
           "Pokročilá analýza trendov",
           "Predpoveď výdavkov",
-          "Denné personalizované odporúčania",
           "Cloudové úložisko bločkov",
           "Cloudová záloha údajov",
           "Správa údajov (CSV, PDF)",
@@ -4363,5 +4339,6 @@
       "signUp": "Vytvor si účet zadarmo",
       "proTipTail": "a uvidíš, kam ide tvojich peniaze."
     }
-  }
+  },
+  "Financial adviser: one plan for the month": "Finančný poradca: plán na mesiac"
 }

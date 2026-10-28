@@ -3649,29 +3649,6 @@
         }
       }
     },
-    "tips": {
-      "title": "Análisis Financiero IA",
-      "badge": "Estándar+",
-      "description": "Obtén análisis financiero detallado de 4 secciones que cubre patrones de gasto, recomendaciones de ahorro, optimización de presupuesto e insights avanzados adaptados a las necesidades de tu negocio.",
-      "benefits": {
-        "patterns": {
-          "title": "Patrones de Gasto",
-          "desc": "Análisis profundo de tus comportamientos y tendencias de gasto"
-        },
-        "strategies": {
-          "title": "Estrategias de Ahorro",
-          "desc": "Recomendaciones personalizadas para optimizar tu flujo de caja"
-        },
-        "optimization": {
-          "title": "Optimización de Presupuesto",
-          "desc": "Ajustes inteligentes para maximizar la eficiencia de tu presupuesto"
-        },
-        "analysis": {
-          "title": "Análisis Avanzado",
-          "desc": "Insights financieros y pronósticos de nivel profesional"
-        }
-      }
-    },
     "insights": {
       "title": "Insights Inteligentes de Gastos",
       "badge": "Estándar+",
@@ -3786,22 +3763,22 @@
         }
       }
     },
-    "contextual": {
-      "title": "Consejos Inteligentes de Dinero",
-      "badge": "Estándar+",
-      "description": "Consejos inteligentes que se adaptan al gasto de tu mes actual, al estado de tu presupuesto y al progreso de tus metas.",
+    "adviser": {
+      "title": "Asesor Financiero",
+      "badge": "Premium",
+      "description": "Un plan para el mes, hecho con tus propias categorías, presupuestos y metas: qué cambiar, por qué y cuánto libera.",
       "benefits": {
-        "realtime": {
-          "title": "Contexto en Tiempo Real",
-          "desc": "Consejos basados en tu situación financiera actual"
+        "priorities": {
+          "title": "Qué cambiar primero",
+          "desc": "Los pocos cambios que valen la pena, ordenados por el dinero que hay detrás"
         },
-        "goal": {
-          "title": "Alineado con Metas",
-          "desc": "Consejos que ayudan a lograr tus metas específicas"
+        "evidence": {
+          "title": "Cada cifra comprobable",
+          "desc": "Cada acción nombra el importe en el que se apoya, tomado de tu propio mes"
         },
-        "budget": {
-          "title": "Consciente del Presupuesto",
-          "desc": "Considera tus restricciones y objetivos presupuestarios"
+        "impact": {
+          "title": "Cuánto libera",
+          "desc": "Importes y no intenciones: lo que cada cambio devuelve a tu mes"
         }
       }
     }
@@ -4028,11 +4005,10 @@
         "tagline": "El seguimiento inteligente completo",
         "features": [
           "Todo lo del plan Standard",
-          "Consejos y análisis con IA",
+          "Asesor financiero: un plan para el mes",
           "1.000 acciones de IA al mes",
           "Análisis avanzado de tendencias",
           "Predicción de gastos",
-          "Recomendaciones diarias personalizadas",
           "Almacenamiento de recibos en la nube",
           "Copia de seguridad en la nube",
           "Gestión de datos (CSV, PDF)",
@@ -4318,5 +4294,6 @@
       "signUp": "Crea una cuenta gratis",
       "proTipTail": "para ver a dónde va tu dinero."
     }
-  }
+  },
+  "Financial adviser: one plan for the month": "Asesor financiero: un plan para el mes"
 }
