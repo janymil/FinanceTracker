@@ -34,7 +34,11 @@ vi.mock('../../server/clerkAuth', () => ({
 // The gate has its own tests; here the person is already through it.
 vi.mock('../../server/aiAccess', () => ({ aiGuard: () => (_req: unknown, _res: unknown, next: () => void) => next() }));
 vi.mock('../../server/adminAuth', () => ({ adminAuth: (_req: unknown, _res: unknown, next: () => void) => next() }));
-vi.mock('../../server/openai', () => openai);
+vi.mock('../../server/openai', () => ({
+  ...openai,
+  // The route puts the prompt version in the cache key; the mock has to carry it too.
+  FINANCIAL_ADVISOR_PROMPT_VERSION: 'financial-advisor@test',
+}));
 vi.mock('../../lib/aiProcessor', () => ({ runAI, runMeteredAI: vi.fn() }));
 vi.mock('../../lib/aiProvider', () => ({ getAIProviderStatus: () => ({}) }));
 vi.mock('../../lib/unifiedAICache', () => ({

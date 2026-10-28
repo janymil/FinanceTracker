@@ -13,6 +13,7 @@ import { PLAN_PRICES, formatMoney } from "../../shared/pricing";
 import { getUserLanguage } from "../categoryTranslations";
 import { 
   categorizeExpense,
+  FINANCIAL_ADVISOR_PROMPT_VERSION,
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI, runMeteredAI } from "../../lib/aiProcessor";
@@ -629,6 +630,12 @@ export function registerAIRoutes(app: Express) {
         topMerchants,
         goals,
         recurring,
+        /*
+         * The answer is cached for a day by this payload, so a prompt change has to be part of it.
+         * Without this, the new prompt shipped and the customers kept reading yesterday's answer
+         * written by the old one.
+         */
+        narrativeVersion: FINANCIAL_ADVISOR_PROMPT_VERSION,
         summary: {
           totalIncome,
           totalExpenses,
