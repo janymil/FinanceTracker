@@ -162,8 +162,26 @@ class BackupScheduler {
         return;
       }
 
-      // Get user's data for backup
-      const backupData = await this.collectUserData(userId);
+      // Get user's data for backup, in the shape the restore path reads: a top-level `userId`
+      // (checked before anything is written back) and a `data` object holding the rows. The
+      // nightly job used to write the bare collector output, so the files it produced were
+      // rejected by restore as "Unauthorized backup access" — an automatic backup nobody
+      // could restore is not a backup.
+
+      const collected = await this.collectUserData(userId);
+      const backupData = {
+        userId,
+        timestamp: new Date().toISOString(),
+        data: {
+          transactions: collected.transactions,
+          budgets: collected.budgets,
+          goals: collected.goals,
+          expenseReminders: collected.expenseReminders,
+          collaborativeGoals: collected.collaborativeGoals,
+          categories: collected.categories,
+          metadata: collected.metadata,
+        },
+      };
       
       // The same provider the manual "Backup now" button and the status tab use, so the two
       // cannot disagree about where a backup went.
