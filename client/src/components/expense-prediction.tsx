@@ -88,7 +88,13 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
     }
   }, [predictionsData]);
 
-  const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
+  /*
+   * The whole-month figure comes from `monthlyPredictions`, not from adding up the category rows:
+   * the answer is capped at the eight largest categories, so summing them undercounts the month by
+   * whatever the smaller categories hold.
+   */
+  const totalPredicted = monthlyPredictions[0]?.predicted
+    ?? predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
   if (isLoading || !isReady) {
     return (
