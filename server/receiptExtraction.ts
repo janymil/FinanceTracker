@@ -2,6 +2,7 @@ import { openai } from './openaiClient';
 import { AI_MODELS, MODEL_CATALOG, stripCodeFences } from '../lib/aiProvider';
 import {
   applyRegexFallback,
+  matchReceiptYearToText,
   normalizeReceiptExtraction,
   toLegacyExtractedReceipt,
   type LegacyExtractedReceipt,
@@ -85,7 +86,12 @@ export async function extractReceiptWithAI(ocrText: string): Promise<ReceiptExtr
       parsed = content;
     }
 
-    return normalizeReceiptExtraction(parsed, meta);
+    const draft = normalizeReceiptExtraction(parsed, meta);
+    // The model reads the day and the month reliably and the year less so: a receipt printed
+    // "05 AGO. 2026" came back as 2025-08-05. The printed text is the ground truth for the year
+    // (`matchReceiptYearToText`), and this is the one place both upload paths pass through.
+    draft.date = matchReceiptYearToText(draft.date, ocrText);
+    return draft;
   } catch (error) {
     log.error('Receipt extraction error:', error);
     return {

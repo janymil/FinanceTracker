@@ -134,6 +134,77 @@ export function normalizeReceiptDate(input: unknown): string | null {
     : formatYmd(parsed.getFullYear(), parsed.getMonth() + 1, parsed.getDate());
 }
 
+/**
+ * Month tokens, indexed 0..11, for receipts that print the month as a word.
+ *
+ * Three languages, because the app is served in `en`, `es` and `sk` and a Peruvian receipt says
+ * "AGO". Only a prefix is listed; the rest of the word is swallowed by the pattern, so "agosto",
+ * "augusta" and "aug" all resolve to their own month.
+ */
+const MONTH_TOKENS: string[][] = [
+  ['jan'], ['feb'], ['mar'], ['apr'], ['may', 'maj'], ['jun'],
+  ['jul'], ['aug', 'ago'], ['sep', 'set'], ['oct', 'okt'], ['nov'], ['dec', 'dic'],
+];
+
+/**
+ * The receipt's own year, for the case where the model read the day and month but the year wrong.
+ *
+ * A photo printed "05 AGO. 2026" came back from the model as `2025-08-05`, so the expense was
+ * saved a year in the past — where the current month never shows it, and the person who had just
+ * scanned the receipt reported "it was not saved". The printed text is the ground truth: when it
+ * carries the same day and the same month with a four-digit year, that year wins.
+ *
+ * Narrow on purpose. A different day or month is a different date (a print date, a card expiry,
+ * "valid until") and is left exactly as the model answered, which is the rule `applyRegexFallback`
+ * already follows. Two candidate years for that day and month means it is not a correction, so
+ * the model's answer stands.
+ */
+export function matchReceiptYearToText(date: string | null, ocrText: string): string | null {
+  if (!date || !ocrText) return date;
+
+  const parts = ISO_DATE.exec(date.trim());
+  if (!parts) return date;
+
+  const year = Number(parts[1]);
+  const month = Number(parts[2]);
+  const day = Number(parts[3]);
+  const tokens = MONTH_TOKENS[month - 1];
+  if (!tokens) return date;
+
+  const text = ocrText.toLowerCase();
+  const dayPattern = day < 10 ? `0?${day}` : String(day);
+  const monthPattern = month < 10 ? `0?${month}` : String(month);
+
+  const patterns = [
+    // 05.08.2025, 05/08/2025, 05-08-2025, 08/05/2025 (US order), 2025-08-05
+    new RegExp(`(?:^|\\D)${dayPattern}[./-]${monthPattern}[./-](\\d{4})(?!\\d)`, 'g'),
+    new RegExp(`(?:^|\\D)${monthPattern}[./-]${dayPattern}[./-](\\d{4})(?!\\d)`, 'g'),
+    new RegExp(`(?:^|\\D)(\\d{4})[./-]${monthPattern}[./-]${dayPattern}(?!\\d)`, 'g'),
+    // 05 AGO. 2026, 5 de agosto de 2026, 05. Aug 2026
+    new RegExp(
+      `(?:^|\\D)${dayPattern}\\s*(?:de\\s*)?[.\\-/]?\\s*(?:${tokens.join('|')})\\p{L}*\\.?\\s*,?\\s*(?:de\\s*)?(\\d{4})(?!\\d)`,
+      'gu',
+    ),
+  ];
+
+  const found: string[] = [];
+  for (const pattern of patterns) {
+    pattern.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(text)) !== null) {
+      if (!found.includes(match[1])) found.push(match[1]);
+      // A zero-length match would spin forever; these patterns always consume a year.
+      if (match.index === pattern.lastIndex) pattern.lastIndex += 1;
+    }
+  }
+
+  if (found.length !== 1) return date;
+  const textYear = Number(found[0]);
+  if (!isValidYmd(textYear, month, day) || textYear === year) return date;
+
+  return formatYmd(textYear, month, day);
+}
+
 /** Vendor -> trimmed, whitespace-collapsed, 1..100 chars, or null. */
 export function normalizeReceiptVendor(input: unknown): string | null {
   if (input === null || input === undefined) return null;

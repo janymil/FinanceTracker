@@ -14,6 +14,7 @@ import { queryClient, newIdempotencyKey } from "@/lib/queryClient";
 // One key per save attempt, so a second tap or a retry returns the row the first one created.
 let saveRequestKey = newIdempotencyKey();
 import { useAiAccess } from "@/hooks/useAiAccess";
+import { useReceiptImageSrc } from "@/hooks/useReceiptImageSrc";
 import QRCode from "qrcode";
 import { todayLocalISO } from '@/lib/dateUtils';
 
@@ -91,6 +92,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
     isPolling: false,
     status: 'idle'
   });
+
+  // The stored receipt is owner-only, so it is fetched with the token and shown as a blob URL.
+  // A plain `<img src>` sent no credential and rendered a broken image.
+  const receiptImageSrc = useReceiptImageSrc(uploadState.imageUrl);
 
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState<FormData>({
@@ -307,7 +312,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
     // Set upload state with the mobile upload data structure
     setUploadState({
       status: 'success',
-      message: 'Receipt processed successfully via mobile!',
+      message: t('upload.receipt_ready_mobile'),
       recognizedText: result.data.text,
       imageUrl: result.data.imageUrl || '',
       extracted: result.data.extracted,
@@ -329,7 +334,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
       return;
     }
 
-    setUploadState({ status: 'processing', message: 'Processing receipt...' });
+    setUploadState({ status: 'processing', message: t('upload.processing') });
 
     try {
       const formDataObj = new FormData();
@@ -415,7 +420,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
       
       setUploadState({
         status: 'success',
-        message: 'Receipt processed successfully!',
+        message: t('upload.receipt_ready'),
         recognizedText: result.recognizedText,
         imageUrl: result.imageUrl,
         extracted: result.extracted,
@@ -429,7 +434,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
     } catch (error) {
       setUploadState({
         status: 'error',
-        message: 'Failed to process receipt'
+        message: t('upload.process_failed')
       });
       toast({
         title: t("upload.upload_failed"),
@@ -466,11 +471,32 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
     }));
   };
 
+  /** "5 de agosto de 2026" in the person's own language, for the toasts and the date hint. */
+  const formatSavedDate = (isoDate: string) => {
+    const parsed = new Date(`${isoDate}T12:00:00`);
+    if (Number.isNaN(parsed.getTime())) return isoDate;
+    return new Intl.DateTimeFormat(i18n.language || 'en', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(parsed);
+  };
+
+  /**
+   * True when the date being saved is not in the current month.
+   *
+   * This is the difference between "it was not saved" and "it was saved in August": the month
+   * view only ever lists the month it is showing, so an expense dated outside it is invisible
+   * right after the save. The form says so before the person presses the button.
+   */
+  const savedOutsideThisMonth =
+    /^\d{4}-\d{2}-\d{2}$/.test(formData.date) && formData.date.slice(0, 7) !== todayLocalISO().slice(0, 7);
+
   const handleSaveTransaction = async () => {
     if (!formData.amount || !formData.description || !formData.categoryId) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
+        title: t('upload.missing_information'),
+        description: t('upload.please_fill_required'),
         variant: "destructive"
       });
       return;
@@ -512,9 +538,11 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
 
       saveRequestKey = newIdempotencyKey();
 
+      // The date is part of the message on purpose: an expense dated outside the month the app
+      // is showing is invisible right after it is saved, and that reads as "it was not saved".
       toast({
-        title: "Transaction saved",
-        description: "Receipt data has been saved as a transaction",
+        title: t('upload.transaction_saved'),
+        description: t('upload.saved_on_date', { date: formatSavedDate(formData.date) }),
       });
 
       // Invalidate cache to refresh transaction lists
@@ -534,8 +562,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
     } catch (error) {
       console.error('Error saving transaction:', error);
       toast({
-        title: "Save failed",
-        description: "Failed to save transaction. Please try again.",
+        title: t('upload.save_failed'),
+        description: t('upload.save_failed_description'),
         variant: "destructive"
       });
     }
@@ -709,16 +737,16 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
                 <span className="font-medium">{uploadState.message}</span>
               </div>
 
-              {/* Image Preview */}
-              {uploadState.imageUrl && (
+              {/* Image Preview — the stored receipt is owner-only, so it arrives as a blob URL */}
+              {receiptImageSrc && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Receipt Image:
+                    {t("upload.receipt_image")}
                   </label>
                   <div className="relative">
                     <img 
-                      src={uploadState.imageUrl} 
-                      alt="Receipt" 
+                      src={receiptImageSrc} 
+                      alt={t("upload.receipt_image")} 
                       className="w-full max-w-md h-auto rounded-lg border shadow-sm mx-auto"
                     />
                   </div>
@@ -747,30 +775,35 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
                     </div>
                     
                     <div>
-                      <Label htmlFor="description">Description *</Label>
+                      <Label htmlFor="description">{t("upload.description_required")}</Label>
                       <Input
                         id="description"
                         value={formData.description}
                         onChange={(e) => handleFormChange('description', e.target.value)}
-                        placeholder="Transaction description"
+                        placeholder={t("upload.transaction_description_placeholder")}
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="date">Date *</Label>
+                      <Label htmlFor="date">{t("upload.date_required")}</Label>
                       <Input
                         id="date"
                         type="date"
                         value={formData.date}
                         onChange={(e) => handleFormChange('date', e.target.value)}
                       />
+                      {savedOutsideThisMonth && (
+                        <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                          {t('upload.date_not_this_month', { date: formatSavedDate(formData.date) })}
+                        </p>
+                      )}
                     </div>
                     
                     <div>
-                      <Label htmlFor="category">Category *</Label>
+                      <Label htmlFor="category">{t("upload.category_required")}</Label>
                       <Select value={formData.categoryId} onValueChange={(value) => handleFormChange('categoryId', value)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t("upload.select_category_placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((category) => (
@@ -784,7 +817,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
 
                     {uploadState.category && (
                       <div className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-                        💡 AI suggested category: {uploadState.category}
+                        💡 {t("upload.ai_suggested_category", { category: uploadState.category })}
                       </div>
                     )}
                   </div>

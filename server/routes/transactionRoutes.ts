@@ -109,6 +109,17 @@ export function registerTransactionRoutes(app: Express) {
         return res.status(400).json({ message: "Unknown category" });
       }
 
+      // The receipt modal sends the OCR hints flat (`ocrVendor`, `ocrDetectedAmount`,
+      // `ocrDetectedDate`), older callers nest them under `extracted`. Reading only the nested
+      // shape wrote three nulls on every scan from the modal, so the record lost what the
+      // receipt said. Both shapes are accepted; a JSON body carries the date as a string.
+      const ocrSource =
+        req.body.extracted && typeof req.body.extracted === 'object' ? req.body.extracted : {};
+      const ocrVendor = cleanText(ocrSource.vendor ?? req.body.ocrVendor, 255);
+      const ocrDetectedAmountRaw = ocrSource.amount ?? req.body.ocrDetectedAmount;
+      const ocrDetectedAmount = cleanAmount(ocrDetectedAmountRaw);
+      const ocrDetectedDate = cleanDate(ocrSource.date ?? req.body.ocrDetectedDate);
+
       const parsed = parseValue({
         ...req.body,
         userId,
@@ -121,9 +132,9 @@ export function registerTransactionRoutes(app: Express) {
         // OCR fields (optional)
         imageUrl: req.body.imageUrl || null,
         ocrText: user?.plan === 'free' ? null : ocrText || null, // Only store for Standard/Premium
-        ocrVendor: req.body.extracted?.vendor || null,
-        ocrDetectedAmount: req.body.extracted?.amount ? req.body.extracted.amount.toString() : null,
-        ocrDetectedDate: req.body.extracted?.date ? new Date(req.body.extracted.date) : null,
+        ocrVendor,
+        ocrDetectedAmount,
+        ocrDetectedDate,
       }, insertTransactionSchema);
       if (!parsed.ok) {
         // Answers 400 with the offending fields instead of the generic message below.

@@ -63,12 +63,18 @@ export const setupClerkAuth = (app: any) => {
  * This used to be `req.path.includes('.')`, which also skipped every route whose path carried
  * a dotted value — `/api/learning/merchant/amazon.com` arrived with no `req.auth` and a
  * signed-in caller was answered 401. A merchant name is not a stylesheet.
+ *
+ * An `/api/...` path is never a file, whatever its last segment looks like. A stored receipt
+ * is served as `/api/receipts/<userId>/<random>.jpg`, so the extension test alone skipped the
+ * Clerk middleware for it: every read answered 503 `auth_not_mounted`, and the browser showed a
+ * broken image where the scanned receipt should be. The extension rule is for the built assets
+ * (`/assets/index-abc.js`, `/logo.png`), not for a photo behind a permission check.
  */
 const STATIC_FILE_EXTENSION =
   /\.(?:css|js|mjs|cjs|map|json|webmanifest|png|jpe?g|gif|svg|webp|avif|ico|bmp|woff2?|ttf|otf|eot|txt|xml|php|html?)$/i;
 
 export const isStaticAssetPath = (requestPath: string): boolean =>
-  STATIC_FILE_EXTENSION.test(requestPath);
+  !requestPath.startsWith('/api/') && STATIC_FILE_EXTENSION.test(requestPath);
 
 // Middleware to require authentication
 export const isAuthenticated = (req: any, res: Response, next: NextFunction) => {

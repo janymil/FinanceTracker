@@ -77,6 +77,10 @@ describe('isStaticAssetPath', () => {
     // The regression that started this: a dotted *value* is not a file extension.
     ['/api/learning/merchant/amazon.com', false],
     ['/api/collaborative-goals/12', false],
+    // A stored receipt is `.../<random>.jpg` behind an owner check. The extension rule used to
+    // claim it, Clerk was skipped, and every read answered 503 instead of the photo.
+    ['/api/receipts/user_3L0xu7vQTz0qhTapoWH8k7CIb4k/1e243130-2fe6.jpg', false],
+    ['/api/export/statement.pdf', false],
   ])('%s → %s', async (requestPath, expected) => {
     const { isStaticAssetPath } = await import('../../server/clerkAuth');
     expect(isStaticAssetPath(requestPath)).toBe(expected);

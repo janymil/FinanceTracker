@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "wouter";
-import { useAuth } from "@clerk/clerk-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Camera, Upload, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
@@ -11,9 +11,17 @@ interface UploadStatus {
   message?: string;
 }
 
+/**
+ * The page a phone opens after scanning the receipt QR code.
+ *
+ * It is the only screen in the app reached from a link somebody else holds, so it has to work
+ * with no session and in the language the person reads. Every word here comes from the
+ * `upload.mobile.*` keys — this page used to be hardcoded English, which is what a Spanish
+ * customer saw after scanning a code with `/es/` in it.
+ */
 export default function MobileUpload() {
   const { sessionId } = useParams();
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({ status: 'idle' });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -23,18 +31,18 @@ export default function MobileUpload() {
     if (!sessionId) {
       setUploadStatus({
         status: 'error',
-        message: 'Invalid session ID'
+        message: t('upload.mobile.invalid_session')
       });
     }
-  }, [sessionId]);
+  }, [sessionId, t]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         toast({
-          title: "Invalid file type",
-          description: "Please select an image file",
+          title: t('upload.invalid_file_type'),
+          description: t('upload.please_select_image'),
           variant: "destructive"
         });
         return;
@@ -51,14 +59,14 @@ export default function MobileUpload() {
   const handleUpload = async () => {
     if (!selectedFile || !sessionId) {
       toast({
-        title: "No file selected",
-        description: "Please select an image first",
+        title: t('upload.mobile.no_file_title'),
+        description: t('upload.mobile.no_file_desc'),
         variant: "destructive"
       });
       return;
     }
 
-    setUploadStatus({ status: 'uploading', message: 'Uploading receipt...' });
+    setUploadStatus({ status: 'uploading', message: t('upload.mobile.uploading') });
 
     try {
       const formData = new FormData();
@@ -73,11 +81,11 @@ export default function MobileUpload() {
         throw new Error('Upload failed');
       }
 
-      const result = await response.json();
+      await response.json();
       
       setUploadStatus({
         status: 'success',
-        message: 'Upload successful! You can now close this page.'
+        message: t('upload.mobile.success_body')
       });
 
       // Clean up preview URL
@@ -87,20 +95,20 @@ export default function MobileUpload() {
       }
 
       toast({
-        title: "Upload successful",
-        description: "Your receipt has been processed successfully"
+        title: t('upload.mobile.success_title'),
+        description: t('upload.mobile.success_toast')
       });
 
     } catch (error) {
       console.error('Upload error:', error);
       setUploadStatus({
         status: 'error',
-        message: 'Upload failed. Please try again.'
+        message: t('upload.mobile.error_body')
       });
       
       toast({
-        title: "Upload failed",
-        description: "Please try again or use the desktop version",
+        title: t('upload.mobile.error_title'),
+        description: t('upload.mobile.error_toast'),
         variant: "destructive"
       });
     }
@@ -122,10 +130,10 @@ export default function MobileUpload() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-600">
               <AlertCircle className="h-5 w-5" />
-              Error
+              {t('upload.mobile.error_title')}
             </CardTitle>
             <CardDescription>
-              Invalid session ID
+              {t('upload.mobile.invalid_session')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -139,10 +147,10 @@ export default function MobileUpload() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Upload Receipt
+            {t('upload.mobile.title')}
           </CardTitle>
           <CardDescription>
-            Scan your receipt to add it to Kaptia
+            {t('upload.mobile.subtitle')}
           </CardDescription>
         </CardHeader>
         
@@ -151,9 +159,9 @@ export default function MobileUpload() {
             <div className="space-y-4">
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
                 <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-lg font-medium mb-2">Take a photo of your receipt</p>
+                <p className="text-lg font-medium mb-2">{t('upload.mobile.photo_title')}</p>
                 <p className="text-sm text-gray-500 mb-4">
-                  Capture a clear image for best results
+                  {t('upload.mobile.photo_hint')}
                 </p>
                 
                 <input
@@ -168,14 +176,14 @@ export default function MobileUpload() {
                   <Button className="w-full" asChild>
                     <span className="flex items-center gap-2">
                       <Camera className="h-4 w-4" />
-                      Take Photo
+                      {t('upload.mobile.take_photo')}
                     </span>
                   </Button>
                 </label>
               </div>
               
               <div className="text-center">
-                <p className="text-sm text-gray-500">or</p>
+                <p className="text-sm text-gray-500">{t('upload.mobile.or')}</p>
               </div>
               
               <div>
@@ -190,7 +198,7 @@ export default function MobileUpload() {
                   <Button variant="outline" className="w-full" asChild>
                     <span className="flex items-center gap-2">
                       <Upload className="h-4 w-4" />
-                      Choose from Gallery
+                      {t('upload.mobile.gallery')}
                     </span>
                   </Button>
                 </label>
@@ -202,10 +210,10 @@ export default function MobileUpload() {
             <div className="space-y-4">
               {previewUrl && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Preview:</p>
+                  <p className="text-sm font-medium">{t('upload.mobile.preview')}</p>
                   <img 
                     src={previewUrl} 
-                    alt="Receipt preview" 
+                    alt={t('upload.mobile.preview')}
                     className="w-full h-auto max-h-64 object-contain rounded-lg border"
                   />
                 </div>
@@ -214,10 +222,10 @@ export default function MobileUpload() {
               <div className="flex gap-2">
                 <Button onClick={handleUpload} className="flex-1">
                   <Upload className="h-4 w-4 mr-2" />
-                  Upload Receipt
+                  {t('upload.mobile.submit')}
                 </Button>
                 <Button onClick={handleReset} variant="outline">
-                  Reset
+                  {t('upload.mobile.reset')}
                 </Button>
               </div>
             </div>
@@ -234,13 +242,13 @@ export default function MobileUpload() {
             <div className="text-center py-8">
               <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">
-                Upload Successful!
+                {t('upload.mobile.success_title')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Your receipt has been processed and added to your account.
+                {t('upload.mobile.success_body')}
               </p>
               <p className="text-xs text-gray-500">
-                You can now close this page and return to the main application.
+                {t('upload.mobile.success_close')}
               </p>
             </div>
           )}
@@ -249,13 +257,13 @@ export default function MobileUpload() {
             <div className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
-                Upload Failed
+                {t('upload.mobile.error_title')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 {uploadStatus.message}
               </p>
               <Button onClick={handleReset} variant="outline">
-                Try Again
+                {t('upload.try_again')}
               </Button>
             </div>
           )}
