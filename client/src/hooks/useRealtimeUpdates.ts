@@ -4,9 +4,9 @@ import { useClerkUserReady } from "./useClerkUserReady";
 
 /** Query keys to refresh for each change type emitted by the server. */
 const QUERY_KEYS_BY_CHANGE: Record<string, string[]> = {
-  transaction: ["transactions", "financial-summary", "expense-breakdown", "trend-predictions", "financial-health"],
-  budget: ["budgets", "financial-summary"],
-  goal: ["goals", "collaborative-goals", "achievements"],
+  transaction: ["transactions", "financial-summary", "expense-breakdown", "trend-predictions", "financial-health", "dashboard-overview"],
+  budget: ["budgets", "financial-summary", "dashboard-overview"],
+  goal: ["goals", "collaborative-goals", "achievements", "dashboard-overview"],
 };
 
 /**

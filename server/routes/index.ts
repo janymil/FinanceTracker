@@ -6,6 +6,7 @@ import { registerUserRoutes } from "./userRoutes";
 import { registerTransactionRoutes } from "./transactionRoutes";
 import { registerBudgetRoutes } from "./budgetRoutes";
 import { registerGoalRoutes } from "./goalRoutes";
+import { registerDashboardRoutes } from "./dashboardRoutes";
 import { registerCollaborativeGoalRoutes } from "./collaborativeGoalRoutes";
 import { registerRealtimeRoutes } from "./realtimeRoutes";
 import { registerExportRoutes } from "./exportRoutes";
@@ -139,6 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerTransactionRoutes(app);
   registerBudgetRoutes(app);
   registerGoalRoutes(app);
+  registerDashboardRoutes(app);
   registerCollaborativeGoalRoutes(app);
   registerRealtimeRoutes(app);
   registerExportRoutes(app);

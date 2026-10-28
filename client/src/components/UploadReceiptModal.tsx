@@ -20,6 +20,10 @@ import { todayLocalISO } from '@/lib/dateUtils';
 interface UploadReceiptModalProps {
   onReceiptProcessed?: (receiptData: any) => void;
   buttonText?: string;
+  /** Controlled use: the top bar's "Scan a receipt" opens this without its own button. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }
 
 interface ExtractedData {
@@ -61,7 +65,7 @@ function generateUUID() {
   });
 }
 
-export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: UploadReceiptModalProps) {
+export default function UploadReceiptModal({ onReceiptProcessed, buttonText, open, onOpenChange, hideTrigger }: UploadReceiptModalProps) {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { getToken } = useAuth();
@@ -69,7 +73,12 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
   const currentLocale = (i18n.language || 'en').split('-')[0];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const isOpen = open ?? ownOpen;
+  const setIsOpen = (next: boolean) => {
+    if (open === undefined) setOwnOpen(next);
+    onOpenChange?.(next);
+  };
   const [uploadMethod, setUploadMethod] = useState<'direct' | 'qr'>('direct');
   
   const [uploadState, setUploadState] = useState<UploadState>({
@@ -536,12 +545,14 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2" data-testid="receipt-upload-trigger">
-          <ImageIcon className="h-4 w-4" />
-          {buttonText || t("upload.button_text")}
-        </Button>
-      </DialogTrigger>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <Button variant="outline" className="flex items-center gap-2" data-testid="receipt-upload-trigger">
+            <ImageIcon className="h-4 w-4" />
+            {buttonText || t("upload.button_text")}
+          </Button>
+        </DialogTrigger>
+      )}
       {!aiAccess.allowed && (
         <DialogContent className="max-w-md" data-testid="receipt-ai-blocked">
           <DialogHeader>

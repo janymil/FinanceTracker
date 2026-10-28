@@ -6,6 +6,7 @@ import { AnonymousHeader } from "@/components/anonymous-header";
 import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
 import { FinancialMascot } from "@/components/financial-mascot";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -37,12 +38,14 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
             <main className={`flex-1 transition-all duration-300 pt-16 ${
               sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
             }`}>
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {children}
               </div>
             </main>
           </div>
           <Footer sidebarCollapsed={sidebarCollapsed} />
+          <div className="h-[68px] lg:hidden" aria-hidden="true" />
+          <MobileBottomNav onMore={() => setSidebarOpen(true)} />
           <FinancialMascot />
         </div>
       );
@@ -79,12 +82,15 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
           <main className={`flex-1 transition-all duration-300 pt-16 ${
             sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
           }`}>
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {children}
             </div>
           </main>
         </div>
         <Footer sidebarCollapsed={sidebarCollapsed} />
+        {/* Room for the phone's bottom bar, so the footer is not hidden under it. */}
+        <div className="h-[68px] lg:hidden" aria-hidden="true" />
+        <MobileBottomNav onMore={() => setSidebarOpen(true)} />
         <FinancialMascot />
       </div>
     );

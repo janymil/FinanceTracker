@@ -4234,5 +4234,146 @@
     }
   },
   "Financial adviser: one plan for the month": "Financial adviser: one plan for the month",
-  "Try again": "Try again"
+  "Try again": "Try again",
+  "overview": {
+    "hello": "Hi, {{name}}",
+    "prev_month": "Previous month",
+    "next_month": "Next month",
+    "back_to_current": "Back to this month",
+    "progress_current": "Day {{day}} of {{total}} · days left: {{count}}",
+    "progress_closed": "Month closed",
+    "progress_future": "Not started yet",
+    "streak": "Streak: {{count}}",
+    "hero": {
+      "left_label": "Left after the bills still to come",
+      "left_label_simple": "Left this month",
+      "kept_label": "Kept in {{month}}",
+      "sub_on_track": "You’re on track to keep {{pct}}% of your income this month.",
+      "sub_past": "That is {{pct}}% of your income.",
+      "sub_short": "Your spending is above your income this month.",
+      "sub_usual": "Your usual is {{pct}}%.",
+      "no_income": "Add this month’s income to see how much is left.",
+      "help": "Your income for the month, minus what you have already spent, minus the bills you have scheduled or set to repeat before the month ends. For a closed month it is simply what you kept.",
+      "bar_label": "Of your income: {{spent}} spent, {{bills}} for bills still to come, {{left}} left",
+      "spent": "Spent",
+      "bills": "Bills still to pay",
+      "left": "Left",
+      "kept": "Kept",
+      "income": "Income",
+      "income_count": "Entries: {{count}}",
+      "spent_count": "Payments: {{count}}",
+      "vs_prev_less": "{{pct}}% less than {{month}}",
+      "vs_prev_more": "{{pct}}% more than {{month}}",
+      "vs_prev_same": "Same as {{month}}",
+      "bills_to_pay": "Bills still to pay",
+      "bills_count": "Before month end: {{count}}",
+      "kept_vs_prev": "Kept vs {{month}}",
+      "prev_kept": "{{month}}: {{amount}}",
+      "forecast_keep": "At this pace you’ll finish {{month}} with about {{amount}} kept.",
+      "forecast_short": "At this pace {{month}} will end about {{amount}} short."
+    },
+    "health": {
+      "of_100": "of 100",
+      "up": "{{count}} points higher than {{month}}",
+      "down": "{{count}} points lower than {{month}}",
+      "same": "Same as {{month}}",
+      "show_breakdown": "How the score is made",
+      "hide_breakdown": "Hide how the score is made"
+    },
+    "attention": {
+      "title": "Needs your attention",
+      "today": "Today",
+      "bill_title": "{{title}} · {{amount}}",
+      "due_today": "Due today",
+      "due_tomorrow": "Due tomorrow",
+      "due_on": "Due {{date}}",
+      "mark_paid": "Mark as paid",
+      "open_calendar": "Open calendar",
+      "budget_title": "{{category}} at {{pct}}% of budget",
+      "budget_sub": "{{spent}} of {{limit}} · days left: {{count}}",
+      "open_budget": "Open budget",
+      "uncategorized_title": "Transactions without a category: {{count}}",
+      "uncategorized_sub": "{{amount}} is missing from your breakdown",
+      "categorize": "Categorize",
+      "goal_title": "{{name}}: {{amount}} still to go",
+      "goal_sub": "Target date {{date}}",
+      "goal_overdue": "Target date passed on {{date}}",
+      "add_savings": "Add savings",
+      "empty_title": "All caught up",
+      "empty_body": "Nothing needs you today. Bills due soon, budgets running low and goals close to their date will show up here."
+    },
+    "categories": {
+      "title": "Where your money went",
+      "help": "Each category is compared with your own average month over the three months before. Ten percent either way counts as your usual.",
+      "subtitle": "{{amount}} spent · compared with your usual month",
+      "all": "All categories",
+      "bar_label": "Share of spending by category",
+      "over": "▲ {{pct}}% over usual",
+      "under": "▼ {{pct}}% under usual",
+      "about": "About usual",
+      "new": "New this month",
+      "others": "Other categories: {{amount}}",
+      "uncategorized": "Without a category: {{amount}}",
+      "empty": "No spending recorded for this month."
+    },
+    "recent": {
+      "title": "Recent transactions",
+      "view_all": "View all",
+      "empty": "No transactions yet. Add your first one with the + button.",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "uncategorized": "No category"
+    },
+    "goals": {
+      "title": "Savings goals",
+      "manage": "Manage",
+      "of": "of",
+      "progress": "{{pct}}% · by {{date}}",
+      "per_month": "{{amount}} a month",
+      "reached": "Reached",
+      "overdue": "Date passed",
+      "empty": "No savings goals yet.",
+      "create": "Create a goal"
+    },
+    "trend": {
+      "title": "Last six months",
+      "income": "Income",
+      "spent": "Spent",
+      "so_far": "so far",
+      "month_label": "{{month}}: income {{income}}, spent {{spent}}"
+    },
+    "upgrade": {
+      "title": "See the whole picture",
+      "body": "Your free plan covers everything above. A paid plan adds what keeps the month on track:",
+      "reminders": "Bill reminders before they are due",
+      "goals": "Savings goals with a monthly pace",
+      "trends": "Six-month trends",
+      "receipts": "Receipts and statements read for you",
+      "cta": "Compare plans"
+    },
+    "adviser_teaser": {
+      "title": "Want to know what to do next month?",
+      "body": "The Financial Adviser reads your month and gives you 2–4 concrete steps, each with the figure behind it. Included in Premium.",
+      "cta": "See Premium"
+    },
+    "add": {
+      "button": "Add transaction",
+      "type": "Type it in",
+      "type_desc": "Amount, description, category",
+      "voice": "Say it",
+      "voice_desc": "Speak, then check the details",
+      "scan": "Scan a receipt",
+      "scan_desc": "Photo or statement"
+    },
+    "nav": {
+      "label": "Main",
+      "home": "Home",
+      "more": "More"
+    },
+    "adviser_error": {
+      "title": "Your adviser could not answer right now",
+      "unavailable": "The AI service is not responding at the moment. The numbers on this page are not affected.",
+      "disabled": "AI is switched off for this account. Turn it on in Profile to get advice."
+    }
+  }
 }

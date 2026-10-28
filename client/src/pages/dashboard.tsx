@@ -1,107 +1,46 @@
 import { trackEvent } from '@/lib/analytics';
-import React from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useMemo, startTransition, useDeferredValue, useTransition } from "react";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 import { SEO } from "@/components/SEO";
-import { useCurrency } from "@/context/CurrencyContext";
-import { CurrencySetupModal } from "@/components/CurrencySetupModal";
-import { useTranslation } from "react-i18next";
-import i18n from "@/i18n/i18n";
-import { getMonthDateRange } from "@/lib/dateRangeUtils";
-
-
-// Core components for immediate display
-import FinancialCards from "@/components/financial-cards";
-import TransactionList from "@/components/transaction-list";
-import BudgetOverview from "@/components/budget-overview";
-import RequirePlan from "@/components/require-plan";
-import UpgradeBanner from "@/components/upgrade-banner";
-import FinancialHealthMascot from "@/components/financial-health-mascot";
-
-// Modular lazy components with React 18 concurrent features
-import {
-  LazyTrendsChart,
-  LazyExpenseChart,
-  LazyFinancialHealthScore,
-  LazyQuickFinancialSnapshot,
-  LazyExpensePrediction,
-  LazyAutoCategorization,
-  LazyTransactionRemindersWidget
-} from "@/components/dashboard/lazy-components";
-import { LoggingStreakCard } from "@/components/LoggingStreakCard";
+import { getMonthDateRange, shiftMonthKey } from "@/lib/dateRangeUtils";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
-import { 
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  PlusCircle,
-  Calendar,
-  Target,
-  PieChart,
-  BarChart3,
-  ArrowUpRight,
-  ArrowDownRight,
-  Crown,
-  Zap,
-  Shield,
-  Star,
+import RequirePlan from "@/components/require-plan";
+import FinancialHealthMascot from "@/components/financial-health-mascot";
+import { useDashboardOverview, useOverviewFormat, PanelSkeleton } from "@/components/dashboard/overviewShared";
+import { MonthHeroCard } from "@/components/dashboard/MonthHeroCard";
+import { HealthCard } from "@/components/dashboard/HealthCard";
+import { NeedsAttention } from "@/components/dashboard/NeedsAttention";
+import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
+import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
+import { GoalsCard } from "@/components/dashboard/GoalsCard";
+import { SixMonthTrend } from "@/components/dashboard/SixMonthTrend";
+import { AdviserTeaser, FreePlanCard } from "@/components/dashboard/PlanCards";
 
-  ChevronRight,
-  Plus,
-  Minus,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Repeat,
-  MessageCircle
-} from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "wouter";
-import SimpleVoiceButton from "@/components/simple-voice-button";
-import { todayLocalISO } from '@/lib/dateUtils';
-
-
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-  type: "income" | "expense";
-}
-
+/*
+ * The dashboard answers "how am I doing this month?" first, then "what needs me today?", then
+ * the detail. Every number comes from one request (`/api/dashboard/overview`) computed on the
+ * server in the person's own time zone, so the cards cannot disagree with each other.
+ *
+ * Adding a transaction lives in the top bar (and the bottom bar on a phone): one place, on every
+ * page, instead of a second copy of the same form here.
+ *
+ * On a phone the cards stack in order of urgency (the month, what needs attention, the score, the
+ * adviser, then the detail); on a wide screen they pair up. The `order-*` classes do that without
+ * rendering anything twice.
+ */
 export default function Dashboard() {
   const { isReady, user } = useClerkUserReady();
-  const { showSetupModal, setShowSetupModal } = useCurrency();
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const f = useOverviewFormat();
 
-  // Helper functions for category localization
-  const isPredefinedCategory = (category: any): boolean => {
-    return category.userId === null;
-  };
-
-  const getLocalizedCategoryName = (category: any): string => {
-    if (isPredefinedCategory(category)) {
-      return t(category.name);
-    }
-    return category.name;
-  };
-
-  // Check for subscription success/error messages
+  // Subscription success / failure coming back from checkout.
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const upgrade = urlParams.get('upgrade');
@@ -114,7 +53,6 @@ export default function Dashboard() {
         title: t("Subscription Successful!"),
         description: `${t("You've been upgraded to the")} ${plan} ${t("plan. Enjoy your new features!")}`,
       });
-      // Clean up URL parameters
       window.history.replaceState({}, '', '/');
     } else if (error) {
       let message = t("An error occurred during payment processing.");
@@ -129,290 +67,49 @@ export default function Dashboard() {
           message = t("Payment successful but plan update failed. Please contact support.");
           break;
       }
-      toast({
-        title: t("Payment Error"),
-        description: message,
-        variant: "destructive",
-      });
-      // Clean up URL parameters
+      toast({ title: t("Payment Error"), description: message, variant: "destructive" });
       window.history.replaceState({}, '', '/');
-    }
-  }, [toast]);
-  const [isPending, startTransition] = useTransition();
-  const [selectedYear, setSelectedYear] = useState(() => String(new Date().getFullYear()));
-  const [selectedMonthNum, setSelectedMonthNum] = useState(() => String(new Date().getMonth() + 1).padStart(2, '0'));
-  
-  // Combine month and year for API calls
-  const selectedMonth = `${selectedYear}-${selectedMonthNum}`;
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-
-  // Defer expensive rendering to prevent Suspense errors
-  const deferredSelectedMonth = useDeferredValue(selectedMonth);
-  const deferredUser = useDeferredValue(user);
-
-  useEffect(() => {
-    // Check for subscription success
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('subscription') === 'success') {
+    } else if (urlParams.get('subscription') === 'success') {
       toast({
         title: t("Subscription Activated!"),
         description: t("Welcome to your new plan! All features are now available."),
       });
-      // Clean up URL
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [toast]);
 
-  const [newTransaction, setNewTransaction] = useState({
-    amount: "",
-    description: "",
-    date: todayLocalISO(),
-    type: "expense" as "income" | "expense",
-    categoryId: "",
-    isRecurring: false,
-    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
-    recurringEndDate: "",
-    paymentUrl: "",
-    referenceNote: "",
-  });
+  // undefined = this month, as the server reads it in the person's zone.
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(undefined);
+  const { data: overview, isLoading, error, isFetching } = useDashboardOverview(selectedMonth);
+  const { data: transactions, isLoading: transactionsLoading, dataUpdatedAt } = useTransactions();
 
-
-
-  // Get start and end dates for the selected month using centralized utilities
-  const { startDate, endDate } = getMonthDateRange(selectedMonth);
-
-  // Hooks
-  const queryClient = useQueryClient();
-
-  // Core data loads immediately with shared cache
-  const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useTransactions();
-
-  // Get user's plan from database
-  const { data: databaseUser } = useQuery({
-    queryKey: ["auth-user", user?.id],
-    enabled: isReady,
-    staleTime: 5 * 60 * 1000, // 5 minutes - plan doesn't change often
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/auth/user");
-      return response.json();
-    },
-  });
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    enabled: isReady,
-    // Thirty seconds: mutations invalidate this key, so the cache only covers time passing.
-    staleTime: 30_000,
-    retry: (failureCount, error: any) => {
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
-  });
-
-  // Load financial summary immediately alongside transactions
-  const { data: financialSummary, isLoading: summaryLoading, error: summaryError } = useQuery({
-    queryKey: ['financial-summary', user?.id, startDate.toISOString(), endDate.toISOString()],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      });
-      const response = await apiRequest("GET", `/api/financial-summary?${params}`);
-      return response.json();
-    },
-    enabled: isReady, // Load immediately when authenticated
-    // Thirty seconds: mutations invalidate this key, so the cache only covers time passing.
-    staleTime: 30_000,
-    retry: (failureCount, error: any) => {
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-  });
-
-  const [budgets, setBudgets] = useState<any[]>([]);
-  const [budgetsLoading, setBudgetsLoading] = useState(false);
-
-  // Get auth headers for Clerk authentication
-  const getAuthHeaders = async (): Promise<Record<string, string>> => {
-    try {
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          return { Authorization: `Bearer ${token}` };
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to get Clerk token:', error);
-    }
-    return {};
-  };
-
-  // Fetch budgets with proper authentication
-  const fetchBudgets = async () => {
-    if (!isReady) return;
-    
-    setBudgetsLoading(true);
-    try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch('/api/budgets', {
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setBudgets(data);
-
-      } else {
-
-      }
-    } catch (error) {
-      console.error('Error fetching budgets:', error);
-    } finally {
-      setBudgetsLoading(false);
-    }
-  };
-
+  // Every add / edit / delete invalidates the transactions list; the overview follows it.
+  const firstUpdate = useRef(true);
   useEffect(() => {
-    if (isReady && transactions) {
-      fetchBudgets();
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      return;
     }
-  }, [isReady, transactions]);
-
-  const createTransactionMutation = useMutation({
-    mutationFn: async (transactionData: typeof newTransaction) => {
-      const response = await apiRequest("POST", "/api/transactions", {
-        ...transactionData,
-        amount: parseFloat(transactionData.amount),
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      if (!Array.isArray(transactions) || transactions.length === 0) {
-        trackEvent('first_transaction', 'activation');
-      }
-      // Invalidate all relevant queries to force refresh
-      queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['transaction-reminders', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['expense-reminders', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['financial-summary', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['budgets', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['financial-health', user?.id] });
-      
-      setIsDialogOpen(false);
-      setNewTransaction({
-        amount: "",
-        description: "",
-        date: todayLocalISO(),
-        type: "expense",
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
-      toast({
-        title: t("Transaction Added"),
-        description: t("Transaction has been created successfully"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("Error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-overview', user?.id] });
+  }, [dataUpdatedAt]);
 
   if (!user) {
     return null;
   }
 
-  // Helper function to get proper locale mapping for date formatting
-  const getDateLocale = () => {
-    const currentLang = i18n.language;
-    
-    if (currentLang.startsWith('es')) {
-      return 'es-pe'; // Use Spanish (Peru) for all Spanish variants
-    } else if (currentLang.startsWith('sk')) {
-      return 'sk-sk'; // Use Slovak
-    } else {
-      return 'en-us'; // Default to English
-    }
-  };
+  const monthKey = overview?.month.key ?? selectedMonth;
+  const plan = overview?.plan ?? 'free';
+  const paid = plan !== 'free';
+  const isCurrent = overview?.month.status === 'current';
+  const { startDate, endDate } = getMonthDateRange(monthKey ?? '2000-01');
 
-  const formatMonth = React.useMemo(() => {
-    return (monthStr: string) => {
-      const [year, month] = monthStr.split('-');
-      const currentLang = i18n.language;
-      
-      const monthNames = {
-        'es': [
-          'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-          'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-        ],
-        'sk': [
-          'január', 'február', 'marec', 'apríl', 'máj', 'jún',
-          'júl', 'august', 'september', 'október', 'november', 'december'
-        ],
-        'en': [
-          'January', 'February', 'March', 'April', 'May', 'June',
-          'July', 'August', 'September', 'October', 'November', 'December'
-        ]
-      };
-      
-      const langKey = currentLang.startsWith('es') ? 'es' : 
-                      currentLang.startsWith('sk') ? 'sk' : 'en';
-      
-      const monthName = monthNames[langKey][parseInt(month) - 1];
-      return `${monthName} ${year}`;
-    };
-  }, [i18n.language]);
-
-  // Generate month options (1-12)
-  const generateMonthOptions = () => {
-    const currentLang = i18n.language;
-    const monthNames = {
-      'es': ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
-      'sk': ['január', 'február', 'marec', 'apríl', 'máj', 'jún', 'júl', 'august', 'september', 'október', 'november', 'december'],
-      'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    };
-    
-    const langKey = currentLang.startsWith('es') ? 'es' : 
-                    currentLang.startsWith('sk') ? 'sk' : 'en';
-    
-    return monthNames[langKey].map((name, index) => ({
-      value: String(index + 1).padStart(2, '0'),
-      label: name
-    }));
-  };
-
-  // Generate year options (current year and previous years)
-  const generateYearOptions = () => {
-    const currentYear = new Date().getFullYear();
-    const years = [];
-    for (let i = 0; i < 5; i++) {
-      const year = currentYear - i;
-      years.push({ value: String(year), label: String(year) });
-    }
-    return years;
-  };
-
-  const handleSubmit = async () => {
-    if (!newTransaction.amount || !newTransaction.description) return;
-    // A second click while the first request is in flight used to add the same expense twice.
-    // The button is also disabled while pending; this is the guard for the keyboard path.
-    if (createTransactionMutation.isPending) return;
-    createTransactionMutation.mutate(newTransaction);
-  };
+  const progress = !overview
+    ? ''
+    : overview.month.status === 'current'
+      ? t('overview.progress_current', { day: overview.month.day, total: overview.month.daysInMonth, count: overview.month.daysLeft })
+      : overview.month.status === 'past'
+        ? t('overview.progress_closed')
+        : t('overview.progress_future');
 
   return <>
     <SEO
@@ -420,453 +117,162 @@ export default function Dashboard() {
       description="Your spending at a glance: expense tracking, budget progress and AI-organized categories."
       noindex
     />
-      <div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {t("Welcome back")}, {user.firstName || t("User")}!
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {t("Here's an overview of your financial situation for")} {formatMonth(selectedMonth)}
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <Select value={selectedMonthNum} onValueChange={setSelectedMonthNum}>
-                    <SelectTrigger className="w-32" aria-label={t('Month')}>
-                      <SelectValue placeholder={t("Month")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {generateMonthOptions().map(({ value, label }) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger className="w-20" aria-label={t('Year')}>
-                      <SelectValue placeholder={t("Year")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {generateYearOptions().map(({ value, label }) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <SimpleVoiceButton onComplete={() => {
-                  if (user) {
-                    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-                    queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
-                  }
-                }} />
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-                      onClick={() => {
-                        setNewTransaction({
-                          amount: "",
-                          description: "",
-                          date: todayLocalISO(),
-                          type: "expense",
-                          categoryId: "",
-                          isRecurring: false,
-                          recurringFrequency: "monthly",
-                          recurringEndDate: "",
-                          paymentUrl: "",
-                          referenceNote: "",
-                        });
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("Add Transaction")}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
-                  <DialogHeader>
-                    <DialogTitle>{t("Add New Transaction")}</DialogTitle>
-                    <DialogDescription>
-                      {t("Record a new income or expense transaction")}
-                    </DialogDescription>
-                  </DialogHeader>
+    <div className="mx-auto flex max-w-7xl flex-col gap-5 pb-24 lg:pb-8">
 
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="amount">{t("Amount")}</Label>
-                        <Input
-                          id="amount"
-                          type="number"
-                          step="0.01"
-                          value={newTransaction.amount}
-                          onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
-                          placeholder="0.00"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="date">{t("Date")}</Label>
-                        <Input
-                          id="date"
-                          type="date"
-                          value={newTransaction.date}
-                          onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description">{t("Description")}</Label>
-                      <Input
-                        id="description"
-                        value={newTransaction.description}
-                        onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                        placeholder={t("Transaction description")}
-                      />
-                    </div>
-
-                    <div>
-                      <Label>{t("Type")}</Label>
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          variant={newTransaction.type === "income" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setNewTransaction({ ...newTransaction, type: "income" })}
-                        >
-                          <ArrowUpRight className="h-4 w-4 mr-2" />
-                          {t("Income")}
-                        </Button>
-                        <Button
-                          variant={newTransaction.type === "expense" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setNewTransaction({ ...newTransaction, type: "expense" })}
-                        >
-                          <ArrowDownRight className="h-4 w-4 mr-2" />
-                          {t("Expense")}
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="category">{t("Category")}</Label>
-                      <Select value={newTransaction.categoryId} onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("Select a category")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.isArray(categories) && (categories as Category[])
-                            .filter((cat: Category) => cat.type === newTransaction.type)
-                            .map((category: Category) => (
-                              <SelectItem key={category.id} value={category.id.toString()}>
-                                {getLocalizedCategoryName(category)}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-
-
-                    {/* Premium Features - Standard/Premium only */}
-                    <RequirePlan plan="standard" compact={true}>
-                      <div className="space-y-4 border-t pt-4">
-                        {/* Smart Bill Assistant - for expenses only */}
-                        {newTransaction.type === "expense" && (
-                          <div className="space-y-4">
-                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {t("Smart Bill Assistant")}
-                            </div>
-                            <div>
-                              <Label htmlFor="paymentUrl">{t("Payment URL (Optional)")}</Label>
-                              <Input
-                                id="paymentUrl"
-                                type="url"
-                                value={newTransaction.paymentUrl}
-                                onChange={(e) => setNewTransaction({ ...newTransaction, paymentUrl: e.target.value })}
-                                placeholder="https://example.com/pay"
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                {t("Link to where you can pay this bill")}
-                              </p>
-                            </div>
-                            <div>
-                              <Label htmlFor="referenceNote">{t("Reference Note (Optional)")}</Label>
-                              <Input
-                                id="referenceNote"
-                                value={newTransaction.referenceNote}
-                                onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
-                                placeholder={t("Account #123456, Reference: ABC789")}
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                {t("Account number or other reference information")}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Recurring transaction options */}
-                        <div className={newTransaction.type === "expense" ? "border-t pt-4 space-y-4" : "space-y-4"}>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="recurring"
-                              checked={newTransaction.isRecurring}
-                              onCheckedChange={(checked) => 
-                                setNewTransaction({ ...newTransaction, isRecurring: checked as boolean })
-                              }
-                            />
-                            <label htmlFor="recurring" className="flex items-center text-sm font-medium">
-                              <Repeat className="h-4 w-4 mr-2" />
-                              {t("Make this a recurring transaction")}
-                            </label>
-                          </div>
-
-                          {newTransaction.isRecurring && (
-                            <div className="grid grid-cols-2 gap-4 pl-6">
-                              <div>
-                                <Label htmlFor="frequency">{t("Frequency")}</Label>
-                                <Select
-                                  value={newTransaction.recurringFrequency}
-                                  onValueChange={(value) => setNewTransaction({ 
-                                    ...newTransaction, 
-                                    recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                                  })}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder={t("Select frequency")} />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="weekly">{t("Weekly")}</SelectItem>
-                                    <SelectItem value="monthly">{t("Monthly")}</SelectItem>
-                                    <SelectItem value="yearly">{t("Yearly")}</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div>
-                                <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
-                                <Input
-                                  id="endDate"
-                                  type="date"
-                                  value={newTransaction.recurringEndDate}
-                                  onChange={(e) => setNewTransaction({ 
-                                    ...newTransaction, 
-                                    recurringEndDate: e.target.value 
-                                  })}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </RequirePlan>
-
-                    <div className="flex justify-end gap-2 pt-4">
-                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        {t("Cancel")}
-                      </Button>
-                      <Button 
-                        onClick={handleSubmit}
-                        disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
-                      >
-                        {createTransactionMutation.isPending ? t("Saving…", "Saving…") : t("Add")}
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </div>
-
-        {!transactionsLoading && (
-          <OnboardingChecklist
-            userId={user?.id}
-            lang={i18n.language?.slice(0, 2) || 'en'}
-            plan={databaseUser?.plan ?? 'free'}
-            transactionsCount={Array.isArray(transactions) ? transactions.length : 0}
-            incomeCount={Array.isArray(transactions) ? transactions.filter((tx: any) => tx.type === 'income').length : 0}
-            budgetsCount={Array.isArray(budgets) ? budgets.length : 0}
-          />
-        )}
-
-        {/* A failed load is said out loud. Before this the cards showed zeros and the recent
-            list showed "no transactions", which reads as real data — someone could look at an
-            empty dashboard while their history was simply unreachable. */}
-        {(transactionsError || summaryError) && (
-          <div
-            role="alert"
-            className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100"
-          >
-            <p className="font-medium">{t('We could not load your data', 'We could not load your data')}</p>
-            <p className="mt-1 text-amber-800 dark:text-amber-200">
-              {t(
-                'The numbers below may be out of date. Please check your connection and reload the page.',
-                'The numbers below may be out of date. Please check your connection and reload the page.',
-              )}
-            </p>
+      {/* Month + streak */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {t('overview.hello', { name: user.firstName || t('User') })}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-                queryClient.invalidateQueries({ queryKey: ['financial-summary', user?.id] });
-              }}
-              className="mt-2 font-medium underline underline-offset-2"
+              aria-label={t('overview.prev_month')}
+              disabled={!monthKey}
+              onClick={() => monthKey && setSelectedMonth(shiftMonthKey(monthKey, -1))}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
             >
-              {t('Try again', 'Try again')}
+              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </button>
+            <h1
+              className="min-w-[11rem] text-center font-display text-2xl font-bold tracking-tight text-gray-900 sm:min-w-[14rem] sm:text-3xl dark:text-white"
+              aria-live="polite"
+              data-testid="dashboard-month"
+            >
+              {monthKey ? f.monthLabel(monthKey) : ' '}
+            </h1>
+            <button
+              type="button"
+              aria-label={t('overview.next_month')}
+              disabled={!monthKey || isCurrent}
+              onClick={() => monthKey && setSelectedMonth(shiftMonthKey(monthKey, 1))}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+            >
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
+            </button>
+            {progress && (
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-600 sm:text-[13px] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+                {progress}
+              </span>
+            )}
+            {!isCurrent && overview && (
+              <button
+                type="button"
+                onClick={() => setSelectedMonth(undefined)}
+                className="text-sm font-semibold text-blue-700 hover:underline dark:text-blue-300"
+              >
+                {t('overview.back_to_current')}
+              </button>
+            )}
           </div>
+        </div>
+        {overview && overview.streak.current > 0 && (
+          <span
+            className="flex h-10 items-center gap-1.5 rounded-xl bg-orange-50 px-3 text-[13px] font-semibold text-orange-800 dark:bg-orange-950 dark:text-orange-300"
+            title={t('streak.description')}
+            data-testid="streak-chip"
+          >
+            <Flame className="h-4 w-4" aria-hidden="true" />
+            {t('overview.streak', { count: overview.streak.current })}
+          </span>
         )}
-
-        {/* Financial Overview Cards */}
-        <FinancialCards
-          key={i18n.language} // Force re-render when language changes
-          summary={financialSummary}
-          isLoading={summaryLoading}
-          budgetsData={budgets as any}
-          selectedMonth={selectedMonth}
-        />
-
-
-
-
-
-
-        {/* Panels are rendered for every signed-in user.
-            Functions that require a higher plan are locked by <RequirePlan>. */}
-        <div className="space-y-8">
-          {/* Health score + quick snapshot */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <LazyFinancialHealthScore
-              summary={financialSummary}
-              budgets={budgets as any}
-              startDate={startDate.toISOString()}
-              endDate={endDate.toISOString()}
-            />
-            <LazyQuickFinancialSnapshot
-              summary={financialSummary}
-              transactions={transactions as any}
-            />
-          </div>
-
-          {/*
-           * The adviser gets its own line, full width, and this is deliberate.
-           *
-           * It is the premium feature, and it now carries the longest text on the dashboard: a focus
-           * card, a summary, the findings and the actions. Squeezed into a third of a row beside the
-           * score, all of that was cut to two lines and a "details" button.
-           */}
-          <RequirePlan
-            plan="premium"
-            compact
-            ai
-            feature={t('financialHealthAdvisor')}
-            description={t('features.adviser.description')}
-          >
-            <FinancialHealthMascot
-              startDate={startDate.toISOString()}
-              endDate={endDate.toISOString()}
-            />
-          </RequirePlan>
-
-          {/* Recent transactions + budget overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <TransactionList
-              transactions={transactions as any}
-              isLoading={transactionsLoading}
-              isPremium={databaseUser?.plan === 'premium'}
-            />
-            <BudgetOverview
-              isLimited={(databaseUser?.plan ?? 'free') === 'free'}
-              startDate={startDate.toISOString()}
-              endDate={endDate.toISOString()}
-            />
-          </div>
-
-          {/* Interactive trends chart (Standard+) */}
-          <RequirePlan
-            plan="standard"
-            compact
-            feature={t("Trends")}
-            description={t("See your spending trends over time with interactive charts.")}
-          >
-            <LazyTrendsChart />
-          </RequirePlan>
-
-          {/* Expense breakdown (Standard+). One column on purpose: the breakdown carries a pie and
-              a per-category list, and sharing a row squeezed both into half the width. */}
-          <div className="grid grid-cols-1 gap-8">
-            <RequirePlan
-              plan="standard"
-              compact
-              feature={t("Expense Breakdown")}
-              description={t("See which categories take the largest share of your spending.")}
-            >
-              <LazyExpenseChart summary={{
-                totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
-                expensesByCategory: financialSummary?.transactionsByCategory
-                  ?.filter((cat: any) => cat.type === 'expense')
-                  ?.map((cat: any, index: number) => ({
-                    category: cat.categoryName,
-                    amount: Math.abs(cat.amount)
-                  })) || []
-              }} />
-            </RequirePlan>
-          </div>
-
-          {/* Reminders and saving streak, side by side: stacked, each one wasted a full row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <RequirePlan
-              plan="standard"
-              compact
-              feature={t("Reminders")}
-              description={t("Bill reminders and saving streaks to keep you on track.")}
-            >
-              <LazyTransactionRemindersWidget />
-            </RequirePlan>
-            <LoggingStreakCard transactions={Array.isArray(transactions) ? transactions : []} />
-          </div>
-
-          {/* Expense prediction (Premium) + auto-categorization (Standard+). items-start keeps the
-              shorter card from being stretched to the taller one's height. */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <RequirePlan
-              plan="premium"
-              compact
-              ai
-              feature={t("Expense Prediction")}
-              description={t("AI forecast of your upcoming expenses and cash flow.")}
-            >
-              <LazyExpensePrediction
-                transactions={transactions as any}
-                summary={financialSummary}
-              />
-            </RequirePlan>
-            <RequirePlan
-              plan="standard"
-              compact
-              ai
-              feature={t("Auto-Categorization")}
-              description={t("Let AI categorize your transactions automatically as they arrive.")}
-            >
-              <LazyAutoCategorization transactions={transactions as any} />
-            </RequirePlan>
-          </div>
-
-        </div>
-
-
-        
-        </div>
       </div>
+
+      {!transactionsLoading && overview && (
+        <OnboardingChecklist
+          userId={user?.id}
+          lang={i18n.language?.slice(0, 2) || 'en'}
+          plan={plan}
+          transactionsCount={Array.isArray(transactions) ? transactions.length : 0}
+          incomeCount={Array.isArray(transactions) ? transactions.filter((tx: any) => tx.type === 'income').length : 0}
+          budgetsCount={overview.budgetCount}
+        />
+      )}
+
+      {/* A failed load is said out loud: zeros would read as real data. */}
+      {error && (
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100"
+        >
+          <p className="font-medium">{t('We could not load your data', 'We could not load your data')}</p>
+          <p className="mt-1 text-amber-800 dark:text-amber-200">
+            {t(
+              'The numbers below may be out of date. Please check your connection and reload the page.',
+              'The numbers below may be out of date. Please check your connection and reload the page.',
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['dashboard-overview', user?.id] })}
+            className="mt-2 font-medium underline underline-offset-2"
+          >
+            {t('Try again', 'Try again')}
+          </button>
+        </div>
+      )}
+
+      {isLoading || !overview ? (
+        !error && (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-12" aria-busy="true">
+            <PanelSkeleton className="h-72 lg:col-span-8" />
+            <PanelSkeleton className="h-72 lg:col-span-4" />
+            <PanelSkeleton className="h-80 lg:col-span-5" />
+            <PanelSkeleton className="h-80 lg:col-span-7" />
+          </div>
+        )
+      ) : (
+        <div className={`grid grid-cols-1 gap-5 transition-opacity lg:grid-cols-12 ${isFetching ? 'opacity-80' : ''}`}>
+          <div className="order-1 lg:order-1 lg:col-span-8">
+            <MonthHeroCard overview={overview} />
+          </div>
+          <div className="order-3 lg:order-2 lg:col-span-4">
+            <HealthCard overview={overview} />
+          </div>
+
+          {isCurrent && (
+            <NeedsAttention overview={overview} className="order-2 lg:order-3 lg:col-span-5" />
+          )}
+          <SpendingByCategory
+            overview={overview}
+            className={`order-5 lg:order-4 ${isCurrent ? 'lg:col-span-7' : 'lg:col-span-12'}`}
+          />
+
+          <div className="order-4 lg:order-5 lg:col-span-12">
+            {plan === 'premium' ? (
+              /*
+               * The adviser gets its own line, full width: it carries the longest text on the
+               * page (summary, findings, actions), and in a third of a row all of it was cut.
+               */
+              <RequirePlan
+                plan="premium"
+                compact
+                ai
+                feature={t('financialHealthAdvisor')}
+                description={t('features.adviser.description')}
+              >
+                <FinancialHealthMascot startDate={startDate.toISOString()} endDate={endDate.toISOString()} />
+              </RequirePlan>
+            ) : plan === 'standard' ? (
+              <AdviserTeaser />
+            ) : (
+              <FreePlanCard />
+            )}
+          </div>
+
+          <RecentTransactions
+            transactions={transactions as any}
+            className={`order-6 ${paid ? 'lg:col-span-7' : 'lg:col-span-12'}`}
+          />
+          {paid && <GoalsCard overview={overview} className="order-7 lg:col-span-5" />}
+          {paid && (
+            <div className="order-8 lg:col-span-12">
+              <SixMonthTrend overview={overview} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
-    </>
+  </>
 }

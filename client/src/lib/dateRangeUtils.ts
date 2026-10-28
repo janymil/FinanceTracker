@@ -322,3 +322,12 @@ export function getDateRangeForFilter(filterType: string): DateRange | null {
       return null;
   }
 }
+/**
+ * Move a "yyyy-MM" month key by whole months ("2026-01", -1 -> "2025-12").
+ * Pure string arithmetic: no Date, so no time zone can shift the result.
+ */
+export function shiftMonthKey(monthKey: string, delta: number): string {
+  const [year, month] = monthKey.split('-').map(Number);
+  const index = year * 12 + (month - 1) + delta;
+  return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, '0')}`;
+}

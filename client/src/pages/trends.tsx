@@ -12,6 +12,8 @@ import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Calend
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears, subDays, subWeeks } from "date-fns";
 import { useState, useMemo, useEffect } from "react";
 import RequirePlan from "@/components/require-plan";
+import ExpensePrediction from "@/components/expense-prediction";
+import { getCurrentMonthDateRange } from "@/lib/dateRangeUtils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, Area, AreaChart } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
@@ -55,6 +57,17 @@ export default function Trends() {
   const [aiPredictions, setAiPredictions] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
+
+  // The AI forecast compares its prediction with this month so far. It used to sit on the
+  // dashboard; it lives with the other forecasts now.
+  const currentMonthSummary = useMemo(() => {
+    const { startDate, endDate } = getCurrentMonthDateRange();
+    const thisMonth = transactions.filter((transaction) => {
+      const date = new Date(transaction.date);
+      return date >= startDate && date <= endDate;
+    });
+    return { totalExpenses: sumTransactionAmountsByType(thisMonth, 'expense') };
+  }, [transactions]);
 
   // Get auth headers for Clerk authentication
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
@@ -792,6 +805,7 @@ export default function Trends() {
 
           {/* Forecasts */}
           <TabsContent value="forecasts" className="space-y-6">
+            <ExpensePrediction transactions={transactions} summary={currentMonthSummary} />
             {loading ? (
               <div className="space-y-4">
                 <Skeleton className="h-8 w-64" />

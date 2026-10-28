@@ -57,6 +57,10 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest, clearUserSession, newIdempotencyKey } from "@/lib/queryClient";
 import { useTheme } from "@/context/ThemeContext";
 import { todayLocalISO } from '@/lib/dateUtils';
+import { QUICK_ADD_EVENT, type QuickAddMode } from "@/lib/quickAdd";
+import { QuickAddMenuItems } from "@/components/QuickAddMenuItems";
+import { SimpleVoiceInput } from "@/components/simple-voice-input";
+import UploadReceiptModal from "@/components/UploadReceiptModal";
 
 interface Category {
   id: number;
@@ -113,6 +117,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   };
   const { theme, toggleTheme } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+  const [isScanOpen, setIsScanOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
@@ -209,6 +215,36 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     createTransactionMutation.mutate(newTransaction);
   };
 
+  // The three ways to add a transaction. The forms live here, once; the phone's bottom bar asks
+  // for one through `requestQuickAdd` (see lib/quickAdd.ts).
+  const openQuickAdd = (mode: QuickAddMode) => {
+    if (mode === "type") {
+      setNewTransaction({
+        amount: "",
+        description: "",
+        date: todayLocalISO(),
+        type: "expense",
+        categoryId: "",
+        isRecurring: false,
+        recurringFrequency: "monthly",
+        recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
+      });
+      setIsDialogOpen(true);
+    } else if (mode === "voice") {
+      setIsVoiceOpen(true);
+    } else {
+      setIsScanOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    const listener = (event: Event) => openQuickAdd((event as CustomEvent<QuickAddMode>).detail);
+    window.addEventListener(QUICK_ADD_EVENT, listener);
+    return () => window.removeEventListener(QUICK_ADD_EVENT, listener);
+  }, []);
+
 
 
   return (
@@ -229,43 +265,36 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             <Menu className="h-5 w-5" />
           </Button>
 
-          {/* Redeem Code button - hidden on mobile */}
-          <Link href="/redeem" className="hidden md:block">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="border-orange-600 text-orange-700 hover:bg-orange-50 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-orange-950"
-            >
-              <Gift className="h-4 w-4 mr-2" />
-              {t("Redeem Code")}
-            </Button>
-          </Link>
-
-          {/* Quick add transaction button - hidden on mobile */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                size="sm" 
-                className="bg-primary hover:bg-primary/90 hidden md:inline-flex"
-                onClick={() => {
-                  setNewTransaction({
-                    amount: "",
-                    description: "",
-                    date: todayLocalISO(),
-                    type: "expense",
-                    categoryId: "",
-                    isRecurring: false,
-                    recurringFrequency: "monthly",
-                    recurringEndDate: "",
-                    paymentUrl: "",
-                    referenceNote: "",
-                  });
-                }}
+          {/* Add a transaction: typed, spoken or scanned. On a phone the bottom bar's "+" opens
+              the same three (components/MobileBottomNav.tsx). */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className="hidden md:inline-flex h-10 rounded-xl px-4 font-semibold"
+                data-testid="quick-add-trigger"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {t("Add Transaction")}
+                {t("overview.add.button")}
               </Button>
-            </DialogTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64 p-1.5">
+              <QuickAddMenuItems onSelect={openQuickAdd} />
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {isVoiceOpen && (
+            <SimpleVoiceInput
+              onClose={() => setIsVoiceOpen(false)}
+              onComplete={() => {
+                setIsVoiceOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['transactions'] });
+                queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+              }}
+            />
+          )}
+          <UploadReceiptModal open={isScanOpen} onOpenChange={setIsScanOpen} hideTrigger />
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{t("Add New Transaction")}</DialogTitle>
@@ -458,21 +487,6 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           </Dialog>
         </div>
 
-        {/* Center - Date selector or breadcrumb */}
-        <div className="hidden md:flex items-center">
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {new Date().toLocaleDateString(
-              i18n.language === 'sk' || i18n.language === 'sk-sk' ? 'sk-sk' : 
-              i18n.language === 'es' || i18n.language === 'es-pe' || i18n.language.startsWith('es') ? 'es-pe' : 
-              'en-us', { 
-              weekday: 'long',
-              day: 'numeric', 
-              month: 'long', 
-              year: 'numeric' 
-            })}
-          </h1>
-        </div>
-
         {/* Right side - User menu and premium status */}
         <div className="flex items-center space-x-3">
           {/* Theme toggle */}
@@ -554,6 +568,12 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 <Link href="/help">
                   <HelpCircle className="h-4 w-4 mr-2" />
 {t("Help & Documentation")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/redeem">
+                  <Gift className="h-4 w-4 mr-2" />
+                  {t("Redeem Code")}
                 </Link>
               </DropdownMenuItem>
               {user?.plan !== 'premium' && (

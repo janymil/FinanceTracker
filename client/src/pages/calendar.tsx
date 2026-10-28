@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RequirePlan from "@/components/require-plan";
+import TransactionRemindersWidget from "@/components/transaction-reminders-widget";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -412,6 +413,10 @@ export default function CalendarPage() {
             </Card>
           </div>
         </div>
+
+        {/* Bills and reminders: created and ticked off here. The dashboard lists the ones due
+            this week under "Needs your attention" and links back to this page. */}
+        <TransactionRemindersWidget />
       </div>
     </RequirePlan>
   );

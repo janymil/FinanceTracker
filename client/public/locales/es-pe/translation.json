@@ -4297,5 +4297,146 @@
     }
   },
   "Financial adviser: one plan for the month": "Asesor financiero: un plan para el mes",
-  "Try again": "Reintentar"
+  "Try again": "Reintentar",
+  "overview": {
+    "hello": "Hola, {{name}}",
+    "prev_month": "Mes anterior",
+    "next_month": "Mes siguiente",
+    "back_to_current": "Volver a este mes",
+    "progress_current": "Día {{day}} de {{total}} · días restantes: {{count}}",
+    "progress_closed": "Mes cerrado",
+    "progress_future": "Aún no empieza",
+    "streak": "Racha: {{count}}",
+    "hero": {
+      "left_label": "Te queda después de las cuentas por pagar",
+      "left_label_simple": "Te queda este mes",
+      "kept_label": "Ahorrado en {{month}}",
+      "sub_on_track": "Vas camino a guardar el {{pct}}% de tus ingresos este mes.",
+      "sub_past": "Es el {{pct}}% de tus ingresos.",
+      "sub_short": "Este mes tus gastos superan tus ingresos.",
+      "sub_usual": "Lo habitual para ti es {{pct}}%.",
+      "no_income": "Agrega los ingresos de este mes para ver cuánto te queda.",
+      "help": "Tus ingresos del mes, menos lo que ya gastaste, menos las cuentas que programaste o que se repiten antes de que termine el mes. En un mes cerrado es simplemente lo que guardaste.",
+      "bar_label": "De tus ingresos: {{spent}} gastado, {{bills}} en cuentas por pagar, {{left}} disponible",
+      "spent": "Gastado",
+      "bills": "Cuentas por pagar",
+      "left": "Disponible",
+      "kept": "Ahorrado",
+      "income": "Ingresos",
+      "income_count": "Registros: {{count}}",
+      "spent_count": "Pagos: {{count}}",
+      "vs_prev_less": "{{pct}}% menos que en {{month}}",
+      "vs_prev_more": "{{pct}}% más que en {{month}}",
+      "vs_prev_same": "Igual que en {{month}}",
+      "bills_to_pay": "Cuentas por pagar",
+      "bills_count": "Antes de fin de mes: {{count}}",
+      "kept_vs_prev": "Ahorro frente a {{month}}",
+      "prev_kept": "{{month}}: {{amount}}",
+      "forecast_keep": "A este ritmo terminarás {{month}} con unos {{amount}} ahorrados.",
+      "forecast_short": "A este ritmo {{month}} terminará con unos {{amount}} de déficit."
+    },
+    "health": {
+      "of_100": "de 100",
+      "up": "{{count}} puntos más que en {{month}}",
+      "down": "{{count}} puntos menos que en {{month}}",
+      "same": "Igual que en {{month}}",
+      "show_breakdown": "Cómo se calcula la puntuación",
+      "hide_breakdown": "Ocultar cómo se calcula"
+    },
+    "attention": {
+      "title": "Requiere tu atención",
+      "today": "Hoy",
+      "bill_title": "{{title}} · {{amount}}",
+      "due_today": "Vence hoy",
+      "due_tomorrow": "Vence mañana",
+      "due_on": "Vence el {{date}}",
+      "mark_paid": "Marcar como pagado",
+      "open_calendar": "Abrir calendario",
+      "budget_title": "{{category}} al {{pct}}% del presupuesto",
+      "budget_sub": "{{spent}} de {{limit}} · días restantes: {{count}}",
+      "open_budget": "Abrir presupuesto",
+      "uncategorized_title": "Transacciones sin categoría: {{count}}",
+      "uncategorized_sub": "Faltan {{amount}} en tu desglose",
+      "categorize": "Categorizar",
+      "goal_title": "{{name}}: faltan {{amount}}",
+      "goal_sub": "Fecha objetivo: {{date}}",
+      "goal_overdue": "La fecha objetivo pasó el {{date}}",
+      "add_savings": "Agregar ahorro",
+      "empty_title": "Todo al día",
+      "empty_body": "Hoy no hay nada pendiente. Aquí aparecerán las cuentas por vencer, los presupuestos casi agotados y las metas cerca de su fecha."
+    },
+    "categories": {
+      "title": "En qué se fue tu dinero",
+      "help": "Cada categoría se compara con tu propio mes promedio de los tres meses anteriores. Un diez por ciento arriba o abajo cuenta como lo habitual.",
+      "subtitle": "{{amount}} gastado · comparado con tu mes habitual",
+      "all": "Todas las categorías",
+      "bar_label": "Proporción del gasto por categoría",
+      "over": "▲ {{pct}}% sobre lo habitual",
+      "under": "▼ {{pct}}% bajo lo habitual",
+      "about": "Como siempre",
+      "new": "Nueva este mes",
+      "others": "Otras categorías: {{amount}}",
+      "uncategorized": "Sin categoría: {{amount}}",
+      "empty": "No hay gastos registrados en este mes."
+    },
+    "recent": {
+      "title": "Transacciones recientes",
+      "view_all": "Ver todas",
+      "empty": "Aún no hay transacciones. Agrega la primera con el botón +.",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "uncategorized": "Sin categoría"
+    },
+    "goals": {
+      "title": "Metas de ahorro",
+      "manage": "Gestionar",
+      "of": "de",
+      "progress": "{{pct}}% · para el {{date}}",
+      "per_month": "{{amount}} al mes",
+      "reached": "Lograda",
+      "overdue": "Fecha vencida",
+      "empty": "Aún no tienes metas de ahorro.",
+      "create": "Crear una meta"
+    },
+    "trend": {
+      "title": "Últimos seis meses",
+      "income": "Ingresos",
+      "spent": "Gastado",
+      "so_far": "hasta hoy",
+      "month_label": "{{month}}: ingresos {{income}}, gastado {{spent}}"
+    },
+    "upgrade": {
+      "title": "Mira el panorama completo",
+      "body": "Tu plan gratuito incluye todo lo de arriba. Un plan de pago agrega lo que mantiene el mes en orden:",
+      "reminders": "Recordatorios antes de que venzan tus cuentas",
+      "goals": "Metas de ahorro con un ritmo mensual",
+      "trends": "Tendencias de seis meses",
+      "receipts": "Recibos y estados de cuenta leídos por ti",
+      "cta": "Comparar planes"
+    },
+    "adviser_teaser": {
+      "title": "¿Quieres saber qué hacer el próximo mes?",
+      "body": "El Asesor Financiero lee tu mes y te da de 2 a 4 pasos concretos, cada uno con la cifra en la que se basa. Incluido en Premium.",
+      "cta": "Ver Premium"
+    },
+    "add": {
+      "button": "Agregar transacción",
+      "type": "Escribirla",
+      "type_desc": "Monto, descripción, categoría",
+      "voice": "Dictarla",
+      "voice_desc": "Habla y luego revisa los datos",
+      "scan": "Escanear un recibo",
+      "scan_desc": "Foto o estado de cuenta"
+    },
+    "nav": {
+      "label": "Principal",
+      "home": "Inicio",
+      "more": "Más"
+    },
+    "adviser_error": {
+      "title": "Tu asesor no pudo responder en este momento",
+      "unavailable": "El servicio de IA no responde en este momento. Las cifras de esta página no se ven afectadas.",
+      "disabled": "La IA está desactivada en esta cuenta. Actívala en tu Perfil para recibir consejos."
+    }
+  }
 }

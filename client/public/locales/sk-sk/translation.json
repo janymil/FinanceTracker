@@ -4342,5 +4342,146 @@
     }
   },
   "Financial adviser: one plan for the month": "Finančný poradca: plán na mesiac",
-  "Try again": "Skúsiť znova"
+  "Try again": "Skúsiť znova",
+  "overview": {
+    "hello": "Ahoj, {{name}}",
+    "prev_month": "Predchádzajúci mesiac",
+    "next_month": "Nasledujúci mesiac",
+    "back_to_current": "Späť na tento mesiac",
+    "progress_current": "Deň {{day}} z {{total}} · zostáva dní: {{count}}",
+    "progress_closed": "Mesiac je uzavretý",
+    "progress_future": "Ešte nezačal",
+    "streak": "Séria: {{count}}",
+    "hero": {
+      "left_label": "Zostáva po platbách, ktoré ešte prídu",
+      "left_label_simple": "Zostáva tento mesiac",
+      "kept_label": "Ušetrené v mesiaci {{month}}",
+      "sub_on_track": "Smerujete k tomu, že si tento mesiac odložíte {{pct}} % príjmu.",
+      "sub_past": "To je {{pct}} % vášho príjmu.",
+      "sub_short": "Tento mesiac sú vaše výdavky vyššie ako príjem.",
+      "sub_usual": "Zvyčajne je to {{pct}} %.",
+      "no_income": "Pridajte príjem za tento mesiac a uvidíte, koľko vám zostáva.",
+      "help": "Váš príjem za mesiac, mínus to, čo ste už minuli, mínus platby, ktoré máte naplánované alebo sa opakujú do konca mesiaca. Pri uzavretom mesiaci je to jednoducho to, čo ste ušetrili.",
+      "bar_label": "Z vášho príjmu: minuté {{spent}}, platby, ktoré ešte prídu {{bills}}, zostáva {{left}}",
+      "spent": "Minuté",
+      "bills": "Platby, ktoré ešte prídu",
+      "left": "Zostáva",
+      "kept": "Ušetrené",
+      "income": "Príjem",
+      "income_count": "Záznamy: {{count}}",
+      "spent_count": "Platby: {{count}}",
+      "vs_prev_less": "o {{pct}} % menej ako v mesiaci {{month}}",
+      "vs_prev_more": "o {{pct}} % viac ako v mesiaci {{month}}",
+      "vs_prev_same": "Rovnako ako v mesiaci {{month}}",
+      "bills_to_pay": "Ešte zaplatiť",
+      "bills_count": "Do konca mesiaca: {{count}}",
+      "kept_vs_prev": "Úspora oproti mesiacu {{month}}",
+      "prev_kept": "{{month}}: {{amount}}",
+      "forecast_keep": "Pri tomto tempe skončíte mesiac {{month}} s úsporou približne {{amount}}.",
+      "forecast_short": "Pri tomto tempe vám v mesiaci {{month}} bude chýbať približne {{amount}}."
+    },
+    "health": {
+      "of_100": "zo 100",
+      "up": "O {{count}} b. viac ako v mesiaci {{month}}",
+      "down": "O {{count}} b. menej ako v mesiaci {{month}}",
+      "same": "Rovnako ako v mesiaci {{month}}",
+      "show_breakdown": "Ako sa skóre počíta",
+      "hide_breakdown": "Skryť výpočet skóre"
+    },
+    "attention": {
+      "title": "Vyžaduje vašu pozornosť",
+      "today": "Dnes",
+      "bill_title": "{{title}} · {{amount}}",
+      "due_today": "Splatné dnes",
+      "due_tomorrow": "Splatné zajtra",
+      "due_on": "Splatné {{date}}",
+      "mark_paid": "Označiť ako zaplatené",
+      "open_calendar": "Otvoriť kalendár",
+      "budget_title": "{{category}}: {{pct}} % rozpočtu",
+      "budget_sub": "{{spent}} z {{limit}} · zostáva dní: {{count}}",
+      "open_budget": "Otvoriť rozpočet",
+      "uncategorized_title": "Transakcie bez kategórie: {{count}}",
+      "uncategorized_sub": "V prehľade chýba {{amount}}",
+      "categorize": "Zaradiť",
+      "goal_title": "{{name}}: chýba ešte {{amount}}",
+      "goal_sub": "Cieľový dátum {{date}}",
+      "goal_overdue": "Cieľový dátum uplynul {{date}}",
+      "add_savings": "Pridať úsporu",
+      "empty_title": "Všetko je vybavené",
+      "empty_body": "Dnes nič nečaká. Zobrazia sa tu platby pred splatnosťou, rozpočty, ktoré sa míňajú, a ciele blízko svojho dátumu."
+    },
+    "categories": {
+      "title": "Kam išli vaše peniaze",
+      "help": "Každú kategóriu porovnávame s vaším vlastným priemerným mesiacom za posledné tri mesiace. Desať percent hore alebo dole považujeme za bežné.",
+      "subtitle": "Minuté {{amount}} · v porovnaní s vaším bežným mesiacom",
+      "all": "Všetky kategórie",
+      "bar_label": "Podiel výdavkov podľa kategórií",
+      "over": "▲ o {{pct}} % viac ako zvyčajne",
+      "under": "▼ o {{pct}} % menej ako zvyčajne",
+      "about": "Ako zvyčajne",
+      "new": "Nové tento mesiac",
+      "others": "Ostatné kategórie: {{amount}}",
+      "uncategorized": "Bez kategórie: {{amount}}",
+      "empty": "V tomto mesiaci nie sú zaznamenané žiadne výdavky."
+    },
+    "recent": {
+      "title": "Posledné transakcie",
+      "view_all": "Zobraziť všetky",
+      "empty": "Zatiaľ žiadne transakcie. Prvú pridáte tlačidlom +.",
+      "today": "Dnes",
+      "yesterday": "Včera",
+      "uncategorized": "Bez kategórie"
+    },
+    "goals": {
+      "title": "Ciele sporenia",
+      "manage": "Spravovať",
+      "of": "z",
+      "progress": "{{pct}} % · do {{date}}",
+      "per_month": "{{amount}} mesačne",
+      "reached": "Splnené",
+      "overdue": "Dátum uplynul",
+      "empty": "Zatiaľ nemáte žiadne ciele sporenia.",
+      "create": "Vytvoriť cieľ"
+    },
+    "trend": {
+      "title": "Posledných šesť mesiacov",
+      "income": "Príjem",
+      "spent": "Minuté",
+      "so_far": "zatiaľ",
+      "month_label": "{{month}}: príjem {{income}}, minuté {{spent}}"
+    },
+    "upgrade": {
+      "title": "Pozrite si celý obraz",
+      "body": "Bezplatný plán obsahuje všetko vyššie. Platený plán pridáva to, čo udrží mesiac pod kontrolou:",
+      "reminders": "Pripomienky platieb pred splatnosťou",
+      "goals": "Ciele sporenia s mesačným tempom",
+      "trends": "Vývoj za šesť mesiacov",
+      "receipts": "Bločky a výpisy prečítané za vás",
+      "cta": "Porovnať plány"
+    },
+    "adviser_teaser": {
+      "title": "Chcete vedieť, čo robiť budúci mesiac?",
+      "body": "Finančný poradca prečíta váš mesiac a dá vám 2 – 4 konkrétne kroky, každý s číslom, o ktoré sa opiera. Súčasť plánu Premium.",
+      "cta": "Pozrieť Premium"
+    },
+    "add": {
+      "button": "Pridať transakciu",
+      "type": "Napísať",
+      "type_desc": "Suma, popis, kategória",
+      "voice": "Nadiktovať",
+      "voice_desc": "Povedzte to a skontrolujte údaje",
+      "scan": "Naskenovať bloček",
+      "scan_desc": "Fotka alebo výpis"
+    },
+    "nav": {
+      "label": "Hlavná navigácia",
+      "home": "Domov",
+      "more": "Viac"
+    },
+    "adviser_error": {
+      "title": "Váš poradca teraz nedokázal odpovedať",
+      "unavailable": "Služba AI momentálne neodpovedá. Čísla na tejto stránke to neovplyvňuje.",
+      "disabled": "AI je pre tento účet vypnutá. Zapnite ju v Profile a dostanete rady."
+    }
+  }
 }

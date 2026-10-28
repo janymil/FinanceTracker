@@ -24,6 +24,7 @@ import Sidebar from "@/components/sidebar";
 import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
 import { FinancialMascot } from "@/components/financial-mascot";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 // The two pages that must paint immediately: an anonymous visitor lands here, and every
 // signed-in session starts on the dashboard.
@@ -382,6 +383,9 @@ export function AuthenticatedApp() {
         </main>
       </div>
       <Footer sidebarCollapsed={sidebarCollapsed} />
+      {/* Room for the phone's bottom bar, so the footer is not hidden under it. */}
+      <div className="h-[68px] lg:hidden" aria-hidden="true" />
+      <MobileBottomNav onMore={() => setSidebarOpen(true)} />
       <FinancialMascot />
       <CookieBanner />
     </div>

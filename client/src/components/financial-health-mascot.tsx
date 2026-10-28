@@ -199,7 +199,7 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
   });
   const [showDetails, setShowDetails] = useState(false);
 
-  const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
+  const { data: healthData, isLoading, error, refetch, isFetching } = useQuery<FinancialHealthData>({
     queryKey: ["/api/financial-health", user?.id, startDate, endDate],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -357,6 +357,36 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-3">
             {t('yourFinancialAssistantIsWakingUp')}
           </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  /*
+   * A refusal is not an empty result. A spent allowance, AI switched off or a provider outage used
+   * to fall through to "add some transactions", which told a customer with a full month of data
+   * that they had none. Say what happened and offer to try again.
+   */
+  if (!healthData && error) {
+    const code = String((error as Error).message ?? '').match(/"code"\s*:\s*"([a-z_]+)"/)?.[1];
+    const reason =
+      code === 'ai_quota_exceeded' ? t('mascot.quota_exceeded')
+        : code === 'ai_rate_limited' ? t('mascot.rate_limited')
+          : code === 'ai_disabled' ? t('overview.adviser_error.disabled')
+            : t('overview.adviser_error.unavailable');
+    return (
+      <Card className="relative overflow-hidden" role="alert" data-testid="adviser-error">
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <AlertTriangle className="h-10 w-10 text-amber-600" aria-hidden="true" />
+            <p className="font-semibold text-gray-900 dark:text-white">{t('overview.adviser_error.title')}</p>
+            <p className="max-w-md text-sm text-gray-600 dark:text-gray-400">{reason}</p>
+            {code !== 'ai_quota_exceeded' && code !== 'ai_disabled' && (
+              <Button variant="outline" size="sm" className="mt-2" disabled={isFetching} onClick={() => refetch()}>
+                {t('Try again')}
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     );

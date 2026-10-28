@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { X, Settings, Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
@@ -9,7 +8,7 @@ import { Label } from "./ui/label";
 import { Badge } from "./ui/badge";
 import { useToast } from "../hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { budgetsForPeriod, calculateFinancialHealth } from "@shared/financialHealth";
+import { useDashboardOverview } from "@/components/dashboard/overviewShared";
 
 interface MascotData {
   id: string;
@@ -21,20 +20,6 @@ interface MascotData {
   isEnabled: boolean;
 }
 
-/**
- * The calendar month the mascot's score describes. The score card passes the month the dashboard
- * is showing; the floating face has no month selector, so it describes this one.
- */
-function startOfThisMonth(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1);
-}
-
-function endOfThisMonth(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-}
-
 export function FinancialMascot() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
@@ -42,7 +27,11 @@ export function FinancialMascot() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [mascot, setMascot] = useState<MascotData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [position, setPosition] = useState({ x: 16, y: 16 }); // Default: bottom-4 right-4
+  // Default: bottom-right corner; on a phone, above the bottom bar (MobileBottomNav, 68px).
+  const [position, setPosition] = useState(() => ({
+    x: 16,
+    y: typeof window !== 'undefined' && window.innerWidth < 1024 ? 84 : 16,
+  }));
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const { t } = useTranslation();
@@ -56,28 +45,11 @@ export function FinancialMascot() {
    * limit, and the panel then said "no tips for this period" about a month that had plenty.
    * The score here is the same rubric the card prints, computed from data already in the cache.
    */
-  const summaryQuery = useQuery<{ totalIncome: number; totalExpenses: number }>({
-    queryKey: ["/api/financial-summary"],
-    enabled: isReady && !!user?.id,
-  });
-  const budgetsQuery = useQuery<Array<{ amount: string | number; startDate: string; endDate: string }>>({
-    queryKey: ["/api/budgets"],
-    enabled: isReady && !!user?.id,
-  });
-
-  const financialHealth = summaryQuery.data
-    ? {
-        score: calculateFinancialHealth({
-          totalIncome: Number(summaryQuery.data.totalIncome) || 0,
-          totalExpenses: Number(summaryQuery.data.totalExpenses) || 0,
-          budgetTotal: budgetsForPeriod(
-            budgetsQuery.data ?? [],
-            startOfThisMonth(),
-            endOfThisMonth(),
-          ).reduce((total, budget) => total + Number(budget.amount || 0), 0),
-        }).score,
-      }
-    : null;
+  // This month's score from the dashboard overview: the same rubric and the same time zone as the
+  // score card. It used to ask for the month summary without saying which month, which the server
+  // refuses (400), so the face never had a number.
+  const overviewQuery = useDashboardOverview(undefined);
+  const financialHealth = overviewQuery.data ? { score: overviewQuery.data.health.score } : null;
 
   // Fetch mascot data
   const fetchMascot = async () => {
