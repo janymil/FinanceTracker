@@ -1190,16 +1190,28 @@ export async function generateExpensePredictions(
       }))
     };
 
-    const prompt = `Analyze this detailed expense data and generate accurate predictions for future spending patterns.
+    /*
+     * The reply has a token budget, and the old prompt asked for more than fits in it.
+     *
+     * It wanted one entry per category, each with three explanation strings, plus three monthly rows
+     * that each carried a per-category breakdown. With fourteen categories that is roughly 1,600
+     * tokens of JSON against a 1,500-token limit, so the answer was cut mid-string and every call
+     * ended as "the model reply was not valid JSON" - which the customer saw as "Failed to generate
+     * predictions". The breakdown was never rendered by the card either.
+     *
+     * What it asks for now is what the card shows: at most eight categories, two short factors each,
+     * and three monthly totals.
+     */
+    const prompt = `Analyze this expense data and predict future spending.
 
 EXPENSE ANALYSIS DATA:
 ${JSON.stringify(analysisData, null, 2)}
 
-REQUIREMENTS:
-1. Identify spending trends, seasonal patterns, and recurring expenses
-2. Calculate realistic predictions based on historical data
-3. Assess confidence levels based on data consistency and patterns
-4. Consider factors like spending volatility, growth trends, and recurring expenses
+WHAT TO RETURN:
+- At most 8 categories: the largest by amount. Skip categories that are a trivial share of spending.
+- Exactly 3 monthly totals, in the order shown.
+- Every amount is computed from the data above, never invented. When there is too little history the
+  confidence is low; the amount is never guessed.
 
 RESPONSE FORMAT (JSON):
 {
@@ -1210,51 +1222,23 @@ RESPONSE FORMAT (JSON):
       "predictedNext": 475.00,
       "confidence": 0.85,
       "trend": "increasing",
-      "factors": ["Two months of higher spending in this category", "Recurring payment counted", "Fewer transactions than last month"]
+      "factors": ["Two months of higher spending", "Recurring payment counted"]
     }
   ],
   "monthlyPredictions": [
-    {
-      "month": "${monthLabel(1)}",
-      "predicted": 2150.00,
-      "confidence": 0.80,
-      "breakdown": [
-        { "category": "Food & Dining", "amount": 475.00 },
-        { "category": "Transportation", "amount": 320.00 }
-      ]
-    },
-    {
-      "month": "${monthLabel(2)}",
-      "predicted": 2200.00,
-      "confidence": 0.75,
-      "breakdown": [
-        { "category": "Food & Dining", "amount": 480.00 },
-        { "category": "Transportation", "amount": 330.00 }
-      ]
-    },
-    {
-      "month": "${monthLabel(3)}",
-      "predicted": 2100.00,
-      "confidence": 0.70,
-      "breakdown": [
-        { "category": "Food & Dining", "amount": 460.00 },
-        { "category": "Transportation", "amount": 310.00 }
-      ]
-    }
+    { "month": "${monthLabel(1)}", "predicted": 2150.00, "confidence": 0.80 }
   ]
 }
 
-ANALYSIS GUIDELINES:
-- Use actual spending patterns to predict future amounts
-- Factor in recurring expenses for higher confidence
-- Consider trend direction (increasing/decreasing/stable)
-- Confidence must match the amount of history: one month of data is 0.5 at best, three months can
-  reach 0.75, six months or more can reach 0.9. Never claim more than 0.95.
-- Include the next 3 months in monthly predictions
-- Always include "factors" array for each category prediction
-- Explain prediction factors clearly, using the person's own amounts
-- Do not claim a seasonal pattern from less than a year of data
-- Ensure all numeric values are provided (no null/undefined)`;
+GUIDELINES:
+- Use the person's own patterns: their averages, their own trend, their recurring expenses.
+- Confidence must match the history: one month is 0.5 at best, three months 0.75, six months or more
+  0.9. Never above 0.95.
+- At most 2 factors per category, each under 12 words.
+- Do not claim a seasonal pattern from less than a year of data.
+- Do not describe the data back to the person, and never mention what you were given or what you were
+  not shown.
+- Every numeric value must be present (no null).`;
 
     const response = await generateProse({
       model: AI_MODELS.default,
@@ -1271,11 +1255,28 @@ You are an advanced financial forecasting AI specializing in expense prediction 
         }
       ],
       response_format: { type: "json_object" },
-      max_tokens: 1500,
+      // The same lesson the trend forecast learned: eight categories with factors plus three monthly
+      // rows does not fit in 1,500 tokens, and a reply cut at the limit is not a transient error the
+      // caller can retry - it fails every time until the budget is fixed.
+      max_tokens: 3000,
       temperature: 0.2 // Low temperature for consistent financial predictions
     });
 
-    const aiResponse = parseModelJson(response.choices[0].message.content);
+    /*
+     * When a reply cannot be read, record how it broke: a reply cut at the token limit and a reply
+     * written as prose need different fixes, and the length is the difference between them. The
+     * content itself is never logged - it holds the person's categories and amounts.
+     */
+    let aiResponse;
+    try {
+      aiResponse = parseModelJson(response.choices[0].message.content);
+    } catch (parseError) {
+      log.error('Expense predictions: unreadable reply', {
+        finishReason: response.choices[0].finish_reason,
+        characters: (response.choices[0].message.content || '').length,
+      });
+      throw parseError;
+    }
     
     // Ensure all required fields are present with proper data types
     // Confidence cannot exceed what the history supports: the prompt asks for that, and this cap

@@ -19,10 +19,39 @@ export function parseModelJson(content: string | null | undefined): Record<strin
   if (typeof content !== 'string' || content.trim() === '') {
     throw new AIResponseError('The model returned an empty reply');
   }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(content);
-  } catch {
+
+  const attempt = (text: string): unknown => {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return undefined;
+    }
+  };
+
+  let parsed = attempt(content);
+
+  /*
+   * A reply inside a code fence, or with one sentence in front of it, is still a usable answer: the
+   * provider's "JSON mode" is advisory, and the gateway in front of it does not always pass it on.
+   * Take the outermost braces and try once more.
+   *
+   * A reply that was cut off mid-string still fails here, which is right: that is a truncated answer,
+   * not a formatting accident, and pretending otherwise would hide a prompt that asks for too much.
+   */
+  if (parsed === undefined) {
+    const withoutFences = content.replace(/```(?:json)?/gi, '').trim();
+    parsed = attempt(withoutFences);
+
+    if (parsed === undefined) {
+      const start = withoutFences.indexOf('{');
+      const end = withoutFences.lastIndexOf('}');
+      if (start !== -1 && end > start) {
+        parsed = attempt(withoutFences.slice(start, end + 1));
+      }
+    }
+  }
+
+  if (parsed === undefined) {
     throw new AIResponseError('The model reply was not valid JSON');
   }
   if (parsed === null || typeof parsed !== 'object') {

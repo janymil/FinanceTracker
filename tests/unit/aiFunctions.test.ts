@@ -336,6 +336,27 @@ describe('generateExpensePredictions', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  /*
+   * The reply used to be cut off: one entry per category with three factors each, plus three monthly
+   * rows carrying a per-category breakdown, did not fit in 1,500 tokens. Every call then failed as
+   * "the model reply was not valid JSON" and the card said "Failed to generate predictions".
+   */
+  it('asks for an answer that fits its token budget', async () => {
+    create.mockResolvedValueOnce(reply({
+      categoryPredictions: [
+        { category: 'Food', currentMonth: 100, predictedNext: 110, confidence: 0.7, trend: 'increasing', factors: ['x'] },
+      ],
+      monthlyPredictions: [{ month: '2026-11', predicted: 110, confidence: 0.7 }],
+    }));
+    await generateExpensePredictions('u', txs(), 'en-us');
+
+    const request = create.mock.calls[0][0];
+    expect(request.max_tokens).toBeGreaterThanOrEqual(3000);
+    expect(userOf()).toContain('At most 8 categories');
+    // The per-month breakdown was never rendered by the card; asking for it only spent tokens.
+    expect(userOf()).not.toContain('"breakdown"');
+  });
+
   it('drops predictions with no category or month instead of printing "Unknown"', async () => {
     create.mockResolvedValueOnce(reply({
       categoryPredictions: [

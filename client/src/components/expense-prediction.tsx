@@ -11,6 +11,7 @@ import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useTranslation } from 'react-i18next';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface ExpensePredictionProps {
   transactions?: any[];
@@ -35,6 +36,9 @@ interface MonthlyPrediction {
 
 export default function ExpensePrediction({ transactions = [], summary }: ExpensePredictionProps) {
   const { t } = useTranslation();
+  // Every amount on this card used to be printed with a dollar sign, whatever the account's currency
+  // is: a soles account was reading its predictions in dollars.
+  const { formatMoney } = useCurrency();
   const [predictionPeriod, setPredictionPeriod] = useState('3m');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [monthlyPredictions, setMonthlyPredictions] = useState<MonthlyPrediction[]>([]);
@@ -60,7 +64,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const hasTransactionData = expenseTransactions.length >= 3;
 
   // Use React Query for predictions with premium check and caching
-  const { data: predictionsData, isLoading: predictionsLoading, error: predictionsError } = useQuery({
+  const { data: predictionsData, isLoading: predictionsLoading, error: predictionsError, refetch: refetchPredictions } = useQuery({
     queryKey: ['expense-predictions', user?.id, expenseTransactions.length],
     enabled: isReady && isPremiumUser, // Let AI decide if data is sufficient
     staleTime: 5 * 60 * 1000, // 5 minutes cache
@@ -138,9 +142,13 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                     {t('Prediction Error')}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
                     {t('Failed to generate predictions. Please try again later.')}
                   </p>
+                  {/* A dead end is not an answer: the failure is often a busy model, not a bad month. */}
+                  <Button variant="outline" size="sm" onClick={() => refetchPredictions()}>
+                    {t('Try again')}
+                  </Button>
                 </div>
               ) : hasTransactionData && predictions.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -150,7 +158,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                       <span className="text-sm font-medium">{t('Next Month')}</span>
                     </div>
                     <div className="text-2xl font-bold text-blue-600">
-                      ${totalPredicted.toLocaleString()}
+                      {formatMoney(totalPredicted)}
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-300">{t('Predicted total expenses')}</p>
                   </Card>
@@ -203,8 +211,8 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-lg font-bold">${prediction.predictedNext.toLocaleString()}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">{t('vs')} ${prediction.currentMonth.toLocaleString()} {t('current')}</div>
+                          <div className="text-lg font-bold">{formatMoney(prediction.predictedNext)}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">{t('vs')} {formatMoney(prediction.currentMonth)} {t('current')}</div>
                         </div>
                       </div>
                       {prediction.factors.length > 0 && (
@@ -252,7 +260,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" />
                         <YAxis />
-                        <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, t('Predicted Expenses')]} />
+                        <Tooltip formatter={(value: any) => [formatMoney(Number(value)), t('Predicted Expenses')]} />
                         <Bar dataKey="predicted" fill="#8884d8" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -271,7 +279,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold">${month.predicted.toLocaleString()}</div>
+                          <div className="font-bold">{formatMoney(month.predicted)}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-300">{t('predicted')}</div>
                         </div>
                       </div>

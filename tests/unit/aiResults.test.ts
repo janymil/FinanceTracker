@@ -30,6 +30,30 @@ describe('parseModelJson', () => {
     expect(() => parseModelJson('Sure! Here is your answer.')).toThrow(/not valid JSON/);
   });
 
+  /*
+   * Providers do not always honour "JSON mode", and the gateway in front of them does not always pass
+   * it on. A fenced or prefixed reply is still a usable answer; a truncated one is not.
+   */
+  it('accepts a reply wrapped in a code fence', () => {
+    expect(parseModelJson('```json\n{"a":1}\n```')).toEqual({ a: 1 });
+  });
+
+  it('accepts a reply with a sentence before and after the object', () => {
+    expect(parseModelJson('Here you go: {"a":1} - hope it helps')).toEqual({ a: 1 });
+  });
+
+  it('takes the outermost object when the reply contains nested ones', () => {
+    expect(parseModelJson('{"a":{"b":2}} trailing')).toEqual({ a: { b: 2 } });
+  });
+
+  it('still rejects a reply cut off mid-string: truncation is not a formatting accident', () => {
+    expect(() => parseModelJson('{"a":"unfinis')).toThrow(/not valid JSON/);
+  });
+
+  it('still rejects prose that merely contains braces', () => {
+    expect(() => parseModelJson('The answer {is} unclear')).toThrow(/not valid JSON/);
+  });
+
   it.each(['42', '"text"', 'true', 'null'])('rejects JSON that is not an object (%s)', (value) => {
     expect(() => parseModelJson(value)).toThrow(AIResponseError);
   });
