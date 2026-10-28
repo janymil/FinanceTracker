@@ -415,14 +415,24 @@ const healthInput = () => ({
 });
 
 const advice = {
+  focus: {
+    title: 'Food is 120 over its budget',
+    body: 'Food reached 620 against a limit of 500. Your own average for this category is 400, so this month is a spike, not a new normal. Cap food at 500 and the month closes even.',
+    estimatedSaving: 120,
+  },
   summary: 'You spent 2000 of 3000 and kept 1000. Food took 620.',
-  observations: ['Food reached 620, above your usual 400.'],
+  observations: [
+    { title: 'Food over its usual level', body: 'Food reached 620, above your usual 400.' },
+    'Groceries took 31% of everything you spent.',
+  ],
   recommendations: [
     {
+      title: 'Cap food at 500',
       action: 'Cap food at 500 a month',
       reason: 'Food reached 620, 120 over the budget',
       impact: 'Frees 120 a month',
       priority: 'high',
+      timeToComplete: 'this week',
     },
   ],
   riskAssessment: 'Food is the only budget over its limit.',
@@ -430,15 +440,35 @@ const advice = {
 };
 
 describe('generateAIFinancialHealthScore (the adviser)', () => {
-  it('returns advice as actions, each carrying the figure behind it', async () => {
+  it('returns the four parts the card shows: focus, summary, observations, actions', async () => {
     create.mockResolvedValueOnce(reply(advice));
     const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
 
-    expect(result.aiAnalysis.recommendations).toEqual([
-      { action: 'Cap food at 500 a month', reason: 'Food reached 620, 120 over the budget', impact: 'Frees 120 a month', priority: 'high' },
-    ]);
-    expect(result.aiAnalysis.personalizedFactors).toEqual(['Food reached 620, above your usual 400.']);
+    expect(result.aiAnalysis.focus).toEqual({
+      title: 'Food is 120 over its budget',
+      body: expect.stringContaining('620'),
+      estimatedSaving: 120,
+    });
     expect(result.aiAnalysis.summary).toContain('620');
+    expect(result.aiAnalysis.observations).toEqual([
+      { title: 'Food over its usual level', body: 'Food reached 620, above your usual 400.' },
+      { title: '', body: 'Groceries took 31% of everything you spent.' },
+    ]);
+    expect(result.aiAnalysis.recommendations).toEqual([
+      {
+        title: 'Cap food at 500',
+        action: 'Cap food at 500 a month',
+        reason: 'Food reached 620, 120 over the budget',
+        impact: 'Frees 120 a month',
+        priority: 'high',
+        timeToComplete: 'this week',
+      },
+    ]);
+    // The flat list stays for callers that only want the sentences.
+    expect(result.aiAnalysis.personalizedFactors).toEqual([
+      'Food reached 620, above your usual 400.',
+      'Groceries took 31% of everything you spent.',
+    ]);
   });
 
   it('does not ask the model to score the month: the app owns that number', async () => {
@@ -448,7 +478,7 @@ describe('generateAIFinancialHealthScore (the adviser)', () => {
     expect(result.score).toBe(0);
     // The prompt tells the model it is the adviser, not the scorekeeper, and that the figures are
     // given to it rather than derived by it.
-    expect(systemOf()).toMatch(/one place this person is\s+given advice/i);
+    expect(systemOf()).toMatch(/the only place\s+this person is\s+given advice/i);
     expect(systemOf()).not.toMatch(/four factors|max \d+/i);
   });
 
@@ -467,8 +497,19 @@ describe('generateAIFinancialHealthScore (the adviser)', () => {
     const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
 
     expect(result.aiAnalysis.recommendations).toEqual([
-      { action: 'Cancel the unused gym membership', reason: '', impact: '', priority: 'medium' },
+      { title: '', action: 'Cancel the unused gym membership', reason: '', impact: '', priority: 'medium', timeToComplete: '' },
     ]);
+  });
+
+  it('signs the money it would free up only when the reply states one', async () => {
+    create.mockResolvedValueOnce(reply({
+      focus: { title: 'Something', body: 'A body with 120 in it.', estimatedSaving: 0 },
+      recommendations: [{ action: 'Do a thing' }],
+    }));
+    const result = await generateAIFinancialHealthScore(healthInput(), 'en-us');
+
+    // Zero and "not stated" are different claims: a 0 here would read as "this saves you nothing".
+    expect(result.aiAnalysis.focus.estimatedSaving).toBeNull();
   });
 
   it('treats a reply with no advice as a failure, not as an empty adviser', async () => {

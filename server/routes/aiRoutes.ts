@@ -690,13 +690,33 @@ export function registerAIRoutes(app: Express) {
    *  - `category` is the band that goes with the number, so the mascot's face and the badge agree.
    */
   function transformAIResponseForMascot(aiData: any, health: FinancialHealth) {
-    const insights: string[] = [];
     const warnings: string[] = [];
 
-    // The adviser's observations, one sentence each, already in the person's language.
-    if (Array.isArray(aiData.aiAnalysis?.personalizedFactors)) {
-      insights.push(...aiData.aiAnalysis.personalizedFactors);
-    }
+    /*
+     * The four parts of the adviser's answer, each kept in its own shape.
+     *
+     * The card shows them differently: the focus card is prose, the observations are short findings,
+     * the actions carry a reason and an impact. Flattening any of them into strings would throw away
+     * what makes the panel worth paying for.
+     */
+    const focus = aiData.aiAnalysis?.focus && typeof aiData.aiAnalysis.focus === 'object'
+      ? {
+          title: String(aiData.aiAnalysis.focus.title || '').trim(),
+          body: String(aiData.aiAnalysis.focus.body || '').trim(),
+          estimatedSaving: Number(aiData.aiAnalysis.focus.estimatedSaving) > 0
+            ? Number(aiData.aiAnalysis.focus.estimatedSaving)
+            : null,
+        }
+      : { title: '', body: '', estimatedSaving: null };
+
+    const insights: Array<{ title: string; body: string }> = Array.isArray(aiData.aiAnalysis?.observations)
+      ? aiData.aiAnalysis.observations
+          .map((entry: any) => (typeof entry === 'string'
+            ? { title: '', body: entry.trim() }
+            : { title: String(entry?.title || '').trim(), body: String(entry?.body || '').trim() }))
+          .filter((entry: { body: string }) => entry.body && !isMetaCommentary(entry.body))
+          .slice(0, 5)
+      : [];
 
     /*
      * The advice, kept as objects instead of flattened to strings.
@@ -705,16 +725,25 @@ export function registerAIRoutes(app: Express) {
      * a machine that does not know the month. The reason - "Food reached 620, 120 over the budget"
      * - is the part that makes it believable and the part the person can check.
      */
-    const advice: Array<{ action: string; reason: string; impact: string; priority: 'high' | 'medium' | 'low' }> =
+    const advice: Array<{
+      title: string;
+      action: string;
+      reason: string;
+      impact: string;
+      priority: 'high' | 'medium' | 'low';
+      timeToComplete: string;
+    }> =
       Array.isArray(aiData.aiAnalysis?.recommendations)
         ? aiData.aiAnalysis.recommendations
             .map((rec: any) => (typeof rec === 'string'
-              ? { action: rec.trim(), reason: '', impact: '', priority: 'medium' as const }
+              ? { title: '', action: rec.trim(), reason: '', impact: '', priority: 'medium' as const, timeToComplete: '' }
               : {
+                  title: String(rec?.title || '').trim(),
                   action: String(rec?.action || '').trim(),
                   reason: String(rec?.reason || '').trim(),
                   impact: String(rec?.impact || '').trim(),
                   priority: (rec?.priority === 'high' || rec?.priority === 'low' ? rec.priority : 'medium') as 'high' | 'medium' | 'low',
+                  timeToComplete: String(rec?.timeToComplete || '').trim(),
                 }))
             .filter((rec: { action: string }) => rec.action && !isMetaCommentary(rec.action))
             .slice(0, 5)
@@ -732,8 +761,9 @@ export function registerAIRoutes(app: Express) {
       score: health.score,
       trend: aiData.trend || 'stable',
       category: health.band,
+      focus,
       summary: typeof aiData.aiAnalysis?.summary === 'string' ? aiData.aiAnalysis.summary.trim() : '',
-      insights: insights.filter((line) => !isMetaCommentary(line)).slice(0, 10), // Limit to 10 insights
+      insights,
       // The strengths tab is computed from `factors` on the client; this field stays for the shape.
       achievements: [],
       warnings: warnings.filter((line) => !isMetaCommentary(line)).slice(0, 3),

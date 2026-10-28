@@ -818,7 +818,8 @@
     "aiFinancialAnalysis": "AI finančná analýza",
     "healthScore": "Skóre zdravia",
     "aiInsights": "AI poznatky",
-    "generating": "Generuje sa..."
+    "generating": "Generuje sa...",
+    "estimatedSaving": "Odhadovaná úspora"
   },
   "aiAnalysisSection": "Sekcia AI analýzy",
   "analysisInProgress": "Analýza prebieha...",

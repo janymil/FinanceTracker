@@ -799,7 +799,8 @@
     "aiFinancialAnalysis": "AI Financial Analysis",
     "healthScore": "Health Score",
     "aiInsights": "AI Insights",
-    "generating": "Generating..."
+    "generating": "Generating...",
+    "estimatedSaving": "Estimated saving"
   },
   "AI Expense Prediction": "AI Expense Prediction",
   "Machine learning predictions based on your spending patterns": "Machine learning predictions based on your spending patterns",

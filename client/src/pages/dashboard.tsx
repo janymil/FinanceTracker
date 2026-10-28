@@ -743,8 +743,8 @@ export default function Dashboard() {
         {/* Panels are rendered for every signed-in user.
             Functions that require a higher plan are locked by <RequirePlan>. */}
         <div className="space-y-8">
-          {/* Health score + quick snapshot + mascot */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Health score + quick snapshot */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <LazyFinancialHealthScore
               summary={financialSummary}
               budgets={budgets as any}
@@ -755,19 +755,27 @@ export default function Dashboard() {
               summary={financialSummary}
               transactions={transactions as any}
             />
-            <RequirePlan
-              plan="premium"
-              compact
-              ai
-              feature={t('financialHealthAdvisor')}
-              description={t('features.adviser.description')}
-            >
-              <FinancialHealthMascot
-                startDate={startDate.toISOString()}
-                endDate={endDate.toISOString()}
-              />
-            </RequirePlan>
           </div>
+
+          {/*
+           * The adviser gets its own line, full width, and this is deliberate.
+           *
+           * It is the premium feature, and it now carries the longest text on the dashboard: a focus
+           * card, a summary, the findings and the actions. Squeezed into a third of a row beside the
+           * score, all of that was cut to two lines and a "details" button.
+           */}
+          <RequirePlan
+            plan="premium"
+            compact
+            ai
+            feature={t('financialHealthAdvisor')}
+            description={t('features.adviser.description')}
+          >
+            <FinancialHealthMascot
+              startDate={startDate.toISOString()}
+              endDate={endDate.toISOString()}
+            />
+          </RequirePlan>
 
           {/* Recent transactions + budget overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -814,8 +822,8 @@ export default function Dashboard() {
             </RequirePlan>
           </div>
 
-          {/* Reminders and saving streak */}
-          <div className="space-y-8">
+          {/* Reminders and saving streak, side by side: stacked, each one wasted a full row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <RequirePlan
               plan="standard"
               compact
@@ -827,8 +835,9 @@ export default function Dashboard() {
             <LoggingStreakCard transactions={Array.isArray(transactions) ? transactions : []} />
           </div>
 
-          {/* Expense prediction (Premium) + auto-categorization (Standard+) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Expense prediction (Premium) + auto-categorization (Standard+). items-start keeps the
+              shorter card from being stretched to the taller one's height. */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <RequirePlan
               plan="premium"
               compact

@@ -205,7 +205,11 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
 
             <TabsContent value="categories" className="space-y-4">
               {hasTransactionData && predictions.length > 0 ? (
-                <div className="space-y-3">
+                /*
+                 * A scroll area with a ceiling, so eight categories do not make this card three times
+                 * taller than the panel beside it. Same content, predictable height.
+                 */
+                <div className="space-y-3 max-h-[26rem] overflow-y-auto pr-1">
                   {predictions.slice(0, 8).map((prediction) => (
                     <Card key={prediction.category} className="p-4">
                       <div className="flex items-center justify-between mb-3">

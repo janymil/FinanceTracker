@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/context/CurrencyContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -107,18 +108,23 @@ interface FinancialHealthData {
   score: number;
   trend: 'improving' | 'declining' | 'stable';
   category: 'excellent' | 'good' | 'fair' | 'needs_improvement';
+  /** The one thing that matters most this month: the in-depth card. */
+  focus?: { title: string; body: string; estimatedSaving: number | null };
   /** The month in two sentences, from the adviser. */
   summary?: string;
-  insights: string[];
+  /** Findings to know, each with a title and a body. */
+  insights: Array<{ title: string; body: string }>;
   achievements: string[];
   /** Only the risk line now; the actions have their own, longer shape below. */
   warnings: string[];
   /** What to change, why, and what it frees up. */
   advice?: Array<{
+    title: string;
     action: string;
     reason: string;
     impact: string;
     priority: AdvicePriority;
+    timeToComplete: string;
   }>;
   /** The four computed factors; the strengths tab and the section colours read these. */
   factors?: Array<{
@@ -148,6 +154,8 @@ interface MascotState {
 export default function FinancialHealthMascot({ startDate, endDate }: FinancialHealthMascotProps) {
   const { isReady, user } = useClerkUserReady();
   const { t } = useTranslation();
+  // The focus card shows a saving in money: it has to be the account's currency, not a hard-coded one.
+  const { formatMoney } = useCurrency();
 
   const mascotConfigs = {
     excellent: {
@@ -437,6 +445,30 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
             </p>
           </div>
 
+          {/*
+           * The adviser's main finding, readable without opening anything.
+           *
+           * This is what the old "AI financial tips" card did with its long body, and it is the part a
+           * premium customer should see first: one analysis, in prose, with the figure it rests on.
+           */}
+          {healthData.focus && healthData.focus.body && (
+            <div className="mb-4 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-900/20 p-4">
+              {healthData.focus.title && (
+                <h4 className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">{healthData.focus.title}</h4>
+              )}
+              <p className="text-xs text-indigo-900/80 dark:text-indigo-100/80 leading-relaxed mt-1">{healthData.focus.body}</p>
+              {typeof healthData.focus.estimatedSaving === 'number' && healthData.focus.estimatedSaving > 0 && (
+                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mt-2">
+                  {t('mascot.estimatedSaving')}: {formatMoney(healthData.focus.estimatedSaving)}
+                </p>
+              )}
+            </div>
+          )}
+
+          {healthData.summary && (
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{healthData.summary}</p>
+          )}
+
           {/* Health Score Progress */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
@@ -599,7 +631,7 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                     )}
                   </TabsContent>
 
-                  {/* Insights Tab */}
+                  {/* Insights Tab: the findings, each with its own title and body */}
                   <TabsContent value="insights" className="mt-4 space-y-3">
                     {healthData?.summary && (
                       <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
@@ -607,142 +639,30 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                       </p>
                     )}
                     {healthData?.insights && healthData.insights.length > 0 ? (
-                      <div className="space-y-3">
-                        {(() => {
-                          // Categorize insights for better grouping
-                          const spendingInsights = healthData.insights.filter(insight => 
-                            insight.toLowerCase().includes('spend') || 
-                            insight.toLowerCase().includes('expense') ||
-                            insight.toLowerCase().includes('cost')
-                          );
-                          const savingInsights = healthData.insights.filter(insight => 
-                            insight.toLowerCase().includes('sav') || 
-                            insight.toLowerCase().includes('budget') ||
-                            insight.toLowerCase().includes('money')
-                          );
-                          const trendInsights = healthData.insights.filter(insight => 
-                            insight.toLowerCase().includes('trend') || 
-                            insight.toLowerCase().includes('pattern') ||
-                            insight.toLowerCase().includes('increase') ||
-                            insight.toLowerCase().includes('decrease')
-                          );
-                          const otherInsights = healthData.insights.filter(insight => 
-                            !spendingInsights.includes(insight) && 
-                            !savingInsights.includes(insight) && 
-                            !trendInsights.includes(insight)
-                          );
-
-                          return (
-                            <>
-                              {/* Spending Patterns */}
-                              {spendingInsights.length > 0 && (
-                                <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-slate-900/30 dark:to-indigo-900/20 p-3 rounded-lg">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <DollarSign className="h-4 w-4 text-slate-600 dark:text-slate-300" />
-                                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">{t('mascot.categories.spendingPatterns')}</span>
-                                    <span aria-hidden="true" className={`w-2 h-2 rounded-full ${spendingDot}`} />
-                                  </div>
-                                  <div className="space-y-2">
-                                    {spendingInsights.map((insight, index) => (
-                                      <motion.div
-                                        key={`spending-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="flex items-start gap-2"
-                                      >
-                                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Savings & Budget */}
-                              {savingInsights.length > 0 && (
-                                <div className="bg-gradient-to-r from-slate-50 to-emerald-50 dark:from-slate-900/30 dark:to-emerald-900/20 p-3 rounded-lg">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <PiggyBank className="h-4 w-4 text-slate-600 dark:text-slate-300" />
-                                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">{t('mascot.categories.savingsBudget')}</span>
-                                    <span aria-hidden="true" className={`w-2 h-2 rounded-full ${savingDot}`} />
-                                  </div>
-                                  <div className="space-y-2">
-                                    {savingInsights.map((insight, index) => (
-                                      <motion.div
-                                        key={`saving-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="flex items-start gap-2"
-                                      >
-                                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Trends & Patterns */}
-                              {trendInsights.length > 0 && (
-                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-lg">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <BarChart3 className="h-4 w-4 text-blue-600" />
-                                    <span className="text-xs font-medium text-blue-700 dark:text-blue-400">{t('mascot.categories.trendsPatterns')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {trendInsights.map((insight, index) => (
-                                      <motion.div
-                                        key={`trend-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="flex items-start gap-2"
-                                      >
-                                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* General Insights */}
-                              {otherInsights.length > 0 && (
-                                <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-3 rounded-lg">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Lightbulb className="h-4 w-4 text-purple-600" />
-                                    <span className="text-xs font-medium text-purple-700 dark:text-purple-400">{t('mascot.categories.generalInsights')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {otherInsights.map((insight, index) => (
-                                      <motion.div
-                                        key={`other-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="flex items-start gap-2"
-                                      >
-                                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-purple-600 dark:text-purple-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
+                      <div className="space-y-2">
+                        {healthData.insights.map((insight, index) => (
+                          <motion.div
+                            key={`insight-${index}`}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.06 }}
+                            className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3"
+                          >
+                            {insight.title && (
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{insight.title}</p>
+                            )}
+                            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mt-1">{insight.body}</p>
+                          </motion.div>
+                        ))}
                       </div>
                     ) : (
                       <div className="text-center py-6">
                         <Brain className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 dark:text-gray-400">{t('mascot.emptyStates.noInsights')}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('mascot.emptyStates.addTransactions')}</p>
                       </div>
                     )}
                   </TabsContent>
+
 
                   {/* Advice Tab: the change, the reason, and what it frees up */}
                   <TabsContent value="recommendations" className="mt-4 space-y-3">
@@ -762,19 +682,31 @@ export default function FinancialHealthMascot({ startDate, endDate }: FinancialH
                                 className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${priorityDot(item.priority)}`}
                               />
                               <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-snug">
-                                  {item.action}
-                                </p>
+                                {(item.title || item.action) && (
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug">
+                                    {item.title || item.action}
+                                  </p>
+                                )}
+                                {item.title && item.action && (
+                                  <p className="text-sm text-gray-800 dark:text-gray-200 mt-1 leading-snug">{item.action}</p>
+                                )}
                                 {item.reason && (
-                                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5 leading-relaxed">
                                     {item.reason}
                                   </p>
                                 )}
-                                {item.impact && (
-                                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mt-1">
-                                    {item.impact}
-                                  </p>
-                                )}
+                                <div className="flex flex-wrap items-center gap-2 mt-2">
+                                  {item.impact && (
+                                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                                      {item.impact}
+                                    </span>
+                                  )}
+                                  {item.timeToComplete && (
+                                    <span className="text-[11px] rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-gray-600 dark:text-gray-300">
+                                      {item.timeToComplete}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </motion.div>

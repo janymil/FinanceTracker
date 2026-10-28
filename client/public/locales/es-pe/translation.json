@@ -789,7 +789,8 @@
     "aiFinancialAnalysis": "Análisis Financiero IA",
     "healthScore": "Puntuación de Salud",
     "aiInsights": "Perspectivas IA",
-    "generating": "Generando..."
+    "generating": "Generando...",
+    "estimatedSaving": "Ahorro estimado"
   },
   "aiAnalysisSection": "Sección de Análisis IA",
   "analysisInProgress": "Análisis en progreso...",

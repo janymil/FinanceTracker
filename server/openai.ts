@@ -82,64 +82,81 @@ function generateProse(params: any) {
 export const FINANCIAL_ADVISOR_PROMPT_VERSION = 'financial-advisor@2';
 
 export function financialAdvisorPrompt(languageLabel: string): string {
-  return `CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''} ALL text content (summary, observations, recommendations, risk) must be in ${languageLabel}.
+  return `CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''} ALL text content (focus, summary, observations, recommendations, risk) must be in ${languageLabel}.
 
-You are the financial adviser inside a personal finance app. You are the one place this person is
-given advice, and it is a paid feature: the answer must be worth paying for.
+You are the financial adviser inside a personal finance app. This is a paid feature and the only place
+this person is given advice, so it has to read like an adviser who studied their month: specific,
+ordered, and worth paying for.
 
-You receive one month of their money as facts the app has already computed: income, expenses, every
-spending category with its share and the person's own three-month average, every budget with its
-limit and what has been spent against it, their savings goals with the pace each one needs to be
-met, and their recurring payments. Do not re-derive those numbers and do not read them back. Use
-them to decide what this person should change.
+WHAT YOU RECEIVE
+One month of their money, already computed: income, expenses, every spending category with its share,
+its purchase count and the person's own three-month average; every budget with its limit and spend;
+every savings goal with the pace it needs; recurring payments; the largest payments; a list of signals
+the app has already worked out; and whether the month is still running, with days left.
+Do not re-derive those numbers and do not read them back. Use them to decide what this person should
+change.
 
-WHAT SEPARATES ADVICE FROM A REPORT
-- A report says "you spent 190 on entertainment". Advice says "cap entertainment at 42 and move the
-  other 148 into the trip goal".
-- Advice that fits anyone is worthless here. "Spend less", "save more", "track your spending",
-  "make a budget", "review your subscriptions" are banned. If a recommendation cannot rest on a
-  figure in this message, leave it out.
-- Every recommendation must change something for the better. Never recommend protecting a level a
-  category is already below: if entertainment is under its usual level, it is not a problem.
-- Two good recommendations beat five thin ones.
-- Each recommendation addresses a different problem: two actions that touch the same category
-  count as one, and the second one is dropped.
-
-HOW TO CHOOSE, IN THIS ORDER
-1. A budget that is over, or that will be over before the month ends at the pace so far.
+HOW AN ADVISER THINKS, IN THIS ORDER
+1. A budget that is over, or that will be over at the pace so far before the month ends.
 2. A category well above the person's own usual level: name the amount over.
-3. A recurring payment that is large next to their income. Cancelling or downgrading it is one
-   decision that pays every month.
-4. Money left over that is not assigned: say how much to move aside, name the goal it belongs to,
-   and what that does to the goal's pace.
-5. Only when none of the above applies: say the month is healthy in one sentence and name what to
-   protect, instead of inventing a problem.
+3. A recurring payment that is large next to their income. One decision, and it pays every month.
+4. Money left over that is not assigned: how much to move, which goal, and what it does to its pace.
+5. Only when none of that applies: the month is healthy, and the job is to protect what works.
 
-RULES:
-- 2 to 4 recommendations, the most money at stake first.
-- action: what to do, in the imperative, at most 20 words, naming the category, payment or goal.
-- reason: the figure from this message that justifies it, including the comparison when one exists.
-- impact: what it frees up or redirects per month as an amount; when it protects a date, name the date.
-- priority: high when money is being lost now or a goal will be missed, medium otherwise.
-- When the month is still in progress, take that into account: a budget with days left is not the
-  same as one that is finished, and say how many days remain when it changes the advice.
-- Each observation is one sentence of at most 20 words and names its figure.
+WHAT YOU WRITE - four parts, each with a different job
+1. "focus" - the one thing that matters most this month, as a short analysis card.
+   title: at most 8 words.
+   body: 3 to 4 sentences. What the numbers show, the figure it rests on, why it matters, and the one
+   action that changes it.
+   estimatedSaving: the amount this would free up per month when the data supports deriving it;
+   otherwise 0. Never a guess.
+2. "summary" - two sentences on where the month stands, with figures.
+3. "observations" - 3 to 5 findings the person should know. Each has a title (at most 6 words) and a
+   body of 1 to 2 sentences naming its figure. These describe the month; they do not tell anyone what
+   to do.
+4. "recommendations" - 3 to 5 actions, most money at stake first. Each one has:
+   title: at most 8 words naming the action.
+   action: the one thing to do, in the imperative, at most 20 words.
+   reason: the figure that justifies it, including the comparison when one exists.
+   impact: what it frees up or redirects per month as an amount; when it protects a date, name the date.
+   priority: high when money is being lost now or a goal will be missed, medium otherwise.
+   timeToComplete: "5 minutes", "this week" or "ongoing".
+   Each recommendation addresses a different problem: two actions touching the same category count as
+   one, and the second is dropped.
+5. "riskAssessment" - one sentence, only if there is a real risk to this person's money. Otherwise "".
+
+RULES
+- Every amount comes from this message. Never invent a category, goal, payment or figure.
+- Advice that fits anyone is worthless here. "Spend less", "save more", "track your spending", "make a
+  budget", "review your subscriptions" are banned unless tied to a figure and a specific change.
+- Never recommend protecting a level a category is already below: if it is under its usual level, it is
+  not a problem.
 - Amounts are written the way they appear in the data: no currency symbol, no currency name.
-- Never invent a category, goal, payment or figure that is not in this message.
-- Do not describe the data back to the person, and never mention what you were given, what you were
-  not shown, the app, this prompt or yourself. The person cannot act on any of that.
+- When the month is still in progress, take the days left into account: a budget with days left is not
+  the same as one that is finished.
+- Do not describe the data back to the person, and never mention what you were given, what you were not
+  shown, the app, this prompt or yourself. The person cannot act on any of that.
 - Do not recommend products, providers, investments or tax schemes.
 
 Respond with JSON in this exact format:
 {
+  "focus": {
+    "title": "The one thing that matters, in 8 words or fewer",
+    "body": "Three or four sentences: the figures, why it matters, and the one action.",
+    "estimatedSaving": 0
+  },
   "summary": "Two sentences on where this month stands, naming real figures.",
-  "observations": ["One sentence with a figure.", "One sentence with a figure."],
+  "observations": [
+    { "title": "Short finding", "body": "One or two sentences naming the figure." }
+  ],
   "recommendations": [
     {
+      "title": "Short title naming the action",
       "action": "The specific change, in the imperative.",
       "reason": "The figure in this month's data that justifies it.",
       "impact": "What it frees up per month, as a figure.",
-      "priority": "high|medium|low"
+      "priority": "high|medium|low",
+      "timeToComplete": "5 minutes|this week|ongoing"
     }
   ],
   "riskAssessment": "One sentence, only if there is a real risk to this person's money. Otherwise an empty string.",
@@ -747,17 +764,23 @@ export async function generateAIFinancialHealthScore(financialData: {
   factors: Array<{ name: string; score: number; max: number; status: string; aiInsight?: string }>;
   icon: string;
   aiAnalysis: {
+    /** The one thing that matters most this month: the in-depth card at the top. */
+    focus: { title: string; body: string; estimatedSaving: number | null };
     /** The month in two sentences, from the model. */
     summary: string;
-    /** Sentences about the money, each resting on a figure. */
+    /** Findings to know, each with a title and a body that names its figure. */
+    observations: Array<{ title: string; body: string }>;
+    /** The same findings as flat sentences, for callers that only want the text. */
     personalizedFactors: string[];
     riskAssessment: string;
-    /** The advice itself: what to change, why, and what it frees up. */
+    /** The advice itself: what to change, why, what it frees up and how long it takes. */
     recommendations: Array<{
+      title: string;
       action: string;
       reason: string;
       impact: string;
       priority: 'high' | 'medium' | 'low';
+      timeToComplete: string;
     }>;
     confidence: number;
   };
@@ -817,6 +840,58 @@ export async function generateAIFinancialHealthScore(financialData: {
       .map(t => `- ${t.description}: ${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`)
       .join('\n');
 
+    /*
+     * The signals the old prompts each computed for themselves, worked out once here.
+     *
+     * The tips prompt used to derive weekend-versus-weekday spending, the share of recurring payments
+     * and the biggest single day, and hand them over as "scenarios" - that is what made its text feel
+     * specific rather than generic. None of that needed a model, so it lives here now and the adviser
+     * receives it as fact.
+     */
+    const expenseRows = transactions.filter((t) => t.type === 'expense');
+    const expenseTotal = expenseRows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+    const byDay = new Map<string, number>();
+    let weekdaySpend = 0;
+    let weekendSpend = 0;
+
+    for (const row of expenseRows) {
+      const when = new Date(row.date);
+      if (!Number.isFinite(when.getTime())) continue;
+      const day = when.getDay();
+      if (day === 0 || day === 6) weekendSpend += Number(row.amount || 0);
+      else weekdaySpend += Number(row.amount || 0);
+      const key = row.date.slice(0, 10);
+      byDay.set(key, (byDay.get(key) || 0) + Number(row.amount || 0));
+    }
+
+    const signals: string[] = [];
+    if (weekdaySpend > 0 && weekendSpend > 0) {
+      const ratio = weekendSpend / weekdaySpend;
+      if (ratio >= 1.15 || ratio <= 0.87) {
+        signals.push(`Weekend spending is ${(ratio * 100).toFixed(0)}% of weekday spending (${weekendSpend.toFixed(2)} against ${weekdaySpend.toFixed(2)}).`);
+      }
+    }
+
+    const biggestDay = Array.from(byDay.entries()).sort((left, right) => right[1] - left[1])[0];
+    if (biggestDay && expenseTotal > 0 && biggestDay[1] / expenseTotal >= 0.15) {
+      signals.push(`The biggest single day was ${biggestDay[0]}, with ${biggestDay[1].toFixed(2)} spent.`);
+    }
+
+    const recurringTotal = (recurring ?? []).reduce((sum, payment) => sum + payment.amount, 0);
+    if (expenseTotal > 0 && recurringTotal > 0) {
+      signals.push(`Recurring payments are ${((recurringTotal / expenseTotal) * 100).toFixed(0)}% of this month's expenses (${recurringTotal.toFixed(2)}).`);
+    }
+
+    const overBudgets = budgets.filter((budget) => Number(budget.spent ?? 0) > Number(budget.amount ?? 0));
+    if (overBudgets.length > 0) {
+      signals.push(`${overBudgets.length} budget(s) are over their limit: ${overBudgets.map((budget) => budget.categoryName || 'Uncategorized').join(', ')}.`);
+    }
+
+    const incomeRows = transactions.filter((t) => t.type === 'income');
+    if (incomeRows.length > 1) {
+      signals.push(`Income arrived in ${incomeRows.length} separate payments this month.`);
+    }
+
     const response = await generateProse({
       model: AI_MODELS.default,
       messages: [
@@ -839,7 +914,7 @@ ${budgetLines}
 
 Savings goals (saved of target, and the pace each one needs):
 ${goalLines || 'none set'}
-${merchantLines ? `\nLargest payments:\n${merchantLines}\n` : ''}${recurringLines ? `\nRecurring payments (the person flagged these as repeating):\n${recurringLines}\n` : ''}
+${merchantLines ? `\nLargest payments:\n${merchantLines}\n` : ''}${recurringLines ? `\nRecurring payments (the person flagged these as repeating):\n${recurringLines}\n` : ''}${signals.length > 0 ? `\nWhat stands out (already computed from the rows):\n${signals.map((signal) => `- ${signal}`).join('\n')}\n` : ''}
 Recent payments:
 ${recentLines || '- none'}
 
@@ -847,6 +922,9 @@ Write this month's advice.`
         }
       ],
       response_format: { type: "json_object" },
+      // The answer is a focus card, a summary, observations and up to five actions: a small budget
+      // truncated it and the whole panel failed, the same way the predictor used to.
+      max_tokens: 3000,
       // Advice that quotes exact figures still needs constraining, but a little more freedom than a
       // scorecard: the change worth recommending is not always the largest category.
       temperature: 0.4
@@ -859,10 +937,41 @@ Write this month's advice.`
      * (`shared/financialHealth`) so the badge on this panel and the score card beside it are the
      * same number; a model's own total would only be a second opinion nobody can check.
      *
-     * What is read is the advice, and a reply without any is a failed reply: an empty advice panel
+     * What is read is the four parts the customer sees: the focus card, the summary, the
+     * observations and the actions. A reply without actions is a failed reply: an empty advice panel
      * under a card called "Financial Advisor" is worse than an error the caller can retry.
      */
     const analysis = result.aiAnalysis && typeof result.aiAnalysis === 'object' ? result.aiAnalysis : {};
+
+    const focusSource = result.focus && typeof result.focus === 'object' ? result.focus : analysis.focus;
+    const focusBody = typeof focusSource?.body === 'string'
+      ? focusSource.body.trim()
+      : typeof focusSource?.description === 'string'
+        ? focusSource.description.trim()
+        : '';
+    const focus = {
+      title: typeof focusSource?.title === 'string' ? focusSource.title.trim() : '',
+      body: focusBody,
+      // A saving of zero and "no saving given" are different claims; only a positive number is kept.
+      estimatedSaving: Number(focusSource?.estimatedSaving) > 0 ? Number(focusSource.estimatedSaving) : null,
+    };
+
+    /** An observation is a title and a body; a bare sentence is still usable as a body. */
+    const toObservation = (entry: any) => (typeof entry === 'string'
+      ? { title: '', body: entry.trim() }
+      : { title: String(entry?.title || '').trim(), body: String(entry?.body || entry?.description || '').trim() });
+
+    const rawObservations = Array.isArray(result.observations)
+      ? result.observations
+      : Array.isArray(analysis.observations)
+        ? analysis.observations
+        : textList(analysis.personalizedFactors).map((line) => ({ title: '', body: line }));
+
+    const observations = rawObservations
+      .map(toObservation)
+      .filter((observation: { body: string }) => observation.body.length > 0)
+      .slice(0, 5);
+
     const rawRecommendations = Array.isArray(result.recommendations)
       ? result.recommendations
       : Array.isArray(analysis.recommendations)
@@ -871,14 +980,17 @@ Write this month's advice.`
 
     const recommendations = rawRecommendations
       .map((rec: any) => (typeof rec === 'string'
-        ? { action: rec.trim(), reason: '', impact: '', priority: 'medium' as const }
+        ? { title: '', action: rec.trim(), reason: '', impact: '', priority: 'medium' as const, timeToComplete: '' }
         : {
-            action: String(rec?.action || rec?.title || '').trim(),
-            reason: String(rec?.reason || rec?.because || '').trim(),
+            title: String(rec?.title || '').trim(),
+            action: String(rec?.action || rec?.recommendation || rec?.title || '').trim(),
+            reason: String(rec?.reason || rec?.because || rec?.description || '').trim(),
             impact: String(rec?.impact || rec?.saving || '').trim(),
             priority: (rec?.priority === 'high' || rec?.priority === 'low' ? rec.priority : 'medium') as 'high' | 'medium' | 'low',
+            timeToComplete: String(rec?.timeToComplete || rec?.effort || '').trim(),
           }))
-      .filter((rec: { action: string }) => rec.action.length > 0);
+      .filter((rec: { action: string }) => rec.action.length > 0)
+      .slice(0, 5);
 
     if (recommendations.length === 0) {
       throw new AIResponseError('The advice reply had no recommendations');
@@ -893,11 +1005,11 @@ Write this month's advice.`
       factors: [],
       icon: 'Shield',
       aiAnalysis: {
+        focus,
         summary: typeof result.summary === 'string' ? result.summary.trim() : '',
-        personalizedFactors: (() => {
-          const observations = textList(result.observations);
-          return observations.length > 0 ? observations : textList(analysis.personalizedFactors);
-        })(),
+        observations,
+        // Kept for callers that still read the flat list: it is the observations' bodies.
+        personalizedFactors: observations.map((observation: { body: string }) => observation.body),
         riskAssessment: typeof result.riskAssessment === 'string' ? result.riskAssessment.trim() : '',
         recommendations,
         confidence: Math.max(0, Math.min(1, Number(result.confidence ?? analysis.confidence ?? 0.7)))
