@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit, ImageIc
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
-import { queryClient, newIdempotencyKey } from "@/lib/queryClient";
+import { queryClient, newIdempotencyKey, invalidateViewsFor } from "@/lib/queryClient";
 
 // One key per save attempt, so a second tap or a retry returns the row the first one created.
 let saveRequestKey = newIdempotencyKey();
@@ -72,6 +73,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
   const { getToken } = useAuth();
   const aiAccess = useAiAccess();
   const currentLocale = (i18n.language || 'en').split('-')[0];
+  const [, setLocation] = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [ownOpen, setOwnOpen] = useState(false);
@@ -545,11 +547,19 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText, ope
         description: t('upload.saved_on_date', { date: formatSavedDate(formData.date) }),
       });
 
-      // Invalidate cache to refresh transaction lists
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      // One list, shared with the live-update stream: a new expense changes the list, the
+      // summary, the breakdown, the dashboard's month and the reminders. Invalidating only some
+      // of them left the screen the person was looking at unchanged, and they reloaded the page.
+      invalidateViewsFor(queryClient, 'transaction');
+
+      // A receipt can be dated any month. With the current month on screen the new row simply
+      // is not in the view — the month filter and the dashboard are showing October, the bill
+      // says August. Rather than ask the person to find it, land them on the month it belongs
+      // to, where it is the row they just saved.
+      const savedMonth = /^\d{4}-\d{2}-\d{2}$/.test(formData.date) ? formData.date.slice(0, 7) : null;
+      if (savedMonth && savedMonth !== todayLocalISO().slice(0, 7)) {
+        setLocation(`/${currentLocale}/transactions?month=${savedMonth}`);
+      }
 
       // Reset and close modal
       handleReset();

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearch } from "wouter";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -100,7 +101,25 @@ export default function Transactions() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+
+  /*
+   * `?month=YYYY-MM` opens the list on that month.
+   *
+   * The receipt modal sends the person here after saving an expense dated outside the current
+   * month, because the current month cannot show it — and a saved bill that appears nowhere is
+   * reported as "it was not saved". The month filter accepts any month even when the twelve-month
+   * strip does not show it.
+   */
+  const search = useSearch();
+  const monthFromUrl = (() => {
+    const value = new URLSearchParams(search).get("month");
+    return value && /^\d{4}-(0[1-9]|1[0-2])$/.test(value) ? value : null;
+  })();
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(monthFromUrl);
+
+  useEffect(() => {
+    if (monthFromUrl) setSelectedMonth(monthFromUrl);
+  }, [monthFromUrl]);
 
   const [newTransaction, setNewTransaction] = useState({
     amount: "",

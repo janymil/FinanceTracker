@@ -1,6 +1,40 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { getCurrentLanguageForAPI } from "../../../lib/languageUtils";
 
+/**
+ * Which cached views one change touches.
+ *
+ * Kept here, next to the client they are invalidated on, so the live-update stream and every
+ * screen that writes cannot drift apart. They did: the receipt modal invalidated only
+ * `transactions` and `financial-summary`, so a scanned expense left the dashboard showing the
+ * previous numbers, and the person reported "it was not saved" and reloaded the page.
+ *
+ * A key here is a prefix — `["transactions"]` matches `["transactions", userId]`.
+ */
+export const QUERY_KEYS_BY_CHANGE = {
+  transaction: [
+    'transactions',
+    'financial-summary',
+    'expense-breakdown',
+    'trend-predictions',
+    'financial-health',
+    'transaction-reminders',
+    'recurring-transactions',
+    'dashboard-overview',
+  ],
+  budget: ['budgets', 'financial-summary', 'dashboard-overview'],
+  goal: ['goals', 'collaborative-goals', 'achievements', 'dashboard-overview'],
+} as const satisfies Record<string, readonly string[]>;
+
+export type ChangeType = keyof typeof QUERY_KEYS_BY_CHANGE;
+
+/** Marks every view the change affects as stale, and refetches the ones on screen. */
+export function invalidateViewsFor(client: QueryClient, changeType: ChangeType): void {
+  for (const key of QUERY_KEYS_BY_CHANGE[changeType]) {
+    client.invalidateQueries({ queryKey: [key] });
+  }
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;

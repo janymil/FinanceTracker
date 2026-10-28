@@ -1,13 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useClerkUserReady } from "./useClerkUserReady";
-
-/** Query keys to refresh for each change type emitted by the server. */
-const QUERY_KEYS_BY_CHANGE: Record<string, string[]> = {
-  transaction: ["transactions", "financial-summary", "expense-breakdown", "trend-predictions", "financial-health", "dashboard-overview"],
-  budget: ["budgets", "financial-summary", "dashboard-overview"],
-  goal: ["goals", "collaborative-goals", "achievements", "dashboard-overview"],
-};
+import { invalidateViewsFor, QUERY_KEYS_BY_CHANGE, type ChangeType } from "@/lib/queryClient";
 
 /**
  * Subscribes to `/api/events` (SSE) and invalidates the affected React Query
@@ -15,6 +9,9 @@ const QUERY_KEYS_BY_CHANGE: Record<string, string[]> = {
  *
  * Uses `fetch` rather than `EventSource` because the stream needs the Clerk
  * bearer token, which EventSource cannot send.
+ *
+ * The key list lives in `lib/queryClient.ts` (`QUERY_KEYS_BY_CHANGE`) so this stream and the
+ * screens that write share one answer to "what does an expense change?".
  */
 export function useRealtimeUpdates() {
   const queryClient = useQueryClient();
@@ -52,9 +49,9 @@ export function useRealtimeUpdates() {
             try {
               const payload = JSON.parse(dataLine.slice(5).trim());
               if (payload?.type !== "dataChange") continue;
-              const keys = QUERY_KEYS_BY_CHANGE[payload.changeType] ?? [];
-              for (const key of keys) {
-                queryClient.invalidateQueries({ queryKey: [key] });
+              const changeType = payload.changeType as ChangeType | undefined;
+              if (changeType && changeType in QUERY_KEYS_BY_CHANGE) {
+                invalidateViewsFor(queryClient, changeType);
               }
             } catch {
               // ignore malformed frames
