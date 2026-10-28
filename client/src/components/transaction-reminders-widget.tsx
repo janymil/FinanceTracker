@@ -646,9 +646,9 @@ export default function TransactionRemindersWidget() {
           ) : (
             <div className="text-center py-8">
               <Bell className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-300">No upcoming reminders</p>
+              <p className="text-gray-600 dark:text-gray-300">{t("page.reminders.empty_title")}</p>
               <p className="text-sm text-gray-500 mt-1">
-                Create future-dated transactions or add manual reminders to see them here
+                {t("page.reminders.empty_body")}
               </p>
             </div>
           )}

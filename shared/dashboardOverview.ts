@@ -24,6 +24,7 @@ import { parseAmountToCents, shareOfTotalInBasisPoints, type AmountInput, type C
 import { UNCATEGORIZED } from './calculations';
 import { budgetsForPeriod, calculateFinancialHealth, type FinancialHealth } from './financialHealth';
 import { localParts, monthRange, calendarDaysRange } from './timezones';
+import { planGoal } from './goalPlan';
 import { loggingStreak } from './streaks';
 
 export interface OverviewTransaction {
@@ -426,31 +427,18 @@ export function buildDashboardOverview(input: OverviewInput): DashboardOverview 
   const goals: GoalLine[] = input.goals
     .filter((goal) => !goal.status || goal.status === 'active')
     .map((goal) => {
-      const targetCents = parseAmountToCents(goal.targetAmount);
-      const savedCents = parseAmountToCents(goal.currentAmount);
-      const target = toInstant(goal.targetDate);
-      // Goals store a calendar day; read it as one, not as an instant in the person's zone.
-      const targetDay = `${target.getUTCFullYear()}-${String(target.getUTCMonth() + 1).padStart(2, '0')}-${String(target.getUTCDate()).padStart(2, '0')}`;
-      const reached = targetCents > 0 && savedCents >= targetCents;
-      const daysLeft = Math.round(
-        (Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), target.getUTCDate())
-          - Date.UTC(today.year, today.month - 1, today.day)) / DAY_MS,
-      );
-      const overdue = !reached && daysLeft < 0;
-      const monthsLeft = (target.getUTCFullYear() - today.year) * 12 + (target.getUTCMonth() + 1 - today.month)
-        + (target.getUTCDate() >= today.day ? 1 : 0);
-      const remaining = Math.max(0, targetCents - savedCents);
+      const plan = planGoal(goal, now, timeZone);
       return {
         id: goal.id,
         name: goal.name,
-        savedCents,
-        targetCents,
-        percent: targetCents > 0 ? Math.min(100, Math.floor((savedCents * 100) / targetCents)) : 0,
-        targetDate: targetDay,
-        monthlyNeededCents: reached || overdue || monthsLeft <= 0 ? null : Math.ceil(remaining / monthsLeft),
-        reached,
-        overdue,
-        _daysLeft: daysLeft,
+        savedCents: plan.savedCents,
+        targetCents: plan.targetCents,
+        percent: plan.percent,
+        targetDate: plan.targetDay,
+        monthlyNeededCents: plan.monthlyNeededCents,
+        reached: plan.reached,
+        overdue: plan.overdue,
+        _daysLeft: plan.daysLeft,
       };
     })
     .sort((a, b) => Number(a.reached) - Number(b.reached) || a._daysLeft - b._daysLeft)

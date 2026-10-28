@@ -1,475 +1,377 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { Lock, MoreHorizontal, Pencil, Plus, Shapes, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
-import { categoryIcons } from "@/lib/icons-registry";
-import { apiRequest } from "@/lib/queryClient";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useCategories, invalidateMoney, type CategoryRow } from "@/hooks/useCategories";
+import { apiRequest } from "@/lib/queryClient";
+import { apiErrorMessage } from "@/lib/apiError";
+import { categoryIcons } from "@/lib/icons-registry";
+import { cn } from "@/lib/utils";
+import {
+  CategoryTile,
+  ChangeChip,
+  EmptyState,
+  LoadError,
+  PageHeader,
+  PageShell,
+  Panel,
+  PanelSkeleton,
+  PanelTitle,
+  Segmented,
+  primaryButton,
+  secondaryButton,
+  useMonthNavigation,
+  useOverviewFormat,
+} from "@/components/page/kit";
+import { buildMonthLedger, type LedgerTransaction } from "@shared/ledger";
+import { buildTrendStats } from "@shared/trendStats";
 
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-  type: "income" | "expense";
-  transactionCount: number;
-  isInUse: boolean;
-  userId?: string | null; // Add userId field to identify predefined categories
-}
+type Kind = "expense" | "income";
 
-// Helper function to check if a category is predefined (userId is null)
-const isPredefinedCategory = (category: Category): boolean => {
-  return category.userId === null || category.userId === undefined;
-}
+const EXPENSE_ICONS = ["food", "shopping", "transportation", "housing", "utilities", "healthcare", "entertainment", "education", "travel", "gift", "heart", "credit-card", "shield", "laptop", "other"];
+const INCOME_ICONS = ["salary", "business", "freelance", "rental", "investment", "gift", "piggy-bank", "dollar-sign", "laptop", "other"];
+const COLORS = ["#2563EB", "#0891B2", "#059669", "#65A30D", "#CA8A04", "#EA580C", "#DC2626", "#DB2777", "#9333EA", "#4F46E5", "#475569", "#0F766E"];
 
-// Helper function to get localized category name
-const getLocalizedCategoryName = (category: Category, t: (key: string) => string): string => {
-  if (isPredefinedCategory(category)) {
-    return t(category.name);
-  }
-  return category.name; // Return original name for custom categories
-}
-
-const getCategoryColors = (t: any) => [
-  { name: t("colors.blue"), value: "#3B82F6" },
-  { name: t("colors.green"), value: "#10B981" },
-  { name: t("colors.purple"), value: "#8B5CF6" },
-  { name: t("colors.red"), value: "#EF4444" },
-  { name: t("colors.orange"), value: "#F97316" },
-  { name: t("colors.pink"), value: "#EC4899" },
-  { name: t("colors.indigo"), value: "#6366F1" },
-  { name: t("colors.teal"), value: "#14B8A6" },
-];
-
+/**
+ * How the person sorts their money, and what each category is doing.
+ *
+ * The old screen listed names with a "transactions" count the server never sent, hid edit and
+ * delete behind a mouse hover (unreachable on a phone), offered both on the built-in categories
+ * (which the server refuses to change) and answered in English whatever the language. Now each
+ * category shows this month against the person's usual month and six months of shape; built-in
+ * ones are marked as such; the person's own can be changed or removed from a menu that works on
+ * touch.
+ */
 export default function Categories() {
   const { t } = useTranslation();
-  const { isReady, user } = useClerkUserReady();
+  const f = useOverviewFormat();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [newCategory, setNewCategory] = useState({
+  const nav = useMonthNavigation();
+  const categoriesQuery = useCategories();
+  const { data: transactions } = useTransactions();
+  const [kind, setKind] = useState<Kind>("expense");
+  const [editing, setEditing] = useState<{ open: boolean; category: CategoryRow | null; name: string; icon: string; color: string; type: Kind }>({
+    open: false,
+    category: null,
     name: "",
     icon: "other",
-    color: "#3B82F6",
-    type: "expense" as "income" | "expense"
+    color: COLORS[0],
+    type: "expense",
   });
+  const [deleting, setDeleting] = useState<CategoryRow | null>(null);
 
-  const { data: categories = [], isLoading } = useQuery<Category[]>({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
-    enabled: isReady && !!user?.id
-  });
+  const rows = (Array.isArray(transactions) ? transactions : []) as LedgerTransaction[];
+  const ledger = useMemo(() => buildMonthLedger(rows, nav.monthKey, { timeZone: nav.timeZone }), [rows, nav.monthKey, nav.timeZone]);
+  const trends = useMemo(() => buildTrendStats(rows, 6, { timeZone: nav.timeZone }), [rows, nav.timeZone]);
+  const useCount = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const row of rows) if (row.categoryId) counts.set(row.categoryId, (counts.get(row.categoryId) ?? 0) + 1);
+    return counts;
+  }, [rows]);
+  const all = (categoriesQuery.data ?? []).filter((category) => category.type === "expense" || category.type === "income");
+  const counts = { expense: all.filter((c) => c.type === "expense").length, income: all.filter((c) => c.type === "income").length };
+  const monthStats = new Map(
+    (kind === "expense" ? ledger.expenseCategories : ledger.incomeCategories)
+      .filter((stat) => stat.categoryId !== null)
+      .map((stat) => [stat.categoryId as number, stat]),
+  );
+  const seriesFor = (id: number) => trends.categories.find((c) => c.key === `id:${id}`)?.series ?? null;
 
-  const createCategoryMutation = useMutation({
-    mutationFn: async (categoryData: typeof newCategory) => {
-      const res = await apiRequest("POST", "/api/categories", categoryData);
-      return res.json();
+  const list = all
+    .filter((category) => category.type === kind)
+    .map((category) => ({
+      category,
+      month: monthStats.get(category.id) ?? null,
+      uses: useCount.get(category.id) ?? 0,
+      series: kind === "expense" ? seriesFor(category.id) : null,
+      builtIn: category.userId === null || category.userId === undefined,
+    }))
+    .sort((a, b) => (b.month?.cents ?? 0) - (a.month?.cents ?? 0) || b.uses - a.uses || a.category.name.localeCompare(b.category.name));
+  const active = list.filter((entry) => entry.uses > 0);
+  const unused = list.filter((entry) => entry.uses === 0);
+
+  const openNew = () => setEditing({ open: true, category: null, name: "", icon: "other", color: COLORS[0], type: kind });
+  const openEdit = (category: CategoryRow) =>
+    setEditing({ open: true, category, name: category.name, icon: category.icon || "other", color: category.color || COLORS[0], type: category.type as Kind });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const body = { name: editing.name.trim(), icon: editing.icon, color: editing.color, type: editing.type };
+      if (editing.category) await apiRequest("PUT", `/api/categories/${editing.category.id}`, body);
+      else await apiRequest("POST", "/api/categories", body);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      setIsDialogOpen(false);
-      setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
-      toast({
-        title: t("categories.category_created"),
-        description: t("categories.category_added_successfully"),
-      });
+      invalidateMoney(queryClient);
+      toast({ title: editing.category ? t("page.categories.updated") : t("page.categories.created") });
+      setEditing((current) => ({ ...current, open: false }));
     },
-    onError: (error: any) => {
-      toast({
-        title: t("common.error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    onError: (error) => toast({ title: t("page.categories.save_failed"), description: apiErrorMessage(error, t("page.common.try_again")), variant: "destructive" }),
   });
 
-  const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newCategory) => {
-      const res = await apiRequest("PUT", `/api/categories/${id}`, data);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      setEditingCategory(null);
-      setIsDialogOpen(false);
-      toast({
-        title: "Category Updated",
-        description: "Category has been updated successfully",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("common.error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  const deleteCategoryMutation = useMutation({
+  const remove = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest("DELETE", `/api/categories/${id}`);
-      return res.json();
+      await apiRequest("DELETE", `/api/categories/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast({
-        title: "Category Deleted",
-        description: "Category has been removed successfully",
-      });
+      invalidateMoney(queryClient);
+      toast({ title: t("page.categories.deleted") });
     },
-    onError: (error: any) => {
-      toast({
-        title: t("common.error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    onError: (error) => toast({ title: t("page.categories.delete_failed"), description: apiErrorMessage(error, t("page.common.try_again")), variant: "destructive" }),
   });
 
-  const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
-  const incomeCategories = categories.filter((cat: Category) => cat.type === "income");
+  const icons = editing.type === "income" ? INCOME_ICONS : EXPENSE_ICONS;
 
-  const handleSubmit = () => {
-    if (!newCategory.name.trim()) return;
-
-    if (editingCategory) {
-      updateCategoryMutation.mutate({ id: editingCategory.id, ...newCategory });
-    } else {
-      createCategoryMutation.mutate(newCategory);
-    }
-  };
-
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
-    setNewCategory({
-      name: category.name,
-      icon: category.icon,
-      color: category.color,
-      type: category.type,
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = (id: number, isInUse: boolean) => {
-    if (isInUse) {
-      toast({
-        title: "Cannot Delete",
-        description: "This category is currently in use by transactions",
-        variant: "destructive",
-      });
-      return;
-    }
-    deleteCategoryMutation.mutate(id);
-  };
-
-  const CategoryCard = ({ category }: { category: Category }) => {
-    const IconComponent = categoryIcons[category.icon as keyof typeof categoryIcons] || categoryIcons["other"];
-    
+  const row = (entry: (typeof list)[number]) => {
+    const { category, month, uses, series, builtIn } = entry;
+    const max = series ? Math.max(1, ...series) : 1;
     return (
-      <Card className="group relative hover:shadow-md transition-shadow">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div 
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: `${category.color}20` }}
-              >
-                <IconComponent 
-                  className="h-5 w-5" 
-                  style={{ color: category.color }}
-                />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900 dark:text-white">
-                  {getLocalizedCategoryName(category, t)}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {category.transactionCount} {category.transactionCount === 1 ? t('transaction') : t('transactions_count')}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleEdit(category)}
-              >
-                <Edit3 className="h-3 w-3" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleDelete(category.id, category.isInUse)}
-                disabled={category.isInUse}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
+      <li key={category.id} className="flex items-center gap-3 border-b border-gray-100 py-3 last:border-b-0 dark:border-gray-800" data-testid="category-row">
+        <CategoryTile color={category.color} icon={category.icon} name={category.name} />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="truncate text-sm font-semibold text-gray-900 dark:text-white">{category.name}</span>
+            {builtIn && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                <Lock className="h-3 w-3" aria-hidden="true" />
+                {t("page.categories.built_in")}
+              </span>
+            )}
+            {month && kind === "expense" && <ChangeChip pct={month.changePct} />}
+          </span>
+          <span className="truncate text-[13px] text-gray-600 dark:text-gray-400">
+            {month
+              ? t(kind === "expense" ? "page.categories.month_spent" : "page.categories.month_received", { amount: f.money(month.cents), count: month.count })
+              : uses > 0 ? t("page.categories.nothing_this_month") : t("page.categories.never_used")}
+            {uses > 0 && ` · ${t("page.categories.uses", { count: uses })}`}
+          </span>
+        </div>
+        {series && series.some((value) => value > 0) && (
+          <div className="hidden h-8 w-24 items-end gap-0.5 sm:flex" role="img" aria-label={t("page.categories.sparkline_label", { name: category.name })}>
+            {series.map((value, i) => (
+              <span
+                key={i}
+                aria-hidden="true"
+                className={cn("flex-1 rounded-t-sm", i === series.length - 1 ? "bg-blue-600" : "bg-blue-200 dark:bg-blue-900")}
+                style={{ height: Math.max(2, (value / max) * 32) }}
+              />
+            ))}
           </div>
-          {category.isInUse && (
-            <Badge variant="secondary" className="text-xs">
-              In use
-            </Badge>
-          )}
-        </CardContent>
-      </Card>
+        )}
+        {!builtIn ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={t("page.categories.actions_for", { name: category.name })}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
+              >
+                <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => openEdit(category)}>
+                <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
+                {t("page.common.edit")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={uses > 0}
+                onSelect={() => setDeleting(category)}
+                className="text-red-700 focus:text-red-800 dark:text-red-400"
+              >
+                <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                {uses > 0 ? t("page.categories.delete_in_use") : t("page.common.delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <span className="w-9 shrink-0" aria-hidden="true" />
+        )}
+      </li>
     );
   };
 
-  if (!user) {
-    return null;
-  }
-
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {t("Category Management")}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {t("Organize your income and expense sources")}
-              </p>
-            </div>
+    <PageShell testId="categories-page">
+      <PageHeader
+        title={t("page.categories.title")}
+        subtitle={t("page.categories.subtitle")}
+        actions={
+          <button type="button" className={primaryButton} onClick={openNew} data-testid="category-new">
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            {t("page.categories.new")}
+          </button>
+        }
+      >
+        <Segmented
+          label={t("page.categories.kind_label")}
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: "expense", label: t("page.categories.expense_tab", { count: counts.expense }) },
+            { value: "income", label: t("page.categories.income_tab", { count: counts.income }) },
+          ]}
+        />
+      </PageHeader>
+
+      {categoriesQuery.error && <LoadError onRetry={() => categoriesQuery.refetch()} />}
+
+      {categoriesQuery.isLoading ? (
+        <PanelSkeleton className="h-96" />
+      ) : (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          <Panel labelledBy="cats-active-title" className="flex flex-col gap-2 lg:col-span-8">
+            <PanelTitle
+              id="cats-active-title"
+              aside={<span className="text-xs text-gray-600 sm:text-sm dark:text-gray-400">{f.monthLabel(nav.monthKey)}</span>}
+            >
+              {kind === "expense" ? t("page.categories.active_expense") : t("page.categories.active_income")}
+            </PanelTitle>
+            {active.length === 0 ? (
+              <EmptyState
+                icon={<Shapes className="h-6 w-6" aria-hidden="true" />}
+                title={t("page.categories.none_used_title")}
+                body={t("page.categories.none_used_body")}
+              />
+            ) : (
+              <ul className="flex flex-col">{active.map(row)}</ul>
+            )}
+          </Panel>
+
+          <div className="flex flex-col gap-5 lg:col-span-4">
+            <Panel labelledBy="cats-tips-title" className="flex flex-col gap-2">
+              <PanelTitle id="cats-tips-title">{t("page.categories.tips_title")}</PanelTitle>
+              <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm text-gray-700 dark:text-gray-300">
+                <li>{t("page.categories.tip_few")}</li>
+                <li>{t("page.categories.tip_builtin")}</li>
+                <li>{t("page.categories.tip_delete")}</li>
+              </ul>
+            </Panel>
+            {unused.length > 0 && (
+              <Panel labelledBy="cats-unused-title" className="flex flex-col gap-2">
+                <PanelTitle id="cats-unused-title">{t("page.categories.unused_title", { count: unused.length })}</PanelTitle>
+                <ul className="flex flex-col">{unused.map(row)}</ul>
+              </Panel>
+            )}
           </div>
         </div>
+      )}
 
-        {/* Tabs for Expense and Income Categories */}
-        <Tabs defaultValue="expenses" className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="expenses" className="flex items-center gap-2 text-xs sm:text-sm">
-                <TrendingUp className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("Expense Categories")}</span>
-                <span className="sm:hidden">{t("Expenses")}</span>
-              </TabsTrigger>
-              <TabsTrigger value="income" className="flex items-center gap-2 text-xs sm:text-sm">
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("Income Categories")}</span>
-                <span className="sm:hidden">{t("Income")}</span>
-              </TabsTrigger>
-            </TabsList>
+      <Dialog open={editing.open} onOpenChange={(open) => setEditing((current) => ({ ...current, open }))}>
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-md" data-testid="category-form">
+          <DialogHeader>
+            <DialogTitle>{editing.category ? t("page.categories.edit_title") : t("page.categories.new_title")}</DialogTitle>
+            <DialogDescription>{t("page.categories.form_description")}</DialogDescription>
+          </DialogHeader>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (editing.name.trim() && !save.isPending) save.mutate();
+            }}
+          >
+            <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3 dark:bg-gray-800/60" aria-hidden="true">
+              <CategoryTile color={editing.color} icon={editing.icon} name={editing.name} size="lg" />
+              <span className="truncate text-base font-semibold text-gray-900 dark:text-white">{editing.name || t("page.categories.preview")}</span>
+            </div>
 
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  onClick={() => {
-                    setEditingCategory(null);
-                    setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("New Category")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingCategory ? t("Edit Category") : t("Create New Category")}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingCategory ? t("Update the category details") : t("Add a new category to organize your transactions")}
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
-                  <div>
-                    <Label htmlFor="name">{t("Category Name")}</Label>
-                    <Input
-                      id="name"
-                      value={newCategory.name}
-                      onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      placeholder={t("Enter category name")}
-                    />
-                  </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="category-name">{t("page.categories.name")}</Label>
+              <Input
+                id="category-name"
+                autoFocus
+                maxLength={50}
+                value={editing.name}
+                onChange={(event) => setEditing((current) => ({ ...current, name: event.target.value }))}
+                placeholder={editing.type === "income" ? t("page.categories.name_income_placeholder") : t("page.categories.name_expense_placeholder")}
+              />
+            </div>
 
-                  <div>
-                    <Label>{t("Category Type")}</Label>
-                    <div className="flex gap-2 mt-2">
-                      <Button
-                        variant={newCategory.type === "expense" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setNewCategory({ ...newCategory, type: "expense" })}
-                      >
-                        {t("Expense")}
-                      </Button>
-                      <Button
-                        variant={newCategory.type === "income" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setNewCategory({ ...newCategory, type: "income" })}
-                      >
-                        {t("Income")}
-                      </Button>
-                    </div>
-                  </div>
+            {!editing.category && (
+              <Segmented
+                label={t("page.categories.kind_label")}
+                value={editing.type}
+                onChange={(type) => setEditing((current) => ({ ...current, type, icon: "other" }))}
+                options={[
+                  { value: "expense", label: t("page.form.expense") },
+                  { value: "income", label: t("page.form.income") },
+                ]}
+              />
+            )}
 
-                  <div>
-                    <Label>{t("Icon")}</Label>
-                    <div className="grid grid-cols-4 gap-2 mt-2">
-                      {(() => {
-                        // Define basic icons based on category type
-                        const expenseIcons = {
-                          "food": categoryIcons["food"],
-                          "transportation": categoryIcons["transportation"], 
-                          "shopping": categoryIcons["shopping"],
-                          "entertainment": categoryIcons["entertainment"],
-                          "healthcare": categoryIcons["healthcare"],
-                          "housing": categoryIcons["housing"],
-                          "education": categoryIcons["education"],
-                          "other": categoryIcons["other"]
-                        };
-                        
-                        const incomeIcons = {
-                          "salary": categoryIcons["salary"],
-                          "business": categoryIcons["business"],
-                          "investment": categoryIcons["investment"],
-                          "gift": categoryIcons["gift"]
-                        };
-                        
-                        const iconsToShow = newCategory.type === "expense" ? expenseIcons : incomeIcons;
-                        
-                        return Object.entries(iconsToShow).map(([key, IconComponent]) => (
-                          <Button
-                            key={key}
-                            variant={newCategory.icon === key ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setNewCategory({ ...newCategory, icon: key })}
-                            className="h-10"
-                          >
-                            <IconComponent className="h-4 w-4" />
-                          </Button>
-                        ));
-                      })()}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>{t("Color")}</Label>
-                    <div className="grid grid-cols-4 gap-2 mt-2">
-                      {getCategoryColors(t).map((color) => (
-                        <Button
-                          key={color.value}
-                          variant={newCategory.color === color.value ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setNewCategory({ ...newCategory, color: color.value })}
-                          className="h-10"
-                          style={{
-                            backgroundColor: newCategory.color === color.value ? color.value : 'transparent',
-                            borderColor: color.value,
-                          }}
-                        >
-                          <div 
-                            className="w-4 h-4 rounded-full" 
-                            style={{ backgroundColor: color.value }}
-                          />
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      {t("Cancel")}
-                    </Button>
-                    <Button 
-                      onClick={handleSubmit}
-                      disabled={!newCategory.name.trim()}
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">{t("page.categories.icon")}</legend>
+              <div className="grid grid-cols-5 gap-2">
+                {icons.map((name) => {
+                  const Icon = (categoryIcons as Record<string, typeof Shapes>)[name] ?? Shapes;
+                  const selected = editing.icon === name;
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      aria-pressed={selected}
+                      aria-label={t(`page.categories.icons.${name.replace("-", "_")}`)}
+                      onClick={() => setEditing((current) => ({ ...current, icon: name }))}
+                      className={cn(
+                        "flex h-11 items-center justify-center rounded-xl border transition-colors",
+                        selected
+                          ? "border-blue-700 bg-blue-50 text-blue-800 dark:border-blue-400 dark:bg-blue-950 dark:text-blue-200"
+                          : "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800",
+                      )}
                     >
-                      {editingCategory ? t("Update") : t("Create")}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
 
-          {/* Expense Categories */}
-          <TabsContent value="expenses" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("Expense Categories")}</CardTitle>
-                <CardDescription>
-                  {t("Manage categories for your expenses and spending")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {expenseCategories.length === 0 ? (
-                  <div className="text-center py-8">
-                    <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      {t("No Expense Categories")}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      {t("Create your first expense category to organize your spending")}
-                    </p>
-                    <Button onClick={() => setIsDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("Add Expense Category")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {expenseCategories.map((category: Category) => (
-                      <CategoryCard key={category.id} category={category} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">{t("page.categories.color")}</legend>
+              <div className="grid grid-cols-6 gap-2">
+                {COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    aria-pressed={editing.color === color}
+                    aria-label={t("page.categories.color_option", { color })}
+                    onClick={() => setEditing((current) => ({ ...current, color }))}
+                    className={cn(
+                      "h-10 rounded-xl border-2 transition-transform",
+                      editing.color === color ? "scale-105 border-gray-900 dark:border-white" : "border-transparent",
+                    )}
+                    style={{ background: color }}
+                  />
+                ))}
+              </div>
+            </fieldset>
 
-          {/* Income Categories */}
-          <TabsContent value="income" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("Income Categories")}</CardTitle>
-                <CardDescription>
-                  {t("Manage categories for your income sources")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {incomeCategories.length === 0 ? (
-                  <div className="text-center py-8">
-                    <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      {t("No Income Categories")}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      {t("Create your first income category to organize your revenue sources")}
-                    </p>
-                    <Button onClick={() => setIsDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("Add Income Category")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {incomeCategories.map((category: Category) => (
-                      <CategoryCard key={category.id} category={category} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button type="button" className={cn(secondaryButton, "justify-center")} onClick={() => setEditing((current) => ({ ...current, open: false }))}>
+                {t("page.common.cancel")}
+              </button>
+              <button type="submit" className={cn(primaryButton, "justify-center")} disabled={!editing.name.trim() || save.isPending} data-testid="category-save">
+                {editing.category ? t("page.form.save_changes") : t("page.categories.create")}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={Boolean(deleting)}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={t("page.categories.delete_title", { name: deleting?.name ?? "" })}
+        body={t("page.categories.delete_body")}
+        onConfirm={() => deleting && remove.mutate(deleting.id)}
+      />
+    </PageShell>
   );
 }

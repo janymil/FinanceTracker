@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { PageHeader, PageShell } from '@/components/page/kit';
+import { DataOverview } from '@/components/page/DataOverview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
@@ -1062,6 +1064,12 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
   const hasBackupData = backupStatusData !== null;
 
+  // The overview at the top shows the last backup, so read it once on open, not only on the tab.
+  useEffect(() => {
+    if (isReady && user?.id) loadBackupStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady, user?.id]);
+
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
@@ -1223,13 +1231,17 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
   return (
     <RequirePlan plan="premium" feature="Data Management">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t('export.page_title')}</h1>
-          <p className="text-muted-foreground">
-            {t('export.page_description')}
-          </p>
-        </div>
+      <PageShell testId="data-page">
+        <PageHeader title={t('export.page_title')} subtitle={t('export.page_description')} />
+        <DataOverview
+          activeTab={activeTab}
+          onTab={(tab) => {
+            setActiveTab(tab);
+            if (tab === "backup") loadBackupStatus();
+          }}
+          lastBackup={backupStatusData?.lastBackup?.date ?? null}
+          autoBackup={backupStatusData ? backupStatusData.settings?.autoBackup !== false : null}
+        />
 
         <Tabs value={activeTab} onValueChange={(value) => {
           setActiveTab(value);
@@ -1237,11 +1249,6 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
             loadBackupStatus(); // Always refresh backup status when tab is accessed
           }
         }} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
-            <TabsTrigger value="export" className="text-xs md:text-sm" data-testid="export-tab-export">{t('export.tab_export')}</TabsTrigger>
-            <TabsTrigger value="import" className="text-xs md:text-sm" data-testid="export-tab-import">{t('export.tab_import')}</TabsTrigger>
-            <TabsTrigger value="backup" className="text-xs md:text-sm" data-testid="export-tab-backup">{t('export.tab_backup')}</TabsTrigger>
-          </TabsList>
 
           {/* Export Tab */}
           <TabsContent value="export" className="space-y-4">
@@ -1818,7 +1825,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Automatic Backup Schedule Notification */}
-                {backupStatusData.settings?.autoBackup === false ? (
+                {backupStatusData?.settings?.autoBackup === false ? (
                   <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-5 w-5 text-amber-600" />
@@ -2164,7 +2171,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
           duplicates={duplicateDetections}
           allTransactions={previewTransactions}
         />
-      </div>
+      </PageShell>
     </RequirePlan>
   );
 }

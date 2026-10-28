@@ -1,606 +1,352 @@
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useState, useMemo } from "react";
-import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown, RotateCcw } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
-import { getMonthDateRange, getCustomDateRange, getCurrentMonthDateRange, getDateRangeForFilter } from "@/lib/dateRangeUtils";
-import RequirePlan from "@/components/require-plan";
-import MonthFilter from "@/components/month-filter";
-import { useCurrency } from "@/context/CurrencyContext";
+import { useMemo, useState } from "react";
+import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
-
-import InteractiveChart from "@/components/interactive-chart";
+import { BarChart3, Brain, Download, FileText, Trophy, Zap } from "lucide-react";
+import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import RequirePlan from "@/components/require-plan";
 import AIInsights from "@/components/ai-insights";
 import AutoCategorization from "@/components/auto-categorization";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useUserTimeZone } from "@/hooks/useUserTimeZone";
+import { cn } from "@/lib/utils";
+import {
+  CategoryTile,
+  ChangeChip,
+  HeroCard,
+  HeroStat,
+  LoadError,
+  PageHeader,
+  PageShell,
+  Panel,
+  PanelSkeleton,
+  PanelTitle,
+  Segmented,
+  secondaryButton,
+  useLangHref,
+  useOverviewFormat,
+} from "@/components/page/kit";
+import { buildPeriodReport, presetRanges, previousOf, type DayRange, type ReportPreset } from "@shared/periodReport";
+import { dayKeyIn, type LedgerTransaction } from "@shared/ledger";
+import { parseAmountToCents } from "@shared/money";
 
+type Row = LedgerTransaction & { description: string; amount: string; date: string };
+
+const PRESETS: Exclude<ReportPreset, "custom">[] = ["month", "last_month", "quarter", "year", "last_12_months"];
+const CHANGE_LABEL = { up: "page.reports.vs_previous_up", down: "page.reports.vs_previous_down", same: "page.reports.vs_previous_same" };
+
+/**
+ * A statement for any period, against the period before it.
+ *
+ * The old page had a "Custom range" that did nothing, printed category amounts in dollars, showed
+ * the same data as three charts, and repeated the dashboard's recent list. Now a period gives one
+ * answer (what was kept and at what rate), a month-by-month statement, where the money went
+ * compared with the previous period, the largest payments, and one chart.
+ */
 export default function Reports() {
-  const { isReady, user } = useClerkUserReady();
-  const [, setLocation] = useLocation();
-  const [selectedPeriod, setSelectedPeriod] = useState("month");
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  
-
-  const { currency } = useCurrency();
-  const displayCurrency = currency || '$';
   const { t } = useTranslation();
+  const f = useOverviewFormat();
+  const href = useLangHref();
+  const timeZone = useUserTimeZone();
+  const { data, isLoading, error, refetch } = useTransactions();
+  const rows: Row[] = Array.isArray(data) ? data : [];
+  const today = dayKeyIn(new Date(), timeZone);
 
-  if (!user) {
-    return null;
-  }
+  const [preset, setPreset] = useState<ReportPreset>("month");
+  const [custom, setCustom] = useState<DayRange>({ start: `${today.slice(0, 7)}-01`, end: today });
+  const customValid = Boolean(custom.start && custom.end && custom.start <= custom.end);
 
-  // User tier checking is handled by RequirePlan components
-
-  // Calculate date ranges based on selected period and month - memoized to prevent infinite loops
-  const { startDate, endDate } = useMemo(() => {
-    const now = new Date();
-
-    // If a specific month is selected, use that month's dates
-    if (selectedMonth) {
-      const { startDate, endDate } = getMonthDateRange(selectedMonth);
-      return { startDate, endDate };
+  const { range, previous } = useMemo(() => {
+    if (preset === "custom") {
+      const r = customValid ? custom : { start: today, end: today };
+      return { range: r, previous: previousOf(r) };
     }
+    return presetRanges(preset, new Date(), timeZone);
+  }, [preset, custom, customValid, timeZone, today]);
 
-    // Otherwise use the selected period
-    switch (selectedPeriod) {
-      case "week":
-        const weekRange = getDateRangeForFilter("this-week");
-        return weekRange ? { startDate: weekRange.startDate, endDate: weekRange.endDate } : { startDate: startOfMonth(now), endDate: endOfMonth(now) };
-      case "month":
-        const { startDate: monthStart, endDate: monthEnd } = getCurrentMonthDateRange();
-        return { startDate: monthStart, endDate: monthEnd };
-      case "quarter":
-        const quarterRange = getDateRangeForFilter("quarter");
-        return quarterRange ? { startDate: quarterRange.startDate, endDate: quarterRange.endDate } : { startDate: startOfMonth(now), endDate: endOfMonth(now) };
-      case "year":
-        const yearRange = getDateRangeForFilter("year");
-        return yearRange ? { startDate: yearRange.startDate, endDate: yearRange.endDate } : { startDate: startOfYear(now), endDate: endOfYear(now) };
-      default:
-        return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
-    }
-  }, [selectedPeriod, selectedMonth]);
+  const report = useMemo(() => buildPeriodReport(rows, range, previous, { timeZone }), [rows, range, previous, timeZone]);
+  const periodRows = useMemo(
+    () => rows.filter((row) => {
+      const day = dayKeyIn(row.date, timeZone);
+      return day >= range.start && day <= range.end;
+    }),
+    [rows, range, timeZone],
+  );
 
-  // React Query hooks for data fetching
-  const { data: financialSummary = null, isLoading: summaryLoading } = useQuery({
-    queryKey: ["financial-summary", startDate.toISOString(), endDate.toISOString()],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      });
-      const response = await apiRequest("GET", `/api/financial-summary?${params}`);
-      return response.json();
-    },
-    enabled: isReady && !!user?.id
-  });
-
-  const { data: transactions = [] } = useQuery({
-    queryKey: ["transactions"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
-    enabled: isReady && !!user?.id
-  });
-
-  // Filter transactions based on selected period and month
-  const filteredTransactions = useMemo(() => {
-    if (!Array.isArray(transactions) || transactions.length === 0) {
-      return [];
-    }
-
-    return transactions.filter((transaction: any) => {
-      const transactionDate = new Date(transaction.date);
-      return transactionDate >= startDate && transactionDate <= endDate;
-    });
-  }, [transactions, startDate, endDate]);
-
-  // Generate dynamic chart data from filtered transactions
-  const generateChartData = () => {
-    if (!Array.isArray(filteredTransactions) || filteredTransactions.length === 0) {
-      return [];
-    }
-
-    // Group transactions by month
-    const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
-
-    filteredTransactions.forEach((transaction: any) => {
-      const date = new Date(transaction.date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-      if (!monthlyData[monthKey]) {
-        monthlyData[monthKey] = { income: 0, expenses: 0 };
-      }
-
-      const amount = parseFloat(transaction.amount);
-      if (transaction.type === 'income') {
-        monthlyData[monthKey].income += amount;
-      } else {
-        monthlyData[monthKey].expenses += amount;
-      }
-    });
-
-    // Convert to chart format and sort by date
-    const chartData = Object.entries(monthlyData)
-      .map(([date, data]) => ({
-        date,
-        income: data.income,
-        expenses: data.expenses,
-        balance: data.income - data.expenses
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    return chartData;
-  };
-
-  const dynamicChartData = generateChartData();
+  const periodLabel = `${f.dateLabel(range.start)} – ${f.dateLabel(range.end)}`;
+  const multiMonth = report.months.length > 1;
+  const best = multiMonth ? report.months.reduce((a, b) => (b.netCents > a.netCents ? b : a)) : null;
+  const chartData = report.months.map((month) => ({
+    label: f.monthShort(month.key),
+    income: month.incomeCents / 100,
+    expenses: month.expenseCents / 100,
+    kept: month.netCents / 100,
+  }));
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {t("reports.title")}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {t("reports.subtitle")}
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Select value={selectedPeriod} onValueChange={(value) => {
-                setSelectedPeriod(value);
-                // Clear month selection when period is changed to avoid conflicts
-                if (value !== "month") {
-                  setSelectedMonth(null);
-                }
-              }}>
-                <SelectTrigger className="w-40">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="week">{t("reports.this_week")}</SelectItem>
-                  <SelectItem value="month">{t("reports.this_month")}</SelectItem>
-                  <SelectItem value="quarter">{t("reports.this_quarter")}</SelectItem>
-                  <SelectItem value="year">{t("reports.this_year")}</SelectItem>
-                  <SelectItem value="custom">{t("reports.custom_range")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <PageShell testId="reports-page">
+      <PageHeader
+        title={t("page.reports.title")}
+        subtitle={t("page.reports.subtitle")}
+        actions={
+          <Link href={href("/export")} className={secondaryButton}>
+            <Download className="h-4 w-4" aria-hidden="true" />
+            {t("page.reports.export")}
+          </Link>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <div className="-mx-1 overflow-x-auto px-1">
+            <Segmented
+              label={t("page.reports.period")}
+              value={preset}
+              onChange={setPreset}
+              options={[
+                ...PRESETS.map((value) => ({ value, label: t(`page.reports.preset_${value}`) })),
+                { value: "custom" as const, label: t("page.reports.preset_custom") },
+              ]}
+            />
           </div>
+          {preset === "custom" && (
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="report-from">{t("page.reports.from")}</Label>
+                <Input id="report-from" type="date" value={custom.start} max={custom.end || undefined} onChange={(event) => setCustom((c) => ({ ...c, start: event.target.value }))} className="w-44" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="report-to">{t("page.reports.to")}</Label>
+                <Input id="report-to" type="date" value={custom.end} min={custom.start || undefined} onChange={(event) => setCustom((c) => ({ ...c, end: event.target.value }))} className="w-44" />
+              </div>
+              {!customValid && <span className="pb-2 text-sm text-red-700 dark:text-red-400">{t("page.reports.range_invalid")}</span>}
+            </div>
+          )}
+          <p className="text-sm text-gray-600 dark:text-gray-400" data-testid="reports-range">
+            {periodLabel} · {t("page.reports.compared_with", { range: `${f.dateLabel(previous.start)} – ${f.dateLabel(previous.end)}` })}
+          </p>
         </div>
+      </PageHeader>
 
-        {/* Month Navigation Filter */}
-        <MonthFilter 
-          selectedMonth={selectedMonth}
-          onMonthSelect={setSelectedMonth}
-          onDateRangeReset={() => setSelectedPeriod("month")}
-        />
+      {error && <LoadError onRetry={() => refetch()} />}
 
-        {/* Reports Tabs - Summary for all, Analytics/Auto-Tag for standard+, AI Insights for premium */}
-        <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
-            <TabsTrigger value="summary" className="flex items-center gap-1 text-xs md:text-sm">
-              <FileText className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("reports.summary")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs md:text-sm">
-              <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("reports.analytics")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="categorization" className="flex items-center gap-1 text-xs md:text-sm">
-              <Zap className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("reports.auto_tag")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-1 text-xs md:text-sm">
-              <Brain className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("reports.insights")}</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Interactive Analytics */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <RequirePlan plan="standard">
-                <InteractiveChart
-                  data={dynamicChartData}
-                  chartType="line"
-                  title={t("reports.income_vs_expenses_trend")}
-                  description={t("reports.track_cash_flow")}
-                  onExport={() => console.log(t("reports.exporting_chart"))}
-                />
-              </RequirePlan>
-              <RequirePlan plan="standard">
-                <InteractiveChart
-                  data={dynamicChartData}
-                  chartType="bar"
-                  title={t("reports.monthly_comparison")}
-                  description={t("reports.compare_monthly_performance")}
-                />
-              </RequirePlan>
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-5">
+          <PanelSkeleton className="h-56" />
+          <PanelSkeleton className="h-80" />
+        </div>
+      ) : (
+        <>
+          <HeroCard
+            tone={report.netCents < 0 ? "slate" : "blue"}
+            testId="reports-hero"
+            label={report.netCents < 0 ? t("page.reports.hero_short_label") : t("page.reports.hero_label")}
+            amount={f.money(Math.abs(report.netCents))}
+            sub={
+              report.savingsRateBp === null
+                ? t("page.reports.hero_sub_no_income")
+                : report.netCents < 0
+                  ? t("page.reports.hero_sub_short")
+                  : t("page.reports.hero_sub_rate", { pct: Math.round(report.savingsRateBp / 100) })
+            }
+            help={t("page.reports.hero_help")}
+          >
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+              <HeroStat
+                label={t("page.reports.income")}
+                value={f.money(report.incomeCents)}
+                note={report.incomeChangePct !== null ? t("page.reports.change_note", { pct: `${report.incomeChangePct > 0 ? "+" : ""}${report.incomeChangePct}` }) : t("page.reports.no_previous")}
+              />
+              <HeroStat
+                label={t("page.reports.expenses")}
+                value={f.money(report.expenseCents)}
+                note={report.expenseChangePct !== null ? t("page.reports.change_note", { pct: `${report.expenseChangePct > 0 ? "+" : ""}${report.expenseChangePct}` }) : t("page.reports.no_previous")}
+              />
+              <HeroStat
+                label={t("page.reports.per_day")}
+                value={report.dailyExpenseCents !== null ? f.money(report.dailyExpenseCents) : "—"}
+                note={report.scheduledExpenseCents > 0 ? t("page.reports.scheduled_note", { amount: f.money(report.scheduledExpenseCents) }) : t("page.reports.per_day_note")}
+              />
             </div>
-            <RequirePlan plan="standard">
-              <InteractiveChart
-                data={dynamicChartData}
-                chartType="area"
-                title={t("reports.financial_overview")}
-                description={t("reports.comprehensive_view")}
-              />
-            </RequirePlan>
-          </TabsContent>
+          </HeroCard>
 
-          {/* Auto-Categorization - Standard+ Users */}
-          <TabsContent value="categorization" className="space-y-6">
-            <RequirePlan plan="standard">
-              <AutoCategorization 
-                transactions={filteredTransactions}
-              />
-            </RequirePlan>
-          </TabsContent>
+          <Tabs defaultValue="summary" className="flex flex-col gap-5">
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl p-1 md:w-auto md:grid-cols-4 md:self-start">
+              <TabsTrigger value="summary" className="gap-1.5 rounded-lg"><FileText className="h-4 w-4" aria-hidden="true" />{t("reports.summary")}</TabsTrigger>
+              <TabsTrigger value="chart" className="gap-1.5 rounded-lg"><BarChart3 className="h-4 w-4" aria-hidden="true" />{t("page.reports.tab_chart")}</TabsTrigger>
+              <TabsTrigger value="categorization" className="gap-1.5 rounded-lg"><Zap className="h-4 w-4" aria-hidden="true" />{t("reports.auto_tag")}</TabsTrigger>
+              <TabsTrigger value="insights" className="gap-1.5 rounded-lg"><Brain className="h-4 w-4" aria-hidden="true" />{t("reports.insights")}</TabsTrigger>
+            </TabsList>
 
-          {/* AI Insights - Premium Users Only (Last Tab) */}
-          <TabsContent value="insights" className="space-y-6">
-            <RequirePlan plan="premium">
-              <AIInsights 
-                data={{
-                  transactions: filteredTransactions,
-                  budgets: [],
-                  goals: []
-                }}
-              />
-            </RequirePlan>
-          </TabsContent>
-
-          {/* Financial Summary - Available for All Users */}
-          <TabsContent value="summary" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Monthly Overview */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {selectedPeriod === "week" ? t("reports.weekly_overview") : 
-                     selectedPeriod === "month" ? t("reports.monthly_overview") :
-                     selectedPeriod === "quarter" ? t("reports.quarterly_overview") :
-                     selectedPeriod === "year" ? t("reports.yearly_overview") : t("reports.financial_overview")}
-                  </CardTitle>
-                  <CardDescription>
-                    {t("reports.basic_financial_summary")} {selectedPeriod === "week" ? t("reports.this_week_period") : 
-                                                 selectedPeriod === "month" ? t("reports.this_month_period") :
-                                                 selectedPeriod === "quarter" ? t("reports.this_quarter_period") :
-                                                 selectedPeriod === "year" ? t("reports.this_year_period") : selectedPeriod}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 dark:bg-green-800 rounded-full">
-                          <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-green-900 dark:text-green-100">{t("reports.total_income")}</p>
-                          <p className="text-xs text-green-600 dark:text-green-400">
-                            {selectedPeriod === "week" ? t("reports.current_week") : 
-                             selectedPeriod === "month" ? t("reports.current_month") :
-                             selectedPeriod === "quarter" ? t("reports.current_quarter") :
-                             selectedPeriod === "year" ? t("reports.current_year") : t("reports.current_period")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-xl font-bold text-green-700 dark:text-green-300">
-                        {summaryLoading ? (
-                          <Skeleton className="h-6 w-16" />
-                        ) : (
-                          `${displayCurrency}${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-red-100 dark:bg-red-800 rounded-full">
-                          <PieChart className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-red-900 dark:text-red-100">{t("reports.total_expenses")}</p>
-                          <p className="text-xs text-red-600 dark:text-red-400">
-                            {selectedPeriod === "week" ? t("reports.current_week") : 
-                             selectedPeriod === "month" ? t("reports.current_month") :
-                             selectedPeriod === "quarter" ? t("reports.current_quarter") :
-                             selectedPeriod === "year" ? t("reports.current_year") : t("reports.current_period")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-xl font-bold text-red-700 dark:text-red-300">
-                        {summaryLoading ? (
-                          <Skeleton className="h-6 w-16" />
-                        ) : (
-                          `${displayCurrency}${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
-                          <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{t("reports.net_balance")}</p>
-                          <p className="text-xs text-blue-600 dark:text-blue-400">
-                            {selectedPeriod === "week" ? t("reports.current_week") : 
-                             selectedPeriod === "month" ? t("reports.current_month") :
-                             selectedPeriod === "quarter" ? t("reports.current_quarter") :
-                             selectedPeriod === "year" ? t("reports.current_year") : t("reports.current_period")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
-                        {summaryLoading ? (
-                          <Skeleton className="h-6 w-16" />
-                        ) : (
-                          `${displayCurrency}${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
-                        )}
-                      </div>
-                    </div>
+            <TabsContent value="summary" className="mt-0 flex flex-col gap-5">
+              {multiMonth && (
+                <Panel labelledBy="statement-title" className="flex flex-col gap-3" testId="reports-statement">
+                  <PanelTitle id="statement-title">{t("page.reports.statement_title")}</PanelTitle>
+                  <div className="-mx-2 overflow-x-auto">
+                    <table className="w-full min-w-[520px] text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-600 dark:border-gray-800 dark:text-gray-400">
+                          <th scope="col" className="px-2 py-2 font-semibold">{t("page.reports.col_month")}</th>
+                          <th scope="col" className="px-2 py-2 text-right font-semibold">{t("page.reports.income")}</th>
+                          <th scope="col" className="px-2 py-2 text-right font-semibold">{t("page.reports.expenses")}</th>
+                          <th scope="col" className="px-2 py-2 text-right font-semibold">{t("page.reports.col_kept")}</th>
+                          <th scope="col" className="px-2 py-2 text-right font-semibold">{t("page.reports.col_rate")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {report.months.map((month) => (
+                          <tr key={month.key} className={cn("border-b border-gray-100 last:border-b-0 dark:border-gray-800", best?.key === month.key && "bg-emerald-50/60 dark:bg-emerald-950/20")}>
+                            <th scope="row" className="px-2 py-2.5 text-left font-medium text-gray-900 dark:text-white">
+                              {f.monthLabel(month.key)}
+                              {best?.key === month.key && month.netCents > 0 && (
+                                <Trophy className="ml-1.5 inline h-3.5 w-3.5 text-amber-500" aria-label={t("page.reports.best_month")} />
+                              )}
+                            </th>
+                            <td className="px-2 py-2.5 text-right tabular-nums text-emerald-700 dark:text-emerald-400">{f.money(month.incomeCents)}</td>
+                            <td className="px-2 py-2.5 text-right tabular-nums text-gray-900 dark:text-white">{f.money(month.expenseCents)}</td>
+                            <td className={cn("px-2 py-2.5 text-right font-semibold tabular-nums", month.netCents < 0 ? "text-red-700 dark:text-red-400" : "text-gray-900 dark:text-white")}>
+                              {month.netCents < 0 ? "−" : ""}{f.money(Math.abs(month.netCents))}
+                            </td>
+                            <td className="px-2 py-2.5 text-right tabular-nums text-gray-700 dark:text-gray-300">
+                              {month.savingsRateBp === null ? "—" : `${Math.round(month.savingsRateBp / 100)}%`}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="border-t-2 border-gray-200 font-semibold dark:border-gray-700">
+                          <th scope="row" className="px-2 py-2.5 text-left text-gray-900 dark:text-white">{t("page.reports.total")}</th>
+                          <td className="px-2 py-2.5 text-right tabular-nums text-emerald-700 dark:text-emerald-400">{f.money(report.incomeCents)}</td>
+                          <td className="px-2 py-2.5 text-right tabular-nums text-gray-900 dark:text-white">{f.money(report.expenseCents)}</td>
+                          <td className="px-2 py-2.5 text-right tabular-nums text-gray-900 dark:text-white">{report.netCents < 0 ? "−" : ""}{f.money(Math.abs(report.netCents))}</td>
+                          <td className="px-2 py-2.5 text-right tabular-nums text-gray-700 dark:text-gray-300">
+                            {report.savingsRateBp === null ? "—" : `${Math.round(report.savingsRateBp / 100)}%`}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
-                </CardContent>
-              </Card>
+                </Panel>
+              )}
 
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("reports.recent_activity")}</CardTitle>
-                  <CardDescription>
-                    {t("reports.latest_transactions")}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {!Array.isArray(transactions) || transactions.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="mx-auto h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-                        <FileText className="h-6 w-6 text-gray-400" />
-                      </div>
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        {t("reports.no_recent_transactions")}
-                      </h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-300">
-                        {t("reports.add_transactions_activity")}
-                      </p>
-                    </div>
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+                <Panel labelledBy="rep-exp-title" className="flex flex-col gap-4 lg:col-span-7" testId="reports-categories">
+                  <PanelTitle id="rep-exp-title">{t("page.reports.spending_title")}</PanelTitle>
+                  {report.expenseCategories.length === 0 ? (
+                    <p className="py-6 text-center text-sm text-gray-600 dark:text-gray-400">{t("page.reports.nothing")}</p>
                   ) : (
-                    <div className="space-y-3">
-                      {(transactions as any[]).slice(0, 5).map((transaction: any) => (
-                          <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-full ${
-                                transaction.type === 'income' 
-                                  ? 'bg-green-100 dark:bg-green-900' 
-                                  : 'bg-red-100 dark:bg-red-900'
-                              }`}>
-                                {transaction.type === 'income' ? (
-                                  <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                ) : (
-                                  <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                )}
-                              </div>
-                              <div>
-                                <div className="flex items-center space-x-2">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {transaction.description}
-                                  </p>
-                                  {transaction.isRecurring && (
-                                    <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300">
-                                      <RotateCcw className="h-3 w-3 mr-1" />
-                                      {t("reports.recurring")}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-600 dark:text-gray-400">
-                                  {new Date(transaction.date).toLocaleDateString()}
-                                </p>
-                              </div>
+                    <ul className="flex flex-col gap-3.5">
+                      {report.expenseCategories.map((category) => (
+                        <li key={category.key} className="flex items-center gap-3">
+                          <CategoryTile color={category.color} icon={category.icon} name={category.name} size="sm" />
+                          <div className="flex min-w-0 flex-1 flex-col gap-1">
+                            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                              <span className="flex min-w-0 items-center gap-2">
+                                <span className="truncate font-semibold text-gray-900 dark:text-white">
+                                  {category.key === "uncategorized" ? t("page.common.uncategorized") : category.name}
+                                </span>
+                                <ChangeChip pct={category.changePct} label={CHANGE_LABEL} />
+                              </span>
+                              <span className="whitespace-nowrap font-semibold tabular-nums text-gray-900 dark:text-white">{f.money(category.cents)}</span>
                             </div>
-                            <div className="text-right">
-                              <p className={`text-sm font-semibold ${
-                                transaction.type === 'income' 
-                                  ? 'text-green-600 dark:text-green-400' 
-                                  : 'text-red-600 dark:text-red-400'
-                              }`}>
-                                {transaction.type === 'income' ? '+' : '-'}{displayCurrency}
-                                {parseFloat(transaction.amount).toFixed(2)}
-                              </p>
+                            <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
+                              <div className="h-full rounded-full bg-blue-600" style={{ width: `${Math.max(2, category.shareBp / 100)}%` }} />
                             </div>
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              {t("page.reports.category_meta", { share: Math.round(category.shareBp / 100), count: category.count })}
+                            </span>
                           </div>
+                        </li>
                       ))}
-                      {Array.isArray(transactions) && transactions.length > 5 && (
-                        <div className="text-center pt-2">
-                          <p className="text-xs text-gray-500">
-                            {t("reports.showing_5_of")} {Array.isArray(transactions) ? transactions.length : 0} {t("reports.transactions")}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    </ul>
                   )}
-                </CardContent>
-              </Card>
-            </div>
+                </Panel>
 
-            {/* Category Breakdown - Basic for Free Users */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("reports.category_breakdown")}</CardTitle>
-                <CardDescription>
-                  {t("reports.detailed_analysis")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!Array.isArray(financialSummary?.transactionsByCategory) || financialSummary.transactionsByCategory.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="mx-auto h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-                      <PieChart className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      {t("reports.no_category_data")}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
-                      {t("reports.add_transactions_categories")}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {(financialSummary.transactionsByCategory as any[])
-                      .sort((a: any, b: any) => Math.abs(b.amount) - Math.abs(a.amount))
-                      .slice(0, 6)
-                      .map((category: any, index: number) => {
-                        const isExpense = category.type === 'expense';
-                        const totalForType = isExpense ? financialSummary.totalExpenses : financialSummary.totalIncome;
-                        const percentage = totalForType > 0 
-                          ? (Math.abs(category.amount) / Math.abs(totalForType)) * 100 
-                          : 0;
-                        return (
-                          <div key={index} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                                <PieChart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {category.categoryName}
-                                </p>
-                                <p className="text-xs text-gray-600 dark:text-gray-400">
-                                  {percentage.toFixed(1)}% {t(isExpense ? "reports.of_expenses" : "reports.of_income")}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                ${category.amount.toFixed(2)}
-                              </p>
-                              <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
-                                <div 
-                                  className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
-                                  style={{ width: `${Math.min(percentage, 100)}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                    {Array.isArray(financialSummary.transactionsByCategory) && financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length > 6 && (
-                      <div className="text-center pt-2">
-                        <p className="text-xs text-gray-500">
-                          {t("reports.showing_top_6")}
-                        </p>
-                      </div>
+                <div className="flex flex-col gap-5 lg:col-span-5">
+                  <Panel labelledBy="rep-inc-title" className="flex flex-col gap-3">
+                    <PanelTitle id="rep-inc-title">{t("page.reports.income_title")}</PanelTitle>
+                    {report.incomeCategories.length === 0 ? (
+                      <p className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">{t("page.reports.nothing")}</p>
+                    ) : (
+                      <ul className="flex flex-col">
+                        {report.incomeCategories.map((source) => (
+                          <li key={source.key} className="flex items-center justify-between gap-3 border-b border-gray-100 py-2 text-sm last:border-b-0 dark:border-gray-800">
+                            <span className="truncate font-medium text-gray-900 dark:text-white">
+                              {source.key === "uncategorized" ? t("page.common.uncategorized") : source.name}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <span className="text-xs text-gray-600 dark:text-gray-400">{Math.round(source.shareBp / 100)}%</span>
+                              <span className="whitespace-nowrap font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">{f.money(source.cents)}</span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </Panel>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("reports.financial_statistics")}</CardTitle>
-                <CardDescription>
-                  {t("reports.key_metrics")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
-                    <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full w-fit mx-auto mb-2">
-                      <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    </div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {financialSummary?.totalTransactionCount || 0}
-                    </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.total_transactions")}</span>
-                  </div>
-
-                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full w-fit mx-auto mb-2">
-                      <PieChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {Array.isArray(financialSummary?.transactionsByCategory) 
-                        ? financialSummary.transactionsByCategory.length 
-                        : 0}
-                    </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.categories_used")}</span>
-                  </div>
-
-                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full w-fit mx-auto mb-2">
-                      <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {displayCurrency}{((financialSummary?.totalIncome || 0) / Math.max(
-                        financialSummary?.incomeTransactionCount || 1, 
-                        1
-                      )).toFixed(0)}
-                    </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.avg_income")}</span>
-                  </div>
-
-                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
-                    <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full w-fit mx-auto mb-2">
-                      <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    </div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {displayCurrency}{((financialSummary?.totalExpenses || 0) / Math.max(
-                        financialSummary?.expenseTransactionCount || 1, 
-                        1
-                      )).toFixed(0)}
-                    </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.avg_expense")}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Upgrade Banner for Free Users */}
-            {false && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                      <Crown className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {t("reports.unlock_advanced_reports")}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300">
-                        {t("reports.get_ai_insights")}
-                      </p>
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={() => setLocation("/subscribe")}
-                    className="bg-premium hover:bg-premium/90"
-                  >
-                    <Crown className="h-4 w-4 mr-2" />
-                    {t("reports.upgrade_now")}
-                  </Button>
+                  <Panel labelledBy="rep-largest-title" className="flex flex-col gap-3">
+                    <PanelTitle id="rep-largest-title">{t("page.reports.largest_title")}</PanelTitle>
+                    {report.largestExpenses.length === 0 ? (
+                      <p className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">{t("page.reports.nothing")}</p>
+                    ) : (
+                      <ul className="flex flex-col">
+                        {report.largestExpenses.map((row) => (
+                          <li key={row.id} className="flex items-center gap-3 border-b border-gray-100 py-2 last:border-b-0 dark:border-gray-800">
+                            <span className="flex min-w-0 flex-1 flex-col">
+                              <span className="truncate text-sm font-medium text-gray-900 dark:text-white">{row.description}</span>
+                              <span className="text-xs text-gray-600 dark:text-gray-400">
+                                {f.dateLabel(dayKeyIn(row.date, timeZone))} · {row.categoryName || t("page.common.uncategorized")}
+                              </span>
+                            </span>
+                            <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+                              {f.money(Math.abs(parseAmountToCents(row.amount)))}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Panel>
                 </div>
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+            </TabsContent>
+
+            <TabsContent value="chart" className="mt-0">
+              <RequirePlan plan="standard">
+                <Panel labelledBy="rep-chart-title" className="flex flex-col gap-4">
+                  <PanelTitle id="rep-chart-title">{t("page.reports.chart_title")}</PanelTitle>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={chartData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} width={80} tickFormatter={(value) => f.money(Number(value) * 100)} />
+                        <Tooltip formatter={(value, name) => [f.money(Number(value) * 100), String(name)]} />
+                        <Legend />
+                        <Bar dataKey="income" name={t("page.reports.income")} fill="#059669" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="expenses" name={t("page.reports.expenses")} fill="#2563eb" radius={[4, 4, 0, 0]} />
+                        <Line type="monotone" dataKey="kept" name={t("page.reports.col_kept")} stroke="#0f172a" strokeWidth={2} dot={{ r: 3 }} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{t("page.reports.chart_note")}</p>
+                </Panel>
+              </RequirePlan>
+            </TabsContent>
+
+            <TabsContent value="categorization" className="mt-0">
+              <RequirePlan plan="standard">
+                <AutoCategorization transactions={periodRows} />
+              </RequirePlan>
+            </TabsContent>
+
+            <TabsContent value="insights" className="mt-0">
+              <RequirePlan plan="premium">
+                <AIInsights data={{ transactions: periodRows, budgets: [], goals: [] }} />
+              </RequirePlan>
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
+    </PageShell>
   );
-} 
+}

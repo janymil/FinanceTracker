@@ -90,7 +90,7 @@ export function NeedsAttention({ overview, className }: { overview: Overview; cl
           key: "uncategorized",
           title: t("overview.attention.uncategorized_title", { count: item.count }),
           sub: t("overview.attention.uncategorized_sub", { amount: f.money(item.amountCents) }),
-          action: <Link href={href("/transactions")} className={actionClass}>{t("overview.attention.categorize")}</Link>,
+          action: <Link href={href("/transactions?filter=uncategorized")} className={actionClass}>{t("overview.attention.categorize")}</Link>,
         };
       case "goal":
         return {

@@ -1,423 +1,297 @@
-import { useState, useEffect, useRef } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { sumTransactionAmountsByType } from "@shared/calculations";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Bell, CalendarClock, Plus } from "lucide-react";
 import RequirePlan from "@/components/require-plan";
 import TransactionRemindersWidget from "@/components/transaction-reminders-widget";
-import {
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Minus,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-} from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO } from "date-fns";
-import { enUS, es, sk } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { TransactionFormDialog, type EditableTransaction } from "@/components/TransactionFormDialog";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useCurrency } from "@/context/CurrencyContext";
-import { formatDate, formatDetailedDate } from "@/lib/dateUtils";
+import { apiRequest } from "@/lib/queryClient";
+import { requestQuickAdd } from "@/lib/quickAdd";
+import { cn } from "@/lib/utils";
+import type { TxRow } from "@/components/ledger/LedgerPanel";
+import {
+  CategoryTile,
+  LoadError,
+  MonthStepper,
+  PageHeader,
+  PageShell,
+  Panel,
+  PanelSkeleton,
+  PanelTitle,
+  StatTile,
+  primaryButton,
+  useMonthNavigation,
+  useOverviewFormat,
+} from "@/components/page/kit";
+import { buildMonthLedger, dayKeyIn, daysInMonthOf } from "@shared/ledger";
+import { parseAmountToCents } from "@shared/money";
 
-interface Transaction {
+interface Reminder {
   id: number;
-  amount: string;
-  description: string;
-  date: string;
-  type: "income" | "expense";
-  categoryId: number;
-  categoryName: string;
-  categoryIcon: string;
-  categoryColor: string;
+  title: string;
+  amount?: string | null;
+  dueDate: string;
+  isActive: boolean;
+  isCompleted: boolean;
 }
 
-interface DayData {
-  date: Date;
-  transactions: Transaction[];
-  totalIncome: number;
-  totalExpenses: number;
-  netAmount: number;
-}
-
+/**
+ * The month as a calendar: which days money moved, how much, and what is still coming.
+ *
+ * The old grid always put the 1st under Sunday whatever weekday it was, printed "$" whatever the
+ * currency and wrote Slovak month names by hand. Days now sit under their real weekday (Monday
+ * first in Spanish and Slovak, Sunday first in English), a day's shade says how much was spent,
+ * bills and reminders appear on their day, and a day can be added to directly.
+ */
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { isReady, user, getAuthHeaders } = useClerkUserReady();
-  const { currency } = useCurrency();
-  const displayCurrency = currency || '$';
+  const f = useOverviewFormat();
+  const { formatMoney } = useCurrency();
+  const { isReady, user } = useClerkUserReady();
+  const nav = useMonthNavigation(null, { allowFuture: true });
+  const { data, isLoading, error, refetch } = useTransactions();
+  const rows: TxRow[] = Array.isArray(data) ? data : [];
+  const ledger = useMemo(() => buildMonthLedger(rows, nav.monthKey, { timeZone: nav.timeZone }), [rows, nav.monthKey, nav.timeZone]);
+  const { clock } = ledger;
+  const isCurrent = clock.status === "current";
+  const todayKey = dayKeyIn(new Date(), nav.timeZone);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [editing, setEditing] = useState<EditableTransaction | null>(null);
 
-  // Get date-fns locale for current language
-  const getDateFnsLocale = () => {
-    const currentLang = i18n.language;
-    if (currentLang.startsWith('es')) {
-      return es;
-    } else if (currentLang.startsWith('sk')) {
-      return sk;
-    } else {
-      return enUS;
-    }
-  };
-
-  useEffect(() => {
-    if (!isReady || !user?.id) {
-      setIsLoading(false);
-      return;
-    }
-
-    let isMounted = true;
-
-    const fetchData = async () => {
+  const remindersQuery = useQuery<Reminder[]>({
+    queryKey: ["expense-reminders", user?.id, "all"],
+    enabled: isReady && !!user?.id,
+    retry: false,
+    queryFn: async () => {
       try {
-        setIsLoading(true);
-        const headers = await getAuthHeaders();
-        
-        const [transactionsRes, categoriesRes] = await Promise.all([
-          fetch('/api/transactions', { headers }),
-          fetch('/api/categories', { headers })
-        ]);
-
-        if (!isMounted) return;
-
-        if (transactionsRes.ok) {
-          const transactionsData = await transactionsRes.json();
-          setTransactions(transactionsData);
-        }
-
-        if (categoriesRes.ok) {
-          const categoriesData = await categoriesRes.json();
-          setCategories(categoriesData);
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error fetching data:', error);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        return (await apiRequest("GET", "/api/expense-reminders")).json();
+      } catch {
+        return [];
       }
-    };
+    },
+  });
+  const remindersByDay = useMemo(() => {
+    const map = new Map<string, Reminder[]>();
+    for (const reminder of remindersQuery.data ?? []) {
+      if (!reminder.isActive || reminder.isCompleted) continue;
+      const key = dayKeyIn(reminder.dueDate, nav.timeZone);
+      map.set(key, [...(map.get(key) ?? []), reminder]);
+    }
+    return map;
+  }, [remindersQuery.data, nav.timeZone]);
 
-    fetchData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isReady, user?.id]);
-
-  // Process transactions for calendar view
-  const processTransactionsForCalendar = (transactions: Transaction[], month: Date): DayData[] => {
-    const monthStart = startOfMonth(month);
-    const monthEnd = endOfMonth(month);
-    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-    return days.map(date => {
-      const dayTransactions = transactions.filter(transaction => 
-        isSameDay(parseISO(transaction.date), date)
-      );
-
-      const totalIncome = sumTransactionAmountsByType(dayTransactions, "income");
-
-      const totalExpenses = sumTransactionAmountsByType(dayTransactions, "expense");
-
-      return {
-        date,
-        transactions: dayTransactions,
-        totalIncome,
-        totalExpenses,
-        netAmount: totalIncome - totalExpenses,
-      };
-    });
-  };
-
-  const calendarData = processTransactionsForCalendar(transactions as Transaction[], currentMonth);
-  const selectedDayData = selectedDate ? calendarData.find(day => isSameDay(day.date, selectedDate)) : null;
-
-  const monthlyTotals = calendarData.reduce(
-    (acc, day) => ({
-      income: acc.income + day.totalIncome,
-      expenses: acc.expenses + day.totalExpenses,
-      net: acc.net + day.netAmount,
-    }),
-    { income: 0, expenses: 0, net: 0 }
+  const days = new Map(ledger.days.map((day) => [day.key, day]));
+  const total = daysInMonthOf(nav.monthKey);
+  const mondayFirst = !i18n.language.startsWith("en");
+  const firstWeekday = new Date(`${nav.monthKey}-01T12:00:00Z`).getUTCDay(); // 0 = Sunday
+  const leading = mondayFirst ? (firstWeekday + 6) % 7 : firstWeekday;
+  const weekdayNames = Array.from({ length: 7 }, (_, i) =>
+    new Intl.DateTimeFormat(f.locale, { weekday: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2024, 0, (mondayFirst ? 1 : 7) + i))),
   );
+  const maxSpend = Math.max(1, ...ledger.days.filter((d) => !d.scheduled).map((d) => d.expenseCents));
+  const compact = new Intl.NumberFormat(f.locale, { notation: "compact", maximumFractionDigits: 1 });
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentMonth(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1));
-    setSelectedDate(null);
-  };
+  const spentDays = ledger.days.filter((d) => !d.scheduled && d.expenseCents > 0);
+  const noSpendDays = Math.max(0, clock.daysElapsed - spentDays.length);
+  const busiest = spentDays.reduce<(typeof spentDays)[number] | null>((a, b) => (!a || b.expenseCents > a.expenseCents ? b : a), null);
 
-  const getDayClassName = (dayData: DayData) => {
-    const baseClasses = "min-h-[100px] p-2 border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors";
-    
-    if (!isSameMonth(dayData.date, currentMonth)) {
-      return cn(baseClasses, "text-gray-400 bg-gray-50 dark:bg-gray-900");
-    }
+  const selectedKey = selected && selected.startsWith(nav.monthKey) ? selected : isCurrent ? todayKey : `${nav.monthKey}-01`;
+  const selectedDay = days.get(selectedKey);
+  const selectedReminders = remindersByDay.get(selectedKey) ?? [];
 
-    if (selectedDate && isSameDay(dayData.date, selectedDate)) {
-      return cn(baseClasses, "bg-primary/10 border-primary");
-    }
-
-    if (dayData.transactions.length > 0) {
-      return cn(baseClasses, "bg-blue-50 dark:bg-blue-900/20");
-    }
-
-    return baseClasses;
-  };
-
-  const formatCurrency = (amount: number) => {
-    return `${displayCurrency}${amount.toFixed(2)}`;
+  const shade = (cents: number) => {
+    if (cents <= 0) return "";
+    const level = cents / maxSpend;
+    if (level > 0.75) return "bg-blue-200 dark:bg-blue-900/70";
+    if (level > 0.4) return "bg-blue-100 dark:bg-blue-900/45";
+    return "bg-blue-50 dark:bg-blue-950/50";
   };
 
   return (
     <RequirePlan plan="standard">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('calendar.title')}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {t('calendar.description')}
-            </p>
+      <PageShell testId="calendar-page">
+        <PageHeader
+          title={t("page.calendar.title")}
+          subtitle={t("page.calendar.subtitle")}
+          actions={
+            <button type="button" className={primaryButton} onClick={() => requestQuickAdd("type", { date: selectedKey })} data-testid="calendar-add">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {t("page.calendar.add_on_day", { day: f.dayLabel(selectedKey) })}
+            </button>
+          }
+        >
+          <MonthStepper
+            label={f.monthLabel(nav.monthKey)}
+            onPrevious={nav.previous}
+            onNext={nav.next}
+            canGoNext={nav.canGoNext}
+            isCurrent={nav.isCurrent}
+            onCurrent={nav.reset}
+          />
+        </PageHeader>
+
+        {error && <LoadError onRetry={() => refetch()} />}
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <PanelSkeleton className="h-24 lg:col-span-12" />
+            <PanelSkeleton className="h-[520px] lg:col-span-8" />
+            <PanelSkeleton className="h-80 lg:col-span-4" />
           </div>
-          
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <StatTile label={t("page.transactions.money_in")} value={`+${f.money(ledger.incomeCents)}`} tone="good" />
+              <StatTile label={t("page.transactions.money_out")} value={`−${f.money(ledger.expenseCents)}`} />
+              <StatTile
+                label={t("page.transactions.no_spend_days")}
+                value={clock.daysElapsed > 0 ? t("page.transactions.days_of", { count: noSpendDays, total: clock.daysElapsed }) : "—"}
+                tone={noSpendDays > 0 ? "good" : "default"}
+              />
+              <StatTile
+                label={t("page.calendar.busiest")}
+                value={busiest ? f.money(busiest.expenseCents) : "—"}
+                note={busiest ? f.dayLabel(busiest.key) : undefined}
+              />
+            </div>
 
-        </div>
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+              <Panel labelledBy="calendar-grid-title" className="flex flex-col gap-3 p-3 sm:p-6 lg:col-span-8" testId="calendar-grid">
+                <h2 id="calendar-grid-title" className="sr-only">{f.monthLabel(nav.monthKey)}</h2>
+                <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400" aria-hidden="true">
+                  {weekdayNames.map((name) => <span key={name}>{name}</span>)}
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                  {Array.from({ length: leading }, (_, i) => <span key={`blank-${i}`} aria-hidden="true" />)}
+                  {Array.from({ length: total }, (_, i) => {
+                    const key = `${nav.monthKey}-${String(i + 1).padStart(2, "0")}`;
+                    const day = days.get(key);
+                    const reminders = remindersByDay.get(key) ?? [];
+                    const future = key > todayKey;
+                    const spent = day?.expenseCents ?? 0;
+                    const label = [
+                      f.dayLabel(key),
+                      spent > 0 ? t("page.calendar.cell_spent", { amount: f.money(spent) }) : "",
+                      (day?.incomeCents ?? 0) > 0 ? t("page.calendar.cell_received", { amount: f.money(day!.incomeCents) }) : "",
+                      reminders.length > 0 ? t("page.calendar.cell_reminders", { count: reminders.length }) : "",
+                    ].filter(Boolean).join(", ");
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelected(key)}
+                        aria-pressed={key === selectedKey}
+                        aria-label={label}
+                        className={cn(
+                          "flex aspect-square min-h-[44px] flex-col items-stretch rounded-lg border p-1 text-left transition-colors sm:aspect-auto sm:min-h-[84px] sm:p-2",
+                          day?.scheduled ? "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40" : cn("border-gray-100 dark:border-gray-800", shade(future ? 0 : spent)),
+                          key === selectedKey && "ring-2 ring-blue-700 dark:ring-blue-400",
+                          "hover:border-blue-400",
+                        )}
+                      >
+                        <span className="flex items-center justify-between">
+                          <span
+                            className={cn(
+                              "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold sm:text-sm",
+                              key === todayKey ? "bg-blue-700 text-white" : future ? "text-gray-400 dark:text-gray-500" : "text-gray-900 dark:text-white",
+                            )}
+                          >
+                            {i + 1}
+                          </span>
+                          {reminders.length > 0 && <Bell className="h-3 w-3 text-amber-600" aria-hidden="true" />}
+                        </span>
+                        <span className="mt-auto hidden flex-col text-[11px] font-semibold tabular-nums sm:flex">
+                          {spent > 0 && <span className="text-gray-800 dark:text-gray-200">−{compact.format(spent / 100)}</span>}
+                          {(day?.incomeCents ?? 0) > 0 && <span className="text-emerald-700 dark:text-emerald-400">+{compact.format(day!.incomeCents / 100)}</span>}
+                        </span>
+                        <span className="mt-auto flex justify-center gap-0.5 sm:hidden" aria-hidden="true">
+                          {spent > 0 && <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
+                          {(day?.incomeCents ?? 0) > 0 && <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-blue-200 dark:bg-blue-900" />{t("page.calendar.legend_shade")}</span>
+                  <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-amber-300 bg-amber-50" />{t("page.calendar.legend_scheduled")}</span>
+                  <span className="flex items-center gap-1.5"><Bell className="h-3 w-3 text-amber-600" aria-hidden="true" />{t("page.calendar.legend_reminder")}</span>
+                </div>
+              </Panel>
 
-        {/* Monthly Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('calendar.monthly_income')}</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(monthlyTotals.income)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('calendar.monthly_expenses')}</CardTitle>
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(monthlyTotals.expenses)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('calendar.net_amount')}</CardTitle>
-              <DollarSign className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className={cn(
-                "text-2xl font-bold",
-                monthlyTotals.net >= 0 ? "text-green-600" : "text-red-600"
-              )}>
-                {formatCurrency(monthlyTotals.net)}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calendar */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">
-                    {i18n.language.startsWith('sk') ? 
-                      `${['január', 'február', 'marec', 'apríl', 'máj', 'jún', 'júl', 'august', 'september', 'október', 'november', 'december'][currentMonth.getMonth()]} ${currentMonth.getFullYear()}` :
-                      format(currentMonth, 'MMMM yyyy', { locale: getDateFnsLocale() })
-                    }
-                  </CardTitle>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigateMonth('prev')}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigateMonth('next')}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+              <Panel labelledBy="day-title" className="flex flex-col gap-4 lg:col-span-4" testId="calendar-day">
+                <PanelTitle id="day-title">{f.dayLabel(selectedKey)}</PanelTitle>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-gray-50 p-3 dark:bg-gray-800/60">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{t("page.transactions.money_out")}</p>
+                    <p className="font-semibold tabular-nums text-gray-900 dark:text-white">{f.money(selectedDay?.expenseCents ?? 0)}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-3 dark:bg-gray-800/60">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{t("page.transactions.money_in")}</p>
+                    <p className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">{f.money(selectedDay?.incomeCents ?? 0)}</p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Calendar Header */}
-                    <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                      {['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].map(day => (
-                        <div key={day} className="bg-gray-100 dark:bg-gray-800 p-3 text-center text-sm font-medium text-gray-900 dark:text-white">
-                          {t(`calendar.days.${day}`)}
-                        </div>
-                      ))}
-                    </div>
 
-                    {/* Calendar Grid */}
-                    <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                      {calendarData.map((dayData, index) => (
-                        <div
-                          key={index}
-                          className={getDayClassName(dayData)}
-                          onClick={() => setSelectedDate(dayData.date)}
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <span className={cn(
-                              "text-sm font-medium",
-                              !isSameMonth(dayData.date, currentMonth) && "text-gray-400"
-                            )}>
-                              {format(dayData.date, 'd')}
-                            </span>
-                            {dayData.transactions.length > 0 && (
-                              <Badge variant="secondary" className="text-xs px-1 py-0">
-                                {dayData.transactions.length}
-                              </Badge>
-                            )}
-                          </div>
-
-                          {dayData.transactions.length > 0 && (
-                            <div className="space-y-1">
-                              {dayData.totalIncome > 0 && (
-                                <div className="flex items-center text-xs text-green-600">
-                                  <Plus className="h-3 w-3 mr-1" />
-                                  {formatCurrency(dayData.totalIncome)}
-                                </div>
-                              )}
-                              {dayData.totalExpenses > 0 && (
-                                <div className="flex items-center text-xs text-red-600">
-                                  <Minus className="h-3 w-3 mr-1" />
-                                  {formatCurrency(dayData.totalExpenses)}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {selectedReminders.length > 0 && (
+                  <ul className="flex flex-col gap-2">
+                    {selectedReminders.map((reminder) => (
+                      <li key={reminder.id} className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+                        <Bell className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 truncate">{reminder.title}</span>
+                        {reminder.amount && <span className="font-semibold tabular-nums">{formatMoney(Number(reminder.amount))}</span>}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Selected Day Details */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {selectedDate ? (
-                    i18n.language.startsWith('sk') ? 
-                      `${selectedDate.getDate()} ${['januára', 'februára', 'marca', 'apríla', 'mája', 'júna', 'júla', 'augusta', 'septembra', 'októbra', 'novembra', 'decembra'][selectedDate.getMonth()]} ${selectedDate.getFullYear()}` :
-                      format(selectedDate, 'MMMM d, yyyy', { locale: getDateFnsLocale() })
-                  ) : t('calendar.select_date')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {selectedDate && selectedDayData ? (
-                  <div className="space-y-4">
-                    {selectedDayData.transactions.length === 0 ? (
-                      <p className="text-gray-500 text-center py-8">
-                        {t('calendar.no_transactions')}
-                      </p>
-                    ) : (
-                      <>
-                        {/* Day Summary */}
-                        <div className="grid grid-cols-2 gap-4 pb-4 border-b">
-                          <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('Income')}</p>
-                            <p className="text-lg font-semibold text-green-600">
-                              {formatCurrency(selectedDayData.totalIncome)}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('Expenses')}</p>
-                            <p className="text-lg font-semibold text-red-600">
-                              {formatCurrency(selectedDayData.totalExpenses)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Transactions List */}
-                        <div className="space-y-3">
-                          <h4 className="font-medium text-gray-900 dark:text-white">
-                            {t('calendar.transactions_count', { count: selectedDayData.transactions.length })}
-                          </h4>
-                          <div className="space-y-2 max-h-80 overflow-y-auto">
-                            {selectedDayData.transactions.map(transaction => (
-                              <div
-                                key={transaction.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center text-white text-sm",
-                                    transaction.type === "income" ? "bg-green-500" : "bg-red-500"
-                                  )}>
-                                    {transaction.type === "income" ? "+" : "-"}
-                                  </div>
-                                  <div>
-                                    <p className="font-medium text-sm text-gray-900 dark:text-white">
-                                      {transaction.description}
-                                    </p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                                      {transaction.categoryName}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className={cn(
-                                  "font-semibold",
-                                  transaction.type === "income" ? "text-green-600" : "text-red-600"
-                                )}>
-                                  {transaction.type === "income" ? "+" : "-"}
-                                  {formatCurrency(parseFloat(transaction.amount))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    {t('calendar.click_date')}
+                {!selectedDay || selectedDay.rows.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                    {selectedKey > todayKey ? t("page.calendar.day_empty_future") : t("page.calendar.day_empty")}
                   </p>
+                ) : (
+                  <ul className="flex flex-col">
+                    {selectedDay.rows.map((row) => (
+                      <li key={row.id}>
+                        <button
+                          type="button"
+                          onClick={() => setEditing(row as EditableTransaction)}
+                          className="flex w-full items-center gap-3 rounded-xl px-1 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800/60"
+                          aria-label={t("page.ledger.edit_row", { name: row.description })}
+                        >
+                          <CategoryTile color={row.categoryColor} icon={row.categoryIcon} name={row.description} size="sm" />
+                          <span className="flex min-w-0 flex-1 flex-col">
+                            <span className="truncate text-sm font-semibold text-gray-900 dark:text-white">{row.description}</span>
+                            <span className="flex items-center gap-1 truncate text-xs text-gray-600 dark:text-gray-400">
+                              {selectedDay.scheduled && <CalendarClock className="h-3 w-3" aria-hidden="true" />}
+                              {row.categoryName || t("page.common.uncategorized")}
+                            </span>
+                          </span>
+                          <span className={cn("whitespace-nowrap text-sm font-semibold tabular-nums", row.type === "income" ? "text-emerald-700 dark:text-emerald-400" : "text-gray-900 dark:text-white")}>
+                            {row.type === "income" ? "+" : "−"}{f.money(Math.abs(parseAmountToCents(row.amount)))}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                <button type="button" className={cn(primaryButton, "justify-center")} onClick={() => requestQuickAdd("type", { date: selectedKey })}>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  {t("page.calendar.add_here")}
+                </button>
+              </Panel>
+            </div>
+          </>
+        )}
 
         {/* Bills and reminders: created and ticked off here. The dashboard lists the ones due
             this week under "Needs your attention" and links back to this page. */}
         <TransactionRemindersWidget />
-      </div>
+
+        <TransactionFormDialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)} transaction={editing} />
+      </PageShell>
     </RequirePlan>
   );
 }

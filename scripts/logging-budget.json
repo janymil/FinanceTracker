@@ -1,13 +1,12 @@
 {
   "$comment": "Ceiling for console.* references in client/src, enforced by scripts/check-logging.ts. It may only go down: remove calls, then run `npm run check:logging -- --update`.",
   "client": {
-    "budget": 202,
+    "budget": 164,
     "measured": "2026-10-28",
     "note": "The browser has no logger yet; this freezes the count until it does.",
     "files": {
       "client/src/components/simple-voice-input.tsx": 37,
       "client/src/components/LanguageGuard.tsx": 21,
-      "client/src/pages/trends.tsx": 16,
       "client/src/components/financial-mascot.tsx": 12,
       "client/src/pages/export.tsx": 8,
       "client/src/components/PDFProcessingProgress.tsx": 7,
@@ -16,13 +15,9 @@
       "client/src/components/UploadReceiptModal.tsx": 6,
       "client/src/main.tsx": 6,
       "client/src/pages/admin-analytics.tsx": 6,
-      "client/src/pages/budget.tsx": 6,
-      "client/src/pages/collaborative-goals.tsx": 5,
-      "client/src/pages/goals.tsx": 5,
       "client/src/App.tsx": 4,
       "client/src/context/CurrencyContext.tsx": 4,
       "client/src/i18n/languageDetector.ts": 4,
-      "client/src/pages/collaborative-goal-detail.tsx": 4,
       "client/src/components/UpgradePrompt.tsx": 2,
       "client/src/components/UploadReceipt.tsx": 2,
       "client/src/hooks/useGeolocation.ts": 2,
@@ -49,10 +44,8 @@
       "client/src/lib/analytics.ts": 1,
       "client/src/lib/dateRangeUtils.ts": 1,
       "client/src/pages/Courses.tsx": 1,
-      "client/src/pages/calendar.tsx": 1,
       "client/src/pages/help.tsx": 1,
-      "client/src/pages/mobile-upload/sessionId.tsx": 1,
-      "client/src/pages/reports.tsx": 1
+      "client/src/pages/mobile-upload/sessionId.tsx": 1
     }
   }
 }

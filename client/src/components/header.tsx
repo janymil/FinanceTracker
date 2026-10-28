@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useClerk, useUser } from "@clerk/clerk-react";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,24 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { 
   Crown, 
   ChevronDown, 
@@ -41,36 +23,23 @@ import {
   Plus,
   Moon,
   Sun,
-  Repeat,
   HelpCircle,
   Gift,
   BookOpen
 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import RequirePlan from "@/components/require-plan";
 import { Link, useLocation } from "wouter";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { useCurrency } from "@/context/CurrencyContext";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest, clearUserSession, newIdempotencyKey } from "@/lib/queryClient";
+import { clearUserSession } from "@/lib/queryClient";
 import { useTheme } from "@/context/ThemeContext";
-import { todayLocalISO } from '@/lib/dateUtils';
-import { QUICK_ADD_EVENT, type QuickAddMode } from "@/lib/quickAdd";
+import { QUICK_ADD_EVENT, type QuickAddMode, type QuickAddPreset, type QuickAddRequest } from "@/lib/quickAdd";
+import { TransactionFormDialog } from "@/components/TransactionFormDialog";
 import { QuickAddMenuItems } from "@/components/QuickAddMenuItems";
 import { SimpleVoiceInput } from "@/components/simple-voice-input";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
-
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-  type: "income" | "expense";
-}
-
-
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -87,17 +56,6 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   // Extract current language from URL to build language-aware links
   const currentLang = currentPath.match(/^\/([a-z]{2})\//)?.[1] || 'en';
 
-  // Helper functions for category localization
-  const isPredefinedCategory = (category: any): boolean => {
-    return category.userId === null;
-  };
-
-  const getLocalizedCategoryName = (category: any): string => {
-    if (isPredefinedCategory(category)) {
-      return t(category.name);
-    }
-    return category.name;
-  };
   const { canChangeCurrency } = useCurrency();
   const { toast } = useToast();
   const { signOut } = useClerk();
@@ -117,120 +75,16 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   };
   const { theme, toggleTheme } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [quickAddPreset, setQuickAddPreset] = useState<QuickAddPreset | undefined>(undefined);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isScanOpen, setIsScanOpen] = useState(false);
-  const [newTransaction, setNewTransaction] = useState({
-    amount: "",
-    description: "",
-    date: todayLocalISO(),
-    type: "expense" as "income" | "expense",
-    categoryId: "",
-    isRecurring: false,
-    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
-    recurringEndDate: "",
-    paymentUrl: "",
-    referenceNote: "",
-  });
-
-  // Use React Query for categories to sync with categories page
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
-    enabled: isReady && !!user?.id,
-    // Category names and colours change only on the categories screen, which invalidates this key.
-    // Refetching them on every mount of the header was pure waste.
-    staleTime: 5 * 60_000,
-  });
-
   const queryClient = useQueryClient();
 
-  // One key for this form, reused if the tap registers twice. It is replaced after a success, so
-  // the next expense is a new write rather than a replay of this one.
-  const requestKeyRef = useRef<string>(newIdempotencyKey());
-
-  const createTransactionMutation = useMutation({
-    mutationFn: async (transactionData: typeof newTransaction) => {
-      const response = await apiRequest(
-        "POST",
-        "/api/transactions",
-        {
-          ...transactionData,
-          amount: parseFloat(transactionData.amount),
-        },
-        { "Idempotency-Key": requestKeyRef.current },
-      );
-      return response.json();
-    },
-    onSuccess: () => {
-      requestKeyRef.current = newIdempotencyKey();
-      // Invalidate all relevant queries to force refresh
-      queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => 
-          query.queryKey[0] === "financial-summary" ||
-          query.queryKey[0] === "budgets" ||
-          query.queryKey[0] === "financial-health" ||
-          query.queryKey[0] === "transaction-reminders"
-      });
-      
-      setIsDialogOpen(false);
-      setNewTransaction({
-        amount: "",
-        description: "",
-        date: todayLocalISO(),
-        type: "expense",
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
-      toast({
-        title: t("Transaction Added"),
-        description: t("Transaction has been created successfully"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("Error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  const handleSubmit = async () => {
-    if (!newTransaction.amount || !newTransaction.description) {
-      toast({
-        title: t("Error"),
-        description: t("Please fill in all required fields"),
-        variant: "destructive",
-      });
-      return;
-    }
-    createTransactionMutation.mutate(newTransaction);
-  };
-
-  // The three ways to add a transaction. The forms live here, once; the phone's bottom bar asks
-  // for one through `requestQuickAdd` (see lib/quickAdd.ts).
-  const openQuickAdd = (mode: QuickAddMode) => {
+  // The three ways to add a transaction. The forms live here, once; any other control asks for
+  // one through `requestQuickAdd` (see lib/quickAdd.ts), with what it already knows as a preset.
+  const openQuickAdd = (mode: QuickAddMode, preset?: QuickAddPreset) => {
     if (mode === "type") {
-      setNewTransaction({
-        amount: "",
-        description: "",
-        date: todayLocalISO(),
-        type: "expense",
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
+      setQuickAddPreset(preset);
       setIsDialogOpen(true);
     } else if (mode === "voice") {
       setIsVoiceOpen(true);
@@ -240,7 +94,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   };
 
   useEffect(() => {
-    const listener = (event: Event) => openQuickAdd((event as CustomEvent<QuickAddMode>).detail);
+    const listener = (event: Event) => {
+      const detail = (event as CustomEvent<QuickAddRequest>).detail;
+      if (detail) openQuickAdd(detail.mode, detail.preset);
+    };
     window.addEventListener(QUICK_ADD_EVENT, listener);
     return () => window.removeEventListener(QUICK_ADD_EVENT, listener);
   }, []);
@@ -278,7 +135,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-64 p-1.5">
-              <QuickAddMenuItems onSelect={openQuickAdd} />
+              <QuickAddMenuItems onSelect={(mode) => openQuickAdd(mode)} />
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -294,197 +151,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           )}
           <UploadReceiptModal open={isScanOpen} onOpenChange={setIsScanOpen} hideTrigger />
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{t("Add New Transaction")}</DialogTitle>
-                <DialogDescription>
-                  {t("Record a new income or expense transaction")}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="amount">{t("Amount")}</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      value={newTransaction.amount}
-                      onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="date">{t("Date")}</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={newTransaction.date}
-                      onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="description">{t("Description")}</Label>
-                  <Textarea
-                    id="description"
-                    value={newTransaction.description}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                    placeholder={t("What was this transaction for?")}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="type">{t("Type")}</Label>
-                    <Select
-                      value={newTransaction.type}
-                      onValueChange={(value: "income" | "expense") => 
-                        setNewTransaction({ ...newTransaction, type: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select type")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="income">{t("Income")}</SelectItem>
-                        <SelectItem value="expense">{t("Expense")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="category">{t("Category")}</Label>
-                    <Select
-                      value={newTransaction.categoryId}
-                      onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select category")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(categories as Category[])
-                          .filter((cat: Category) => cat.type === newTransaction.type)
-                          .map((category: Category) => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                              {getLocalizedCategoryName(category)}
-                            </SelectItem>
-                          ))}
-                        {(categories as Category[]).filter((cat: Category) => cat.type === newTransaction.type).length === 0 && (
-                          <div className="px-2 py-1 text-sm text-gray-500">
-                            {t("No categories available for")} {newTransaction.type}
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Premium Features - Standard/Premium only */}
-                <RequirePlan plan="standard" compact={true}>
-                  <div className="space-y-4 border-t pt-4">
-                    {/* Smart Bill Assistant - for expenses only */}
-                    {newTransaction.type === "expense" && (
-                      <div className="space-y-4">
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {t("Smart Bill Assistant")}
-                        </div>
-                        <div>
-                          <Label htmlFor="paymentUrl">{t("Payment URL (Optional)")}</Label>
-                          <Input
-                            id="paymentUrl"
-                            type="url"
-                            value={newTransaction.paymentUrl}
-                            onChange={(e) => setNewTransaction({ ...newTransaction, paymentUrl: e.target.value })}
-                            placeholder="https://example.com/pay"
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            {t("Link to where you can pay this bill")}
-                          </p>
-                        </div>
-                        <div>
-                          <Label htmlFor="referenceNote">{t("Reference Note (Optional)")}</Label>
-                          <Input
-                            id="referenceNote"
-                            value={newTransaction.referenceNote}
-                            onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
-                            placeholder="Invoice number, account reference, etc."
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Recurring transaction options */}
-                    <div className={newTransaction.type === "expense" ? "border-t pt-4 space-y-4" : "space-y-4"}>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="recurring"
-                          checked={newTransaction.isRecurring}
-                          onCheckedChange={(checked) => 
-                            setNewTransaction({ ...newTransaction, isRecurring: checked as boolean })
-                          }
-                        />
-                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
-                          <Repeat className="h-4 w-4 mr-2" />
-{t("Make this a recurring transaction")}
-                        </label>
-                      </div>
-
-                      {newTransaction.isRecurring && (
-                        <div className="grid grid-cols-2 gap-4 pl-6">
-                          <div>
-                            <Label htmlFor="frequency">{t("Frequency")}</Label>
-                            <Select
-                              value={newTransaction.recurringFrequency}
-                              onValueChange={(value) => setNewTransaction({ 
-                                ...newTransaction, 
-                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                              })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder={t("Select frequency")} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="weekly">{t("Weekly")}</SelectItem>
-                                <SelectItem value="monthly">{t("Monthly")}</SelectItem>
-                                <SelectItem value="yearly">{t("Yearly")}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
-                            <Input
-                              id="endDate"
-                              type="date"
-                              value={newTransaction.recurringEndDate}
-                              onChange={(e) => setNewTransaction({ 
-                                ...newTransaction, 
-                                recurringEndDate: e.target.value 
-                              })}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </RequirePlan>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    {t("Cancel")}
-                  </Button>
-                  <Button 
-                    onClick={handleSubmit}
-                    disabled={!newTransaction.amount || !newTransaction.description}
-                  >
-                    {t("Add Transaction")}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <TransactionFormDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} preset={quickAddPreset} />
         </div>
 
         {/* Right side - User menu and premium status */}

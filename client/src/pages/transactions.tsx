@@ -1,890 +1,194 @@
-import { useState, useEffect } from "react";
-import { useSearch } from "wouter";
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { sumTransactionAmountsByType } from "@shared/calculations";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import UploadReceiptModal from "@/components/UploadReceiptModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Calendar, 
-  Edit3, 
-  Trash2, 
-  ArrowUpRight,
-  ArrowDownLeft,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Repeat,
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import RequirePlan from "@/components/require-plan";
-
-import { useToast } from "@/hooks/use-toast";
-import { useSubmitLock } from "@/hooks/useSubmitLock";
-import MonthFilter from "@/components/month-filter";
-import { format } from "date-fns";
-import { useCurrency } from "@/context/CurrencyContext";
+import { useMemo } from "react";
+import { Link, useSearch } from "wouter";
 import { useTranslation } from "react-i18next";
-import TransactionFilters from "@/components/TransactionFilters";
-import { useDateFormat } from "@/hooks/useDateFormat";
-import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
-import SimpleVoiceButton from "@/components/simple-voice-button";
-import { todayLocalISO } from '@/lib/dateUtils';
+import { ArrowDownLeft, ArrowUpRight, CalendarClock, Scale } from "lucide-react";
+import { useTransactions } from "@/hooks/useTransactions";
+import { LedgerPanel, type TxRow } from "@/components/ledger/LedgerPanel";
+import { DailyBars } from "@/components/ledger/DailyBars";
+import {
+  CategoryTile,
+  LoadError,
+  MonthStepper,
+  PageHeader,
+  PageShell,
+  Panel,
+  PanelSkeleton,
+  PanelTitle,
+  StatTile,
+  linkButton,
+  useLangHref,
+  useMonthNavigation,
+  useOverviewFormat,
+} from "@/components/page/kit";
+import { buildMonthLedger } from "@shared/ledger";
 
-interface Transaction {
-  id: number;
-  amount: string;
-  description: string;
-  date: string;
-  type: "income" | "expense";
-  categoryId?: number;
-  categoryName?: string;
-  categoryIcon?: string;
-  categoryColor?: string;
-  isRecurring?: boolean;
-  recurringFrequency?: "weekly" | "monthly" | "yearly";
-  recurringEndDate?: string;
-  paymentUrl?: string;
-  referenceNote?: string;
-  imageUrl?: string;
-  ocrText?: string;
-  ocrVendor?: string;
-  ocrDetectedAmount?: string;
-  ocrDetectedDate?: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-  type: "income" | "expense";
-}
-
+/**
+ * Everything that came in and went out, one month at a time.
+ *
+ * `?month=YYYY-MM` opens a given month: the receipt scanner sends the person here after saving an
+ * expense dated in another month, because a saved bill that appears nowhere reads as "not saved".
+ * `?filter=uncategorized` opens on the rows without a category (the dashboard's "Categorize").
+ */
 export default function Transactions() {
-  const { isReady, user } = useClerkUserReady();
-  const { toast } = useToast();
-  const submitOnce = useSubmitLock();
-  const { currency } = useCurrency();
-  const displayCurrency = currency || '$';
   const { t } = useTranslation();
-  const { formatDate } = useDateFormat();
+  const f = useOverviewFormat();
+  const href = useLangHref();
+  const params = new URLSearchParams(useSearch());
+  const monthParam = params.get("month");
+  const monthFromUrl = monthParam && /^\d{4}-(0[1-9]|1[0-2])$/.test(monthParam) ? monthParam : null;
+  const nav = useMonthNavigation(monthFromUrl, { allowFuture: true });
+  const { data, isLoading, error, refetch } = useTransactions();
+  const rows: TxRow[] = Array.isArray(data) ? data : [];
 
-  // Helper functions for category localization
-  const isPredefinedCategory = (category: any): boolean => {
-    return category.userId === null;
-  };
+  const ledger = useMemo(
+    () => buildMonthLedger(rows, nav.monthKey, { timeZone: nav.timeZone }),
+    [rows, nav.monthKey, nav.timeZone],
+  );
+  const { clock } = ledger;
+  const isCurrent = clock.status === "current";
 
-  const getLocalizedCategoryName = (category: any): string => {
-    if (isPredefinedCategory(category)) {
-      return t(category.name);
-    }
-    return category.name;
-  };
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
-  const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [filterRecurring, setFilterRecurring] = useState<string>("all");
-  const [dateRange, setDateRange] = useState<string>("all");
+  const note = isCurrent
+    ? t("overview.progress_current", { day: clock.daysElapsed, total: clock.daysInMonth, count: clock.daysLeft })
+    : clock.status === "past" ? t("overview.progress_closed") : t("overview.progress_future");
 
-  /*
-   * `?month=YYYY-MM` opens the list on that month.
-   *
-   * The receipt modal sends the person here after saving an expense dated outside the current
-   * month, because the current month cannot show it — and a saved bill that appears nowhere is
-   * reported as "it was not saved". The month filter accepts any month even when the twelve-month
-   * strip does not show it.
-   */
-  const search = useSearch();
-  const monthFromUrl = (() => {
-    const value = new URLSearchParams(search).get("month");
-    return value && /^\d{4}-(0[1-9]|1[0-2])$/.test(value) ? value : null;
-  })();
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(monthFromUrl);
+  const spentDays = ledger.days.filter((day) => !day.scheduled && day.expenseCents > 0).length;
+  const noSpendDays = Math.max(0, clock.daysElapsed - spentDays);
 
-  useEffect(() => {
-    if (monthFromUrl) setSelectedMonth(monthFromUrl);
-  }, [monthFromUrl]);
-
-  const [newTransaction, setNewTransaction] = useState({
-    amount: "",
-    description: "",
-    date: todayLocalISO(),
-    type: "expense" as "income" | "expense",
-    categoryId: "",
-    isRecurring: false,
-    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
-    recurringEndDate: "",
-    paymentUrl: "",
-    referenceNote: "",
-  });
-
-  // React Query hooks for data fetching using the same pattern as dashboard
-  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useTransactions();
-  const queryClient = useQueryClient();
-
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
-    enabled: isReady && !!user?.id
-  });
-
-  const isLoading = transactionsLoading || categoriesLoading;
-
-
-
-  // React Query mutation for creating transactions
-  const createTransactionMutation = useMutation({
-    mutationFn: async (transactionData: typeof newTransaction) => {
-      const res = await apiRequest("POST", "/api/transactions", {
-        ...transactionData,
-        amount: parseFloat(transactionData.amount),
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      setIsDialogOpen(false);
-      toast({
-        title: t("Transaction Added"),
-        description: t("transactions.transactionAddedSuccess"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("Error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // React Query mutation for editing transactions
-  const editTransactionMutation = useMutation({
-    mutationFn: async (transactionData: any) => {
-      const res = await apiRequest("PUT", `/api/transactions/${transactionData.id}`, transactionData);
-      if (!res.ok) {
-        throw new Error(`Edit failed: ${res.status}`);
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      setEditingTransaction(null);
-      setIsDialogOpen(false);
-      toast({
-        title: t("transactions.transactionUpdated"),
-        description: t("transactions.transactionUpdatedSuccess"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("transactions.editFailed"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // React Query mutation for updating transactions via form
-  const updateTransactionMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newTransaction) => {
-      const updateData = {
-        amount: parseFloat(newTransaction.amount),
-        description: newTransaction.description,
-        date: newTransaction.date,
-        type: newTransaction.type,
-        categoryId: parseInt(newTransaction.categoryId),
-        isRecurring: newTransaction.isRecurring,
-        recurringFrequency: newTransaction.recurringFrequency,
-        recurringEndDate: newTransaction.recurringEndDate || null,
-        paymentUrl: newTransaction.paymentUrl || "",
-        referenceNote: newTransaction.referenceNote || ""
-      };
-      
-      const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      if (!res.ok) {
-        throw new Error(`Update failed: ${res.status}`);
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      setEditingTransaction(null);
-      setIsDialogOpen(false);
-      toast({
-        title: t("transactions.transactionUpdated"),
-        description: t("transactions.transactionUpdatedSuccess"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("Error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // React Query mutation for deleting transactions
-  const deleteTransactionMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      toast({
-        title: t("transactions.transactionDeleted"),
-        description: t("transactions.transactionDeletedSuccess"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("Error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Filter transactions based on search and filters
-  const filteredTransactions = transactions.filter((transaction: Transaction) => {
-    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.categoryName?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesType = filterType === "all" || transaction.type === filterType;
-
-    const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
-
-    const matchesRecurring = filterRecurring === "all" || 
-                           (filterRecurring === "recurring" && transaction.isRecurring) ||
-                           (filterRecurring === "one-time" && !transaction.isRecurring);
-
-    // Check month filter first (horizontal filter takes priority)
-    let matchesMonth = true;
-    if (selectedMonth) {
-      const transactionDate = new Date(transaction.date);
-      const { startDate, endDate } = getMonthDateRange(selectedMonth);
-      matchesMonth = transactionDate >= startDate && transactionDate <= endDate;
-    }
-
-    let matchesDate = true;
-    if (dateRange !== "all" && !selectedMonth) {
-      const transactionDate = new Date(transaction.date);
-      const dateRangeFilter = getDateRangeForFilter(dateRange);
-      if (dateRangeFilter) {
-        matchesDate = isDateInRange(transactionDate, dateRangeFilter);
-      }
-    }
-
-    return matchesSearch && matchesType && matchesCategory && matchesRecurring && matchesMonth && matchesDate;
-  });
-
-  const availableCategories = Array.from(new Set(transactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
-
-  const handleSubmit = async () => {
-    if (!newTransaction.amount || !newTransaction.description) return;
-
-    // One submit at a time: two clicks in the same tick must not create two rows.
-    submitOnce((done) => {
-      if (editingTransaction) {
-      // Use React Query mutation for editing
-      const updateData = {
-        id: editingTransaction.id,
-        amount: parseFloat(newTransaction.amount),
-        description: newTransaction.description,
-        date: newTransaction.date,
-        type: newTransaction.type,
-        categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
-        isRecurring: newTransaction.isRecurring,
-        recurringFrequency: newTransaction.recurringFrequency,
-        recurringEndDate: newTransaction.recurringEndDate || null,
-        paymentUrl: newTransaction.paymentUrl || "",
-        referenceNote: newTransaction.referenceNote || ""
-      };
-
-      editTransactionMutation.mutate(updateData, { onSettled: done });
-      
-      // Reset form
-      setNewTransaction({
-        amount: "",
-        description: "",
-        date: todayLocalISO(),
-        type: "expense",
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
-    } else {
-      // Use React Query mutation for creating
-      const createData = {
-        amount: newTransaction.amount,
-        description: newTransaction.description,
-        date: newTransaction.date,
-        type: newTransaction.type,
-        categoryId: newTransaction.categoryId || "",
-        isRecurring: newTransaction.isRecurring,
-        recurringFrequency: newTransaction.recurringFrequency,
-        recurringEndDate: newTransaction.recurringEndDate || "",
-        paymentUrl: newTransaction.paymentUrl || "",
-        referenceNote: newTransaction.referenceNote || ""
-      };
-
-      createTransactionMutation.mutate(createData, { onSettled: done });
-      
-      // Reset form
-      setNewTransaction({
-        amount: "",
-        description: "",
-        date: todayLocalISO(),
-        type: "expense",
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
-    }
-    });
-  };
-
-  const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
-
-    // Find the category ID from the transaction's category name
-    const matchingCategory = (categories as Category[]).find(
-      cat => cat.name === transaction.categoryName
-    );
-
-    // Format the date properly - ensure it's in YYYY-MM-DD format
-    const formattedDate = typeof transaction.date === 'string' 
-      ? transaction.date.split('T')[0]
-      : new Date(transaction.date).toISOString().split('T')[0];
-
-    // Format recurring end date if it exists
-    const formattedRecurringEndDate = transaction.recurringEndDate 
-      ? (typeof transaction.recurringEndDate === 'string' 
-          ? transaction.recurringEndDate.split('T')[0]
-          : new Date(transaction.recurringEndDate).toISOString().split('T')[0])
-      : "";
-
-    setNewTransaction({
-      amount: transaction.amount.toString(),
-      description: transaction.description,
-      date: formattedDate,
-      type: transaction.type,
-      categoryId: matchingCategory ? matchingCategory.id.toString() : "",
-      isRecurring: Boolean(transaction.isRecurring),
-      recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
-      recurringEndDate: formattedRecurringEndDate,
-      paymentUrl: transaction.paymentUrl || "",
-      referenceNote: transaction.referenceNote || "",
-    });
-    setIsDialogOpen(true);
-  };
-
-  const totalIncome = sumTransactionAmountsByType(filteredTransactions, "income");
-
-  const totalExpenses = sumTransactionAmountsByType(filteredTransactions, "expense");
-
-  if (!user) {
-    return null;
+  let outNote = t("page.transactions.count", { count: ledger.expenseCount });
+  if (ledger.samePointLastMonthCents !== null && ledger.samePointLastMonthCents > 0) {
+    outNote = t("page.transactions.by_now_last_month", { amount: f.money(ledger.samePointLastMonthCents) });
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
-        {/* Header */}
-        <div className="mb-4 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                {t("transactions.allTransactions")}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
-                {t("transactions.manageTransactionsDesc")}
-              </p>
-            </div>
-            <div className="flex gap-2 flex-wrap sm:flex-nowrap">
-              <UploadReceiptModal 
-                onReceiptProcessed={(data) => {
-                  // Refresh transactions after receipt processing
-                  refetchTransactions();
-                }}
-                buttonText={t("transactions.uploadImage")}
-              />
-              <SimpleVoiceButton 
-                onComplete={() => {
-                  if (user) {
-                    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-                    refetchTransactions();
-                  }
-                }} 
-              />
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button 
-                    onClick={() => {
-                      setEditingTransaction(null);
-                      setNewTransaction({
-                        amount: "",
-                        description: "",
-                        date: todayLocalISO(),
-                        type: "expense",
-                        categoryId: "",
-                        isRecurring: false,
-                        recurringFrequency: "monthly",
-                        recurringEndDate: "",
-                        paymentUrl: "",
-                        referenceNote: "",
-                      });
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("Add Transaction")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingTransaction ? t("transactions.editTransaction") : t("Add New Transaction")}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {editingTransaction ? t("transactions.updateTransactionDetails") : 
-                       user?.primaryEmailAddress ? 
-                       t("transactions.recordNewTransactionWithCount", {count: transactions?.length || 0}) :
-                       t("transactions.recordNewTransaction")}
-                    </DialogDescription>
-                  </DialogHeader>
-
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="amount">{t("Amount")}</Label>
-                      <Input
-                        id="amount"
-                        type="number"
-                        step="0.01"
-                        value={newTransaction.amount}
-                        onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="date">{t("Date")}</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={newTransaction.date}
-                        onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">{t("Description")}</Label>
-                    <Input
-                      id="description"
-                      value={newTransaction.description}
-                      onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                      placeholder={t("Transaction description")}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>{t("Type")}</Label>
-                    <div className="flex gap-2 mt-2">
-                      <Button
-                        variant={newTransaction.type === "income" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setNewTransaction({ ...newTransaction, type: "income" })}
-                      >
-                        <ArrowUpRight className="h-4 w-4 mr-2" />
-                        {t("Income")}
-                      </Button>
-                      <Button
-                        variant={newTransaction.type === "expense" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setNewTransaction({ ...newTransaction, type: "expense" })}
-                      >
-                        <ArrowDownLeft className="h-4 w-4 mr-2" />
-                        {t("Expense")}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="category">{t("Category")}</Label>
-                    <Select 
-                      value={newTransaction.categoryId || ""} 
-                      onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select a category")}>
-                          {newTransaction.categoryId && (categories as Category[]).find(cat => cat.id.toString() === newTransaction.categoryId)?.name}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(categories as Category[])
-                          .filter((cat: Category) => cat.type === newTransaction.type)
-                          .map((category: Category) => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                              {getLocalizedCategoryName(category)}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Premium Features - Standard/Premium only */}
-                  <RequirePlan plan="standard" compact={true}>
-                    <div className="space-y-4 border-t pt-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="recurring"
-                          checked={newTransaction.isRecurring}
-                          onCheckedChange={(checked) => 
-                            setNewTransaction({ ...newTransaction, isRecurring: checked as boolean })
-                          }
-                        />
-                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
-                          <Repeat className="h-4 w-4 mr-2" />
-                          {t("Make this a recurring transaction")}
-                        </label>
-                      </div>
-
-                      {newTransaction.isRecurring && (
-                        <div className="grid grid-cols-2 gap-4 pl-6">
-                          <div>
-                            <Label htmlFor="frequency">{t("Frequency")}</Label>
-                            <Select
-                              value={newTransaction.recurringFrequency}
-                              onValueChange={(value) => setNewTransaction({ 
-                                ...newTransaction, 
-                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                              })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder={t("Select frequency")} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="weekly">{t("Weekly")}</SelectItem>
-                                <SelectItem value="monthly">{t("Monthly")}</SelectItem>
-                                <SelectItem value="yearly">{t("Yearly")}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
-                            <Input
-                              id="endDate"
-                              type="date"
-                              value={newTransaction.recurringEndDate}
-                              onChange={(e) => setNewTransaction({ 
-                                ...newTransaction, 
-                                recurringEndDate: e.target.value 
-                              })}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Smart Bill Assistant - Expense only */}
-                      {newTransaction.type === "expense" && (
-                        <div className="space-y-4 border-t pt-4">
-                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {t("Smart Bill Assistant")}
-                          </div>
-                          <div>
-                            <Label htmlFor="paymentUrl">{t("Payment URL (Optional)")}</Label>
-                            <Input
-                              id="paymentUrl"
-                              type="url"
-                              value={newTransaction.paymentUrl}
-                              onChange={(e) => setNewTransaction({ ...newTransaction, paymentUrl: e.target.value })}
-                              placeholder="https://example.com/pay"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              {t("Link to where you can pay this bill")}
-                            </p>
-                          </div>
-                          <div>
-                            <Label htmlFor="referenceNote">{t("Reference Note (Optional)")}</Label>
-                            <Input
-                              id="referenceNote"
-                              value={newTransaction.referenceNote}
-                              onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
-                              placeholder={t("Account #123456, Reference: ABC789")}
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              {t("Account number or other reference information")}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </RequirePlan>
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      {t("Cancel")}
-                    </Button>
-                    <Button 
-                      onClick={handleSubmit}
-                      disabled={!newTransaction.amount || !newTransaction.description}
-                    >
-                      {editingTransaction ? t("Update") : t("Add")}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Total Income")}</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {displayCurrency}{totalIncome.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-100 dark:bg-red-900 rounded-lg">
-                  <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Total Expenses")}</p>
-                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    {currency || '$'}{totalExpenses.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Net Balance")}</p>
-                  <p className={`text-2xl font-bold ${(totalIncome - totalExpenses) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {currency || '$'}{(totalIncome - totalExpenses).toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-
-
-        {/* Month Navigation Filter */}
-        <MonthFilter 
-          selectedMonth={selectedMonth}
-          onMonthSelect={setSelectedMonth}
-          onDateRangeReset={() => setDateRange("all")}
+    <PageShell testId="transactions-page">
+      <PageHeader
+        title={t("page.transactions.title")}
+        subtitle={t("page.transactions.subtitle")}
+      >
+        <MonthStepper
+          label={f.monthLabel(nav.monthKey)}
+          onPrevious={nav.previous}
+          onNext={nav.next}
+          canGoNext={nav.canGoNext}
+          isCurrent={nav.isCurrent}
+          onCurrent={nav.reset}
+          note={note}
+          testId="transactions-month"
         />
+      </PageHeader>
 
-        {/* Search and Filters */}
-        <div className="mb-6">
-          <TransactionFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filterType={filterType}
-            onTypeChange={(value: string) => setFilterType(value as "all" | "income" | "expense")}
-            filterCategory={filterCategory}
-            onCategoryChange={setFilterCategory}
-            filterRecurring={filterRecurring}
-            onRecurringChange={setFilterRecurring}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            availableCategories={availableCategories}
-            showTypeFilter={true}
-            searchPlaceholder={t("Search transactions...")}
-          />
+      {error && <LoadError onRetry={() => refetch()} />}
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          <PanelSkeleton className="h-28 lg:col-span-12" />
+          <PanelSkeleton className="h-[480px] lg:col-span-8" />
+          <PanelSkeleton className="h-64 lg:col-span-4" />
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <StatTile
+              icon={<ArrowUpRight className="h-4 w-4 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />}
+              label={t("page.transactions.money_in")}
+              value={`+${f.money(ledger.incomeCents)}`}
+              tone="good"
+              note={t("page.transactions.count", { count: ledger.incomeCount })}
+            />
+            <StatTile
+              icon={<ArrowDownLeft className="h-4 w-4" aria-hidden="true" />}
+              label={t("page.transactions.money_out")}
+              value={`−${f.money(ledger.expenseCents)}`}
+              note={outNote}
+            />
+            <StatTile
+              icon={<Scale className="h-4 w-4" aria-hidden="true" />}
+              label={t("page.transactions.balance")}
+              value={`${ledger.netCents < 0 ? "−" : "+"}${f.money(Math.abs(ledger.netCents))}`}
+              tone={ledger.netCents < 0 ? "bad" : "good"}
+              note={ledger.scheduledCount > 0
+                ? t("page.transactions.scheduled_note", { count: ledger.scheduledCount, amount: f.money(ledger.scheduledExpenseCents) })
+                : t("page.transactions.balance_note")}
+            />
+          </div>
 
-        {/* Transactions List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("transactions.transactionsCount", {count: filteredTransactions.length})}</CardTitle>
-            <CardDescription>
-              {searchTerm || filterType !== "all" || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
-                ? t("transactions.filteredTransactions") 
-                : t("transactions.allYourTransactions")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">{t("transactions.loadingTransactions")}</p>
-              </div>
-            ) : filteredTransactions.length === 0 ? (
-              <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  {t("transactions.noTransactionsFound")}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {searchTerm || filterType !== "all" || filterCategory !== "all" || dateRange !== "all"
-                    ? t("transactions.tryAdjustingFilters")
-                    : t("transactions.addFirstTransaction")}
-                </p>
-                <Button onClick={() => setIsDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("Add Transaction")}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredTransactions.map((transaction: Transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors gap-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`p-2 rounded-lg shrink-0 ${transaction.type === "income" ? "bg-green-100 dark:bg-green-900" : "bg-red-100 dark:bg-red-900"}`}>
-                        {transaction.type === "income" ? (
-                          <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <ArrowDownLeft className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 dark:text-white truncate">
-                          {transaction.description}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-sm text-gray-600 dark:text-gray-300 mt-1">
-                          <span className="shrink-0">{formatDate(transaction.date)}</span>
-                          {transaction.categoryName && (
-                            <>
-                              <span className="hidden sm:inline">•</span>
-                              <Badge variant="outline" className="text-xs">{transaction.categoryName}</Badge>
-                            </>
-                          )}
-                          {transaction.isRecurring && (
-                            <>
-                              <span className="hidden sm:inline">•</span>
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
-                                🔄 {transaction.recurringFrequency ? t(transaction.recurringFrequency) : t("Recurring")}
-                              </Badge>
-                            </>
-                          )}
-                        </div>
-                        {transaction.referenceNote && (
-                          <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
-                            {t("Note")}: {transaction.referenceNote}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0">
-                      <p className={`font-semibold text-lg ${transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                        {transaction.type === "income" ? "+" : "-"}{displayCurrency}{parseFloat(transaction.amount).toFixed(2)}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setEditingTransaction(transaction);
-                            
-                            // Find the category ID - check both categoryId field and categoryName
-                            let categoryId = "";
-                            if (transaction.categoryId) {
-                              categoryId = transaction.categoryId.toString();
-                            } else if (transaction.categoryName) {
-                              const matchingCategory = (categories as Category[]).find(
-                                cat => cat.name === transaction.categoryName
-                              );
-                              categoryId = matchingCategory ? matchingCategory.id.toString() : "";
-                            }
-                            
-                            setNewTransaction({
-                              amount: transaction.amount.toString(),
-                              description: transaction.description,
-                              date: typeof transaction.date === 'string' 
-                                ? transaction.date.split('T')[0]
-                                : new Date(transaction.date).toISOString().split('T')[0],
-                              type: transaction.type,
-                              categoryId: categoryId,
-                              isRecurring: Boolean(transaction.isRecurring),
-                              recurringFrequency: transaction.recurringFrequency || "monthly",
-                              recurringEndDate: transaction.recurringEndDate || "",
-                              paymentUrl: transaction.paymentUrl || "",
-                              referenceNote: transaction.referenceNote || ""
-                            });
-                            setIsDialogOpen(true);
-                          }}
-                        >
-                          <Edit3 className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteTransactionMutation.mutate(transaction.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <div className="min-w-0 lg:col-span-8">
+              <LedgerPanel
+                monthDays={ledger.days}
+                allRows={rows}
+                kind="all"
+                timeZone={nav.timeZone}
+                startUncategorized={params.get("filter") === "uncategorized"}
+                title={t("page.transactions.list_title")}
+              />
+            </div>
+
+            <aside className="flex flex-col gap-5 lg:col-span-4">
+              <Panel labelledBy="rhythm-title" className="flex flex-col gap-4">
+                <PanelTitle id="rhythm-title">{t("page.transactions.rhythm_title")}</PanelTitle>
+                <DailyBars
+                  monthKey={nav.monthKey}
+                  daysInMonth={clock.daysInMonth}
+                  days={ledger.days}
+                  today={isCurrent ? clock.daysElapsed : 0}
+                />
+                <dl className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex flex-col gap-0.5 rounded-xl bg-gray-50 p-3 dark:bg-gray-800/60">
+                    <dt className="text-xs text-gray-600 dark:text-gray-400">{t("page.transactions.daily_average")}</dt>
+                    <dd className="font-semibold tabular-nums text-gray-900 dark:text-white">
+                      {ledger.dailyAverageCents !== null ? f.money(ledger.dailyAverageCents) : "—"}
+                    </dd>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-    </div>
+                  <div className="flex flex-col gap-0.5 rounded-xl bg-gray-50 p-3 dark:bg-gray-800/60">
+                    <dt className="text-xs text-gray-600 dark:text-gray-400">{t("page.transactions.no_spend_days")}</dt>
+                    <dd className="font-semibold tabular-nums text-gray-900 dark:text-white">
+                      {clock.daysElapsed > 0 ? t("page.transactions.days_of", { count: noSpendDays, total: clock.daysElapsed }) : "—"}
+                    </dd>
+                  </div>
+                </dl>
+                {ledger.scheduledCount > 0 && (
+                  <p className="flex items-center gap-2 text-[13px] text-amber-800 dark:text-amber-300">
+                    <CalendarClock className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {t("page.transactions.scheduled_legend")}
+                  </p>
+                )}
+              </Panel>
+
+              <Panel labelledBy="top-cats-title" className="flex flex-col gap-3">
+                <PanelTitle
+                  id="top-cats-title"
+                  aside={<Link href={href("/expenses")} className={linkButton}>{t("page.transactions.see_expenses")}</Link>}
+                >
+                  {t("page.transactions.top_categories")}
+                </PanelTitle>
+                {ledger.expenseCategories.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">{t("page.transactions.no_spending")}</p>
+                ) : (
+                  <ul className="flex flex-col gap-3">
+                    {ledger.expenseCategories.slice(0, 5).map((category) => (
+                      <li key={category.key} className="flex items-center gap-3">
+                        <CategoryTile color={category.color} icon={category.icon} name={category.name} size="sm" />
+                        <div className="flex min-w-0 flex-1 flex-col gap-1">
+                          <div className="flex items-baseline justify-between gap-2 text-sm">
+                            <span className="truncate font-medium text-gray-900 dark:text-white">
+                              {category.key === "uncategorized" ? t("page.common.uncategorized") : category.name}
+                            </span>
+                            <span className="whitespace-nowrap font-semibold tabular-nums text-gray-900 dark:text-white">{f.money(category.cents)}</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
+                            <div className="h-full rounded-full bg-blue-600" style={{ width: `${Math.max(2, category.shareBp / 100)}%` }} />
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Panel>
+            </aside>
+          </div>
+        </>
+      )}
+    </PageShell>
   );
 }

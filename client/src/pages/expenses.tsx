@@ -1,827 +1,279 @@
-import { useState, useEffect } from "react";
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { sumAmountsByCategoryName, sumAmountsByMonthKey, sumTransactionAmounts } from "@shared/calculations";
-import { parseMonthKeyLocal } from "@/lib/dateUtils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import UploadReceiptModal from "@/components/UploadReceiptModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Calendar, 
-  Edit3, 
-  Trash2, 
-  ArrowDownLeft,
-  DollarSign,
-  TrendingDown,
-  BarChart3,
-  Repeat
-} from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import RequirePlan from "@/components/require-plan";
-import { useToast } from "@/hooks/use-toast";
-import { useSubmitLock } from "@/hooks/useSubmitLock";
-import { format } from "date-fns";
-import MonthFilter from "@/components/month-filter";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { useCurrency } from "@/context/CurrencyContext";
+import { useMemo } from "react";
+import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
-import { useDateFormat } from "@/hooks/useDateFormat";
-import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
-
-import TransactionFilters from "@/components/TransactionFilters";
+import { Store, TrendingUp, Trophy } from "lucide-react";
+import { useTransactions } from "@/hooks/useTransactions";
+import { LedgerPanel, type TxRow } from "@/components/ledger/LedgerPanel";
+import { MonthBars } from "@/components/ledger/MonthBars";
 import { RecurringRulesCard } from "@/components/RecurringRulesCard";
-import SimpleVoiceButton from "@/components/simple-voice-button";
-import { todayLocalISO } from '@/lib/dateUtils';
+import { AddMenuButton } from "@/components/page/AddMenuButton";
+import {
+  CategoryTile,
+  ChangeChip,
+  HeroCard,
+  HeroStat,
+  LoadError,
+  MonthStepper,
+  PageHeader,
+  PageShell,
+  Panel,
+  PanelSkeleton,
+  PanelTitle,
+  linkButton,
+  useLangHref,
+  useMonthNavigation,
+  useOverviewFormat,
+} from "@/components/page/kit";
+import { buildMonthLedger } from "@shared/ledger";
+import { parseAmountToCents } from "@shared/money";
 
-
-// Helper functions for category localization
-const isPredefinedCategory = (category: Category): boolean => {
-  return category.userId === null;
-};
-
-const getLocalizedCategoryName = (category: Category, t: any): string => {
-  // Use the category name directly - it's already translated by the API
-  return category.name;
-};
-
-interface Transaction {
-  id: number;
-  amount: string;
-  description: string;
-  date: string;
-  type: "income" | "expense";
-  categoryId?: number;
-  categoryName?: string;
-  categoryIcon?: string;
-  categoryColor?: string;
-  isRecurring?: boolean;
-  recurringFrequency?: "weekly" | "monthly" | "yearly";
-  recurringEndDate?: string;
-  paymentUrl?: string;
-  referenceNote?: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-  type: "income" | "expense";
-  userId: string | null;
-}
-
+/**
+ * Where the money went this month, and whether that is normal for this person.
+ *
+ * The old page showed a total, an "average expense" (total divided by the number of rows, which
+ * says nothing) and a pie chart of the whole history. This one answers the questions people ask:
+ * how much so far, more or less than usual, how much is fixed and how much is everyday choices,
+ * where it goes (category and place), and where the month is heading.
+ */
 export default function Expenses() {
-  const { isReady, user } = useClerkUserReady();
-  const { currency } = useCurrency();
-  const displayCurrency = currency || '$';
-  const { toast } = useToast();
-  const submitOnce = useSubmitLock();
-  const { t, i18n } = useTranslation();
-  const { formatDate } = useDateFormat();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [filterRecurring, setFilterRecurring] = useState<string>("all");
-  const [dateRange, setDateRange] = useState<string>("all");
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const { t } = useTranslation();
+  const f = useOverviewFormat();
+  const href = useLangHref();
+  const nav = useMonthNavigation(null, { allowFuture: true });
+  const { data, isLoading, error, refetch } = useTransactions();
+  const rows: TxRow[] = Array.isArray(data) ? data : [];
+  const expenses = useMemo(() => rows.filter((row) => row.type === "expense"), [rows]);
+  const ledger = useMemo(
+    () => buildMonthLedger(rows, nav.monthKey, { timeZone: nav.timeZone }),
+    [rows, nav.monthKey, nav.timeZone],
+  );
+  const { clock } = ledger;
+  const isCurrent = clock.status === "current";
+  const monthName = f.monthName(nav.monthKey);
 
-  
-  const [newExpense, setNewExpense] = useState({
-    amount: "",
-    description: "",
-    date: todayLocalISO(),
-    categoryId: "",
-    isRecurring: false,
-    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
-    recurringEndDate: "",
-    paymentUrl: "",
-    referenceNote: "",
-  });
+  const note = isCurrent
+    ? t("overview.progress_current", { day: clock.daysElapsed, total: clock.daysInMonth, count: clock.daysLeft })
+    : clock.status === "past" ? t("overview.progress_closed") : t("overview.progress_future");
 
-  // React Query hooks for data fetching using the same pattern as transactions page
-  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useTransactions();
-  const queryClient = useQueryClient();
-
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
-    enabled: isReady && !!user?.id
-  });
-
-  const isLoading = transactionsLoading || categoriesLoading;
-
-  // React Query mutation for creating expenses
-  const createExpenseMutation = useMutation({
-    mutationFn: async (expenseData: typeof newExpense) => {
-      const res = await apiRequest("POST", "/api/transactions", {
-        ...expenseData,
-        amount: parseFloat(expenseData.amount),
-        type: "expense",
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      setIsDialogOpen(false);
-      setNewExpense({
-        amount: "",
-        description: "",
-        date: todayLocalISO(),
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
-      toast({
-        title: t("expenses.expense_added"),
-        description: t("expenses.expense_added_description"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("common.error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // React Query mutation for updating expenses
-  const updateExpenseMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newExpense) => {
-      const updateData = {
-        amount: parseFloat(data.amount),
-        description: data.description,
-        date: data.date,
-        type: "expense" as const,
-        categoryId: data.categoryId ? parseInt(data.categoryId) : null,
-        isRecurring: data.isRecurring,
-        recurringFrequency: data.recurringFrequency,
-        recurringEndDate: data.recurringEndDate || null,
-        paymentUrl: data.paymentUrl || "",
-        referenceNote: data.referenceNote || ""
-      };
-      
-      const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      if (!res.ok) {
-        throw new Error(`Update failed: ${res.status}`);
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      setEditingTransaction(null);
-      setIsDialogOpen(false);
-      toast({
-        title: t("expenses.expense_updated"),
-        description: t("expenses.expense_updated_description"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("common.error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // React Query mutation for deleting expenses
-  const deleteExpenseMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      if (!res.ok) {
-        throw new Error(`Delete failed: ${res.status}`);
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      toast({
-        title: t("expenses.expense_deleted"),
-        description: t("expenses.expense_deleted_description"),
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: t("common.error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Filter only expense transactions
-  const expenseTransactions = transactions.filter((transaction: Transaction) => transaction.type === "expense");
-  
-  // Apply additional filters
-  const filteredExpenses = expenseTransactions.filter((transaction: Transaction) => {
-    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.categoryName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
-
-    const matchesRecurring = filterRecurring === "all" || 
-                           (filterRecurring === "recurring" && transaction.isRecurring) ||
-                           (filterRecurring === "one-time" && !transaction.isRecurring);
-    
-    // Month filter takes precedence over date range
-    if (selectedMonth) {
-      const transactionDate = new Date(transaction.date);
-      const { startDate, endDate } = getMonthDateRange(selectedMonth);
-      const monthMatches = transactionDate >= startDate && transactionDate <= endDate;
-      return matchesSearch && matchesCategory && matchesRecurring && monthMatches;
-    }
-    
-    let matchesDate = true;
-    if (dateRange !== "all") {
-      const transactionDate = new Date(transaction.date);
-      const dateRangeFilter = getDateRangeForFilter(dateRange);
-      if (dateRangeFilter) {
-        matchesDate = isDateInRange(transactionDate, dateRangeFilter);
-      }
-    }
-    
-    return matchesSearch && matchesCategory && matchesRecurring && matchesDate;
-  });
-
-  const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
-  const availableCategories = Array.from(new Set(expenseTransactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
-
-  const totalExpenses = sumTransactionAmounts(filteredExpenses);
-  const averageExpense = filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0;
-
-  // Chart data preparation with localized month names (summed in integer cents)
-  const chartData = sumAmountsByMonthKey(expenseTransactions)
-    .slice(-6)
-    .map(({ monthKey: month, amount }) => {
-      // Local parts, not UTC: `new Date(month + '-01')` showed September for October in Lima.
-      const date = parseMonthKeyLocal(month);
-      const currentLang = i18n.language;
-      
-      let monthName;
-      if (currentLang.startsWith('es')) {
-        const spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-        monthName = `${spanishMonths[date.getMonth()]} ${date.getFullYear()}`;
-      } else if (currentLang.startsWith('sk')) {
-        const slovakMonths = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
-        monthName = `${slovakMonths[date.getMonth()]} ${date.getFullYear()}`;
-      } else {
-        monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      }
-      
-      return {
-        month: monthName,
-        amount
-      };
-    });
-
-  const pieData = sumAmountsByCategoryName(expenseTransactions).map(({ name, amount }, index) => ({
-    name,
-    value: amount,
-    fill: `hsl(${index * 137.5 % 360}, 70%, 50%)`,
-  }));
-
-  const handleSubmit = async () => {
-    if (!newExpense.amount || !newExpense.description) return;
-
-    // One submit at a time: a double click must not create two rows.
-    submitOnce((done) => {
-      if (editingTransaction) {
-        updateExpenseMutation.mutate({ id: editingTransaction.id, ...newExpense }, { onSettled: done });
-      } else {
-        createExpenseMutation.mutate(newExpense, { onSettled: done });
-      }
-    });
-  };
-
-  const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
-    
-    // Find the category ID - check both categoryId field and categoryName
-    let categoryId = "";
-    if (transaction.categoryId) {
-      categoryId = transaction.categoryId.toString();
-    } else if (transaction.categoryName) {
-      const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
-      categoryId = category ? category.id.toString() : "";
-    }
-    
-    // Convert date to proper format for date input (YYYY-MM-DD)
-    const formattedDate = new Date(transaction.date).toISOString().split('T')[0];
-    
-    // Format recurring end date if it exists
-    const formattedRecurringEndDate = transaction.recurringEndDate 
-      ? new Date(transaction.recurringEndDate).toISOString().split('T')[0]
-      : "";
-    
-    setNewExpense({
-      amount: transaction.amount,
-      description: transaction.description,
-      date: formattedDate,
-      categoryId: categoryId,
-      isRecurring: Boolean(transaction.isRecurring),
-      recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
-      recurringEndDate: formattedRecurringEndDate,
-      paymentUrl: transaction.paymentUrl || "",
-      referenceNote: transaction.referenceNote || "",
-    });
-    setIsDialogOpen(true);
-  };
-
-  if (!user) {
-    return null;
+  let sub: string;
+  if (ledger.expenseCount === 0) {
+    sub = t("page.expenses.hero_sub_none");
+  } else if (isCurrent && ledger.samePointLastMonthCents) {
+    const diff = ledger.expenseCents - ledger.samePointLastMonthCents;
+    sub = diff <= 0
+      ? t("page.expenses.hero_sub_less", { amount: f.money(-diff) })
+      : t("page.expenses.hero_sub_more", { amount: f.money(diff) });
+  } else if (ledger.usualExpenseCents) {
+    const pct = Math.round(((ledger.expenseCents - ledger.usualExpenseCents) * 100) / ledger.usualExpenseCents);
+    sub = Math.abs(pct) < 5
+      ? t("page.expenses.hero_sub_usual_same")
+      : pct < 0
+        ? t("page.expenses.hero_sub_usual_less", { pct: -pct })
+        : t("page.expenses.hero_sub_usual_more", { pct });
+  } else {
+    sub = t("page.expenses.hero_sub_count", { count: ledger.expenseCount });
   }
 
+  const fixedShare = ledger.expenseCents > 0 ? Math.round((ledger.recurringExpenseCents * 100) / ledger.expenseCents) : 0;
+
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {t("expenses.title")}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {t("expenses.subtitle")}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <UploadReceiptModal 
-                onReceiptProcessed={(data) => {
-                  // Refresh expenses after receipt processing
-                  refetchTransactions();
-                }}
-                buttonText={t("upload.button_text")}
-              />
-              <SimpleVoiceButton onComplete={() => {
-                refetchTransactions();
-              }} />
-
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    data-testid="add-expense"
-                    className="bg-red-600 hover:bg-red-700"
-                    onClick={() => {
-                      setEditingTransaction(null);
-                      setNewExpense({
-                        amount: "",
-                        description: "",
-                        date: todayLocalISO(),
-                        categoryId: "",
-                        isRecurring: false,
-                        recurringFrequency: "monthly",
-                        recurringEndDate: "",
-                        paymentUrl: "",
-                        referenceNote: "",
-                      });
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("expenses.add_expense")}
-                  </Button>
-                </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingTransaction ? t("expenses.edit_expense") : t("expenses.add_new_expense")}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingTransaction ? t("expenses.edit_description") : t("expenses.add_description")}
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="amount">{t("expenses.form.amount")}</Label>
-                      <Input
-                        id="amount"
-                        type="number"
-                        step="0.01"
-                        value={newExpense.amount}
-                        onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="date">{t("expenses.form.date")}</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={newExpense.date}
-                        onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">{t("expenses.form.description")}</Label>
-                    <Input
-                      id="description"
-                      value={newExpense.description}
-                      onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-                      placeholder={t("expenses.form.description_placeholder")}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="category">{t("expenses.form.category")}</Label>
-                    <Select 
-                      value={newExpense.categoryId || ""} 
-                      onValueChange={(value) => setNewExpense({ ...newExpense, categoryId: value })}
-                    >
-                      <SelectTrigger id="category">
-                        <SelectValue placeholder={t("expenses.form.category_placeholder")}>
-                          {newExpense.categoryId && expenseCategories.find(cat => cat.id.toString() === newExpense.categoryId)?.name}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {expenseCategories.map((category: Category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {getLocalizedCategoryName(category, t)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Advanced Features - Standard/Premium only */}
-                  <RequirePlan plan="standard" compact={true}>
-                    <div className="space-y-6 border-t pt-4">
-                      {/* Smart Bill Assistant */}
-                      <div className="space-y-4">
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {t("expenses.form.smart_bill_assistant")}
-                        </div>
-                        <div>
-                          <Label htmlFor="paymentUrl">{t("expenses.form.payment_url")}</Label>
-                          <Input
-                            id="paymentUrl"
-                            type="url"
-                            value={newExpense.paymentUrl}
-                            onChange={(e) => setNewExpense({ ...newExpense, paymentUrl: e.target.value })}
-                            placeholder={t("expenses.form.payment_url_placeholder")}
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            {t("expenses.form.payment_url_help")}
-                          </p>
-                        </div>
-                        <div>
-                          <Label htmlFor="referenceNote">{t("expenses.form.reference_note")}</Label>
-                          <Input
-                            id="referenceNote"
-                            value={newExpense.referenceNote}
-                            onChange={(e) => setNewExpense({ ...newExpense, referenceNote: e.target.value })}
-                            placeholder={t("expenses.form.reference_note_placeholder")}
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            {t("expenses.form.reference_note_help")}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Recurring transaction options */}
-                      <div className="space-y-4 border-t pt-4">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="recurring"
-                            checked={newExpense.isRecurring}
-                            onCheckedChange={(checked) => 
-                              setNewExpense({ ...newExpense, isRecurring: checked as boolean })
-                            }
-                          />
-                          <label htmlFor="recurring" className="flex items-center text-sm font-medium">
-                            <Repeat className="h-4 w-4 mr-2" />
-                            {t("expenses.form.make_recurring")}
-                          </label>
-                        </div>
-
-                        {newExpense.isRecurring && (
-                          <div className="grid grid-cols-2 gap-4 pl-6">
-                            <div>
-                              <Label htmlFor="frequency">{t("expenses.form.frequency")}</Label>
-                              <Select
-                                value={newExpense.recurringFrequency}
-                                onValueChange={(value) => setNewExpense({ 
-                                  ...newExpense, 
-                                  recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                                })}
-                              >
-                                <SelectTrigger id="frequency">
-                                  <SelectValue placeholder={t("expenses.form.frequency_placeholder")} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="weekly">{t("expenses.form.weekly")}</SelectItem>
-                                  <SelectItem value="monthly">{t("expenses.form.monthly")}</SelectItem>
-                                  <SelectItem value="yearly">{t("expenses.form.yearly")}</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label htmlFor="endDate">{t("expenses.form.end_date")}</Label>
-                              <Input
-                                id="endDate"
-                                type="date"
-                                value={newExpense.recurringEndDate}
-                                onChange={(e) => setNewExpense({ 
-                                  ...newExpense, 
-                                  recurringEndDate: e.target.value 
-                                })}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </RequirePlan>
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      {t("common.cancel")}
-                    </Button>
-                    <Button
-                      data-testid="save-expense"
-                      onClick={handleSubmit}
-                      disabled={!newExpense.amount || !newExpense.description}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      {editingTransaction ? t("expenses.form.update") : t("expenses.form.add_expense")}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-100 dark:bg-red-900 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-red-600 dark:text-red-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("expenses.total_expenses")}</p>
-                  <p
-                    data-testid="expenses-total"
-                    className="text-2xl font-bold text-red-600 dark:text-red-400"
-                  >
-                    {displayCurrency}{totalExpenses.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                  <TrendingDown className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("expenses.average_expense")}</p>
-                  <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    {displayCurrency}{averageExpense.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                  <BarChart3 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("expenses.expense_count")}</p>
-                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    {filteredExpenses.length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("expenses.charts.trend_title")}</CardTitle>
-              <CardDescription>{t("expenses.charts.trend_description")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`${displayCurrency}${value}`, t("expenses.charts.expenses_label")]} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="amount" 
-                      stroke="#EF4444" 
-                      strokeWidth={2}
-                      dot={{ fill: '#EF4444' }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("expenses.charts.category_title")}</CardTitle>
-              <CardDescription>{t("expenses.charts.category_description")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${displayCurrency}${value}`, t("expenses.charts.amount_label")]} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Month Navigation Filter */}
-        <MonthFilter 
-          selectedMonth={selectedMonth}
-          onMonthSelect={setSelectedMonth}
-          onDateRangeReset={() => setDateRange("all")}
+    <PageShell testId="expenses-page">
+      <PageHeader
+        title={t("page.expenses.title")}
+        subtitle={t("page.expenses.subtitle")}
+        actions={<AddMenuButton label={t("page.ledger.add_expense")} preset={{ type: "expense" }} testId="add-expense" />}
+      >
+        <MonthStepper
+          label={f.monthLabel(nav.monthKey)}
+          onPrevious={nav.previous}
+          onNext={nav.next}
+          canGoNext={nav.canGoNext}
+          isCurrent={nav.isCurrent}
+          onCurrent={nav.reset}
+          note={note}
         />
+      </PageHeader>
 
-        <RecurringRulesCard kind="expense" />
+      {error && <LoadError onRetry={() => refetch()} />}
 
-        {/* Search and Filters */}
-        <div className="mb-6">
-          <TransactionFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filterCategory={filterCategory}
-            onCategoryChange={setFilterCategory}
-            filterRecurring={filterRecurring}
-            onRecurringChange={setFilterRecurring}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            availableCategories={availableCategories}
-            showTypeFilter={false}
-            searchPlaceholder={t("expenses.search_placeholder")}
-          />
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          <PanelSkeleton className="h-64 lg:col-span-12" />
+          <PanelSkeleton className="h-80 lg:col-span-7" />
+          <PanelSkeleton className="h-80 lg:col-span-5" />
         </div>
-
-        {/* Expense List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("expenses.transaction_list_title", { count: filteredExpenses.length })}</CardTitle>
-            <CardDescription>
-              {searchTerm || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
-                ? t("expenses.filtered_transactions") 
-                : t("expenses.all_transactions")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">{t("expenses.loading")}</p>
-              </div>
-            ) : filteredExpenses.length === 0 ? (
-              <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  {t("expenses.no_expenses_found")}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {searchTerm || filterCategory !== "all" || dateRange !== "all"
-                    ? t("expenses.adjust_filters")
-                    : t("expenses.add_first_expense")}
-                </p>
-                <Button
-                  data-testid="add-expense"
-                  onClick={() => setIsDialogOpen(true)}
-                  className="bg-red-600 hover:bg-red-700"
+      ) : (
+        <>
+          <HeroCard
+            tone="slate"
+            testId="expenses-hero"
+            label={isCurrent ? t("page.expenses.hero_label_current", { month: monthName }) : t("page.expenses.hero_label", { month: monthName })}
+            amount={<span data-testid="expenses-total">{f.money(ledger.expenseCents)}</span>}
+            sub={sub}
+            help={t("page.expenses.hero_help")}
+          >
+            {ledger.expenseCents > 0 && (
+              <div className="flex flex-col gap-2">
+                <div
+                  role="img"
+                  aria-label={t("page.expenses.split_label", { fixed: f.money(ledger.recurringExpenseCents), everyday: f.money(ledger.everydayExpenseCents) })}
+                  className="flex h-3 overflow-hidden rounded-full bg-white/20"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("expenses.add_expense")}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredExpenses.map((transaction: Transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors gap-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg shrink-0">
-                        <ArrowDownLeft className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 dark:text-white truncate">
-                          {transaction.description}
-                        </p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
-                          <span className="shrink-0">{formatDate(transaction.date)}</span>
-                          {transaction.categoryName && (
-                            <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
-                              {transaction.categoryName}
-                            </Badge>
-                          )}
-                          {transaction.isRecurring && (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
-                              🔄 {t(`recurring.${transaction.recurringFrequency}`)}
-                            </Badge>
-                          )}
-                        </div>
-                        {transaction.referenceNote && (
-                          <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
-                            {t("expenses.note")}: {transaction.referenceNote}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between sm:justify-end sm:gap-4 shrink-0">
-                      <p className="font-semibold text-red-600 dark:text-red-400 text-lg">
-                        -{displayCurrency}{parseFloat(transaction.amount).toFixed(2)}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(transaction)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteExpenseMutation.mutate(transaction.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  <div className="bg-amber-400" style={{ width: `${fixedShare}%` }} />
+                  <div className="bg-white/90" style={{ width: `${100 - fixedShare}%` }} />
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/90 sm:text-sm">
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-amber-400" />{t("page.expenses.fixed")}</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-white/90" />{t("page.expenses.everyday")}</span>
+                </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+              <HeroStat label={t("page.expenses.fixed")} value={f.money(ledger.recurringExpenseCents)} note={t("page.expenses.fixed_note")} />
+              <HeroStat label={t("page.expenses.everyday")} value={f.money(ledger.everydayExpenseCents)} note={t("page.expenses.everyday_note")} />
+              <HeroStat
+                label={t("page.expenses.per_day")}
+                value={ledger.dailyAverageCents !== null ? f.money(ledger.dailyAverageCents) : "—"}
+                note={t("page.expenses.per_day_note")}
+              />
+            </div>
+            {ledger.projectedExpenseCents !== null && (
+              <p className="flex items-center gap-2 rounded-xl bg-black/25 px-3.5 py-2.5 text-sm" data-testid="expenses-projection">
+                <TrendingUp className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {ledger.usualExpenseCents
+                  ? t("page.expenses.projection_vs_usual", {
+                      month: monthName,
+                      amount: f.money(ledger.projectedExpenseCents),
+                      usual: f.money(ledger.usualExpenseCents),
+                    })
+                  : t("page.expenses.projection", { month: monthName, amount: f.money(ledger.projectedExpenseCents) })}
+              </p>
+            )}
+          </HeroCard>
 
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <Panel labelledBy="exp-cats-title" className="flex flex-col gap-4 lg:col-span-7" testId="expenses-categories">
+              <PanelTitle
+                id="exp-cats-title"
+                aside={<Link href={href("/budget")} className={linkButton}>{t("page.expenses.set_budgets")}</Link>}
+              >
+                {t("page.expenses.categories_title")}
+              </PanelTitle>
+              {ledger.expenseCategories.length === 0 ? (
+                <p className="py-6 text-center text-sm text-gray-600 dark:text-gray-400">{t("page.expenses.nothing_yet")}</p>
+              ) : (
+                <ul className="flex flex-col gap-4">
+                  {ledger.expenseCategories.map((category) => (
+                    <li key={category.key} className="flex items-center gap-3">
+                      <CategoryTile color={category.color} icon={category.icon} name={category.name} />
+                      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                              {category.key === "uncategorized" ? t("page.common.uncategorized") : category.name}
+                            </span>
+                            <ChangeChip pct={category.changePct} />
+                          </span>
+                          <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-gray-900 dark:text-white">{f.money(category.cents)}</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-gray-100 dark:bg-gray-800">
+                          <div className="h-full rounded-full bg-blue-600" style={{ width: `${Math.max(2, category.shareBp / 100)}%` }} />
+                        </div>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          {t("page.expenses.category_meta", {
+                            share: Math.round(category.shareBp / 100),
+                            count: category.count,
+                            ticket: f.money(Math.round(category.cents / Math.max(1, category.count))),
+                          })}
+                          {category.usualCents !== null && ` · ${t("page.expenses.usual_amount", { amount: f.money(category.usualCents) })}`}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Panel>
 
-      </div>
-    </div>
-    </div>
+            <div className="flex flex-col gap-5 lg:col-span-5">
+              <Panel labelledBy="payees-title" className="flex flex-col gap-3" testId="expenses-payees">
+                <PanelTitle id="payees-title">
+                  <Store className="h-4 w-4 text-gray-500" aria-hidden="true" />
+                  {t("page.expenses.payees_title")}
+                </PanelTitle>
+                {ledger.payees.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">{t("page.expenses.nothing_yet")}</p>
+                ) : (
+                  <ol className="flex flex-col">
+                    {ledger.payees.slice(0, 6).map((payee, index) => (
+                      <li key={`${payee.name}-${index}`} className="flex items-center gap-3 border-b border-gray-100 py-2 last:border-b-0 dark:border-gray-800">
+                        <span className="w-5 text-right text-xs font-semibold text-gray-500 tabular-nums">{index + 1}</span>
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900 dark:text-white">{payee.name}</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{t("page.expenses.times", { count: payee.count })}</span>
+                        <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-gray-900 dark:text-white">{f.money(payee.cents)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </Panel>
+
+              <Panel labelledBy="largest-title" className="flex flex-col gap-3">
+                <PanelTitle id="largest-title">
+                  <Trophy className="h-4 w-4 text-gray-500" aria-hidden="true" />
+                  {t("page.expenses.largest_title")}
+                </PanelTitle>
+                {ledger.largestExpenses.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">{t("page.expenses.nothing_yet")}</p>
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {ledger.largestExpenses.map((row) => (
+                      <li key={row.id} className="flex items-center gap-3">
+                        <CategoryTile color={row.categoryColor} icon={row.categoryIcon} name={row.description} size="sm" />
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="truncate text-sm font-medium text-gray-900 dark:text-white">{row.description}</span>
+                          <span className="truncate text-xs text-gray-600 dark:text-gray-400">{row.categoryName || t("page.common.uncategorized")}</span>
+                        </span>
+                        <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+                          {f.money(Math.abs(parseAmountToCents(row.amount)))}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Panel>
+            </div>
+
+            <Panel labelledBy="exp-history-title" className="flex flex-col gap-4 lg:col-span-12">
+              <PanelTitle
+                id="exp-history-title"
+                aside={ledger.usualExpenseCents !== null
+                  ? <span className="text-xs text-gray-600 sm:text-sm dark:text-gray-400">{t("page.expenses.usual_month", { amount: f.money(ledger.usualExpenseCents) })}</span>
+                  : undefined}
+              >
+                {t("page.expenses.history_title")}
+              </PanelTitle>
+              <MonthBars
+                months={ledger.history.map((m) => ({ key: m.key, cents: m.expenseCents }))}
+                selectedKey={nav.monthKey}
+                inProgressKey={isCurrent ? nav.monthKey : null}
+                onSelect={(key) => nav.set(key)}
+                reference={ledger.usualExpenseCents}
+              />
+            </Panel>
+
+            <div className="lg:col-span-12">
+              <RecurringRulesCard kind="expense" />
+            </div>
+          </div>
+
+          <LedgerPanel
+            monthDays={ledger.days.map((day) => ({ ...day, rows: day.rows.filter((row) => row.type === "expense") })).filter((day) => day.rows.length > 0)}
+            allRows={expenses}
+            kind="expense"
+            timeZone={nav.timeZone}
+            title={t("page.expenses.list_title", { month: monthName })}
+          />
+        </>
+      )}
+    </PageShell>
   );
 }
