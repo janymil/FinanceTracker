@@ -2200,6 +2200,8 @@
     "files_stored": "archivos almacenados",
     "no_backup_status": "No hay estado de respaldo disponible",
     "backup_storage_unavailable": "El almacenamiento del respaldo en la nube no está configurado. Todavía no se está guardando nada.",
+    "backup_auto_off": "Los respaldos automáticos están desactivados",
+    "backup_auto_off_desc": "No se guarda nada automáticamente. Pulsa \"Respaldar ahora\" cuando quieras una copia.",
     "creating_backup": "Creando Respaldo...",
     "backup_now": "Respaldar Ahora",
     "restoring": "Restaurando...",

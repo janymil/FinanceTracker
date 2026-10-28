@@ -2123,6 +2123,8 @@
     "files_stored": "súborov uložených",
     "no_backup_status": "Stav zálohy nie je k dispozícii",
     "backup_storage_unavailable": "Úložisko pre cloudovú zálohu nie je nastavené. Zatiaľ sa nič neukladá.",
+    "backup_auto_off": "Automatické zálohy sú vypnuté",
+    "backup_auto_off_desc": "Nič sa neukladá automaticky. Kedykoľvek stlačte \"Zálohovať teraz\".",
     "creating_backup": "Vytváram Zálohu...",
     "backup_now": "Zálohovať Teraz",
     "restoring": "Obnovujem...",

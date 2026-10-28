@@ -28,6 +28,7 @@ const storage = vi.hoisted(() => ({
   createImportLog: vi.fn(),
   updateBackupSettings: vi.fn(),
   getUserBackupSettings: vi.fn(),
+  ensureBackupSettings: vi.fn(),
 }));
 
 vi.mock('../../server/storage', () => ({ storage }));
@@ -117,7 +118,17 @@ beforeEach(() => {
   storage.getUserImportLogs.mockResolvedValue([]);
   storage.createImportLog.mockResolvedValue({ id: 1 });
   storage.updateBackupSettings.mockResolvedValue(undefined);
-  storage.getUserBackupSettings.mockResolvedValue({ retentionDays: 30 });
+  const settingsRow = {
+    userId: 'user_1',
+    autoBackup: true,
+    frequency: 'daily',
+    retentionDays: 30,
+    lastBackupDate: null,
+    nextBackupDate: new Date('2026-10-29T07:00:00.000Z'), // 02:00 in Lima
+    status: 'active',
+  };
+  storage.getUserBackupSettings.mockResolvedValue(settingsRow);
+  storage.ensureBackupSettings.mockResolvedValue(settingsRow);
 });
 
 
@@ -224,6 +235,12 @@ describe('cloud backup — one provider, and the tab reports it', () => {
     expect(response.json.info.configured).toBe(true);
     expect(response.json.realUsage.files).toBe(1);
     expect(response.json.lastBackup.filename).toBe('backup-2026-10-28.json');
+    // The schedule comes from the account's row, and the next run is an instant (02:00 in Lima),
+    // not a hardcoded "2 AM".
+    expect(response.json.settings.autoBackup).toBe(true);
+    expect(response.json.settings.frequency).toBe('daily');
+    expect(response.json.nextBackup).toBe('2026-10-29T07:00:00.000Z');
+    expect(response.json.timeZone).toBe('America/Lima');
     // No provider name is hardcoded into the payload any more.
     expect(JSON.stringify(response.json)).not.toMatch(/bunny|b-cdn/i);
   });

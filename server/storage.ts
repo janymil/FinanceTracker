@@ -200,6 +200,8 @@ export interface IStorage {
   updateBackupSettings(userId: string, settings: Partial<InsertBackupSettings>): Promise<BackupSettings>;
   getUsersWithActiveBackups(): Promise<Array<{ userId: string }>>;
   getUsersWithOverdueBackups(): Promise<Array<{ userId: string }>>;
+  getPremiumUsersForBackup(): Promise<Array<{ userId: string; timeZone: string | null }>>;
+  ensureBackupSettings(userId: string): Promise<BackupSettings>;
 
   // Profile Management
   updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void>;
@@ -1761,6 +1763,39 @@ export class DatabaseStorage implements IStorage {
       );
 
     return result;
+  }
+
+  /**
+   * Every account that pays for cloud backup, with the zone its 2 AM belongs to.
+   *
+   * The scheduler used to ask `getUsersWithActiveBackups()`, which inner-joins `backup_settings`,
+   * and nothing ever created a row there. So the answer was always zero users — the log said
+   * "Scheduled backups for 0 users" on every boot — and no automatic backup ever ran for anybody.
+   * The feature is included in the plan, so the starting point is the plan, not a settings row.
+   */
+  async getPremiumUsersForBackup(): Promise<Array<{ userId: string; timeZone: string | null }>> {
+    const rows = await db
+      .select({ userId: users.id, timeZone: users.timezone })
+      .from(users)
+      .where(eq(users.plan, 'premium'));
+
+    return rows;
+  }
+
+  /** The settings row for this account, created with the app's defaults when it is missing. */
+  async ensureBackupSettings(userId: string): Promise<BackupSettings> {
+    const existing = await this.getUserBackupSettings(userId);
+    if (existing) return existing;
+
+    return this.createBackupSettings({
+      userId,
+      autoBackup: true,
+      frequency: 'daily',
+      retentionDays: 30,
+      includeAttachments: true,
+      encryptBackups: true,
+      status: 'active',
+    });
   }
 
   async getUsersWithOverdueBackups(): Promise<Array<{ userId: string }>> {

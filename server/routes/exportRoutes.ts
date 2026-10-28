@@ -4,6 +4,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { getUserLanguage } from "../categoryTranslations";
 import { buildMonthlyPayload, requestPdf, PdfProcessorError } from "../pdfProcessorClient";
+import { nextBackupAt } from "@shared/backupSchedule";
 import { cloudStorage, storageInfo } from "../cloudStorage";
 import {
   cleanDateValue,
@@ -593,8 +594,28 @@ export function registerExportRoutes(app: Express) {
       // createBackup writes under backups/user-<id>/ in the bucket
       log.info('Creating a backup for user', userId);
       
+      await storage.ensureBackupSettings(userId);
       const filename = await backupStorage.createBackup(userId, backupData);
-      
+
+      // A manual backup is a backup: record it and move the automatic schedule forward, so the tab
+      // and the nightly job tell the same story instead of the tab saying "never" right after one.
+      const settings = await storage.ensureBackupSettings(userId);
+      const frequency = (settings.frequency || 'daily') as 'daily' | 'weekly' | 'monthly';
+      const backupInfo = await backupStorage.getBackupInfo(userId);
+      await storage.updateBackupSettings(userId, {
+        lastBackupDate: new Date(),
+        nextBackupDate: nextBackupAt({
+          now: new Date(),
+          timeZone: resolveTimeZone(user.timezone),
+          frequency,
+          lastBackup: new Date(),
+          hour: 2,
+        }),
+        totalBackups: backupInfo.totalBackups,
+        totalSize: `${Math.round(backupInfo.totalSize / 1024)} KB`,
+        status: 'active'
+      });
+
       log.info('Backup written for user', userId, `(${filename})`);
 
       return res.json({ 
@@ -629,10 +650,26 @@ export function registerExportRoutes(app: Express) {
         return res.status(503).json({ message: "Cloud backup service unavailable" });
       }
 
-      // Use the existing getUserBackups method
+      // The row the plan includes, created with the app's defaults on first look. It used to be
+      // three hardcoded literals (autoBackup: true, frequency: 'daily', 2 AM), so the tab claimed a
+      // schedule that did not exist — the scheduler had 0 users to run for.
+      const settings = await storage.ensureBackupSettings(userId);
+      const userTimeZone = resolveTimeZone(user.timezone);
+
       const backups = await backupStorage.getUserBackups(userId);
       const lastBackup = backups.length > 0 ? backups[0] : null;
       const storageMeta = storageInfo();
+
+      const frequency = (settings.frequency || 'daily') as 'daily' | 'weekly' | 'monthly';
+      const nextBackup = settings.nextBackupDate
+        ? new Date(settings.nextBackupDate)
+        : nextBackupAt({
+            now: new Date(),
+            timeZone: userTimeZone,
+            frequency,
+            lastBackup: settings.lastBackupDate ? new Date(settings.lastBackupDate) : null,
+            hour: 2,
+          });
 
       res.json({
         lastBackup: lastBackup ? {
@@ -640,19 +677,9 @@ export function registerExportRoutes(app: Express) {
           size: lastBackup.Length,
           filename: lastBackup.ObjectName
         } : null,
-        nextBackup: (() => {
-          // Calculate next 2AM backup time
-          const now = new Date();
-          const next2AM = new Date();
-          next2AM.setHours(2, 0, 0, 0);
-          
-          // If it's past 2AM today, schedule for tomorrow
-          if (now.getHours() >= 2) {
-            next2AM.setDate(next2AM.getDate() + 1);
-          }
-          
-          return next2AM.toISOString();
-        })(),
+        nextBackup: nextBackup.toISOString(),
+        // The zone the promise is made in: 2 AM here, not 2 AM where the server happens to run.
+        timeZone: userTimeZone,
         realUsage: {
           used: backups.reduce((sum, file) => sum + file.Length, 0),
           limit: 100 * 1024 * 1024, // 100MB limit
@@ -660,9 +687,10 @@ export function registerExportRoutes(app: Express) {
           total: `${Math.round(backups.reduce((sum, file) => sum + file.Length, 0) / 1024)} KB`
         },
         settings: {
-          autoBackup: true,
-          frequency: 'daily',
-          retentionDays: 30,
+          autoBackup: settings.autoBackup !== false,
+          frequency,
+          retentionDays: settings.retentionDays ?? 30,
+          lastBackupDate: settings.lastBackupDate ?? null,
           includeTransactions: true,
           includeBudgets: true,
           includeGoals: true

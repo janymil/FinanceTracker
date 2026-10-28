@@ -2015,6 +2015,8 @@
     "files_stored": "files stored",
     "no_backup_status": "No backup status available",
     "backup_storage_unavailable": "Cloud backup storage is not configured. Nothing is being saved yet.",
+    "backup_auto_off": "Automatic backups are turned off",
+    "backup_auto_off_desc": "Nothing is saved automatically. Press \"Backup now\" whenever you want a copy.",
     "creating_backup": "Creating Backup...",
     "backup_now": "Backup Now",
     "restoring": "Restoring...",

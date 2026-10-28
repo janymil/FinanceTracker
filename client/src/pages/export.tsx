@@ -1818,17 +1818,29 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Automatic Backup Schedule Notification */}
-                <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <div>
-                      <h4 className="font-medium text-green-800 dark:text-green-200">{t('export.automatic_backup_enabled')}</h4>
-                      <p className="text-sm text-green-700 dark:text-green-300">
-                        {t('export.backup_schedule_description')}
-                      </p>
+                {backupStatusData.settings?.autoBackup === false ? (
+                  <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-amber-600" />
+                      <div>
+                        <h4 className="font-medium text-amber-800 dark:text-amber-200">{t('export.backup_auto_off')}</h4>
+                        <p className="text-sm text-amber-700 dark:text-amber-300">{t('export.backup_auto_off_desc')}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-5 w-5 text-green-600" />
+                      <div>
+                        <h4 className="font-medium text-green-800 dark:text-green-200">{t('export.automatic_backup_enabled')}</h4>
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          {t('export.backup_schedule_description')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {isLoadingBackupStatus ? (
                   <div className="flex items-center justify-center py-8">
@@ -1853,11 +1865,12 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                         }
                       </div>
                       <div className="text-sm text-muted-foreground">
-{t('export.next_scheduled')}: {backupStatusData.nextBackup ? 
+{t('export.next_scheduled')}:{backupStatusData.nextBackup ? 
                           (() => {
                             try {
                               const date = new Date(backupStatusData.nextBackup);
-                              return isNaN(date.getTime()) ? t('export.tonight_2am') : `${format(date, 'MMM dd')} ${t('export.at_2am')}`;
+                              // The instant the server scheduled, in the reader's own clock.
+                              return isNaN(date.getTime()) ? t('export.tonight_2am') : ` ${format(date, 'dd MMM, HH:mm')}`;
                             } catch {
                               return t('export.tonight_2am');
                             }
