@@ -48,7 +48,6 @@ export function MonthBars({
                 disabled={!onSelect}
                 onClick={() => onSelect?.(month.key)}
                 aria-pressed={selected}
-                aria-label={t("page.common.month_amount", { month: f.monthLabel(month.key), amount: f.money(month.cents) })}
                 className={cn(
                   "flex w-full flex-col items-center gap-1.5 rounded-xl px-0.5 pb-1.5 pt-0 transition-colors",
                   selected ? "bg-blue-50 dark:bg-blue-950/50" : onSelect ? "hover:bg-gray-50 dark:hover:bg-gray-800/60" : "",
@@ -67,8 +66,12 @@ export function MonthBars({
                   {f.money(month.cents)}
                 </span>
                 {month.key === inProgressKey && (
-                  <span className="hidden text-[10px] text-gray-500 sm:block">{t("overview.trend.so_far")}</span>
+                  <span className="hidden text-[11px] font-semibold text-gray-600 sm:block dark:text-gray-400">{t("overview.trend.so_far")}</span>
                 )}
+                {/* The year, for a screen reader: the visible label is an abbreviation. A button's
+                    accessible name must contain its visible text (WCAG 2.5.3), so the name is built
+                    from the content plus this, never from an `aria-label` that replaces it. */}
+                <span className="sr-only">{month.key.slice(0, 4)}</span>
               </button>
             </li>
           );

@@ -79,7 +79,7 @@ export function MonthHeroCard({ overview }: { overview: Overview }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <h2 id="hero-title" className="text-sm font-medium text-white/85">{label}</h2>
+          <h2 id="hero-title" className="text-sm font-medium text-white/90">{label}</h2>
           <p className="font-display text-4xl font-bold leading-none tracking-tight tabular-nums sm:text-5xl" data-testid="hero-amount">
             {totals.leftCents < 0 ? "−" : ""}{f.money(Math.abs(totals.leftCents))}
           </p>
@@ -134,9 +134,9 @@ function Stat({ label, value, note }: { label: string; value: string; note: stri
     // A row on a phone (label left, amount right), a tile from `sm` up: three amounts side by side
     // in 390px were cut to "7 000,…".
     <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl bg-white/10 px-3.5 py-2.5 sm:flex-col sm:items-start sm:justify-start sm:gap-0.5 sm:px-4 sm:py-3.5">
-      <span className="text-[13px] text-white/85 sm:truncate sm:text-xs">{label}</span>
+      <span className="text-[13px] text-white/90 sm:truncate sm:text-xs">{label}</span>
       <span className="whitespace-nowrap text-base font-bold tabular-nums sm:text-xl">{value}</span>
-      {note && <span className="hidden truncate text-xs text-white/85 sm:block">{note}</span>}
+      {note && <span className="hidden truncate text-xs text-white/90 sm:block">{note}</span>}
     </div>
   );
 }

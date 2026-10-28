@@ -307,14 +307,13 @@ export function LedgerPanel({
                   return (
                     <li
                       key={row.id}
-                      className="group flex items-center gap-3 border-b border-gray-50 py-2.5 last:border-b-0 dark:border-gray-800/60"
+                      className="group flex flex-wrap items-center gap-3 border-b border-gray-50 py-2.5 last:border-b-0 dark:border-gray-800/60"
                       data-testid="ledger-row"
                     >
                       <button
                         type="button"
                         onClick={() => setEditing(row as EditableTransaction)}
                         className="flex min-w-0 flex-1 items-center gap-3 rounded-xl text-left"
-                        aria-label={t("page.ledger.edit_row", { name: row.description })}
                       >
                         <CategoryTile color={row.categoryColor} icon={row.categoryIcon} name={row.description} />
                         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -331,13 +330,20 @@ export function LedgerPanel({
                             {row.referenceNote && <span className="truncate italic">· {row.referenceNote}</span>}
                           </span>
                         </span>
+                        {/* Says what the tap does, without replacing the visible text as the
+                            accessible name (WCAG 2.5.3). */}
+                        <span className="sr-only">{t("page.common.edit")}</span>
                       </button>
 
                       {uncategorized && choices.length > 0 && (
-                        <Select
-                          value=""
-                          onValueChange={(value) => setCategoryOf.mutate({ id: row.id, categoryId: Number(value) })}
-                        >
+                        // On a phone the picker takes its own line: inline it claimed every spare
+                        // pixel and squeezed the description to 11px. From `sm` up there is room
+                        // for it beside the description.
+                        <div className="order-last w-full sm:order-none sm:w-40">
+                          <Select
+                            value=""
+                            onValueChange={(value) => setCategoryOf.mutate({ id: row.id, categoryId: Number(value) })}
+                          >
                           <SelectTrigger
                             className="h-8 w-auto shrink-0 gap-1 rounded-full border-dashed border-blue-300 px-2.5 text-xs font-semibold text-blue-700 dark:border-blue-700 dark:text-blue-300"
                             aria-label={t("page.ledger.choose_category_for", { name: row.description })}
@@ -357,6 +363,7 @@ export function LedgerPanel({
                             ))}
                           </SelectContent>
                         </Select>
+                        </div>
                       )}
 
                       <span

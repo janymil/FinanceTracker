@@ -184,7 +184,6 @@ export default function CalendarPage() {
                         type="button"
                         onClick={() => setSelected(key)}
                         aria-pressed={key === selectedKey}
-                        aria-label={label}
                         className={cn(
                           "flex aspect-square min-h-[44px] flex-col items-stretch rounded-lg border p-1 text-left transition-colors sm:aspect-auto sm:min-h-[84px] sm:p-2",
                           day?.scheduled ? "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40" : cn("border-gray-100 dark:border-gray-800", shade(future ? 0 : spent)),
@@ -196,7 +195,7 @@ export default function CalendarPage() {
                           <span
                             className={cn(
                               "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold sm:text-sm",
-                              key === todayKey ? "bg-blue-700 text-white" : future ? "text-gray-400 dark:text-gray-500" : "text-gray-900 dark:text-white",
+                              key === todayKey ? "bg-blue-700 text-white" : future ? "text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-white",
                             )}
                           >
                             {i + 1}
@@ -205,12 +204,16 @@ export default function CalendarPage() {
                         </span>
                         <span className="mt-auto hidden flex-col text-[11px] font-semibold tabular-nums sm:flex">
                           {spent > 0 && <span className="text-gray-800 dark:text-gray-200">−{compact.format(spent / 100)}</span>}
-                          {(day?.incomeCents ?? 0) > 0 && <span className="text-emerald-700 dark:text-emerald-400">+{compact.format(day!.incomeCents / 100)}</span>}
+                          {(day?.incomeCents ?? 0) > 0 && <span className="text-emerald-800 dark:text-emerald-400">+{compact.format(day!.incomeCents / 100)}</span>}
                         </span>
                         <span className="mt-auto flex justify-center gap-0.5 sm:hidden" aria-hidden="true">
                           {spent > 0 && <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
                           {(day?.incomeCents ?? 0) > 0 && <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />}
                         </span>
+                        {/* The sentence a screen reader needs, as content: a button's accessible
+                            name must contain its visible text (WCAG 2.5.3), so it cannot be an
+                            `aria-label` that replaces the day and its amounts. */}
+                        <span className="sr-only">{label}</span>
                       </button>
                     );
                   })}
@@ -259,7 +262,6 @@ export default function CalendarPage() {
                           type="button"
                           onClick={() => setEditing(row as EditableTransaction)}
                           className="flex w-full items-center gap-3 rounded-xl px-1 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800/60"
-                          aria-label={t("page.ledger.edit_row", { name: row.description })}
                         >
                           <CategoryTile color={row.categoryColor} icon={row.categoryIcon} name={row.description} size="sm" />
                           <span className="flex min-w-0 flex-1 flex-col">
@@ -272,6 +274,7 @@ export default function CalendarPage() {
                           <span className={cn("whitespace-nowrap text-sm font-semibold tabular-nums", row.type === "income" ? "text-emerald-700 dark:text-emerald-400" : "text-gray-900 dark:text-white")}>
                             {row.type === "income" ? "+" : "−"}{f.money(Math.abs(parseAmountToCents(row.amount)))}
                           </span>
+                          <span className="sr-only">{t("page.common.edit")}</span>
                         </button>
                       </li>
                     ))}
