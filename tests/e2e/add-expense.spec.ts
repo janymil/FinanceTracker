@@ -59,7 +59,7 @@ test.describe('E2E-1 add expense', () => {
     // Two clicks in the same tick — the exact thing an impatient user does. Dispatching
     // both from the page avoids Playwright's "wait until stable/attached" behaviour, which
     // would serialise them and hide the race we are testing.
-    await page.getByTestId('save-expense').evaluate((element) => {
+    await page.getByTestId('transaction-save').evaluate((element) => {
       (element as HTMLButtonElement).click();
       (element as HTMLButtonElement).click();
     });

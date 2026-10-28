@@ -190,9 +190,11 @@ test.describe('goals', () => {
 
 test.describe('reports', () => {
   test('the Reports page loads its numbers without errors', async ({ page }) => {
-    const summary = page.waitForResponse((r) => r.url().includes('/api/financial-summary') && r.ok(), { timeout: 30_000 });
+    // The statement is computed from the account's transactions (shared/periodReport),
+    // so this page reads `/api/transactions` and no longer asks `/api/financial-summary`.
+    const data = page.waitForResponse((r) => r.url().includes('/api/transactions') && r.ok(), { timeout: 30_000 });
     await page.goto(path('/reports'));
-    await summary;
+    await data;
     await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/something went wrong|chyba|error boundary/i)).toHaveCount(0);
   });

@@ -3,7 +3,8 @@ import { path } from '../support/env';
 
 /**
  * Page object for `/expenses`. Uses the stable `data-testid` hooks added for E2E plus
- * the real control ids from the form (`#amount`, `#description`), never i18n copy.
+ * the real control ids from the shared transaction form (`#tx-amount`, `#tx-description`),
+ * never i18n copy.
  */
 export class ExpensesPage {
   private readonly addButton: Locator;
@@ -14,9 +15,9 @@ export class ExpensesPage {
 
   constructor(private readonly page: Page) {
     this.addButton = page.getByTestId('add-expense').first();
-    this.saveButton = page.getByTestId('save-expense');
-    this.amountInput = page.locator('#amount');
-    this.descriptionInput = page.locator('#description');
+    this.saveButton = page.getByTestId('transaction-save');
+    this.amountInput = page.locator('#tx-amount');
+    this.descriptionInput = page.locator('#tx-description');
     this.total = page.getByTestId('expenses-total');
   }
 
