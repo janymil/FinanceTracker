@@ -1,0 +1,222 @@
+#!/usr/bin/env bash
+# devkit-bootstrap — put the kit into every app that does not have it yet.
+#
+#   devkit-bootstrap --all            every app folder under /var/www (default for the watcher)
+#   devkit-bootstrap /var/www/newapp  one folder, by hand
+#   devkit-bootstrap --status         what is bootstrapped and what is stale
+#   devkit-bootstrap --force --all    rewrite template files even if they exist (loses edits)
+#
+# Rules that keep this safe to run on a timer:
+#   · only folders that look like an app (package.json, .git, pyproject.toml, ...) are touched
+#   · symlinks are skipped (a new name pointing at an existing app is not a new app)
+#   · an existing file is never overwritten — `.devkit/profile.sh` and `verify.sh` belong to
+#     the app once created, so a person's edits survive every later run
+#   · files created here are given to the folder's owner, not to root
+#   · every run is idempotent and logged
+set -uo pipefail
+
+DEVKIT_ROOT="${DEVKIT_ROOT:-/opt/devkit}"
+SCAN_ROOT="${DEVKIT_SCAN_ROOT:-/var/www}"
+JOURNAL="$DEVKIT_ROOT/state/journal.log"
+KIT_VERSION="$(cat "$DEVKIT_ROOT/VERSION" 2>/dev/null || echo 'dev')"
+
+FORCE=0
+MODE="app"        # app | all | status
+TARGET=""
+
+log() {
+  local line
+  line="$(date -Iseconds) $*"
+  printf '%s\n' "$line"
+  mkdir -p "$(dirname "$JOURNAL")" 2>/dev/null
+  printf '%s\n' "$line" >> "$JOURNAL" 2>/dev/null
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --all) MODE="all"; shift ;;
+    --status) MODE="status"; shift ;;
+    --force) FORCE=1; shift ;;
+    -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "devkit-bootstrap: unknown flag $1" >&2; exit 2 ;;
+    *) MODE="app"; TARGET="$1"; shift ;;
+  esac
+done
+
+# --- what counts as an app ---------------------------------------------------
+
+is_app() {
+  local dir="$1"
+  [ -d "$dir" ] || return 1
+  [ -L "$dir" ] && return 1                                  # symlink: not a new app
+  [ "$dir" = "$DEVKIT_ROOT" ] && return 1
+  [ -f "$dir/package.json" ] && return 0
+  [ -f "$dir/pyproject.toml" ] && return 0
+  [ -f "$dir/requirements.txt" ] && return 0
+  [ -f "$dir/go.mod" ] && return 0
+  [ -f "$dir/Cargo.toml" ] && return 0
+  # `.git` is a folder in a normal clone and a file in a linked worktree — both are a checkout.
+  [ -e "$dir/.git" ] && return 0
+  return 1
+}
+
+owner_of() {
+  stat -c '%U:%G' "$1" 2>/dev/null || echo 'root:root'
+}
+
+# Append a delimited block to a file, but only if the markers are absent.
+append_block() {
+  local file="$1" block="$2" start='<!-- devkit:begin -->' end='<!-- devkit:end -->'
+  grep -qF "$start" "$file" 2>/dev/null && return 0
+  {
+    printf '\n%s\n' "$start"
+    cat "$block"
+    printf '%s\n' "$end"
+  } >> "$file"
+}
+
+# --- the install itself ------------------------------------------------------
+
+install_into() {
+  local app="$1"
+  local name
+  name="$(basename "$app")"
+  local created=()
+
+  mkdir -p "$app/.devkit/plans" "$app/.devkit/prompts" || return 1
+
+  # Templates the app owns from now on.
+  local pair
+  for pair in \
+    "templates/DONE.md:.devkit/DONE.md" \
+    "templates/lessons.md:.devkit/lessons.md" \
+    "templates/plans/TEMPLATE.md:.devkit/plans/TEMPLATE.md" \
+    "templates/reviewer.md:.devkit/prompts/reviewer.md"
+  do
+    local src="$DEVKIT_ROOT/${pair%%:*}"
+    local dst="$app/${pair##*:}"
+    if [ -f "$dst" ] && [ "$FORCE" = "0" ]; then continue; fi
+    if [ -f "$src" ]; then
+      cp "$src" "$dst" && created+=("${pair##*:}")
+    fi
+  done
+
+  # The gate runner.
+  if [ ! -f "$app/verify.sh" ] || [ "$FORCE" = "1" ]; then
+    cp "$DEVKIT_ROOT/templates/verify.sh" "$app/verify.sh" && created+=("verify.sh")
+  fi
+  chmod 755 "$app/verify.sh" 2>/dev/null
+
+  # The app's own step list, detected once.
+  if [ ! -f "$app/.devkit/profile.sh" ] || [ "$FORCE" = "1" ]; then
+    "$DEVKIT_ROOT/bin/devkit-detect" "$app" > "$app/.devkit/profile.sh" 2>/dev/null
+    [ -s "$app/.devkit/profile.sh" ] && created+=(".devkit/profile.sh")
+  fi
+
+  # A pointer the rules can rely on, inside the app.
+  if [ ! -e "$app/.clinerules" ] || [ -d "$app/.clinerules" ]; then
+    mkdir -p "$app/.clinerules"
+    if [ ! -f "$app/.clinerules/devkit.md" ]; then
+      cp "$DEVKIT_ROOT/templates/clinerules-devkit.md" "$app/.clinerules/devkit.md" \
+        && created+=(".clinerules/devkit.md")
+    fi
+  else
+    log "  skip .clinerules: it is a file, not a folder, in $name"
+  fi
+
+  # An app that already keeps a memory file gets the short block; one that does not is
+  # left alone — the machine-wide rule already applies there.
+  local memory
+  for memory in CLAUDE.md AGENTS.md; do
+    if [ -f "$app/$memory" ]; then
+      local before after
+      before="$(wc -c < "$app/$memory" 2>/dev/null || echo 0)"
+      append_block "$app/$memory" "$DEVKIT_ROOT/templates/app-memory-block.md"
+      after="$(wc -c < "$app/$memory" 2>/dev/null || echo 0)"
+      [ "$before" != "$after" ] && created+=("$memory (block)")
+    fi
+  done
+
+  # Marker: what version put what here, and when. Written once per version, so a sweep
+  # every 15 minutes does not rewrite a file inside every repo and spoil their git status.
+  if [ "$FORCE" = "1" ] || [ ! -f "$app/.devkit/.installed" ] \
+     || ! grep -q "^version=$KIT_VERSION$" "$app/.devkit/.installed" 2>/dev/null; then
+    {
+      echo "version=$KIT_VERSION"
+      echo "installed_at=$(date -Iseconds)"
+      echo "stack=$(grep -m1 '^DEVKIT_STACK=' "$app/.devkit/profile.sh" 2>/dev/null | cut -d"'" -f2)"
+      echo "automated=$( [ "${DEVKIT_TRIGGER:-manual}" = "watcher" ] && echo yes || echo no )"
+    } > "$app/.devkit/.installed"
+  fi
+
+  # Everything created above belongs to the app's owner, not to root.
+  local owner
+  owner="$(owner_of "$app")"
+  if [ "$(id -u)" = "0" ] && [ -n "$owner" ]; then
+    chown -R "$owner" "$app/.devkit" 2>/dev/null
+    chown "$owner" "$app/verify.sh" 2>/dev/null
+    [ -d "$app/.clinerules" ] && chown -R "$owner" "$app/.clinerules" 2>/dev/null
+  fi
+
+  log "  $name: ${#created[@]} file(s) — ${created[*]:-nothing to do}"
+  return 0
+}
+
+# --- modes -------------------------------------------------------------------
+
+status_all() {
+  printf '%-22s %-10s %-26s %s\n' APP STACK BOOTSTRAPPED GATE
+  local dir name stack when gate
+  for dir in "$SCAN_ROOT"/*; do
+    is_app "$dir" || continue
+    name="$(basename "$dir")"
+    if [ -f "$dir/.devkit/profile.sh" ]; then
+      stack="$(grep -m1 '^DEVKIT_STACK=' "$dir/.devkit/profile.sh" | cut -d"'" -f2)"
+    else
+      stack="-"
+    fi
+    when="$(grep -m1 '^installed_at=' "$dir/.devkit/.installed" 2>/dev/null | cut -d= -f2- || true)"
+    if [ -x "$dir/verify.sh" ]; then gate="yes"; else gate="no"; fi
+    printf '%-22s %-10s %-26s %s\n' "$name" "${stack:--}" "${when:--}" "$gate"
+  done
+}
+
+if [ "$MODE" = "status" ]; then
+  status_all
+  exit 0
+fi
+
+# One installer at a time. A clone that drops a folder per second should not start ten runs.
+exec 9>"/tmp/devkit-bootstrap.lock"
+if ! flock -n 9; then
+  log "another devkit-bootstrap is running; this trigger is folded into it"
+  exit 0
+fi
+
+if [ "$MODE" = "app" ]; then
+  if [ -z "$TARGET" ]; then
+    echo "devkit-bootstrap: give a folder, or --all, or --status" >&2
+    exit 2
+  fi
+  TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" || {
+    echo "devkit-bootstrap: no such folder: $TARGET" >&2
+    exit 1
+  }
+  if ! is_app "$TARGET"; then
+    log "skip $TARGET: no package.json, .git, pyproject.toml, go.mod or Cargo.toml yet"
+    exit 0
+  fi
+  log "bootstrapping $TARGET ($KIT_VERSION)"
+  install_into "$TARGET"
+  exit 0
+fi
+
+# --all
+log "sweep started ($KIT_VERSION, trigger=${DEVKIT_TRIGGER:-manual})"
+count=0
+for dir in "$SCAN_ROOT"/*; do
+  is_app "$dir" || continue
+  count=$((count + 1))
+  install_into "$dir"
+done
+log "sweep finished: $count app(s) checked"

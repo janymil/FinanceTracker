@@ -1565,6 +1565,8 @@
   "profile": {
     "mp_cancel": "Cancelar suscripción",
     "mp_cancel_note": "Al cancelar se detienen los cobros futuros en MercadoPago.",
+    "wallet_active_note": "Tu plan está activo hasta el {{date}}. Se compró por un periodo y no se renueva por sí solo.",
+
     "mp_cancel_confirm": "¿Cancelar tu suscripción de MercadoPago? Tu plan volverá a Gratis.",
     "mp_cancelled": "Suscripción cancelada",
     "Loading...": "Cargando...",
@@ -3434,6 +3436,33 @@
     }
   },
   "subscribe": {
+    "change_plan": "Cambiar a este plan",
+    "change_wallet": "Tu plan se pagó por un periodo. Paga otro periodo de la misma forma, más abajo.",
+
+    "change_scheduled": "Tu cambio de plan quedó aplicado.",
+    "upgrade_applied": "Plan mejorado. La diferencia se cobra ahora.",
+    "downgrade_scheduled": "Programado. El nuevo plan empieza cuando termine el periodo pagado.",
+    "peru": {
+      "title": "Paga con Yape, Plin o transferencia bancaria",
+      "subtitle": "Solo Perú. Este pago cubre un periodo y no se renueva automáticamente: te avisamos antes de que termine.",
+      "plan": "Plan",
+      "period": "Periodo",
+      "method": "¿Cómo pagaste?",
+      "transfer": "Transferencia bancaria",
+      "operation": "Número de operación",
+      "operation_hint": "El código que te dio tu aplicación",
+      "tax_title": "Tu boleta o factura",
+      "tax_kind": "Comprobante",
+      "boleta": "Boleta (DNI)",
+      "factura": "Factura (RUC)",
+      "business_name": "Razón social",
+      "fiscal_address": "Domicilio fiscal",
+      "tax_note": "Tu comprobante se emite en SUNAT y se envía a tu correo. Revisa tus datos: una factura con RUC equivocado no se puede corregir.",
+      "tax_error": "Revisa los datos del comprobante.",
+      "submit": "Ya pagué — confirmar mi pago",
+      "sent": "Recibimos los datos de tu pago. Activamos el plan cuando lo confirmemos, normalmente en un día hábil."
+    },
+
     "title": "Elige Tu Plan",
     "subtitle": "Desbloquea potentes funciones de gestión financiera con tu suscripción",
     "back_to_home": "Volver al Inicio",
@@ -5059,6 +5088,162 @@
     "reminders": {
       "empty_title": "No hay recordatorios próximos",
       "empty_body": "Aquí aparecen los pagos con fecha futura y los recordatorios que agregues."
+    }
+  },
+  "roadmap": {
+    "menu": "Hoja de ruta",
+    "title": "Hoja de ruta",
+    "subtitle": "Lo que Kaptia hace por ti hoy y lo que estamos construyendo.",
+    "filter": "Mostrar",
+    "step": "Paso {{number}}",
+    "stage": {
+      "all": "Todo",
+      "now": "Disponible",
+      "next": "Lo próximo",
+      "later": "Más adelante",
+      "horizon": "En el horizonte"
+    },
+    "hero": {
+      "eyebrow": "Hoja de ruta",
+      "title": "Paso a paso, en el orden que más te ayuda",
+      "text": "Aquí no hay fechas a propósito: cada paso sale cuando funciona bien, en los tres idiomas. El orden importa: los primeros pasos hacen más exactas todas las cifras de la app y lo demás se construye sobre ellos.",
+      "available": "Disponible hoy",
+      "coming": "En camino"
+    },
+    "now": {
+      "title": "Lo que ya tienes",
+      "text": "Todo lo de abajo funciona hoy, en la web y en tu celular."
+    },
+    "available": {
+      "capture": {
+        "title": "Registra como prefieras",
+        "desc": "Escríbelo, dilo en voz alta, fotografía una boleta, importa un estado de cuenta o súbelo desde tu celular con un código QR."
+      },
+      "budgets_goals": {
+        "title": "Presupuestos y metas",
+        "desc": "Límites por categoría y periodo, y metas de ahorro con el ritmo que necesitas para llegar."
+      },
+      "shared_goals": {
+        "title": "Metas compartidas",
+        "desc": "Ahorra junto a amigos o familia, con aportes y un chat para cada meta."
+      },
+      "health": {
+        "title": "Puntaje de salud financiera",
+        "desc": "Un puntaje para tu mes, con observaciones claras y acciones concretas en Premium."
+      },
+      "reports": {
+        "title": "Reportes y tendencias",
+        "desc": "Reportes de cualquier periodo, tendencias, un calendario de tu dinero y predicción de gastos."
+      },
+      "recurring": {
+        "title": "Pagos recurrentes y recordatorios",
+        "desc": "Los movimientos que se repiten se crean solos, y las cuentas por pagar te avisan antes del vencimiento."
+      },
+      "achievements": {
+        "title": "Rachas y logros",
+        "desc": "Pequeñas recompensas por mantener el hábito de registrar tu dinero."
+      },
+      "export": {
+        "title": "Exportar",
+        "desc": "Llévate tus datos en CSV o PDF cuando quieras."
+      },
+      "privacy": {
+        "title": "Privado desde el diseño",
+        "desc": "Los campos sensibles van cifrados y tus datos personales se quitan antes de que una IA vea nada."
+      }
+    },
+    "steps": {
+      "s1": "Mira dónde está tu dinero, y mover plata entre tus propias cuentas ya no cuenta como gasto",
+      "s2": "Tu mes puede empezar el día que cobras",
+      "s3": "Todas tus suscripciones en un solo lugar: cuánto cuestan, cuándo cobran, cuándo terminan",
+      "s4": "Cuánto te cuestan de verdad tus deudas, y un orden claro para pagarlas",
+      "s5": "Kaptia te avisa el mismo día que algo no cuadra",
+      "s6": "Efectivo en dos toques, y un mensaje de Yape pegado se vuelve un movimiento",
+      "s7": "Ahorra en dólares junto a tus soles, y recibe ayuda cuando te suben un precio",
+      "s8": "Hazle preguntas a tus propios datos y mira cómo cambian tus precios",
+      "s9": "Dos personas, un solo registro; gastos deducibles reunidos; un resumen semanal"
+    },
+    "features": {
+      "accounts": {
+        "title": "Dónde está mi dinero",
+        "desc": "El efectivo de tu billetera, tu cuenta de tarjeta, tu saldo de Yape, tu alcancía: cada uno con su saldo y un total.",
+        "example": "«¿Cuánto tengo de verdad, y dónde?»"
+      },
+      "transfers": {
+        "title": "Transferencias reconocidas",
+        "desc": "Kaptia detecta el dinero que moviste entre tus propios lugares y te ofrece unir el par, para que tus totales dejen de inflarse.",
+        "example": "«Estos dos parecen una transferencia, ¿los unimos?»"
+      },
+      "payday": {
+        "title": "Un mes que empieza el día de pago",
+        "desc": "Elige el día en que empieza tu mes y el panel, los presupuestos y los reportes lo siguen. ¿Ingresos irregulares? Kaptia te muestra un colchón.",
+        "example": "«Mi mes empieza el 15.»"
+      },
+      "subscriptions": {
+        "title": "Suscripciones",
+        "desc": "Todas tus suscripciones en una pantalla: próximo cobro, total mensual y anual, historial de precios, pruebas gratis por cobrar y lo que sale en los próximos 14 días.",
+        "example": "«Tus suscripciones cuestan S/ 1 284 al año.»"
+      },
+      "debts": {
+        "title": "Deudas",
+        "desc": "Un lugar para lo que debes: tarjetas, dinero que le debes a tu familia. Cuánto falta, cuánto cuesta cada mes y el mejor orden para pagarlo.",
+        "example": "«Paga primero la tarjeta: ahorras S/ 480 y terminas 17 meses antes.»"
+      },
+      "watchdog": {
+        "title": "El vigilante",
+        "desc": "Avisos cortos y concretos el día que algo no cuadra: un recibo inusual, un pago doble, una prueba gratis que va a cobrar.",
+        "example": "«La luz está 40 % por encima de lo normal.»"
+      },
+      "fast_capture": {
+        "title": "Registro rápido",
+        "desc": "Efectivo en dos toques, una notificación de Yape o Plin pegada o compartida se vuelve un movimiento, y todo funciona sin conexión.",
+        "example": "«5, taxi» → listo."
+      },
+      "currency": {
+        "title": "Varias monedas",
+        "desc": "Una alcancía en dólares junto a tus soles. Cada aporte guarda el tipo de cambio de su día, así ves cuánto ganaste o perdiste.",
+        "example": "«Pusiste 1 000 dólares; hoy son S/ 180 más que el día que los pusiste.»"
+      },
+      "negotiation": {
+        "title": "Ayuda para negociar",
+        "desc": "Cuando te suben un recibo o una suscripción: un mensaje listo para enviar y un lugar para anotar cuánto ahorraste.",
+        "example": "«Esta llamada te ahorró S/ 240 al año.»"
+      },
+      "ask": {
+        "title": "Pregunta a tus datos",
+        "desc": "Una caja de preguntas en tus reportes. La respuesta trae la cifra, una frase y los movimientos que la respaldan.",
+        "example": "«¿Cuánto gasté en Cusco en marzo?»"
+      },
+      "basket": {
+        "title": "Tu propia inflación",
+        "desc": "Las boletas se leen línea por línea, así Kaptia te muestra cómo cambian los precios de lo que tú compras.",
+        "example": "«Tu canasta cuesta 12 % más que en junio.»"
+      },
+      "what_if": {
+        "title": "¿Y si…?",
+        "desc": "Controles sobre tus propias cifras para ver qué significaría un cambio para tus metas y deudas.",
+        "example": "«Recorta restaurantes 30 % y la laptop llega en setiembre.»"
+      },
+      "household": {
+        "title": "Dinero del hogar compartido",
+        "desc": "Dos personas, un solo registro: presupuestos compartidos, quién pagó qué y una línea a fin de mes para cuadrar.",
+        "example": "«Ana pagó S/ 340 más que su parte.»"
+      },
+      "tax": {
+        "title": "Ayuda con impuestos",
+        "desc": "Los gastos deducibles reunidos desde lo que ya registras, con el límite del año, el plazo y un archivo para tu contador. Primero Perú.",
+        "example": "«El plazo vence en 61 días.»"
+      },
+      "weekly": {
+        "title": "Resumen semanal y espera antes de comprar",
+        "desc": "Un mensaje corto cada lunes con lo importante de la semana, y una lista de deseos con un tiempo de espera.",
+        "example": "«¿Todavía lo quieres el viernes?»"
+      }
+    },
+    "idea": {
+      "title": "¿Te falta algo?",
+      "text": "Cuéntanos qué haría Kaptia más útil para ti. Leemos cada mensaje.",
+      "cta": "Sugerir una idea"
     }
   }
 }

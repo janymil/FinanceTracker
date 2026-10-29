@@ -124,6 +124,7 @@ The dashboard is **plan-aware** by design: every panel is rendered from the plan
 | Auto-categorization bulk action | `POST /api/auto-categorize` | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) needs OpenAI/Mistral |
 | Reminder streaks & upcoming bills widget | `GET /api/expense-reminders/upcoming` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Transaction reminders widget | `GET /api/transaction-reminders` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
+| Repeating movements card (only when the month has any) | part of `GET /api/dashboard/overview` (`shared/dashboardOverview`) | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Voice quick-add button | `POST /api/voice/parse` (or browser speech API) | ![needs key](https://img.shields.io/badge/needs%20key-d29922?style=flat-square) |
 | Currency setup modal (first run) | client-side `CurrencyContext` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |
 | Upgrade banners / plan gating | `components/require-plan.tsx`, `components/upgrade-banner.tsx` | ![working](https://img.shields.io/badge/working-2ea043?style=flat-square) |

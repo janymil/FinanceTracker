@@ -64,6 +64,18 @@ export const users = pgTable("users", {
   // they cancelled. Setting it on cancellation keeps the plan until it passes; the grace
   // processor then moves the account to free.
   paidUntil: timestamp("paid_until"),
+  /*
+   * A downgrade the customer already asked for, waiting for the charge it belongs to.
+   *
+   * MercadoPago cannot schedule a plan change, and applying a downgrade at once takes away
+   * access the customer has paid for. So the request is remembered here: the amount on the
+   * subscription is lowered immediately (the next charge is already the new price) and the plan
+   * itself moves on `pendingChangeAt`, which is the provider's next payment date. The grace
+   * processor applies it; nothing else reads these three columns.
+   */
+  pendingPlan: varchar("pending_plan", { length: 20 }),
+  pendingInterval: varchar("pending_interval", { length: 20 }),
+  pendingChangeAt: timestamp("pending_change_at"),
   // Last language the person used in the app ('en' | 'es' | 'sk'); e-mails are sent in it.
   language: varchar("language", { length: 5 }),
   // Bill reminders and the weekly summary by e-mail. On by default, off in Profile.
@@ -919,10 +931,115 @@ export const complaints = pgTable(
     detail: text("detail").notNull(),
     request: text("request").notNull(),
     language: varchar("language", { length: 5 }).notNull().default("es"),
+    /**
+     * The order, plan or payment the claim is about.
+     *
+     * The standard asks the consumer to identify the contracted good or service. Free text in
+     * `service` alone left the reply team searching by hand for which subscription or charge the
+     * person meant; this is the reference the consumer already has (plan, receipt, operation
+     * number). Nullable: every sheet written before this column exists has none.
+     */
+    reference: varchar("reference", { length: 120 }),
     status: varchar("status", { length: 12 }).notNull().default("open"), // open | answered
     response: text("response"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     answeredAt: timestamp("answered_at"),
   },
   (table) => [uniqueIndex("UQ_complaints_code").on(table.code), index("IDX_complaints_email").on(table.email)],
+);
+
+/**
+ * How a Peruvian customer wants to be billed: boleta or factura.
+ *
+ * A factura needs a RUC, a razón social and a fiscal address; a boleta needs a DNI. Without
+ * this the team rebuilt every document by hand from an e-mail. One row per user, refreshed on
+ * each payment, because the fiscal data changes rarely but changes.
+ */
+export const billingProfiles = pgTable("billing_profiles", {
+  userId: varchar("user_id").primaryKey().notNull(),
+  kind: varchar("kind", { length: 10 }).notNull().default("boleta"), // boleta | factura
+  documentType: varchar("document_type", { length: 12 }).notNull(), // dni | ruc
+  documentNumber: varchar("document_number", { length: 24 }).notNull(),
+  businessName: varchar("business_name", { length: 160 }),
+  fiscalAddress: varchar("fiscal_address", { length: 240 }),
+  email: varchar("email", { length: 160 }),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/**
+ * Every charge that needs a Peruvian tax document, with the state of that document.
+ *
+ * Facturas and boletas are issued by hand in SUNAT clave sol (owner's decision: no CPE
+ * automation), so the app's job is to hold the data, the amount, the period and the reference,
+ * and to record the series and number once the operator has the document. `pending` means
+ * "money received, document not issued yet" — a queue nobody can lose.
+ */
+export const billingDocuments = pgTable(
+  "billing_documents",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id").notNull(),
+    kind: varchar("kind", { length: 10 }).notNull(), // boleta | factura
+    documentType: varchar("document_type", { length: 12 }).notNull(),
+    documentNumber: varchar("document_number", { length: 24 }).notNull(),
+    businessName: varchar("business_name", { length: 160 }),
+    fiscalAddress: varchar("fiscal_address", { length: 240 }),
+    email: varchar("email", { length: 160 }),
+    amountCents: integer("amount_cents").notNull(),
+    currency: varchar("currency", { length: 5 }).notNull(), // pen | usd
+    plan: varchar("plan", { length: 20 }).notNull(),
+    interval: varchar("interval", { length: 10 }).notNull(), // monthly | yearly
+    provider: varchar("provider", { length: 20 }).notNull(), // mercadopago | stripe | manual
+    providerReference: varchar("provider_reference", { length: 120 }),
+    periodStart: timestamp("period_start").notNull(),
+    periodEnd: timestamp("period_end").notNull(),
+    status: varchar("status", { length: 12 }).notNull().default("pending"), // pending | issued | void
+    series: varchar("series", { length: 12 }),
+    number: varchar("number", { length: 20 }),
+    issuedAt: timestamp("issued_at"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    // One charge, one document. The reference already carries the period (`preapproval#2026-10`),
+    // so this alone is enough — and it is what stops the first payment, which MercadoPago reports
+    // twice, from being queued twice and invoiced twice.
+    uniqueIndex("UQ_billing_documents_reference").on(table.provider, table.providerReference),
+    index("IDX_billing_documents_user").on(table.userId),
+    index("IDX_billing_documents_status").on(table.status),
+  ],
+);
+
+/**
+ * A one-shot payment the customer says they made by Yape, Plin or bank transfer.
+ *
+ * Recurring billing cannot run on those wallets — MercadoPago's subscriptions accept cards
+ * only, and Yape's approval token is single-use by design — so a wallet payment buys a period
+ * and does not renew. The row is the claim; a human confirms it (approval link in the e-mail)
+ * before any access is granted, because nothing in the provider can confirm it for us.
+ */
+export const manualPayments = pgTable(
+  "manual_payments",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id").notNull(),
+    plan: varchar("plan", { length: 20 }).notNull(), // standard | premium
+    interval: varchar("interval", { length: 10 }).notNull(), // monthly | yearly
+    amountCents: integer("amount_cents").notNull(),
+    currency: varchar("currency", { length: 5 }).notNull().default("pen"),
+    method: varchar("method", { length: 12 }).notNull(), // yape | plin | transfer
+    operationNumber: varchar("operation_number", { length: 64 }),
+    payerName: varchar("payer_name", { length: 160 }),
+    note: text("note"),
+    status: varchar("status", { length: 12 }).notNull().default("pending"), // pending | approved | rejected
+    reviewerNote: text("reviewer_note"),
+    reviewedAt: timestamp("reviewed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("IDX_manual_payments_status").on(table.status),
+    index("IDX_manual_payments_user").on(table.userId),
+  ],
 );

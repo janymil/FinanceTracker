@@ -321,8 +321,12 @@ function getPageContent(route: string, lang: string = 'en'): string {
   // so they come from the one price list, in the currency that language is charged in:
   // Spanish pages quote soles (the Peru market), everything else US dollars.
   const currency = currencyForLanguage(lang);
+  /** The word for "year" next to a price, in the language of the page. */
+  const perYear = (per: string) => (per === 'mes' ? 'año' : per === 'mesiac' ? 'rok' : 'year');
+  // Both intervals are quoted: a page that only says "/month" is how a yearly choice gets lost.
   const price = (plan: 'standard' | 'premium', per: string) =>
-    `${formatMoney(amountFor(plan, 'monthly', currency), currency)}/${per}`;
+    `${formatMoney(amountFor(plan, 'monthly', currency), currency)}/${per}` +
+    ` or ${formatMoney(amountFor(plan, 'yearly', currency), currency)}/${perYear(per)}`;
   const freePrice = (per: string) => `${formatMoney(0, currency)}/${per}`;
 
   const content = {

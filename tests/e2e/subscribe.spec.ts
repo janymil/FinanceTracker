@@ -31,28 +31,70 @@ test.describe('E2E-5 checkout', () => {
     );
   });
 
-  test('choosing a plan asks for a session and follows the returned URL', async ({ page }) => {
-    const asked: { plan?: string; currency?: string } = {};
-    await page.route('**/api/create-checkout-session', async (route) => {
-      Object.assign(asked, route.request().postDataJSON());
-      await route.fulfill({ json: { url: PROVIDER_URL } });
-    });
-
-    // A plan the account does not already have: the button for the current plan is disabled
-    // on purpose, so clicking it would prove nothing.
+  test('choosing a plan asks the right thing: a session when free, a change when already paying', async ({ page }) => {
     const me = await (await page.request.get('/api/auth/user')).json();
     const testId = me.plan === 'premium' ? 'subscribe-standard-monthly' : 'subscribe-premium-monthly';
     const expectedPlan = testId.includes('premium') ? 'premium' : 'standard';
+    const interval = testId.endsWith('yearly') ? 'yearly' : 'monthly';
+
+    const asked = {
+      checkout: 0,
+      change: null as { plan?: string; currency?: string } | null,
+      mercadoPago: null as { plan?: string; interval?: string } | null,
+    };
+
+    // Whatever the account is, /api/create-checkout-session must never be reached by someone who
+    // already has paid access: it would create a second charge for the same plan.
+    await page.route('**/api/create-checkout-session', async (route) => {
+      asked.checkout += 1;
+      await route.fulfill({ json: { url: PROVIDER_URL } });
+    });
+    await page.route('**/api/change-subscription', async (route) => {
+      asked.change = route.request().postDataJSON();
+      await route.fulfill({ json: { success: true, type: 'upgrade' } });
+    });
+    await page.route('**/api/mercadopago/subscribe', async (route) => {
+      asked.mercadoPago = route.request().postDataJSON();
+      await route.fulfill({ json: { init_point: PROVIDER_URL } });
+    });
+    // The change path ends with a reload and a dialog; accept whatever it says.
+    page.on('dialog', (dialog) => dialog.dismiss());
 
     await page.goto(path('/subscribe'));
     const button = page.getByTestId(testId);
     await expect(button).toBeEnabled();
     await button.click();
 
+    const paidWithCard = Boolean(me.stripeSubscriptionId);
+    const paidWithMercadoPago = Boolean(me.mpPreapprovalId);
+
+    if (paidWithMercadoPago) {
+      // Soles are charged by MercadoPago; the interval travels with the plan.
+      await expect.poll(() => asked.mercadoPago?.plan).toBe(expectedPlan);
+      expect(asked.mercadoPago?.interval).toBe(interval);
+      expect(asked.checkout).toBe(0);
+      return;
+    }
+
+    if (paidWithCard) {
+      // planKey(): monthly plans travel as the bare name, yearly ones as `premium-yearly`.
+      const expectedKey = interval === 'monthly' ? expectedPlan : `${expectedPlan}-yearly`;
+      await expect.poll(() => asked.change?.plan).toBe(expectedKey);
+      expect(asked.change?.currency).toBe('usd');
+      expect(asked.checkout).toBe(0);
+      return;
+    }
+
+    // A period paid by wallet/transfer, or a free account: a wallet payer is told to pay the same
+    // way instead of being sent to card checkout, and a free account gets a session.
+    const walletPaid = Boolean(me.paidUntil) && new Date(me.paidUntil).getTime() > Date.now() && me.plan !== 'free';
+    if (walletPaid) {
+      await expect.poll(() => asked.checkout).toBe(0);
+      return;
+    }
+
     await expect(page).toHaveURL(/checkout\.kaptia\.test/);
-    expect(asked?.plan).toBe(expectedPlan);
-    // The page shows one price list and the server must charge that same one.
-    expect(asked?.currency).toBe('usd');
+    expect(asked.checkout).toBe(1);
   });
 
   test('a refused checkout keeps the person on the page, with the button usable again', async ({ page }) => {

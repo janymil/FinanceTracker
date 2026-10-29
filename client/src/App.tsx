@@ -69,6 +69,7 @@ const AdminAnalytics = lazy(() => import("@/pages/admin-analytics"));
 const AdminWatch = lazy(() => import("@/pages/admin-watch"));
 const MobileUpload = lazy(() => import("@/pages/mobile-upload/sessionId"));
 const RedeemPage = lazy(() => import("@/pages/redeem"));
+const RoadmapPage = lazy(() => import("@/pages/roadmap"));
 const FeaturesPage = lazy(() => import("@/pages/features"));
 
 // Optimized loading state
@@ -194,6 +195,7 @@ function Router() {
           <Route path="/:lang/profile" component={AuthenticatedApp} />
           <Route path="/:lang/subscribe" component={AuthenticatedApp} />
           <Route path="/:lang/redeem" component={AuthenticatedApp} />
+          <Route path="/:lang/roadmap" component={AuthenticatedApp} />
           <Route path="/:lang/admin-analytics" component={AuthenticatedApp} />
           <Route path="/:lang/admin-watch" component={AuthenticatedApp} />
 
@@ -357,6 +359,7 @@ export function AuthenticatedApp() {
                 <Route path="/:lang/courses" component={CoursesPage} />
                 <Route path="/:lang/subscribe" component={SubscribePage} />
                 <Route path="/:lang/redeem" component={RedeemPage} />
+                <Route path="/:lang/roadmap" component={RoadmapPage} />
                 <Route path="/:lang/profile" component={ProfilePage} />
                 <Route path="/:lang/admin-analytics" component={AdminAnalytics} />
                 <Route path="/:lang/admin-watch" component={AdminWatch} />

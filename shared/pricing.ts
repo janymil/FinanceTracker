@@ -34,6 +34,99 @@ export function planKey(plan: PlanId, interval: BillingInterval): string {
   return interval === 'yearly' ? `${plan}-yearly` : plan;
 }
 
+/**
+ * The four paid plan keys, cheapest first.
+ *
+ * This order is the only thing that decides whether a plan change is an upgrade or a
+ * downgrade, and both payment providers read it. Two copies of this list would eventually
+ * disagree, and the side that disagrees gives away a plan or charges twice.
+ */
+export type PlanKey = 'standard' | 'standard-yearly' | 'premium' | 'premium-yearly';
+
+export const PLAN_KEY_ORDER: readonly PlanKey[] = [
+  'standard',
+  'standard-yearly',
+  'premium',
+  'premium-yearly',
+];
+
+export function isPlanKey(value: unknown): value is PlanKey {
+  return typeof value === 'string' && (PLAN_KEY_ORDER as readonly string[]).includes(value);
+}
+
+/** `standard-yearly` -> `{ plan: 'standard', interval: 'yearly' }`; null when unknown. */
+export function parsePlanKey(value: unknown): { plan: PlanId; interval: BillingInterval } | null {
+  if (!isPlanKey(value)) return null;
+  const yearly = value.endsWith('-yearly');
+  return {
+    plan: (yearly ? value.slice(0, -'-yearly'.length) : value) as PlanId,
+    interval: yearly ? 'yearly' : 'monthly',
+  };
+}
+
+/** 1..4, cheapest first; null when the pair is not a paid plan (free, legacy grants). */
+export function planWeight(plan: string, interval: string | null | undefined): number | null {
+  const key = interval === 'yearly' ? `${plan}-yearly` : plan;
+  const index = PLAN_KEY_ORDER.indexOf(key as PlanKey);
+  return index === -1 ? null : index + 1;
+}
+
+/**
+ * Everything wrong with a provider price for a plan, as a list of plain statements.
+ *
+ * The interval and the amount are the two facts that decide a bill, and both have been wrong in
+ * this account at once: "Standard Anual: S/ 99.90" pointed at a *monthly* S/ 99.90. A yearly
+ * buyer would have been charged the annual amount every month. Pure so it can be tested without
+ * a provider, and shared so Stripe and MercadoPago cannot disagree about what "correct" means.
+ */
+export function priceProblems(
+  price: { amountCents: number | null; interval: string | null; currency: string },
+  planKeyValue: unknown,
+  currency: BillingCurrency,
+): string[] {
+  const parsed = parsePlanKey(planKeyValue);
+  if (!parsed) return [`${String(planKeyValue)} is not a plan this app sells`];
+
+  const expectedCents = Math.round(PLAN_PRICES[parsed.plan][currency][parsed.interval] * 100);
+  const expectedInterval = parsed.interval === 'yearly' ? 'year' : 'month';
+  const problems: string[] = [];
+
+  if (price.currency.toLowerCase() !== currency) {
+    problems.push(`currency is ${price.currency}, expected ${currency}`);
+  }
+  if (price.interval !== expectedInterval) {
+    problems.push(`billed every ${price.interval ?? '?'}, expected every ${expectedInterval}`);
+  }
+  if (price.amountCents !== null && price.amountCents !== expectedCents) {
+    problems.push(`amount is ${price.amountCents / 100}, expected ${expectedCents / 100}`);
+  }
+
+  return problems;
+}
+
+export type PlanChangeDirection = 'upgrade' | 'downgrade' | 'same' | 'unknown';
+
+/**
+ * Which way a plan change goes, from what the account is recorded as paying for.
+ *
+ * `upgrade` means "the customer is now entitled to more than they paid for" — it applies at
+ * once and may be charged immediately. `downgrade` must never remove access before the paid
+ * period ends. An account on `free` (or a manually granted plan) is not in the list, so any
+ * paid target is an upgrade: granting early is recoverable, taking away paid access is not.
+ */
+export function changeDirection(
+  current: { plan: string; billingInterval?: string | null },
+  target: unknown
+): PlanChangeDirection {
+  if (!isPlanKey(target)) return 'unknown';
+  const currentWeight = planWeight(current.plan, current.billingInterval);
+  const targetWeight = planWeight(parsePlanKey(target)!.plan, parsePlanKey(target)!.interval);
+  if (targetWeight === null) return 'unknown';
+  if (currentWeight === null) return 'upgrade';
+  if (targetWeight === currentWeight) return 'same';
+  return targetWeight > currentWeight ? 'upgrade' : 'downgrade';
+}
+
 /** Language (`sk`, `en`, `es`, `es-pe`, …) -> billing currency. */
 export function currencyForLanguage(language: string | undefined | null): BillingCurrency {
   return String(language ?? '').toLowerCase().startsWith('es') ? 'pen' : 'usd';

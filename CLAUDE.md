@@ -388,3 +388,11 @@ applies whatever it finds in `shared/schema.ts`, drops included, with no review 
 - Follow established conventions and code style
 - Use existing libraries and utilities when available
 - Prioritize security and privacy in all implementations
+<!-- devkit:begin -->
+## devkit is active in this app
+
+- The gate is `./verify.sh`; its steps are in `.devkit/profile.sh`.
+- Definition of done and the reviewer pass: `.devkit/DONE.md` and `.devkit/prompts/reviewer.md`.
+- Read `.devkit/lessons.md` before editing — an older lesson beats your instinct.
+- A change bigger than one file starts as a plan in `.devkit/plans/`.
+<!-- devkit:end -->

@@ -2,6 +2,7 @@ import { log } from './logger';
 import { storage } from './storage';
 import { sendGraceExpiryWarning, sendAccountDowngradedNotification } from './emailService';
 import { withJobRun } from './errorGuard/jobs.js';
+import { listDuePendingPlanChanges } from './billingDocuments';
 
 class GraceProcessor {
   private isRunning = false;
@@ -32,6 +33,37 @@ class GraceProcessor {
     }
   }
 
+  /**
+   * Plan changes the customer already asked for, whose charge date has arrived.
+   *
+   * MercadoPago cannot schedule a downgrade, so the request is stored with the date of the charge
+   * it belongs to. `subscription_authorized_payment` applies it when the notification arrives;
+   * this sweep is the safety net for a notification that never came. Applying it twice is
+   * harmless — the second run finds nothing pending.
+   */
+  private async applyScheduledPlanChanges(): Promise<void> {
+    const due = await listDuePendingPlanChanges();
+    if (due.length === 0) return;
+
+    log.info(`Applying ${due.length} scheduled plan change(s)`);
+
+    for (const user of due) {
+      try {
+        const plan = user.pendingPlan as 'standard' | 'premium';
+        const interval = (user.pendingInterval ?? 'monthly') as 'monthly' | 'yearly';
+        await storage.updateUserPlan(user.id, plan, interval);
+        await storage.updateUser(user.id, {
+          pendingPlan: null,
+          pendingInterval: null,
+          pendingChangeAt: null,
+        } as any);
+        log.info(`${user.id} moved to the scheduled ${plan}/${interval}`);
+      } catch (error) {
+        log.error(`Error applying the scheduled plan change of ${user.id}:`, error);
+      }
+    }
+  }
+
   // Process users in grace period for warnings and downgrades
   async processGracePeriods(): Promise<void> {
     if (this.isRunning) {
@@ -44,6 +76,7 @@ class GraceProcessor {
       log.info('Starting grace period processing...');
 
       await this.downgradeExpiredPaidPeriods();
+      await this.applyScheduledPlanChanges();
 
       // Get users with expired grace periods for downgrade
       const expiredUsers = await storage.getUsersWithExpiredGrace();

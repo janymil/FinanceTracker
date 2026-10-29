@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic devkit sweep over /var/www
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=15min
+AccuracySec=1min
+Unit=devkit-sweep.service
+
+[Install]
+WantedBy=timers.target

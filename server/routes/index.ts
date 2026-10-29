@@ -18,6 +18,7 @@ import { registerErrorGuardRoutes } from "../errorGuard/routes.js";
 import { normalizeRoute } from "@shared/errorGuard/fingerprint";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { registerMercadoPagoRoutes } from "./mercadoPagoRoutes";
+import { registerBillingAccountRoutes } from "./billingAccountRoutes";
 import { registerBillingRegionRoute } from "../billingRegion";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
@@ -149,6 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerStripeRoutes(app);
   // Peru pays in soles through MercadoPago; USD keeps going through Stripe.
   registerMercadoPagoRoutes(app);
+  // Tax data (boleta / factura), the document queue, and wallet/transfer payments.
+  registerBillingAccountRoutes(app);
   registerRedeemRoutes(app);
 
   // Receipt upload endpoint — OCR and AI run per file, so it needs both a login and a cap.

@@ -66,6 +66,9 @@ export function useOverviewFormat() {
     /** "Thu 30 Oct" */
     dayLabel: (key: string) =>
       new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(fromKey(key)),
+    /** "30 Oct" */
+    shortDay: (key: string) =>
+      new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" }).format(fromKey(key)),
     /** "30 Oct 2026" */
     dateLabel: (key: string) =>
       new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(fromKey(key)),

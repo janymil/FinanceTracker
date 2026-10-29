@@ -106,7 +106,10 @@ describe('POST /api/mercadopago/subscribe', () => {
       { method: 'PUT', path: '/preapproval/pre-old' },
       { method: 'POST', path: '/preapproval' },
     ]);
-    expect(mocks.storage.updateUser).toHaveBeenCalledWith('user_1', { mpPreapprovalId: 'pre-new' });
+    expect(mocks.storage.updateUser).toHaveBeenCalledWith(
+      'user_1',
+      expect.objectContaining({ mpPreapprovalId: 'pre-new' }),
+    );
   });
 
   it('does not downgrade someone who is not paying yet', async () => {

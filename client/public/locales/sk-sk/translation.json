@@ -3312,6 +3312,33 @@
     }
   },
   "subscribe": {
+    "change_plan": "Prejsť na tento plán",
+    "change_wallet": "Tvoj plán bol zaplatený na jedno obdobie. Ďalšie obdobie zaplať rovnakým spôsobom, nižšie.",
+
+    "change_scheduled": "Zmena plánu bola uplatnená.",
+    "upgrade_applied": "Plán vylepšený. Rozdiel sa účtuje teraz.",
+    "downgrade_scheduled": "Naplánované. Nový plán začne po skončení zaplateného obdobia.",
+    "peru": {
+      "title": "Plať cez Yape, Plin alebo bankovým prevodom",
+      "subtitle": "Len pre Peru. Táto platba pokrýva jedno obdobie a neobnovuje sa automaticky: upozorníme ťa pred jeho koncom.",
+      "plan": "Plán",
+      "period": "Obdobie",
+      "method": "Ako si platil",
+      "transfer": "Bankový prevod",
+      "operation": "Číslo operácie",
+      "operation_hint": "Kód, ktorý ti dala aplikácia",
+      "tax_title": "Tvoja boleta alebo faktura",
+      "tax_kind": "Doklad",
+      "boleta": "Boleta (DNI)",
+      "factura": "Faktura (RUC)",
+      "business_name": "Razón social",
+      "fiscal_address": "Fiskálna adresa",
+      "tax_note": "Doklad sa vystavuje v SUNAT a posiela na tvoj e-mail. Skontroluj údaje: fakturu s nesprávnym RUC nie je možné opraviť.",
+      "tax_error": "Skontroluj údaje dokladu.",
+      "submit": "Už som zaplatil — potvrdiť platbu",
+      "sent": "Údaje o platbe sme dostali. Plán aktivujeme po potvrdení, zvyčajne do jedného pracovného dňa."
+    },
+
     "title": "Vyberte Si Svoj Plán",
     "subtitle": "Odomknite výkonné funkcie správy financií s vaším predplatným",
     "back_to_home": "Späť na Domov",
@@ -3377,6 +3404,8 @@
   "profile": {
     "mp_cancel": "Zrušiť predplatné",
     "mp_cancel_note": "Zrušením sa zastavia ďalšie platby v MercadoPago.",
+    "wallet_active_note": "Tvoj plán je aktívny do {{date}}. Bol kúpený na jedno obdobie a sám sa neobnovuje.",
+
     "mp_cancel_confirm": "Zrušiť predplatné MercadoPago? Váš plán sa vráti na Free.",
     "mp_cancelled": "Predplatné bolo zrušené",
     "Loading...": "Načítava sa...",
@@ -5104,6 +5133,162 @@
     "reminders": {
       "empty_title": "Žiadne nadchádzajúce pripomienky",
       "empty_body": "Zobrazia sa tu platby s budúcim dátumom a pripomienky, ktoré pridáte."
+    }
+  },
+  "roadmap": {
+    "menu": "Plán vývoja",
+    "title": "Plán vývoja",
+    "subtitle": "Čo pre vás Kaptia robí dnes a čo pripravujeme ďalej.",
+    "filter": "Zobraziť",
+    "step": "Krok {{number}}",
+    "stage": {
+      "all": "Všetko",
+      "now": "Dostupné",
+      "next": "Na rade",
+      "later": "Neskôr",
+      "horizon": "Na obzore"
+    },
+    "hero": {
+      "eyebrow": "Plán vývoja",
+      "title": "Krok za krokom, v poradí, ktoré vám pomôže najviac",
+      "text": "Dátumy tu zámerne nie sú: každý krok vyjde, keď poriadne funguje, a to vo všetkých troch jazykoch. Na poradí záleží — prvé kroky spresnia každé číslo v aplikácii a všetko ďalšie na nich stavia.",
+      "available": "Dostupné dnes",
+      "coming": "Na ceste"
+    },
+    "now": {
+      "title": "Čo už máte",
+      "text": "Všetko nižšie funguje už dnes, na webe aj v telefóne."
+    },
+    "available": {
+      "capture": {
+        "title": "Zapisujte, ako vám vyhovuje",
+        "desc": "Napíšte to, povedzte to nahlas, odfoťte bloček, importujte výpis alebo nahrajte z telefónu cez QR kód."
+      },
+      "budgets_goals": {
+        "title": "Rozpočty a ciele",
+        "desc": "Limity podľa kategórie a obdobia a ciele sporenia s tempom, ktoré potrebujete."
+      },
+      "shared_goals": {
+        "title": "Spoločné ciele",
+        "desc": "Sporte spolu s priateľmi alebo rodinou, s príspevkami a chatom pri každom cieli."
+      },
+      "health": {
+        "title": "Skóre finančného zdravia",
+        "desc": "Jedno skóre za váš mesiac, s jasnými postrehmi a konkrétnymi krokmi v Premium."
+      },
+      "reports": {
+        "title": "Prehľady a trendy",
+        "desc": "Prehľady za ľubovoľné obdobie, trendy, kalendár vašich peňazí a predpoveď výdavkov."
+      },
+      "recurring": {
+        "title": "Opakované platby a pripomienky",
+        "desc": "Opakované transakcie sa vytvoria samé a účty vám pripomenú splatnosť vopred."
+      },
+      "achievements": {
+        "title": "Série a úspechy",
+        "desc": "Malé odmeny za to, že si držíte zvyk zapisovať svoje peniaze."
+      },
+      "export": {
+        "title": "Export",
+        "desc": "Vezmite si svoje dáta ako CSV alebo PDF, kedykoľvek chcete."
+      },
+      "privacy": {
+        "title": "Súkromie od základu",
+        "desc": "Citlivé polia sú šifrované a osobné údaje sa odstránia skôr, než čokoľvek uvidí AI."
+      }
+    },
+    "steps": {
+      "s1": "Uvidíte, kde máte peniaze — a presun medzi vlastnými účtami sa už nepočíta ako výdavok",
+      "s2": "Váš mesiac môže začínať v deň výplaty",
+      "s3": "Všetky predplatné na jednom mieste: koľko stoja, kedy sa platia, kedy končia",
+      "s4": "Koľko vás dlhy naozaj stoja a jedno poradie, ako ich splatiť",
+      "s5": "Kaptia vás upozorní v deň, keď niečo nesedí",
+      "s6": "Hotovosť na dve ťuknutia a vložená správa o platbe sa zmení na transakciu",
+      "s7": "Sporte v inej mene a získajte pomoc, keď vám zvýšia cenu",
+      "s8": "Pýtajte sa vlastných dát a sledujte, ako sa menia vaše ceny",
+      "s9": "Dvaja ľudia, jedna kniha; daňovo odpočítateľné výdavky pokope; týždenný súhrn"
+    },
+    "features": {
+      "accounts": {
+        "title": "Kde mám peniaze",
+        "desc": "Hotovosť v peňaženke, účet ku karte, zostatok v platobnej aplikácii, sporiaca kasička — každé so svojím zostatkom a jeden súčet.",
+        "example": "„Koľko vlastne mám a kde?“"
+      },
+      "transfers": {
+        "title": "Rozpoznané prevody",
+        "desc": "Kaptia nájde peniaze, ktoré ste presunuli medzi vlastnými miestami, a ponúkne ich spojiť, aby vaše súčty neboli nafúknuté.",
+        "example": "„Toto vyzerá ako prevod — spojiť?“"
+      },
+      "payday": {
+        "title": "Mesiac od výplaty",
+        "desc": "Zvoľte deň, kedy váš mesiac začína, a prehľad, rozpočty aj reporty sa ním riadia. Nepravidelný príjem? Kaptia ukáže rezervu.",
+        "example": "„Môj mesiac začína 15.“"
+      },
+      "subscriptions": {
+        "title": "Predplatné",
+        "desc": "Všetky predplatné na jednej obrazovke: ďalšia platba, mesačný a ročný súčet, história cien, skúšobné obdobia pred spoplatnením a čo odíde v najbližších 14 dňoch.",
+        "example": "„Vaše predplatné stoja 1 284 ročne.“"
+      },
+      "debts": {
+        "title": "Dlhy",
+        "desc": "Miesto pre to, čo dlžíte — karty, peniaze, ktoré dlžíte rodine. Koľko zostáva, koľko to naozaj stojí mesačne a najlepšie poradie splácania.",
+        "example": "„Najprv kartu: ušetríte 480 a budete voľní o 17 mesiacov skôr.“"
+      },
+      "watchdog": {
+        "title": "Strážca",
+        "desc": "Krátke, konkrétne upozornenia v deň, keď niečo nesedí: nezvyčajný účet, dvojitá platba, skúšobné obdobie pred spoplatnením.",
+        "example": "„Elektrina je o 40 % vyššia ako zvyčajne.“"
+      },
+      "fast_capture": {
+        "title": "Rýchly zápis",
+        "desc": "Hotovosť na dve ťuknutia, vložená alebo zdieľaná správa o platbe sa zmení na transakciu a všetko funguje aj offline.",
+        "example": "„5, taxík“ → hotovo."
+      },
+      "currency": {
+        "title": "Viac mien",
+        "desc": "Sporiaca kasička v inej mene vedľa vašej. Každý vklad si pamätá kurz svojho dňa, takže vidíte zisk či stratu.",
+        "example": "„Vložili ste 1 000 dolárov; dnes je to o 180 viac ako v deň vkladu.“"
+      },
+      "negotiation": {
+        "title": "Pomocník pri vyjednávaní",
+        "desc": "Keď vám zdražejú účet alebo predplatné: hotová správa na odoslanie a miesto, kam zapíšete, koľko ste ušetrili.",
+        "example": "„Tento hovor vám ušetril 240 ročne.“"
+      },
+      "ask": {
+        "title": "Pýtajte sa svojich dát",
+        "desc": "Okno na otázky v prehľadoch. Odpoveď prinesie číslo, jednu vetu a transakcie, z ktorých vychádza.",
+        "example": "„Koľko som minul v reštauráciách v marci?“"
+      },
+      "basket": {
+        "title": "Vaša vlastná inflácia",
+        "desc": "Bločky sa čítajú po riadkoch, takže Kaptia ukáže, ako sa menia ceny vecí, ktoré naozaj kupujete.",
+        "example": "„Váš nákupný košík stojí o 12 % viac ako v júni.“"
+      },
+      "what_if": {
+        "title": "Čo ak",
+        "desc": "Posuvníky na vašich vlastných číslach, aby ste videli, čo zmena znamená pre vaše ciele a dlhy.",
+        "example": "„Menej reštaurácií o 30 % a notebook bude v septembri.“"
+      },
+      "household": {
+        "title": "Spoločné peniaze domácnosti",
+        "desc": "Dvaja ľudia, jedna kniha: spoločné rozpočty, kto čo zaplatil a jeden riadok na konci mesiaca na vyrovnanie.",
+        "example": "„Ana zaplatila o 340 viac, ako bol jej podiel.“"
+      },
+      "tax": {
+        "title": "Pomocník s daňami",
+        "desc": "Odpočítateľné výdavky zozbierané z toho, čo už zapisujete, s ročným limitom, termínom a jedným súborom pre účtovníka. Najprv Peru, potom Slovensko.",
+        "example": "„Termín je o 61 dní.“"
+      },
+      "weekly": {
+        "title": "Týždenný súhrn a počkaj pred nákupom",
+        "desc": "Krátka pondelková správa s tým, na čom tento týždeň záleží, a zoznam želaní s časom na rozmyslenie.",
+        "example": "„Chcete to ešte aj v piatok?“"
+      }
+    },
+    "idea": {
+      "title": "Niečo vám chýba?",
+      "text": "Povedzte nám, čo by Kaptiu pre vás urobilo užitočnejšou. Čítame každú správu.",
+      "cta": "Navrhnúť nápad"
     }
   }
 }

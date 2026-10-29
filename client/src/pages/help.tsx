@@ -49,10 +49,16 @@ export default function Help() {
   // Language from route
   const langMatch = location.match(/^\/([a-z]{2})(?:\/|$)/);
   const currentLang = langMatch ? langMatch[1] : (localStorage.getItem('preferredLanguage') || 'en');
-  // Prices shown in help must match /pricing: soles on Spanish pages, dollars elsewhere.
+  // Prices shown in help must match /pricing: soles on Spanish pages, dollars elsewhere — and
+  // both intervals, because a price list that only quotes monthly is how a yearly choice gets
+  // lost on the way to checkout.
   const priceCurrency = currencyForLanguage(currentLang);
-  const standardPrice = formatMoney(amountFor('standard', 'monthly', priceCurrency), priceCurrency);
-  const premiumPrice = formatMoney(amountFor('premium', 'monthly', priceCurrency), priceCurrency);
+  const money = (plan: 'standard' | 'premium', interval: 'monthly' | 'yearly') =>
+    formatMoney(amountFor(plan, interval, priceCurrency), priceCurrency);
+  const bothIntervals = (plan: 'standard' | 'premium') =>
+    `${money(plan, 'monthly')} / ${t('month')} · ${money(plan, 'yearly')} / ${t('year')}`;
+  const standardPrice = bothIntervals('standard');
+  const premiumPrice = bothIntervals('premium');
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {

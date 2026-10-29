@@ -1,0 +1,19 @@
+[Unit]
+Description=Install the devkit into every app under /var/www
+Documentation=file:/opt/devkit/README.md
+After=local-fs.target
+
+[Service]
+Type=oneshot
+# A clone creates the folder before its package.json lands. Ten seconds is enough for a
+# normal clone; the sweep timer is the safety net for anything slower than that.
+# This must stay in [Service] — systemd ignores it in [Unit].
+ExecStartPre=/bin/sleep 10
+Environment=DEVKIT_TRIGGER=watcher
+ExecStart=/opt/devkit/bin/devkit-bootstrap --all
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+# Writes to /var/www (app folders) and to the home directory (global rules), so neither
+# ProtectSystem=strict nor ProtectHome can be enabled here.
+NoNewPrivileges=yes

@@ -9,6 +9,7 @@ import {
   overviewWindow,
   parseMonthParam,
   type OverviewBill,
+  type OverviewRecurringRule,
 } from "@shared/dashboardOverview";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -68,10 +69,24 @@ export function registerDashboardRoutes(app: Express) {
       let budgets: Awaited<ReturnType<typeof storage.getUserBudgets>> = [];
       let goals: Awaited<ReturnType<typeof storage.getUserGoals>> = [];
       const bills: OverviewBill[] = [];
+      const recurringRules: OverviewRecurringRule[] = [];
 
       if (paid) {
         budgets = (await storage.getUserBudgets(userId, timeZone)).map(translate);
         goals = await storage.getUserGoals(userId);
+
+        // The rules that repeat, so the dashboard can show the ones landing in this month.
+        for (const rule of await storage.getUserRecurringTransactions(userId)) {
+          recurringRules.push({
+            id: rule.id,
+            description: rule.description,
+            amount: rule.amount,
+            type: rule.type,
+            frequency: rule.frequency,
+            startDate: rule.startDate,
+            endDate: rule.endDate,
+          });
+        }
 
         // Far enough ahead to cover the rest of this month (the money card) and a week (the list).
         const monthEnd = monthRange(today.year, today.month, timeZone).end;
@@ -111,6 +126,7 @@ export function registerDashboardRoutes(app: Express) {
         budgets,
         goals,
         bills,
+        recurringRules,
       });
 
       // `budgetCount` drives the first-run checklist ("set a monthly budget").

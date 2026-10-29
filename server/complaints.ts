@@ -33,7 +33,23 @@ const complaintSchema = z
     email: z.string().trim().max(160).email(),
     phone: z.string().trim().max(32).optional().or(z.literal("")),
     service: trimmed(160),
-    amountClaimed: z.string().trim().max(32).optional().or(z.literal("")),
+    /**
+     * The order, plan or payment the claim is about — optional, because an older client does not
+     * send it and a consumer may not have one. When present it is what makes the reply findable.
+     */
+    reference: z.string().trim().max(120).optional().or(z.literal("")),
+    /**
+     * Amount in soles. Kept as a string (it is what the consumer typed and what the copy shows)
+     * but validated as money: the old free-text field accepted "aprox 40 soles" and then the
+     * reply could not say what was being claimed.
+     */
+    amountClaimed: z
+      .string()
+      .trim()
+      .max(32)
+      .regex(/^\d{1,9}([.,]\d{1,2})?$/, "Use an amount in soles, for example 39.90")
+      .optional()
+      .or(z.literal("")),
     detail: z.string().trim().min(10).max(4000),
     request: z.string().trim().min(5).max(2000),
     language: z.enum(["en", "es", "sk"]).default("es"),
@@ -57,7 +73,7 @@ function complaintText(code: string, data: ComplaintInput, createdAt: Date): str
   return [
     `Libro de Reclamaciones - Kaptia (NutriNova LLC)`,
     `Hoja de ${data.kind === "reclamo" ? "Reclamo" : "Queja"} N.º ${code}`,
-    `Fecha: ${createdAt.toISOString().slice(0, 10)}`,
+    `Fecha: ${createdAt.toISOString().slice(0, 10)} ${createdAt.toISOString().slice(11, 16)} UTC`,
     ``,
     `1. Identificación del consumidor`,
     `Nombre: ${data.fullName}`,
@@ -68,6 +84,7 @@ function complaintText(code: string, data: ComplaintInput, createdAt: Date): str
     ``,
     `2. Identificación del servicio contratado`,
     `Servicio: ${data.service}`,
+    `Referencia (plan, pedido o pago): ${data.reference || "-"}`,
     `Monto reclamado: ${data.amountClaimed || "-"}`,
     ``,
     `3. Detalle`,
@@ -75,7 +92,8 @@ function complaintText(code: string, data: ComplaintInput, createdAt: Date): str
     ``,
     `Pedido del consumidor: ${data.request}`,
     ``,
-    `Respuesta: el proveedor responderá en un plazo máximo de ${RESPONSE_DAYS} días calendario.`,
+    `4. Respuesta del proveedor`,
+    `Pendiente. El proveedor responderá en un plazo máximo de ${RESPONSE_DAYS} días calendario.`,
   ].join("\n");
 }
 
@@ -111,6 +129,7 @@ export function registerComplaintRoutes(app: Express) {
             phone: data.phone || null,
             service: data.service,
             amountClaimed: data.amountClaimed || null,
+            reference: data.reference || null,
             detail: data.detail,
             request: data.request,
             language: data.language,

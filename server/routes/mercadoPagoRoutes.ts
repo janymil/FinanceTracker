@@ -7,12 +7,24 @@ import {
   cancelPreapproval,
   createPreapproval,
   findPreapprovalForUser,
+  getAuthorizedPayment,
   getPreapproval,
   isMercadoPagoConfigured,
   listPreapprovalsForUser,
+  updatePreapprovalAmount,
   verifyWebhookSignature,
 } from '../mercadopago';
-import type { BillingInterval, PlanId } from '../../shared/pricing';
+import {
+  PLAN_PRICES,
+  changeDirection,
+  parsePlanKey,
+  planKey,
+  planWeight,
+  type BillingInterval,
+  type PlanChangeDirection,
+  type PlanId,
+} from '../../shared/pricing';
+import { chargeReference, findUserByPreapproval, periodEnd, recordBillingDocument } from '../billingDocuments';
 
 
 const PAID_PLANS: PlanId[] = ['standard', 'premium'];
@@ -26,6 +38,17 @@ function baseUrl(req: Request): string {
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+/** Soles, in cents: the same number the price page quoted for this plan and interval. */
+function amountInCents(plan: PlanId, interval: BillingInterval): number {
+  return Math.round(PLAN_PRICES[plan].pen[interval] * 100);
+}
+
+function dateFrom(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 async function activatePlan(userId: string, plan: PlanId, interval: BillingInterval, preapprovalId: string) {
@@ -43,12 +66,37 @@ async function activatePlan(userId: string, plan: PlanId, interval: BillingInter
   }
 
   await storage.updateUserPlan(userId, plan, interval);
-  await storage.updateUser(userId, { mpPreapprovalId: preapprovalId });
+  await storage.updateUser(userId, {
+    mpPreapprovalId: preapprovalId,
+    /*
+     * The subscription is live again, so the end date of a period that was *cancelled* no
+     * longer applies. Leaving it behind meant the grace sweep downgraded a customer who had
+     * just re-subscribed, on the old cancellation date.
+     */
+    paidUntil: null,
+    pendingPlan: null,
+    pendingInterval: null,
+    pendingChangeAt: null,
+  } as any);
   log.info(`[MercadoPago] ${userId} activated ${plan} (${interval}) via preapproval ${preapprovalId}`);
 
   // Two pending authorisations can both be completed — pressing "subscribe" twice creates
   // two, and both are payable. One subscription per person: end the others.
   await cancelOtherPreapprovals(userId, preapprovalId);
+
+  // A paying customer gets a document for their money. Queued, not issued: facturas are made
+  // by hand in SUNAT, and this row is the queue. The reference carries the period, so the first
+  // payment being reported twice does not become two documents.
+  const startedAt = new Date();
+  await recordBillingDocument({
+    userId,
+    plan,
+    interval,
+    currency: 'pen',
+    provider: 'mercadopago',
+    providerReference: chargeReference(preapprovalId, startedAt),
+    periodStart: startedAt,
+  });
 }
 
 /** Ends a preapproval without failing the caller: the caller already has the outcome it needs. */
@@ -118,6 +166,69 @@ async function deactivatePlan(
 }
 
 
+/**
+ * Moves a live Peruvian subscription to another plan **without ending it**.
+ *
+ * MercadoPago fixes the frequency when the subscription is created, so this only works while the
+ * interval stays the same; monthly -> yearly needs a fresh authorisation and is handled by the
+ * route below. What this buys:
+ *
+ *  - an upgrade charges the new amount from the next charge and grants the plan at once. Nobody
+ *    is cut off, and nothing is charged twice for days already paid for;
+ *  - a downgrade lowers the amount on the subscription immediately (so the next charge really is
+ *    the cheaper price) but the plan itself moves on that charge date, not today — taking away
+ *    access that has been paid for is not allowed.
+ *
+ * Returns false when the change cannot be made in place, and the caller falls back to replacing
+ * the subscription.
+ */
+async function changePlanInPlace(
+  user: { id: string; plan: string; billingInterval?: string | null; mpPreapprovalId?: string | null },
+  plan: PlanId,
+  interval: BillingInterval,
+  direction: PlanChangeDirection,
+): Promise<boolean> {
+  const preapprovalId = user.mpPreapprovalId;
+  if (!preapprovalId) return false;
+  if (direction === 'unknown' || direction === 'same') return false;
+  if ((user.billingInterval ?? 'monthly') !== interval) return false;
+
+  await updatePreapprovalAmount(preapprovalId, PLAN_PRICES[plan].pen[interval]);
+
+  if (direction === 'upgrade') {
+    await storage.updateUserPlan(user.id, plan, interval);
+    await storage.updateUser(user.id, {
+      pendingPlan: null,
+      pendingInterval: null,
+      pendingChangeAt: null,
+    } as any);
+    log.info(`[MercadoPago] ${user.id} upgraded to ${plan}/${interval} in place (${preapprovalId})`);
+    return true;
+  }
+
+  // Downgrade: the plan moves on the charge this new amount belongs to.
+  let effectiveAt: Date | null = null;
+  try {
+    effectiveAt = dateFrom((await getPreapproval(preapprovalId)).nextPaymentDate);
+  } catch (error) {
+    log.warn(
+      `[MercadoPago] Could not read the next charge date of ${preapprovalId}:`,
+      messageOf(error),
+    );
+  }
+
+  await storage.updateUser(user.id, {
+    pendingPlan: plan,
+    pendingInterval: interval,
+    pendingChangeAt: effectiveAt ?? periodEnd(new Date(), interval),
+  } as any);
+  log.info(
+    `[MercadoPago] ${user.id} scheduled a downgrade to ${plan}/${interval} for ` +
+      `${(effectiveAt ?? periodEnd(new Date(), interval)).toISOString()}`,
+  );
+  return true;
+}
+
 export function registerMercadoPagoRoutes(app: Express) {
   /** Starts a Peruvian subscription. Returns the MercadoPago authorisation URL. */
   app.post('/api/mercadopago/subscribe', isAuthenticated, async (req: any, res: Response) => {
@@ -157,11 +268,70 @@ export function registerMercadoPagoRoutes(app: Express) {
     }
 
 
+    const targetKey = planKey(plan, interval);
+    const direction: PlanChangeDirection = changeDirection(
+      { plan: user.plan, billingInterval: user.billingInterval },
+      targetKey,
+    );
+
+    if (direction === 'same' && user.plan !== 'free') {
+      return res.status(409).json({
+        error: 'You are already on this plan.',
+        code: 'already_subscribed',
+        plan,
+        interval,
+      });
+    }
+
     try {
-      // A second preapproval must never run next to the first: end the old one first. That
-      // includes a *pending* one — the payer could still authorise it from an earlier tab,
-      // and two authorised subscriptions mean two charges for one plan.
+      /*
+       * First: can this be done on the subscription the customer already has?
+       *
+       * Same interval (standard -> premium, or premium -> standard) is an amount change, so it
+       * costs the payer nothing extra to ask, keeps the card and the charge history, and never
+       * leaves a window where the account is on no plan at all.
+       */
+      if (user.mpPreapprovalId && user.plan !== 'free') {
+        const changed = await changePlanInPlace(user, plan, interval, direction);
+        if (changed) {
+          return res.json({
+            changed: true,
+            plan,
+            interval,
+            direction,
+            message:
+              direction === 'upgrade'
+                ? 'Your plan has been upgraded. The new price applies from your next charge.'
+                : 'Your plan change is scheduled for your next charge date.',
+          });
+        }
+      }
+
+      /*
+       * Otherwise the subscription has to be replaced — a different interval, or a first payment.
+       *
+       * A second preapproval must never run next to the first: end the old one first. That
+       * includes a *pending* one — the payer could still authorise it from an earlier tab, and
+       * two authorised subscriptions mean two charges for one plan.
+       *
+       * But ending it must not end the paid period. MercadoPago keeps no record of the days it
+       * already charged for, so the next charge date is read *before* the cancellation and kept
+       * in `paidUntil`: whoever walks away from the new authorisation keeps what they paid for,
+       * and whoever completes it is switched over with no gap.
+       */
+      let paidUntil: Date | null = null;
       if (user.mpPreapprovalId) {
+        if (user.plan !== 'free') {
+          try {
+            paidUntil = dateFrom((await getPreapproval(user.mpPreapprovalId)).nextPaymentDate);
+          } catch (error) {
+            log.warn(
+              `[MercadoPago] Could not read the paid period of ${user.mpPreapprovalId} before replacing it:`,
+              messageOf(error),
+            );
+          }
+        }
+
         try {
           await cancelPreapproval(user.mpPreapprovalId);
         } catch (error) {
@@ -173,12 +343,6 @@ export function registerMercadoPagoRoutes(app: Express) {
             return res.status(502).json({ error: 'MercadoPago is unavailable. Please try again.' });
           }
         }
-        // The old plan ends with it; the new plan starts when the new preapproval is
-        // authorised. Someone who walks away from the new authorisation is not left on a
-        // paid plan that nothing is paying for.
-        if (user.plan !== 'free') {
-          await deactivatePlan(userId, user.mpPreapprovalId);
-        }
       }
 
       const created = await createPreapproval({
@@ -189,7 +353,14 @@ export function registerMercadoPagoRoutes(app: Express) {
         backUrl: `${baseUrl(req)}/es/profile?mp=return`,
       });
 
-      await storage.updateUser(userId, { mpPreapprovalId: created.id });
+      await storage.updateUser(userId, {
+        mpPreapprovalId: created.id,
+        // Only a paid account has something to protect; a free one has no paid days to keep.
+        ...(user.plan !== 'free' && paidUntil ? { paidUntil } : {}),
+        pendingPlan: null,
+        pendingInterval: null,
+        pendingChangeAt: null,
+      } as any);
 
       return res.json({ init_point: created.initPoint, preapproval_id: created.id });
     } catch (error: any) {
@@ -357,9 +528,76 @@ export function registerMercadoPagoRoutes(app: Express) {
           await storage.releaseWebhookEvent('mercadopago', eventKey).catch(() => undefined);
           throw error;
         }
+      } else if (type === 'subscription_authorized_payment') {
+        /*
+         * A recurring charge happened: this is the only notification that carries money.
+         *
+         * Ignoring it left the app blind between "subscribed" and "cancelled": no record of the
+         * renewal, nothing to invoice from, and a downgrade the customer had asked for waiting
+         * on a date that nothing was watching. The id in the payload belongs to the *charge*, so
+         * the subscription is resolved first, and the account from the subscription.
+         */
+        const claimKey = `payment:${dataId}`;
+        const firstDelivery = await storage.claimWebhookEvent({
+          source: 'mercadopago',
+          key: claimKey,
+          type,
+        });
+        if (!firstDelivery) {
+          log.info(`[MercadoPago] ${claimKey} is claimed elsewhere; asking for a retry`);
+          return res.status(500).json({ error: 'Event is being handled', retry: true });
+        }
+
+        try {
+          const payment = await getAuthorizedPayment(dataId);
+          const user = payment.preapprovalId
+            ? await findUserByPreapproval(payment.preapprovalId)
+            : null;
+
+          if (user) {
+            const chargedAt = dateFrom(payment.dateCreated) ?? new Date();
+            // The charge that a scheduled downgrade was waiting for has arrived: apply it, so
+            // the account matches what was just charged from now on. A change whose date has not
+            // come yet stays pending — and the document must name the plan that was actually
+            // charged, not the one still waiting.
+            const pendingDue = Boolean(
+              user.pendingPlan && user.pendingChangeAt && user.pendingChangeAt.getTime() <= chargedAt.getTime(),
+            );
+            const plan = (pendingDue && user.pendingPlan ? user.pendingPlan : user.plan) as PlanId;
+            const interval = (
+              pendingDue && user.pendingInterval
+                ? user.pendingInterval
+                : (user.billingInterval as BillingInterval | null) ?? 'monthly'
+            ) as BillingInterval;
+
+            if (pendingDue) {
+              await storage.updateUserPlan(user.id, plan, interval);
+              await storage.updateUser(user.id, {
+                pendingPlan: null,
+                pendingInterval: null,
+                pendingChangeAt: null,
+              } as any);
+              log.info(`[MercadoPago] ${user.id} moved to the scheduled ${plan}/${interval} at renewal`);
+            }
+
+            await recordBillingDocument({
+              userId: user.id,
+              plan,
+              interval,
+              currency: 'pen',
+              provider: 'mercadopago',
+              providerReference: chargeReference(String(payment.preapprovalId), chargedAt),
+              periodStart: chargedAt,
+              amountCents: payment.amount !== null ? Math.round(payment.amount * 100) : undefined,
+            });
+          } else {
+            log.info(`[MercadoPago] Charge ${dataId} belongs to no known subscription; ignored`);
+          }
+        } catch (error) {
+          await storage.releaseWebhookEvent('mercadopago', claimKey).catch(() => undefined);
+          throw error;
+        }
       }
-      // `subscription_authorized_payment` events only confirm a recurring charge; the plan
-      // is already active, so nothing needs to change.
     } catch (error: any) {
       // The dashboard's "test notification" button sends a fixed payload with data.id
       // "123456", and a preapproval deleted before its last event can 404 as well. Neither

@@ -40,6 +40,20 @@ const mocks = vi.hoisted(() => {
 const storage = mocks.storage;
 
 vi.mock('../../server/storage', () => ({ storage }));
+// The tax-document queue is a database writer; the webhook's job is the plan, and its own tests
+// cover the queue. Kept inert so this file never touches the database.
+vi.mock('../../server/billingDocuments', () => ({
+  recordBillingDocument: vi.fn(async () => null),
+  findUserByPreapproval: vi.fn(async () => null),
+  chargeReference: (reference: string, at: Date) =>
+    `${reference}#${at.getUTCFullYear()}-${String(at.getUTCMonth() + 1).padStart(2, '0')}`,
+  periodEnd: (start: Date, interval: string) => {
+    const end = new Date(start.getTime());
+    if (interval === 'yearly') end.setUTCFullYear(end.getUTCFullYear() + 1);
+    else end.setUTCMonth(end.getUTCMonth() + 1);
+    return end;
+  },
+}));
 vi.mock('../../server/clerkAuth', () => ({
   isAuthenticated: (_req: unknown, _res: unknown, next: () => void) => next(),
   getUserId: () => 'user_1',
@@ -140,7 +154,10 @@ describe('POST /api/mercadopago/webhook', () => {
 
     expect(result.status).toBe(200);
     expect(storage.updateUserPlan).toHaveBeenCalledWith('user_1', 'premium', 'monthly');
-    expect(storage.updateUser).toHaveBeenCalledWith('user_1', { mpPreapprovalId: 'pre-1' });
+    expect(storage.updateUser).toHaveBeenCalledWith(
+      'user_1',
+      expect.objectContaining({ mpPreapprovalId: 'pre-1' }),
+    );
   });
 
   it('applies the same notice once and asks MercadoPago to retry the copy it cannot claim', async () => {
@@ -264,7 +281,10 @@ describe('POST /api/mercadopago/webhook', () => {
     expect(resumed.status).toBe(200);
     expect(resumed.json.duplicate).toBeUndefined();
     expect(storage.updateUserPlan).toHaveBeenLastCalledWith('user_1', 'premium', 'monthly');
-    expect(storage.updateUser).toHaveBeenCalledWith('user_1', { mpPreapprovalId: 'pre-1' });
+    expect(storage.updateUser).toHaveBeenCalledWith(
+      'user_1',
+      expect.objectContaining({ mpPreapprovalId: 'pre-1' }),
+    );
   });
 
   it('keeps a paused subscription on the account so the customer can still cancel it', async () => {

@@ -168,13 +168,35 @@ export async function getPreapproval(id: string): Promise<PreapprovalState> {
   return toState(data);
 }
 
-/** Most recent preapproval for a user (used when the payer comes back from MercadoPago). */
+/**
+ * Most recent preapproval for a user (used when the payer comes back from MercadoPago).
+ */
 export async function findPreapprovalForUser(userId: string): Promise<PreapprovalState | null> {
   const data = await mpFetch(`/preapproval/search?external_reference=${encodeURIComponent(userId)}`);
   const results: any[] = Array.isArray(data?.results) ? data.results : [];
   if (results.length === 0) return null;
   const sorted = [...results].sort((a, b) => String(b.date_created ?? '').localeCompare(String(a.date_created ?? '')));
   return toState(sorted[0]);
+}
+
+/**
+ * One charge of a subscription — the record that money actually moved.
+ *
+ * `subscription_authorized_payment` notifications carry the id of this resource, not of the
+ * subscription, so this call is what turns "a renewal happened" into "for which subscription,
+ * how much, on which day". Without it a renewal was invisible to the app: no receipt to
+ * invoice from, and no date to apply a downgrade the customer had asked for.
+ */
+export async function getAuthorizedPayment(
+  id: string,
+): Promise<{ preapprovalId: string | null; amount: number | null; currencyId: string | null; dateCreated: string | null }> {
+  const data = await mpFetch(`/authorized_payments/${encodeURIComponent(id)}`);
+  return {
+    preapprovalId: data?.preapproval_id ? String(data.preapproval_id) : null,
+    amount: Number.isFinite(Number(data?.transaction_amount)) ? Number(data.transaction_amount) : null,
+    currencyId: data?.currency_id ? String(data.currency_id) : null,
+    dateCreated: data?.date_created ? String(data.date_created) : null,
+  };
 }
 
 /**
@@ -193,6 +215,27 @@ export async function cancelPreapproval(id: string): Promise<void> {
   await mpFetch(`/preapproval/${encodeURIComponent(id)}`, {
     method: 'PUT',
     body: JSON.stringify({ status: 'cancelled' }),
+  });
+}
+
+/**
+ * Changes what an existing subscription will charge from its next payment on.
+ *
+ * The only in-place change MercadoPago allows besides the card: the *frequency* is fixed when
+ * the subscription is created, so monthly -> yearly needs a new authorisation, while
+ * standard -> premium (same interval) does not. Charging the new amount without a new
+ * authorisation is what keeps an upgrade free of a cancellation gap.
+ */
+export async function updatePreapprovalAmount(
+  id: string,
+  amount: number,
+  currencyId: 'PEN' = 'PEN',
+): Promise<void> {
+  await mpFetch(`/preapproval/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      auto_recurring: { transaction_amount: amount, currency_id: currencyId },
+    }),
   });
 }
 

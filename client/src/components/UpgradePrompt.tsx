@@ -69,7 +69,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   const planDetails = {
     standard: {
       name: t('upgrade.standard_name'),
-      price: `${formatMoney(amountFor('standard', 'monthly', currency), currency)}/${t('checkout.period_monthly')}`,
+      price: `${formatMoney(amountFor('standard', 'monthly', currency), currency)}/${t('checkout.period_monthly')} · ${formatMoney(amountFor('standard', 'yearly', currency), currency)}/${t('checkout.period_yearly')}`,
       color: 'blue',
       icon: TrendingUp,
       features: [
@@ -82,7 +82,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
     },
     premium: {
       name: t('upgrade.premium_name'),
-      price: `${formatMoney(amountFor('premium', 'monthly', currency), currency)}/${t('checkout.period_monthly')}`,
+      price: `${formatMoney(amountFor('premium', 'monthly', currency), currency)}/${t('checkout.period_monthly')} · ${formatMoney(amountFor('premium', 'yearly', currency), currency)}/${t('checkout.period_yearly')}`,
       color: 'purple',
       icon: Crown,
       features: [

@@ -1,0 +1,10 @@
+[Unit]
+Description=Safety-net sweep: install the devkit into any app folder that appeared while the watcher was down
+
+[Service]
+Type=oneshot
+Environment=DEVKIT_TRIGGER=sweep
+ExecStart=/opt/devkit/bin/devkit-bootstrap --all
+Nice=10
+IOSchedulingClass=idle
+NoNewPrivileges=yes

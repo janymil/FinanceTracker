@@ -41,6 +41,19 @@ export default function ProfilePage() {
   // nothing of theirs in it.
   const paysWithMercadoPago = Boolean((authUser as any)?.mpPreapprovalId);
 
+  /*
+   * A plan bought once — Yape, Plin or a transfer — has no subscription behind it and never
+   * renews, so there is nothing to cancel and no portal that knows about it. Showing the "Manage
+   * subscription" button to these customers opened an error they could not act on. What they need
+   * is the date their paid period ends.
+   */
+  const paidUntilDate = (authUser as any)?.paidUntil ? new Date((authUser as any).paidUntil) : null;
+  const paidWithoutRenewal =
+    (authUser as any)?.plan && (authUser as any).plan !== 'free' &&
+    !paysWithMercadoPago &&
+    !(authUser as any)?.stripeSubscriptionId &&
+    Boolean(paidUntilDate && !Number.isNaN(paidUntilDate.getTime()) && paidUntilDate.getTime() > Date.now());
+
   useEffect(() => {
     setAiEnabled((authUser as any)?.aiEnabled !== false);
   }, [(authUser as any)?.aiEnabled]);
@@ -471,6 +484,15 @@ export default function ProfilePage() {
                       >
                         {isLoading ? t('profile.Opening...') : t('profile.mp_cancel')}
                       </Button>
+                      <p className="text-xs text-muted-foreground">{t('profile.mp_cancel_note')}</p>
+                    </div>
+                  ) : paidWithoutRenewal ? (
+                    <div className="grid gap-3">
+                      <p className="text-sm">
+                        {t('profile.wallet_active_note', {
+                          date: paidUntilDate!.toISOString().slice(0, 10),
+                        })}
+                      </p>
                       <p className="text-xs text-muted-foreground">{t('profile.mp_cancel_note')}</p>
                     </div>
                   ) : (

@@ -16,6 +16,8 @@
  *   - where the money went, against the person's own usual month,
  *   - what needs attention today (a bill due, a budget nearly used, rows without a category,
  *     a goal running out of time),
+ *   - which movements repeat in the month, which is what shows or hides the card next to the
+ *     adviser,
  *   - the last six months, and the health score with its change since the month before.
  *
  * It is pure: no database, no clock (the caller passes `now`), no AI. Money is integer cents.
@@ -26,6 +28,7 @@ import { budgetsForPeriod, calculateFinancialHealth, type FinancialHealth } from
 import { localParts, monthRange, calendarDaysRange } from './timezones';
 import { planGoal } from './goalPlan';
 import { loggingStreak } from './streaks';
+import { isRecurrenceFrequency, occurrenceAt, type RecurrenceFrequency } from './recurrence';
 
 export interface OverviewTransaction {
   id?: number;
@@ -66,6 +69,17 @@ export interface OverviewBill {
   source: 'recurring_transaction' | 'expense_reminder';
 }
 
+/** A rule the person set up to repeat, as the dashboard needs to show it. */
+export interface OverviewRecurringRule {
+  id: number;
+  description: string;
+  amount: AmountInput;
+  type: string;
+  frequency: string;
+  startDate: Date | string;
+  endDate?: Date | string | null;
+}
+
 export interface OverviewInput {
   /** The month the dashboard is showing, 1-12. */
   year: number;
@@ -82,6 +96,8 @@ export interface OverviewInput {
   budgets: readonly OverviewBudget[];
   goals: readonly OverviewGoal[];
   bills: readonly OverviewBill[];
+  /** Active repeating rules. Only those landing in the month appear in the answer. */
+  recurringRules?: readonly OverviewRecurringRule[];
 }
 
 export type MonthStatus = 'past' | 'current' | 'future';
@@ -104,6 +120,26 @@ export type AttentionItem =
   | { kind: 'budget'; categoryName: string; spentCents: Cents; limitCents: Cents; percent: number; daysLeft: number }
   | { kind: 'uncategorized'; count: number; amountCents: Cents }
   | { kind: 'goal'; id: number; name: string; remainingCents: Cents; targetDate: string; daysLeft: number };
+
+/**
+ * A repeating rule that lands at least once in the month on screen.
+ *
+ * Occurrences are counted the same way the server creates them (`shared/recurrence`), anchored to
+ * the rule's start date, so "3 times" here is the three rows the rule makes.
+ */
+export interface RecurringLine {
+  id: number;
+  description: string;
+  /** What one occurrence costs or brings in. */
+  amountCents: Cents;
+  type: 'income' | 'expense';
+  frequency: string;
+  /** How many times it repeats in the month (31 at most). */
+  count: number;
+  /** First and last day it repeats in the month, as yyyy-MM-dd. */
+  firstDay: string;
+  lastDay: string;
+}
 
 export interface GoalLine {
   id: number;
@@ -154,6 +190,8 @@ export interface DashboardOverview {
   trend: TrendMonth[];
   attention: AttentionItem[];
   goals: GoalLine[];
+  /** The repeating rules that land in this month, oldest day first. Empty hides the card. */
+  recurring: RecurringLine[];
   streak: { current: number; loggedToday: boolean };
 }
 
@@ -201,6 +239,84 @@ interface MonthBucket {
   incomeCount: number;
   expensesCents: Cents;
   hasRows: boolean;
+}
+
+/** Average length of one step of each frequency, in days. Only used to jump to the month. */
+const DAYS_PER_STEP: Record<RecurrenceFrequency, number> = {
+  daily: 1,
+  weekly: 7,
+  biweekly: 14,
+  monthly: 30.44,
+  quarterly: 91.31,
+  yearly: 365.25,
+};
+
+/**
+ * The rules that land inside `range`, with the days they land on.
+ *
+ * A daily rule started years ago must still be found, so the walk starts at the step nearest the
+ * month instead of at the rule's first occurrence; from there a month is at most 31 steps.
+ */
+function recurringLines(
+  rules: readonly OverviewRecurringRule[],
+  range: { start: Date; end: Date },
+  timeZone: string,
+): RecurringLine[] {
+  const lines: RecurringLine[] = [];
+
+  for (const rule of rules) {
+    const type = rule.type === 'income' ? 'income' : rule.type === 'expense' ? 'expense' : null;
+    if (!type || !isRecurrenceFrequency(rule.frequency)) continue;
+
+    const start = toInstant(rule.startDate);
+    if (!Number.isFinite(start.getTime())) continue;
+    const end = rule.endDate ? toInstant(rule.endDate) : null;
+    // The rule has to still be running while the month is on.
+    const last = end ? Math.min(range.end.getTime(), end.getTime()) : range.end.getTime();
+    if (last < range.start.getTime()) continue;
+
+    let amountCents: Cents;
+    try {
+      amountCents = Math.abs(parseAmountToCents(rule.amount));
+    } catch {
+      continue;
+    }
+
+    const steps = DAYS_PER_STEP[rule.frequency];
+    // One step before the estimate, so a rule anchored on the 31st cannot be missed by rounding.
+    const from = Math.max(
+      0,
+      Math.floor((range.start.getTime() - start.getTime()) / DAY_MS / steps) - 1,
+    );
+
+    let count = 0;
+    let firstDay: string | null = null;
+    let lastDay: string | null = null;
+    for (let step = from; step < from + 62; step++) {
+      const at = occurrenceAt(start, rule.frequency, step);
+      const time = at.getTime();
+      if (time > last) break;
+      if (time < range.start.getTime()) continue;
+      count += 1;
+      const day = dayKey(at, timeZone);
+      firstDay ??= day;
+      lastDay = day;
+    }
+
+    if (count === 0 || firstDay === null || lastDay === null) continue;
+    lines.push({
+      id: rule.id,
+      description: rule.description,
+      amountCents,
+      type,
+      frequency: rule.frequency,
+      count,
+      firstDay,
+      lastDay,
+    });
+  }
+
+  return lines.sort((a, b) => a.firstDay.localeCompare(b.firstDay) || a.description.localeCompare(b.description));
 }
 
 export function buildDashboardOverview(input: OverviewInput): DashboardOverview {
@@ -456,6 +572,9 @@ export function buildDashboardOverview(input: OverviewInput): DashboardOverview 
       return goal;
     });
 
+  // The rules that repeat inside this month; the card that shows them is hidden when this is empty.
+  const recurring = recurringLines(input.recurringRules ?? [], range, timeZone);
+
   const streakRows = input.streakTransactions ?? input.transactions;
   const streak = loggingStreak(
     streakRows
@@ -495,6 +614,7 @@ export function buildDashboardOverview(input: OverviewInput): DashboardOverview 
     }),
     attention,
     goals,
+    recurring,
     streak: { current: streak.current, loggedToday: streak.loggedToday },
   };
 }

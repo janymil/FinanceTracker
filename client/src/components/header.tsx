@@ -25,7 +25,8 @@ import {
   Sun,
   HelpCircle,
   Gift,
-  BookOpen
+  BookOpen,
+  Map as MapIcon
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -235,6 +236,12 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 <Link href="/help">
                   <HelpCircle className="h-4 w-4 mr-2" />
 {t("Help & Documentation")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/${currentLang}/roadmap`}>
+                  <MapIcon className="h-4 w-4 mr-2" />
+                  {t("roadmap.menu")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

@@ -1,0 +1,12 @@
+[Unit]
+Description=Watch /var/www for a new app folder and install the devkit into it
+Documentation=file:/opt/devkit/README.md
+
+[Path]
+# Any change to a direct child of /var/www bumps the directory's own mtime — a new app
+# folder, a rename, a clone landing. systemd re-arms this after each run.
+PathModified=/var/www
+Unit=devkit-bootstrap.service
+
+[Install]
+WantedBy=paths.target

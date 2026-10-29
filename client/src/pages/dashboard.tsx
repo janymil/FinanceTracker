@@ -19,6 +19,7 @@ import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { GoalsCard } from "@/components/dashboard/GoalsCard";
 import { SixMonthTrend } from "@/components/dashboard/SixMonthTrend";
+import { RecurringCard } from "@/components/dashboard/RecurringCard";
 import { AdviserTeaser, FreePlanCard } from "@/components/dashboard/PlanCards";
 
 /*
@@ -30,8 +31,9 @@ import { AdviserTeaser, FreePlanCard } from "@/components/dashboard/PlanCards";
  * page, instead of a second copy of the same form here.
  *
  * On a phone the cards stack in order of urgency (the month, what needs attention, the score, the
- * adviser, then the detail); on a wide screen they pair up. The `order-*` classes do that without
- * rendering anything twice.
+ * adviser, what repeats this month, then the detail); on a wide screen they pair up. The `order-*`
+ * classes do that without rendering anything twice. The card of repeating movements shares the
+ * adviser's line, and only exists when the month has something that repeats.
  */
 export default function Dashboard() {
   const { isReady, user } = useClerkUserReady();
@@ -101,6 +103,9 @@ export default function Dashboard() {
   const plan = overview?.plan ?? 'free';
   const paid = plan !== 'free';
   const isCurrent = overview?.month.status === 'current';
+  // Only a month that really has repeating movements gets the card; otherwise the adviser keeps
+  // the whole row for itself.
+  const recurring = overview?.recurring ?? [];
   const { startDate, endDate } = getMonthDateRange(monthKey ?? '2000-01');
 
   const progress = !overview
@@ -236,14 +241,15 @@ export default function Dashboard() {
           )}
           <SpendingByCategory
             overview={overview}
-            className={`order-5 lg:order-4 ${isCurrent ? 'lg:col-span-7' : 'lg:col-span-12'}`}
+            className={`order-6 lg:order-4 ${isCurrent ? 'lg:col-span-7' : 'lg:col-span-12'}`}
           />
 
-          <div className="order-4 lg:order-5 lg:col-span-12">
+          <div className={`order-4 lg:order-5 ${recurring.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
             {plan === 'premium' ? (
               /*
-               * The adviser gets its own line, full width: it carries the longest text on the
-               * page (summary, findings, actions), and in a third of a row all of it was cut.
+               * The adviser carries the longest text on the page (summary, findings, actions), so
+               * it keeps the wider of the two columns; in a third of a row all of it was cut.
+               * The card of repeating movements, when there is one, takes the other.
                */
               <RequirePlan
                 plan="premium"
@@ -261,13 +267,19 @@ export default function Dashboard() {
             )}
           </div>
 
+          {recurring.length > 0 && (
+            <div className="order-5 lg:order-5 lg:col-span-5">
+              <RecurringCard rules={recurring} />
+            </div>
+          )}
+
           <RecentTransactions
             transactions={transactions as any}
-            className={`order-6 ${paid ? 'lg:col-span-7' : 'lg:col-span-12'}`}
+            className={`order-7 ${paid ? 'lg:col-span-7' : 'lg:col-span-12'}`}
           />
-          {paid && <GoalsCard overview={overview} className="order-7 lg:col-span-5" />}
+          {paid && <GoalsCard overview={overview} className="order-8 lg:col-span-5" />}
           {paid && (
-            <div className="order-8 lg:col-span-12">
+            <div className="order-9 lg:col-span-12">
               <SixMonthTrend overview={overview} />
             </div>
           )}

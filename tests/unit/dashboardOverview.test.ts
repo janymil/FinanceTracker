@@ -190,6 +190,59 @@ describe('buildDashboardOverview — goals, trend, score, streak', () => {
   });
 });
 
+describe('buildDashboardOverview — the movements that repeat in the month', () => {
+  it('lists only the rules that land in the month, with the days they land on', () => {
+    const result = buildDashboardOverview(input({
+      recurringRules: [
+        { id: 1, description: 'Rent', amount: '1200.00', type: 'expense', frequency: 'monthly', startDate: '2026-01-05T15:00:00Z' },
+        { id: 2, description: 'Gym', amount: '50.00', type: 'expense', frequency: 'weekly', startDate: '2026-10-06T15:00:00Z', endDate: '2026-10-20T15:00:00Z' },
+        { id: 3, description: 'Salary', amount: '3500.00', type: 'income', frequency: 'monthly', startDate: '2026-01-30T15:00:00Z' },
+        { id: 4, description: 'Insurance', amount: '300.00', type: 'expense', frequency: 'yearly', startDate: '2026-03-10T15:00:00Z' },
+        { id: 5, description: 'Old rule', amount: '20.00', type: 'expense', frequency: 'monthly', startDate: '2026-01-02T15:00:00Z', endDate: '2026-09-30T15:00:00Z' },
+      ],
+    }));
+
+    expect(result.recurring).toEqual([
+      { id: 1, description: 'Rent', amountCents: 120_000, type: 'expense', frequency: 'monthly', count: 1, firstDay: '2026-10-05', lastDay: '2026-10-05' },
+      { id: 2, description: 'Gym', amountCents: 5_000, type: 'expense', frequency: 'weekly', count: 3, firstDay: '2026-10-06', lastDay: '2026-10-20' },
+      { id: 3, description: 'Salary', amountCents: 350_000, type: 'income', frequency: 'monthly', count: 1, firstDay: '2026-10-30', lastDay: '2026-10-30' },
+    ]);
+  });
+
+  it('finds every day of a daily rule that started years before the month', () => {
+    const result = buildDashboardOverview(input({
+      recurringRules: [
+        { id: 7, description: 'Coffee', amount: '4.00', type: 'expense', frequency: 'daily', startDate: '2020-01-01T15:00:00Z' },
+      ],
+    }));
+
+    expect(result.recurring).toHaveLength(1);
+    expect(result.recurring[0]).toMatchObject({ count: 31, firstDay: '2026-10-01', lastDay: '2026-10-31' });
+  });
+
+  it('keeps a monthly rule on its own day of the month, without drifting to the 28th', () => {
+    const result = buildDashboardOverview(input({
+      recurringRules: [
+        { id: 8, description: 'Studio', amount: '900.00', type: 'expense', frequency: 'monthly', startDate: '2026-01-31T15:00:00Z' },
+      ],
+    }));
+
+    expect(result.recurring[0]).toMatchObject({ count: 1, firstDay: '2026-10-31', lastDay: '2026-10-31' });
+  });
+
+  it('is empty when nothing repeats in the month, which is what hides the card', () => {
+    const result = buildDashboardOverview(input({
+      recurringRules: [
+        { id: 9, description: 'Insurance', amount: '300.00', type: 'expense', frequency: 'yearly', startDate: '2026-03-10T15:00:00Z' },
+        { id: 10, description: 'Ended', amount: '10.00', type: 'expense', frequency: 'weekly', startDate: '2026-01-06T15:00:00Z', endDate: '2026-09-30T15:00:00Z' },
+        { id: 11, description: 'Not a rule', amount: '10.00', type: 'expense', frequency: 'sometimes', startDate: '2026-10-06T15:00:00Z' },
+      ],
+    }));
+
+    expect(result.recurring).toEqual([]);
+  });
+});
+
 describe('month parameter and window', () => {
   it('accepts yyyy-MM and nothing else', () => {
     expect(parseMonthParam('2026-10')).toEqual({ year: 2026, month: 10 });

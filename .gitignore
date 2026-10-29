@@ -52,6 +52,8 @@ client/public/videos/*.webp
 # Playwright
 test-results/
 coverage/
+# devkit writes this marker on every sweep; the folder itself is committed on purpose
+.devkit/.installed
 playwright-report/
 
 # Playwright auth state (contains a live session cookie, never commit)

@@ -12,6 +12,12 @@ import {
   type StripeBillingCurrency,
   type StripePlanKey,
 } from "../../shared/stripePriceEnv";
+import {
+  PLAN_KEY_ORDER as PLAN_KEY_ORDER_SHARED,
+  changeDirection,
+  priceProblems,
+  type PlanChangeDirection,
+} from "../../shared/pricing";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -148,6 +154,18 @@ const VALID_PLANS = new Set(['free', 'standard', 'standard-yearly', 'premium', '
  * interval (month vs year) is the one the page promised.
  */
 
+/** Answers 503 when a configured price cannot be the plan; false when the error is something else. */
+export function answeredPriceMismatch(error: unknown, res: Response): boolean {
+  if (!(error instanceof PricePlanMismatchError)) return false;
+  res.status(503).json({
+    error:
+      'This plan cannot be sold right now: the price configured for it does not match the price ' +
+      'shown. Nothing was charged. Please contact support.',
+    code: 'price_misconfigured',
+  });
+  return true;
+}
+
 const resolvedPriceCache = new Map<string, string>();
 
 /** Accepts `price_…` as-is; resolves `prod_…` to the product's price id. */
@@ -194,29 +212,56 @@ async function resolvePriceId(reference: string | undefined): Promise<string | u
   }
 }
 
-const intervalChecked = new Set<string>();
+/** A configured price that cannot be the plan it is sold as. Never retried, never charged. */
+export class PricePlanMismatchError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PricePlanMismatchError';
+  }
+}
+
+const priceChecks = new Map<string, { amount: number | null; interval: string | null; currency: string }>();
 
 /**
- * Warns when a plan's price has the wrong recurring interval. The account
- * currently has both "Anual" products priced with `interval: month`, which
- * would bill the yearly amount every month. Never blocks checkout.
+ * Refuses to sell a plan on a price that is not that plan.
+ *
+ * The live account had "Standard Anual: S/ 99.90" pointing at a *monthly* S/ 99.90 price: a
+ * customer who chose yearly would have been billed S/ 99.90 every month, forever. The interval
+ * check existed but only warned, so the charge went through — a log line nobody reads is not a
+ * guard. This compares the resolved price against the one price list (`PLAN_PRICES`) on both
+ * facts that decide the bill — amount and interval — and **stops** the checkout when they
+ * disagree. Refusing to take money is recoverable; taking the wrong amount every month is not.
  */
-async function warnIfIntervalMismatch(plan: PlanKey, priceId: string, currency: BillingCurrency): Promise<void> {
-  if (!stripe || intervalChecked.has(priceId)) return;
-  intervalChecked.add(priceId);
+async function assertPriceMatchesPlan(
+  plan: PlanKey,
+  priceId: string,
+  currency: BillingCurrency,
+): Promise<void> {
+  if (!stripe) return;
 
-  try {
-    const price = await stripe.prices.retrieve(priceId);
-    const actual = price.recurring?.interval;
-    const expected = plan.endsWith('-yearly') ? 'year' : 'month';
-    if (actual && actual !== expected) {
-      log.warn(
-        `[Billing] ${plan} uses price ${priceId} with interval "${actual}" but "${expected}" is expected. ` +
-        `Fix the price interval in Stripe or point ${PRICE_ENV_KEYS[currency][plan][0]} at a price_… id with the right interval.`
-      );
-    }
-  } catch {
-    // The interval check is advisory only.
+  let price = priceChecks.get(priceId);
+  if (!price) {
+    const fetched = await stripe.prices.retrieve(priceId);
+    price = {
+      amount: fetched.unit_amount ?? null,
+      interval: fetched.recurring?.interval ?? null,
+      currency: String(fetched.currency ?? ''),
+    };
+    priceChecks.set(priceId, price);
+  }
+
+  const problems = priceProblems(
+    { amountCents: price.amount, interval: price.interval, currency: price.currency },
+    plan,
+    currency,
+  );
+
+  if (problems.length > 0) {
+    log.error(
+      `[Billing] Refusing to sell ${plan} on ${priceId} (${currency}): ${problems.join('; ')}. ` +
+        `Point ${PRICE_ENV_KEYS[currency][plan][0]} at a price_… id that matches shared/pricing.ts.`,
+    );
+    throw new PricePlanMismatchError(problems.join('; '));
   }
 }
 
@@ -224,14 +269,12 @@ async function getPlanPriceId(plan: string, currency: BillingCurrency): Promise<
   if (!(plan in PRICE_ENV_KEYS[currency])) return undefined;
   const key = plan as PlanKey;
   const priceId = await resolvePriceId(readConfiguredReference(key, currency));
-  if (priceId) await warnIfIntervalMismatch(key, priceId, currency);
+  if (priceId) await assertPriceMatchesPlan(key, priceId, currency);
   return priceId;
 }
 
-/** Plan order, cheapest first. Turns "is this an upgrade?" into a comparison of what the account
- * is recorded as paying for — no price lookup, and no dependency on which currency list the
- * existing subscription was sold from. */
-const PLAN_KEY_ORDER: PlanKey[] = ['standard', 'standard-yearly', 'premium', 'premium-yearly'];
+/** Plan order, cheapest first — one copy, in `shared/pricing.ts`, shared with MercadoPago. */
+const PLAN_KEY_ORDER = PLAN_KEY_ORDER_SHARED;
 
 function planKeyFor(user: User): PlanKey {
   const interval = user.billingInterval === 'yearly' ? '-yearly' : '';
@@ -245,15 +288,8 @@ function planKeyFor(user: User): PlanKey {
  * backwards turns a downgrade into an immediate second charge. No Stripe call is needed to
  * answer it, so it is tested on its own.
  */
-export function planChangeDirection(user: User, newPlan: string): 'upgrade' | 'downgrade' | 'same' | 'unknown' {
-  if (!PLAN_KEY_ORDER.includes(newPlan as PlanKey)) return 'unknown';
-  const currentWeight = PLAN_KEY_ORDER.indexOf(planKeyFor(user)) + 1;
-  // `indexOf` is -1 for a plan the list does not know (a manually granted plan, 'free'), which
-  // makes any recognised plan an upgrade — the safe direction, since it grants immediately
-  // rather than ending something already paid for.
-  const newWeight = PLAN_KEY_ORDER.indexOf(newPlan as PlanKey) + 1;
-  if (newWeight === currentWeight) return 'same';
-  return newWeight > currentWeight ? 'upgrade' : 'downgrade';
+export function planChangeDirection(user: User, newPlan: string): PlanChangeDirection {
+  return changeDirection({ plan: user.plan, billingInterval: user.billingInterval }, newPlan);
 }
 
 /**
@@ -349,6 +385,7 @@ async function handleSubscriptionChange(user: User, newPlan: string, currency: B
     });
 
   } catch (error) {
+    if (answeredPriceMismatch(error, res)) return;
     log.error('Error updating subscription:', error);
     return res.status(500).json({ error: "Failed to update subscription" });
   }
@@ -373,6 +410,32 @@ export function registerStripeRoutes(app: Express) {
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+
+      /*
+       * ONE SUBSCRIPTION PER CUSTOMER.
+       *
+       * Checkout used to be reached by an existing subscriber whenever the customer portal could
+       * not be opened (and it could not: the account had no portal configuration, so the
+       * `subscription_update` flow was rejected and the code carried on). Checkout in
+       * `mode: subscription` creates a *new* subscription on a customer who already has one, so
+       * one click on "subscribe" became two live charges — the same class of bug as choosing
+       * yearly and being billed monthly, and just as expensive to explain.
+       *
+       * A plan change is not a purchase: it goes through /api/change-subscription, which edits
+       * the subscription that already exists.
+       */
+      const payingSomewhere =
+        user.plan !== 'free' && (user.stripeSubscriptionId || user.mpPreapprovalId);
+      if (payingSomewhere) {
+        return res.status(409).json({
+          error: 'You already have an active subscription. Change your plan instead of subscribing again.',
+          code: 'already_subscribed',
+          plan: user.plan,
+          interval: user.billingInterval ?? 'monthly',
+          gateway: user.stripeSubscriptionId ? 'stripe' : 'mercadopago',
+          changeEndpoint: user.stripeSubscriptionId ? '/api/change-subscription' : '/api/mercadopago/subscribe',
+        });
       }
 
       // Stripe charges dollars, so it is not offered in Peru: soles are the market price
@@ -516,6 +579,7 @@ export function registerStripeRoutes(app: Express) {
       return res.json({ url: session.url });
 
     } catch (error) {
+      if (answeredPriceMismatch(error, res)) return;
       log.error('Error creating checkout session:', error);
       return res.status(500).json({ error: "Failed to create checkout session" });
     }

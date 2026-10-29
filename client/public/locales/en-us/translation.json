@@ -3253,6 +3253,33 @@
     }
   },
   "subscribe": {
+    "change_plan": "Change to this plan",
+    "change_wallet": "Your plan was paid for one period. Pay another period the same way, below.",
+
+    "change_scheduled": "Your plan change has been applied.",
+    "upgrade_applied": "Upgraded. The difference is charged now.",
+    "downgrade_scheduled": "Scheduled. The new plan starts when the paid period ends.",
+    "peru": {
+      "title": "Pay with Yape, Plin or a bank transfer",
+      "subtitle": "Peru only. This payment covers one period and does not renew automatically: we remind you before it ends.",
+      "plan": "Plan",
+      "period": "Period",
+      "method": "How you paid",
+      "transfer": "Bank transfer",
+      "operation": "Operation number",
+      "operation_hint": "The code your app gave you",
+      "tax_title": "Your boleta or factura",
+      "tax_kind": "Document",
+      "boleta": "Boleta (DNI)",
+      "factura": "Factura (RUC)",
+      "business_name": "Razón social",
+      "fiscal_address": "Fiscal address",
+      "tax_note": "Your document is issued in SUNAT and sent to your e-mail. Keep your data exact: a factura with the wrong RUC cannot be corrected.",
+      "tax_error": "Check the document data.",
+      "submit": "I paid — confirm my payment",
+      "sent": "We received your payment details. We activate the plan once it is confirmed, usually within one working day."
+    },
+
     "title": "Choose Your Plan",
     "subtitle": "Unlock powerful financial management features with your subscription",
     "back_to_home": "Back to Home",
@@ -3313,6 +3340,8 @@
   "profile": {
     "mp_cancel": "Cancel subscription",
     "mp_cancel_note": "Cancelling stops future charges in MercadoPago.",
+    "wallet_active_note": "Your plan is active until {{date}}. It was bought for one period and does not renew by itself.",
+
     "mp_cancel_confirm": "Cancel your MercadoPago subscription? Your plan returns to Free.",
     "mp_cancelled": "Subscription cancelled",
     "Profile Settings": "Profile Settings",
@@ -4996,6 +5025,162 @@
     "reminders": {
       "empty_title": "No upcoming reminders",
       "empty_body": "Payments dated in the future and reminders you add appear here."
+    }
+  },
+  "roadmap": {
+    "menu": "Roadmap",
+    "title": "Roadmap",
+    "subtitle": "What Kaptia does for you today, and what we are building next.",
+    "filter": "Show",
+    "step": "Step {{number}}",
+    "stage": {
+      "all": "Everything",
+      "now": "Available now",
+      "next": "Next up",
+      "later": "Later",
+      "horizon": "On the horizon"
+    },
+    "hero": {
+      "eyebrow": "Product roadmap",
+      "title": "Built step by step, in the order that helps you most",
+      "text": "No dates here on purpose: each step ships when it works properly, in all three languages. The order matters — the first steps make every number in the app more accurate, and everything after builds on them.",
+      "available": "Available today",
+      "coming": "On the way"
+    },
+    "now": {
+      "title": "What you already have",
+      "text": "Everything below works today, on the web and on your phone."
+    },
+    "available": {
+      "capture": {
+        "title": "Add money your way",
+        "desc": "Type it, say it out loud, photograph a receipt, import a statement, or upload from your phone with a QR code."
+      },
+      "budgets_goals": {
+        "title": "Budgets and goals",
+        "desc": "Limits by category and period, and savings goals with the pace you need to reach them."
+      },
+      "shared_goals": {
+        "title": "Shared goals",
+        "desc": "Save together with friends or family, with contributions and a chat for each goal."
+      },
+      "health": {
+        "title": "Financial health score",
+        "desc": "One score for your month, with clear observations and concrete actions on Premium."
+      },
+      "reports": {
+        "title": "Reports and trends",
+        "desc": "Reports for any period, trends, a calendar of your money and spending predictions."
+      },
+      "recurring": {
+        "title": "Recurring payments and reminders",
+        "desc": "Repeating transactions are created for you, and bills come with a reminder before they are due."
+      },
+      "achievements": {
+        "title": "Streaks and achievements",
+        "desc": "Small rewards for keeping the habit of recording your money."
+      },
+      "export": {
+        "title": "Export",
+        "desc": "Take your data with you as CSV or PDF, whenever you want."
+      },
+      "privacy": {
+        "title": "Private by design",
+        "desc": "Sensitive fields are encrypted, and personal details are removed before any AI sees your data."
+      }
+    },
+    "steps": {
+      "s1": "See where your money is — and moving it between your own accounts no longer counts as spending",
+      "s2": "Your month can start on your payday",
+      "s3": "Every subscription in one place: what it costs, when it charges, when it ends",
+      "s4": "What your debt really costs, and one order to clear it",
+      "s5": "Kaptia warns you the day something looks wrong",
+      "s6": "Cash in two taps, and a pasted payment message becomes a transaction",
+      "s7": "Save in another currency, and get help when a price goes up",
+      "s8": "Ask your own data a question, and see how your own prices move",
+      "s9": "Two people, one book; tax-deductible expenses collected; a weekly summary"
+    },
+    "features": {
+      "accounts": {
+        "title": "Where my money is",
+        "desc": "Cash in your wallet, your card account, your payment app balance, your savings pot — each with its own balance, and one total.",
+        "example": "“How much do I actually have, and where?”"
+      },
+      "transfers": {
+        "title": "Transfers recognised",
+        "desc": "Kaptia spots money you moved between your own places and offers to join the pair, so your totals stop being inflated.",
+        "example": "“These two look like a transfer — join them?”"
+      },
+      "payday": {
+        "title": "A month that starts on payday",
+        "desc": "Choose the day your month starts, and the dashboard, budgets and reports follow it. Paid irregularly? Kaptia shows a safety buffer instead.",
+        "example": "“My month starts on the 15th.”"
+      },
+      "subscriptions": {
+        "title": "Subscriptions",
+        "desc": "Every subscription on one screen: next payment, monthly and yearly total, price history, free trials that are about to charge, and what goes out in the next 14 days.",
+        "example": "“Your subscriptions cost 1,284 a year.”"
+      },
+      "debts": {
+        "title": "Debts",
+        "desc": "A place for what you owe — cards, money you owe family. How much is left, what it really costs each month, and the best order to pay it off.",
+        "example": "“Pay the card first: you save 480 and are free 17 months sooner.”"
+      },
+      "watchdog": {
+        "title": "The watchdog",
+        "desc": "Short, specific alerts the day something looks wrong: an unusual bill, a double payment, a trial about to charge.",
+        "example": "“Electricity is 40% above your usual.”"
+      },
+      "fast_capture": {
+        "title": "Fast capture",
+        "desc": "Cash in two taps, a pasted or shared payment notice turns into a transaction, and it all works offline.",
+        "example": "“5, taxi” → done."
+      },
+      "currency": {
+        "title": "Several currencies",
+        "desc": "A savings pot in dollars next to your local money. Every entry keeps the rate of its day, so you see what you gained or lost.",
+        "example": "“You put in 1,000 dollars; today that is 180 more than the day you put it in.”"
+      },
+      "negotiation": {
+        "title": "Negotiation helper",
+        "desc": "When a bill or subscription goes up: a ready message to send, and a place to record what you saved.",
+        "example": "“This call saved you 240 a year.”"
+      },
+      "ask": {
+        "title": "Ask your own data",
+        "desc": "A question box on your reports. The answer comes with the number, one sentence and the rows behind it.",
+        "example": "“How much did I spend on restaurants in March?”"
+      },
+      "basket": {
+        "title": "Your own inflation",
+        "desc": "Receipts are read line by line, so Kaptia can show how the prices of the things you actually buy change.",
+        "example": "“Your basket costs 12% more than in June.”"
+      },
+      "what_if": {
+        "title": "What-if",
+        "desc": "Sliders on your own numbers to see what a change would mean for your goals and debts.",
+        "example": "“Cut restaurants by 30% and the laptop arrives in September.”"
+      },
+      "household": {
+        "title": "Shared household money",
+        "desc": "Two people, one book: shared budgets, who paid what, and one line at the end of the month to settle up.",
+        "example": "“Ana paid 340 more than her share.”"
+      },
+      "tax": {
+        "title": "Tax helper",
+        "desc": "Deductible expenses collected from what you already record, with the yearly limit, the deadline and one file for your accountant. Peru first.",
+        "example": "“The deadline is in 61 days.”"
+      },
+      "weekly": {
+        "title": "Weekly summary and wait-before-you-buy",
+        "desc": "A short Monday message with what matters this week, and a wish list with a cooling-off timer.",
+        "example": "“Still want it on Friday?”"
+      }
+    },
+    "idea": {
+      "title": "Missing something?",
+      "text": "Tell us what would make Kaptia more useful for you. Every message is read.",
+      "cta": "Suggest an idea"
     }
   }
 }
