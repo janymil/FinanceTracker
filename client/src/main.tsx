@@ -1,16 +1,16 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
-import { esES, skSK } from '@clerk/localizations';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
-import { Router } from 'wouter';
+import { Router, useLocation } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider } from 'react-i18next';
 import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
 import { installErrorGuard } from './lib/errorGuard';
+import { clerkLocalizationFor, pickClerkLanguage } from './i18n/clerkLocalization';
 import i18n from './i18n/i18n';
 // Clear any stale authentication data on app startup
 clearStaleSession();
@@ -94,60 +94,48 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = processClerkRedirect('/dashboard');
 
-// Custom Slovak localization with missing terms
-const customSlovak = {
-  ...skSK,
-  signUp: {
-    ...(skSK.signUp || {}),
-    legalConsent: {
-      ...(skSK.signUp?.legalConsent || {}),
-      checkbox: {
-        label__onlyPrivacyPolicy: 'Súhlasím so {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}',
-        label__onlyTermsOfService: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }}',
-        label__termsOfServiceAndPrivacyPolicy: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }} a {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}'
-      },
-      continue: {
-        subtitle: 'Pokračovaním súhlasíte s našimi zásadami.',
-        title: 'Zákonné súhlasy'
-      }
-    }
-  }
-};
+/**
+ * Clerk draws its own sign-in, sign-up and verification forms, so their language comes from the
+ * `localization` prop and not from this app's translations.
+ *
+ * It follows the language in the address and re-renders when that changes, which Clerk applies to
+ * the mounted form. Reading it here — instead of once at module load from the browser language —
+ * is what keeps `/es/auth` in Spanish for a visitor whose browser is English.
+ */
+function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
+  const [location] = useLocation();
+  const language = pickClerkLanguage({
+    pathname: location,
+    saved: localStorage.getItem('preferredLanguage'),
+    browser: navigator.language,
+  });
 
-// Dynamic Clerk localization based on saved preference or browser language
-const savedLanguage = localStorage.getItem('preferredLanguage') || '';
-const browserLanguage = navigator.language || 'en-US';
-
-// Determine localization based on saved preference or browser language
-let localization;
-if (savedLanguage.startsWith('es') || browserLanguage.startsWith('es')) {
-  localization = esES;
-} else if (savedLanguage.startsWith('sk') || browserLanguage.startsWith('sk')) {
-  localization = customSlovak;
-} else {
-  localization = undefined; // English default
+  return (
+    <ClerkProvider
+      publishableKey={clerkPubKey}
+      signInFallbackRedirectUrl={dashboardRedirectUrl}
+      signUpFallbackRedirectUrl={dashboardRedirectUrl}
+      afterSignInUrl={dashboardRedirectUrl}
+      afterSignUpUrl={dashboardRedirectUrl}
+      localization={clerkLocalizationFor(language)}
+    >
+      {children}
+    </ClerkProvider>
+  );
 }
-
-console.log('Clerk localization set based on:', { savedLanguage, browserLanguage, localization: localization?.signIn?.start?.title || 'English' });
 
 const root = createRoot(container);
 root.render(
   <I18nextProvider i18n={i18n}>
     <HelmetProvider>
-      <ClerkProvider 
-        publishableKey={clerkPubKey}
-        signInFallbackRedirectUrl={dashboardRedirectUrl}
-        signUpFallbackRedirectUrl={dashboardRedirectUrl}
-        afterSignInUrl={dashboardRedirectUrl}
-        afterSignUpUrl={dashboardRedirectUrl}
-        localization={localization}
-      >
-        <QueryClientProvider client={queryClient}>
-          <Router>
+      {/* Router wraps the Clerk provider so the provider can read the language from the address. */}
+      <Router>
+        <LocalizedClerkProvider>
+          <QueryClientProvider client={queryClient}>
             <App />
-          </Router>
-        </QueryClientProvider>
-      </ClerkProvider>
+          </QueryClientProvider>
+        </LocalizedClerkProvider>
+      </Router>
     </HelmetProvider>
   </I18nextProvider>
 );

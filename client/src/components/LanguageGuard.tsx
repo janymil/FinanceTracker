@@ -116,14 +116,14 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     
     const i18nLang = langMap[lang] || 'en-us';
 
-    // Update Clerk localization based on current language
+    // Remember the language the visitor is reading, for the next visit
     const updateClerkLocalization = (langCode: string) => {
       try {
         console.log('LanguageGuard: Updating Clerk localization for', langCode);
         
-        // Note: Clerk localization is primarily set in main.tsx at initialization
-        // Dynamic localization updates during runtime are not supported in the current Clerk version
-        // The localization is set based on browser language at app startup
+        // Clerk's own forms follow the language in the address, decided in main.tsx — there is
+        // nothing to push from here. Remembering the choice only matters for an address that
+        // carries no language prefix, which is the case this guard is about to fix.
         
         // Store the language preference for next app load
         localStorage.setItem('preferredLanguage', langCode);
