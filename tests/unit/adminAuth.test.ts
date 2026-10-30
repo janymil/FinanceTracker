@@ -19,12 +19,15 @@ vi.mock('@clerk/express', () => ({
 
 let server: Server;
 let baseUrl: string;
+let isLegacyPasswordLoginEnabled: () => boolean;
 
 // Read once, when `server/adminAuth` is imported below.
 process.env.ADMIN_PASSWORD = 'unit-test-shared-password';
 
 beforeAll(async () => {
-  const { adminAuth, adminLogin, isAdminRequest } = await import('../../server/adminAuth');
+  const { adminAuth, adminLogin, isAdminRequest, isLegacyPasswordLoginEnabled: passwordDoor } =
+    await import('../../server/adminAuth');
+  isLegacyPasswordLoginEnabled = passwordDoor;
   const app = express();
   // Stand-ins for express-session and clerkMiddleware, which the test app does not mount.
   app.use((req: any, _res, next) => {
@@ -37,7 +40,10 @@ beforeAll(async () => {
   app.get('/admin', adminAuth, (_req, res) => res.json({ ok: true }));
   // The shape `/api/admin-analytics/auth-status` answers with.
   app.get('/admin/status', async (req: any, res) =>
-    res.json({ authenticated: await isAdminRequest(req) }),
+    res.json({
+      authenticated: await isAdminRequest(req),
+      passwordLoginEnabled: isLegacyPasswordLoginEnabled(),
+    }),
   );
   server = app.listen(0);
   baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
@@ -215,22 +221,31 @@ describe('isAdminRequest — the answer the login screen shows', () => {
   it('reports a Clerk admin as authenticated, so the password form never renders', async () => {
     getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
 
-    expect(await status({ 'x-user': 'user_status_admin' })).toEqual({ authenticated: true });
+    expect(await status({ 'x-user': 'user_status_admin' })).toEqual({
+      authenticated: true,
+      passwordLoginEnabled: true,
+    });
   });
 
   it('reports the legacy password session as authenticated without asking Clerk', async () => {
-    expect(await status({ 'x-legacy-admin': '1' })).toEqual({ authenticated: true });
+    expect(await status({ 'x-legacy-admin': '1' })).toEqual({
+      authenticated: true,
+      passwordLoginEnabled: true,
+    });
     expect(getUser).not.toHaveBeenCalled();
   });
 
   it('reports a signed-in user without the admin role as not authenticated', async () => {
     getUser.mockResolvedValueOnce({ publicMetadata: { role: 'user' } });
 
-    expect(await status({ 'x-user': 'user_status_plain' })).toEqual({ authenticated: false });
+    expect(await status({ 'x-user': 'user_status_plain' })).toEqual({
+      authenticated: false,
+      passwordLoginEnabled: true,
+    });
   });
 
   it('reports an anonymous visitor as not authenticated without asking Clerk', async () => {
-    expect(await status()).toEqual({ authenticated: false });
+    expect(await status()).toEqual({ authenticated: false, passwordLoginEnabled: true });
     expect(getUser).not.toHaveBeenCalled();
   });
 
@@ -239,9 +254,55 @@ describe('isAdminRequest — the answer the login screen shows', () => {
     getUser.mockResolvedValueOnce({ publicMetadata: { role: 'admin' }, twoFactorEnabled: false });
 
     // Same account, both doors: the status must not promise access the guard will refuse.
-    expect(await status({ 'x-user': 'user_status_no_2fa' })).toEqual({ authenticated: false });
+    expect(await status({ 'x-user': 'user_status_no_2fa' })).toEqual({
+      authenticated: false,
+      passwordLoginEnabled: true,
+    });
     expect((await call({ 'x-user': 'user_status_no_2fa' })).status).toBe(401);
 
     delete process.env.ADMIN_REQUIRE_2FA;
+  });
+});
+
+/**
+ * Whether the password door may be offered at all.
+ *
+ * "You are not an administrator" used to be followed, always, by a password box. In production
+ * the shared door is shut (`adminLogin` refuses it), so that box could never open anything: the
+ * screen promised a way in that did not exist. The status the panel reads now carries this
+ * answer, and the form is rendered only when it is true.
+ */
+describe('isLegacyPasswordLoginEnabled — the password door the panel may offer', () => {
+  const original = { nodeEnv: process.env.NODE_ENV, allow: process.env.ALLOW_LEGACY_ADMIN_PASSWORD };
+
+  afterEach(() => {
+    process.env.NODE_ENV = original.nodeEnv;
+    if (original.allow === undefined) delete process.env.ALLOW_LEGACY_ADMIN_PASSWORD;
+    else process.env.ALLOW_LEGACY_ADMIN_PASSWORD = original.allow;
+  });
+
+  it('offers the form outside production, where a fresh test account has no admin role', () => {
+    process.env.NODE_ENV = 'development';
+
+    expect(isLegacyPasswordLoginEnabled()).toBe(true);
+  });
+
+  it('does not offer it in production while the shared door is shut', async () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.ALLOW_LEGACY_ADMIN_PASSWORD;
+
+    expect(isLegacyPasswordLoginEnabled()).toBe(false);
+    // The panel renders from this answer, so it must not say "come in" either.
+    await expect(status()).resolves.toEqual({
+      authenticated: false,
+      passwordLoginEnabled: false,
+    });
+  });
+
+  it('offers it again only when the operator writes the risk down', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.ALLOW_LEGACY_ADMIN_PASSWORD = '1';
+
+    expect(isLegacyPasswordLoginEnabled()).toBe(true);
   });
 });

@@ -100,3 +100,32 @@ describe('other settings', () => {
     expect(storage.updateUser).not.toHaveBeenCalled();
   });
 });
+
+describe('AI consent', () => {
+  // The AI question is asked once, at signup. It is only "once" if the answer is recorded, and
+  // only an answer if the server says when it was given — a body could carry either a setting
+  // with no date (asked again tomorrow) or a date the client invented (no evidence at all).
+  it('records the choice and when it was made', async () => {
+    expect((await put({ aiEnabled: true })).status).toBe(200);
+    const [, data] = storage.updateUser.mock.calls[0];
+    expect(data).toMatchObject({ aiEnabled: true });
+    expect(data.aiConsentDecidedAt).toBeInstanceOf(Date);
+  });
+
+  it('records a refusal too, so the question is not asked again on the next visit', async () => {
+    expect((await put({ aiEnabled: false })).status).toBe(200);
+    const [, data] = storage.updateUser.mock.calls[0];
+    expect(data).toMatchObject({ aiEnabled: false });
+    expect(data.aiConsentDecidedAt).toBeInstanceOf(Date);
+  });
+
+  it('does not take the timestamp from the request body', async () => {
+    expect((await put({ aiConsentDecidedAt: '1999-01-01T00:00:00.000Z' })).status).toBe(400);
+    expect(storage.updateUser).not.toHaveBeenCalled();
+
+    await put({ aiEnabled: true, aiConsentDecidedAt: '1999-01-01T00:00:00.000Z' });
+    const [, data] = storage.updateUser.mock.calls[0];
+    expect((data.aiConsentDecidedAt as Date).getUTCFullYear()).toBeGreaterThan(2020);
+  });
+});
+

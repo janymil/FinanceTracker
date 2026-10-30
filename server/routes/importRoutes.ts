@@ -30,6 +30,14 @@ import { detectDuplicateTransactions } from "../../shared/duplicateDetection";
 import { rateLimit } from "../middleware/rateLimit";
 import { notifyDataChange } from "../realtime";
 import { getCurrentLanguageForAPI } from "../../lib/languageUtils";
+import {
+  issueProgressTicket,
+  openProgressStream,
+  publishProgress,
+  redeemProgressTicket,
+} from "../pdfProgressStream";
+import { hasAcceptedStatementConsent, STATEMENT_CONSENT_VERSION } from "@shared/statementConsent";
+import { parseBody, sendValidationError } from "../validation";
 
 // Configure multer for PDF uploads
 const upload = multer({
@@ -105,13 +113,9 @@ const importDataSchema = z.object({
 // CSV parsing lives in `shared/importCsv.ts`, next to the writer that produces the export: the
 // two used to disagree about the file, so exporting and re-importing was impossible.
 import { csvRowsToImportData, parseCsvRows, readCsvAmount } from "@shared/importCsv";
-// Store active SSE connections for progress updates.
-//
-// The key includes the account. The session id is chosen by the client, so two people can
-// legitimately pick the same one; keyed on the id alone, whoever connected second took the
-// stream over and the first person silently stopped receiving updates.
-const progressConnections = new Map<string, any>();
-const progressKey = (userId: string, sessionId: string) => `${userId}:${sessionId}`;
+// PDF progress for an import lives in `server/pdfProgressStream`: the stream has to survive a
+// browser that connects a moment late, and it cannot be authenticated with a header the browser
+// is unable to send.
 
 /**
  * Same calendar day, amount and description — what a repeated confirm sends again.
@@ -123,57 +127,125 @@ function importRowKey(date: Date, amount: number, description: string): string {
   return `${day}|${value.toFixed(2)}|${description.trim().toLowerCase()}`;
 }
 
+const progressTicketSchema = z.object({
+  sessionId: z.string().min(1).max(128),
+});
+
 export function registerImportRoutes(app: Express) {
   
-  // SSE endpoint for PDF processing progress
-  app.get('/api/import/pdf-progress/:sessionId', isAuthenticated, (req: any, res) => {
-    const { sessionId } = req.params;
+  /**
+   * A ticket for the progress stream.
+   *
+   * `EventSource` sends no headers, so the browser cannot present a Clerk session to the stream.
+   * The page exchanges its normal authenticated request for a ticket bound to one account and one
+   * import, and the stream accepts that instead. It expires in minutes and can read nothing.
+   */
+  app.post('/api/import/pdf-progress-ticket', isAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 30, keyPrefix: 'pdf-progress-ticket', perUser: true }), (req: any, res) => {
     const userId = getUserId(req);
-    if (!userId || typeof sessionId !== 'string' || !sessionId || sessionId.length > 128) {
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const parsed = parseBody(req, progressTicketSchema);
+    if (!parsed.ok) {
+      return sendValidationError(res, parsed.issues, 'Invalid progress session');
+    }
+    const sessionId = parsed.data.sessionId;
+
+    return res.json({ ticket: issueProgressTicket(userId, sessionId) });
+  });
+
+  /**
+   * The progress stream itself.
+   *
+   * Two ways in, both real authentication: a valid Clerk session (any non-browser caller), or a
+   * ticket naming this exact account and session (what the page uses). A ticket is not a way
+   * around the check — it is the check, in a form the browser can carry.
+   */
+  app.get('/api/import/pdf-progress/:sessionId', (req: any, res) => {
+    const sessionId = typeof req.params.sessionId === 'string' ? req.params.sessionId : '';
+    if (!sessionId || sessionId.length > 128) {
       return res.status(400).json({ error: 'Invalid progress session' });
     }
-    const key = progressKey(userId, sessionId);
 
-    log.info(`[PDF Progress] New SSE connection for session: ${sessionId}`);
-    
+    const ticket = typeof req.query?.ticket === 'string' ? req.query.ticket : '';
+    const claim = ticket ? redeemProgressTicket(ticket) : null;
+
+    let userId: string | null = null;
+    if (claim && claim.sessionId === sessionId) {
+      userId = claim.userId;
+    } else {
+      try {
+        userId = req.auth?.()?.userId ?? null;
+      } catch {
+        userId = null;
+      }
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // `openProgressStream` writes the headers, replays the steps that already happened (the page
+    // always connects after the upload starts, so without this the first steps are invisible) and
+    // keeps a heartbeat going so a silent stream can be told apart from a dead one.
+    openProgressStream(userId, sessionId, res);
+  });
+
+  /**
+   * Which version of the statement-upload screen this person has accepted.
+   *
+   * The page used to keep this in component state, so it forgot on refresh and nothing anywhere
+   * recorded who agreed to what. Reading it from the account means the screen appears exactly
+   * once per version, and an edit to the wording re-asks instead of silently inheriting an old
+   * "yes" to different sentences.
+   */
+  app.get('/api/import/statement-consent', isAuthenticated, async (req: any, res) => {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
     try {
-      // Set headers for SSE
-      res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+      const user = await storage.getUser(userId);
+      return res.json({
+        version: STATEMENT_CONSENT_VERSION,
+        accepted: hasAcceptedStatementConsent(
+          user ? { version: user.statementConsentVersion, acceptedAt: user.statementConsentAcceptedAt } : null,
+        ),
+        acceptedAt: user?.statementConsentAcceptedAt ?? null,
       });
-
-      // Store connection for this session
-      progressConnections.set(key, res);
-      log.info(`[PDF Progress] Connection stored for session: ${sessionId}`);
-
-      // Send initial connection confirmation
-      const initialMessage = JSON.stringify({ 
-        stage: 'connected', 
-        percentage: 0, 
-        message: 'Connected to progress stream' 
-      });
-      res.write(`data: ${initialMessage}\n\n`);
-      log.info(`[PDF Progress] Initial message sent for session: ${sessionId}`);
-
-      // Clean up on client disconnect
-      req.on('close', () => {
-        log.info(`[PDF Progress] Client disconnected for session: ${sessionId}`);
-        progressConnections.delete(key);
-      });
-      
-      // Handle errors
-      req.on('error', (error: any) => {
-        log.error(`[PDF Progress] Request error for session ${sessionId}:`, error);
-        progressConnections.delete(key);
-      });
-      
     } catch (error) {
-      log.error(`[PDF Progress] Error setting up SSE for session ${sessionId}:`, error);
-      res.status(500).json({ error: 'Failed to establish progress connection' });
+      log.error('Could not read statement consent:', error);
+      return res.status(500).json({ error: 'Could not read the stored answer' });
     }
   });
+
+  /**
+   * Record the acceptance. The version is never taken from the body: a browser that could name
+   * the version could claim to have accepted text it was never shown, and the timestamp is
+   * stamped here for the same reason.
+   */
+  app.post('/api/import/statement-consent', isAuthenticated, async (req: any, res) => {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    try {
+      const user = await storage.recordStatementConsent(userId, STATEMENT_CONSENT_VERSION);
+      return res.json({
+        version: STATEMENT_CONSENT_VERSION,
+        accepted: true,
+        acceptedAt: user.statementConsentAcceptedAt ?? null,
+      });
+    } catch (error) {
+      log.error('Could not record statement consent:', error);
+      return res.status(500).json({ error: 'Could not store the answer' });
+    }
+  });
+
+
   // Get import logs for a user
   app.get('/api/import-logs', isAuthenticated, async (req: any, res) => {
     try {
@@ -531,12 +603,10 @@ export function registerImportRoutes(app: Express) {
 
       log.info(`Found ${formattedExisting.length} existing transactions for duplicate detection`);
 
-      // Progress callback function
+      // Progress callback function. `publishProgress` buffers as well as writing: the browser
+      // connects a moment after this request starts, so the first steps used to be lost.
       const onProgress = (progress: any) => {
-        const connection = progressConnections.get(progressKey(userId, sessionId));
-        if (connection) {
-          connection.write(`data: ${JSON.stringify(progress)}\n\n`);
-        }
+        publishProgress(userId, sessionId, progress);
       };
 
       // Process the PDF using our hybrid approach with duplicate detection and progress tracking

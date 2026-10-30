@@ -134,6 +134,8 @@ export interface IStorage {
   updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User>;
   updateUserPlan(userId: string, plan: 'free' | 'standard' | 'premium', billingInterval?: 'monthly' | 'yearly'): Promise<User>;
   updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
+  /** Records that this person accepted the statement-upload screen, with the text's version. */
+  recordStatementConsent(userId: string, version: string): Promise<User>;
 
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -553,6 +555,32 @@ export class DatabaseStorage implements IStorage {
     // Convert boolean to plan for backward compatibility
     const plan = isPremium ? 'premium' : 'free';
     return await this.updateUserPlan(userId, plan);
+  }
+
+  /**
+   * Store the acceptance of the statement-upload screen.
+   *
+   * A dedicated method rather than `updateUser`: that one whitelists its fields and drops the
+   * rest silently, and a consent write that answers 200 while storing nothing is exactly the
+   * kind of quiet lie this change exists to remove. The timestamp comes from the server's clock,
+   * never from the request.
+   */
+  async recordStatementConsent(userId: string, version: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        statementConsentVersion: version,
+        statementConsentAcceptedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
   }
 
   // Transaction operations
@@ -1887,6 +1915,9 @@ export class DatabaseStorage implements IStorage {
         // The AI switch and the MercadoPago subscription id must be persistable, otherwise
         // the toggle answers 200 and changes nothing.
         aiEnabled: userData.aiEnabled,
+        // When the AI question was answered. Persisting it is what stops the dialog asking a
+        // second time, so it is written on the same path as the setting it belongs to.
+        aiConsentDecidedAt: userData.aiConsentDecidedAt,
         emailNotifications: userData.emailNotifications,
         timezone: userData.timezone,
         language: userData.language,

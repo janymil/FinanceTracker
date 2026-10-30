@@ -31,6 +31,17 @@ if (!ADMIN_PASSWORD) {
   log.warn('ADMIN_PASSWORD environment variable is not set - legacy admin login will be disabled until configured.');
 }
 
+/**
+ * Whether the shared-password form may be offered at all.
+ *
+ * It answers the same question `adminLogin` answers with a refusal, so the panel cannot show a
+ * password box for a door that is shut. That is what happened in production: the door was
+ * closed, the screen still offered it, and the only feedback was a rejection after typing.
+ * Deliberately not exported as "the password" — this is a yes/no about the door, nothing else.
+ */
+export const isLegacyPasswordLoginEnabled = (): boolean =>
+  legacyPasswordAllowed() && Boolean(ADMIN_PASSWORD);
+
 interface AdminRequest extends Request {
   session: any;
 }

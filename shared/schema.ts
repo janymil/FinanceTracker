@@ -53,7 +53,21 @@ export const users = pgTable("users", {
   paymentFailureCount: integer("payment_failure_count").default(0),
   lastPaymentFailureNotified: timestamp("last_payment_failure_notified"),
   // The account switch in Profile. false = no OCR, no AI, no voice transcription.
-  aiEnabled: boolean("ai_enabled").default(true).notNull(),
+  // New accounts start off: consent is asked at signup, not assumed (see `aiConsentDecidedAt`).
+  aiEnabled: boolean("ai_enabled").default(false).notNull(),
+  // When the person answered "may Kaptia send my receipts and voice notes to AI providers?".
+  // null = never asked, and that is the only state in which the dialog appears. Written by the
+  // server with its own clock, never accepted from the request body.
+  aiConsentDecidedAt: timestamp("ai_consent_decided_at"),
+  // Which version of the statement-upload screen this person accepted, and when.
+  //
+  // That screen makes promises about where their PDF goes and who reads it, so the answer is
+  // kept next to the version that was on screen. Without the version, editing the wording later
+  // turns every older "yes" into agreement with sentences nobody was shown — and the older text
+  // was not true, so those answers are not consent to the corrected one either. NULL means the
+  // question has not been put in its current form, and the screen appears.
+  statementConsentVersion: varchar("statement_consent_version", { length: 32 }),
+  statementConsentAcceptedAt: timestamp("statement_consent_accepted_at"),
   // MercadoPago subscription that pays for the current plan in Peru (null for Stripe).
   mpPreapprovalId: varchar("mp_preapproval_id"),
   // When the paid period already invoiced by MercadoPago ends.

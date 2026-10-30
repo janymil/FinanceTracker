@@ -57,6 +57,20 @@
       "when": 1793226600000,
       "tag": "0007_billing_document_reference",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793315625993,
+      "tag": "0008_users_ai_consent",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793395200000,
+      "tag": "0009_users_statement_consent",
+      "breakpoints": true
     }
   ]
 }

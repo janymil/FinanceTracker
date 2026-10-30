@@ -19,6 +19,7 @@ import {
 import { sendEmail } from '../emailService';
 import { rateLimit } from '../middleware/rateLimit';
 import { parseBody, sendValidationError } from '../validation';
+import { profileSchema, profileValues } from '../billingProfileInput';
 
 /**
  * The Peruvian side of paying: which document the customer needs, and the wallet/transfer path.
@@ -140,36 +141,6 @@ function soles(cents: number): string {
 }
 
 
-const profileSchema = z
-  .object({
-    kind: z.enum(['boleta', 'factura']),
-    documentType: z.enum(['dni', 'ruc']),
-    documentNumber: z.string().trim().regex(/^[0-9]{8,11}$/),
-    businessName: z.string().trim().max(160).optional().or(z.literal('')),
-    fiscalAddress: z.string().trim().max(240).optional().or(z.literal('')),
-    email: z.string().trim().max(160).email().optional().or(z.literal('')),
-  })
-  .refine((data) => data.documentType !== 'dni' || /^\d{8}$/.test(data.documentNumber), {
-    path: ['documentNumber'],
-    message: 'A DNI is eight digits',
-  })
-  .refine((data) => data.kind !== 'factura' || data.documentType === 'ruc', {
-    path: ['documentType'],
-    message: 'A factura needs a RUC',
-  })
-  .refine((data) => data.documentType !== 'ruc' || /^\d{11}$/.test(data.documentNumber), {
-    path: ['documentNumber'],
-    message: 'A RUC is eleven digits',
-  })
-  .refine((data) => data.kind !== 'factura' || Boolean(data.businessName), {
-    path: ['businessName'],
-    message: 'A factura needs the razón social',
-  })
-  .refine((data) => data.kind !== 'factura' || Boolean(data.fiscalAddress), {
-    path: ['fiscalAddress'],
-    message: 'A factura needs the fiscal address',
-  });
-
 const manualPaymentSchema = z.object({
   plan: z.enum(['standard', 'premium']),
   interval: z.enum(['monthly', 'yearly']),
@@ -223,12 +194,7 @@ export function registerBillingAccountRoutes(app: Express) {
     const data = parsed.data;
     const values = {
       userId,
-      kind: data.kind,
-      documentType: data.documentType,
-      documentNumber: data.documentNumber,
-      businessName: data.businessName || null,
-      fiscalAddress: data.fiscalAddress || null,
-      email: data.email || null,
+      ...profileValues(data),
       updatedAt: new Date(),
     };
 

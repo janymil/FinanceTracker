@@ -91,7 +91,7 @@ export function PDFSecurityModal({ isOpen, onClose, onConsent }: PDFSecurityModa
                 {t('export.pdf_security.compliance_title')}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {['pci_dss', 'tls_encryption', 'data_minimization', 'aes_standard'].map((standard) => (
+                {['payment_processors', 'tls_encryption', 'data_minimization', 'encryption_at_rest'].map((standard) => (
                   <div key={standard} className="text-center">
                     <div className="bg-blue-100 dark:bg-blue-800 p-2 rounded-lg mb-1">
                       <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400 mx-auto" />
@@ -151,7 +151,7 @@ export function PDFSecurityModal({ isOpen, onClose, onConsent }: PDFSecurityModa
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>{t('export.pdf_security.audit_log')}</span>
+                  <span>{t('export.pdf_security.import_history')}</span>
                 </div>
               </div>
             </div>

@@ -1,7 +1,13 @@
 import { log } from '../logger';
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage.js";
-import { adminAuth, adminLogin, adminLogout, isAdminRequest } from "../adminAuth.js";
+import {
+  adminAuth,
+  adminLogin,
+  adminLogout,
+  isAdminRequest,
+  isLegacyPasswordLoginEnabled,
+} from "../adminAuth.js";
 import { cancelBilling } from "../cancelBilling.js";
 import { rateLimit } from "../middleware/rateLimit";
 import { db } from "../db.js";
@@ -47,15 +53,22 @@ export function registerAdminRoutes(app: Express) {
   // accept both doors — the legacy password session and a Clerk account whose public metadata
   // says role="admin". Reporting only the session left Clerk admins on the password screen
   // while every admin API behind it would already have let them in.
+  //
+  // `passwordLoginEnabled` is the second half of that answer: being told "you are not an admin"
+  // must not be followed by a password box the server will refuse. The client renders the form
+  // only when this is true.
   app.get('/api/admin-analytics/auth-status', async (req: any, res: Response) => {
     if (!req.session) {
       req.session = {};
     }
     try {
-      return res.json({ authenticated: await isAdminRequest(req) });
+      return res.json({
+        authenticated: await isAdminRequest(req),
+        passwordLoginEnabled: isLegacyPasswordLoginEnabled(),
+      });
     } catch (error) {
       log.error('Admin auth-status check failed', { error: (error as Error).message });
-      return res.json({ authenticated: false });
+      return res.json({ authenticated: false, passwordLoginEnabled: isLegacyPasswordLoginEnabled() });
     }
   });
 

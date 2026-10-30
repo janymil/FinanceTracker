@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { sendTestProblem } from '@/lib/errorGuard';
+import { signInUrl } from '@/lib/authRedirect';
 import {
   kindLabel,
   severityLabel,
@@ -306,6 +307,9 @@ function ProblemCard({
 export default function AdminWatch() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  // Whether the server would accept a password at all (see server/adminAuth.ts). False until
+  // it says otherwise, so a shut door is never painted as an open one.
+  const [passwordLoginEnabled, setPasswordLoginEnabled] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'open' | 'resolved' | 'ignored'>('open');
@@ -316,8 +320,11 @@ export default function AdminWatch() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const status = await adminFetch<{ authenticated: boolean }>('/api/admin-analytics/auth-status');
+        const status = await adminFetch<{ authenticated: boolean; passwordLoginEnabled?: boolean }>(
+          '/api/admin-analytics/auth-status',
+        );
         setIsAuthenticated(Boolean(status.authenticated));
+        setPasswordLoginEnabled(Boolean(status.passwordLoginEnabled));
       } catch {
         setIsAuthenticated(false);
       } finally {
@@ -448,11 +455,38 @@ export default function AdminWatch() {
     }
   };
 
+  // The sign-in page keeps the language prefix of the address the visitor is on.
+  const lang = window.location.pathname.match(/^\/([a-z]{2})(\/|$)/)?.[1] || 'en';
+
   if (!authChecked) {
     return (
       <div className="container mx-auto max-w-2xl p-6">
         <Card>
           <CardContent className="py-8 text-sm text-muted-foreground">Checking your access…</CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && !passwordLoginEnabled) {
+    return (
+      <div className="container mx-auto max-w-2xl p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Kaptia Watch</CardTitle>
+            <CardDescription>Administrator account required.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border bg-blue-50 p-3 text-sm dark:bg-blue-900/20">
+              <p className="font-medium">Password sign-in is switched off on this site.</p>
+              <p className="mt-1 text-muted-foreground">
+                Sign in with the Kaptia account that has administrator rights, then open this page again.
+              </p>
+            </div>
+            <Button asChild className="w-full">
+              <a href={signInUrl(lang, window.location.pathname + window.location.search)}>Go to sign-in</a>
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );

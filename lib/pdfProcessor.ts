@@ -10,6 +10,9 @@ import { getCurrentLanguageForAPI } from './languageUtils';
 import { DataEncryption } from '../server/encryption';
 import { runAI } from './aiProcessor';
 import { isAIFailure } from '../shared/aiResults';
+// The redaction rules live in `shared/` so they can be tested against real statement lines
+// without going through a PDF, an AI provider or a database.
+import { countRedactions, sanitizeStatementText, type SensitiveDataHit, type SensitiveKind } from '../shared/textSanitizer';
 import crypto from 'crypto';
 import {
   calculateAmountSimilarity,
@@ -76,12 +79,11 @@ export interface AnonymizationPreviewData {
   processingStats: ProcessingStats;
 }
 
-export interface SensitiveDataDetection {
-  type: 'name' | 'account' | 'ssn' | 'email' | 'phone' | 'address' | 'balance';
-  count: number;
-  examples: string[];
-  redactionPattern: string;
-}
+/**
+ * What the sanitizer found. Re-exported from `shared/textSanitizer` so the kinds listed on the
+ * consent screen and the kinds the code can remove cannot drift apart.
+ */
+export type SensitiveDataDetection = SensitiveDataHit;
 
 export interface ProcessingStats {
   originalLength: number;
@@ -125,106 +127,33 @@ class PDFSecurityManager {
     });
   }
 
+  /**
+   * Redact identifiers before the text is sent anywhere.
+   *
+   * The patterns themselves live in `shared/textSanitizer` so they can be tested against the
+   * lines a bank actually prints; this method only logs what happened and shapes the result the
+   * pipeline already expects. `holderNames` is what makes the removed name the *right* name: the
+   * account holder's, taken from the account, instead of every two capitalised words in a row
+   * (which used to turn `Tesco Stores` into `[NAME_REDACTED]` and leave `JUAN PEREZ` in place).
+   */
   static sanitizeExtractedText(
-    text: string, 
-    securityLog: SecurityEvent[]
+    text: string,
+    securityLog: SecurityEvent[],
+    holderNames: Array<string | null | undefined> = []
   ): { sanitized: string; detectedData: SensitiveDataDetection[] } {
     PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_start', 'success');
-    
-    let sanitized = text;
-    const detectedData: SensitiveDataDetection[] = [];
-    
-    // Track personal names
-    const nameMatches = text.match(/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g) || [];
-    if (nameMatches.length > 0) {
-      detectedData.push({
-        type: 'name',
-        count: nameMatches.length,
-        examples: nameMatches.slice(0, 3),
-        redactionPattern: '[NAME_REDACTED]'
-      });
-      sanitized = sanitized.replace(/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g, '[NAME_REDACTED]');
-    }
-    
-    // Track SSN numbers
-    const ssnMatches = text.match(/\b\d{3}-\d{2}-\d{4}\b/g) || [];
-    if (ssnMatches.length > 0) {
-      detectedData.push({
-        type: 'ssn',
-        count: ssnMatches.length,
-        examples: ssnMatches.slice(0, 2),
-        redactionPattern: '[SSN_REDACTED]'
-      });
-      sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
-    }
-    
-    // Track account numbers
-    const accountMatches = text.match(/\b\d{8,20}\b/g) || [];
-    if (accountMatches.length > 0) {
-      detectedData.push({
-        type: 'account',
-        count: accountMatches.length,
-        examples: accountMatches.slice(0, 3).map(acc => `****${acc.slice(-4)}`),
-        redactionPattern: '[ACCOUNT_REDACTED]'
-      });
-      sanitized = sanitized.replace(/\b\d{8,20}\b/g, '[ACCOUNT_REDACTED]');
-    }
-    
-    // Track email addresses
-    const emailMatches = text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g) || [];
-    if (emailMatches.length > 0) {
-      detectedData.push({
-        type: 'email',
-        count: emailMatches.length,
-        examples: emailMatches.slice(0, 2),
-        redactionPattern: '[EMAIL_REDACTED]'
-      });
-      sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]');
-    }
-    
-    // Track phone numbers
-    const phoneMatches = text.match(/\b(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g) || [];
-    if (phoneMatches.length > 0) {
-      detectedData.push({
-        type: 'phone',
-        count: phoneMatches.length,
-        examples: phoneMatches.slice(0, 2),
-        redactionPattern: '[PHONE_REDACTED]'
-      });
-      sanitized = sanitized.replace(/\b(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g, '[PHONE_REDACTED]');
-    }
-    
-    // Track addresses
-    const addressMatches = text.match(/\b\d+\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)*\s+(St|Street|Ave|Avenue|Rd|Road|Dr|Drive|Blvd|Boulevard|Ln|Lane|Way|Ct|Court)\b/gi) || [];
-    if (addressMatches.length > 0) {
-      detectedData.push({
-        type: 'address',
-        count: addressMatches.length,
-        examples: addressMatches.slice(0, 2),
-        redactionPattern: '[ADDRESS_REDACTED]'
-      });
-      sanitized = sanitized.replace(/\b\d+\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)*\s+(St|Street|Ave|Avenue|Rd|Road|Dr|Drive|Blvd|Boulevard|Ln|Lane|Way|Ct|Court)\b/gi, '[ADDRESS_REDACTED]');
-    }
-    
-    // Track balance/total lines
-    const balanceMatches = [...(text.match(/^.*balance.*$/gmi) || []), ...(text.match(/^.*total.*$/gmi) || [])];
-    if (balanceMatches.length > 0) {
-      detectedData.push({
-        type: 'balance',
-        count: balanceMatches.length,
-        examples: balanceMatches.slice(0, 2),
-        redactionPattern: '[BALANCE_REDACTED]'
-      });
-      sanitized = sanitized.replace(/^.*balance.*$/gmi, '[BALANCE_REDACTED]');
-      sanitized = sanitized.replace(/^.*total.*$/gmi, '[TOTAL_REDACTED]');
-    }
-    
-    PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', 
-      `Anonymized ${text.length} chars, found ${detectedData.reduce((sum, d) => sum + d.count, 0)} sensitive items`);
-    
+
+    const { sanitized, detectedData } = sanitizeStatementText(text, { holderNames });
+
+    PDFSecurityManager.logSecurityEvent(
+      securityLog,
+      'text_sanitization_complete',
+      'success',
+      `Anonymized ${text.length} chars, found ${countRedactions(detectedData)} sensitive items`
+    );
+
     return { sanitized, detectedData };
   }
-
   static encryptSensitiveData(transaction: ExtractedTransaction, securityLog: SecurityEvent[]): ExtractedTransaction {
     PDFSecurityManager.logSecurityEvent(securityLog, 'transaction_encryption_start', 'success');
     
@@ -333,6 +262,25 @@ export async function processBankStatementPDF(
   // Array to track buffers for secure cleanup
   const buffers: Buffer[] = [pdfBuffer];
 
+  /*
+   * The account holder's own name is the one that must never leave the server, and it cannot be
+   * guessed from capitals: statements print it uppercase, which is also how some merchants are
+   * printed. So it is looked up from the account and matched exactly. Without a user id (the
+   * preview helper) the labelled-header rule still catches `Titular: ...`.
+   */
+  let holderNames: Array<string | null | undefined> = [];
+  if (userId) {
+    try {
+      const { storage } = await import('../server/storage');
+      const user = await storage.getUser(userId);
+      if (user) {
+        holderNames = [user.firstName, user.lastName, [user.firstName, user.lastName].filter(Boolean).join(' ')];
+      }
+    } catch (error) {
+      console.warn('Could not load the account holder name for redaction:', (error as Error).message);
+    }
+  }
+
   try {
     // Step 0: Security validation
     onProgress?.({
@@ -391,7 +339,7 @@ export async function processBankStatementPDF(
 
     // Step 1.5: Sanitize extracted text for security and create preview data
     const originalText = extractedText; // Store original for preview
-    const sanitizationResult = PDFSecurityManager.sanitizeExtractedText(extractedText, result.securityLog);
+    const sanitizationResult = PDFSecurityManager.sanitizeExtractedText(extractedText, result.securityLog, holderNames);
     extractedText = sanitizationResult.sanitized;
 
     // Create anonymization preview data
@@ -508,7 +456,8 @@ export async function processBankStatementPDF(
  */
 export async function generateAnonymizationPreview(
   pdfBuffer: Buffer,
-  language: string = 'en-us'
+  language: string = 'en-us',
+  holderNames: Array<string | null | undefined> = []
 ): Promise<AnonymizationPreviewData | null> {
   const securityLog: SecurityEvent[] = [];
   
@@ -528,7 +477,7 @@ export async function generateAnonymizationPreview(
     }
 
     // Step 2: Generate anonymization preview
-    const sanitizationResult = PDFSecurityManager.sanitizeExtractedText(originalText, securityLog);
+    const sanitizationResult = PDFSecurityManager.sanitizeExtractedText(originalText, securityLog, holderNames);
     const totalRedactions = sanitizationResult.detectedData.reduce((sum, d) => sum + d.count, 0);
     const safetyScore = calculateSafetyScore(sanitizationResult.detectedData, originalText.length);
 
@@ -563,9 +512,13 @@ function calculateSafetyScore(detectedData: SensitiveDataDetection[], originalLe
   // Penalize based on sensitive data density
   const sensitivityRatio = totalSensitiveItems / (originalLength / 100); // items per 100 chars
   
-  // Heavy penalties for high-risk data
-  const riskPenalties = {
+  // Heavy penalties for high-risk data. A card and an IBAN belong at the top with the SSN:
+  // they are the values a bank statement only ever carries for payment, never for a transaction
+  // description.
+  const riskPenalties: Record<SensitiveKind, number> = {
     'ssn': 20,      // SSN is highest risk
+    'card': 20,     // A full card number is payment data
+    'iban': 18,     // An IBAN moves money on its own
     'account': 15,  // Account numbers are high risk
     'name': 10,     // Names are medium risk
     'email': 8,     // Email addresses are medium risk

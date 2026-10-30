@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { CountryBlockingPanel } from "@/components/admin/CountryBlockingPanel";
 import { EditLimitDialog, UserOverrideDialog } from "@/components/admin/AiUsageDialogs";
+import { signInUrl } from "@/lib/authRedirect";
 
 interface User {
   id: string;
@@ -43,6 +44,10 @@ interface UserStats {
 
 export default function AdminAnalytics() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  // Whether the server would accept a password at all. False until it says otherwise, so a
+  // closed door is never painted as an open one while the check is still in flight.
+  const [passwordLoginEnabled, setPasswordLoginEnabled] = useState(false);
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,6 +76,9 @@ export default function AdminAnalytics() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  // The sign-in page keeps the language prefix of the address the visitor is on.
+  const lang = window.location.pathname.match(/^\/([a-z]{2})(\/|$)/)?.[1] || 'en';
+
   // Check authentication status on component mount
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -79,12 +87,14 @@ export default function AdminAnalytics() {
           credentials: 'include'
         });
         const data = await response.json();
-        console.log('Admin auth status:', data);
         if (data.authenticated) {
           setIsAuthenticated(true);
         }
+        setPasswordLoginEnabled(Boolean(data.passwordLoginEnabled));
       } catch (error) {
         console.error('Error checking auth status:', error);
+      } finally {
+        setAuthChecked(true);
       }
     };
 
@@ -430,6 +440,19 @@ export default function AdminAnalytics() {
       });
 
       if (!response.ok) {
+        // The server may also close this door while the page is open (a restart with the
+        // shared password switched off). Saying "wrong password" then is a lie, and the form
+        // has to go, not just report the failure.
+        const body = await response.json().catch(() => null);
+        if (body?.code === 'legacy_password_disabled') {
+          setPasswordLoginEnabled(false);
+          toast({
+            title: "Password sign-in is switched off",
+            description: "Sign in with the account that has administrator rights.",
+            variant: "destructive",
+          });
+          return;
+        }
         throw new Error('Invalid admin password');
       }
 
@@ -607,12 +630,13 @@ export default function AdminAnalytics() {
     }
   };
 
-  // Helper function to determine if user is from production or development
-  const isProductionUser = (userId: string) => {
-    // Production users have longer Clerk IDs starting with "user_2y"
-    // Dev users typically have shorter IDs or different patterns
-    return userId.startsWith('user_2y') && userId.length > 20;
-  };
+  // Which environment these accounts belong to.
+  //
+  // This used to be guessed from the Clerk id (`userId.startsWith('user_2y')`), but an id is
+  // random and says nothing about where the account was made: the production owner's id starts
+  // with `user_3LNY`, so the panel labelled them "DEV". The environment belongs to the
+  // deployment, and the build mode is the honest source for it — the same signal main.tsx uses.
+  const isProductionBuild = import.meta.env.PROD;
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
@@ -721,8 +745,8 @@ export default function AdminAnalytics() {
     const matchesPlan = planFilter === "all" || user.plan === planFilter;
 
     const matchesUserType = userTypeFilter === "all" || 
-      (userTypeFilter === "prod" && isProductionUser(user.id)) ||
-      (userTypeFilter === "dev" && !isProductionUser(user.id));
+      (userTypeFilter === "prod" && isProductionBuild) ||
+      (userTypeFilter === "dev" && !isProductionBuild);
 
     return matchesSearch && matchesPlan && matchesUserType;
   });
@@ -746,6 +770,55 @@ export default function AdminAnalytics() {
   };
 
   // Payment information helper functions
+
+  // Nothing is decided yet. Rendering the password form first meant every visit flashed a door
+  // that may already be shut — and in production it stayed on screen, because the door was shut.
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardContent className="py-8 text-sm text-muted-foreground">
+            Checking your access…
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Not an administrator, and no password door to try. Explain the only way in rather than
+  // asking for a password the server refuses.
+  if (!isAuthenticated && !passwordLoginEnabled) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Shield className="h-12 w-12 text-blue-600" />
+            </div>
+            <CardTitle className="text-2xl">Kaptia Admin Access</CardTitle>
+            <CardDescription>Administrator account required</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-blue-700 dark:text-blue-300">
+                  <strong>Password sign-in is switched off on this site.</strong><br />
+                  Sign in with the Kaptia account that has administrator rights, then open this page again.
+                </div>
+              </div>
+            </div>
+            <Button asChild className="w-full">
+              <a href={signInUrl(lang, window.location.pathname + window.location.search)}>
+                Go to sign-in
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Show login form if not authenticated
   if (!isAuthenticated) {
     return (
@@ -1093,7 +1166,7 @@ export default function AdminAnalytics() {
                               }
                             </div>
                             <div className="text-xs text-gray-500 flex items-center gap-1">
-                              {isProductionUser(user.id) ? (
+                              {isProductionBuild ? (
                                 <span className="bg-green-100 text-green-800 px-1.5 py-0.5 rounded text-xs">PROD</span>
                               ) : (
                                 <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">DEV</span>

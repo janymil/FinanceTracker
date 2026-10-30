@@ -19,7 +19,7 @@ const SUPPORT_ADDRESS = "info@kaptia.app";
  */
 const NO_REPLY_ADDRESS =
   process.env.EMAIL_NO_REPLY || process.env.EMAIL_FROM || "no-reply@kaptia.app";
-const RESPONSE_DAYS = 30;
+const RESPONSE_DAYS = 15;
 
 const trimmed = (max: number) => z.string().trim().min(1).max(max);
 
@@ -93,7 +93,7 @@ function complaintText(code: string, data: ComplaintInput, createdAt: Date): str
     `Pedido del consumidor: ${data.request}`,
     ``,
     `4. Respuesta del proveedor`,
-    `Pendiente. El proveedor responderá en un plazo máximo de ${RESPONSE_DAYS} días calendario.`,
+    `Pendiente. El proveedor responderá en un plazo máximo de ${RESPONSE_DAYS} días calendario improrrogables.`,
   ].join("\n");
 }
 

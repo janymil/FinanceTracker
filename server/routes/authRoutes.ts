@@ -234,7 +234,13 @@ export function registerAuthRoutes(app: Express) {
         }
         updateData.timezone = timezone;
       }
-      if (typeof aiEnabled === "boolean") updateData.aiEnabled = aiEnabled;
+      if (typeof aiEnabled === "boolean") {
+        updateData.aiEnabled = aiEnabled;
+        // The answer to "may we send your receipts and voice notes to AI providers?" is stamped
+        // here, not by the caller: a timestamp the browser supplies is not evidence, and a
+        // choice stored without one is a question the dialog asks again on the next visit.
+        updateData.aiConsentDecidedAt = new Date();
+      }
       if (typeof emailNotifications === "boolean") updateData.emailNotifications = emailNotifications;
       for (const [key, value] of Object.entries({ firstName, lastName, phone, website })) {
         if (typeof value === "string") updateData[key] = value;

@@ -511,6 +511,34 @@ export default function ExportPage() {
   const [showSecurityDisclosure, setShowSecurityDisclosure] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [hasConsentedToSecurity, setHasConsentedToSecurity] = useState(false);
+
+  /*
+   * Whether this version of the security screen has been accepted comes from the account, not
+   * from component state. Two reasons: refreshing used to ask again, and nothing anywhere
+   * recorded who had agreed to which sentences. Now an edit to the wording re-asks instead of
+   * inheriting a "yes" to text nobody saw.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    const loadConsent = async () => {
+      try {
+        const token = await getToken();
+        if (!token || cancelled) return;
+        const response = await fetch('/api/import/statement-consent', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled) setHasConsentedToSecurity(Boolean(data.accepted));
+      } catch (error) {
+        console.error('Could not read the stored statement consent:', error);
+      }
+    };
+    void loadConsent();
+    return () => {
+      cancelled = true;
+    };
+  }, [getToken]);
   
   // Duplicate warning state
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
@@ -704,9 +732,23 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     }
   };
 
-  const handleSecurityConsent = () => {
+  const handleSecurityConsent = async () => {
     setHasConsentedToSecurity(true);
     setShowSecurityDisclosure(false);
+    // Recorded on the server so it survives a refresh and can be shown to anyone who asks what
+    // this person agreed to. A failure here does not block the upload: the local answer stands
+    // for this visit, and the next visit asks again.
+    try {
+      const token = await getToken();
+      if (token) {
+        await fetch('/api/import/statement-consent', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch (error) {
+      console.error('Could not store the statement consent:', error);
+    }
     // Trigger file selection after consent
     setTimeout(() => {
       fileInputRef.current?.click();
@@ -1514,6 +1556,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                       {isProcessingPDF && processingSessionId ? (
                         <PDFProcessingProgress 
                           sessionId={processingSessionId}
+                          getToken={getToken}
                           onComplete={(success) => {
                             setIsProcessingPDF(false);
                             setProcessingSessionId(null);

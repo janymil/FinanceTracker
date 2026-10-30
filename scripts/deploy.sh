@@ -164,6 +164,9 @@ fi
 # Keep a few timestamped copies for archaeology, drop the rest.
 # `|| true`: when there are no backups yet, `ls` exits non-zero and `set -e` would abort
 # the deploy after it has already succeeded.
-ls -dt dist.backup-* 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -rf || true
+# Sort by the timestamp in the NAME. `ls -dt` sorts by folder mtime, and every `dist` folder
+# carries the same mtime because Vite rewrites `dist/public` and never `dist` itself — so the
+# copy just made could be pruned as if it were the oldest (see .devkit/lessons.md, 2026-10-29).
+ls -d dist.backup-* 2>/dev/null | sort -r | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -rf || true
 
 echo "==> Deployed at $STAMP. Health: ok (release $RELEASE_ID)"

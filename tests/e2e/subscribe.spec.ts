@@ -130,4 +130,126 @@ test.describe('E2E-5 checkout', () => {
     const current = page.getByTestId(`subscribe-${me.plan}-${me.billingInterval === 'yearly' ? 'yearly' : 'monthly'}`);
     await expect(current).toBeDisabled();
   });
+
+  /**
+   * The Peru path — the one that used to live *below* the plans.
+   *
+   * Paying in soles has three parts that only make sense together: which method, where to send
+   * the money, and the document. The popup is the only place that shows all three, so these
+   * cases pin: the click opens it, the Yape number is on screen before an operation number is
+   * asked for, the document is stored before the claim, and the claim carries the plan that
+   * was clicked.
+   *
+   * Both document shapes run through the same steps on purpose — a natural person who gives no
+   * DNI must reach the same claim a named boleta does. Refusing them was the bug.
+   */
+  const documents = [
+    {
+      label: 'a boleta with a DNI',
+      selection: 'boleta',
+      number: '12345678',
+      name: 'Ana Torres',
+      expectedType: 'dni',
+      expectedNumber: '12345678',
+      expectedName: 'Ana Torres',
+    },
+    {
+      label: 'a boleta with both optional boxes empty',
+      selection: 'boleta',
+      number: '',
+      name: '',
+      expectedType: 'none',
+      // The dialog sends no number at all; the server stores SUNAT's placeholder.
+      expectedNumber: undefined,
+      expectedName: undefined,
+    },
+  ] as const;
+
+  for (const document of documents) {
+    test(`soles: ${document.label} reaches the claim through one popup`, async ({ page }) => {
+      await page.route('**/api/billing-region*', (route) =>
+        route.fulfill({
+          json: { country: 'PE', gateway: 'mercadopago', gateways: ['mercadopago'], currency: 'pen' },
+        }),
+      );
+
+      // Captured request bodies. A plain `let` here is narrowed to null by control-flow
+      // analysis (the assignment happens inside a callback), so the assertions cannot read it.
+      const captured: { profile: any; claim: any } = { profile: null, claim: null };
+      await page.route('**/api/billing-profile', async (route) => {
+        if (route.request().method() === 'PUT') {
+          captured.profile = route.request().postDataJSON();
+          return route.fulfill({ json: { success: true, profile: captured.profile } });
+        }
+        return route.fulfill({ json: { profile: null } });
+      });
+
+      await page.route('**/api/payments/manual/instructions', (route) =>
+        route.fulfill({
+          json: {
+            legalName: 'Kaptia Peru SAC',
+            yape: '987654321',
+            plin: null,
+            bank: { name: 'BCP', account: '193-1234567-0-11', cci: null, holder: null },
+            renewsAutomatically: false,
+          },
+        }),
+      );
+
+      let claimReceived = false;
+      await page.route('**/api/payments/manual', (route) => {
+        captured.claim = route.request().postDataJSON();
+        claimReceived = true;
+        return route.fulfill({
+          status: 201,
+          json: { success: true, id: 1, status: 'pending', amountCents: 990, message: 'ok' },
+        });
+      });
+
+      const me = await (await page.request.get('/api/auth/user')).json();
+      test.skip(
+        Boolean(me.stripeSubscriptionId || me.mpPreapprovalId),
+        'this case is about buying, not about editing a card subscription',
+      );
+
+      const testId = me.plan === 'premium' ? 'subscribe-standard-monthly' : 'subscribe-premium-monthly';
+      const expectedPlan = testId.includes('premium') ? 'premium' : 'standard';
+
+      await page.goto(path('/subscribe'));
+      await page.getByTestId(testId).click();
+
+      const dialog = page.getByTestId('peru-checkout-dialog');
+      await expect(dialog).toBeVisible();
+      // Opening the popup charges nothing: the method is still being chosen.
+      expect(claimReceived).toBe(false);
+
+      // The wallet path shows where the money goes BEFORE asking for an operation number.
+      await page.getByTestId('peru-method-yape').click();
+      await expect(page.getByTestId('peru-destination')).toContainText('987654321');
+
+      await page.getByTestId(`comprobante-kind-${document.selection}`).click();
+      // Both boxes are on screen and optional; the anonymous boleta simply leaves them empty.
+      await expect(page.getByTestId('comprobante-number')).toBeVisible();
+      if (document.number) {
+        await page.getByTestId('comprobante-number').fill(document.number);
+        await page.getByTestId('comprobante-name').fill(document.name);
+      }
+
+      await page.getByTestId('peru-operation-number').fill('OP-123456');
+      await page.getByTestId('peru-checkout-submit').click();
+
+      await expect.poll(() => captured.claim?.method).toBe('yape');
+      expect(captured.claim?.operationNumber).toBe('OP-123456');
+      expect(captured.claim?.plan).toBe(expectedPlan);
+      expect(captured.claim?.interval).toBe('monthly');
+      // The document is stored before the claim, because it cannot be fixed afterwards.
+      expect(captured.profile?.documentType).toBe(document.expectedType);
+      expect(captured.profile?.documentNumber).toBe(document.expectedNumber);
+      expect(captured.profile?.businessName).toBe(document.expectedName);
+      expect(captured.profile?.kind).toBe('boleta');
+      await expect(page.getByTestId('peru-checkout-dialog')).toContainText('OP-123456');
+    });
+  }
 });
+
+

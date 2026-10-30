@@ -129,7 +129,7 @@ describe('POST /api/complaints', () => {
     expect(consumer.text).toContain('Hoja de Reclamo N.º RC-2026-000042');
     expect(consumer.text).toContain('Fecha: 2026-03-04');
     expect(consumer.text).toContain('Monto reclamado: 39.90');
-    expect(consumer.text).toContain('30 días calendario');
+    expect(consumer.text).toContain('15 días calendario');
     expect(team.text).toBe(consumer.text);
   });
 

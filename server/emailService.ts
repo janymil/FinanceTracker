@@ -49,6 +49,17 @@ export function safeLinkUrl(value: string): string {
   return 'https://kaptia.app';
 }
 
+/**
+ * An absolute link back to the site, built from `APP_URL` like the rest of the mail.
+ *
+ * The fallback is the same host `safeLinkUrl` falls back to, so a missing variable produces a
+ * working link rather than a broken one in a stranger's inbox.
+ */
+function publicUrl(path: string): string {
+  const base = (process.env.APP_URL || 'https://kaptia.app').replace(/\/+$/, '');
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
 let smtpTransporter: Transporter | null = null;
 
 function getSmtpTransporter(): Transporter | null {
@@ -352,6 +363,39 @@ The Kaptia Team
 }
 
 // Collaborative Goal Invitation Email Templates
+
+/**
+ * The notice a stranger's inbox is owed.
+ *
+ * An invitation is addressed to someone who never gave us their address: another customer typed
+ * it. Sending only marketing copy to that person is unsolicited mail, so every invitation says
+ * where the address came from, what we did *not* do with it, and how to stop it — in the plain
+ * text body too, not only in the HTML, because a text-only client must not be the one that
+ * leaves it out.
+ *
+ * Exported so the promise can be asserted without a mail transport (`tests/unit/inviteNotice`).
+ */
+export function invitationNotice(inviterName: string): { text: string; html: string } {
+  const policyUrl = publicUrl('/en/privacy');
+  const safeInviterName = escapeHtml(inviterName);
+  const safePolicyUrl = safeLinkUrl(policyUrl);
+
+  const text = `
+---
+How we got your email address: ${inviterName} typed it to invite you to a shared savings goal in Kaptia. We have not created an account for you and we have not added you to any list. This invitation sends one email.
+Privacy policy: ${policyUrl}
+If you would rather not receive invitations at this address, write to info@kaptia.app and we will stop sending them.
+`.trim();
+
+  const html = `
+    <div style="background-color:#f8f9fa; border-top:1px solid #e5e7eb; padding:16px 20px; font-size:12px; color:#666; line-height:1.6;">
+      <p style="margin:0 0 8px 0;"><strong>How we got your email address:</strong> ${safeInviterName} typed it to invite you to a shared savings goal in Kaptia. We have not created an account for you and we have not added you to any list. This invitation sends one email.</p>
+      <p style="margin:0;"><a href="${safePolicyUrl}" style="color:#667eea;">Privacy policy</a> · If you would rather not receive invitations at this address, write to info@kaptia.app and we will stop sending them.</p>
+    </div>`;
+
+  return { text, html };
+}
+
 interface GoalInvitationParams {
   recipientEmail: string;
   recipientName: string;
@@ -389,6 +433,13 @@ export async function sendGoalInvitationEmail(params: GoalInvitationParams): Pro
   const safeFormattedAmount = escapeHtml(formattedAmount);
   const safeFormattedDate = escapeHtml(formattedDate);
   const safeGoalUrl = safeLinkUrl(goalUrl);
+
+  /*
+   * The person reading this never asked to hear from us: someone else typed their address.
+   * Until now the e-mail said nothing about that, which made it an unsolicited message from a
+   * company they had no relationship with.
+   */
+  const { text: noticeText, html: noticeHtml } = invitationNotice(inviterName);
   
   if (isExistingUser) {
     // Email for existing users
@@ -410,6 +461,8 @@ Click here to view and join the goal:
 ${goalUrl}
 
 Start contributing today and be part of this exciting savings journey!
+
+${noticeText}
 
 Best regards,
 The Kaptia Team
@@ -453,6 +506,8 @@ The Kaptia Team
       Start contributing today and be part of this exciting savings journey!
     </p>
   </div>
+
+${noticeHtml}
   
   <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
     <p>Best regards,<br>The Kaptia Team</p>
@@ -497,6 +552,8 @@ Why collaborative goals work:
 • Celebration of achievements together
 
 Start your financial journey today!
+
+${noticeText}
 
 Best regards,
 The Kaptia Team
@@ -554,6 +611,8 @@ The Kaptia Team
     </div>
   </div>
   
+${noticeHtml}
+
   <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
     <p>Start your financial journey today!</p>
     <p>Best regards,<br>The Kaptia Team</p>

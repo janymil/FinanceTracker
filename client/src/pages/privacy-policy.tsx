@@ -146,6 +146,21 @@ export default function PrivacyPolicy() {
                     <td className="px-4 py-3">{t("privacy.section6.table.backups_retention", "30 days (rolling)")}</td>
                     <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.backups_desc", "Automated system disaster recovery snapshots. Deleted data is permanently overwritten and purged from all backup cycles within 30 days.")}</td>
                   </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.complaints", "Complaints and claims (Libro de Reclamaciones)")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.complaints_retention", "While the claim can still be enforced")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.complaints_desc", "Name, document, address and the facts of the claim. It is a legal record under Ley 29571, so it is not deleted with the account.")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.invitations", "Goal invitations")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.invitations_retention", "Not stored")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.invitations_desc", "The address is used only to send the invitation. It is not kept in our database, and that person can ask us to stop writing to it.")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">{t("privacy.section6.table.tax_documents", "Boletas, facturas and payment confirmations")}</td>
+                    <td className="px-4 py-3">{t("privacy.section6.table.tax_documents_retention", "The period tax law requires")}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t("privacy.section6.table.tax_documents_desc", "Tax and payment details. Kept while Peruvian tax law requires us to be able to prove them, including after the account is deleted.")}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -193,6 +208,7 @@ export default function PrivacyPolicy() {
               <li>{t("privacy.peru.right_rectification")}</li>
               <li>{t("privacy.peru.right_cancellation")}</li>
               <li>{t("privacy.peru.right_opposition")}</li>
+              <li>{t("privacy.peru.right_portability")}</li>
             </ul>
 
             <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.exercise_title")}</h3>
@@ -200,6 +216,9 @@ export default function PrivacyPolicy() {
 
             <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.transfers_title")}</h3>
             <p className="mb-4">{t("privacy.peru.transfers_desc")}</p>
+
+            <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.databanks_title")}</h3>
+            <p className="mb-4">{t("privacy.peru.databanks_desc")}</p>
 
             <h3 className="text-lg font-semibold mb-2">{t("privacy.peru.authority_title")}</h3>
             <p>{t("privacy.peru.authority_desc")}</p>

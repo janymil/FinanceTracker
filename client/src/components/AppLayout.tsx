@@ -5,6 +5,7 @@ import Sidebar from "@/components/sidebar";
 import { AnonymousHeader } from "@/components/anonymous-header";
 import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
+import { AiConsentDialog } from "@/components/AiConsentDialog";
 import { FinancialMascot } from "@/components/financial-mascot";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 
@@ -47,6 +48,8 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
           <div className="h-[68px] lg:hidden" aria-hidden="true" />
           <MobileBottomNav onMore={() => setSidebarOpen(true)} />
           <FinancialMascot />
+          {/* The AI question, only for an account that has never answered it. */}
+          <AiConsentDialog />
         </div>
       );
     } else {
@@ -92,6 +95,8 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
         <div className="h-[68px] lg:hidden" aria-hidden="true" />
         <MobileBottomNav onMore={() => setSidebarOpen(true)} />
         <FinancialMascot />
+        {/* The AI question, only for an account that has never answered it. */}
+        <AiConsentDialog />
       </div>
     );
   }

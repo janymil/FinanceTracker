@@ -122,7 +122,7 @@ export default function TermsOfService() {
               <li>{t("We provide data export capabilities")}</li>
               <li>{t("You may delete your account and data at any time")}</li>
               <li>{t("We use encryption to protect your data")}</li>
-              <li>{t("AI features process anonymized data only (see Privacy Policy for details)")}</li>
+              <li>{t("terms.privacy_ai_processing", "AI features process pseudonymous data only; voice notes are transcribed as recorded (see Privacy Policy for details)")}</li>
             </ul>
           </section>
 
