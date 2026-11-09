@@ -117,6 +117,9 @@ export function libpqEnv(connectionString: string, base: NodeJS.ProcessEnv = pro
     // Neon requires TLS; its certificate is not verified here for the same reason the app does
     // not verify it (see server/db.ts). `sslmode` is carried through when the URL states one.
     env.PGSSLMODE = url.searchParams.get('sslmode') || 'require';
+    // verify-full needs the CA; libpq only reads it from PGSSLROOTCERT, not from the URL we split.
+    const rootCert = url.searchParams.get('sslrootcert');
+    if (rootCert) env.PGSSLROOTCERT = rootCert;
     env.PGAPPNAME = 'kaptia-db-dump';
   } catch {
     // Not a URL: hand it over as a database name and let libpq decide what it is.
@@ -249,8 +252,8 @@ async function deliverToS3(
     endpoint: endpoint || undefined,
     forcePathStyle: Boolean(endpoint),
     credentials: {
-      accessKeyId: process.env.BACKUP_S3_ACCESS_KEY_ID ?? '',
-      secretAccessKey: process.env.BACKUP_S3_SECRET_ACCESS_KEY ?? '',
+      accessKeyId: process.env.BACKUP_S3_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.BACKUP_S3_SECRET_ACCESS_KEY || process.env.R2_SECRET_ACCESS_KEY || '',
     },
   });
 
@@ -312,9 +315,13 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   }
   const options = parsed;
 
-  const bucket = process.env.BACKUP_S3_BUCKET ?? '';
-  const endpoint = process.env.BACKUP_S3_ENDPOINT ?? '';
-  const region = process.env.BACKUP_S3_REGION ?? 'auto';
+  // BACKUP_S3_* wins; otherwise fall back to the Cloudflare R2 variables the app already uses.
+  const r2Account = process.env.R2_ACCOUNT_ID ?? '';
+  const bucket = process.env.BACKUP_S3_BUCKET || process.env.R2_BUCKET_NAME || '';
+  const endpoint =
+    process.env.BACKUP_S3_ENDPOINT ||
+    (r2Account ? `https://${r2Account}.r2.cloudflarestorage.com` : '');
+  const region = process.env.BACKUP_S3_REGION || 'auto';
   const useS3 = Boolean(bucket);
 
   if (!useS3 && !options.localDir) {
